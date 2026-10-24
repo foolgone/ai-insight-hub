@@ -62,8 +62,8 @@ class Settings(BaseSettings):
     # ---------------- 可观测（自建，替代 LangSmith） ----------------
     LOG_LEVEL: str = "INFO"
     LOG_FILE: str = "logs/app.log"
-    LLM_CALL_LOG_ENABLED: bool = True          # 是否把每次 LLM 调用写入数据库
-    PROMETHEUS_ENABLED: bool = True            # 是否暴露 /metrics
+    LLM_CALL_LOG_ENABLED: bool = True  # 是否把每次 LLM 调用写入数据库
+    PROMETHEUS_ENABLED: bool = True  # 是否暴露 /metrics
     METRICS_PATH: str = "/metrics"
 
     # ---------------- 文件存储（MinIO/S3） ----------------
