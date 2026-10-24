@@ -2,8 +2,8 @@
 
 > AI 客服数据分析平台 - 通过 AI Agent 自动清洗、评估和分析客服对话数据
 
-**项目状态**：骨架就绪 / M1 环境就绪  
-**文档版本**：v1.1  
+**项目状态**：骨架就绪 / M1 环境就绪（数据库已接入本地 VM）  
+**文档版本**：v1.2  
 **更新日期**：2026年10月24日
 
 ---
@@ -50,10 +50,12 @@ AI Insight Hub 是一个智能数据中台，专门为 AI 客服/对话系统提
 
 ### 前置要求
 
-- **Docker Desktop** 或 **Docker + Docker Compose**
+- **本地虚拟机**（VMware，提供 PostgreSQL + Redis，见 [`docs/00-本地VM数据库接入.md`](./docs/00-本地VM数据库接入.md)）
 - **Python 3.11+**
 - **Node.js 20+**
 - **Git**
+
+> 本机 Docker 已暂停使用；`docker-compose.yml` 保留为备选方案（见下文「方式 B」）。
 
 ### 安装步骤
 
@@ -79,22 +81,33 @@ cp .env.example .env
 
 > 后端配置项的事实源是 `backend/.env.example`，必须与 `backend/app/core/config.py` 一一对应。
 
-#### 3. 启动基础服务（Docker）
+#### 3. 准备基础服务（数据库 / 缓存）
+
+**方式 A（默认，推荐）：使用本地虚拟机**
+
+PostgreSQL 14 + pgvector 与 Redis 7 跑在本地 VMware 虚拟机 `192.168.150.100` 的 Docker 里，由宿主机直接连接：
+
+| 服务 | 地址 | 说明 |
+|------|------|------|
+| PostgreSQL 14 + pgvector | `192.168.150.100:5433` | 容器 `aiinsight-postgres`，库/用户/密码 `aiinsight` / `aiinsight` / `dev_password` |
+| Redis 7 | `192.168.150.100:6379` | 容器 `aiinsight-redis` |
+
+- `backend/.env` 已按此地址配置，无需改动
+- 启动/停止：登录 VM 后 `cd /root/ai-insight-hub-infra && docker compose up -d` / `down`
+- 详细说明（含 VM 侧 compose 文件、扩展初始化、已知问题）：[`docs/00-本地VM数据库接入.md`](./docs/00-本地VM数据库接入.md)
+
+**方式 B（备选）：沿用本机 Docker**
 
 ```bash
 # 在项目根目录
 docker-compose up -d
-
-# 检查服务状态
 docker-compose ps
 ```
 
-这将启动：
-- PostgreSQL 14 + pgvector（容器 `aiinsight-postgres`）- `localhost:5432`
-- Redis（容器 `aiinsight-redis`）- `localhost:6379`
-- MinIO（容器 `aiinsight-minio`）- `localhost:9000`（控制台 `localhost:9001`）
+将启动 `aiinsight-postgres`（`localhost:5432`）、`aiinsight-redis`（`localhost:6379`）、`aiinsight-minio`（`localhost:9000`，控制台 `9001`）。
+此时需把 `backend/.env` 的 `DATABASE_URL` / `REDIS_URL` / `CELERY_*` 改回 `localhost`。
 
-首次启动会自动执行 `backend/scripts/init_db.sql`，创建 `vector` / `pg_trgm` / `pgcrypto` 扩展。
+首次启动会自动执行 `backend/scripts/init_db.sql`，创建 `vector` / `pg_trgm` / `pgcrypto` 扩展（VM 那套已执行过）。
 
 #### 4. 安装后端依赖并初始化数据库
 

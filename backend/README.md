@@ -5,7 +5,8 @@
 ### 环境要求
 
 - Python 3.11+
-- Docker（PostgreSQL 14 + pgvector / Redis 7 / MinIO，见仓库根目录 `docker-compose.yml`）
+- 数据库/缓存：本地 VMware 虚拟机 `192.168.150.100` 的 Docker（PostgreSQL 14 + pgvector 映射 5433 / Redis 7 映射 6379），
+  详见 [`docs/00-本地VM数据库接入.md`](../docs/00-本地VM数据库接入.md)；本机 `docker-compose.yml` 保留为备选
 
 ### 安装
 
@@ -53,15 +54,17 @@ METRICS_PATH=/metrics
 ### 初始化数据库
 
 ```bash
-# 1) 启动基础服务（在仓库根目录）
-docker-compose up -d
+# 1) 确认 VM 上的数据库/缓存已启动（在 VM 内执行）
+cd /root/ai-insight-hub-infra && docker compose up -d
 
-# 2) 执行迁移（首次启动会由 init_db.sql 创建 vector / pg_trgm / pgcrypto 扩展）
+# 2) 执行迁移（VM 那套已在建库时创建 vector / pg_trgm / pgcrypto 扩展）
 alembic upgrade head
 
 # 3) 可选：填充演示数据
 python ../scripts/seed_data.py
 ```
+
+> 备选：改回本机 `docker-compose up -d` + `localhost:5432`（见仓库根目录 README「方式 B」）。
 
 ### 运行
 
@@ -90,6 +93,7 @@ pytest -m prompt                        # Prompt 测试（需真实 LLM，注意
 
 测试分层标记见 `pytest.ini`：`unit` / `integration` / `prompt` / `slow`。
 集成测试依赖：`docker-compose -f ../docker-compose.test.yml up -d`（PostgreSQL 5433 / Redis 6380）。
+> 本机 Docker 暂停期间先用 VM 库做开发联调；集成测试库建议单独建（勿把用例跑在 `aiinsight` 开发库上）。
 
 ## 项目结构
 

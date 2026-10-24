@@ -1,0 +1,33 @@
+# 测试环境依赖（供集成测试使用）
+# 用法：docker-compose -f docker-compose.test.yml up -d
+# 端口刻意与开发环境错开，避免冲突
+version: '3.8'
+
+services:
+  postgres-test:
+    image: pgvector/pgvector:pg14
+    container_name: aiinsight-postgres-test
+    environment:
+      POSTGRES_USER: aiinsight
+      POSTGRES_PASSWORD: dev_password
+      POSTGRES_DB: aiinsight_test
+    ports:
+      - "5433:5432"
+    volumes:
+      - ./backend/scripts/init_db.sql:/docker-entrypoint-initdb.d/init_db.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U aiinsight"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis-test:
+    image: redis:7-alpine
+    container_name: aiinsight-redis-test
+    ports:
+      - "6380:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10

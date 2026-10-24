@@ -12,9 +12,33 @@ $backend = Join-Path $root "backend"
 $python = Join-Path $backend "venv\Scripts\python.exe"
 
 if (-not (Test-Path $python)) {
-    Write-Host "📦 创建 Python 虚拟环境..." -ForegroundColor Yellow
+    Write-Host "📦 创建 Python 虚拟环境并安装依赖（含开发依赖）..." -ForegroundColor Yellow
     python -m venv (Join-Path $backend "venv")
-    & $python -m pip install -r (Join-Path $backend "requirements.txt")
+    & $python -m pip install -r (Join-Path $backend "requirements.txt") -r (Join-Path $backend "requirements-dev.txt")
+}
+
+# ---------- 环境变量 ----------
+if (-not (Test-Path (Join-Path $backend ".env"))) {
+    Copy-Item (Join-Path $backend ".env.example") (Join-Path $backend ".env")
+    Write-Host "⚠️  已从 .env.example 创建 backend\.env，请填入 DEEPSEEK_API_KEY" -ForegroundColor Yellow
+}
+if (-not (Test-Path (Join-Path $root "frontend\.env"))) {
+    Copy-Item (Join-Path $root "frontend\.env.example") (Join-Path $root "frontend\.env")
+}
+
+# ---------- 依赖服务检查（数据库/缓存默认在本地 VM 192.168.150.100）----------
+$vmHost = "192.168.150.100"
+$dbOk = Test-NetConnection -ComputerName $vmHost -Port 5433 -InformationLevel Quiet -WarningAction SilentlyContinue
+$redisOk = Test-NetConnection -ComputerName $vmHost -Port 6379 -InformationLevel Quiet -WarningAction SilentlyContinue
+
+if ($dbOk -and $redisOk) {
+    Write-Host "🐳 依赖服务正常：VM $vmHost 的 PostgreSQL(5433) + Redis(6379)" -ForegroundColor DarkGray
+} else {
+    Write-Host "⚠️  连不上 VM $vmHost 的 PostgreSQL(5433)/Redis(6379)" -ForegroundColor Yellow
+    Write-Host "   1) 先启动虚拟机（VMware Workstation）" -ForegroundColor Yellow
+    Write-Host "   2) 在 VM 上执行： cd /root/ai-insight-hub-infra && docker compose up -d" -ForegroundColor Yellow
+    Write-Host "   备选：改回本机 docker compose up -d（端口 5432/6379），并调整 backend\.env" -ForegroundColor DarkGray
+    Write-Host "   详见 docs\00-本地VM数据库接入.md" -ForegroundColor DarkGray
 }
 
 Write-Host "🐍 启动后端 API (端口 8000)..." -ForegroundColor Yellow

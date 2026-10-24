@@ -10,8 +10,8 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
-lib64/
+/lib/
+/lib64/
 parts/
 sdist/
 var/
@@ -84,6 +84,10 @@ dist/
 dist-ssr/
 build/
 *.local
+
+# 测试覆盖率产物
+coverage/
+.nyc_output/
 
 # Editor directories and files
 .vscode/*
