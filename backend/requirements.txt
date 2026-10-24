@@ -5,7 +5,7 @@
 # Web 框架
 fastapi==0.109.0
 uvicorn[standard]==0.27.0
-pydantic==2.5.0
+pydantic==2.14.1
 pydantic-settings==2.1.0
 python-multipart==0.0.6
 
@@ -20,11 +20,13 @@ redis==5.0.1
 hiredis==2.3.2
 
 # AI 框架（LLM = DeepSeek V4.1 Flash，官方集成 langchain-deepseek；不使用 LangSmith）
-# ⚠️ langchain-* / langgraph 的版本兼容矩阵需在 M2 POC 首次安装时校验，如有冲突以 pip 解析结果为准并回写本文件
-langchain==0.1.0
-langchain-core==0.1.10
-langchain-deepseek==0.1.0
-langgraph==0.0.20
+# ✅ 2026-10-24 实测校验：原 langchain==0.1.0 + langchain-core==0.1.10 + langchain-deepseek==0.1.0
+#    三者依赖互相冲突（CI 报 ResolutionImpossible），已整体升级到 langchain 1.x 体系；
+#    升级后 langchain-core 要求 pydantic ≥2.9，故 pydantic 同步由 2.5.0 提到 2.14.1（fastapi 0.109 兼容）。
+langchain==1.4.7
+langchain-core==1.7.0
+langchain-deepseek==1.1.1
+langgraph==1.2.17
 
 # 向量和 NLP
 sentence-transformers==2.3.1
@@ -61,4 +63,4 @@ sentry-sdk[fastapi]==1.39.2
 
 # 邮件
 aiosmtplib==3.0.1
-email-validator==2.1.0
+email-validator==2.3.0
