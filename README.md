@@ -2,9 +2,9 @@
 
 > AI 客服数据分析平台 - 通过 AI Agent 自动清洗、评估和分析客服对话数据
 
-**项目状态**：开发准备阶段  
-**文档版本**：v1.0  
-**创建日期**：2026年10月23日
+**项目状态**：骨架就绪 / M1 环境就绪  
+**文档版本**：v1.1  
+**更新日期**：2026年10月24日
 
 ---
 
@@ -13,7 +13,7 @@
 AI Insight Hub 是一个智能数据中台，专门为 AI 客服/对话系统提供：
 
 - 🔧 **数据清洗**：自动将非结构化对话数据标准化
-- 📊 **质量评估**：5 维度评估 AI 回复质量（准确性、完整性、幻觉检测等）
+- 📊 **质量评估**：5 维度评估 AI 回复质量（准确性、完整性、语气、合规性、幻觉）
 - 📚 **知识提取**：自动构建 FAQ 知识库，发现知识盲区
 - 💡 **洞察分析**：客户诉求分析、情感趋势、痛点识别
 - 📄 **报告生成**：自动生成专业分析报告
@@ -24,17 +24,25 @@ AI Insight Hub 是一个智能数据中台，专门为 AI 客服/对话系统提
 
 ### 后端
 - **Python 3.11+** | FastAPI | SQLAlchemy 2.0
-- **LangChain + LangGraph** | Claude 5.5 (Sonnet/Opus/Haiku)
+- **LangChain + LangGraph** | **DeepSeek V4.1 Flash**（`langchain-deepseek` 官方集成）
+- 模型 id 由 `DEFAULT_LLM_MODEL` 配置决定，业务代码不写死
 
 ### 前端
 - **React 18** | Vite 5 | TailwindCSS 3
-- **React Query** (服务端状态) | **Zustand** (客户端状态)
+- **React Query v5**（服务端状态） | **Zustand 4**（客户端状态）
+- **Vitest**（单元测试）
 
-### 数据库
-- **PostgreSQL 14+** (pgvector) | **Redis 7+** | **MinIO**
+### 数据库 / 存储
+- **PostgreSQL 14 + pgvector**（384 维向量，HNSW 索引）
+- **Redis 7** | **MinIO**（S3 兼容对象存储）
+
+### 可观测（自建，不使用 LangSmith SaaS）
+- **Loguru** 结构化日志
+- **数据库调用记录**（每次 LLM 调用的 token / 成本 / 耗时）
+- **Prometheus** 指标（`/metrics`）
 
 ### DevOps
-- **Docker** | **Docker Compose** | **GitHub Actions**
+- **Docker** | **Docker Compose** | **GitHub Actions**（`.github/workflows/test.yml`）
 
 ---
 
@@ -52,7 +60,7 @@ AI Insight Hub 是一个智能数据中台，专门为 AI 客服/对话系统提
 #### 1. 克隆仓库
 
 ```bash
-git clone https://github.com/your-org/ai-insight-hub.git
+git clone https://github.com/foolgone/ai-insight-hub.git
 cd ai-insight-hub
 ```
 
@@ -62,12 +70,14 @@ cd ai-insight-hub
 # 后端
 cd backend
 cp .env.example .env
-# 编辑 .env，填入必要的配置（API Key 等）
+# 编辑 .env，填入 DEEPSEEK_API_KEY 等必要配置
 
 # 前端
 cd ../frontend
 cp .env.example .env
 ```
+
+> 后端配置项的事实源是 `backend/.env.example`，必须与 `backend/app/core/config.py` 一一对应。
 
 #### 3. 启动基础服务（Docker）
 
@@ -80,18 +90,26 @@ docker-compose ps
 ```
 
 这将启动：
-- PostgreSQL (with pgvector) - `localhost:5432`
-- Redis - `localhost:6379`
-- MinIO - `localhost:9000` (控制台: `localhost:9001`)
+- PostgreSQL 14 + pgvector（容器 `aiinsight-postgres`）- `localhost:5432`
+- Redis（容器 `aiinsight-redis`）- `localhost:6379`
+- MinIO（容器 `aiinsight-minio`）- `localhost:9000`（控制台 `localhost:9001`）
 
-#### 4. 初始化数据库
+首次启动会自动执行 `backend/scripts/init_db.sql`，创建 `vector` / `pg_trgm` / `pgcrypto` 扩展。
+
+#### 4. 安装后端依赖并初始化数据库
 
 ```bash
 cd backend
-source venv/bin/activate  # Windows: venv\Scripts\activate
+python -m venv venv
+source venv/bin/activate        # Windows PowerShell: .\venv\Scripts\Activate.ps1
+
+pip install -r requirements.txt -r requirements-dev.txt
 
 # 运行数据库迁移
 alembic upgrade head
+
+# （可选）填充演示数据
+python ../scripts/seed_data.py
 ```
 
 #### 5. 启动后端
@@ -104,6 +122,8 @@ uvicorn app.main:app --reload --port 8000
 访问：
 - API 文档：http://localhost:8000/docs
 - ReDoc：http://localhost:8000/redoc
+- 健康检查：http://localhost:8000/api/v1/health
+- Prometheus 指标：http://localhost:8000/metrics
 
 #### 6. 启动前端
 
@@ -115,61 +135,80 @@ npm run dev
 
 访问：http://localhost:5173
 
+#### 一键启动（Windows）
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\dev.ps1
+```
+
 ---
 
 ## 📁 项目结构
 
+> 标注「规划」的目录为占位，尚未实现；当前后端只有系统接口，前端只有欢迎页。
+
 ```
 ai-insight-hub/
 ├── README.md                    # 本文件
-├── docker-compose.yml           # Docker 服务编排
-├── .gitignore
+├── LICENSE                      # MIT
+├── docker-compose.yml           # 开发环境服务编排
+├── docker-compose.test.yml      # 测试环境（PostgreSQL 5433 / Redis 6380）
+├── .github/workflows/test.yml   # CI：后端 pytest + 前端 vitest
 │
-├── docs/                        # 📚 文档（20+ 份完整文档）
+├── docs/                        # 📚 文档（36 份设计文档 + 1 份审查报告）
 │   ├── 00-AI应用开发基调.md
-│   ├── 01-requirements/
-│   ├── 02-design/
-│   ├── 03-architecture/
-│   └── 04-development/
+│   ├── 00-技术栈优化总结.md
+│   ├── 01-requirements/         # 需求
+│   ├── 02-design/               # Prompt 设计
+│   ├── 03-architecture/         # 架构 / Agent / 数据库 / API
+│   ├── 04-development/          # 开发规范 / 成本 / 方案 / 状态管理 ...
+│   ├── 05-design/               # UI 设计规范
+│   ├── 06-testing/              # 测试规范
+│   └── 07-review/               # 文档审查报告
 │
 ├── backend/                     # 🐍 Python 后端
 │   ├── .env.example
 │   ├── requirements.txt
+│   ├── requirements-dev.txt
 │   ├── alembic.ini
 │   ├── pytest.ini
 │   ├── app/
-│   │   ├── main.py             # FastAPI 入口
-│   │   ├── core/               # 核心配置
-│   │   ├── api/                # API 路由
-│   │   ├── models/             # 数据库模型
-│   │   ├── schemas/            # Pydantic Schemas
-│   │   ├── agents/             # AI Agents
-│   │   ├── prompts/            # Prompt 资产库
-│   │   ├── services/           # 业务服务
-│   │   └── utils/              # 工具函数
-│   ├── migrations/             # 数据库迁移
-│   └── tests/                  # 测试
+│   │   ├── main.py              # FastAPI 入口（/、/health、/api/v1/health、/metrics）
+│   │   ├── core/config.py       # 配置事实源
+│   │   ├── api/                 # 规划：API 路由
+│   │   ├── models/              # 规划：数据库模型
+│   │   ├── schemas/             # 规划：Pydantic Schemas
+│   │   ├── agents/              # 规划：5 个 Agent
+│   │   ├── prompts/             # 规划：Prompt 资产库
+│   │   ├── services/            # 规划：业务服务
+│   │   └── utils/               # 规划：工具函数
+│   ├── migrations/              # Alembic 迁移（env.py 已就绪）
+│   ├── scripts/init_db.sql      # 数据库扩展初始化
+│   └── tests/                   # 目前为冒烟测试
 │
 ├── frontend/                    # ⚛️ React 前端
 │   ├── .env.example
 │   ├── package.json
 │   ├── vite.config.js
-│   ├── tailwind.config.js
+│   ├── vitest.config.js         # 测试配置（jsdom + 覆盖率门禁）
+│   ├── tailwind.config.js       # 设计 Token 事实源
+│   ├── .eslintrc.json
 │   ├── src/
 │   │   ├── main.jsx
-│   │   ├── App.jsx
-│   │   ├── components/         # 通用组件
-│   │   ├── pages/              # 页面
-│   │   ├── features/           # 功能模块
-│   │   ├── stores/             # Zustand stores
-│   │   ├── lib/                # 工具库
-│   │   └── hooks/              # 自定义 Hooks
-│   └── tests/
+│   │   ├── App.jsx              # 目前为欢迎页
+│   │   ├── components/          # 规划
+│   │   ├── pages/               # 规划
+│   │   ├── api/                 # 规划
+│   │   ├── stores/              # 规划：Zustand
+│   │   ├── hooks/               # 规划
+│   │   ├── lib/                 # 规划
+│   │   └── test/                # setup.js（jest-dom + matchMedia）、utils.jsx（renderWithProviders）
 │
 └── scripts/                     # 🔧 工具脚本
-    ├── init_project.sh         # 项目初始化
-    ├── dev.sh                  # 启动开发环境
-    └── seed_data.py            # 填充测试数据
+    ├── dev.ps1                  # Windows 一键启动
+    ├── dev.sh
+    ├── init_project.sh / .bat
+    └── seed_data.py             # 填充演示数据
 ```
 
 ---
@@ -179,89 +218,73 @@ ai-insight-hub/
 ### 后端开发
 
 ```bash
-# 创建虚拟环境
 cd backend
-python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
+source venv/bin/activate        # Windows: .\venv\Scripts\Activate.ps1
 
-# 安装依赖
-pip install -r requirements.txt
-pip install -r requirements-dev.txt
-
-# 代码格式化
-black app/
-flake8 app/
-
-# 类型检查
+# 代码格式化 / 检查
+black app/ tests/
+flake8 app/ tests/
 mypy app/
 
-# 运行测试
-pytest tests/ -v --cov=app
+# 运行测试（默认排除需要真实 LLM 的 prompt 测试）
+pytest
+pytest -m "not prompt" --cov=app --cov-report=html
 
 # 启动开发服务器
 uvicorn app.main:app --reload
 ```
 
----
-
 ### 前端开发
 
 ```bash
 cd frontend
-
-# 安装依赖
 npm install
-
-# 代码检查
-npm run lint
-
-# 运行测试
-npm run test
-
-# 启动开发服务器
-npm run dev
-
-# 构建生产版本
-npm run build
+npm run lint          # ESLint
+npm run test          # Vitest
+npm run dev           # 开发服务器
+npm run build         # 生产构建
 ```
 
 ---
 
 ## 🧪 测试
 
-### 运行所有测试
-
 ```bash
-# 后端
-cd backend
-pytest tests/ -v --cov=app --cov-report=html
+# 后端：单元 + 集成（排除 prompt）
+cd backend && pytest -m "not prompt"
+
+# 后端：Prompt 测试（需真实 LLM，注意成本）
+pytest -m prompt
 
 # 前端
-cd frontend
-npm run test:coverage
+cd frontend && npm run test:coverage
 ```
 
 ### 测试覆盖率目标
 
-- 单元测试覆盖率：**> 80%**
-- Prompt 测试：每个 Agent **50+ 用例**
+| 类型 | 目标 |
+|------|------|
+| 后端单元测试 | ≥ **80%** |
+| 后端集成测试 | ≥ **60%** |
+| Prompt 测试 | 每个 Agent **≥ 50 条**（每个维度 ≥ 10 条） |
+| 前端组件测试 | ≥ **70%** |
 
 ---
 
 ## 📊 成本预算
 
-### 中型企业（10万条/月）
+单条成本受 **模型单价 × token 用量** 直接决定，因此本文档**不写死金额**：
 
-| 服务 | 月成本 |
-|------|--------|
-| Claude API | $849 |
-| 基础设施 | $380 |
-| LangSmith | $39 |
-| **总计** | **$1,268** |
+```
+月成本 = (月输入 token × P_IN + 月输出 token × P_OUT) / 1_000_000
+```
 
-**单条处理成本**：~$0.0127
+- `P_IN` / `P_OUT`：DeepSeek V4.1 Flash 的输入/输出单价（USD / 百万 token），**以官方最新定价为准**
+- token 用量结构（每 1000 条对话的输入/输出 token）见 `docs/04-development/03-成本管理.md`
+- 成本监控与告警见 `docs/04-development/09-可观测与成本监控.md`
+- 超限降级策略见 `docs/04-development/06-成本超限降级策略.md`
 
-详见：`docs/04-development/03-成本管理.md`
+> 早期文档中的 `$1,268 / 月`、`~$0.0127 / 条` 等数字基于 Claude 定价，已失效，不应再引用。
 
 ---
 
@@ -269,14 +292,14 @@ npm run test:coverage
 
 | 里程碑 | 时间 | 状态 |
 |--------|------|------|
-| M1: 环境就绪 | Week 1 | 🔄 进行中 |
-| M2: POC 完成 | Week 2 | ⏸️  待开始 |
-| M3: 基础架构 | Week 4 | ⏸️  待开始 |
-| M4: 数据清洗 | Week 6 | ⏸️  待开始 |
-| M5: 质量评估 | Week 8 | ⏸️  待开始 |
-| M6: 知识提取 | Week 10 | ⏸️  待开始 |
-| M7: MVP 完成 | Week 12 | ⏸️  待开始 |
-| M8: 上线就绪 | Week 14 | ⏸️  待开始 |
+| M1: 环境就绪 | Week 1 | ✅ 完成 |
+| M2: POC 完成 | Week 2 | ⏸️ 待开始 |
+| M3: 基础架构 | Week 4 | ⏸️ 待开始 |
+| M4: 数据清洗 | Week 6 | ⏸️ 待开始 |
+| M5: 质量评估 | Week 8 | ⏸️ 待开始 |
+| M6: 知识提取 | Week 10 | ⏸️ 待开始 |
+| M7: MVP 完成 | Week 12 | ⏸️ 待开始 |
+| M8: 上线就绪 | Week 14 | ⏸️ 待开始 |
 
 详见：`docs/04-development/04-开发方案.md`
 
@@ -284,12 +307,15 @@ npm run test:coverage
 
 ## 📚 文档
 
-完整文档请查看 `docs/` 目录：
+完整文档见 `docs/` 目录（36 份设计文档 + 1 份审查报告）：
 
-- **需求文档**：产品概述、用户调研
-- **设计文档**：Prompt 工程规范、版本管理
-- **架构文档**：系统架构、Agent 设计、数据库设计、API 设计
-- **开发文档**：开发规范、技术栈、成本管理、开发方案
+- **需求**：`01-requirements/`（产品概述、用户调研、需求讨论记录）
+- **设计**：`02-design/`（Prompt 工程规范、Prompt 版本管理）
+- **架构**：`03-architecture/`（系统架构、Agent 详细设计、数据库设计、API 设计）
+- **开发**：`04-development/`（开发规范、技术栈、成本管理、开发方案、状态管理、重试、降级...）
+- **UI**：`05-design/`（视觉、组件、页面、响应式规范）
+- **测试**：`06-testing/`（测试策略、后端单测/集成、Prompt 测试、前端测试）
+- **审查**：`07-review/00-文档审查报告.md`
 
 ---
 
@@ -297,14 +323,14 @@ npm run test:coverage
 
 ### 开发流程
 
-1. 从 `develop` 分支创建功能分支
+1. 从 `main` 分支创建功能分支
 2. 遵循代码规范（见 `docs/04-development/01-开发规范.md`）
-3. 编写测试（覆盖率 > 80%）
+3. 编写测试（覆盖率见上表）
 4. 提交前运行检查：
    ```bash
    # 后端
-   black app/ && flake8 app/ && pytest tests/
-   
+   black app/ tests/ && flake8 app/ tests/ && pytest -m "not prompt"
+
    # 前端
    npm run lint && npm run test
    ```
@@ -343,7 +369,7 @@ docs(readme): 更新安装文档
 - [LangChain](https://github.com/langchain-ai/langchain) - AI 应用框架
 - [FastAPI](https://fastapi.tiangolo.com/) - 高性能 Web 框架
 - [React](https://react.dev/) - UI 框架
-- [Anthropic Claude](https://www.anthropic.com/) - 强大的 LLM
+- [DeepSeek](https://www.deepseek.com/) - 本项目使用的 LLM
 
 ---
 

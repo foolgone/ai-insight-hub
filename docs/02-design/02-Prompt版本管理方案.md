@@ -50,11 +50,32 @@
 5. 一键回滚到历史版本
 ```
 
+### 单一真相源（必须遵守）
+
+`01-Prompt工程规范.md` 说 Prompt 存在 `prompts/**/*.txt` 文件里，本方案说存在数据库里 —— 两套载体必须定主从，否则改一处、跑一处，线上行为不可解释。
+
+| 载体 | 定位 | 说明 |
+|------|------|------|
+| 数据库 `prompt_versions` 表 | **唯一真相源（Source of Truth）** | 生产运行时只从库读取；激活 / A/B / 回滚全部以库为准 |
+| `backend/app/prompts/**/*.txt`（`system.txt` / `user_template.txt` / `examples.json` / `version.txt`） | 导出物 / 备份 / Code Review 产物 | 由 `export_to_files()` 从库导出，便于 Git diff 与评审 |
+
+**同步规则**：
+
+1. 任何 Prompt 改动 = ① 建 `draft` 版本入库 → ② `export_to_files()` 落盘 → ③ Git 提交（顺序不可颠倒）；
+2. **禁止只改文件不改库**：下次 `export_to_files()` 会把文件覆盖回库里的旧内容；
+3. 服务启动时若库中某 Agent 一条版本都没有，执行一次 `import_from_files()` 作为 bootstrap；
+4. 文件与库不一致时以**库**为准，并打印告警（Loguru `WARNING`）＋ Prometheus 计数 `prompt_file_db_mismatch_total`；
+5. 回滚只改库，再重新导出文件，不回滚 Git 历史（Git 侧用 `git revert` 保留可追溯性，见 `01-Prompt工程规范.md` 4.3 节）。
+
 ---
 
 ## 3. 数据库设计
 
-### 3.1 Prompt 版本表
+> 本节给出 `prompt_versions`、`prompt_usage_logs`、`version_rollback_logs` 三张表的建表 SQL。
+> **三张表已在 `docs/03-architecture/03-数据库设计.md` 登记**，本文件与之一致；若两处不一致，以 `03-数据库设计.md` 为准并回来同步修正本节。
+> 数据库连接口径：库 / 用户 `aiinsight`，密码 `dev_password`（见 `docs/03-architecture/03-数据库设计.md` 与 `backend/.env.example`）。
+
+### 3.1 Prompt 版本表（prompt_versions）
 
 ```sql
 CREATE TABLE prompt_versions (
@@ -113,7 +134,7 @@ CREATE INDEX idx_prompt_versions_default ON prompt_versions(agent_name, is_defau
 
 ---
 
-### 3.2 Prompt 使用记录表
+### 3.2 Prompt 使用记录表（prompt_usage_logs）
 
 ```sql
 CREATE TABLE prompt_usage_logs (
@@ -131,29 +152,70 @@ CREATE TABLE prompt_usage_logs (
     -- 性能数据
     duration FLOAT,              -- 执行时长（秒）
     token_usage JSONB,          -- {input: 100, output: 50}
-    cost FLOAT,                 -- 成本（美元）
+    cost FLOAT,                 -- 成本（美元，按实际模型单价重算，不写死单价）
     
     -- 质量数据
     success BOOLEAN,
     error_message TEXT,
-    quality_score FLOAT,        -- 输出质量评分
+    quality_score FLOAT,        -- 输出质量评分（0-100）
     
     -- 时间戳
     created_at TIMESTAMP DEFAULT NOW()
-) PARTITION BY RANGE (created_at);
-
--- 按月分区
-CREATE TABLE prompt_usage_logs_2026_10 PARTITION OF prompt_usage_logs
-    FOR VALUES FROM ('2026-10-01') TO ('2026-11-01');
-
-CREATE TABLE prompt_usage_logs_2026_11 PARTITION OF prompt_usage_logs
-    FOR VALUES FROM ('2026-11-01') TO ('2026-12-01');
+);
 
 -- 索引
 CREATE INDEX idx_prompt_usage_agent_version 
     ON prompt_usage_logs(agent_name, version, created_at);
 CREATE INDEX idx_prompt_usage_prompt_id 
     ON prompt_usage_logs(prompt_version_id, created_at);
+```
+
+> **分区口径（MVP：普通表，不分区）**
+>
+> 与 `docs/04-development/11-数据库分区策略调整.md` 的「MVP 移除分区」结论保持一致，本表 MVP 阶段为**普通表**。
+> 后续数据量增长再改为 `PARTITION BY RANGE (created_at)`（按月），但**不能只手工预建 2 个月分区**——写满后写入会直接失败。必须配套自动建分区机制：
+>
+> 1. Celery 每日凌晨任务 `ensure_next_month_partitions()`，始终保证「本月 + 下月 + 下下月」3 个分区存在；
+> 2. 建分区用 `CREATE TABLE IF NOT EXISTS prompt_usage_logs_YYYY_MM PARTITION OF prompt_usage_logs FOR VALUES FROM (...) TO (...)`，幂等可重复执行；
+> 3. Prometheus 暴露 `prompt_usage_partition_count`，< 3 时告警；
+> 4. 转分区时主键须改为 `PRIMARY KEY (id, created_at)`（PG 要求唯一约束包含全部分区键），并重建索引。
+>
+> 具体分区时间点：待确认（确认方式：按 `prompt_usage_logs` 实际行数与查询 P95 压测后再定，参考阈值单表 > 1000 万行）。
+
+---
+
+### 3.3 版本回滚日志表（version_rollback_logs）
+
+> 第 6 节回滚逻辑会写入本表，此前全文与数据库设计都**没有这张表**，此处补齐；**已在 `03-数据库设计.md` 登记**。
+
+```sql
+CREATE TABLE version_rollback_logs (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    
+    agent_name VARCHAR(100) NOT NULL,
+    
+    -- 回滚前正在生效的版本（必须先读出来再激活目标版本，见 6.1）
+    from_version VARCHAR(50) NOT NULL,
+    -- 回滚目标版本
+    to_version VARCHAR(50) NOT NULL,
+    
+    -- 触发方式与原因
+    trigger_type VARCHAR(20) DEFAULT 'manual' CHECK (
+        trigger_type IN ('manual', 'auto')
+    ),
+    reason TEXT,
+    -- 自动回滚时的错误率快照（0-1）
+    error_rate FLOAT,
+    
+    created_by VARCHAR(255),
+    created_at TIMESTAMP DEFAULT NOW(),
+    
+    -- 回滚源与目标不能是同一个版本，从数据库层拦住 6.1 曾出现的日志失真问题
+    CHECK (from_version <> to_version)
+);
+
+CREATE INDEX idx_rollback_agent_created 
+    ON version_rollback_logs(agent_name, created_at DESC);
 ```
 
 ---
@@ -164,6 +226,9 @@ CREATE INDEX idx_prompt_usage_prompt_id
 
 ```python
 # app/services/prompt_version_service.py
+# 伪代码：以下方法需在 PromptVersionService 中实现，本文档只给出关键实现
+#   _log_usage / get_default_version / get_ab_test_version / get_version / list_versions /
+#   get_previous_stable_version / send_alert / export_to_files / import_from_files
 from pathlib import Path
 import uuid
 from datetime import datetime
@@ -193,7 +258,9 @@ class PromptVersionService:
             raise ValueError(f"Version {version} already exists for {agent_name}")
         
         # 2. 插入数据库
-        version_id = await self.db.execute(
+        #    ⚠️ asyncpg 的 execute() 只返回状态串（如 "INSERT 0 1"），拿不到 RETURNING 的值；
+        #       要取回自增/默认生成的 id，必须用 fetch_val()。
+        version_id = await self.db.fetch_val(
             """
             INSERT INTO prompt_versions (
                 agent_name, version, system_prompt, user_template, examples,
@@ -213,6 +280,9 @@ class PromptVersionService:
                 "created_by": created_by
             }
         )
+        
+        # 3. 落盘导出（库是唯一真相源，文件是导出物，见第 2 节同步规则）
+        await self.export_to_files(agent_name, version)
         
         return {
             "id": version_id,
@@ -347,17 +417,33 @@ async def enable_ab_test(
 
 ```python
 # app/agents/base.py
-import random
+# 伪代码：BaseAgent 依赖 VersionService 的下列方法，需在 VersionService 中实现
+#   _log_usage / get_default_version / get_ab_test_version / get_version / list_versions
+import hashlib
+from typing import Optional
+
+from langchain_deepseek import ChatDeepSeek
+
+from app.core.config import settings
 
 class BaseAgent:
     """Agent 基类（增强版本管理）"""
-    
-    def __init__(self, agent_name: str):
-        self.agent_name = agent_name
+
+    def __init__(self, config: "AgentConfig"):
+        # 签名与 03-architecture/02-Agent详细设计.md §1.2 保持一致：BaseAgent.__init__(self, config: AgentConfig)
+        self.config = config
+        self.agent_name = config.name
+        self.llm = ChatDeepSeek(
+            model=settings.DEFAULT_LLM_MODEL,      # 模型 id 统一走配置，不写死
+            temperature=config.temperature,
+        )
         self.version_service = PromptVersionService()
-    
-    async def _select_prompt_version(self, user_id: str = None) -> dict:
-        """选择 Prompt 版本（支持 A/B 测试）"""
+
+    async def _select_prompt_version(self, routing_key: Optional[str] = None) -> dict:
+        """选择 Prompt 版本（支持 A/B 测试）
+
+        routing_key 必须是「稳定键」：优先 datasource_id，其次 conversation_id / user_id。
+        """
         
         # 1. 获取默认版本
         default_version = await self.version_service.get_default_version(
@@ -371,27 +457,31 @@ class BaseAgent:
         
         if not ab_test_version:
             return default_version
+
+        # 3. 无稳定键时不做随机分流：随机分流会让同一数据源跨版本，A/B 指标被污染
+        if not routing_key:
+            return default_version
         
-        # 3. 根据流量分配决定使用哪个版本
+        # 4. 按稳定键哈希分流（md5 跨进程稳定；Python 内置 hash() 带随机种子，禁止使用）
         traffic_pct = ab_test_version["ab_test_config"]["traffic_percentage"]
-        
-        # 使用 user_id 哈希保证同一用户始终使用同一版本
-        if user_id:
-            hash_value = int(hashlib.md5(user_id.encode()).hexdigest(), 16)
-            use_ab_version = (hash_value % 100) < (traffic_pct * 100)
-        else:
-            use_ab_version = random.random() < traffic_pct
+        hash_value = int(hashlib.md5(routing_key.encode("utf-8")).hexdigest(), 16)
+        use_ab_version = (hash_value % 100) < (traffic_pct * 100)
         
         return ab_test_version if use_ab_version else default_version
     
-    async def invoke(self, input_data: dict, user_id: str = None) -> dict:
+    async def invoke(
+        self,
+        input_data: dict,
+        routing_key: Optional[str] = None,
+        version: Optional[dict] = None,
+    ) -> dict:
         """执行 Agent（记录版本）"""
         
-        # 1. 选择版本
-        version = await self._select_prompt_version(user_id)
+        # 1. 选择版本（显式传入的版本优先，用于回放/指定版本验证）
+        selected = version or await self._select_prompt_version(routing_key)
         
         # 2. 加载 Prompt
-        prompt = version["system_prompt"]
+        prompt = selected["system_prompt"]
         
         # 3. 执行
         import time
@@ -403,12 +493,12 @@ class BaseAgent:
             
             # 4. 记录使用
             await self._log_usage(
-                version_id=version["id"],
-                version=version["version"],
+                version_id=selected["id"],
+                version=selected["version"],
                 duration=duration,
                 success=True,
                 result=result,
-                user_id=user_id
+                routing_key=routing_key
             )
             
             return result
@@ -418,12 +508,12 @@ class BaseAgent:
             
             # 记录失败
             await self._log_usage(
-                version_id=version["id"],
-                version=version["version"],
+                version_id=selected["id"],
+                version=selected["version"],
                 duration=duration,
                 success=False,
                 error=str(e),
-                user_id=user_id
+                routing_key=routing_key
             )
             
             raise
@@ -434,6 +524,10 @@ class BaseAgent:
 ### 5.3 A/B 测试报告
 
 ```python
+# 伪代码片段：依赖 VersionService.self.db 与 self._get_quality_scores()
+import numpy as np
+from scipy import stats
+
 async def get_ab_test_report(
     self,
     agent_name: str,
@@ -463,28 +557,45 @@ async def get_ab_test_report(
         {"agent": agent_name, "version_a": version_a, "version_b": version_b}
     )
     
+    # 按 version 建映射：GROUP BY 不保证返回顺序，绝不能用 results[0] / results[1]
+    rows_by_version = {row["version"]: dict(row) for row in results}
+    
     # 统计显著性检验
     from scipy import stats
     
     data_a = await self._get_quality_scores(agent_name, version_a)
     data_b = await self._get_quality_scores(agent_name, version_b)
     
+    # scipy.stats.ttest_ind(a, b) 返回的 t 值符号含义：t > 0 表示 mean(a) > mean(b)。
+    # 此处 a = 对照组 A，b = 实验组 B，所以：
+    #   t_stat > 0 → B 版本更好；t_stat < 0 → A 版本更好（切勿写反）
     t_stat, p_value = stats.ttest_ind(data_a, data_b)
+    
+    if p_value >= 0.05:
+        conclusion = "无显著差异"
+    elif t_stat > 0:
+        conclusion = (
+            f"B 版本显著更好（B 均值 {np.mean(data_b):.2f} > A 均值 {np.mean(data_a):.2f}）"
+        )
+    else:
+        conclusion = (
+            f"A 版本显著更好（A 均值 {np.mean(data_a):.2f} > B 均值 {np.mean(data_b):.2f}）"
+        )
     
     return {
         "version_a": {
             "version": version_a,
-            "metrics": results[0] if results else {}
+            "metrics": rows_by_version.get(version_a, {})
         },
         "version_b": {
             "version": version_b,
-            "metrics": results[1] if len(results) > 1 else {}
+            "metrics": rows_by_version.get(version_b, {})
         },
         "statistical_test": {
             "t_statistic": t_stat,
             "p_value": p_value,
             "is_significant": p_value < 0.05,
-            "conclusion": "B 版本显著更好" if p_value < 0.05 and t_stat > 0 else "无显著差异"
+            "conclusion": conclusion
         }
     }
 ```
@@ -496,11 +607,13 @@ async def get_ab_test_report(
 ### 6.1 快速回滚
 
 ```python
+# 伪代码片段：依赖 VersionService.self.db / activate_version / get_default_version
 async def rollback_to_version(
     self,
     agent_name: str,
     target_version: str,
-    reason: str = None
+    reason: str = None,
+    trigger_type: str = "manual"
 ) -> dict:
     """回滚到指定版本"""
     
@@ -520,31 +633,51 @@ async def rollback_to_version(
     if target["status"] == "deprecated":
         raise ValueError(f"Cannot rollback to deprecated version {target_version}")
     
-    # 2. 激活目标版本
+    # 2. 先读出「回滚前正在生效的版本」
+    #    ⚠️ 必须在 activate 之前读！否则 activate 已把 is_default 移到目标版本，
+    #       查出来的 from_version 会等于 to_version，回滚日志失真。
+    current = await self.db.fetch_one(
+        """
+        SELECT id, version
+        FROM prompt_versions
+        WHERE agent_name = :agent AND is_default = TRUE
+        """,
+        {"agent": agent_name}
+    )
+    from_version = current["version"] if current else None
+    
+    if from_version == target_version:
+        return {
+            "agent_name": agent_name,
+            "rolled_back_to": target_version,
+            "status": "noop",
+            "reason": "target version is already the default"
+        }
+    
+    # 3. 激活目标版本
     await self.activate_version(agent_name, target_version)
     
-    # 3. 记录回滚日志
+    # 4. 记录回滚日志（表结构见 3.3 version_rollback_logs）
     await self.db.execute(
         """
         INSERT INTO version_rollback_logs (
-            agent_name, from_version, to_version, reason
+            agent_name, from_version, to_version, reason, trigger_type
         ) VALUES (
-            :agent, 
-            (SELECT version FROM prompt_versions 
-             WHERE agent_name = :agent AND is_default = TRUE),
-            :to_version,
-            :reason
+            :agent, :from_version, :to_version, :reason, :trigger_type
         )
         """,
         {
             "agent": agent_name,
+            "from_version": from_version or "unknown",
             "to_version": target_version,
-            "reason": reason or "Manual rollback"
+            "reason": reason or "Manual rollback",
+            "trigger_type": trigger_type
         }
     )
     
     return {
         "agent_name": agent_name,
+        "from_version": from_version,
         "rolled_back_to": target_version,
         "status": "success"
     }
@@ -555,6 +688,8 @@ async def rollback_to_version(
 ### 6.2 自动回滚（基于错误率）
 
 ```python
+# 伪代码片段：依赖 get_default_version / get_previous_stable_version / send_alert
+# （均在 VersionService 中实现；告警走 Loguru + Prometheus + SMTP）
 async def auto_rollback_check(self, agent_name: str):
     """自动检查是否需要回滚"""
     
@@ -589,7 +724,8 @@ async def auto_rollback_check(self, agent_name: str):
             await self.rollback_to_version(
                 agent_name,
                 previous["version"],
-                reason=f"Auto rollback: error rate {error_rate:.1%}"
+                reason=f"Auto rollback: error rate {error_rate:.1%}",
+                trigger_type="auto"
             )
             
             # 发送告警
@@ -607,34 +743,42 @@ async def auto_rollback_check(self, agent_name: str):
 
 ```python
 # app/agents/cleaning_agent.py
+# 伪代码：VersionService.get_version 见 4.1，BaseAgent 见 5.2
 from app.agents.base import BaseAgent
 
 class DataCleaningAgent(BaseAgent):
     """数据清洗 Agent（版本管理增强）"""
     
-    def __init__(self):
-        super().__init__(agent_name="cleaning_agent")
+    def __init__(self, config):
+        # 与 02-Agent详细设计.md 一致：BaseAgent.__init__(self, config: AgentConfig)
+        super().__init__(config)
     
     async def clean(
         self,
         raw_data: str,
+        datasource_id: str = None,
         user_id: str = None,
-        version: str = None  # 可选：指定版本
+        version: str = None  # 可选：指定版本（回放 / 灰度验证）
     ) -> dict:
         """清洗数据"""
         
-        # 如果指定版本，使用指定版本；否则自动选择
+        # 1. 确定本次使用的 Prompt 版本
         if version:
             prompt_version = await self.version_service.get_version(
                 self.agent_name, version
             )
         else:
-            prompt_version = await self._select_prompt_version(user_id)
+            # 用 datasource_id 作为稳定分流键，保证同一数据源始终命中同一版本
+            prompt_version = await self._select_prompt_version(
+                routing_key=datasource_id or user_id
+            )
         
-        # 执行清洗
+        # 2. 显式把选中的版本传进执行逻辑，确保 version 参数真正生效
+        #    （原实现取了 prompt_version 却没用，指定版本形同虚设）
         result = await self.invoke(
-            {"raw_data": raw_data},
-            user_id=user_id
+            {"raw_data": raw_data, "datasource_id": datasource_id},
+            routing_key=datasource_id or user_id,
+            version=prompt_version
         )
         
         return result
@@ -646,6 +790,7 @@ class DataCleaningAgent(BaseAgent):
 
 ```python
 # app/api/v1/prompt_versions.py
+# 伪代码：list_versions 需在 PromptVersionService 中实现
 from fastapi import APIRouter, Depends
 
 router = APIRouter(prefix="/prompt-versions", tags=["Prompt 版本管理"])
