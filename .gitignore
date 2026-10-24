@@ -19,28 +19,19 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+MANIFEST
+*.manifest
+*.spec
+pip-log.txt
+pip-delete-this-directory.txt
 
 # Virtual Environment
 venv/
-env/
 ENV/
+env/
 .venv
 
-# Node
-node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-dist/
-build/
-.cache/
-
-# Environment Variables
-.env
-.env.local
-.env.*.local
-
-# IDE
+# IDEs
 .vscode/
 .idea/
 *.swp
@@ -48,35 +39,107 @@ build/
 *~
 .DS_Store
 
-# Logs
-logs/
-*.log
+# Environment Variables
+.env
+.env.local
+.env.*.local
 
 # Database
 *.db
 *.sqlite
 *.sqlite3
 
-# Test Coverage
-htmlcov/
+# Logs
+*.log
+logs/
+*.log.*
+
+# Testing
 .coverage
-.coverage.*
+.pytest_cache/
+htmlcov/
+.tox/
+.hypothesis/
 coverage.xml
 *.cover
+
+# MyPy
+.mypy_cache/
+.dmypy.json
+dmypy.json
 
 # Jupyter Notebook
 .ipynb_checkpoints
 
-# pyenv
-.python-version
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
 
-# Temp files
-*.tmp
-*.bak
-*.swp
-.temp/
-temp/
+# Build outputs
+dist/
+dist-ssr/
+build/
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
 
 # OS
-Thumbs.db
 .DS_Store
+Thumbs.db
+
+# Docker
+.dockerignore
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Backup files
+*.bak
+*~
+
+# Data files (large datasets)
+data/
+*.csv
+*.json.gz
+*.parquet
+
+# Reports
+reports/
+*.pdf
+
+# MinIO/S3 data
+minio_data/
+
+# Alembic
+backend/migrations/versions/*.pyc
+
+# Secrets
+*.pem
+*.key
+*.crt
+secrets/
+
+# Celery
+celerybeat-schedule
+celerybeat.pid
+
+# Prometheus
+prometheus_data/
+
+# Grafana
+grafana_data/

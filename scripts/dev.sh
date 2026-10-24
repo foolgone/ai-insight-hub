@@ -1,62 +1,60 @@
 #!/bin/bash
 
-# AI Insight Hub 开发环境启动脚本
+# AI Insight Hub - 开发环境启动脚本
 
 echo "🚀 启动 AI Insight Hub 开发环境..."
 echo ""
 
-# 检查是否在项目根目录
-if [ ! -f "README.md" ]; then
-    echo "❌ 错误：请在项目根目录运行此脚本"
+# 检查 Docker 服务是否运行
+if ! docker ps >/dev/null 2>&1; then
+    echo "❌ Docker 未运行，请先启动 Docker"
     exit 1
 fi
 
-# 启动后端
-echo "📦 启动后端服务..."
-cd backend
-if [ ! -d "venv" ]; then
-    echo "创建 Python 虚拟环境..."
-    python -m venv venv
+# 检查 Docker Compose 服务
+echo "🐳 检查 Docker 服务..."
+if ! docker-compose ps | grep -q "Up"; then
+    echo "⚠️  Docker 服务未启动，正在启动..."
+    docker-compose up -d
+    echo "⏳ 等待服务就绪..."
+    sleep 5
 fi
 
-source venv/bin/activate  # Linux/Mac
-# venv\Scripts\activate  # Windows (需手动运行)
+# 使用 tmux 或并行启动（如果安装了 tmux）
+if command -v tmux &> /dev/null; then
+    echo "🔀 使用 tmux 启动多个服务..."
 
-echo "安装 Python 依赖..."
-pip install -r requirements.txt
+    # 创建新会话
+    tmux new-session -d -s aiinsight
 
-echo "启动后端 API (端口 8000)..."
-uvicorn app.main:app --reload --port 8000 &
-BACKEND_PID=$!
+    # 后端窗口
+    tmux rename-window -t aiinsight:0 'backend'
+    tmux send-keys -t aiinsight:0 'cd backend && source venv/bin/activate && uvicorn app.main:app --reload' C-m
 
-cd ..
+    # 前端窗口
+    tmux new-window -t aiinsight:1 -n 'frontend'
+    tmux send-keys -t aiinsight:1 'cd frontend && npm run dev' C-m
 
-# 启动前端
-echo ""
-echo "⚛️  启动前端服务..."
-cd frontend
+    echo "✅ 服务已在 tmux 中启动"
+    echo ""
+    echo "📚 使用方式："
+    echo "  - 连接到会话：tmux attach -t aiinsight"
+    echo "  - 切换窗口：Ctrl+B 然后按 0(后端) 或 1(前端)"
+    echo "  - 退出会话：Ctrl+B 然后按 D"
+    echo "  - 停止所有服务：tmux kill-session -t aiinsight"
+    echo ""
+    echo "🌐 访问："
+    echo "  - 前端：http://localhost:5173"
+    echo "  - 后端 API：http://localhost:8000/docs"
 
-if [ ! -d "node_modules" ]; then
-    echo "安装 Node 依赖..."
-    npm install
+    # 自动连接到会话
+    tmux attach -t aiinsight
+else
+    echo "⚠️  tmux 未安装，请手动启动服务："
+    echo ""
+    echo "终端 1 - 后端："
+    echo "  cd backend && source venv/bin/activate && uvicorn app.main:app --reload"
+    echo ""
+    echo "终端 2 - 前端："
+    echo "  cd frontend && npm run dev"
 fi
-
-echo "启动前端开发服务器 (端口 5173)..."
-npm run dev &
-FRONTEND_PID=$!
-
-cd ..
-
-echo ""
-echo "✅ 开发环境已启动！"
-echo ""
-echo "访问地址："
-echo "  前端：http://localhost:5173"
-echo "  后端：http://localhost:8000"
-echo "  API 文档：http://localhost:8000/docs"
-echo ""
-echo "按 Ctrl+C 停止所有服务"
-
-# 等待用户中断
-trap "kill $BACKEND_PID $FRONTEND_PID; exit" INT
-wait
