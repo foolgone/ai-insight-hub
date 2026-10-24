@@ -1,0 +1,17 @@
+# 覆盖率配置（pytest-cov 自动读取）
+# 用法：pytest --cov=app --cov-report=term-missing
+
+[run]
+source = app
+omit =
+    app/core/config.py
+    */migrations/*
+    */tests/*
+    */venv/*
+
+[report]
+exclude_lines =
+    pragma: no cover
+    if TYPE_CHECKING:
+    raise NotImplementedError
+    if __name__ == .__main__.:

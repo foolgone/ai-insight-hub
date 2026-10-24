@@ -1,0 +1,33 @@
+# 代码质量工具配置（black / isort / mypy）
+# 覆盖率配置在 .coveragerc（pytest-cov 读取），测试标记在 pytest.ini（pytest 读取）
+
+[tool.black]
+line-length = 100
+target-version = ["py311"]
+extend-exclude = '''
+/(
+    \.venv
+  | venv
+  | migrations/versions
+)/
+'''
+
+[tool.isort]
+profile = "black"
+line_length = 100
+known_first_party = ["app"]
+skip_glob = ["*/migrations/versions/*", "*/venv/*"]
+
+[tool.mypy]
+python_version = "3.11"
+warn_unused_configs = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+ignore_missing_imports = true
+exclude = '''
+/(
+    \.venv
+  | venv
+  | migrations/versions
+)/
+'''

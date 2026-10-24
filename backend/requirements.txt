@@ -19,11 +19,12 @@ psycopg2-binary==2.9.9
 redis==5.0.1
 hiredis==2.3.2
 
-# AI 框架
+# AI 框架（LLM = DeepSeek V4.1 Flash，官方集成 langchain-deepseek；不使用 LangSmith）
+# ⚠️ langchain-* / langgraph 的版本兼容矩阵需在 M2 POC 首次安装时校验，如有冲突以 pip 解析结果为准并回写本文件
 langchain==0.1.0
-langchain-anthropic==0.1.0
 langchain-core==0.1.10
-langsmith==0.0.75
+langchain-deepseek==0.1.0
+langgraph==0.0.20
 
 # 向量和 NLP
 sentence-transformers==2.3.1
