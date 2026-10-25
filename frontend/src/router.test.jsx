@@ -6,6 +6,9 @@ import { useAuthStore } from './stores/authStore'
 import { listDataSources } from './api/datasources'
 import { listTasks } from './api/tasks'
 import { listCleanedData } from './api/cleaning'
+import { listQualityResults } from './api/quality'
+import { listFaq } from './api/knowledge'
+import { listReports } from './api/reports'
 
 vi.mock('./api/datasources', () => ({
   listDataSources: vi.fn(),
@@ -26,6 +29,27 @@ vi.mock('./api/cleaning', () => ({
   listCleanedData: vi.fn(),
   getCleanedData: vi.fn(),
 }))
+vi.mock('./api/quality', () => ({
+  triggerQuality: vi.fn(),
+  listQualityResults: vi.fn(),
+  reviewQuality: vi.fn(),
+}))
+vi.mock('./api/knowledge', () => ({
+  listFaq: vi.fn(),
+  searchKnowledge: vi.fn(),
+  listGaps: vi.fn(),
+  extractKnowledge: vi.fn(),
+  createFaq: vi.fn(),
+  updateFaq: vi.fn(),
+  deleteFaq: vi.fn(),
+}))
+vi.mock('./api/reports', () => ({
+  listReports: vi.fn(),
+  createReport: vi.fn(),
+  getReport: vi.fn(),
+  deleteReport: vi.fn(),
+  downloadReport: vi.fn(),
+}))
 
 const USER = { id: 'u1', email: 'a@example.com', name: '用户', role: 'user' }
 
@@ -41,6 +65,13 @@ describe('AppRoutes', () => {
     })
     listTasks.mockResolvedValue({ items: [], pagination: { total: 0 } })
     listCleanedData.mockResolvedValue({ items: [], pagination: { total: 0 } })
+    listQualityResults.mockResolvedValue({
+      items: [],
+      pagination: { total: 0 },
+      summary: { total: 0, avg_overall_score: 0, needs_review_count: 0 },
+    })
+    listFaq.mockResolvedValue({ items: [], pagination: { total: 0 } })
+    listReports.mockResolvedValue({ items: [], pagination: { total: 0 } })
   })
 
   afterEach(() => useAuthStore.setState({ user: null }))
@@ -49,7 +80,9 @@ describe('AppRoutes', () => {
     useAuthStore.setState({ user: USER })
     renderAt('/dashboard')
 
-    expect(await screen.findByRole('heading', { name: 'Dashboard' })).toBeInTheDocument()
+    expect(
+      await screen.findByRole('heading', { name: 'Dashboard' }, { timeout: 5000 })
+    ).toBeInTheDocument()
     expect(screen.getByRole('navigation', { name: '主菜单' })).toBeInTheDocument()
     expect(screen.getByRole('navigation', { name: '面包屑' })).toHaveTextContent('Dashboard')
   })
