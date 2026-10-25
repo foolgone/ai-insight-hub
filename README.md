@@ -156,6 +156,26 @@ powershell -ExecutionPolicy Bypass -File scripts\dev.ps1
 
 ---
 
+## 🚀 生产部署（前端 + Nginx）
+
+前端生产镜像采用多阶段构建（Node 构建 → Nginx 托管），SPA 路由由 `try_files` 回退，`/api` 反向代理到后端，gzip 在 Nginx 层开启：
+
+```bash
+# 1. 构建并启动全部服务（PG/Redis/MinIO/API/worker/beat/前端 Nginx）
+docker compose -f docker-compose.prod.yml up -d --build
+
+# 2. 仅构建前端镜像（构建上下文为仓库根目录）
+docker build -f frontend/Dockerfile -t aiinsight-frontend .
+
+# 3. 访问（默认 80 端口）
+# http://<host>/dashboard 刷新不应 404
+```
+
+- `frontend/Dockerfile`：`VITE_API_URL` 构建参数（默认空 = 相对路径 `/api/v1`）
+- `nginx/nginx.conf`：SPA 回退、`/assets` 长缓存、`/api` `/docs` `/health` 代理、gzip
+- 前端环境变量见 `frontend/.env.example`
+- 上线验收清单（含前端章节）：[`docs/04-development/15-上线验收清单.md`](./docs/04-development/15-上线验收清单.md)
+
 ## 📁 项目结构
 
 > 标注「规划」的目录为占位，尚未实现；当前后端只有系统接口，前端只有欢迎页。

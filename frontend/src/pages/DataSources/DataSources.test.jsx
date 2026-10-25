@@ -94,6 +94,7 @@ describe('DataSourcesPage', () => {
   })
 
   it('点击新建打开 Drawer', async () => {
+    useAuthStore.setState({ user: ADMIN })
     const user = userEvent.setup()
     renderPage()
     await screen.findByRole('heading', { name: '客服对话-1月' })

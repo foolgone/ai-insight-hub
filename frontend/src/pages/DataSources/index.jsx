@@ -89,9 +89,11 @@ export default function DataSources() {
             按数据源隔离导入与分析，支持 CSV / JSON / XLSX / TXT（≤ 50MB）
           </p>
         </div>
-        <Button icon={<LuPlus className="h-4 w-4" />} onClick={openCreate}>
-          新建数据源
-        </Button>
+        {canWrite ? (
+          <Button icon={<LuPlus className="h-4 w-4" />} onClick={openCreate}>
+            新建数据源
+          </Button>
+        ) : null}
       </div>
 
       <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -145,7 +147,7 @@ export default function DataSources() {
               <p className="text-sm text-gray-500">
                 {items.length === 0 ? '暂无数据源，先创建一个吧' : '当前页无匹配数据源'}
               </p>
-              {items.length === 0 ? (
+              {canWrite && items.length === 0 ? (
                 <Button className="mt-4" icon={<LuPlus className="h-4 w-4" />} onClick={openCreate}>
                   新建数据源
                 </Button>

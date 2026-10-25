@@ -18,6 +18,8 @@ export default defineConfig({
     globals: false,
     clearMocks: true,
     restoreMocks: true,
+    // 页面级集成用例涉及懒加载 + 多 Query，CI 机器较慢时放宽单测超时
+    testTimeout: 15000,
     // 骨架阶段还没有用例，避免 vitest run 以「No test files found」失败；用例补齐后可删除
     passWithNoTests: true,
     coverage: {
