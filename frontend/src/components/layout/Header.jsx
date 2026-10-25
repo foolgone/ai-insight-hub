@@ -1,0 +1,61 @@
+import { LuMenu } from 'react-icons/lu'
+import { useAuthStore } from '../../stores/authStore'
+import { useUiStore } from '../../stores/uiStore'
+import { Breadcrumb } from './Breadcrumb'
+
+/**
+ * 顶部导航（03 §2.1）：Logo + 面包屑 + 数据源选择器插槽 + 用户信息。
+ * P2/F-106 在此接入全局数据源选择器与用户菜单。
+ */
+export function Header() {
+  const user = useAuthStore(state => state.user)
+  const openMobileSidebar = useUiStore(state => state.openMobileSidebar)
+  const displayName = user?.name || user?.email || '未登录'
+
+  return (
+    <header className="sticky top-0 z-20 flex h-14 items-center gap-3 border-b border-gray-200 bg-white px-3 md:h-16 md:px-4">
+      <button
+        type="button"
+        aria-label="打开菜单"
+        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md text-gray-600 hover:bg-gray-100 md:hidden"
+        onClick={openMobileSidebar}
+      >
+        <LuMenu className="h-5 w-5" aria-hidden="true" />
+      </button>
+
+      <div className="flex shrink-0 items-center gap-2">
+        <div
+          className="grid h-9 w-9 place-items-center rounded-md bg-primary-500 text-sm font-bold text-white"
+          aria-hidden="true"
+        >
+          AI
+        </div>
+        <span className="hidden text-base font-semibold text-gray-900 sm:inline">
+          AI Insight Hub
+        </span>
+      </div>
+
+      <div className="hidden min-w-0 flex-1 md:block">
+        <Breadcrumb />
+      </div>
+      <div className="flex-1 md:hidden" />
+
+      {/* 数据源选择器插槽：D-F01 / F-106 在 P2 接入 */}
+      <div data-testid="datasource-selector-slot" className="hidden md:block" />
+
+      {user ? (
+        <div className="flex shrink-0 items-center gap-2">
+          <div
+            className="grid h-8 w-8 place-items-center rounded-full bg-primary-100 text-xs font-medium text-primary-700"
+            aria-hidden="true"
+          >
+            {displayName.slice(0, 1).toUpperCase()}
+          </div>
+          <span className="hidden max-w-32 truncate text-sm text-gray-700 md:inline">
+            {displayName}
+          </span>
+        </div>
+      ) : null}
+    </header>
+  )
+}
