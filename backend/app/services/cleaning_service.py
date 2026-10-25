@@ -336,7 +336,11 @@ async def run_clean_task(task_id: str, *, session: AsyncSession | None = None) -
     from app.core.database import SessionLocal
 
     async with SessionLocal() as db:
-        return await _execute_clean(uuid.UUID(task_id), db, commit=True)
+        result = await _execute_clean(uuid.UUID(task_id), db, commit=True)
+    from app.core.database import dispose_engine
+
+    await dispose_engine()
+    return result
 
 
 # --------------------------------------------------------------------------- 结果查询

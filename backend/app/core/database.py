@@ -59,13 +59,19 @@ SessionLocal = async_sessionmaker(
 
 
 async def get_db() -> AsyncIterator[AsyncSession]:
-    """FastAPI 依赖：每个请求一个会话，异常时回滚。"""
+    """FastAPI 依赖：每个请求一个会话。
+
+    请求正常完成 → ``commit`` 持久化（服务层只 ``flush``，提交统一在边界）；
+    请求抛异常 → ``rollback`` 后继续抛出，交由异常处理器返回统一错误响应。
+    """
     async with SessionLocal() as session:
         try:
             yield session
         except Exception:
             await session.rollback()
             raise
+        else:
+            await session.commit()
 
 
 async def dispose_engine() -> None:

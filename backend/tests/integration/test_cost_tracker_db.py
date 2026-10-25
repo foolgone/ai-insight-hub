@@ -94,21 +94,29 @@ async def test_daily_cost_and_usage_stats(db_session, monkeypatch) -> None:
     # 固定单价，避免 D-09 的 0.0 导致成本恒 0
     monkeypatch.setattr(settings, "LLM_PRICE_INPUT_PER_MTOK", 1.0)
     monkeypatch.setattr(settings, "LLM_PRICE_OUTPUT_PER_MTOK", 2.0)
+    user = UserFactory()
+    await persist(db_session, user)
     tracker = CostTracker(db_session)
     task_one = uuid.uuid4()
     task_two = uuid.uuid4()
 
-    await tracker.track(response=_response(tokens=(1_000_000, 0)), task_id=task_one)
+    # 加 user_id 过滤：本地/共享库可能已有其它 llm_calls 记录，避免全局聚合受污染
+    await tracker.track(
+        response=_response(tokens=(1_000_000, 0)),
+        task_id=task_one,
+        user_id=user.id,
+    )
     await tracker.track(
         response=_response(model="deepseek-flash", tokens=(0, 500_000)),
         task_id=task_two,
         attempt=1,
+        user_id=user.id,
     )
 
-    daily = await tracker.get_daily_cost()
+    daily = await tracker.get_daily_cost(user_id=user.id)
     assert daily == Decimal("2.00000000")
 
-    stats = await tracker.get_usage_stats(days=7)
+    stats = await tracker.get_usage_stats(days=7, user_id=user.id)
     assert stats["calls"] == 2
     assert stats["total_tokens"] == 1_500_000
     assert stats["total_cost"] == "2.00000000"

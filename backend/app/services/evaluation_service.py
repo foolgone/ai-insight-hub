@@ -247,7 +247,11 @@ async def run_evaluation_task(
     from app.core.database import SessionLocal
 
     async with SessionLocal() as db:
-        return await _execute_evaluation(uuid.UUID(task_id), db, commit=True)
+        result = await _execute_evaluation(uuid.UUID(task_id), db, commit=True)
+    from app.core.database import dispose_engine
+
+    await dispose_engine()
+    return result
 
 
 # --------------------------------------------------------------------------- 查询 / 复核
