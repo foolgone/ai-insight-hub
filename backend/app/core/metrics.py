@@ -1,27 +1,40 @@
 """Prometheus 指标（09-可观测与成本监控 §4；Agent 设计 §8.3）。
 
-指标名是外部契约（Grafana/告警按名查询），**不得随意改名**：
-- ``llm_calls_total{model,status}``
-- ``llm_tokens_total{model,direction}``
-- ``llm_cost_usd_total{model}``
-- ``llm_latency_seconds{model}``
+指标名与 label 是外部契约（Grafana/告警按名查询），**不得随意改名**：
+- ``llm_calls_total{model,agent_name,status}``
+- ``llm_tokens_total{model,agent_name,direction}``
+- ``llm_cost_usd_total{model,agent_name}``
+- ``llm_latency_seconds{model,agent_name}``
 - ``agent_invocations_total{agent,status}``
 - ``agent_duration_seconds{agent}``
 
+基数控制：``agent_name`` 为有限枚举，禁止把 task_id/user_id 放进 label。
 成本对账只认 ``llm_calls`` 表，Prometheus 为进程内累加（不能用于月结）。
 """
 from __future__ import annotations
 
 from prometheus_client import Counter, Histogram
 
-LLM_CALLS_TOTAL = Counter("llm_calls_total", "Total number of LLM calls", ["model", "status"])
-LLM_TOKENS_TOTAL = Counter("llm_tokens_total", "Total number of LLM tokens", ["model", "direction"])
-LLM_COST_USD_TOTAL = Counter("llm_cost_usd_total", "Cumulative LLM cost in USD", ["model"])
+LLM_CALLS_TOTAL = Counter(
+    "llm_calls_total",
+    "Total number of LLM calls",
+    ["model", "agent_name", "status"],
+)
+LLM_TOKENS_TOTAL = Counter(
+    "llm_tokens_total",
+    "Total number of LLM tokens",
+    ["model", "agent_name", "direction"],
+)
+LLM_COST_USD_TOTAL = Counter(
+    "llm_cost_usd_total",
+    "Cumulative LLM cost in USD",
+    ["model", "agent_name"],
+)
 LLM_LATENCY_SECONDS = Histogram(
     "llm_latency_seconds",
     "LLM call latency in seconds",
-    ["model"],
-    buckets=(0.05, 0.1, 0.25, 0.5, 1, 2, 5, 10, 30, 60),
+    ["model", "agent_name"],
+    buckets=(0.5, 1, 2, 5, 10, 20, 30, 60, 120),
 )
 AGENT_INVOCATIONS_TOTAL = Counter(
     "agent_invocations_total", "Total number of agent invocations", ["agent", "status"]
@@ -39,19 +52,24 @@ def record_llm_call(
     model: str,
     status: str,
     duration_seconds: float,
+    agent_name: str = "unknown",
     input_tokens: int = 0,
     output_tokens: int = 0,
     cost_usd: float = 0.0,
 ) -> None:
     """记录一次 LLM 调用（成功或失败）。"""
-    LLM_CALLS_TOTAL.labels(model=model, status=status).inc()
+    LLM_CALLS_TOTAL.labels(model=model, agent_name=agent_name, status=status).inc()
     if input_tokens:
-        LLM_TOKENS_TOTAL.labels(model=model, direction="input").inc(input_tokens)
+        LLM_TOKENS_TOTAL.labels(model=model, agent_name=agent_name, direction="input").inc(
+            input_tokens
+        )
     if output_tokens:
-        LLM_TOKENS_TOTAL.labels(model=model, direction="output").inc(output_tokens)
+        LLM_TOKENS_TOTAL.labels(model=model, agent_name=agent_name, direction="output").inc(
+            output_tokens
+        )
     if cost_usd:
-        LLM_COST_USD_TOTAL.labels(model=model).inc(cost_usd)
-    LLM_LATENCY_SECONDS.labels(model=model).observe(duration_seconds)
+        LLM_COST_USD_TOTAL.labels(model=model, agent_name=agent_name).inc(cost_usd)
+    LLM_LATENCY_SECONDS.labels(model=model, agent_name=agent_name).observe(duration_seconds)
 
 
 def record_agent_invocation(*, agent: str, status: str, duration_seconds: float) -> None:

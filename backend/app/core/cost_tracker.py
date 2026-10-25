@@ -129,6 +129,7 @@ class CostTracker:
         row = await self._upsert(values)
         record_llm_call(
             model=response.model,
+            agent_name=agent_name or "unknown",
             status="success",
             duration_seconds=response.latency_ms / 1000,
             input_tokens=usage.input_tokens,
@@ -179,6 +180,7 @@ class CostTracker:
         row = await self._upsert(values)
         record_llm_call(
             model=model,
+            agent_name=agent_name or "unknown",
             status="failed",
             duration_seconds=duration_seconds or 0.0,
         )

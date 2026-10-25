@@ -1,4 +1,4 @@
-"""B-405 评估 Prompt 测试骨架（真实 LLM，默认排除：pytest -m prompt）。"""
+"""B-405 / B-607 评估 Prompt 测试（50 条，默认排除：pytest -m prompt）。"""
 from __future__ import annotations
 
 import uuid
@@ -23,18 +23,35 @@ _DIALOGUES = [
     ("包装里有哪些配件", "数据线、说明书和取卡针。"),
 ]
 
-_KNOWLEDGE_BASE = [{"question": "iPhone 14 价格", "answer": "5999 元起"}]
+_KB_VARIANTS = [
+    None,
+    [],
+    [{"question": "iPhone 14 价格", "answer": "5999 元起"}],
+    [
+        {"question": "退货政策", "answer": "7 天无理由"},
+        {"question": "发货时效", "answer": "48 小时"},
+        {"question": "保修", "answer": "整机一年"},
+    ],
+    [
+        {"question": "价格", "answer": "5999"},
+        {"question": "分期", "answer": "12 期免息"},
+        {"question": "发票", "answer": "电子发票"},
+        {"question": "物流", "answer": "48 小时发货"},
+        {"question": "保修", "answer": "一年"},
+    ],
+]
 
 CASES = [
     {
         "dialogue": {
-            "dialogue_id": f"prompt-{index}",
+            "dialogue_id": f"eval-{index}-{variant_index}",
             "user_message": user_message,
             "ai_response": ai_response,
         },
-        "knowledge_base": _KNOWLEDGE_BASE,
+        "knowledge_base": knowledge_base,
     }
-    for index, (user_message, ai_response) in enumerate(_DIALOGUES, start=1)
+    for index, (user_message, ai_response) in enumerate(_DIALOGUES)
+    for variant_index, knowledge_base in enumerate(_KB_VARIANTS)
 ]
 
 
@@ -67,4 +84,4 @@ async def test_evaluation_prompt_returns_valid_scores(case: dict) -> None:
 
 
 def test_evaluation_prompt_case_count() -> None:
-    assert len(CASES) == 10
+    assert len(CASES) == 50

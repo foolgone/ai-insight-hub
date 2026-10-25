@@ -1,4 +1,4 @@
-"""B-202 Prometheus 指标测试。"""
+"""B-202 / B-608 Prometheus 指标测试（label 与可观测文档一致）。"""
 from __future__ import annotations
 
 import pytest
@@ -16,14 +16,17 @@ def _value(name: str, labels: dict[str, str]) -> float:
 
 def test_record_llm_call_updates_all_metrics() -> None:
     model = "m-metrics-test"
-    calls = _value("llm_calls_total", {"model": model, "status": "success"})
-    tokens_in = _value("llm_tokens_total", {"model": model, "direction": "input"})
-    tokens_out = _value("llm_tokens_total", {"model": model, "direction": "output"})
-    cost = _value("llm_cost_usd_total", {"model": model})
-    latency_count = _value("llm_latency_seconds_count", {"model": model})
+    agent = "cleaning_agent"
+    labels = {"model": model, "agent_name": agent}
+    calls = _value("llm_calls_total", {**labels, "status": "success"})
+    tokens_in = _value("llm_tokens_total", {**labels, "direction": "input"})
+    tokens_out = _value("llm_tokens_total", {**labels, "direction": "output"})
+    cost = _value("llm_cost_usd_total", labels)
+    latency_count = _value("llm_latency_seconds_count", labels)
 
     metrics.record_llm_call(
         model=model,
+        agent_name=agent,
         status="success",
         duration_seconds=0.42,
         input_tokens=11,
@@ -31,20 +34,27 @@ def test_record_llm_call_updates_all_metrics() -> None:
         cost_usd=0.002,
     )
 
-    assert _value("llm_calls_total", {"model": model, "status": "success"}) == calls + 1
-    assert _value("llm_tokens_total", {"model": model, "direction": "input"}) == tokens_in + 11
-    assert _value("llm_tokens_total", {"model": model, "direction": "output"}) == tokens_out + 7
-    assert _value("llm_cost_usd_total", {"model": model}) == pytest.approx(cost + 0.002)
-    assert _value("llm_latency_seconds_count", {"model": model}) == latency_count + 1
+    assert _value("llm_calls_total", {**labels, "status": "success"}) == calls + 1
+    assert _value("llm_tokens_total", {**labels, "direction": "input"}) == tokens_in + 11
+    assert _value("llm_tokens_total", {**labels, "direction": "output"}) == tokens_out + 7
+    assert _value("llm_cost_usd_total", labels) == pytest.approx(cost + 0.002)
+    assert _value("llm_latency_seconds_count", labels) == latency_count + 1
 
 
 def test_record_failed_llm_call() -> None:
     model = "m-failed-test"
-    metrics.record_llm_call(model=model, status="failed", duration_seconds=0.1)
+    agent = "evaluation_agent"
+    labels = {"model": model, "agent_name": agent}
+    metrics.record_llm_call(
+        model=model,
+        agent_name=agent,
+        status="failed",
+        duration_seconds=0.1,
+    )
 
-    assert _value("llm_calls_total", {"model": model, "status": "failed"}) == 1
-    assert _value("llm_tokens_total", {"model": model, "direction": "input"}) == 0
-    assert _value("llm_cost_usd_total", {"model": model}) == 0
+    assert _value("llm_calls_total", {**labels, "status": "failed"}) == 1
+    assert _value("llm_tokens_total", {**labels, "direction": "input"}) == 0
+    assert _value("llm_cost_usd_total", labels) == 0
 
 
 def test_record_agent_invocation() -> None:
@@ -58,6 +68,7 @@ def test_record_agent_invocation() -> None:
 def test_metrics_endpoint_exposes_llm_metrics(client) -> None:
     metrics.record_llm_call(
         model="m-endpoint-test",
+        agent_name="insight_agent",
         status="success",
         duration_seconds=0.2,
         input_tokens=1,

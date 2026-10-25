@@ -7,6 +7,7 @@
 from __future__ import annotations
 
 from celery import Celery
+from celery.schedules import crontab
 
 from app.core.config import settings
 
@@ -31,6 +32,13 @@ celery_app.conf.update(
     broker_connection_retry_on_startup=True,
     task_always_eager=settings.CELERY_TASK_ALWAYS_EAGER,
     task_eager_propagates=True,
+    # B-608：每日成本对账/告警（成本只认 llm_calls 聚合）
+    beat_schedule={
+        "daily-cost-monitor": {
+            "task": "tasks.monitor_cost",
+            "schedule": crontab(hour=0, minute=5),
+        },
+    },
 )
 
 
