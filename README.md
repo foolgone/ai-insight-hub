@@ -24,7 +24,7 @@ AI Insight Hub 是一个智能数据中台，专门为 AI 客服/对话系统提
 
 ### 后端
 - **Python 3.11+** | FastAPI | SQLAlchemy 2.0
-- **LangChain + LangGraph** | **DeepSeek V4.1 Flash**（`langchain-deepseek` 官方集成）
+- **自研 LLM 客户端**（httpx，OpenAI 兼容协议） | **DeepSeek V4.1 Flash**（不引入 LangChain/LangGraph，见 [ADR-001](./docs/04-development/13-ADR-001-移除LangChain与LangGraph.md)）
 - 模型 id 由 `DEFAULT_LLM_MODEL` 配置决定，业务代码不写死
 
 ### 前端
@@ -168,7 +168,7 @@ ai-insight-hub/
 ├── docker-compose.test.yml      # 测试环境（PostgreSQL 5433 / Redis 6380）
 ├── .github/workflows/test.yml   # CI：后端 pytest + 前端 vitest
 │
-├── docs/                        # 📚 文档（36 份设计文档 + 1 份审查报告）
+├── docs/                        # 📚 文档（38 份设计/执行文档 + 1 份审查报告）
 │   ├── 00-AI应用开发基调.md
 │   ├── 00-技术栈优化总结.md
 │   ├── 01-requirements/         # 需求
@@ -314,18 +314,18 @@ cd frontend && npm run test:coverage
 | M7: MVP 完成 | Week 12 | ⏸️ 待开始 |
 | M8: 上线就绪 | Week 14 | ⏸️ 待开始 |
 
-详见：`docs/04-development/04-开发方案.md`
+详见：`docs/04-development/04-开发方案.md`（总体方案）、[`docs/04-development/12-后端开发计划.md`](./docs/04-development/12-后端开发计划.md)（后端执行计划：阶段、任务 WBS、验收标准、决策清单）
 
 ---
 
 ## 📚 文档
 
-完整文档见 `docs/` 目录（36 份设计文档 + 1 份审查报告）：
+完整文档见 `docs/` 目录（38 份设计/执行文档 + 1 份审查报告）：
 
 - **需求**：`01-requirements/`（产品概述、用户调研、需求讨论记录）
 - **设计**：`02-design/`（Prompt 工程规范、Prompt 版本管理）
 - **架构**：`03-architecture/`（系统架构、Agent 详细设计、数据库设计、API 设计）
-- **开发**：`04-development/`（开发规范、技术栈、成本管理、开发方案、状态管理、重试、降级...）
+- **开发**：`04-development/`（开发规范、技术栈、成本管理、开发方案、状态管理、重试、降级、**后端开发计划**、**技术选型 ADR**...）
 - **UI**：`05-design/`（视觉、组件、页面、响应式规范）
 - **测试**：`06-testing/`（测试策略、后端单测/集成、Prompt 测试、前端测试）
 - **审查**：`07-review/00-文档审查报告.md`
@@ -379,7 +379,7 @@ docs(readme): 更新安装文档
 
 ## 🙏 致谢
 
-- [LangChain](https://github.com/langchain-ai/langchain) - AI 应用框架
+- [httpx](https://www.python-httpx.org/) - HTTP 客户端（LLM 调用）
 - [FastAPI](https://fastapi.tiangolo.com/) - 高性能 Web 框架
 - [React](https://react.dev/) - UI 框架
 - [DeepSeek](https://www.deepseek.com/) - 本项目使用的 LLM

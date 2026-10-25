@@ -1,5 +1,7 @@
 # AI Insight Hub - Agent 详细设计
 
+> ⚠️ **选型变更（2026-10-24）**：LangChain/LangGraph 已移除。本文的 `BaseAgent` 契约（输入输出、异常树、重试、质量分口径、5 个 Agent 规格、工作流步骤）继续有效；但实现改为依赖自研 `LLMClient`（`app/core/llm.py`）与自研编排器（`app/agents/workflow.py`），文中 `ChatDeepSeek`/`StateGraph` 示例已过期，以 [ADR-001](../04-development/13-ADR-001-移除LangChain与LangGraph.md) 为准。
+
 > **文档版本**：v1.0  
 > **创建日期**：2026年10月23日  
 > **最后更新**：2026年10月23日  
@@ -72,7 +74,7 @@ class AgentConfig(BaseModel):
     """Agent 配置"""
     name: str
     version: str
-    # 模型 id 不写死：统一由 settings.DEFAULT_LLM_MODEL 提供（默认 deepseek-v4.1-flash）
+    # 模型 id 不写死：统一由 settings.DEFAULT_LLM_MODEL 提供（默认 deepseek-flash）
     model: str = settings.DEFAULT_LLM_MODEL
     # 结构化输出（清洗/评估/提取）用 0.0；洞察/报告类可单独覆盖为 0.3
     temperature: float = settings.DEFAULT_TEMPERATURE
