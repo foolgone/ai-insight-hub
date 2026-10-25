@@ -14,7 +14,14 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from fastapi.testclient import TestClient  # noqa: E402
 
+from app.core.config import settings  # noqa: E402
 from app.main import app  # noqa: E402
+
+
+@pytest.fixture(autouse=True)
+def disable_rate_limit_by_default(monkeypatch) -> None:
+    """测试默认关闭限流：仅限流用例显式开启，避免 Redis/事件循环耦合。"""
+    monkeypatch.setattr(settings, "RATE_LIMIT_ENABLED", False)
 
 
 @pytest.fixture()
