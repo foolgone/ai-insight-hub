@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import uuid
+from datetime import datetime
 from pathlib import Path
 
 from fastapi import APIRouter, Depends, File, Query, UploadFile
@@ -14,6 +15,7 @@ from app.core.database import get_db
 from app.core.exceptions import FileFormatInvalidError, FileTooLargeError
 from app.models import RawData, User
 from app.schemas.base import Page
+from app.schemas.cleaned_data import CleanedDataDetail, CleanedDataItem
 from app.schemas.datasource import (
     DataSourceCreate,
     DataSourceDeleteResponse,
@@ -289,6 +291,58 @@ async def clean_datasource(
         estimated_duration=estimated_duration,
         message="Cleaning task queued",
     )
+
+
+@router.get(
+    "/{datasource_id}/cleaned-data",
+    response_model=Page[CleanedDataItem],
+    response_model_by_alias=False,
+    summary="清洗结果列表（分页/质量分/问题/日期过滤）",
+)
+async def list_cleaned_data(
+    datasource_id: uuid.UUID,
+    params: PaginationParams = Depends(),
+    quality_score_min: float | None = Query(default=None, ge=0, le=100),
+    quality_score_max: float | None = Query(default=None, ge=0, le=100),
+    has_issues: bool | None = Query(default=None, description="是否只看有问题/无问题数据"),
+    date_from: datetime | None = Query(default=None),
+    date_to: datetime | None = Query(default=None),
+    user: User = Depends(require_roles(*READ_ROLES)),
+    session: AsyncSession = Depends(get_db),
+) -> Page[CleanedDataItem]:
+    rows, pagination = await cleaning_service.list_cleaned_data(
+        session,
+        user=user,
+        datasource_id=datasource_id,
+        params=params,
+        quality_score_min=quality_score_min,
+        quality_score_max=quality_score_max,
+        has_issues=has_issues,
+        date_from=date_from,
+        date_to=date_to,
+    )
+    return Page[CleanedDataItem](
+        items=[CleanedDataItem.model_validate(item) for item in rows],
+        pagination=pagination,
+    )
+
+
+@router.get(
+    "/{datasource_id}/cleaned-data/{data_id}",
+    response_model=CleanedDataDetail,
+    response_model_by_alias=False,
+    summary="清洗结果详情",
+)
+async def get_cleaned_data(
+    datasource_id: uuid.UUID,
+    data_id: uuid.UUID,
+    user: User = Depends(require_roles(*READ_ROLES)),
+    session: AsyncSession = Depends(get_db),
+) -> CleanedDataDetail:
+    item = await cleaning_service.get_cleaned_data(
+        session, user=user, datasource_id=datasource_id, data_id=data_id
+    )
+    return CleanedDataDetail.model_validate(item)
 
 
 __all__ = ["router"]

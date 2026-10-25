@@ -18,6 +18,7 @@ from app.core.errors import (
     validation_exception_handler,
 )
 from app.core.exceptions import AIInsightHubException
+from app.middleware.degradation_middleware import DegradationMiddleware
 from app.middleware.rate_limit import RateLimitMiddleware
 from app.utils.logger import logger, setup_logging
 
@@ -44,6 +45,9 @@ app.add_middleware(
 
 # 限流（B-211：Redis 固定窗口，60 请求/分钟，超限 429 + X-RateLimit-*）
 app.add_middleware(RateLimitMiddleware)
+
+# 成本降级（B-316：STOPPED 返回 429，响应头 X-Cost-*；D-09 只告警不切模型）
+app.add_middleware(DegradationMiddleware)
 
 # 统一错误响应（B-201：所有失败均为 {"error": {"code", "message", "details"?}}）
 app.add_exception_handler(AIInsightHubException, aiinsight_exception_handler)

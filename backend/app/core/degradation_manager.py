@@ -26,12 +26,17 @@ class DegradationManager:
     def __init__(self, session: AsyncSession | None = None) -> None:
         self._session = session
 
-    async def get_level(self, *, user_id: uuid.UUID | None = None) -> DegradationLevel:
+    async def get_cost_ratio(self, *, user_id: uuid.UUID | None = None) -> float:
+        """当日成本 / 日预算（无会话或预算≤0 时返回 0）。"""
         limit = float(settings.DAILY_COST_LIMIT)
         if self._session is None or limit <= 0:
-            return DegradationLevel.NORMAL
+            return 0.0
         cost = await CostTracker(self._session).get_daily_cost(user_id=user_id)
-        return CostAlertManager.level_for_ratio(float(cost) / limit)
+        return float(cost) / limit
+
+    async def get_level(self, *, user_id: uuid.UUID | None = None) -> DegradationLevel:
+        ratio = await self.get_cost_ratio(user_id=user_id)
+        return CostAlertManager.level_for_ratio(ratio)
 
     @staticmethod
     def should_use_degraded_model(level: DegradationLevel) -> bool:

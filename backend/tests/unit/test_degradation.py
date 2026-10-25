@@ -94,3 +94,9 @@ async def test_manager_zero_daily_limit_returns_normal(monkeypatch) -> None:
     level = await manager.get_level()
 
     assert level is DegradationLevel.NORMAL
+
+
+async def test_manager_cost_ratio_without_session() -> None:
+    manager = DegradationManager()
+
+    assert await manager.get_cost_ratio() == 0.0
