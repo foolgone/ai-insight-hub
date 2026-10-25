@@ -128,6 +128,11 @@ backend/app/data/__pycache__/
 
 # Reports
 reports/
+# 例外：app 内的报告 Prompt/模板是源码，不是生成物
+!backend/app/prompts/reports/
+!backend/app/prompts/reports/**
+!backend/app/templates/reports/
+!backend/app/templates/reports/**
 *.pdf
 
 # MinIO/S3 data

@@ -129,4 +129,48 @@ def read_upload(object_name: str, *, backend: str | None = None) -> bytes:
     return (Path(settings.STORAGE_LOCAL_DIR).resolve() / object_name).read_bytes()
 
 
-__all__ = ["StoredFile", "read_upload", "save_upload"]
+def save_bytes(
+    content: bytes,
+    *,
+    object_name: str,
+    content_type: str | None = None,
+) -> StoredFile:
+    """保存生成物（报告文件等）：MinIO 优先，``auto`` 模式失败回退本地。"""
+    backend = (settings.STORAGE_BACKEND or "auto").lower()
+
+    if backend in ("auto", "minio"):
+        try:
+            stored = _save_minio(content, object_name=object_name, content_type=content_type)
+            logger.info(
+                "artifact stored backend=minio object={} size={}",
+                stored.object_name,
+                stored.size,
+            )
+            return stored
+        except Exception as exc:  # noqa: BLE001
+            if backend == "minio":
+                logger.opt(exception=exc).error("MinIO 保存失败（STORAGE_BACKEND=minio）")
+                raise
+            logger.warning("MinIO 不可用，回退本地存储：{}", exc)
+
+    stored = _save_local(content, object_name=object_name)
+    logger.info(
+        "artifact stored backend=local object={} size={}",
+        stored.object_name,
+        stored.size,
+    )
+    return stored
+
+
+def read_bytes(object_name: str, *, backend: str | None = None) -> bytes:
+    """读取生成物（报告文件）；实现与 ``read_upload`` 相同。"""
+    return read_upload(object_name, backend=backend)
+
+
+__all__ = [
+    "StoredFile",
+    "read_bytes",
+    "read_upload",
+    "save_bytes",
+    "save_upload",
+]

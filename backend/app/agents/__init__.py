@@ -18,6 +18,7 @@ from app.agents.base import (
 from app.agents.cleaning_agent import DataCleaningAgent
 from app.agents.evaluation_agent import QualityEvaluationAgent
 from app.agents.extraction_agent import KnowledgeExtractionAgent
+from app.agents.report_agent import ReportGenerationAgent
 from app.agents.structured_output import (
     StructuredOutputError,
     extract_json_text,
@@ -42,6 +43,7 @@ __all__ = [
     "KnowledgeExtractionAgent",
     "QualityEvaluationAgent",
     "ReportError",
+    "ReportGenerationAgent",
     "StructuredOutputError",
     "extract_json_text",
     "parse_with_repair",

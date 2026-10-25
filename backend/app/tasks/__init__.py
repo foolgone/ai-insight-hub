@@ -11,6 +11,11 @@ def ping() -> str:
 
 
 # 导入子模块以完成任务注册（Celery include 只加载本包）
-from app.tasks import cleaning, evaluation, knowledge  # noqa: E402,F401
+from app.tasks import (  # noqa: E402,F401
+    cleaning,
+    evaluation,
+    knowledge,
+    report,
+)
 
 __all__ = ["ping"]
