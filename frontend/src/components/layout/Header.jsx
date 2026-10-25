@@ -39,8 +39,8 @@ export function Header() {
       </div>
       <div className="flex-1 md:hidden" />
 
-      {/* 全局数据源选择器（D-F01 / F-106） */}
-      <div data-testid="datasource-selector-slot" className="hidden md:block">
+      {/* 全局数据源选择器（D-F01 / F-106）：移动端仅图标，避免拥挤 */}
+      <div data-testid="datasource-selector-slot" className="shrink-0">
         <DataSourceSelector />
       </div>
 

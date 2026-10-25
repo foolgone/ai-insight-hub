@@ -81,7 +81,7 @@ export function DataSourceSelector() {
           className="flex h-9 max-w-[220px] items-center gap-2 rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-700 transition-colors hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
         >
           <LuDatabase className="h-4 w-4 shrink-0 text-gray-400" aria-hidden="true" />
-          <span className="truncate">{triggerLabel}</span>
+          <span className="hidden truncate sm:inline">{triggerLabel}</span>
           <LuChevronDown className="h-4 w-4 shrink-0 text-gray-400" aria-hidden="true" />
         </button>
       </Popover.Trigger>
