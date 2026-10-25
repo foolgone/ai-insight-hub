@@ -1,0 +1,21 @@
+[
+  {
+    "input": "10 条对话：价格咨询 5 条、退货咨询 3 条、投诉 2 条；情感偏中性。",
+    "output": {
+      "intent_distribution": {"咨询": 8, "投诉": 2},
+      "top_questions": [{"question": "退货政策", "count": 3, "ratio": 0.3}],
+      "sentiment_distribution": {"正面": 0.2, "中性": 0.6, "负面": 0.2},
+      "sentiment_trend": [],
+      "pain_points": [
+        {
+          "issue": "退货流程复杂",
+          "frequency": 3,
+          "severity": "medium",
+          "suggestions": "提供一键退货入口"
+        }
+      ],
+      "unresolved_issues": [],
+      "emerging_topics": []
+    }
+  }
+]

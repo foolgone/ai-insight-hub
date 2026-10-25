@@ -1,0 +1,4 @@
+痛点识别（pain_point_detection）：
+- 从用户抱怨、重复追问、未解决问题中提炼痛点；
+- 每条痛点包含 issue、frequency（出现条数）、severity（high/medium/low）、suggestions（可执行建议）；
+- 同时输出 unresolved_issues（用户提出但客服未解决/未回答的问题）。

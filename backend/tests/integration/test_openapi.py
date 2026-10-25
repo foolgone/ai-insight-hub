@@ -22,6 +22,8 @@ EXPECTED_PATHS = {
     "/api/v1/datasources/{datasource_id}/analyze/quality",
     "/api/v1/datasources/{datasource_id}/analysis/quality",
     "/api/v1/datasources/{datasource_id}/analysis/quality/{result_id}/review",
+    "/api/v1/datasources/{datasource_id}/analyze/insights",
+    "/api/v1/datasources/{datasource_id}/analysis/insights",
     "/api/v1/datasources/{datasource_id}/extract-knowledge",
     "/api/v1/datasources/{datasource_id}/knowledge/faq",
     "/api/v1/datasources/{datasource_id}/knowledge/faq/{faq_id}",

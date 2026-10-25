@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import uuid
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import require_roles
@@ -19,7 +19,12 @@ from app.schemas.analysis import (
     ReviewRequest,
     ReviewResponse,
 )
-from app.services import evaluation_service
+from app.schemas.insight import (
+    InsightRequest,
+    InsightResponse,
+    InsightTaskResponse,
+)
+from app.services import evaluation_service, insight_service
 
 router = APIRouter()
 
@@ -131,6 +136,54 @@ async def review_quality_analysis(
         needs_review=False,
         decision=payload.decision,
         message="Review recorded",
+    )
+
+
+@router.post(
+    "/{datasource_id}/analyze/insights",
+    response_model=InsightTaskResponse,
+    response_model_by_alias=False,
+    status_code=status.HTTP_202_ACCEPTED,
+    summary="提交洞察分析任务（202）",
+)
+async def analyze_insights(
+    datasource_id: uuid.UUID,
+    payload: InsightRequest | None = None,
+    user: User = Depends(require_roles(*WRITE_ROLES)),
+    session: AsyncSession = Depends(get_db),
+) -> InsightTaskResponse:
+    datasource = await insight_service._datasource_or_404(  # noqa: SLF001
+        session, datasource_id, user
+    )
+    request = payload or InsightRequest()
+    task = await insight_service.create_insight_task(
+        session, user=user, datasource_id=datasource.id, request=request
+    )
+    task.celery_task_id = insight_service.enqueue_insight(task)
+    await session.flush()
+    await session.refresh(task)
+    return InsightTaskResponse(task_id=task.id, status="pending")
+
+
+@router.get(
+    "/{datasource_id}/analysis/insights",
+    response_model=InsightResponse,
+    response_model_by_alias=False,
+    summary="获取洞察结果（最近一次完成的任务）",
+)
+async def get_insights(
+    datasource_id: uuid.UUID,
+    start: str | None = Query(default=None),
+    end: str | None = Query(default=None),
+    user: User = Depends(require_roles(*READ_ROLES)),
+    session: AsyncSession = Depends(get_db),
+) -> InsightResponse:
+    return await insight_service.get_latest_insights(
+        session,
+        user=user,
+        datasource_id=datasource_id,
+        start=start,
+        end=end,
     )
 
 
