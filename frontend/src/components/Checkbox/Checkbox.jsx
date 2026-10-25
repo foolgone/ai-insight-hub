@@ -14,6 +14,7 @@ import { LuCheck, LuMinus } from 'react-icons/lu'
  *   id?: string,
  *   name?: string,
  *   value?: string,
+ *   ariaLabel?: string,
  *   className?: string,
  * }} props
  */
@@ -26,6 +27,7 @@ export function Checkbox({
   id,
   name,
   value,
+  ariaLabel,
   className,
 }) {
   const autoId = useId()
@@ -40,6 +42,7 @@ export function Checkbox({
         checked={indeterminate ? 'indeterminate' : checked}
         onCheckedChange={onCheckedChange}
         disabled={disabled}
+        aria-label={ariaLabel}
         className={clsx(
           'flex h-5 w-5 shrink-0 items-center justify-center rounded border border-gray-300 bg-white text-white transition-colors',
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2',
