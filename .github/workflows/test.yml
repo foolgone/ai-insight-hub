@@ -84,8 +84,8 @@ jobs:
         run: npm run lint
       - name: 格式检查
         run: npm run format:check
-      # 骨架阶段还没有用例：先跑 test:run 保证 CI 绿；用例补齐后改为 test:coverage（含 80% 门禁）
-      - name: 单元测试
-        run: npm run test:run
+      # 覆盖率门禁（F-110）：lines/functions/statements ≥80、branches ≥70
+      - name: 单元测试 + 覆盖率
+        run: npm run test:coverage
       - name: 构建
         run: npm run build

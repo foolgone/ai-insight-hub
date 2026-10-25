@@ -48,4 +48,18 @@ describe('AppRoutes', () => {
 
     expect(await screen.findByRole('heading', { name: 'Dashboard' })).toBeInTheDocument()
   })
+
+  it.each([
+    ['/data-sources', '数据源管理'],
+    ['/data-cleaning', '数据清洗'],
+    ['/quality-assessment', '质量评估'],
+    ['/quality-assessment/abc', '评估详情'],
+    ['/knowledge-base', '知识库'],
+    ['/reports', '报告中心'],
+  ])('已登录访问 %s 渲染 %s 页面', async (path, heading) => {
+    useAuthStore.setState({ user: USER })
+    renderAt(path)
+
+    expect(await screen.findByRole('heading', { name: heading })).toBeInTheDocument()
+  })
 })
