@@ -1,6 +1,7 @@
 import { LuMenu } from 'react-icons/lu'
 import { useUiStore } from '../../stores/uiStore'
 import { Breadcrumb } from './Breadcrumb'
+import { DataSourceSelector } from './DataSourceSelector'
 import { UserMenu } from './UserMenu'
 
 /**
@@ -38,8 +39,10 @@ export function Header() {
       </div>
       <div className="flex-1 md:hidden" />
 
-      {/* 数据源选择器插槽：D-F01 / F-106 在 P2 接入 */}
-      <div data-testid="datasource-selector-slot" className="hidden md:block" />
+      {/* 全局数据源选择器（D-F01 / F-106） */}
+      <div data-testid="datasource-selector-slot" className="hidden md:block">
+        <DataSourceSelector />
+      </div>
 
       <UserMenu />
     </header>

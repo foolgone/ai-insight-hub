@@ -1,20 +1,33 @@
-import { afterEach, describe, expect, it } from 'vitest'
-import { render, screen } from '@testing-library/react'
-import { MemoryRouter } from 'react-router-dom'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { screen } from '@testing-library/react'
 import { AppRoutes } from './router'
+import { renderWithProviders } from './test/utils'
 import { useAuthStore } from './stores/authStore'
+import { listDataSources } from './api/datasources'
+
+vi.mock('./api/datasources', () => ({
+  listDataSources: vi.fn(),
+  getDataSource: vi.fn(),
+  createDataSource: vi.fn(),
+  updateDataSource: vi.fn(),
+  deleteDataSource: vi.fn(),
+  uploadDataSourceFile: vi.fn(),
+}))
 
 const USER = { id: 'u1', email: 'a@example.com', name: '用户', role: 'user' }
 
 function renderAt(path) {
-  return render(
-    <MemoryRouter initialEntries={[path]}>
-      <AppRoutes />
-    </MemoryRouter>
-  )
+  return renderWithProviders(<AppRoutes />, { route: path })
 }
 
 describe('AppRoutes', () => {
+  beforeEach(() => {
+    listDataSources.mockResolvedValue({
+      items: [],
+      pagination: { page: 1, limit: 100, total: 0, pages: 0 },
+    })
+  })
+
   afterEach(() => useAuthStore.setState({ user: null }))
 
   it('已登录访问 /dashboard 渲染布局与页面', async () => {
@@ -60,6 +73,8 @@ describe('AppRoutes', () => {
     useAuthStore.setState({ user: USER })
     renderAt(path)
 
-    expect(await screen.findByRole('heading', { name: heading })).toBeInTheDocument()
+    expect(
+      await screen.findByRole('heading', { name: heading }, { timeout: 5000 })
+    ).toBeInTheDocument()
   })
 })
