@@ -2,9 +2,9 @@
 
 > AI 客服数据分析平台 - 通过 AI Agent 自动清洗、评估和分析客服对话数据
 
-**项目状态**：骨架就绪 / M1 环境就绪（数据库已接入本地 VM）  
-**文档版本**：v1.2  
-**更新日期**：2026年10月24日
+**项目状态**：后端 MVP 已交付（P0~P7 完成；5 Agent + 36 端点 + 437 项测试）  
+**文档版本**：v2.0  
+**更新日期**：2026年10月25日
 
 ---
 
@@ -197,7 +197,7 @@ ai-insight-hub/
 │   │   └── utils/               # 规划：工具函数
 │   ├── migrations/              # Alembic 迁移（env.py 已就绪）
 │   ├── scripts/init_db.sql      # 数据库扩展初始化
-│   └── tests/                   # 目前为冒烟测试
+│   └── tests/                   # 单元 / 集成 / 安全 / Prompt / 性能测试
 │
 ├── frontend/                    # ⚛️ React 前端
 │   ├── .env.example
@@ -388,4 +388,12 @@ docs(readme): 更新安装文档
 
 **准备开始开发了吗？** 🚀
 
-查看 [开发方案](./docs/04-development/04-开发方案.md) 了解详细的开发计划！
+后端已按 [后端开发计划](./docs/04-development/12-后端开发计划.md) 完成 P0~P7：
+- 部署与运维：[部署与运维手册](./docs/04-development/14-部署与运维手册.md)
+- 上线验收：[上线验收清单](./docs/04-development/15-上线验收清单.md)
+- 架构决策：[ADR-001（去 LangChain/LangGraph）](./docs/04-development/13-ADR-001-移除LangChain与LangGraph.md)
+
+```powershell
+# 生产部署（容器启动前自动执行迁移）
+docker compose -f docker-compose.prod.yml up -d --build
+```
