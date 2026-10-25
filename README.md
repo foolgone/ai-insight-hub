@@ -393,6 +393,8 @@ docs(readme): 更新安装文档
 - 上线验收：[上线验收清单](./docs/04-development/15-上线验收清单.md)
 - 架构决策：[ADR-001（去 LangChain/LangGraph）](./docs/04-development/13-ADR-001-移除LangChain与LangGraph.md)
 
+前端按 [前端开发计划](./docs/05-design/05-前端开发计划.md) 执行 P0~P5（设计规范见 `docs/05-design/`，当前实现进度以 `frontend/src` 为准）：
+
 ```powershell
 # 生产部署（容器启动前自动执行迁移）
 docker compose -f docker-compose.prod.yml up -d --build

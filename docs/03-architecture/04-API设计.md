@@ -1,12 +1,20 @@
 # AI Insight Hub - API 接口文档
 
-> **文档版本**：v1.1  
+> **文档版本**：v1.2  
 > **创建日期**：2026年10月23日  
-> **最后更新**：2026年10月24日  
+> **最后更新**：2026年10月25日  
 > **API 版本**：v1  
 > **Base URL**：`http://localhost:8000/api/v1`（与 `backend/.env.example` 的 `API_V1_PREFIX=/api/v1` 一致）  
 > **认证方式**：JWT Bearer Token（access 60 分钟 / refresh 7 天）  
 > **路径口径**：所有接口均以 `/api/v1/datasources` 为基准（**不是** `data_sources`）；清洗接口固定为 `POST /api/v1/datasources/{datasource_id}/clean`
+>
+> **v1.2 修订（2026-10-25，对齐 `backend/app` 实际实现）**：
+> 1. §7.1 评估请求体改为 `{data_ids, config:{dimensions, threshold}}`，删除不存在的 `include_knowledge_base`；响应去掉 `status`。
+> 2. §7.2 评估列表：删除未实现的 `score_min/score_max/has_issues/dimension` 过滤；列表项 `dialogue_id→data_id`、删除 `suggestions`；`summary` 改为 `total/avg_overall_score/needs_review_count/dimension_averages`。
+> 3. 新增 §7.2.1 人工复核端点（实现已存在）。
+> 4. §9.1 报告格式明确 MVP 仅 `markdown`/`excel`，`pdf/html` 返回 422；报告按需生成，无周期报表。
+> 5. §2.1 注册端点保留但 MVP 不开放前端入口。
+> 6. 业务端点实测 **37 个**（含复核端点）。
 
 ---
 
@@ -112,6 +120,8 @@ curl -X POST http://localhost:8000/api/v1/auth/refresh \
 - `201`: 创建成功
 - `400`: 参数错误
 - `409`: 邮箱已存在（`USER_EMAIL_EXISTS`）
+
+> **MVP 产品口径**：注册端点保留给后续开通，**前端不提供注册入口**；账号由管理员创建（迁移 006 种子管理员）。
 
 ---
 
@@ -822,23 +832,26 @@ file: <binary>
 ```json
 {
   "data_ids": [],
-  "dimensions": ["accuracy", "completeness", "tone", "compliance", "hallucination"],
-  "threshold": 70,
-  "include_knowledge_base": true
+  "config": {
+    "dimensions": ["accuracy", "completeness", "tone", "compliance", "hallucination"],
+    "threshold": 70
+  }
 }
 ```
 
-> `data_ids` 为空表示评估全部清洗后数据；`threshold` 为 0–100 的问题标记阈值；`dimensions` 默认即上面 5 维。
+> `data_ids` 为空表示评估全部清洗后数据；`config.threshold` 为 0–100 的问题标记阈值；`config.dimensions` 默认即上面 5 维。
+> **MVP 不支持 `include_knowledge_base`**：知识库片段由后端按数据源自动附带，不开放请求开关。
 
 **响应**：
 ```json
 {
   "task_id": "6ba7b810-9dad-41d1-80b4-00c04fd430c8",
-  "status": "pending",
   "estimated_duration": 300,
   "message": "Quality evaluation task queued"
 }
 ```
+
+> 实现响应只含 `task_id` / `estimated_duration` / `message`（无 `status`）；进度统一查 `GET /tasks/{task_id}`。
 
 **状态码**：
 - `202`: 任务已入队
@@ -856,10 +869,9 @@ file: <binary>
 **查询参数**：
 - `page`: 页码
 - `limit`: 每页数量
-- `score_min`: 最低分（0–100）
-- `score_max`: 最高分（0–100）
-- `has_issues`: 是否有问题
-- `dimension`: 按维度过滤（accuracy/completeness/tone/compliance/hallucination）
+- `sort`: 排序字段（白名单，`-` 前缀为降序）
+
+> **实现限制**：当前版本只支持分页/排序，**不支持** `score_min`/`score_max`/`has_issues`/`dimension` 过滤；前端按需在已加载页内做客户端筛选。
 
 **响应**：
 ```json
@@ -867,7 +879,7 @@ file: <binary>
   "items": [
     {
       "id": "9b2f0e4c-1b5a-4f2e-9a3d-8c7b6a5d4e3f",
-      "dialogue_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+      "data_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
       "overall_score": 85,
       "dimensions": {
         "accuracy": {
@@ -898,9 +910,8 @@ file: <binary>
       },
       "quality_level": "good",
       "needs_review": false,
-      "suggestions": [
-        "建议补充产品配置信息"
-      ],
+      "agent_name": "evaluation_agent",
+      "agent_version": "v1.0.0",
       "created_at": "2025-01-15T10:30:00Z"
     }
   ],
@@ -913,15 +924,60 @@ file: <binary>
     "has_prev": false
   },
   "summary": {
-    "total_evaluated": 1000,
-    "avg_score": 82.5,
-    "excellent_count": 300,
-    "good_count": 500,
-    "acceptable_count": 150,
-    "poor_count": 50
+    "total": 1000,
+    "avg_overall_score": 82.5,
+    "needs_review_count": 120,
+    "dimension_averages": {
+      "accuracy": 86.2,
+      "completeness": 80.1,
+      "tone": 88.4,
+      "compliance": 92.0,
+      "hallucination": 81.5
+    }
   }
 }
 ```
+
+> 分数字段均为 **0–100**；`quality_level` 取值为 `excellent` / `good` / `fair` / `poor`（阈值 90/75/60）。
+> **列表项不返回 `suggestions` 与 `dialogue_id`**：改进建议未暴露；对话原文用 `data_id` 调 `GET /datasources/{id}/cleaned-data/{data_id}`。
+> **`summary` 只返回 4 个聚合字段**，不返回 4 档数量；前端如需 4 档分布，按列表项 `quality_level` 客户端统计并标注范围。
+
+---
+
+### 7.2.1 人工复核评估结果
+
+**POST** `/api/v1/datasources/{datasource_id}/analysis/quality/{result_id}/review`
+
+**所需角色**：admin / user（自己的）；viewer ❌
+
+**请求体**：
+```json
+{
+  "decision": "corrected",
+  "note": "修正准确性与完整性分数",
+  "corrected_scores": {
+    "accuracy": 92,
+    "completeness": 85
+  }
+}
+```
+
+> `decision` 取 `approved` / `rejected` / `corrected`；仅 `corrected` 时可传 `corrected_scores`（未知维度被忽略，分数限 0–100）。复核后 `needs_review` 置为 `false`，`overall_score` 按权重重算；**`quality_level` 不重算**，展示端应按分数重新映射等级。
+
+**响应**：
+```json
+{
+  "id": "9b2f0e4c-1b5a-4f2e-9a3d-8c7b6a5d4e3f",
+  "needs_review": false,
+  "decision": "corrected",
+  "message": "Review recorded"
+}
+```
+
+**状态码**：
+- `200`: 复核成功
+- `404`: 评估结果不存在
+- `403`: 越权访问
 
 > 所有分数字段均为 **0–100** 量纲（不是 0–1）。
 
@@ -1221,7 +1277,7 @@ file: <binary>
 {
   "title": "2025年1月质量分析报告",
   "report_type": "quality",
-  "format": "pdf",
+  "format": "markdown",
   "config": {
     "include_charts": true,
     "include_recommendations": true,
@@ -1233,9 +1289,10 @@ file: <binary>
 }
 ```
 
-> 枚举口径（与 `reports` 表 CHECK 一致）：
+> 枚举口径：
 > - `report_type`: `quality` / `knowledge` / `insight` / `comprehensive`
-> - `format`: `pdf` / `excel` / `markdown` / `html`
+> - `format`: MVP 仅支持 `markdown` / `excel`；`pdf` / `html` 保留在数据库 CHECK 中但**未实现**，提交会返回 `422 REPORT_FORMAT_INVALID`（见 ADR/后端 D-11）
+> - **报告按需生成**，无日报/周报/月报模板与定时任务
 
 **响应**：
 ```json
@@ -1243,7 +1300,7 @@ file: <binary>
   "id": "b1d5f7a2-3c4e-4d6b-9f80-2a3b4c5d6e7f",
   "title": "2025年1月质量分析报告",
   "report_type": "quality",
-  "format": "pdf",
+  "format": "markdown",
   "status": "generating",
   "created_at": "2025-01-15T10:30:00Z"
 }
