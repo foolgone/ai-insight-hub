@@ -4,6 +4,8 @@ import { AppRoutes } from './router'
 import { renderWithProviders } from './test/utils'
 import { useAuthStore } from './stores/authStore'
 import { listDataSources } from './api/datasources'
+import { listTasks } from './api/tasks'
+import { listCleanedData } from './api/cleaning'
 
 vi.mock('./api/datasources', () => ({
   listDataSources: vi.fn(),
@@ -12,6 +14,17 @@ vi.mock('./api/datasources', () => ({
   updateDataSource: vi.fn(),
   deleteDataSource: vi.fn(),
   uploadDataSourceFile: vi.fn(),
+}))
+vi.mock('./api/tasks', () => ({
+  listTasks: vi.fn(),
+  getTask: vi.fn(),
+  cancelTask: vi.fn(),
+  retryTask: vi.fn(),
+}))
+vi.mock('./api/cleaning', () => ({
+  startCleaning: vi.fn(),
+  listCleanedData: vi.fn(),
+  getCleanedData: vi.fn(),
 }))
 
 const USER = { id: 'u1', email: 'a@example.com', name: '用户', role: 'user' }
@@ -26,6 +39,8 @@ describe('AppRoutes', () => {
       items: [],
       pagination: { page: 1, limit: 100, total: 0, pages: 0 },
     })
+    listTasks.mockResolvedValue({ items: [], pagination: { total: 0 } })
+    listCleanedData.mockResolvedValue({ items: [], pagination: { total: 0 } })
   })
 
   afterEach(() => useAuthStore.setState({ user: null }))
