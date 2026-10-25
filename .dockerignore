@@ -1,0 +1,12 @@
+# 生产镜像构建忽略项（F-508）
+.git
+.github
+docs
+backend
+**/node_modules
+frontend/dist
+frontend/coverage
+**/__pycache__
+**/.venv
+**/.pytest_cache
+*.log
