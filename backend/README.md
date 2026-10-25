@@ -44,7 +44,7 @@ JWT_SECRET_KEY=your-jwt-secret-key-change-this
 
 # LLM：DeepSeek V4.1 Flash（langchain-deepseek 官方集成）
 DEEPSEEK_API_KEY=your-deepseek-api-key-here
-DEFAULT_LLM_MODEL=deepseek-v4.1-flash   # 模型 id 由配置决定，业务代码不写死
+DEFAULT_LLM_MODEL=deepseek-flash   # 模型 id 由配置决定，业务代码不写死
 
 # 可观测（自建：Loguru + DB 调用记录 + Prometheus；不使用 LangSmith）
 PROMETHEUS_ENABLED=true
@@ -124,7 +124,8 @@ backend/
 ## 约定
 
 - **配置**：新增配置项时同时改 `app/core/config.py` 与 `.env.example`，两者必须一致。
-- **模型**：LLM 调用统一用 `ChatDeepSeek(model=settings.DEFAULT_LLM_MODEL, ...)`，不在业务代码里写死模型 id。
+- **模型**：LLM 调用统一走自研 `app/core/llm.py::LLMClient`（OpenAI 兼容协议，HTTP 客户端用 httpx），
+  模型 id 读 `settings.DEFAULT_LLM_MODEL`；**不使用 LangChain/LangGraph**（见 `docs/04-development/13-ADR-001`）。
 - **可观测**：每次 LLM 调用需记录到数据库（token / 成本 / 耗时）并上报 Prometheus 指标。
 - **中文检索**：MVP 使用 `pg_trgm`；zhparser 需自建镜像，见 `docs/03-architecture/03-数据库设计.md` 附录。
 

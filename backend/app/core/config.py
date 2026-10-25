@@ -2,7 +2,8 @@
 应用配置
 
 - 唯一入口：本文件是后端配置项的事实源，必须与 `backend/.env.example` 保持一一对应。
-- LLM：DeepSeek V4.1 Flash（通过 langchain-deepseek 官方集成接入），模型 id 不写死在代码里，
+- LLM：DeepSeek V4.1 Flash（OpenAI 兼容协议，由自研 `app/core/llm.py::LLMClient` 直连；
+  不使用 LangChain/LangGraph，见 docs/04-development/13-ADR-001），模型 id 不写死在代码里，
   统一从 `DEFAULT_LLM_MODEL` 读取，便于后续切换模型而不改业务代码。
 - 可观测：Loguru 结构化日志 + 数据库调用记录 + Prometheus 指标（不使用 LangSmith SaaS）。
 """
@@ -45,8 +46,9 @@ class Settings(BaseSettings):
     # ---------------- LLM（DeepSeek） ----------------
     DEEPSEEK_API_KEY: str = ""
     DEEPSEEK_BASE_URL: str = "https://api.deepseek.com/v1"
-    # 默认模型 id 由配置决定，业务代码不写死；实际可用 id 以 DeepSeek 官方为准
-    DEFAULT_LLM_MODEL: str = "deepseek-v4.1-flash"
+    # 默认模型 id 由配置决定，业务代码不写死；已实测可用：deepseek-flash（2026-10-24，
+    # 高阶备选 deepseek-v4-pro 本 MVP 不用）
+    DEFAULT_LLM_MODEL: str = "deepseek-flash"
     # 结构化输出（清洗/提取/评估）默认温度为 0；洞察/报告类 Agent 可单独覆盖为 0.3
     DEFAULT_TEMPERATURE: float = 0.0
     DEFAULT_MAX_TOKENS: int = 4096
@@ -73,6 +75,10 @@ class Settings(BaseSettings):
     MINIO_BUCKET_UPLOADS: str = "aiinsight-uploads"
     MINIO_BUCKET_REPORTS: str = "aiinsight-reports"
     MINIO_USE_SSL: bool = False
+    # 存储后端：auto（MinIO 不可用时回退本地）| minio | local
+    STORAGE_BACKEND: str = "auto"
+    # 本地回退目录（相对 backend 工作目录）
+    STORAGE_LOCAL_DIR: str = ".storage/uploads"
 
     # ---------------- 认证（JWT） ----------------
     JWT_SECRET_KEY: str = "your-jwt-secret-key-change-this"
@@ -88,6 +94,8 @@ class Settings(BaseSettings):
     # ---------------- Celery ----------------
     CELERY_BROKER_URL: str = "redis://localhost:6379/1"
     CELERY_RESULT_BACKEND: str = "redis://localhost:6379/2"
+    # 测试/本地联调：True 时任务同步执行（不依赖 worker，便于集成测试）
+    CELERY_TASK_ALWAYS_EAGER: bool = False
 
     # ---------------- 邮件告警（可选） ----------------
     SMTP_HOST: str = "smtp.gmail.com"
