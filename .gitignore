@@ -147,3 +147,6 @@ prometheus_data/
 
 # Grafana
 grafana_data/
+
+# 本地对象存储回退目录
+.storage/

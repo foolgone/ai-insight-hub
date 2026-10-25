@@ -48,6 +48,10 @@ jobs:
       - name: 准备测试库扩展
         run: |
           PGPASSWORD=dev_password psql -h localhost -U aiinsight -d aiinsight_test -f scripts/init_db.sql
+      - name: 执行数据库迁移
+        env:
+          DATABASE_URL: postgresql://aiinsight:dev_password@localhost:5432/aiinsight_test
+        run: alembic upgrade head
       - name: 单元测试 + 覆盖率（阈值 80%）
         env:
           DATABASE_URL: postgresql://aiinsight:dev_password@localhost:5432/aiinsight_test
@@ -57,6 +61,9 @@ jobs:
         run: |
           black --check app tests
           flake8 app tests
+      - name: 类型检查（非阻塞，M8 前逐步收紧，见计划 D-15）
+        continue-on-error: true
+        run: mypy app
 
   frontend:
     name: 前端测试
