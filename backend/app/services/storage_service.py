@@ -1,0 +1,132 @@
+"""对象存储服务（B-304）。
+
+- 默认 MinIO（S3 兼容）；``STORAGE_BACKEND=auto`` 时 MinIO 不可用自动回退本地文件系统
+  （本地 VM 上 MinIO 未启动，属预期路径）；
+- 对象命名：``{datasource_id}/{uuid}_{filename}``（filename 取 basename，防目录穿越）；
+- 返回 ``StoredFile``（object_name / url / backend / size），由调用方写入 ``raw_data.file_info``。
+"""
+from __future__ import annotations
+
+import uuid as uuid_module
+from dataclasses import dataclass
+from io import BytesIO
+from pathlib import Path
+
+from loguru import logger
+
+from app.core.config import settings
+
+
+@dataclass(frozen=True)
+class StoredFile:
+    object_name: str
+    url: str
+    backend: str
+    size: int
+
+
+def _object_name(datasource_id: object, filename: str) -> str:
+    safe_name = Path(filename).name or "upload.bin"
+    return f"{datasource_id}/{uuid_module.uuid4().hex}_{safe_name}"
+
+
+def _minio_client():
+    from minio import Minio
+
+    return Minio(
+        settings.MINIO_ENDPOINT,
+        access_key=settings.MINIO_ACCESS_KEY,
+        secret_key=settings.MINIO_SECRET_KEY,
+        secure=settings.MINIO_USE_SSL,
+    )
+
+
+def _save_minio(
+    content: bytes,
+    *,
+    object_name: str,
+    content_type: str | None,
+) -> StoredFile:
+    bucket = settings.MINIO_BUCKET_UPLOADS
+    client = _minio_client()
+    if not client.bucket_exists(bucket):
+        client.make_bucket(bucket)
+    client.put_object(
+        bucket,
+        object_name,
+        BytesIO(content),
+        length=len(content),
+        content_type=content_type or "application/octet-stream",
+    )
+    scheme = "https" if settings.MINIO_USE_SSL else "http"
+    return StoredFile(
+        object_name=object_name,
+        url=f"{scheme}://{settings.MINIO_ENDPOINT}/{bucket}/{object_name}",
+        backend="minio",
+        size=len(content),
+    )
+
+
+def _save_local(content: bytes, *, object_name: str) -> StoredFile:
+    root = Path(settings.STORAGE_LOCAL_DIR).resolve()
+    target = root / object_name
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_bytes(content)
+    return StoredFile(
+        object_name=object_name,
+        url=str(target),
+        backend="local",
+        size=len(content),
+    )
+
+
+def save_upload(
+    content: bytes,
+    *,
+    datasource_id: object,
+    filename: str,
+    content_type: str | None = None,
+) -> StoredFile:
+    """保存上传文件：优先 MinIO，``auto`` 模式下失败回退本地。"""
+    backend = (settings.STORAGE_BACKEND or "auto").lower()
+    object_name = _object_name(datasource_id, filename)
+
+    if backend in ("auto", "minio"):
+        try:
+            stored = _save_minio(content, object_name=object_name, content_type=content_type)
+            logger.info(
+                "upload stored backend=minio object={} size={}",
+                stored.object_name,
+                stored.size,
+            )
+            return stored
+        except Exception as exc:  # noqa: BLE001 - 存储不可用需回退
+            if backend == "minio":
+                logger.opt(exception=exc).error("MinIO 上传失败（STORAGE_BACKEND=minio）")
+                raise
+            logger.warning("MinIO 不可用，回退本地存储：{}", exc)
+
+    stored = _save_local(content, object_name=object_name)
+    logger.info(
+        "upload stored backend=local object={} size={}",
+        stored.object_name,
+        stored.size,
+    )
+    return stored
+
+
+def read_upload(object_name: str, *, backend: str | None = None) -> bytes:
+    """读取已存储文件（本地回退实现；MinIO 读取待 B-313 清洗链路使用）。"""
+    selected = (backend or settings.STORAGE_BACKEND or "auto").lower()
+    if selected == "minio":
+        bucket = settings.MINIO_BUCKET_UPLOADS
+        response = _minio_client().get_object(bucket, object_name)
+        try:
+            return response.read()
+        finally:
+            response.close()
+            response.release_conn()
+    return (Path(settings.STORAGE_LOCAL_DIR).resolve() / object_name).read_bytes()
+
+
+__all__ = ["StoredFile", "read_upload", "save_upload"]
