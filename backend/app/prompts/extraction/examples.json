@@ -1,0 +1,98 @@
+[
+  {
+    "input": "客户：iPhone 14 多少钱 客服：5999 元起，支持 12 期免息",
+    "output": {
+      "faqs": [
+        {
+          "question": "iPhone 14 多少钱？",
+          "answer": "5999 元起，支持 12 期免息。",
+          "category": "价格",
+          "variations": ["iPhone 14 价格", "14 多少钱"],
+          "confidence": 0.95,
+          "source_dialogue_ids": ["1"]
+        }
+      ],
+      "gaps": []
+    }
+  },
+  {
+    "input": "客户：退货怎么操作 客服：在订单页点击申请退货即可",
+    "output": {
+      "faqs": [
+        {
+          "question": "如何申请退货？",
+          "answer": "在订单页点击申请退货即可。",
+          "category": "售后",
+          "variations": ["退货流程", "怎么退货"],
+          "confidence": 0.9,
+          "source_dialogue_ids": ["1"]
+        }
+      ],
+      "gaps": []
+    }
+  },
+  {
+    "input": "客户：多久发货 客服：48 小时内发出",
+    "output": {
+      "faqs": [
+        {
+          "question": "下单后多久发货？",
+          "answer": "48 小时内发出。",
+          "category": "物流",
+          "variations": ["什么时候发货", "发货时间"],
+          "confidence": 0.9,
+          "source_dialogue_ids": ["1"]
+        }
+      ],
+      "gaps": []
+    }
+  },
+  {
+    "input": "客户：发票能开吗 客服：可以，下单时填写抬头即可",
+    "output": {
+      "faqs": [
+        {
+          "question": "可以开发票吗？",
+          "answer": "可以，下单时填写抬头即可。",
+          "category": "发票",
+          "variations": ["能开票吗", "怎么开发票"],
+          "confidence": 0.9,
+          "source_dialogue_ids": ["1"]
+        }
+      ],
+      "gaps": []
+    }
+  },
+  {
+    "input": "客户：保修多久 客服：整机保修一年",
+    "output": {
+      "faqs": [
+        {
+          "question": "整机保修多久？",
+          "answer": "整机保修一年。",
+          "category": "售后",
+          "variations": ["保修期", "质保多久"],
+          "confidence": 0.9,
+          "source_dialogue_ids": ["1"]
+        }
+      ],
+      "gaps": []
+    }
+  },
+  {
+    "input": "客户：支持以旧换新吗 客服：支持，可在结算页选择 客户：旧机怎么估价 客服：按机型与成色评估",
+    "output": {
+      "faqs": [
+        {
+          "question": "支持以旧换新吗？",
+          "answer": "支持，可在结算页选择以旧换新；旧机按机型与成色评估。",
+          "category": "售后",
+          "variations": ["旧机回收", "以旧换新"],
+          "confidence": 0.92,
+          "source_dialogue_ids": ["1", "2"]
+        }
+      ],
+      "gaps": []
+    }
+  }
+]

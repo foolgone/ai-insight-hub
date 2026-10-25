@@ -54,6 +54,15 @@ class Settings(BaseSettings):
     DEFAULT_MAX_TOKENS: int = 4096
     DEFAULT_TIMEOUT: int = 60
 
+    # ---------------- 嵌入（sentence-transformers，本地离线缓存） ----------------
+    # 默认多语言 MiniLM（384 维，与 embedding 表结构一致）；离线部署时把
+    # EMBEDDING_CACHE_DIR 指向本地模型目录，避免联网下载。
+    EMBEDDING_MODEL: str = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+    EMBEDDING_DIM: int = 384
+    EMBEDDING_BATCH_SIZE: int = 32
+    EMBEDDING_DEVICE: str = "cpu"
+    EMBEDDING_CACHE_DIR: str = ""
+
     # 成本核算单价（USD / 百万 token）
     # ⚠️ 代码不写死单价：默认 0.0 表示「未配置」，成本计算时须检测并告警；实际值填在 .env
     LLM_PRICE_INPUT_PER_MTOK: float = 0.0

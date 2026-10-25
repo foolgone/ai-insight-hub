@@ -45,6 +45,8 @@ class DataSourceCreate(BaseSchema):
     description: str | None = None
     type: DataSourceType
     config: DataSourceConfig = Field(default_factory=DataSourceConfig)
+    # 创建时可选初始化 12 条种子知识（B-502 冷启动）
+    init_seed_knowledge: bool = False
 
 
 class DataSourceUpdate(BaseSchema):

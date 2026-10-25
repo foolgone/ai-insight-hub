@@ -118,6 +118,10 @@ temp/
 
 # Data files (large datasets)
 data/
+# 例外：app/data 是源码（种子知识），不是数据文件
+!backend/app/data/
+!backend/app/data/**
+backend/app/data/__pycache__/
 *.csv
 *.json.gz
 *.parquet

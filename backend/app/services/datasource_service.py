@@ -85,6 +85,14 @@ async def create(session: AsyncSession, *, user: User, data: DataSourceCreate) -
     session.add(datasource)
     await session.flush()
     await session.refresh(datasource)
+
+    if data.init_seed_knowledge:
+        from app.data.seed_knowledge import seed_knowledge
+
+        seeded = await seed_knowledge(session, datasource.id)
+        if seeded:
+            await session.refresh(datasource)
+
     return datasource
 
 
