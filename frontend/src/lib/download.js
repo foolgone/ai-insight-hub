@@ -10,13 +10,11 @@ export function toCsv(rows) {
 }
 
 /**
- * 触发浏览器下载文本文件。
+ * 触发浏览器下载 Blob。
  * @param {string} filename
- * @param {string} content
- * @param {string} [mime]
+ * @param {Blob} blob
  */
-export function downloadTextFile(filename, content, mime = 'text/csv;charset=utf-8') {
-  const blob = new Blob([content], { type: mime })
+export function downloadBlobFile(filename, blob) {
   const url = URL.createObjectURL(blob)
   const anchor = document.createElement('a')
   anchor.href = url
@@ -25,4 +23,14 @@ export function downloadTextFile(filename, content, mime = 'text/csv;charset=utf
   anchor.click()
   anchor.remove()
   URL.revokeObjectURL(url)
+}
+
+/**
+ * 触发浏览器下载文本文件。
+ * @param {string} filename
+ * @param {string} content
+ * @param {string} [mime]
+ */
+export function downloadTextFile(filename, content, mime = 'text/csv;charset=utf-8') {
+  downloadBlobFile(filename, new Blob([content], { type: mime }))
 }

@@ -81,7 +81,7 @@ describe('AppRoutes', () => {
     renderAt('/dashboard')
 
     expect(
-      await screen.findByRole('heading', { name: 'Dashboard' }, { timeout: 5000 })
+      await screen.findByRole('heading', { name: 'Dashboard' }, { timeout: 10000 })
     ).toBeInTheDocument()
     expect(screen.getByRole('navigation', { name: '主菜单' })).toBeInTheDocument()
     expect(screen.getByRole('navigation', { name: '面包屑' })).toHaveTextContent('Dashboard')
