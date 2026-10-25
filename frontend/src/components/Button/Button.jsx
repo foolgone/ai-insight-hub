@@ -1,3 +1,4 @@
+import { forwardRef } from 'react'
 import clsx from 'clsx'
 
 const VARIANT_CLASSES = {
@@ -35,23 +36,27 @@ const SIZE_CLASSES = {
  *   onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void,
  * }} props
  */
-export function Button({
-  variant = 'primary',
-  size = 'md',
-  disabled = false,
-  loading = false,
-  icon = null,
-  iconRight = null,
-  fullWidth = false,
-  type = 'button',
-  className,
-  children,
-  ...rest
-}) {
+export const Button = forwardRef(function Button(
+  {
+    variant = 'primary',
+    size = 'md',
+    disabled = false,
+    loading = false,
+    icon = null,
+    iconRight = null,
+    fullWidth = false,
+    type = 'button',
+    className,
+    children,
+    ...rest
+  },
+  ref
+) {
   const isDisabled = disabled || loading
 
   return (
     <button
+      ref={ref}
       type={type}
       disabled={isDisabled}
       aria-busy={loading || undefined}
@@ -84,4 +89,4 @@ export function Button({
       ) : null}
     </button>
   )
-}
+})

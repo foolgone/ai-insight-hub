@@ -33,7 +33,7 @@ describe('组件 barrel 导出', () => {
     expect(typeof Alert.Alert).toBe('function')
     expect(typeof Avatar.Avatar).toBe('function')
     expect(typeof Badge.Badge).toBe('function')
-    expect(typeof Button.Button).toBe('function')
+    expect(Button.Button).toBeDefined()
     expect(typeof Card.Card).toBe('function')
     expect(typeof Chart.Chart).toBe('function')
     expect(typeof Checkbox.Checkbox).toBe('function')
