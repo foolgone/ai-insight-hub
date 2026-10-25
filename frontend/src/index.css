@@ -3,6 +3,15 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --chart-primary: theme('colors.primary.500');
+    --chart-success: theme('colors.success.500');
+    --chart-warning: theme('colors.warning.500');
+    --chart-info: theme('colors.info.500');
+    --chart-error: theme('colors.error.500');
+    --chart-grid: theme('colors.gray.200');
+  }
+
   html {
     @apply font-sans;
   }
