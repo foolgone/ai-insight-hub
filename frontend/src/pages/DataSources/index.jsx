@@ -8,7 +8,13 @@ import { Input } from '../../components/Input'
 import { Select } from '../../components/Select'
 import { DataSourceCard } from '../../components/business/DataSourceCard'
 import { CreateDataSourceDrawer } from '../../components/datasource/CreateDataSourceDrawer'
+import { DataSourceActions } from '../../components/datasource/DataSourceActions'
+import { DataSourceDetailDrawer } from '../../components/datasource/DataSourceDetailDrawer'
+import { DeleteDataSourceModal } from '../../components/datasource/DeleteDataSourceModal'
+import { EditDataSourceModal } from '../../components/datasource/EditDataSourceModal'
+import { UploadDataModal } from '../../components/datasource/UploadDataModal'
 import { useDataSourcesQuery } from '../../hooks/useDataSources'
+import { usePermissions } from '../../hooks/usePermissions'
 
 const PAGE_SIZE = 20
 
@@ -37,6 +43,11 @@ export default function DataSources() {
   const [status, setStatus] = useState('')
   const [type, setType] = useState('')
   const [keyword, setKeyword] = useState('')
+  const [detailTarget, setDetailTarget] = useState(null)
+  const [editTarget, setEditTarget] = useState(null)
+  const [uploadTarget, setUploadTarget] = useState(null)
+  const [deleteTarget, setDeleteTarget] = useState(null)
+  const { canWrite } = usePermissions()
 
   const params = useMemo(
     () => ({
@@ -142,7 +153,20 @@ export default function DataSources() {
             </div>
           ) : (
             filteredItems.map(datasource => (
-              <DataSourceCard key={datasource.id} datasource={datasource} />
+              <DataSourceCard
+                key={datasource.id}
+                datasource={datasource}
+                actions={
+                  <DataSourceActions
+                    datasource={datasource}
+                    canWrite={canWrite}
+                    onDetail={() => setDetailTarget(datasource)}
+                    onEdit={() => setEditTarget(datasource)}
+                    onUpload={() => setUploadTarget(datasource)}
+                    onDelete={() => setDeleteTarget(datasource)}
+                  />
+                }
+              />
             ))
           )
         ) : null}
@@ -176,6 +200,27 @@ export default function DataSources() {
       ) : null}
 
       <CreateDataSourceDrawer open={createOpen} onClose={closeCreate} onSuccess={handleCreated} />
+
+      <DataSourceDetailDrawer
+        datasource={detailTarget}
+        open={Boolean(detailTarget)}
+        onClose={() => setDetailTarget(null)}
+      />
+      <EditDataSourceModal
+        datasource={editTarget}
+        open={Boolean(editTarget)}
+        onClose={() => setEditTarget(null)}
+      />
+      <UploadDataModal
+        datasource={uploadTarget}
+        open={Boolean(uploadTarget)}
+        onClose={() => setUploadTarget(null)}
+      />
+      <DeleteDataSourceModal
+        datasource={deleteTarget}
+        open={Boolean(deleteTarget)}
+        onClose={() => setDeleteTarget(null)}
+      />
     </section>
   )
 }

@@ -1,39 +1,16 @@
 import clsx from 'clsx'
-import { format } from 'date-fns'
 import { Badge } from '../Badge'
-
-const STATUS_META = {
-  active: { label: '已就绪', variant: 'success' },
-  processing: { label: '处理中', variant: 'warning' },
-  archived: { label: '已归档', variant: 'default' },
-  error: { label: '异常', variant: 'error' },
-}
-
-const TYPE_LABELS = {
-  customer_service: '客服对话',
-  sales: '销售',
-  support: '支持',
-  other: '其他',
-}
-
-function formatDateTime(value) {
-  if (!value) return '—'
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return '—'
-  return format(date, 'yyyy-MM-dd HH:mm')
-}
+import { getDatasourceStatus, getDatasourceTypeLabel } from '../../lib/datasourceMeta'
+import { formatDateTime } from '../../lib/format'
 
 /**
  * 数据源卡片（02 §6.1 / 03 §3.3）。
  * @param {{ datasource: Object, actions?: React.ReactNode }} props
  */
 export function DataSourceCard({ datasource, actions }) {
-  const status = STATUS_META[datasource.status] || {
-    label: datasource.status,
-    variant: 'default',
-  }
+  const status = getDatasourceStatus(datasource.status)
   const statistics = datasource.statistics || {}
-  const typeLabel = TYPE_LABELS[datasource.type] || datasource.type
+  const typeLabel = getDatasourceTypeLabel(datasource.type)
 
   return (
     <article className="flex flex-col gap-3 border-b border-gray-200 px-6 py-4 last:border-b-0 sm:flex-row sm:items-center sm:justify-between">

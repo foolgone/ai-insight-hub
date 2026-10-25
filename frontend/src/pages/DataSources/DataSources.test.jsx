@@ -5,6 +5,10 @@ import { MemoryRouter } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import DataSources from './index'
 import { listDataSources } from '../../api/datasources'
+import { useAuthStore } from '../../stores/authStore'
+
+const ADMIN = { id: 'u1', email: 'a@example.com', name: '管理员', role: 'admin' }
+const VIEWER = { id: 'u2', email: 'v@example.com', name: '访客', role: 'viewer' }
 
 vi.mock('../../api/datasources', () => ({
   listDataSources: vi.fn(),
@@ -55,7 +59,10 @@ describe('DataSourcesPage', () => {
     })
   })
 
-  afterEach(() => localStorage.clear())
+  afterEach(() => {
+    localStorage.clear()
+    useAuthStore.setState({ user: null })
+  })
 
   it('加载后渲染数据源卡片', async () => {
     renderPage()
@@ -121,5 +128,30 @@ describe('DataSourcesPage', () => {
         expect.objectContaining({ page: 2, limit: 20 })
       )
     )
+  })
+
+  it('管理员可打开详情与编辑', async () => {
+    useAuthStore.setState({ user: ADMIN })
+    const user = userEvent.setup()
+    renderPage()
+    await screen.findByRole('heading', { name: '客服对话-1月' })
+
+    await user.click(screen.getByRole('button', { name: '数据源操作：客服对话-1月' }))
+    await user.click(await screen.findByRole('menuitem', { name: /查看详情/ }))
+
+    expect(await screen.findByRole('dialog', { name: '数据源详情' })).toBeInTheDocument()
+  })
+
+  it('viewer 只能查看，不能编辑/删除', async () => {
+    useAuthStore.setState({ user: VIEWER })
+    const user = userEvent.setup()
+    renderPage()
+    await screen.findByRole('heading', { name: '客服对话-1月' })
+
+    await user.click(screen.getByRole('button', { name: '数据源操作：客服对话-1月' }))
+
+    expect(await screen.findByRole('menuitem', { name: /查看详情/ })).toBeInTheDocument()
+    expect(screen.queryByRole('menuitem', { name: /编辑信息/ })).toBeNull()
+    expect(screen.queryByRole('menuitem', { name: /删除数据源/ })).toBeNull()
   })
 })
