@@ -33,11 +33,13 @@ describe('AppRoutes', () => {
     expect(await screen.findByRole('heading', { name: '页面不存在' })).toBeInTheDocument()
   })
 
-  it('未登录访问 /login 渲染登录占位页', async () => {
+  it('未登录访问 /login 渲染登录页', async () => {
     useAuthStore.setState({ user: null })
     renderAt('/login')
 
-    expect(await screen.findByRole('heading', { name: '登录' })).toBeInTheDocument()
+    expect(
+      await screen.findByRole('heading', { name: '欢迎使用 AI Insight Hub' })
+    ).toBeInTheDocument()
   })
 
   it('已登录访问 /login 重定向到 Dashboard', async () => {
