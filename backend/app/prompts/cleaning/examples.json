@@ -1,0 +1,152 @@
+[
+  {
+    "input": "2025-01-15 10:30\n客户：iPhone 14 多少钱？\n客服：5999 元起。",
+    "output": {
+      "dialogues": [
+        {
+          "dialogue_id": "1",
+          "timestamp": "2025-01-15T10:30:00",
+          "user_message": "iPhone 14 多少钱？",
+          "ai_response": "5999 元起。",
+          "quality_score": 100,
+          "issues": []
+        }
+      ]
+    }
+  },
+  {
+    "input": "user_message,ai_response\n退货怎么操作,在订单页点击申请退货即可",
+    "output": {
+      "dialogues": [
+        {
+          "dialogue_id": "1",
+          "timestamp": null,
+          "user_message": "退货怎么操作",
+          "ai_response": "在订单页点击申请退货即可",
+          "quality_score": 95,
+          "issues": ["missing_timestamp"]
+        }
+      ]
+    }
+  },
+  {
+    "input": "客户：可以分期吗\n客服：支持花呗 12 期免息",
+    "output": {
+      "dialogues": [
+        {
+          "dialogue_id": "1",
+          "timestamp": null,
+          "user_message": "可以分期吗",
+          "ai_response": "支持花呗 12 期免息",
+          "quality_score": 90,
+          "issues": ["missing_timestamp"]
+        }
+      ]
+    }
+  },
+  {
+    "input": "客户：\n客服：您好，请问有什么可以帮您？",
+    "output": {
+      "dialogues": [
+        {
+          "dialogue_id": "1",
+          "timestamp": null,
+          "user_message": "",
+          "ai_response": "您好，请问有什么可以帮您？",
+          "quality_score": 40,
+          "issues": ["empty_user_message", "missing_timestamp"]
+        }
+      ]
+    }
+  },
+  {
+    "input": "2025/01/16 09:05 客户：发票能开吗 客服：可以，下单时填写抬头即可",
+    "output": {
+      "dialogues": [
+        {
+          "dialogue_id": "1",
+          "timestamp": "2025-01-16T09:05:00",
+          "user_message": "发票能开吗",
+          "ai_response": "可以，下单时填写抬头即可",
+          "quality_score": 100,
+          "issues": []
+        }
+      ]
+    }
+  },
+  {
+    "input": "客户：这个和 13 有什么区别\n客服：芯片和续航都有提升",
+    "output": {
+      "dialogues": [
+        {
+          "dialogue_id": "1",
+          "timestamp": null,
+          "user_message": "这个和 13 有什么区别",
+          "ai_response": "芯片和续航都有提升",
+          "quality_score": 90,
+          "issues": ["missing_timestamp"]
+        }
+      ]
+    }
+  },
+  {
+    "input": "客户：多久发货\n客服：48 小时内发出",
+    "output": {
+      "dialogues": [
+        {
+          "dialogue_id": "1",
+          "timestamp": null,
+          "user_message": "多久发货",
+          "ai_response": "48 小时内发出",
+          "quality_score": 90,
+          "issues": ["missing_timestamp"]
+        }
+      ]
+    }
+  },
+  {
+    "input": "客户：能便宜点吗\n客服：抱歉，当前价格已是最低",
+    "output": {
+      "dialogues": [
+        {
+          "dialogue_id": "1",
+          "timestamp": null,
+          "user_message": "能便宜点吗",
+          "ai_response": "抱歉，当前价格已是最低",
+          "quality_score": 90,
+          "issues": ["missing_timestamp"]
+        }
+      ]
+    }
+  },
+  {
+    "input": "客户：保修多久\n客服：整机保修一年",
+    "output": {
+      "dialogues": [
+        {
+          "dialogue_id": "1",
+          "timestamp": null,
+          "user_message": "保修多久",
+          "ai_response": "整机保修一年",
+          "quality_score": 90,
+          "issues": ["missing_timestamp"]
+        }
+      ]
+    }
+  },
+  {
+    "input": "客户：支持以旧换新吗\n客服：支持，可在结算页选择以旧换新",
+    "output": {
+      "dialogues": [
+        {
+          "dialogue_id": "1",
+          "timestamp": null,
+          "user_message": "支持以旧换新吗",
+          "ai_response": "支持，可在结算页选择以旧换新",
+          "quality_score": 90,
+          "issues": ["missing_timestamp"]
+        }
+      ]
+    }
+  }
+]

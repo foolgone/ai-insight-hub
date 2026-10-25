@@ -15,6 +15,7 @@ from app.agents.base import (
     InsightError,
     ReportError,
 )
+from app.agents.cleaning_agent import DataCleaningAgent
 from app.agents.structured_output import (
     StructuredOutputError,
     extract_json_text,
@@ -32,6 +33,7 @@ __all__ = [
     "AgentTimeoutError",
     "BaseAgent",
     "CleaningError",
+    "DataCleaningAgent",
     "EvaluationError",
     "ExtractionError",
     "InsightError",
