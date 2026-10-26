@@ -118,17 +118,37 @@ async def test_excel_report_generation(client, auth_headers, db_session, monkeyp
     assert len(download.content) > 0
 
 
-async def test_pdf_and_html_rejected_with_specific_code(client, auth_headers) -> None:
+async def test_pdf_report_generation(client, auth_headers, db_session, monkeypatch) -> None:
+    _patch_agent(monkeypatch)
+    datasource_id = await _datasource(client, auth_headers, "report-pdf-ds")
+    created = await client.post(
+        f"/api/v1/datasources/{datasource_id}/reports",
+        headers=auth_headers,
+        json={"title": "PDF 报告", "report_type": "quality", "format": "pdf"},
+    )
+    assert created.status_code == 202, created.text
+    report_id = created.json()["id"]
+
+    outcome = await report_service.run_report_task(report_id, session=db_session)
+
+    assert outcome["status"] == "completed"
+    download = await client.get(f"/api/v1/reports/{report_id}/download", headers=auth_headers)
+    assert download.status_code == 200
+    assert download.headers["content-type"] == "application/pdf"
+    assert download.content.startswith(b"%PDF")
+    assert len(download.content) > 1000
+
+
+async def test_html_rejected_with_specific_code(client, auth_headers) -> None:
     datasource_id = await _datasource(client, auth_headers, "report-invalid-ds")
 
-    for fmt in ("pdf", "html"):
-        response = await client.post(
-            f"/api/v1/datasources/{datasource_id}/reports",
-            headers=auth_headers,
-            json={"title": "x", "report_type": "quality", "format": fmt},
-        )
-        assert response.status_code == 422, response.text
-        assert response.json()["error"]["code"] == "REPORT_FORMAT_INVALID"
+    response = await client.post(
+        f"/api/v1/datasources/{datasource_id}/reports",
+        headers=auth_headers,
+        json={"title": "x", "report_type": "quality", "format": "html"},
+    )
+    assert response.status_code == 422, response.text
+    assert response.json()["error"]["code"] == "REPORT_FORMAT_INVALID"
 
     invalid_type = await client.post(
         f"/api/v1/datasources/{datasource_id}/reports",

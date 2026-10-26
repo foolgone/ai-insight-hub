@@ -126,8 +126,8 @@ backend/app/data/__pycache__/
 *.json.gz
 *.parquet
 
-# Reports
-reports/
+# Reports（仅忽略仓库根目录的生成物；源码目录如 frontend/src/**/reports 不受影响）
+/reports/
 # 例外：app 内的报告 Prompt/模板是源码，不是生成物
 !backend/app/prompts/reports/
 !backend/app/prompts/reports/**

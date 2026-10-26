@@ -5,10 +5,11 @@
 - 查询：列表（类型/状态过滤 + 分页）、详情（累加 view_count）；
 - 下载：读取文件字节 + 累加 download_count；
 - 删除：硬删除（API 204）；
-- 格式口径（D-11 降级）：MVP 支持 markdown / excel；pdf / html 返回 422 REPORT_FORMAT_INVALID。
+- 格式口径（T8 更新）：支持 markdown / excel / pdf；html 仍返回 422 REPORT_FORMAT_INVALID。
 """
 from __future__ import annotations
 
+import re
 import time
 import uuid
 from datetime import datetime, timedelta, timezone
@@ -41,8 +42,9 @@ TEMPLATE_DIR = Path(__file__).resolve().parents[1] / "templates" / "reports"
 MEDIA_TYPES = {
     "markdown": "text/markdown; charset=utf-8",
     "excel": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    "pdf": "application/pdf",
 }
-EXTENSIONS = {"markdown": "md", "excel": "xlsx"}
+EXTENSIONS = {"markdown": "md", "excel": "xlsx", "pdf": "pdf"}
 _SORTABLE = {"created_at": Report.created_at, "completed_at": Report.completed_at}
 
 
@@ -287,6 +289,116 @@ def render_excel(report: Report, output: dict[str, Any]) -> bytes:
     return buffer.getvalue()
 
 
+def _pdf_escape(text: Any) -> str:
+    """转义 Paragraph 的 XML 特殊字符，并保留 ``**加粗**`` 标记。"""
+    escaped = str(text or "").replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+    return re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", escaped)
+
+
+def _pdf_paragraphs(content: Any) -> list[str]:
+    """把文本/Markdown 片段转成可渲染段落（空行丢弃、标题去 #、列表加 •）。"""
+    rendered: list[str] = []
+    for line in str(content or "").splitlines():
+        stripped = line.strip()
+        if not stripped:
+            continue
+        if stripped.startswith(("# ", "## ", "### ")):
+            stripped = stripped.lstrip("#").strip()
+        elif stripped.startswith(("- ", "* ")):
+            stripped = f"• {stripped[2:].strip()}"
+        rendered.append(_pdf_escape(stripped))
+    return rendered or ["（无）"]
+
+
+def render_pdf(report: Report, output: dict[str, Any], data: dict[str, Any]) -> bytes:
+    """渲染 PDF（T8）：reportlab + 内置 STSong-Light CJK 字体，不依赖系统字体。"""
+    from reportlab.lib import colors
+    from reportlab.lib.pagesizes import A4
+    from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
+    from reportlab.lib.units import mm
+    from reportlab.pdfbase import pdfmetrics
+    from reportlab.pdfbase.cidfonts import UnicodeCIDFont
+    from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer
+
+    del data  # 图表渲染预留（Phase 2）；当前 PDF 为文本版
+
+    font_name = "STSong-Light"
+    if font_name not in pdfmetrics.getRegisteredFontNames():
+        pdfmetrics.registerFont(UnicodeCIDFont(font_name))
+
+    base_styles = getSampleStyleSheet()
+    title_style = ParagraphStyle(
+        "CnTitle", parent=base_styles["Title"], fontName=font_name, fontSize=20, leading=26
+    )
+    heading_style = ParagraphStyle(
+        "CnHeading",
+        parent=base_styles["Heading2"],
+        fontName=font_name,
+        fontSize=13,
+        leading=19,
+        spaceBefore=12,
+        spaceAfter=5,
+    )
+    body_style = ParagraphStyle(
+        "CnBody", parent=base_styles["BodyText"], fontName=font_name, fontSize=10.5, leading=16
+    )
+    meta_style = ParagraphStyle(
+        "CnMeta",
+        parent=body_style,
+        fontSize=9,
+        leading=13,
+        textColor=colors.HexColor("#6B7280"),
+    )
+
+    buffer = BytesIO()
+    document = SimpleDocTemplate(
+        buffer,
+        pagesize=A4,
+        leftMargin=18 * mm,
+        rightMargin=18 * mm,
+        topMargin=16 * mm,
+        bottomMargin=16 * mm,
+        title=report.title,
+        author="AI Insight Hub",
+    )
+    story: list[Any] = [Paragraph(_pdf_escape(report.title), title_style)]
+
+    generated_at = output.get("generated_at") or _now_naive().isoformat()
+    time_range = (report.config or {}).get("time_range") or {}
+    meta_parts = [
+        f"报告类型：{REPORT_TYPE_LABELS.get(report.report_type, report.report_type)}",
+        f"生成时间：{generated_at}",
+    ]
+    if time_range:
+        meta_parts.append(f"统计区间：{time_range.get('start', '')} ~ {time_range.get('end', '')}")
+    story.append(Paragraph("　".join(meta_parts), meta_style))
+    story.append(Spacer(1, 8))
+
+    blocks: list[tuple[str, str]] = [("摘要", str(output.get("summary") or ""))]
+    blocks += [
+        (str(section.get("title") or "章节"), str(section.get("content") or ""))
+        for section in output.get("sections") or []
+    ]
+    highlights = [str(item) for item in output.get("highlights") or []]
+    if highlights:
+        blocks.append(("核心发现", "\n".join(f"- {item}" for item in highlights)))
+    recommendations = [str(item) for item in output.get("recommendations") or []]
+    if recommendations:
+        numbered = "\n".join(
+            f"{index}. {item}" for index, item in enumerate(recommendations, start=1)
+        )
+        blocks.append(("改进建议", numbered))
+
+    for heading, content in blocks:
+        story.append(Paragraph(_pdf_escape(heading), heading_style))
+        for paragraph in _pdf_paragraphs(content):
+            story.append(Paragraph(paragraph, body_style))
+        story.append(Spacer(1, 4))
+
+    document.build(story)
+    return buffer.getvalue()
+
+
 # --------------------------------------------------------------------------- 业务
 
 
@@ -295,7 +407,7 @@ def validate_create(*, report_type: str, format: str) -> None:
         raise ReportFormatInvalidError(
             details={"report_type": report_type, "allowed": list(REPORT_TYPES)}
         )
-    # D-11：MVP 不生成 pdf/html（weasyprint 依赖未引入）
+    # T8：html 不支持（pdf 已支持）
     if format not in SUPPORTED_FORMATS:
         raise ReportFormatInvalidError(
             details={"format": format, "allowed": list(SUPPORTED_FORMATS)}
@@ -375,6 +487,8 @@ async def _execute_report(
         output = result.data
         if report.format == "markdown":
             content = render_markdown(report, output, data).encode("utf-8")
+        elif report.format == "pdf":
+            content = render_pdf(report, output, data)
         else:
             content = render_excel(report, output)
         extension = EXTENSIONS[report.format]
@@ -492,6 +606,7 @@ __all__ = [
     "list_reports",
     "render_excel",
     "render_markdown",
+    "render_pdf",
     "run_report_task",
     "validate_create",
 ]

@@ -1,12 +1,15 @@
 # AI Insight Hub - API 接口文档
 
-> **文档版本**：v1.3  
+> **文档版本**：v1.4  
 > **创建日期**：2026年10月23日  
 > **最后更新**：2026年10月26日  
 > **API 版本**：v1  
 > **Base URL**：`http://localhost:8000/api/v1`（与 `backend/.env.example` 的 `API_V1_PREFIX=/api/v1` 一致）  
 > **认证方式**：JWT Bearer Token（access 60 分钟，响应体下发）；refresh 7 天，**仅 HttpOnly Cookie**（T4）  
 > **路径口径**：所有接口均以 `/api/v1/datasources` 为基准（**不是** `data_sources`）；清洗接口固定为 `POST /api/v1/datasources/{datasource_id}/clean`
+>
+> **v1.4 修订（2026-10-26）**：
+> 1. 报告格式新增 `pdf`（reportlab 渲染，中文 CID 字体）；仅 `html` 返回 422（T8）。
 >
 > **v1.3 修订（2026-10-26）**：
 > 1. §2 认证改为 refresh token 仅 HttpOnly Cookie（登录/刷新/登出 + 时序图重写，T4）。
@@ -1308,7 +1311,8 @@ file: <binary>
 
 > 枚举口径：
 > - `report_type`: `quality` / `knowledge` / `insight` / `comprehensive`
-> - `format`: MVP 仅支持 `markdown` / `excel`；`pdf` / `html` 保留在数据库 CHECK 中但**未实现**，提交会返回 `422 REPORT_FORMAT_INVALID`（见 ADR/后端 D-11）
+> - `format`: 支持 `markdown` / `excel` / `pdf`（T8 于 2026-10-26 补 PDF）；`html` 仍返回 `422 REPORT_FORMAT_INVALID`
+> - PDF 由 reportlab 渲染（内置 STSong-Light 中文字体，不依赖系统字体/WeasyPrint）
 > - **报告按需生成**，无日报/周报/月报模板与定时任务
 
 **响应**：

@@ -14,8 +14,8 @@ REPORT_TYPES: tuple[str, ...] = (
     "comprehensive",
 )
 REPORT_FORMATS: tuple[str, ...] = ("markdown", "excel", "pdf", "html")
-# D-11 降级口径：MVP 只生成 markdown / excel；pdf/html 返回 422
-SUPPORTED_FORMATS: tuple[str, ...] = ("markdown", "excel")
+# T8：MVP 生成 markdown / excel / pdf；html 仍返回 422
+SUPPORTED_FORMATS: tuple[str, ...] = ("markdown", "excel", "pdf")
 
 REPORT_TYPE_LABELS = {
     "quality": "质量分析报告",
