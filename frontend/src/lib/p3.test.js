@@ -43,7 +43,8 @@ describe('download helpers', () => {
       ['退款,加急', '含"引号"'],
     ])
 
-    expect(csv).toBe('"名称","说明"\r\n"退款,加急","含""引号"""')
+    // 以 UTF-8 BOM 开头，避免 Excel 按 GBK 解码导致中文乱码
+    expect(csv).toBe('\uFEFF"名称","说明"\r\n"退款,加急","含""引号"""')
   })
 
   it('downloadTextFile 创建 Blob 并触发下载', () => {
