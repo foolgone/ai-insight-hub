@@ -3,6 +3,8 @@ FastAPI 应用主入口
 
 配置全部来自 app.core.config.settings（事实源），不在本文件写死端口、前缀或域名。
 """
+from typing import Any, cast
+
 from fastapi import APIRouter, FastAPI, Response
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
@@ -50,9 +52,11 @@ app.add_middleware(RateLimitMiddleware)
 app.add_middleware(DegradationMiddleware)
 
 # 统一错误响应（B-201：所有失败均为 {"error": {"code", "message", "details"?}}）
+# Note：Starlette 的类型签名要求 handler 接收 Exception 基类，具体异常类型的 handler
+# 在运行时是合法的（按注册类型分派），这里用 cast 表达该约定。
 app.add_exception_handler(AIInsightHubException, aiinsight_exception_handler)
-app.add_exception_handler(RequestValidationError, validation_exception_handler)
-app.add_exception_handler(StarletteHTTPException, http_exception_handler)
+app.add_exception_handler(RequestValidationError, cast(Any, validation_exception_handler))
+app.add_exception_handler(StarletteHTTPException, cast(Any, http_exception_handler))
 app.add_exception_handler(Exception, unhandled_exception_handler)
 
 

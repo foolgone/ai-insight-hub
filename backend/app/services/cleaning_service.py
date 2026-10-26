@@ -16,6 +16,7 @@ from typing import Any
 from loguru import logger
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import InstrumentedAttribute
 
 from app.api.deps import assert_owner
 from app.api.pagination import PaginationParams, paginate
@@ -32,7 +33,7 @@ ACTIVE_STATUSES = ("pending", "running")
 CLEAN_TASK_TYPE = "clean"
 DIALOGUE_NAMESPACE = uuid.UUID("6f1a6d1e-2b7f-4c5e-9a10-3c2b1d4e5f60")
 
-_CLEANED_SORTABLE = {
+_CLEANED_SORTABLE: dict[str, InstrumentedAttribute] = {
     "timestamp": CleanedData.timestamp,
     "quality_score": CleanedData.quality_score,
     "created_at": CleanedData.created_at,

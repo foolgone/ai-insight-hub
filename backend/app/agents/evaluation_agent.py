@@ -11,6 +11,7 @@ Prompt 资产：``app/prompts/evaluation/``（system + 5 个维度说明 + versi
 from __future__ import annotations
 
 import json
+from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
 
@@ -48,7 +49,7 @@ def quality_level_for(score: float) -> QualityLevel:
     return QualityLevel.POOR
 
 
-def compute_overall_score(scores: dict[str, float], dimensions: list[str]) -> float:
+def compute_overall_score(scores: dict[str, float], dimensions: Sequence[str]) -> float:
     """按启用维度权重归一化计算总分（保留 1 位小数）。"""
     total_weight = sum(DIMENSION_WEIGHTS[dim] for dim in dimensions)
     if total_weight <= 0:

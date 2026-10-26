@@ -2,12 +2,12 @@
 
 > AI 客服数据分析平台 - 通过 AI Agent 自动清洗、评估和分析客服对话数据
 
-**项目状态**：后端 MVP 已交付（P0~P7 完成；5 Agent + 38 个 HTTP 端点 + 439 个后端用例 + 316 个前端用例）  
-**文档版本**：v2.1  
+**项目状态**：后端 MVP 已交付（P0~P7 完成；5 Agent + 41 个 HTTP 端点 + 446 个后端用例 + 316 个前端用例）  
+**文档版本**：v2.2  
 **更新日期**：2026年10月26日
 
-> 口径说明：端点 = `api/v1` 业务接口 35 个 + 系统接口 3 个（`/`、`/health`、`/metrics`）；用例数取自
-> `pytest --collect-only`（默认排除 prompt 标记）与前端 `vitest run`。当前项目状态与待办见
+> 口径说明：端点 = `/api/v1` 下 38 个（37 个模块路由 + `/api/v1/health`）+ 系统级 3 个（`/`、`/health`、`/metrics`）；
+> 用例数取自 `pytest --collect-only`（默认排除 255 个 prompt 标记用例）与前端 `vitest run`。当前项目状态与待办见
 > [docs/07-review/01-项目现状与待办清单.md](./docs/07-review/01-项目现状与待办清单.md)。
 
 ---
@@ -182,7 +182,7 @@ docker build -f frontend/Dockerfile -t aiinsight-frontend .
 
 ## 📁 项目结构
 
-> 当前前后端 MVP 均已交付：后端 5 个 Agent + 38 个端点，前端 7 个业务页面（含登录/404 共 9 个路由）。
+> 当前前后端 MVP 均已交付：后端 5 个 Agent + 41 个端点，前端 7 个业务页面（含登录/404 共 9 个路由）。
 > 目录注释与实现进度以 `backend/app`、`frontend/src` 实际内容为准。
 
 ```
@@ -213,7 +213,7 @@ ai-insight-hub/
 │   ├── app/
 │   │   ├── main.py              # FastAPI 入口（/、/health、/api/v1/health、/metrics）
 │   │   ├── core/config.py       # 配置事实源
-│   │   ├── api/                 # API 路由（v1，35 个业务端点）
+│   │   ├── api/                 # API 路由（v1，38 个端点）
 │   │   ├── models/              # SQLAlchemy 模型（15 张表）
 │   │   ├── schemas/             # Pydantic Schemas
 │   │   ├── agents/              # 5 个 Agent + 自研工作流编排器

@@ -12,7 +12,9 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, Field, field_validator
 
-DIMENSION_NAMES: tuple[str, ...] = (
+DimensionName = Literal["accuracy", "completeness", "hallucination", "tone", "compliance"]
+
+DIMENSION_NAMES: tuple[DimensionName, ...] = (
     "accuracy",
     "completeness",
     "hallucination",
@@ -46,9 +48,7 @@ class DimensionScore(BaseModel):
 
 
 class EvaluationConfig(BaseModel):
-    dimensions: list[
-        Literal["accuracy", "completeness", "hallucination", "tone", "compliance"]
-    ] = Field(default_factory=lambda: list(DIMENSION_NAMES))
+    dimensions: list[DimensionName] = Field(default_factory=lambda: list(DIMENSION_NAMES))
     threshold: float = Field(default=EVALUATION_THRESHOLD, ge=0, le=100)
 
     @field_validator("dimensions")

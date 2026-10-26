@@ -48,7 +48,8 @@ async def create_report(
         format=payload.format,
         config=payload.config,
     )
-    report.celery_task_id = report_service.enqueue_report(report)
+    # Celery 任务 id 由 tasks 表跟踪；Report 模型无 celery_task_id 列，不写幽灵属性
+    report_service.enqueue_report(report)
     await session.flush()
     await session.refresh(report)
     return ReportCreateResponse(

@@ -136,6 +136,10 @@ async def _execute_evaluation(
     if task.status == "cancelled":
         return {"status": "cancelled", "task_id": str(task_id)}
 
+    datasource_id = task.datasource_id
+    if datasource_id is None:
+        raise ValueError("evaluation task has no datasource")
+
     task.status = "running"
     task.started_at = _now_naive()
     task.progress = 5
@@ -149,7 +153,7 @@ async def _execute_evaluation(
         targets = await _load_targets(session, task)
         if not targets:
             raise ValueError("no cleaned data to evaluate")
-        knowledge = await _knowledge_snippets(session, task.datasource_id)
+        knowledge = await _knowledge_snippets(session, datasource_id)
         config = _config_from_params(task.params or {})
 
         for index, item in enumerate(targets, start=1):

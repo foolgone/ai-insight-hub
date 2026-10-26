@@ -9,13 +9,13 @@ from __future__ import annotations
 
 from typing import Any
 
-from app.core.errors import ERROR_STATUS, ErrorCode
+from app.core.errors import ERROR_STATUS, ErrorCode, FrameworkErrorCode
 
 
 class AIInsightHubException(Exception):
     """业务异常基类。"""
 
-    code: ErrorCode = ErrorCode.INTERNAL_ERROR
+    code: ErrorCode | FrameworkErrorCode = ErrorCode.INTERNAL_ERROR
     default_message: str = "Internal server error"
 
     def __init__(
@@ -23,7 +23,7 @@ class AIInsightHubException(Exception):
         message: str | None = None,
         *,
         details: dict[str, Any] | None = None,
-        code: ErrorCode | None = None,
+        code: ErrorCode | FrameworkErrorCode | None = None,
         status_code: int | None = None,
         headers: dict[str, str] | None = None,
     ) -> None:

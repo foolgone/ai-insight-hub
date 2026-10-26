@@ -30,7 +30,8 @@ async def close_redis() -> None:
     """关闭客户端（应用退出/测试用例间调用，避免跨事件循环复用连接）。"""
     global _redis
     if _redis is not None:
-        await _redis.aclose()
+        # redis-py 5.x 运行时提供 aclose()（4.x 为 close），当前类型定义未同步
+        await _redis.aclose()  # type: ignore[attr-defined]
         _redis = None
 
 

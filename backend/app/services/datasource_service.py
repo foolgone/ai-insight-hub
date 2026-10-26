@@ -11,6 +11,7 @@ from datetime import datetime, timezone
 
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import InstrumentedAttribute
 
 from app.api.deps import assert_owner
 from app.api.pagination import PaginationParams, paginate
@@ -36,7 +37,10 @@ DEFAULT_MAX_DATASOURCES = 10
 # 级联相关表（force 删除时统计 deleted_records）
 _RELATED_MODELS = (RawData, CleanedData, AnalysisResult, KnowledgeBase, Report, Task)
 
-_SORTABLE = {"created_at": DataSource.created_at, "name": DataSource.name}
+_SORTABLE: dict[str, InstrumentedAttribute] = {
+    "created_at": DataSource.created_at,
+    "name": DataSource.name,
+}
 
 
 def _now_naive() -> datetime:

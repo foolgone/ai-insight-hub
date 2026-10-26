@@ -24,7 +24,7 @@ def build_default_steps(
     from app.agents.insight_agent import InsightAnalysisAgent
     from app.agents.report_agent import ReportGenerationAgent
 
-    agents = {
+    agents: dict[str, Any] = {
         "clean": cleaning_agent or DataCleaningAgent(),
         "evaluate": evaluation_agent or QualityEvaluationAgent(),
         "extract": extraction_agent or KnowledgeExtractionAgent(),

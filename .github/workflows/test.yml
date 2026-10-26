@@ -61,8 +61,7 @@ jobs:
         run: |
           black --check app tests
           flake8 app tests
-      - name: 类型检查（非阻塞，M8 前逐步收紧，见计划 D-15）
-        continue-on-error: true
+      - name: 类型检查（阻塞，mypy）
         run: mypy app
 
   frontend:

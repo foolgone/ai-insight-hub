@@ -11,11 +11,12 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime, timezone
-from typing import Any
+from typing import Any, Literal, cast
 
 from loguru import logger
 from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import InstrumentedAttribute
 
 from app.api.deps import assert_owner
 from app.api.pagination import PaginationParams, paginate
@@ -36,7 +37,7 @@ from app.services import cleaning_service, embedding_service, onboarding_service
 EXTRACT_TASK_TYPE = "extract"
 MAX_DIALOGUES = 200
 MAX_GAP_ITEMS = 200
-_SORTABLE = {
+_SORTABLE: dict[str, InstrumentedAttribute] = {
     "frequency": KnowledgeBase.frequency,
     "created_at": KnowledgeBase.created_at,
 }
@@ -227,6 +228,10 @@ async def _execute_extraction(
     if task.status == "cancelled":
         return {"status": "cancelled", "task_id": str(task_id)}
 
+    datasource_id = task.datasource_id
+    if datasource_id is None:
+        raise ValueError("extraction task has no datasource")
+
     task.status = "running"
     task.started_at = _now_naive()
     task.progress = 10
@@ -234,16 +239,16 @@ async def _execute_extraction(
     await session.flush()
 
     try:
-        dialogues = await _load_dialogues(session, task.datasource_id)
+        dialogues = await _load_dialogues(session, datasource_id)
         if not dialogues:
             raise ValueError("no cleaned data to extract knowledge from")
-        existing = await _existing_questions(session, task.datasource_id)
+        existing = await _existing_questions(session, datasource_id)
         params = task.params or {}
 
         agent = _build_agent()
         result = await agent.extract(
             {
-                "datasource_id": str(task.datasource_id),
+                "datasource_id": str(datasource_id),
                 "dialogues": dialogues,
                 "existing_questions": existing,
                 "config": {
@@ -255,16 +260,16 @@ async def _execute_extraction(
             session=session,
             task_id=task.id,
             user_id=task.user_id,
-            datasource_id=task.datasource_id,
+            datasource_id=datasource_id,
         )
         if not result.success or not result.data:
             raise RuntimeError("knowledge extraction failed: " + "; ".join(result.errors))
 
         data = result.data
-        removed = await _replace_seed_knowledge(session, task.datasource_id)
+        removed = await _replace_seed_knowledge(session, datasource_id)
         inserted = await _insert_extracted_faqs(
             session,
-            datasource_id=task.datasource_id,
+            datasource_id=datasource_id,
             faqs=data.get("faqs") or [],
         )
         task.status = "completed"
@@ -287,7 +292,7 @@ async def _execute_extraction(
         }
         try:
             await onboarding_service.maybe_mark_knowledge_built(
-                session, datasource_id=task.datasource_id
+                session, datasource_id=datasource_id
             )
         except ValueError as exc:  # 状态只进不退，已 ready 时忽略
             logger.info("workflow status unchanged: {}", exc)
@@ -467,7 +472,10 @@ async def search_faqs(
     return SearchResponse(query=query, results=results, total=len(results))
 
 
-def _priority_for(frequency: int) -> str:
+PriorityLevel = Literal["high", "medium", "low"]
+
+
+def _priority_for(frequency: int) -> PriorityLevel:
     if frequency >= 10:
         return "high"
     if frequency >= 3:
@@ -492,12 +500,16 @@ async def list_gaps(session: AsyncSession, *, user: User, datasource_id: uuid.UU
     gaps: list[GapItem] = []
     for item in raw_gaps[:MAX_GAP_ITEMS]:
         frequency = int(item.get("frequency", 1) or 1)
+        priority: PriorityLevel = _priority_for(frequency)
+        raw_priority = item.get("priority")
+        if raw_priority in ("high", "medium", "low"):
+            priority = cast(PriorityLevel, raw_priority)
         gaps.append(
             GapItem(
                 question=str(item.get("question", "")),
                 frequency=frequency,
                 category=str(item.get("category") or "其他"),
-                priority=str(item.get("priority") or _priority_for(frequency)),
+                priority=priority,
                 suggested_answer=item.get("suggested_answer"),
             )
         )

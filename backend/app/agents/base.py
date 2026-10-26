@@ -25,6 +25,7 @@ from loguru import logger
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.agents.guards import neutralize_payload
 from app.core.config import settings
 from app.core.cost_tracker import CostTracker, compute_cost
 from app.core.degradation import DegradationLevel
@@ -171,16 +172,25 @@ class BaseAgent(ABC):
         level = DegradationLevel.NORMAL
         attempts = 0
         token_usage = {"input": 0, "output": 0}
+        guard_hits: list[str] = []
 
         try:
-            self._validate_input(input_data)
+            # 输入来自用户数据（不可信）：先中和显式 Prompt 注入，再校验/组装 messages
+            sanitized_input, guard_hits = neutralize_payload(input_data)
+            if guard_hits:
+                logger.warning(
+                    "prompt injection suspected agent={} hits={}",
+                    self.config.name,
+                    guard_hits[:5],
+                )
+            self._validate_input(sanitized_input)
 
             level = await self._resolve_level(session, user_id)
             if DegradationManager.is_service_stopped(level):
                 raise AgentDegradedError("AI service stopped: daily cost limit reached")
             model = DegradationManager.model_for_level(level)
 
-            messages = list(self._create_agent(input_data))
+            messages = list(self._create_agent(sanitized_input))
             retry_config = RetryConfig(
                 max_retries=self.config.max_retries,
                 initial_delay=self.config.retry_base_delay,
@@ -234,7 +244,9 @@ class BaseAgent(ABC):
                     "model": model,
                     "degradation": level.value,
                     "attempts": attempts + 1,
+                    "input_guard_hits": len(guard_hits),
                 },
+                warnings=list(guard_hits),
                 duration=duration,
                 token_usage=token_usage,
                 cost=cost,
@@ -282,8 +294,10 @@ class BaseAgent(ABC):
                     "model": model,
                     "degradation": level.value,
                     "attempts": attempts + 1,
+                    "input_guard_hits": len(guard_hits),
                 },
                 errors=[f"{type(exc).__name__}: {exc}"],
+                warnings=list(guard_hits),
                 duration=duration,
                 token_usage=token_usage,
             )

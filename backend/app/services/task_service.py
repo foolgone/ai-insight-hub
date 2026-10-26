@@ -6,6 +6,7 @@ from datetime import datetime, timezone
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import InstrumentedAttribute
 
 from app.api.deps import assert_owner
 from app.api.pagination import PaginationParams, paginate
@@ -18,7 +19,10 @@ from app.models import Task, User
 from app.schemas.base import Pagination
 
 CANCELLABLE_STATUSES = {"pending", "running"}
-_SORTABLE = {"created_at": Task.created_at, "status": Task.status}
+_SORTABLE: dict[str, InstrumentedAttribute] = {
+    "created_at": Task.created_at,
+    "status": Task.status,
+}
 
 
 def _now_naive() -> datetime:

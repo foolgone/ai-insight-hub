@@ -202,7 +202,7 @@ class CostTracker:
             "error_type",
             "error_message",
         ]
-        stmt = pg_insert(LlmCall).values(**values)
+        stmt: Any = pg_insert(LlmCall).values(**values)
         stmt = stmt.on_conflict_do_update(
             index_elements=["idempotency_key"],
             set_={field: values[field] for field in update_fields},

@@ -132,6 +132,10 @@ async def _execute_insight(
     if task.status == "cancelled":
         return {"status": "cancelled", "task_id": str(task_id)}
 
+    datasource_id = task.datasource_id
+    if datasource_id is None:
+        raise ValueError("insight task has no datasource")
+
     task.status = "running"
     task.started_at = _now_naive()
     task.progress = 10
@@ -140,7 +144,7 @@ async def _execute_insight(
 
     try:
         params = task.params or {}
-        dialogues = await _load_dialogues(session, task.datasource_id, params.get("time_range"))
+        dialogues = await _load_dialogues(session, datasource_id, params.get("time_range"))
         if not dialogues:
             raise ValueError("no cleaned data for insight analysis")
 

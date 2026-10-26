@@ -66,7 +66,7 @@ class FrameworkErrorCode(str, Enum):
     HTTP_ERROR = "HTTP_ERROR"
 
 
-ERROR_STATUS: dict[ErrorCode, int] = {
+ERROR_STATUS: dict[ErrorCode | FrameworkErrorCode, int] = {
     ErrorCode.AUTH_INVALID_CREDENTIALS: 401,
     ErrorCode.AUTH_TOKEN_EXPIRED: 401,
     ErrorCode.AUTH_REFRESH_TOKEN_INVALID: 401,
