@@ -1,7 +1,7 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import { screen } from '@testing-library/react'
 import { AppRoutes } from './router'
-import { renderWithProviders } from './test/utils'
+import { preloadRoutes, renderWithProviders } from './test/utils'
 import { useAuthStore } from './stores/authStore'
 import { listDataSources } from './api/datasources'
 import { listTasks } from './api/tasks'
@@ -52,6 +52,9 @@ vi.mock('./api/reports', () => ({
 }))
 
 const USER = { id: 'u1', email: 'a@example.com', name: '用户', role: 'user' }
+
+// 预热路由懒加载模块，避免全量并行跑时首页偶发停在 Suspense fallback
+beforeAll(preloadRoutes, 30000)
 
 function renderAt(path) {
   return renderWithProviders(<AppRoutes />, { route: path })

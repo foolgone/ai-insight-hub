@@ -21,3 +21,26 @@ export function renderWithProviders(ui, { route = '/' } = {}) {
     </QueryClientProvider>
   )
 }
+
+/**
+ * 预热路由的懒加载模块（router.jsx 中 `lazy(() => import(...))`）。
+ *
+ * 背景：全量并行跑测试时，多个 worker 会争抢 Vite 模块转换，首次 import 一个
+ * 较重页面（如 Dashboard → recharts）可能超过 findBy* 的超时，导致用例偶发
+ * 停在 Suspense fallback。在 beforeAll 里先预热一次，后续懒加载即命中缓存。
+ *
+ * 用法：`beforeAll(preloadRoutes, 30000)`
+ */
+export async function preloadRoutes() {
+  await Promise.all([
+    import('../pages/Login'),
+    import('../pages/Dashboard'),
+    import('../pages/DataSources'),
+    import('../pages/DataCleaning'),
+    import('../pages/QualityAssessment'),
+    import('../pages/QualityAssessment/Detail'),
+    import('../pages/KnowledgeBase'),
+    import('../pages/Reports'),
+    import('../pages/NotFound'),
+  ])
+}

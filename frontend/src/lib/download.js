@@ -9,9 +9,12 @@
  * @returns {string}
  */
 export function toCsv(rows) {
-  return '\uFEFF' + rows
-    .map(row => row.map(cell => `"${String(cell ?? '').replace(/"/g, '""')}"`).join(','))
-    .join('\r\n')
+  return (
+    '\uFEFF' +
+    rows
+      .map(row => row.map(cell => `"${String(cell ?? '').replace(/"/g, '""')}"`).join(','))
+      .join('\r\n')
+  )
 }
 
 /**

@@ -2,9 +2,13 @@
 
 > AI 客服数据分析平台 - 通过 AI Agent 自动清洗、评估和分析客服对话数据
 
-**项目状态**：后端 MVP 已交付（P0~P7 完成；5 Agent + 36 端点 + 437 项测试）  
-**文档版本**：v2.0  
-**更新日期**：2026年10月25日
+**项目状态**：后端 MVP 已交付（P0~P7 完成；5 Agent + 38 个 HTTP 端点 + 439 个后端用例 + 316 个前端用例）  
+**文档版本**：v2.1  
+**更新日期**：2026年10月26日
+
+> 口径说明：端点 = `api/v1` 业务接口 35 个 + 系统接口 3 个（`/`、`/health`、`/metrics`）；用例数取自
+> `pytest --collect-only`（默认排除 prompt 标记）与前端 `vitest run`。当前项目状态与待办见
+> [docs/07-review/01-项目现状与待办清单.md](./docs/07-review/01-项目现状与待办清单.md)。
 
 ---
 
@@ -178,7 +182,8 @@ docker build -f frontend/Dockerfile -t aiinsight-frontend .
 
 ## 📁 项目结构
 
-> 标注「规划」的目录为占位，尚未实现；当前后端只有系统接口，前端只有欢迎页。
+> 当前前后端 MVP 均已交付：后端 5 个 Agent + 38 个端点，前端 7 个业务页面（含登录/404 共 9 个路由）。
+> 目录注释与实现进度以 `backend/app`、`frontend/src` 实际内容为准。
 
 ```
 ai-insight-hub/
@@ -188,7 +193,7 @@ ai-insight-hub/
 ├── docker-compose.test.yml      # 测试环境（PostgreSQL 5433 / Redis 6380）
 ├── .github/workflows/test.yml   # CI：后端 pytest + 前端 vitest
 │
-├── docs/                        # 📚 文档（38 份设计/执行文档 + 1 份审查报告）
+├── docs/                        # 📚 文档（47 份：需求/设计/架构/开发/UI/测试/审查）
 │   ├── 00-AI应用开发基调.md
 │   ├── 00-技术栈优化总结.md
 │   ├── 01-requirements/         # 需求
@@ -208,13 +213,13 @@ ai-insight-hub/
 │   ├── app/
 │   │   ├── main.py              # FastAPI 入口（/、/health、/api/v1/health、/metrics）
 │   │   ├── core/config.py       # 配置事实源
-│   │   ├── api/                 # 规划：API 路由
-│   │   ├── models/              # 规划：数据库模型
-│   │   ├── schemas/             # 规划：Pydantic Schemas
-│   │   ├── agents/              # 规划：5 个 Agent
-│   │   ├── prompts/             # 规划：Prompt 资产库
-│   │   ├── services/            # 规划：业务服务
-│   │   └── utils/               # 规划：工具函数
+│   │   ├── api/                 # API 路由（v1，35 个业务端点）
+│   │   ├── models/              # SQLAlchemy 模型（15 张表）
+│   │   ├── schemas/             # Pydantic Schemas
+│   │   ├── agents/              # 5 个 Agent + 自研工作流编排器
+│   │   ├── prompts/             # Prompt 资产库
+│   │   ├── services/            # 业务服务（清洗/评估/知识库/报告/成本）
+│   │   └── utils/               # 工具函数（重试/幂等/脱敏等）
 │   ├── migrations/              # Alembic 迁移（env.py 已就绪）
 │   ├── scripts/init_db.sql      # 数据库扩展初始化
 │   └── tests/                   # 单元 / 集成 / 安全 / Prompt / 性能测试
@@ -228,14 +233,15 @@ ai-insight-hub/
 │   ├── .eslintrc.json
 │   ├── src/
 │   │   ├── main.jsx
-│   │   ├── App.jsx              # 目前为欢迎页
-│   │   ├── components/          # 规划
-│   │   ├── pages/               # 规划
-│   │   ├── api/                 # 规划
-│   │   ├── stores/              # 规划：Zustand
-│   │   ├── hooks/               # 规划
-│   │   ├── lib/                 # 规划
-│   │   └── test/                # setup.js（jest-dom + matchMedia）、utils.jsx（renderWithProviders）
+│   │   ├── App.jsx              # 应用入口（路由挂载于 router.jsx）
+│   │   ├── router.jsx           # 路由表（懒加载 9 个页面）
+│   │   ├── components/          # 通用/业务组件（Table、Chart、Radix 封装等）
+│   │   ├── pages/               # 7 个业务页面 + 登录 + 404
+│   │   ├── api/                 # Axios 客户端与各模块 API
+│   │   ├── stores/              # Zustand（auth / datasource）
+│   │   ├── hooks/               # React Query hooks
+│   │   ├── lib/                 # 工具（CSV 导出、格式化、错误映射）
+│   │   └── test/                # setup.js、utils.jsx（renderWithProviders / preloadRoutes）
 │
 └── scripts/                     # 🔧 工具脚本
     ├── dev.ps1                  # Windows 一键启动
@@ -300,7 +306,7 @@ cd frontend && npm run test:coverage
 | 后端单元测试 | ≥ **80%** |
 | 后端集成测试 | ≥ **60%** |
 | Prompt 测试 | 每个 Agent **≥ 50 条**（每个维度 ≥ 10 条） |
-| 前端组件测试 | ≥ **70%** |
+| 前端组件测试 | 行/函数/语句 ≥ **80%**，分支 ≥ **70%**（见 `frontend/vitest.config.js` 的 `thresholds`） |
 
 ---
 
@@ -323,16 +329,19 @@ cd frontend && npm run test:coverage
 
 ## 🎯 开发里程碑
 
-| 里程碑 | 时间 | 状态 |
-|--------|------|------|
+| 里程碑 | 计划时间 | 状态 |
+|--------|----------|------|
 | M1: 环境就绪 | Week 1 | ✅ 完成 |
-| M2: POC 完成 | Week 2 | ⏸️ 待开始 |
-| M3: 基础架构 | Week 4 | ⏸️ 待开始 |
-| M4: 数据清洗 | Week 6 | ⏸️ 待开始 |
-| M5: 质量评估 | Week 8 | ⏸️ 待开始 |
-| M6: 知识提取 | Week 10 | ⏸️ 待开始 |
-| M7: MVP 完成 | Week 12 | ⏸️ 待开始 |
-| M8: 上线就绪 | Week 14 | ⏸️ 待开始 |
+| M2: POC 完成 | Week 2 | ✅ 完成 |
+| M3: 基础架构 | Week 4 | ✅ 完成 |
+| M4: 数据清洗 | Week 6 | ✅ 完成 |
+| M5: 质量评估 | Week 8 | ✅ 完成 |
+| M6: 知识提取 | Week 10 | ✅ 完成 |
+| M7: MVP 完成 | Week 12 | ✅ 完成 |
+| M8: 上线就绪 | Week 14 | ✅ 完成 |
+
+> 实际按后端 P0~P7、前端 P0~P5 的批次推进并交付；上表保留最初的计划口径，进度以
+> [docs/07-review/01-项目现状与待办清单.md](./docs/07-review/01-项目现状与待办清单.md) 为准。
 
 详见：`docs/04-development/04-开发方案.md`（总体方案）、[`docs/04-development/12-后端开发计划.md`](./docs/04-development/12-后端开发计划.md)（后端执行计划：阶段、任务 WBS、验收标准、决策清单）
 
@@ -340,7 +349,7 @@ cd frontend && npm run test:coverage
 
 ## 📚 文档
 
-完整文档见 `docs/` 目录（38 份设计/执行文档 + 1 份审查报告）：
+完整文档见 `docs/` 目录（47 份，覆盖需求/设计/架构/开发/UI/测试/审查）：
 
 - **需求**：`01-requirements/`（产品概述、用户调研、需求讨论记录）
 - **设计**：`02-design/`（Prompt 工程规范、Prompt 版本管理）
@@ -348,7 +357,7 @@ cd frontend && npm run test:coverage
 - **开发**：`04-development/`（开发规范、技术栈、成本管理、开发方案、状态管理、重试、降级、**后端开发计划**、**技术选型 ADR**...）
 - **UI**：`05-design/`（视觉、组件、页面、响应式规范）
 - **测试**：`06-testing/`（测试策略、后端单测/集成、Prompt 测试、前端测试）
-- **审查**：`07-review/00-文档审查报告.md`
+- **审查**：`07-review/`（`00-文档审查报告`、`01-项目现状与待办清单`、`02-项目评估报告-代码复核版`，以及两份历史快照）
 
 ---
 

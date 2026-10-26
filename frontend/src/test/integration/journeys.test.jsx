@@ -1,8 +1,8 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { AppRoutes } from '../../router'
-import { renderWithProviders } from '../utils'
+import { preloadRoutes, renderWithProviders } from '../utils'
 import { useAuthStore } from '../../stores/authStore'
 import { useDatasourceStore } from '../../stores/datasourceStore'
 import { login } from '../../api/auth'
@@ -96,6 +96,9 @@ const REPORT = {
 function renderAt(path) {
   return renderWithProviders(<AppRoutes />, { route: path })
 }
+
+// 预热路由懒加载模块，避免全量并行跑时 Dashboard 偶发停在 Suspense fallback
+beforeAll(preloadRoutes, 30000)
 
 function loginAs(user) {
   useAuthStore.setState({ user, hydrated: true })
