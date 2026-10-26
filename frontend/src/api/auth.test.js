@@ -34,17 +34,12 @@ describe('auth API', () => {
     expect(result).toEqual({ ok: true })
   })
 
-  it('logout 携带 refresh_token', async () => {
-    await logout('refresh-token')
-
-    expect(lastConfig.url).toBe('/auth/logout')
-    expect(JSON.parse(lastConfig.data)).toEqual({ refresh_token: 'refresh-token' })
-  })
-
-  it('logout 无 refresh_token 时提交空对象', async () => {
+  it('logout 提交空对象并携带 Cookie（refresh token 在 HttpOnly Cookie）', async () => {
     await logout()
 
+    expect(lastConfig.url).toBe('/auth/logout')
     expect(JSON.parse(lastConfig.data)).toEqual({})
+    expect(lastConfig.withCredentials).toBe(true)
   })
 
   it('fetchCurrentUser 请求 /users/me', async () => {

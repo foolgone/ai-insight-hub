@@ -57,8 +57,8 @@ curl -X POST http://localhost:8000/api/v1/auth/register \
   -H "Content-Type: application/json" \
   -d '{"email":"user@example.com","password":"pass123","name":"User"}'
 
-# 2. 登录获取 access_token + refresh_token
-curl -X POST http://localhost:8000/api/v1/auth/login \
+# 2. 登录获取 access_token（refresh token 由后端写入 HttpOnly Cookie，响应体不返回）
+curl -c cookies.txt -X POST http://localhost:8000/api/v1/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email":"user@example.com","password":"pass123"}'
 
@@ -66,10 +66,8 @@ curl -X POST http://localhost:8000/api/v1/auth/login \
 curl -X GET http://localhost:8000/api/v1/datasources \
   -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
 
-# 4. access_token 过期后用 refresh_token 换新
-curl -X POST http://localhost:8000/api/v1/auth/refresh \
-  -H "Content-Type: application/json" \
-  -d '{"refresh_token":"YOUR_REFRESH_TOKEN"}'
+# 4. access_token 过期后用 Cookie 中的 refresh token 换新（浏览器自动携带 Cookie）
+curl -b cookies.txt -c cookies.txt -X POST http://localhost:8000/api/v1/auth/refresh
 ```
 
 ---
@@ -143,7 +141,7 @@ curl -X POST http://localhost:8000/api/v1/auth/refresh \
 ```json
 {
   "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1NTBlODQwMC1lMjliLTQxZDQtYTcxNi00NDY2NTU0NDAwMDAiLCJ0eXAiOiJhY2Nlc3MiLCJleHAiOjE3MzY5NDUwMDB9.signature",
-  "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1NTBlODQwMC1lMjliLTQxZDQtYTcxNi00NDY2NTU0NDAwMDAiLCJ0eXAiOiJyZWZyZXNoIiwiZXhwIjoxNzM3NTQ5ODAwfQ.signature",
+  "refresh_token": null,
   "token_type": "bearer",
   "expires_in": 3600,
   "refresh_expires_in": 604800,
@@ -156,12 +154,17 @@ curl -X POST http://localhost:8000/api/v1/auth/refresh \
 }
 ```
 
+**响应头（T4）**：
+```
+Set-Cookie: aiih_refresh=<refresh_jwt>; HttpOnly; Path=/api/v1/auth; Max-Age=604800; SameSite=lax
+```
+
 **字段说明**：
 
 | 字段 | 说明 |
 |---|---|
 | `access_token` | 访问令牌，有效期 `JWT_ACCESS_TOKEN_EXPIRE_MINUTES=60`（`expires_in=3600` 秒） |
-| `refresh_token` | 刷新令牌，有效期 `JWT_REFRESH_TOKEN_EXPIRE_DAYS=7`（`refresh_expires_in=604800` 秒） |
+| `refresh_token` | **恒为 null**：refresh token 只通过 HttpOnly Cookie 下发，JS 不可读（字段保留兼容旧客户端解析） |
 | `token_type` | 固定 `bearer` |
 
 **状态码**：
@@ -169,6 +172,7 @@ curl -X POST http://localhost:8000/api/v1/auth/refresh \
 - `401`: 认证失败（`AUTH_INVALID_CREDENTIALS`）
 
 > ⚠️ `refresh_token` 只能用于 `POST /api/v1/auth/refresh`，不能用于业务接口；业务接口只接受 `access_token`。
+> Cookie 属性由 `.env` 控制：`AUTH_COOKIE_NAME` / `AUTH_COOKIE_PATH` / `AUTH_COOKIE_SECURE`（生产 HTTPS 必须 true）/ `AUTH_COOKIE_SAMESITE`（默认 lax）/ `AUTH_COOKIE_DOMAIN`。
 
 ---
 
@@ -176,38 +180,45 @@ curl -X POST http://localhost:8000/api/v1/auth/refresh \
 
 **POST** `/api/v1/auth/refresh`
 
-**所需角色**：持有有效 `refresh_token`
+**所需角色**：持有有效 refresh token（浏览器自动携带 HttpOnly Cookie）
 
-**请求体（推荐）**：
+**请求（浏览器，推荐）**：
+```
+POST /api/v1/auth/refresh
+Cookie: aiih_refresh=<refresh_jwt>
+```
+
+**兼容方式（非浏览器客户端 / 旧脚本）**：请求体传 `refresh_token`
 ```json
 {
   "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1NTBlODQwMC1lMjliLTQxZDQtYTcxNi00NDY2NTU0NDAwMDAiLCJ0eXAiOiJyZWZyZXNoIiwiZXhwIjoxNzM1NDk4MDB9.signature"
 }
 ```
 
-**兼容方式（请求头）**：
-```
-Authorization: Bearer <refresh_token>
-```
-
-> 两种方式任选其一，服务端优先读请求体，请求体缺失时回退到 `Authorization` 头。
+> 服务端优先读 Cookie，Cookie 缺失时回退请求体。浏览器路径不再依赖任何 JS 可读的 refresh token。
 
 **响应**：
 ```json
 {
   "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1NTBlODQwMC1lMjliLTQxZDQtYTcxNi00NDY2NTU0NDAwMDAiLCJ0eXAiOiJhY2Nlc3MiLCJleHAiOjE3MzY5NDg2MDB9.signature",
-  "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1NTBlODQwMC1lMjliLTQxZDQtYTcxNi00NDY2NTU0NDAwMDAiLCJ0eXAiOiJyZWZyZXNoIiwiZXhwIjoxNzM3NTUzNDAwfQ.signature",
+  "refresh_token": null,
   "token_type": "bearer",
   "expires_in": 3600,
   "refresh_expires_in": 604800
 }
 ```
 
+**响应头（T4）**：
+```
+Set-Cookie: aiih_refresh=<new_refresh_jwt>; HttpOnly; Path=/api/v1/auth; Max-Age=604800; SameSite=lax
+```
+
 **状态码**：
 - `200`: 刷新成功
-- `401`: refresh token 无效/过期/已吊销（`AUTH_REFRESH_TOKEN_INVALID`）
+- `401`: refresh token 无效/过期/已吊销（`AUTH_REFRESH_TOKEN_INVALID`）；失败时同时下发清除 Cookie 的响应头
 
 > 刷新即轮换：旧 refresh token 立即失效（MVP 用 Redis 黑名单记录已吊销 `jti`，TTL = 剩余有效期）。
+> CSRF 缓解：`SameSite=Lax` 使跨站 POST 不携带该 Cookie；如需跨站部署再评估 `SameSite=None; Secure` + CSRF Token。
 
 ---
 
@@ -222,12 +233,7 @@ Authorization: Bearer <refresh_token>
 Authorization: Bearer <access_token>
 ```
 
-**请求体（可选，建议传以便同时吊销 refresh token）**：
-```json
-{
-  "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1NTBlODQwMC1lMjliLTQxZDQtYTcxNi00NDY2NTU0NDAwMDAiLCJ0eXAiOiJyZWZyZXNoIiwiZXhwIjoxNzM1NTM0MDB9.signature"
-}
-```
+**请求体**：无。浏览器自动携带 refresh Cookie，服务端同时吊销 access token 与 Cookie 中的 refresh token。
 
 **响应**：
 ```json
@@ -236,7 +242,12 @@ Authorization: Bearer <access_token>
 }
 ```
 
-> 实现：把 access token（及请求体里的 refresh token）的 `jti` 写入 Redis 黑名单，TTL 取其剩余有效期；黑名单内的 token 一律返回 `401 AUTH_TOKEN_EXPIRED`。
+**响应头（T4）**：
+```
+Set-Cookie: aiih_refresh=; HttpOnly; Path=/api/v1/auth; Max-Age=0; SameSite=lax
+```
+
+> 实现：把 access token 及 Cookie（或兼容请求体）里的 refresh token 的 `jti` 写入 Redis 黑名单，TTL 取其剩余有效期；黑名单内的 token 一律返回 `401 AUTH_TOKEN_EXPIRED`。
 
 ---
 
@@ -245,8 +256,9 @@ Authorization: Bearer <access_token>
 ```
 ① 注册/登录
    浏览器 --POST /auth/login {email,password}--> 后端
-   后端 --校验 bcrypt--> 签发 access_token(60min) + refresh_token(7d) --> 浏览器
-   浏览器：access_token 放内存/Zustand，refresh_token 落 httpOnly cookie 或安全存储
+   后端 --校验 bcrypt--> 签发 access_token(60min) + refresh_token(7d)
+   后端 --Set-Cookie: aiih_refresh=...; HttpOnly; SameSite=lax; Path=/api/v1/auth--> 浏览器
+   浏览器：access_token 只在内存，refresh token 在 HttpOnly Cookie（JS 不可读）
 
 ② 调用业务接口
    浏览器 --Authorization: Bearer <access_token>--> 后端
@@ -254,14 +266,14 @@ Authorization: Bearer <access_token>
    失败(expired) → 401 AUTH_TOKEN_EXPIRED
 
 ③ 刷新（access 过期后）
-   浏览器 --POST /auth/refresh {refresh_token}--> 后端
+   浏览器 --POST /auth/refresh（自动携带 aiih_refresh Cookie）--> 后端
    后端：验签 + 校验 type=refresh + 校验黑名单 → 吊销旧 refresh_token
-        → 返回新 access_token + 新 refresh_token
-   刷新失败 → 401 AUTH_REFRESH_TOKEN_INVALID → 前端跳登录页
+        → 返回新 access_token + Set-Cookie 轮换新 refresh_token
+   刷新失败 → 401 AUTH_REFRESH_TOKEN_INVALID + 清除 Cookie → 前端跳登录页
 
 ④ 登出
-   浏览器 --POST /auth/logout (Bearer access_token, body.refresh_token)--> 后端
-   后端：两个 jti 入 Redis 黑名单（TTL=剩余有效期）→ 204/200
+   浏览器 --POST /auth/logout (Bearer access_token，自动携带 Cookie)--> 后端
+   后端：两个 jti 入 Redis 黑名单（TTL=剩余有效期）+ Set-Cookie Max-Age=0 → 200
 ```
 
 **Token 载荷（最小集）**：

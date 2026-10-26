@@ -38,7 +38,8 @@ class UserPublic(ORMSchema):
 
 class TokenResponse(BaseSchema):
     access_token: str
-    refresh_token: str
+    # T4：refresh token 仅通过 HttpOnly Cookie 下发，响应体恒为 null（字段保留兼容旧客户端解析）
+    refresh_token: str | None = None
     token_type: str = "bearer"
     expires_in: int
     refresh_expires_in: int

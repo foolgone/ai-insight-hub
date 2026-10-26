@@ -62,7 +62,6 @@ describe('Login', () => {
     loginApi.mockResolvedValue({
       user: USER,
       access_token: 'access',
-      refresh_token: 'refresh',
     })
     const user = userEvent.setup()
     renderLogin('/login?returnUrl=%2Fdata-sources')
@@ -94,11 +93,10 @@ describe('Login', () => {
     expect(useAuthStore.getState().user).toBeNull()
   })
 
-  it('未勾选记住我时不持久化 refresh token', async () => {
+  it('未勾选记住我时只持久化用户信息（不落 token）', async () => {
     loginApi.mockResolvedValue({
       user: USER,
       access_token: 'access',
-      refresh_token: 'refresh',
     })
     const user = userEvent.setup()
     renderLogin()
@@ -110,7 +108,10 @@ describe('Login', () => {
     expect(await screen.findByText('dashboard-page')).toBeInTheDocument()
     expect(useAuthStore.getState().remember).toBe(false)
     expect(localStorage.getItem('aiih.auth')).toBeNull()
-    expect(sessionStorage.getItem('aiih.auth')).toContain('refresh')
+    // T4：refresh token 在 HttpOnly Cookie，access token 只在内存
+    expect(sessionStorage.getItem('aiih.auth')).toContain(USER.email)
+    expect(sessionStorage.getItem('aiih.auth')).not.toContain('refresh')
+    expect(sessionStorage.getItem('aiih.auth')).not.toContain('access')
   })
 
   it('提交中禁用按钮并显示登录中', async () => {

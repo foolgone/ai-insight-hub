@@ -1,6 +1,5 @@
 import { useCallback } from 'react'
 import * as authApi from '../api/auth'
-import { loadAuth } from '../lib/authStorage'
 import { useAuthStore } from '../stores/authStore'
 
 /**
@@ -25,7 +24,6 @@ export function useAuth() {
       setSession({
         user: data.user,
         accessToken: data.access_token,
-        refreshToken: data.refresh_token,
         remember: rememberMe,
       })
       return data.user
@@ -34,9 +32,9 @@ export function useAuth() {
   )
 
   const logout = useCallback(async () => {
-    const saved = loadAuth()
     try {
-      await authApi.logout(saved?.refreshToken)
+      // refresh token 在 HttpOnly Cookie 中，前端无需传参
+      await authApi.logout()
     } catch {
       // 登出接口失败不阻塞本地清理（token 可能已过期）
     }

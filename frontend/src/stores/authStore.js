@@ -3,7 +3,8 @@ import { clearAuth, loadAuth, saveAuth } from '../lib/authStorage'
 import { clearAccessToken, setAccessToken } from '../lib/token'
 
 /**
- * 认证状态：access_token 只在内存（token.js），refresh_token 按「记住我」持久化。
+ * 认证状态：access_token 只在内存（token.js）；refresh token 在后端 HttpOnly Cookie 中，
+ * 前端只按「记住我」持久化用户信息（T4）。
  * @typedef {Object} AuthUser
  * @property {string} id
  * @property {string} email
@@ -17,7 +18,7 @@ export const useAuthStore = create((set, get) => ({
   remember: false,
   hydrated: false,
 
-  /** 从 Storage 恢复用户信息（应用启动时调用一次）。 */
+  /** 从 Storage 恢复用户信息（应用启动时调用一次；access token 缺失时首个 401 会静默刷新）。 */
   hydrate: () => {
     const saved = loadAuth()
     set({
@@ -29,11 +30,11 @@ export const useAuthStore = create((set, get) => ({
 
   /**
    * 登录/刷新成功后写入会话。
-   * @param {{ user: AuthUser, accessToken: string, refreshToken: string, remember?: boolean }} session
+   * @param {{ user: AuthUser, accessToken: string, remember?: boolean }} session
    */
-  setSession: ({ user, accessToken, refreshToken, remember = false }) => {
+  setSession: ({ user, accessToken, remember = false }) => {
     if (accessToken) setAccessToken(accessToken)
-    saveAuth({ user, refreshToken, remember })
+    saveAuth({ user, remember })
     set({ user, remember, hydrated: true })
   },
 

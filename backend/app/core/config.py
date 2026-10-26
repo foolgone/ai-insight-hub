@@ -8,6 +8,7 @@
 - 可观测：Loguru 结构化日志 + 数据库调用记录 + Prometheus 指标（不使用 LangSmith SaaS）。
 """
 from functools import lru_cache
+from typing import Literal
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -94,6 +95,14 @@ class Settings(BaseSettings):
     JWT_ALGORITHM: str = "HS256"
     JWT_ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
     JWT_REFRESH_TOKEN_EXPIRE_DAYS: int = 7
+
+    # ---------------- 认证 Cookie（T4：refresh token 只放 HttpOnly Cookie） ----------------
+    AUTH_COOKIE_NAME: str = "aiih_refresh"
+    AUTH_COOKIE_PATH: str = "/api/v1/auth"
+    # 生产（HTTPS）必须为 true；SameSite=None 时同样要求 Secure
+    AUTH_COOKIE_SECURE: bool = False
+    AUTH_COOKIE_SAMESITE: Literal["lax", "strict", "none"] = "lax"
+    AUTH_COOKIE_DOMAIN: str | None = None
 
     # ---------------- 成本控制 ----------------
     DAILY_COST_LIMIT: float = 100.0

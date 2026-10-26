@@ -19,7 +19,6 @@ describe('authStore', () => {
     useAuthStore.getState().setSession({
       user: USER,
       accessToken: 'access-1',
-      refreshToken: 'refresh-1',
       remember: true,
     })
 
@@ -28,23 +27,22 @@ describe('authStore', () => {
     expect(getAccessToken()).toBe('access-1')
     expect(JSON.parse(localStorage.getItem('aiih.auth'))).toEqual({
       user: USER,
-      refreshToken: 'refresh-1',
       remember: true,
     })
     expect(sessionStorage.getItem('aiih.auth')).toBeNull()
-    // access_token 不落 Web Storage
+    // access / refresh token 都不落 Web Storage（T4：refresh 只在 HttpOnly Cookie）
     expect(localStorage.getItem('aiih.auth')).not.toContain('access-1')
+    expect(localStorage.getItem('aiih.auth')).not.toContain('refresh')
   })
 
   it('未勾选记住我时写 sessionStorage', () => {
     useAuthStore.getState().setSession({
       user: USER,
       accessToken: 'access-2',
-      refreshToken: 'refresh-2',
       remember: false,
     })
 
-    expect(sessionStorage.getItem('aiih.auth')).toContain('refresh-2')
+    expect(sessionStorage.getItem('aiih.auth')).toContain(USER.email)
     expect(localStorage.getItem('aiih.auth')).toBeNull()
   })
 
@@ -52,7 +50,6 @@ describe('authStore', () => {
     useAuthStore.getState().setSession({
       user: USER,
       accessToken: 'access-3',
-      refreshToken: 'refresh-3',
       remember: true,
     })
     useAuthStore.setState({ user: null, remember: false })
@@ -68,7 +65,6 @@ describe('authStore', () => {
     useAuthStore.getState().setSession({
       user: USER,
       accessToken: 'access-4',
-      refreshToken: 'refresh-4',
       remember: true,
     })
 

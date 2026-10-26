@@ -7,11 +7,12 @@ import { clearAccessToken, setAccessToken } from '../lib/token'
 const USER = { id: 'u1', email: 'user@example.com', name: '用户', role: 'user' }
 
 function buildAdapter({ refreshStatus = 200, secureFailures = 1 } = {}) {
-  const state = { secureCalls: 0, refreshCalls: 0, tokens: [] }
+  const state = { secureCalls: 0, refreshCalls: 0, tokens: [], refreshConfig: null }
 
   const adapter = config => {
     if (config.url === endpoints.auth.refresh) {
       state.refreshCalls += 1
+      state.refreshConfig = config
       if (refreshStatus !== 200) {
         return Promise.reject({
           config,
@@ -23,7 +24,7 @@ function buildAdapter({ refreshStatus = 200, secureFailures = 1 } = {}) {
         })
       }
       return Promise.resolve({
-        data: { access_token: 'new-token', refresh_token: 'refresh-2' },
+        data: { access_token: 'new-token' },
         status: 200,
         statusText: 'OK',
         headers: {},
@@ -63,7 +64,7 @@ describe('apiClient 401 刷新', () => {
     clearAuth()
     clearAccessToken()
     setAccessToken('old-token')
-    saveAuth({ user: USER, refreshToken: 'refresh-1', remember: true })
+    saveAuth({ user: USER, remember: true })
   })
 
   afterEach(() => {
@@ -85,6 +86,8 @@ describe('apiClient 401 刷新', () => {
     expect(state.refreshCalls).toBe(1)
     expect(state.secureCalls).toBe(2)
     expect(state.tokens[1]).toBe('Bearer new-token')
+    // refresh 依赖 HttpOnly Cookie → 必须带凭据
+    expect(state.refreshConfig.withCredentials).toBe(true)
   })
 
   it('并发 401 只触发一次刷新（单飞）', async () => {

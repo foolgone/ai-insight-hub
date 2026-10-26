@@ -1,6 +1,9 @@
 /**
- * 会话持久化（D-F05）：refresh_token 与用户信息按「记住我」分别写
- * localStorage / sessionStorage，key 统一为 `aiih.auth`。
+ * 会话持久化（D-F05 + T4）。
+ *
+ * - 只持久化「用户信息 + 记住我」；access_token 只在内存（`lib/token.js`）；
+ * - refresh token 由后端写入 **HttpOnly Cookie**，JS 不可读，因此不落 Web Storage。
+ *   「记住我」只决定用户信息写 localStorage 还是 sessionStorage。
  */
 export const AUTH_STORAGE_KEY = 'aiih.auth'
 
@@ -11,7 +14,7 @@ function getStorages() {
 
 /**
  * 读取持久化会话。
- * @returns {{ user: Object, refreshToken: string, remember: boolean } | null}
+ * @returns {{ user: Object, remember: boolean } | null}
  */
 export function loadAuth() {
   for (const storage of getStorages()) {
@@ -19,10 +22,9 @@ export function loadAuth() {
       const raw = storage.getItem(AUTH_STORAGE_KEY)
       if (!raw) continue
       const parsed = JSON.parse(raw)
-      if (!parsed || typeof parsed !== 'object' || !parsed.refreshToken) continue
+      if (!parsed || typeof parsed !== 'object' || !parsed.user) continue
       return {
-        user: parsed.user || null,
-        refreshToken: parsed.refreshToken,
+        user: parsed.user,
         remember: Boolean(parsed.remember),
       }
     } catch {
@@ -34,15 +36,15 @@ export function loadAuth() {
 
 /**
  * 保存会话（先清两处，再按 remember 写入其一）。
- * @param {{ user: Object, refreshToken: string, remember?: boolean }} session
+ * @param {{ user: Object, remember?: boolean }} session
  */
-export function saveAuth({ user, refreshToken, remember = false }) {
+export function saveAuth({ user, remember = false }) {
   if (typeof window === 'undefined') return
   clearAuth()
   const target = remember ? window.localStorage : window.sessionStorage
   target.setItem(
     AUTH_STORAGE_KEY,
-    JSON.stringify({ user: user || null, refreshToken, remember: Boolean(remember) })
+    JSON.stringify({ user: user || null, remember: Boolean(remember) })
   )
 }
 

@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { API_PREFIX, endpoints } from './endpoints'
 import { getAccessToken, setAccessToken } from '../lib/token'
-import { clearAuth, loadAuth, saveAuth } from '../lib/authStorage'
+import { clearAuth, loadAuth } from '../lib/authStorage'
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || API_PREFIX
 
@@ -23,27 +23,22 @@ export function setUnauthorizedHandler(handler) {
 }
 
 export const apiClient = axios.create({ baseURL: BASE_URL, timeout: 30000 })
-/** 刷新令牌专用实例：不挂拦截器，避免 401 递归。 */
-export const refreshClient = axios.create({ baseURL: BASE_URL, timeout: 30000 })
+/** 刷新令牌专用实例：不挂拦截器，避免 401 递归；refresh token 在 HttpOnly Cookie 里。 */
+export const refreshClient = axios.create({
+  baseURL: BASE_URL,
+  timeout: 30000,
+  withCredentials: true,
+})
 
 let refreshPromise = null
 
 /**
- * 用 refresh_token 换取新 token，并回写 Storage。
+ * 用 HttpOnly Cookie 中的 refresh token 换取新 access token（Cookie 由浏览器自动携带）。
  * @returns {Promise<string>} 新 access_token
  */
 async function refreshSession() {
-  const saved = loadAuth()
-  if (!saved?.refreshToken) throw new Error('NO_REFRESH_TOKEN')
-  const { data } = await refreshClient.post(endpoints.auth.refresh, {
-    refresh_token: saved.refreshToken,
-  })
+  const { data } = await refreshClient.post(endpoints.auth.refresh, {})
   setAccessToken(data.access_token)
-  saveAuth({
-    user: saved.user,
-    refreshToken: data.refresh_token,
-    remember: saved.remember,
-  })
   return data.access_token
 }
 
@@ -88,9 +83,9 @@ apiClient.interceptors.response.use(
 
     if (status === 401 && original && !original._retry && !isRefreshRequest) {
       original._retry = true
-      const saved = loadAuth()
+      const hasSession = Boolean(loadAuth()?.user)
 
-      if (saved?.refreshToken) {
+      if (hasSession) {
         try {
           if (!refreshPromise) {
             refreshPromise = refreshSession().finally(() => {
