@@ -2,11 +2,11 @@
 
 > AI 客服数据分析平台 - 通过 AI Agent 自动清洗、评估和分析客服对话数据
 
-**项目状态**：后端 MVP 已交付（P0~P7 完成；5 Agent + 41 个 HTTP 端点 + 448 个后端用例 + 315 个前端用例）  
-**文档版本**：v2.3  
+**项目状态**：后端 MVP 已交付（P0~P7 完成；5 Agent + 42 个 HTTP 端点 + 454 个后端用例 + 321 个前端用例）  
+**文档版本**：v2.4  
 **更新日期**：2026年10月26日
 
-> 口径说明：端点 = `/api/v1` 下 38 个（37 个模块路由 + `/api/v1/health`）+ 系统级 3 个（`/`、`/health`、`/metrics`）；
+> 口径说明：端点 = `/api/v1` 下 39 个（37 个模块路由 + `/api/v1/health` + `/tasks/stream`）+ 系统级 3 个（`/`、`/health`、`/metrics`）；
 > 用例数取自 `pytest --collect-only`（默认排除 255 个 prompt 标记用例）与前端 `vitest run`。当前项目状态与待办见
 > [docs/07-review/01-项目现状与待办清单.md](./docs/07-review/01-项目现状与待办清单.md)。
 
@@ -43,7 +43,9 @@ AI Insight Hub 是一个智能数据中台，专门为 AI 客服/对话系统提
 ### 可观测（自建，不使用 LangSmith SaaS）
 - **Loguru** 结构化日志
 - **数据库调用记录**（每次 LLM 调用的 token / 成本 / 耗时）
-- **Prometheus** 指标（`/metrics`）
+- **Prometheus** 指标（`/metrics`）+ **Grafana** 看板（`--profile monitoring`，`ops/grafana/`）
+- **Sentry** 错误追踪（前后端，`SENTRY_DSN` / `VITE_SENTRY_DSN` 为空时关闭）
+- **任务进度 SSE**（`GET /api/v1/tasks/stream`，替代前端轮询）
 
 ### DevOps
 - **Docker** | **Docker Compose** | **GitHub Actions**（`.github/workflows/test.yml`）
@@ -213,7 +215,7 @@ ai-insight-hub/
 │   ├── app/
 │   │   ├── main.py              # FastAPI 入口（/、/health、/api/v1/health、/metrics）
 │   │   ├── core/config.py       # 配置事实源
-│   │   ├── api/                 # API 路由（v1，38 个端点）
+│   │   ├── api/                 # API 路由（v1，39 个端点）
 │   │   ├── models/              # SQLAlchemy 模型（15 张表）
 │   │   ├── schemas/             # Pydantic Schemas
 │   │   ├── agents/              # 5 个 Agent + 自研工作流编排器

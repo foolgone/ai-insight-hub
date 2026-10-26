@@ -1,7 +1,8 @@
 import { Component } from 'react'
+import { captureException } from '../../lib/sentry'
 
 /**
- * 渲染异常兜底（F-105）：防止单页报错导致整站白屏。
+ * 渲染异常兜底（F-105）：防止单页报错导致整站白屏；T7 起同时上报 Sentry。
  */
 export class ErrorBoundary extends Component {
   constructor(props) {
@@ -11,6 +12,10 @@ export class ErrorBoundary extends Component {
 
   static getDerivedStateFromError() {
     return { hasError: true }
+  }
+
+  componentDidCatch(error, info) {
+    captureException(error, { componentStack: info?.componentStack })
   }
 
   render() {

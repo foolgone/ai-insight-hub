@@ -18,6 +18,8 @@ from fastapi.responses import JSONResponse
 from loguru import logger
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
+from app.core.sentry import capture_exception
+
 
 class ErrorCode(str, Enum):
     """业务错误码（API §12.2，共 25 条，不得自造）。"""
@@ -122,6 +124,8 @@ async def aiinsight_exception_handler(_request: Request, exc: Exception) -> JSON
     status_code = getattr(exc, "status_code", None) or ERROR_STATUS.get(code, 500)
     headers = getattr(exc, "headers", None)
     logger.warning("domain exception code={} status={} message={}", code, status_code, message)
+    if status_code >= 500:  # 5xx 才上报 Sentry，避免业务 4xx 噪声
+        capture_exception(exc, code=str(getattr(code, "value", code)), status_code=status_code)
     return JSONResponse(
         status_code=status_code,
         content=error_payload(code, message, details),
@@ -160,6 +164,7 @@ async def http_exception_handler(_request: Request, exc: StarletteHTTPException)
 async def unhandled_exception_handler(_request: Request, exc: Exception) -> JSONResponse:
     """未捕获异常 → 500 统一错误响应（不向前端泄露堆栈）。"""
     logger.opt(exception=exc).error("unhandled exception: {}", exc)
+    capture_exception(exc)
     return JSONResponse(
         status_code=500,
         content=error_payload(ErrorCode.INTERNAL_ERROR, "Internal server error"),

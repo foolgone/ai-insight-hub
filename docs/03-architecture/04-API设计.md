@@ -1,12 +1,17 @@
 # AI Insight Hub - API 接口文档
 
-> **文档版本**：v1.2  
+> **文档版本**：v1.3  
 > **创建日期**：2026年10月23日  
-> **最后更新**：2026年10月25日  
+> **最后更新**：2026年10月26日  
 > **API 版本**：v1  
 > **Base URL**：`http://localhost:8000/api/v1`（与 `backend/.env.example` 的 `API_V1_PREFIX=/api/v1` 一致）  
-> **认证方式**：JWT Bearer Token（access 60 分钟 / refresh 7 天）  
+> **认证方式**：JWT Bearer Token（access 60 分钟，响应体下发）；refresh 7 天，**仅 HttpOnly Cookie**（T4）  
 > **路径口径**：所有接口均以 `/api/v1/datasources` 为基准（**不是** `data_sources`）；清洗接口固定为 `POST /api/v1/datasources/{datasource_id}/clean`
+>
+> **v1.3 修订（2026-10-26）**：
+> 1. §2 认证改为 refresh token 仅 HttpOnly Cookie（登录/刷新/登出 + 时序图重写，T4）。
+> 2. 新增 §10.5 任务进度 SSE 推送（`GET /api/v1/tasks/stream`，T11）。
+> 3. 端点总数：`/api/v1` 下 **39 个**（37 个业务路由 + `/api/v1/health` + SSE）+ 系统级 3 个 = **42 个**。
 >
 > **v1.2 修订（2026-10-25，对齐 `backend/app` 实际实现）**：
 > 1. §7.1 评估请求体改为 `{data_ids, config:{dimensions, threshold}}`，删除不存在的 `include_knowledge_base`；响应去掉 `status`。
@@ -1531,6 +1536,33 @@ file: <binary>
 **状态码**：
 - `202`: 已重新入队
 - `409`: 任务不是失败状态（`TASK_NOT_RETRYABLE`）
+
+---
+
+### 10.5 任务进度推送（SSE，T11）
+
+**GET** `/api/v1/tasks/stream`
+
+**所需角色**：admin（全部任务）/ user、viewer（只看自己的）
+
+**协议**：`text/event-stream`。浏览器端用 `fetch` 流式读取（`EventSource` 不能自定义
+`Authorization` 头），鉴权同普通接口：`Authorization: Bearer <access_token>`。
+
+**事件格式**：
+```
+event: tasks
+data: {"items":[{"id":"...","task_type":"clean","status":"running","progress":45,
+       "current_step":"cleaning","error_message":null,"completed_at":null}]}
+```
+
+- 数据未变化不重复推送；每 15s 一条 `: keep-alive` 心跳；
+- 服务端 1s 轮询快照（MVP，不依赖 Redis pub/sub，连接期间不占用数据库会话）；
+- 断线由客户端指数退避重连（1s → 30s）；前端连接成功后关闭 3s 轮询兜底；
+- Nginx 对该路径关闭缓冲（`proxy_buffering off`），仓库 `nginx/nginx.conf` 已配置。
+
+**状态码**：
+- `200`: 建立 SSE 流
+- `401`: 未认证（`AUTH_TOKEN_EXPIRED`）
 
 ---
 

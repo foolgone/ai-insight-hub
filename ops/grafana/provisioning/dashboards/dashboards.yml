@@ -1,0 +1,13 @@
+apiVersion: 1
+
+providers:
+  - name: aiinsight
+    orgId: 1
+    folder: AI Insight Hub
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 30
+    allowUiUpdates: true
+    options:
+      path: /var/lib/grafana/dashboards
+      foldersFromFilesStructure: false

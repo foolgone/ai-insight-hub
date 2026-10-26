@@ -14,6 +14,7 @@ import { AgentStatusBadge } from '../../components/business/AgentStatusBadge'
 import { CleanedDataDrawer } from '../../components/cleaning/CleanedDataDrawer'
 import { CreateCleaningModal } from '../../components/cleaning/CreateCleaningModal'
 import { useCleanedDataQuery } from '../../hooks/useCleaning'
+import { useTaskStream } from '../../hooks/useTaskStream'
 import { useCancelTask, useRetryTask, useTasksQuery } from '../../hooks/useTasks'
 import { useDatasourceStore } from '../../stores/datasourceStore'
 import { getErrorMessage } from '../../lib/errorMessages'
@@ -62,6 +63,8 @@ export default function DataCleaning() {
 
   const cancelMutation = useCancelTask()
   const retryMutation = useRetryTask()
+  // T11：优先用 SSE 推送；连接不可用时回退到 3s 轮询
+  const { connected: streamConnected } = useTaskStream(Boolean(currentDatasourceId))
 
   const taskParams = useMemo(
     () => ({
@@ -76,6 +79,7 @@ export default function DataCleaning() {
 
   const tasksQuery = useTasksQuery(taskParams, {
     refetchInterval: query => {
+      if (streamConnected) return false
       const items = query.state.data?.items || []
       const hasActive = items.some(task => task.status === 'pending' || task.status === 'running')
       return hasActive ? 3000 : false

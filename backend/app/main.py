@@ -20,12 +20,16 @@ from app.core.errors import (
     validation_exception_handler,
 )
 from app.core.exceptions import AIInsightHubException
+from app.core.sentry import init_sentry
 from app.middleware.degradation_middleware import DegradationMiddleware
 from app.middleware.rate_limit import RateLimitMiddleware
 from app.utils.logger import logger, setup_logging
 
 # 结构化日志（Loguru）：启动即落文件日志（B-202）
 setup_logging()
+
+# 错误追踪（T7）：SENTRY_DSN 为空时 no-op
+init_sentry()
 
 # 业务 API 路由（基础路径由配置决定，默认 /api/v1）
 api_router = APIRouter(prefix=settings.API_V1_PREFIX, tags=["system"])

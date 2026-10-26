@@ -94,6 +94,27 @@ export function Chart({
         ) : null}
       </header>
 
+      {hasData && !loading ? (
+        // 读屏替代：SVG 数据点不可聚焦，用隐藏表格提供等价的文本数据
+        <table className="sr-only">
+          <caption>{title}数据表</caption>
+          <thead>
+            <tr>
+              <th scope="col">名称</th>
+              <th scope="col">数值</th>
+            </tr>
+          </thead>
+          <tbody>
+            {data.map((entry, index) => (
+              <tr key={String(entry.name ?? index)}>
+                <th scope="row">{String(entry.name ?? '')}</th>
+                <td>{String(entry.value ?? '')}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      ) : null}
+
       {loading ? (
         <Skeleton variant="card" />
       ) : !hasData ? (

@@ -112,6 +112,15 @@ export function Table({
                 <th
                   key={column.key}
                   scope="col"
+                  aria-sort={
+                    column.sortable
+                      ? sort?.key === column.key
+                        ? sort.direction === 'asc'
+                          ? 'ascending'
+                          : 'descending'
+                        : 'none'
+                      : undefined
+                  }
                   style={column.width ? { width: column.width } : undefined}
                   className={clsx(
                     'whitespace-nowrap px-4 py-3 font-semibold',

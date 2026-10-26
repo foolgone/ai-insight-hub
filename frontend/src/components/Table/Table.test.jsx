@@ -62,9 +62,19 @@ describe('Table', () => {
       />
     )
 
+    const header = screen.getByRole('columnheader', { name: /名称/ })
+    expect(header).toHaveAttribute('aria-sort', 'none')
+
     await user.click(screen.getByRole('button', { name: /名称/ }))
 
+    expect(header).toHaveAttribute('aria-sort', 'ascending')
     expect(bodyRows()[0]).toHaveTextContent('a')
+
+    await user.click(screen.getByRole('button', { name: /名称/ }))
+    expect(header).toHaveAttribute('aria-sort', 'descending')
+
+    await user.click(screen.getByRole('button', { name: /名称/ }))
+    expect(header).toHaveAttribute('aria-sort', 'none')
   })
 
   it('行选择回调返回选中键', async () => {

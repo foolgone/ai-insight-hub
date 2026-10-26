@@ -44,6 +44,7 @@ export const endpoints = {
   },
   tasks: {
     list: '/tasks',
+    stream: '/tasks/stream',
     byId: taskId => `/tasks/${taskId}`,
     cancel: taskId => `/tasks/${taskId}/cancel`,
     retry: taskId => `/tasks/${taskId}/retry`,

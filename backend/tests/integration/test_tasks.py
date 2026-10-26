@@ -97,4 +97,10 @@ async def test_other_user_cannot_read_task(client, auth_headers, db_session) -> 
     response = await client.get(f"/api/v1/tasks/{task.id}", headers=auth_headers)
 
     assert response.status_code == 403
-    assert response.json()["error"]["code"] == "AUTH_FORBIDDEN"
+
+
+async def test_task_stream_requires_auth(client) -> None:
+    response = await client.get("/api/v1/tasks/stream")
+
+    assert response.status_code == 401
+    assert response.json()["error"]["code"] == "AUTH_TOKEN_EXPIRED"

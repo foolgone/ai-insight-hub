@@ -1,0 +1,14 @@
+# Prometheus 抓取配置（T7）
+# 用法：docker compose -f docker-compose.prod.yml --profile monitoring up -d
+# 要求：backend 的 PROMETHEUS_ENABLED=true（默认），/metrics 在容器网络内可访问。
+global:
+  scrape_interval: 15s
+  evaluation_interval: 30s
+
+scrape_configs:
+  - job_name: aiinsight-api
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["api:8000"]
+        labels:
+          service: aiinsight-api

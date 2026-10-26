@@ -77,6 +77,11 @@ class Settings(BaseSettings):
     LLM_CALL_LOG_ENABLED: bool = True  # 是否把每次 LLM 调用写入数据库
     PROMETHEUS_ENABLED: bool = True  # 是否暴露 /metrics
     METRICS_PATH: str = "/metrics"
+    # Sentry 错误追踪（T7）：DSN 为空时完全 no-op，不影响启动
+    SENTRY_DSN: str = ""
+    SENTRY_ENVIRONMENT: str = "development"
+    SENTRY_TRACES_SAMPLE_RATE: float = 0.0
+    SENTRY_SEND_DEFAULT_PII: bool = False
 
     # ---------------- 文件存储（MinIO/S3） ----------------
     MINIO_ENDPOINT: str = "localhost:9000"

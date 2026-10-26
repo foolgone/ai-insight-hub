@@ -50,6 +50,15 @@ describe('Chart', () => {
     expect(screen.getAllByTestId('recharts').length).toBeGreaterThan(0)
   })
 
+  it('提供读屏可读的隐藏数据表', () => {
+    render(<Chart title="处理量趋势" data={DATA} />)
+
+    expect(screen.getByRole('table', { name: '处理量趋势数据表' })).toBeInTheDocument()
+    expect(screen.getByRole('rowheader', { name: '10-20' })).toBeInTheDocument()
+    expect(screen.getByRole('cell', { name: '10' })).toBeInTheDocument()
+    expect(screen.getByRole('cell', { name: '20' })).toBeInTheDocument()
+  })
+
   it('工具栏回调', async () => {
     const onRefresh = vi.fn()
     const onExport = vi.fn()
