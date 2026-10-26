@@ -147,6 +147,17 @@ async def test_refresh_rotates_cookie_and_revokes_old_token(client) -> None:
     assert me.status_code == 200
 
 
+async def test_refresh_accepts_empty_json_body_with_cookie(client) -> None:
+    """浏览器前端发 `{}`（Cookie 携带 token）时必须 200，而不是 422。"""
+    email, _ = await _register(client)
+    await _login(client, email)
+
+    response = await client.post(REFRESH_PATH, json={})
+
+    assert response.status_code == 200, response.text
+    assert response.json()["access_token"]
+
+
 async def test_refresh_without_cookie_returns_401(client) -> None:
     response = await client.post(REFRESH_PATH)
 

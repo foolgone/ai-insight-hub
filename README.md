@@ -2,7 +2,7 @@
 
 > AI 客服数据分析平台 - 通过 AI Agent 自动清洗、评估和分析客服对话数据
 
-**项目状态**：后端 MVP 已交付（P0~P7 完成；5 Agent + 42 个 HTTP 端点 + 458 个后端用例 + 323 个前端用例）  
+**项目状态**：后端 MVP 已交付（P0~P7 完成；5 Agent + 42 个 HTTP 端点 + 459 个后端用例 + 323 个前端用例 + 8 条真栈 E2E）  
 **文档版本**：v2.4  
 **更新日期**：2026年10月26日
 
@@ -299,6 +299,9 @@ pytest -m prompt
 
 # 前端
 cd frontend && npm run test:coverage
+
+# 前端 E2E（真栈：需前后端已启动；本地用系统 Edge，详见 frontend/e2e/README.md）
+cd frontend && npm run test:e2e
 ```
 
 ### 测试覆盖率目标

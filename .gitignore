@@ -159,3 +159,10 @@ grafana_data/
 
 # 本地对象存储回退目录
 .storage/
+
+# Playwright E2E 产物与测试凭据
+frontend/e2e/.auth/
+frontend/test-results/
+frontend/playwright-report/
+frontend/blob-report/
+frontend/.playwright/

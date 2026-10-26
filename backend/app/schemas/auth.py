@@ -21,7 +21,8 @@ class LoginRequest(BaseSchema):
 
 
 class RefreshRequest(BaseSchema):
-    refresh_token: str
+    # 浏览器走 HttpOnly Cookie，请求体允许为空对象 {}；非浏览器客户端可回退传 token
+    refresh_token: str | None = None
 
 
 class LogoutRequest(BaseSchema):
