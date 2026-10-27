@@ -13,6 +13,7 @@ from tests.factories import (
     AnalysisResultFactory,
     CleanedDataFactory,
     DataSourceFactory,
+    RawDataFactory,
     TaskFactory,
     UserFactory,
     persist,
@@ -81,11 +82,14 @@ async def _setup(db_session, *, cleaned: int = 2) -> tuple:
     await persist(db_session, user)
     datasource = DataSourceFactory(user_id=user.id)
     await persist(db_session, datasource)
+    raw = RawDataFactory(datasource_id=datasource.id)
+    await persist(db_session, raw)
     for dialogue in _DIALOGUES[:cleaned]:
         await persist(
             db_session,
             CleanedDataFactory(
                 datasource_id=datasource.id,
+                raw_data_id=raw.id,
                 dialogue_id=uuid.UUID(dialogue["dialogue_id"]),
                 user_message=dialogue["user_message"],
                 ai_response=dialogue["ai_response"],

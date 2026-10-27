@@ -10,6 +10,7 @@ from app.services import insight_service
 from tests.factories import (
     CleanedDataFactory,
     DataSourceFactory,
+    RawDataFactory,
     TaskFactory,
     UserFactory,
     persist,
@@ -62,11 +63,14 @@ async def _setup(db_session) -> tuple:
     await persist(db_session, user)
     datasource = DataSourceFactory(user_id=user.id)
     await persist(db_session, datasource)
+    raw = RawDataFactory(datasource_id=datasource.id)
+    await persist(db_session, raw)
     for index in range(2):
         await persist(
             db_session,
             CleanedDataFactory(
                 datasource_id=datasource.id,
+                raw_data_id=raw.id,
                 user_message=f"怎么退货 {index}",
                 ai_response="在订单页申请",
             ),

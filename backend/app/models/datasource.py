@@ -1,7 +1,9 @@
 """数据源与数据管道三表（数据库设计 §3.2 ~ §3.4）。
 
 说明：
-- ``cleaned_data.raw_data_id`` 是**逻辑外键**（不建 REFERENCES），由应用层保证一致性；
+- ``cleaned_data.raw_data_id`` 为数据库层外键（``ON DELETE CASCADE``，T10）：
+  原始数据被删除时级联清理清洗记录，避免孤儿行；软删除数据源时仍由
+  ``data_sources.deleted_at`` 统一隔离（查询入口先校验数据源未删除）；
 - 中文检索的表达式 GIN(pg_trgm) 索引无法用 SQLAlchemy ``Index`` 表达，统一在
   Alembic 迁移 ``002`` 中以 ``op.execute`` 创建；
 - 时间倒序索引在 ORM 中按普通列声明，迁移中按设计补 ``DESC``。
@@ -170,8 +172,13 @@ class CleanedData(Base):
         ForeignKey("data_sources.id", ondelete="CASCADE"),
         nullable=False,
     )
-    # 逻辑外键 -> raw_data(id)：不建 REFERENCES（理由见数据库设计 §3.4）
-    raw_data_id: Mapped[uuid.UUID] = mapped_column(PG_UUID(as_uuid=True), nullable=False)
+    # 数据库层外键 -> raw_data(id)：ON DELETE CASCADE（T10），raw_data 删除时
+    # 级联清理清洗记录，避免应用层遗漏造成孤儿行
+    raw_data_id: Mapped[uuid.UUID] = mapped_column(
+        PG_UUID(as_uuid=True),
+        ForeignKey("raw_data.id", ondelete="CASCADE"),
+        nullable=False,
+    )
     dialogue_id: Mapped[uuid.UUID] = mapped_column(PG_UUID(as_uuid=True), nullable=False)
     timestamp: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     user_message: Mapped[str] = mapped_column(Text, nullable=False)

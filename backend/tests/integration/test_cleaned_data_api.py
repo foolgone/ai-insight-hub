@@ -8,9 +8,9 @@ import pytest
 
 from app.core.security import hash_password
 from tests.factories import (
-    CleanedDataFactory,
     UserFactory,
     persist,
+    persist_cleaned,
 )
 
 pytestmark = pytest.mark.integration
@@ -28,15 +28,12 @@ async def _create_datasource(client, auth_headers) -> str:
 
 async def _seed_cleaned(db_session, datasource_id: str, **overrides) -> object:
     payload = {
-        "datasource_id": uuid.UUID(datasource_id),
         "timestamp": datetime(2025, 1, 15, 10, 30, 0),
         "quality_score": 90.0,
         "issues": [],
     }
     payload.update(overrides)
-    item = CleanedDataFactory(**payload)
-    await persist(db_session, item)
-    return item
+    return await persist_cleaned(db_session, uuid.UUID(datasource_id), **payload)
 
 
 async def test_list_and_detail(client, auth_headers, db_session) -> None:

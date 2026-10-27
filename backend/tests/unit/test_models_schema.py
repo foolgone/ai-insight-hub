@@ -71,13 +71,14 @@ def test_foreign_keys_follow_design() -> None:
     assert ("prompt_version_id", "prompt_versions") in fk_targets("prompt_usage_logs")
     assert ("user_id", "users") in fk_targets("llm_calls")
 
-    # 逻辑外键：不建 REFERENCES
-    assert "raw_data_id" not in {fk.parent.name for fk in _table("cleaned_data").foreign_keys}
+    # T10：cleaned_data.raw_data_id 为数据库外键（raw_data，ON DELETE CASCADE）
+    assert ("raw_data_id", "raw_data") in fk_targets("cleaned_data")
+    # analysis_results.data_id 仍为逻辑外键：不建 REFERENCES
     assert "data_id" not in {fk.parent.name for fk in _table("analysis_results").foreign_keys}
 
 
 def test_cleaned_data_fk_cascades_on_delete() -> None:
-    fk = next(iter(_table("cleaned_data").foreign_keys))
+    fk = next(fk for fk in _table("cleaned_data").foreign_keys if fk.parent.name == "raw_data_id")
     assert fk.ondelete == "CASCADE"
 
 

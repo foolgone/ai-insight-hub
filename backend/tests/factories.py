@@ -148,6 +148,22 @@ async def persist(session: AsyncSession, *instances: object) -> None:
     await session.flush()
 
 
+async def persist_cleaned(
+    session: AsyncSession, datasource_id: uuid.UUID, **overrides: Any
+) -> object:
+    """持久化一条 cleaned_data，并自动创建其 ``raw_data``（T10 外键要求）。
+
+    未显式传 ``raw_data_id`` 时先建一条 raw_data 再引用，避免孤儿行触发外键错误。
+    """
+    if "raw_data_id" not in overrides:
+        raw = RawDataFactory(datasource_id=datasource_id)
+        await persist(session, raw)
+        overrides["raw_data_id"] = raw.id
+    cleaned = CleanedDataFactory(datasource_id=datasource_id, **overrides)
+    await persist(session, cleaned)
+    return cleaned
+
+
 def as_dict(**kwargs: Any) -> dict[str, Any]:
     """便捷构造请求体（测试用）。"""
     return dict(kwargs)
@@ -163,4 +179,5 @@ __all__ = [
     "UserFactory",
     "as_dict",
     "persist",
+    "persist_cleaned",
 ]

@@ -13,6 +13,7 @@ from tests.factories import (
     CleanedDataFactory,
     DataSourceFactory,
     KnowledgeBaseFactory,
+    RawDataFactory,
     TaskFactory,
     UserFactory,
     persist,
@@ -75,10 +76,13 @@ async def _setup(db_session) -> tuple:
     await persist(db_session, user)
     datasource = DataSourceFactory(user_id=user.id)
     await persist(db_session, datasource)
+    raw = RawDataFactory(datasource_id=datasource.id)
+    await persist(db_session, raw)
     await persist(
         db_session,
         CleanedDataFactory(
             datasource_id=datasource.id,
+            raw_data_id=raw.id,
             user_message="iPhone 14 多少钱",
             ai_response="5999 元起",
         ),
