@@ -7,11 +7,30 @@
 from __future__ import annotations
 
 from celery import Celery
+from celery.signals import worker_process_init
 from celery.schedules import crontab
 
+from loguru import logger
+
+from app.core import metrics  # noqa: F401  注册 Worker 侧 Prometheus 指标
 from app.core.config import settings
 
 TASK_MODULES = ["app.tasks"]
+
+
+@worker_process_init.connect
+def _start_worker_metrics(**_kwargs: object) -> None:
+    """在 worker 子进程启动 Prometheus HTTP server（仅 WORKER_METRICS_ENABLED）。"""
+    if not settings.WORKER_METRICS_ENABLED:
+        return
+    try:
+        from prometheus_client import start_http_server
+
+        start_http_server(settings.WORKER_METRICS_PORT)
+        logger.info("worker metrics server started port={}", settings.WORKER_METRICS_PORT)
+    except Exception as exc:  # noqa: BLE001 - 可观测失败不影响任务
+        logger.warning("worker metrics server failed: {}", exc)
+
 
 celery_app = Celery(
     "aiinsight",

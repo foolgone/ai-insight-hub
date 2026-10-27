@@ -36,10 +36,10 @@
 
 ## 4. 未解决的验收发现（需排期）
 
-1. **Prometheus 抓不到 Agent/LLM 指标（T7 实际效果缺陷）**
-   - 现状：LLM 调用发生在 **Celery worker 进程**，`llm_* / agent_*` 指标只累加在 worker 内存；`/metrics` 由 API 进程暴露，`ops/prometheus/prometheus.yml` 也只抓 `api:8000`。
-   - 后果：Grafana「LLM 调用/成本/延迟」面板在生产会长期为 0。
-   - 建议：worker 启动 `prometheus_client.start_http_server(9109)`（`worker_process_init` 信号，concurrency=1 或使用 multiprocess 模式），Prometheus 增加 `celery:9109` job；或在 worker 内改用 Pushgateway。
+1. ~~Prometheus 抓不到 Agent/LLM 指标~~ **已修复（2026-10-27）**：
+   - worker 启动 `prometheus_client.start_http_server(9109)`（`worker_process_init` + 显式导入 metrics 注册指标）；
+   - Prometheus 增加 `aiinsight-worker` job（target `worker:9109`）；
+   - 实测：`llm_calls_total{agent_name="cleaning_agent",model="deepseek-flash",status="success"} = 1`，Grafana 看板 2 个 provisioning 成功。
 2. **500/503 错误码未真实触发**：需要故障注入（DB 断开/降级 STOPPED），当前由单测/异常处理器覆盖。
 3. **WebAIM 人工对比度抽查**：已用 axe（0 违规）+ Lighthouse（100）替代自动化部分，人工视觉走查仍建议部署前补。
 4. **键盘焦点陷阱**：仅采集了 Tab 序列，Modal/Drawer 的 focus trap 未自动化验证。

@@ -55,6 +55,10 @@ class Settings(BaseSettings):
     DEFAULT_MAX_TOKENS: int = 4096
     DEFAULT_TIMEOUT: int = 60
 
+    # ---------------- 可观测：Celery worker 指标（Prometheus） ----------------
+    # LLM/Agent 指标产生在 worker 进程；开启后 worker 在独立端口暴露 /metrics
+    WORKER_METRICS_ENABLED: bool = False
+    WORKER_METRICS_PORT: int = 9109
     # ---------------- 嵌入（sentence-transformers，本地离线缓存） ----------------
     # 默认多语言 MiniLM（384 维，与 embedding 表结构一致）；离线部署时把
     # EMBEDDING_CACHE_DIR 指向本地模型目录，避免联网下载。

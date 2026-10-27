@@ -80,6 +80,8 @@ services:
       MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD:-change-me}
       STORAGE_BACKEND: auto
       PROMETHEUS_ENABLED: "true"
+    volumes:
+      - api_storage:/app/.storage
     ports:
       - "8000:8000"
     depends_on:
@@ -114,7 +116,10 @@ services:
       MINIO_ACCESS_KEY: ${MINIO_ROOT_USER:-minioadmin}
       MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD:-change-me}
       STORAGE_BACKEND: auto
-    command: ["celery", "-A", "app.core.celery:celery_app", "worker", "-l", "info", "--concurrency=2"]
+      WORKER_METRICS_ENABLED: "true"
+    volumes:
+      - api_storage:/app/.storage
+    command: ["celery", "-A", "app.core.celery:celery_app", "worker", "-l", "info", "--concurrency=1"]
     depends_on:
       postgres:
         condition: service_healthy
@@ -191,6 +196,7 @@ services:
     networks: [aiinsight]
 
 volumes:
+  api_storage:
   postgres_data:
   redis_data:
   minio_data:

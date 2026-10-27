@@ -12,3 +12,11 @@ scrape_configs:
       - targets: ["api:8000"]
         labels:
           service: aiinsight-api
+
+  # Celery worker：LLM/Agent 指标产生在这里（WORKER_METRICS_ENABLED=true）
+  - job_name: aiinsight-worker
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["worker:9109"]
+        labels:
+          service: aiinsight-worker
