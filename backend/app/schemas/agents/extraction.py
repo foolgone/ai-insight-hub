@@ -9,6 +9,7 @@ from pydantic import BaseModel, Field
 DEFAULT_MAX_FAQS = 20
 DEFAULT_MIN_CONFIDENCE = 0.5
 MAX_DIALOGUES_PER_RUN = 50
+MAX_EXISTING_QUESTIONS = 30
 
 
 class ExtractedFAQ(BaseModel):
@@ -61,6 +62,7 @@ __all__ = [
     "DEFAULT_MAX_FAQS",
     "DEFAULT_MIN_CONFIDENCE",
     "MAX_DIALOGUES_PER_RUN",
+    "MAX_EXISTING_QUESTIONS",
     "ExtractedFAQ",
     "ExtractedFAQWithEmbedding",
     "ExtractionConfig",

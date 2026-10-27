@@ -782,6 +782,13 @@ ERROR_HANDLING = {
 
 ## 4. Agent 3: 知识提取 Agent
 
+> **实现现状（2026-10-27，T9 Phase 1）**：线上实现为「单次 LLM 结构化提取 + 本地 384 维 embedding」，**不使用** §4.2 工具列表中的 sklearn DBSCAN 聚类工具链：
+> - **输入裁剪**：加载最近 200 条清洗对话 → 规则去重（问题 + 答案归一化后完全相同才合并，保留 `duplicate_count` 频次）→ 实际发送 ≤50 条；
+> - **既有问题**：按当前对话 embedding 用 pgvector `cosine_distance` 选 top-8（`EXTRACTION_QUESTION_TOPK`；embedding 失败/离线自动回退「全部问题 → Agent 截前 30」）；
+> - **提取**：1 次 LLM 调用返回 `faqs[] + gaps[]`；置信度过滤 + 字符串精确去重 → 逐条 embedding 入库；
+> - **成本埋点**：`task.result.statistics` 记录去重/裁剪/token/成本指标（见 §4.6）。
+> 语义聚类（DBSCAN/阈值合并同义问法）保留为 T9 Phase 2，当前不做。
+
 ### 4.1 功能概述
 
 **职责**：从对话数据中提取知识，构建 FAQ 知识库
@@ -971,6 +978,22 @@ prompts/extraction/
 ```
 
 ---
+
+#### 4.6 提取成本统计字段（T9 Phase 0/1，`task.result.statistics`）
+
+| 字段 | 含义 |
+| --- | --- |
+| `dialogue_loaded` / `dialogue_unique` / `dialogue_sent` | DB 取出条数 / 规则去重后条数 / 实际进 prompt 条数（≤50） |
+| `rule_dedup_removed` | 完全重复问答对合并数 |
+| `dedup_mode` | `rule` / `off`（`EXTRACTION_RULE_DEDUP_ENABLED`） |
+| `existing_questions_total` / `existing_questions_sent` | 既有 FAQ 总数 / 实际发送数（≤8，失败回退 ≤30） |
+| `question_select_mode` | `embedding_topk` / `legacy_top30` / `fallback` |
+| `fallback_reason` | 语义选优失败原因（如 `RuntimeError: ...`） |
+| `input_tokens` / `output_tokens` / `total_tokens` / `cost` / `llm_duration` | 本次 LLM 调用用量与成本（与 `llm_calls` 口径一致） |
+| `source_ids_expanded` | source_dialogue_ids 从代表 id 展开为同簇全部 id 的 FAQ 条数 |
+| `shadow_*_est` | 优化潜在节省估算（仅趋势观测，非财务口径） |
+
+> 只增不改：`TaskDetail.result` 为 `dict`，老客户端忽略新字段即可。
 
 #### 性能指标
 

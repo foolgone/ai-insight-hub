@@ -19,6 +19,7 @@ from app.agents.base import (
 )
 from app.schemas.agents.extraction import (
     MAX_DIALOGUES_PER_RUN,
+    MAX_EXISTING_QUESTIONS,
     ExtractedFAQWithEmbedding,
     ExtractionInput,
     ExtractionLLMOutput,
@@ -81,6 +82,8 @@ class KnowledgeExtractionAgent(BaseAgent):
                 "dialogue_id": item.get("dialogue_id"),
                 "user_message": item.get("user_message", ""),
                 "ai_response": item.get("ai_response", ""),
+                # T9 Phase 1：规则去重后的出现次数（未去重时为 1）
+                "duplicate_count": item.get("duplicate_count", 1),
             }
             for item in dialogues
         ]
@@ -90,7 +93,7 @@ class KnowledgeExtractionAgent(BaseAgent):
                 "content": json.dumps(
                     {
                         "datasource_id": str(payload.datasource_id),
-                        "existing_questions": payload.existing_questions[:30],
+                        "existing_questions": payload.existing_questions[:MAX_EXISTING_QUESTIONS],
                         "dialogues": compact,
                     },
                     ensure_ascii=False,

@@ -1459,6 +1459,8 @@ file: <binary>
 - `failed`: 失败
 - `cancelled`: 已取消
 
+> 任务完成后 `result` 返回产物（如 `faqs_inserted`、`gaps`）；知识提取任务的 `result.statistics` 另含成本与裁剪指标（T9 Phase 1）：`dialogue_loaded` / `dialogue_unique` / `rule_dedup_removed` / `existing_questions_sent` / `input_tokens` / `output_tokens` / `cost` / `llm_duration` / `question_select_mode` 等，字段只增不改。
+
 ---
 
 ### 10.2 获取任务列表

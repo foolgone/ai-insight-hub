@@ -2,13 +2,14 @@
 from __future__ import annotations
 
 import uuid
+from datetime import datetime
 
 import pytest
 from sqlalchemy import select
 
 from app.agents.base import AgentResult
 from app.models import KnowledgeBase
-from app.services import knowledge_service
+from app.services import knowledge_dedup, knowledge_service
 from tests.factories import (
     CleanedDataFactory,
     DataSourceFactory,
@@ -316,3 +317,174 @@ async def test_extraction_task_registered() -> None:
     from app.core.celery import celery_app
 
     assert "tasks.extract_knowledge" in celery_app.tasks
+
+
+# ---------------------------------------------------------------------------
+# T9 Phase 1：规则去重 / 既有问题语义 top-k
+# ---------------------------------------------------------------------------
+
+
+class _CapturingAgent:
+    """记录 Agent 入参的 Fake Agent（用于断言裁剪后的输入）。"""
+
+    def __init__(self, result: AgentResult) -> None:
+        self._result = result
+        self.inputs: list[dict] = []
+
+    async def extract(self, input_data, **kwargs) -> AgentResult:
+        self.inputs.append(input_data)
+        return self._result
+
+
+async def _setup_extraction_with_dialogues(db_session, dialogues: list) -> tuple:
+    user = UserFactory()
+    await persist(db_session, user)
+    datasource = DataSourceFactory(user_id=user.id)
+    await persist(db_session, datasource)
+    raw = RawDataFactory(datasource_id=datasource.id)
+    await persist(db_session, raw)
+    for dialogue_id, question, answer in dialogues:
+        await persist(
+            db_session,
+            CleanedDataFactory(
+                datasource_id=datasource.id,
+                raw_data_id=raw.id,
+                dialogue_id=dialogue_id,
+                user_message=question,
+                ai_response=answer,
+                created_at=datetime(2025, 1, 1, 12, 0, 0),
+            ),
+        )
+    task = TaskFactory(
+        user_id=user.id,
+        datasource_id=datasource.id,
+        task_type="extract",
+        status="pending",
+        params={"max_faq_count": 100},
+    )
+    await persist(db_session, task)
+    return user, datasource, task
+
+
+async def test_extraction_rule_dedup_and_metrics(db_session, monkeypatch) -> None:
+    dup_a, dup_b = uuid.uuid4(), uuid.uuid4()
+    _, datasource, task = await _setup_extraction_with_dialogues(
+        db_session,
+        [
+            (dup_a, "怎么退款？", "7 天可退"),
+            (dup_b, "怎么退款", "7 天可退"),
+            (uuid.uuid4(), "多久发货", "48 小时"),
+        ],
+    )
+    result = _success_result()
+    result.data["faqs"] = [
+        dict(_FAQS[0], source_dialogue_ids=[str(dup_a)]),
+        dict(_FAQS[1]),
+    ]
+    agent = _CapturingAgent(result)
+    monkeypatch.setattr(knowledge_service, "_build_agent", lambda: agent)
+
+    outcome = await knowledge_service.run_extraction_task(str(task.id), session=db_session)
+
+    assert outcome["status"] == "completed"
+    sent = agent.inputs[0]["dialogues"]
+    assert len(sent) == 2, "完全重复的问答对应被规则去重"
+    assert max(item["duplicate_count"] for item in sent) == 2
+
+    await db_session.refresh(task)
+    stats = task.result["statistics"]
+    assert stats["dialogue_loaded"] == 3
+    assert stats["dialogue_unique"] == 2
+    assert stats["rule_dedup_removed"] == 1
+    assert stats["dedup_mode"] == "rule"
+    assert stats["existing_questions_total"] == 0
+    assert stats["existing_questions_sent"] == 0
+    assert stats["question_select_mode"] == "embedding_topk"
+    assert stats["input_tokens"] == 100
+    assert stats["output_tokens"] == 50
+    assert stats["total_tokens"] == 150
+    assert "cost" in stats and "llm_duration" in stats
+    assert stats["shadow_rule_dedup_removed"] == 1
+
+    rows = (
+        (
+            await db_session.execute(
+                select(KnowledgeBase).where(KnowledgeBase.datasource_id == datasource.id)
+            )
+        )
+        .scalars()
+        .all()
+    )
+    refund = next(row for row in rows if row.question == "iPhone 14 多少钱？")
+    assert {str(dup_a), str(dup_b)} <= {str(item) for item in (refund.source_dialogue_ids or [])}
+    assert stats["source_ids_expanded"] == 1
+
+
+async def test_extraction_selects_semantic_top_k(db_session, monkeypatch) -> None:
+    _, datasource, task = await _setup_extraction_with_dialogues(
+        db_session, [(uuid.uuid4(), "怎么退款", "7 天可退")]
+    )
+    for index in range(12):
+        vector = [0.0] * 384
+        vector[index] = 1.0
+        await persist(
+            db_session,
+            KnowledgeBaseFactory(
+                datasource_id=datasource.id,
+                question=f"问题{index}",
+                embedding=vector,
+            ),
+        )
+
+    agent = _CapturingAgent(_success_result())
+    monkeypatch.setattr(knowledge_service, "_build_agent", lambda: agent)
+
+    async def _encode(texts: list[str]) -> list[list[float]]:
+        vector = [0.0] * 384
+        vector[5] = 1.0
+        return [list(vector) for _ in texts]
+
+    monkeypatch.setattr(knowledge_dedup.embedding_service, "encode_texts", _encode)
+
+    outcome = await knowledge_service.run_extraction_task(str(task.id), session=db_session)
+
+    assert outcome["status"] == "completed"
+    sent = agent.inputs[0]["existing_questions"]
+    assert len(sent) == 8
+    assert sent[0] == "问题5", "最相似的问题应排在首位"
+
+    await db_session.refresh(task)
+    stats = task.result["statistics"]
+    assert stats["existing_questions_total"] == 12
+    assert stats["existing_questions_sent"] == 8
+    assert stats["question_select_mode"] == "embedding_topk"
+
+
+async def test_extraction_question_selection_falls_back_on_embedding_error(
+    db_session, monkeypatch
+) -> None:
+    _, datasource, task = await _setup_extraction_with_dialogues(
+        db_session, [(uuid.uuid4(), "怎么退款", "7 天可退")]
+    )
+    for index in range(3):
+        await persist(
+            db_session,
+            KnowledgeBaseFactory(datasource_id=datasource.id, question=f"既有问题 {index}"),
+        )
+
+    agent = _CapturingAgent(_success_result())
+    monkeypatch.setattr(knowledge_service, "_build_agent", lambda: agent)
+
+    async def _boom(texts: list[str]) -> list[list[float]]:
+        raise RuntimeError("embedding model unavailable")
+
+    monkeypatch.setattr(knowledge_dedup.embedding_service, "encode_texts", _boom)
+
+    outcome = await knowledge_service.run_extraction_task(str(task.id), session=db_session)
+
+    assert outcome["status"] == "completed"
+    assert len(agent.inputs[0]["existing_questions"]) == 3
+    await db_session.refresh(task)
+    stats = task.result["statistics"]
+    assert stats["question_select_mode"] == "fallback"
+    assert "RuntimeError" in (stats["fallback_reason"] or "")

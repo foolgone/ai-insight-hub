@@ -127,6 +127,7 @@ class KnowledgeBaseFactory(factory.Factory):
     source = "extracted"
     is_seed = False
     status = "active"
+    embedding = None
 
 
 class TaskFactory(factory.Factory):

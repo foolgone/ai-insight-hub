@@ -64,6 +64,14 @@ class Settings(BaseSettings):
     EMBEDDING_DEVICE: str = "cpu"
     EMBEDDING_CACHE_DIR: str = ""
 
+    # ---------------- 知识提取成本优化（T9 Phase 1） ----------------
+    # 规则去重：只合并「问题 + 答案归一化后完全相同」的对话（零语义风险）
+    EXTRACTION_RULE_DEDUP_ENABLED: bool = True
+    # 既有问题语义 top-k；0 表示关闭，回退旧行为（全部问题 → Agent 截前 30 条）
+    EXTRACTION_QUESTION_TOPK: int = 8
+    # 语义选优查询文本的截断长度（字符）
+    EXTRACTION_QUESTION_QUERY_CHARS: int = 800
+
     # 成本核算单价（USD / 百万 token）
     # ⚠️ 代码不写死单价：默认 0.0 表示「未配置」，成本计算时须检测并告警；实际值填在 .env
     LLM_PRICE_INPUT_PER_MTOK: float = 0.0

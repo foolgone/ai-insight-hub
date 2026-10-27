@@ -20,8 +20,10 @@ from sqlalchemy.orm import InstrumentedAttribute
 
 from app.api.deps import assert_owner
 from app.api.pagination import PaginationParams, paginate
+from app.core.config import settings
 from app.core.exceptions import DataSourceNotFoundError, FaqNotFoundError
 from app.models import CleanedData, DataSource, KnowledgeBase, Task, User
+from app.schemas.agents.extraction import MAX_DIALOGUES_PER_RUN, MAX_EXISTING_QUESTIONS
 from app.schemas.knowledge import (
     FAQCreate,
     FAQUpdate,
@@ -32,7 +34,7 @@ from app.schemas.knowledge import (
     SearchItem,
     SearchResponse,
 )
-from app.services import cleaning_service, embedding_service, onboarding_service
+from app.services import cleaning_service, embedding_service, knowledge_dedup, onboarding_service
 
 EXTRACT_TASK_TYPE = "extract"
 MAX_DIALOGUES = 200
@@ -219,6 +221,51 @@ async def _save_gaps(
     await session.flush()
 
 
+def _extraction_metrics(
+    *,
+    dialogue_loaded: int,
+    dialogue_unique: int,
+    rule_removed: int,
+    existing_total: int,
+    existing_sent: int,
+    select_mode: str,
+    fallback_reason: str | None,
+    result: Any,
+    shadow_removed: int,
+    shadow_chars: int,
+    shadow_tokens: int,
+    source_ids_expanded: int,
+) -> dict[str, Any]:
+    """T9 Phase 0/1：提取任务的成本与裁剪指标（写入 ``task.result.statistics``）。"""
+    usage = result.token_usage or {}
+    input_tokens = int(usage.get("input", 0))
+    output_tokens = int(usage.get("output", 0))
+    top_k = settings.EXTRACTION_QUESTION_TOPK
+    return {
+        "dialogue_loaded": dialogue_loaded,
+        "dialogue_sent": min(dialogue_unique, MAX_DIALOGUES_PER_RUN),
+        "dialogue_unique": dialogue_unique,
+        "rule_dedup_removed": rule_removed,
+        "existing_questions_total": existing_total,
+        "existing_questions_sent": min(existing_sent, MAX_EXISTING_QUESTIONS),
+        "dedup_mode": "rule" if settings.EXTRACTION_RULE_DEDUP_ENABLED else "off",
+        "question_select_mode": select_mode,
+        "fallback_reason": fallback_reason,
+        "source_ids_expanded": source_ids_expanded,
+        "input_tokens": input_tokens,
+        "output_tokens": output_tokens,
+        "total_tokens": input_tokens + output_tokens,
+        "cost": str(result.cost),
+        "llm_duration": round(float(result.duration or 0.0), 3),
+        "shadow_rule_dedup_removed": shadow_removed,
+        "shadow_question_topk_removed": (
+            max(0, min(existing_total, MAX_EXISTING_QUESTIONS) - top_k) if top_k > 0 else 0
+        ),
+        "shadow_prompt_chars_saved_est": shadow_chars,
+        "shadow_tokens_saved_est": shadow_tokens,
+    }
+
+
 async def _execute_extraction(
     task_id: uuid.UUID, session: AsyncSession, *, commit: bool
 ) -> dict[str, Any]:
@@ -242,15 +289,41 @@ async def _execute_extraction(
         dialogues = await _load_dialogues(session, datasource_id)
         if not dialogues:
             raise ValueError("no cleaned data to extract knowledge from")
-        existing = await _existing_questions(session, datasource_id)
-        params = task.params or {}
+        existing_all = await _existing_questions(session, datasource_id)
 
+        # T9 Phase 0/1：规则去重（影子值始终计算，便于与开启前基线对比）
+        deduped_dialogues, shadow_removed, duplicate_map = knowledge_dedup.dedupe_dialogues(
+            dialogues
+        )
+        if settings.EXTRACTION_RULE_DEDUP_ENABLED:
+            unique_dialogues = deduped_dialogues
+            rule_removed = shadow_removed
+        else:
+            unique_dialogues = list(dialogues)
+            rule_removed = 0
+            duplicate_map = {}
+
+        # T9 Phase 1：既有问题按当前对话语义取 top-k；任何失败自动回退旧行为
+        (
+            selected_questions,
+            select_mode,
+            fallback_reason,
+        ) = await knowledge_dedup.select_relevant_questions(
+            session,
+            datasource_id=datasource_id,
+            dialogues=unique_dialogues,
+            legacy_questions=existing_all,
+            top_k=settings.EXTRACTION_QUESTION_TOPK,
+            query_chars=settings.EXTRACTION_QUESTION_QUERY_CHARS,
+        )
+
+        params = task.params or {}
         agent = _build_agent()
         result = await agent.extract(
             {
                 "datasource_id": str(datasource_id),
-                "dialogues": dialogues,
-                "existing_questions": existing,
+                "dialogues": unique_dialogues,
+                "existing_questions": selected_questions,
                 "config": {
                     "max_faqs": int(params.get("max_faq_count", 100)),
                     "min_confidence": 0.0,
@@ -266,11 +339,13 @@ async def _execute_extraction(
             raise RuntimeError("knowledge extraction failed: " + "; ".join(result.errors))
 
         data = result.data
+        faqs = list(data.get("faqs") or [])
+        source_ids_expanded = knowledge_dedup.expand_source_ids(faqs, duplicate_map)
         removed = await _replace_seed_knowledge(session, datasource_id)
         inserted = await _insert_extracted_faqs(
             session,
             datasource_id=datasource_id,
-            faqs=data.get("faqs") or [],
+            faqs=faqs,
         )
         task.status = "completed"
         task.progress = 100
@@ -278,11 +353,34 @@ async def _execute_extraction(
         task.completed_at = _now_naive()
         if task.started_at is not None:
             task.duration = round((task.completed_at - task.started_at).total_seconds(), 3)
+        shadow_chars, shadow_tokens = knowledge_dedup.estimate_prompt_savings(
+            deduped_dialogues=deduped_dialogues,
+            removed_dialogues=shadow_removed,
+            legacy_questions=existing_all,
+            sent_questions=selected_questions,
+        )
+        statistics = {
+            **(data.get("stats") or {}),
+            **_extraction_metrics(
+                dialogue_loaded=len(dialogues),
+                dialogue_unique=len(unique_dialogues),
+                rule_removed=rule_removed,
+                existing_total=len(existing_all),
+                existing_sent=len(selected_questions),
+                select_mode=select_mode,
+                fallback_reason=fallback_reason,
+                result=result,
+                shadow_removed=shadow_removed,
+                shadow_chars=shadow_chars,
+                shadow_tokens=shadow_tokens,
+                source_ids_expanded=source_ids_expanded,
+            ),
+        }
         await _save_gaps(
             session,
             task=task,
             gaps=data.get("gaps") or [],
-            stats=data.get("stats") or {},
+            stats=statistics,
             faq_count=inserted,
         )
         task.result = {
