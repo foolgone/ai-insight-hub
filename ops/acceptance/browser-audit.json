@@ -1,0 +1,434 @@
+{
+  "generatedAt": "2026-10-27T12:50:18.310Z",
+  "app": "http://127.0.0.1:5173",
+  "viewports": [
+    {
+      "name": "375-mobile",
+      "width": 375,
+      "height": 812
+    },
+    {
+      "name": "768-tablet",
+      "width": 768,
+      "height": 1024
+    },
+    {
+      "name": "1024-laptop",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "name": "1280-desktop",
+      "width": 1280,
+      "height": 800
+    },
+    {
+      "name": "1920-wide",
+      "width": 1920,
+      "height": 1080
+    }
+  ],
+  "screenshots": 30,
+  "axe": {
+    "pages": 30,
+    "violations": 0,
+    "serious": 0
+  },
+  "overflow": [],
+  "modalIssues": [],
+  "keyboard": {
+    "375-mobile": [
+      "加载中...",
+      "加载中...",
+      "加载中...",
+      "you@example.com",
+      "请输入密码",
+      "BUTTON"
+    ],
+    "1024-laptop": [
+      "加载中...",
+      "加载中...",
+      "AI欢迎使用 AI Insight HubAI 驱动的智能对",
+      "you@example.com",
+      "请输入密码",
+      "BUTTON"
+    ]
+  },
+  "results": [
+    {
+      "viewport": "375-mobile",
+      "pages": [
+        {
+          "page": "dashboard",
+          "heading": "Dashboard",
+          "overflowX": 0,
+          "axeViolations": 0,
+          "serious": 0
+        },
+        {
+          "page": "data-sources",
+          "heading": "数据源管理",
+          "overflowX": 0,
+          "axeViolations": 0,
+          "serious": 0
+        },
+        {
+          "page": "data-cleaning",
+          "heading": "数据清洗",
+          "overflowX": 0,
+          "axeViolations": 0,
+          "serious": 0
+        },
+        {
+          "page": "quality-assessment",
+          "heading": "质量评估",
+          "overflowX": 0,
+          "axeViolations": 0,
+          "serious": 0
+        },
+        {
+          "page": "knowledge-base",
+          "heading": "知识库",
+          "overflowX": 0,
+          "axeViolations": 0,
+          "serious": 0
+        },
+        {
+          "page": "reports",
+          "heading": "报告中心",
+          "overflowX": 0,
+          "axeViolations": 0,
+          "serious": 0
+        }
+      ],
+      "overflow": [],
+      "modals": [
+        {
+          "name": "new-datasource-drawer",
+          "inside": true,
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 375,
+            "height": 812
+          },
+          "escapeClosed": true
+        },
+        {
+          "name": "report-modal",
+          "inside": true,
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 375,
+            "height": 812
+          }
+        }
+      ],
+      "keyboard": [
+        "加载中...",
+        "加载中...",
+        "加载中...",
+        "you@example.com",
+        "请输入密码",
+        "BUTTON"
+      ]
+    },
+    {
+      "viewport": "768-tablet",
+      "pages": [
+        {
+          "page": "dashboard",
+          "heading": "Dashboard",
+          "overflowX": 0,
+          "axeViolations": 0,
+          "serious": 0
+        },
+        {
+          "page": "data-sources",
+          "heading": "数据源管理",
+          "overflowX": 0,
+          "axeViolations": 0,
+          "serious": 0
+        },
+        {
+          "page": "data-cleaning",
+          "heading": "数据清洗",
+          "overflowX": 0,
+          "axeViolations": 0,
+          "serious": 0
+        },
+        {
+          "page": "quality-assessment",
+          "heading": "质量评估",
+          "overflowX": 0,
+          "axeViolations": 0,
+          "serious": 0
+        },
+        {
+          "page": "knowledge-base",
+          "heading": "知识库",
+          "overflowX": 0,
+          "axeViolations": 0,
+          "serious": 0
+        },
+        {
+          "page": "reports",
+          "heading": "报告中心",
+          "overflowX": 0,
+          "axeViolations": 0,
+          "serious": 0
+        }
+      ],
+      "overflow": [],
+      "modals": [
+        {
+          "name": "new-datasource-drawer",
+          "inside": true,
+          "box": {
+            "x": 288,
+            "y": 0,
+            "width": 480,
+            "height": 1024
+          },
+          "escapeClosed": true
+        },
+        {
+          "name": "report-modal",
+          "inside": true,
+          "box": {
+            "x": 16,
+            "y": 226.5,
+            "width": 736,
+            "height": 571
+          }
+        }
+      ],
+      "keyboard": null
+    },
+    {
+      "viewport": "1024-laptop",
+      "pages": [
+        {
+          "page": "dashboard",
+          "heading": "Dashboard",
+          "overflowX": 0,
+          "axeViolations": 0,
+          "serious": 0
+        },
+        {
+          "page": "data-sources",
+          "heading": "数据源管理",
+          "overflowX": 0,
+          "axeViolations": 0,
+          "serious": 0
+        },
+        {
+          "page": "data-cleaning",
+          "heading": "数据清洗",
+          "overflowX": 0,
+          "axeViolations": 0,
+          "serious": 0
+        },
+        {
+          "page": "quality-assessment",
+          "heading": "质量评估",
+          "overflowX": 0,
+          "axeViolations": 0,
+          "serious": 0
+        },
+        {
+          "page": "knowledge-base",
+          "heading": "知识库",
+          "overflowX": 0,
+          "axeViolations": 0,
+          "serious": 0
+        },
+        {
+          "page": "reports",
+          "heading": "报告中心",
+          "overflowX": 0,
+          "axeViolations": 0,
+          "serious": 0
+        }
+      ],
+      "overflow": [],
+      "modals": [
+        {
+          "name": "new-datasource-drawer",
+          "inside": true,
+          "box": {
+            "x": 544,
+            "y": 0,
+            "width": 480,
+            "height": 768
+          },
+          "escapeClosed": true
+        },
+        {
+          "name": "report-modal",
+          "inside": true,
+          "box": {
+            "x": 112,
+            "y": 98.5,
+            "width": 800,
+            "height": 571
+          }
+        }
+      ],
+      "keyboard": [
+        "加载中...",
+        "加载中...",
+        "AI欢迎使用 AI Insight HubAI 驱动的智能对",
+        "you@example.com",
+        "请输入密码",
+        "BUTTON"
+      ]
+    },
+    {
+      "viewport": "1280-desktop",
+      "pages": [
+        {
+          "page": "dashboard",
+          "heading": "Dashboard",
+          "overflowX": 0,
+          "axeViolations": 0,
+          "serious": 0
+        },
+        {
+          "page": "data-sources",
+          "heading": "数据源管理",
+          "overflowX": 0,
+          "axeViolations": 0,
+          "serious": 0
+        },
+        {
+          "page": "data-cleaning",
+          "heading": "数据清洗",
+          "overflowX": 0,
+          "axeViolations": 0,
+          "serious": 0
+        },
+        {
+          "page": "quality-assessment",
+          "heading": "质量评估",
+          "overflowX": 0,
+          "axeViolations": 0,
+          "serious": 0
+        },
+        {
+          "page": "knowledge-base",
+          "heading": "知识库",
+          "overflowX": 0,
+          "axeViolations": 0,
+          "serious": 0
+        },
+        {
+          "page": "reports",
+          "heading": "报告中心",
+          "overflowX": 0,
+          "axeViolations": 0,
+          "serious": 0
+        }
+      ],
+      "overflow": [],
+      "modals": [
+        {
+          "name": "new-datasource-drawer",
+          "inside": true,
+          "box": {
+            "x": 800,
+            "y": 0,
+            "width": 480,
+            "height": 800
+          },
+          "escapeClosed": true
+        },
+        {
+          "name": "report-modal",
+          "inside": true,
+          "box": {
+            "x": 240,
+            "y": 114.5,
+            "width": 800,
+            "height": 571
+          }
+        }
+      ],
+      "keyboard": null
+    },
+    {
+      "viewport": "1920-wide",
+      "pages": [
+        {
+          "page": "dashboard",
+          "heading": "Dashboard",
+          "overflowX": 0,
+          "axeViolations": 0,
+          "serious": 0
+        },
+        {
+          "page": "data-sources",
+          "heading": "数据源管理",
+          "overflowX": 0,
+          "axeViolations": 0,
+          "serious": 0
+        },
+        {
+          "page": "data-cleaning",
+          "heading": "数据清洗",
+          "overflowX": 0,
+          "axeViolations": 0,
+          "serious": 0
+        },
+        {
+          "page": "quality-assessment",
+          "heading": "质量评估",
+          "overflowX": 0,
+          "axeViolations": 0,
+          "serious": 0
+        },
+        {
+          "page": "knowledge-base",
+          "heading": "知识库",
+          "overflowX": 0,
+          "axeViolations": 0,
+          "serious": 0
+        },
+        {
+          "page": "reports",
+          "heading": "报告中心",
+          "overflowX": 0,
+          "axeViolations": 0,
+          "serious": 0
+        }
+      ],
+      "overflow": [],
+      "modals": [
+        {
+          "name": "new-datasource-drawer",
+          "inside": true,
+          "box": {
+            "x": 1440,
+            "y": 0,
+            "width": 480,
+            "height": 1080
+          },
+          "escapeClosed": true
+        },
+        {
+          "name": "report-modal",
+          "inside": true,
+          "box": {
+            "x": 560,
+            "y": 254.5,
+            "width": 800,
+            "height": 571
+          }
+        }
+      ],
+      "keyboard": null
+    }
+  ],
+  "allViolations": []
+}

@@ -58,7 +58,7 @@ export default function Login() {
       <main className="w-full max-w-[400px] rounded-lg bg-white p-8 shadow-xl">
         <div className="mb-8 text-center">
           <div
-            className="mx-auto grid h-16 w-16 place-items-center rounded-lg bg-primary-500 text-xl font-bold text-white"
+            className="mx-auto grid h-16 w-16 place-items-center rounded-lg bg-primary-600 text-xl font-bold text-white"
             aria-hidden="true"
           >
             AI
@@ -126,7 +126,7 @@ export default function Login() {
           </Button>
         </form>
 
-        <p className="mt-6 text-center text-xs text-gray-400">
+        <p className="mt-6 text-center text-xs text-gray-500">
           账号由管理员创建，MVP 不提供注册与找回密码
         </p>
       </main>

@@ -196,7 +196,7 @@ ai-insight-hub/
 ├── .github/workflows/test.yml   # CI：后端 pytest + 前端 vitest
 ├── .github/workflows/e2e.yml    # CI：E2E（PG/Redis + 前后端 + Chromium）
 │
-├── docs/                        # 📚 文档（47 份：需求/设计/架构/开发/UI/测试/审查）
+├── docs/                        # 📚 文档（48 份：需求/设计/架构/开发/UI/测试/审查）
 │   ├── 00-AI应用开发基调.md
 │   ├── 00-技术栈优化总结.md
 │   ├── 01-requirements/         # 需求
@@ -356,9 +356,9 @@ cd frontend && npm run test:e2e
 
 ## 📚 文档
 
-完整文档见 `docs/` 目录（47 份，覆盖需求/设计/架构/开发/UI/测试/审查）：
+完整文档见 `docs/` 目录（48 份，覆盖需求/设计/架构/开发/UI/测试/审查）：
 
-- **需求**：`01-requirements/`（产品概述、用户调研、需求讨论记录）
+- **需求**：`01-requirements/`（产品概述、用户调研、需求讨论记录、**用户自带 API Key（BYOK）需求**）
 - **设计**：`02-design/`（Prompt 工程规范、Prompt 版本管理）
 - **架构**：`03-architecture/`（系统架构、Agent 详细设计、数据库设计、API 设计）
 - **开发**：`04-development/`（开发规范、技术栈、成本管理、开发方案、状态管理、重试、降级、**后端开发计划**、**技术选型 ADR**...）

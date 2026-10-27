@@ -24,7 +24,7 @@ export function Header() {
 
       <div className="flex shrink-0 items-center gap-2">
         <div
-          className="grid h-9 w-9 place-items-center rounded-md bg-primary-500 text-sm font-bold text-white"
+          className="grid h-9 w-9 place-items-center rounded-md bg-primary-600 text-sm font-bold text-white"
           aria-hidden="true"
         >
           AI

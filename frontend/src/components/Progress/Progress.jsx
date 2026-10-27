@@ -73,7 +73,7 @@ export function Progress({
                 className={clsx(
                   'grid h-6 w-6 place-items-center rounded-full border',
                   done
-                    ? 'border-primary-500 bg-primary-500 text-white'
+                    ? 'border-primary-600 bg-primary-600 text-white'
                     : 'border-gray-300 bg-white text-gray-400'
                 )}
                 aria-hidden="true"
@@ -93,6 +93,7 @@ export function Progress({
     <div className={clsx('flex items-center gap-3', className)}>
       <div
         role="progressbar"
+        aria-label="进度"
         aria-valuenow={safePercent}
         aria-valuemin={0}
         aria-valuemax={100}

@@ -78,7 +78,7 @@ export function Pagination({ current = 1, pageSize = 20, total = 0, onChange, cl
               className={clsx(
                 BUTTON_CLASS,
                 item === current
-                  ? 'border-primary-500 bg-primary-500 text-white'
+                  ? 'border-primary-600 bg-primary-600 text-white'
                   : 'border-gray-300 text-gray-600 hover:bg-gray-50'
               )}
             >

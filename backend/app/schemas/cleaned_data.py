@@ -11,8 +11,9 @@ from app.schemas.base import ORMSchema
 
 
 class CleanedDataItem(ORMSchema):
-    """清洗结果列表项。"""
+    """清洗结果列表项（含 ``id``，供详情端点使用）。"""
 
+    id: uuid.UUID
     dialogue_id: uuid.UUID
     timestamp: datetime | None = None
     user_message: str
@@ -26,7 +27,6 @@ class CleanedDataItem(ORMSchema):
 class CleanedDataDetail(CleanedDataItem):
     """清洗结果详情（附 Agent 执行信息）。"""
 
-    id: uuid.UUID
     datasource_id: uuid.UUID
     agent_version: str | None = None
     processing_duration: float | None = None
