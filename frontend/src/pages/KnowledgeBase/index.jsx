@@ -146,6 +146,7 @@ export default function KnowledgeBase() {
             <div className="space-y-4">
               <div className="max-w-xs">
                 <Select
+                  ariaLabel="知识分类筛选"
                   options={CATEGORY_OPTIONS}
                   value={category || 'all'}
                   onChange={value => setCategory(value === 'all' ? '' : value)}

@@ -8,7 +8,7 @@ export default function NotFound() {
       <p className="mt-2 text-sm text-gray-500">访问的地址不存在或已被移除。</p>
       <Link
         to="/dashboard"
-        className="mt-6 rounded-md bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2"
+        className="mt-6 rounded-md bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2"
       >
         返回 Dashboard
       </Link>

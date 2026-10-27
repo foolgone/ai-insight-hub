@@ -93,7 +93,12 @@ export function Table({
 
   return (
     <div className={clsx('overflow-hidden rounded-md border border-gray-200 bg-white', className)}>
-      <div className="overflow-x-auto">
+      <div
+        className="overflow-x-auto"
+        tabIndex={0}
+        role="region"
+        aria-label="表格内容（可横向滚动）"
+      >
         <table aria-busy={loading || undefined} className="min-w-full border-collapse text-sm">
           <caption className="sr-only">{caption}</caption>
           <thead className="bg-gray-50 text-left text-gray-700">

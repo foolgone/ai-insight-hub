@@ -45,7 +45,9 @@ class LlmCall(Base):
     )
     user_id: Mapped[uuid.UUID | None] = mapped_column(PG_UUID(as_uuid=True), ForeignKey("users.id"))
     datasource_id: Mapped[uuid.UUID | None] = mapped_column(
-        PG_UUID(as_uuid=True), ForeignKey("data_sources.id")
+        PG_UUID(as_uuid=True),
+        # 数据源物理删除时保留成本记录（SET NULL），避免 force 删除被外键阻塞
+        ForeignKey("data_sources.id", ondelete="SET NULL"),
     )
     # 逻辑关联 tasks.id（不建外键，任务可能被清理）
     task_id: Mapped[uuid.UUID | None] = mapped_column(PG_UUID(as_uuid=True))

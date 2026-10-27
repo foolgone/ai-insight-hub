@@ -16,7 +16,7 @@ describe('Button', () => {
     render(<Button>确定</Button>)
 
     const button = screen.getByRole('button', { name: '确定' })
-    expect(button).toHaveClass('bg-primary-500')
+    expect(button).toHaveClass('bg-primary-600')
     expect(button).toHaveClass('h-10')
   })
 

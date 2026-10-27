@@ -166,3 +166,8 @@ frontend/test-results/
 frontend/playwright-report/
 frontend/blob-report/
 frontend/.playwright/
+
+# 上线验收本地产物
+ops/acceptance/screenshots/
+ops/acceptance/*.log
+ops/acceptance/axe-details.json

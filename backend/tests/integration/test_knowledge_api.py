@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import pytest
 from sqlalchemy import select
@@ -343,7 +343,9 @@ async def _setup_extraction_with_dialogues(db_session, dialogues: list) -> tuple
     await persist(db_session, datasource)
     raw = RawDataFactory(datasource_id=datasource.id)
     await persist(db_session, raw)
-    for dialogue_id, question, answer in dialogues:
+    base_time = datetime(2025, 1, 1, 12, 0, 0)
+    for index, (dialogue_id, question, answer) in enumerate(dialogues):
+        # 递减时间，保证 _load_dialogues 的 created_at desc 顺序稳定（代表首条）
         await persist(
             db_session,
             CleanedDataFactory(
@@ -352,7 +354,7 @@ async def _setup_extraction_with_dialogues(db_session, dialogues: list) -> tuple
                 dialogue_id=dialogue_id,
                 user_message=question,
                 ai_response=answer,
-                created_at=datetime(2025, 1, 1, 12, 0, 0),
+                created_at=base_time - timedelta(seconds=index),
             ),
         )
     task = TaskFactory(

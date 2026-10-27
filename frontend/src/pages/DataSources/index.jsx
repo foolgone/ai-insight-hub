@@ -108,6 +108,7 @@ export default function DataSources() {
           aria-label="搜索数据源名称"
         />
         <Select
+          ariaLabel="数据源状态筛选"
           options={STATUS_OPTIONS}
           value={status || 'all'}
           onChange={value => {
@@ -116,6 +117,7 @@ export default function DataSources() {
           }}
         />
         <Select
+          ariaLabel="数据源类型筛选"
           options={TYPE_OPTIONS}
           value={type || 'all'}
           onChange={value => {

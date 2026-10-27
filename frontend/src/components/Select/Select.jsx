@@ -17,6 +17,7 @@ import { LuCheck, LuChevronDown, LuSearch } from 'react-icons/lu'
  *   id?: string,
  *   name?: string,
  *   className?: string,
+ *   ariaLabel?: string,
  * }} props
  */
 export function Select({
@@ -31,6 +32,7 @@ export function Select({
   id,
   name,
   className,
+  ariaLabel,
 }) {
   const autoId = useId()
   const triggerId = id || autoId
@@ -75,6 +77,7 @@ export function Select({
             name={name}
             type="button"
             role="combobox"
+            aria-label={ariaLabel}
             aria-haspopup="listbox"
             aria-expanded={open}
             aria-invalid={Boolean(error) || undefined}

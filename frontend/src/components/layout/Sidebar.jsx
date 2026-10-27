@@ -74,7 +74,7 @@ export function Sidebar() {
           )}
         >
           <div
-            className="grid h-8 w-8 shrink-0 place-items-center rounded-md bg-primary-500 text-xs font-bold text-white"
+            className="grid h-8 w-8 shrink-0 place-items-center rounded-md bg-primary-600 text-xs font-bold text-white"
             aria-hidden="true"
           >
             AI
@@ -116,7 +116,7 @@ export function Sidebar() {
                   <>
                     {isActive ? (
                       <span
-                        className="absolute inset-y-2 left-0 w-[3px] rounded-r bg-primary-500"
+                        className="absolute inset-y-2 left-0 w-[3px] rounded-r bg-primary-600"
                         aria-hidden="true"
                       />
                     ) : null}

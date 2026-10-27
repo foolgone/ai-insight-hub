@@ -2,7 +2,7 @@ import { forwardRef } from 'react'
 import clsx from 'clsx'
 
 const VARIANT_CLASSES = {
-  primary: 'bg-primary-500 text-white hover:bg-primary-600 active:bg-primary-700',
+  primary: 'bg-primary-600 text-white hover:bg-primary-700 active:bg-primary-800',
   secondary: 'bg-gray-100 text-gray-700 hover:bg-gray-200 active:bg-gray-300',
   outline: 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 active:bg-gray-100',
   ghost: 'text-gray-600 hover:bg-gray-100 active:bg-gray-200',
