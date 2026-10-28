@@ -67,6 +67,10 @@ class LlmCall(Base):
     status: Mapped[str] = mapped_column(
         String(20), nullable=False, server_default=text("'success'")
     )
+    # BYOK：'user' 表示用户自带 Key（估算成本只记录、不纳入 DAILY_COST_LIMIT）
+    key_source: Mapped[str] = mapped_column(
+        String(10), nullable=False, server_default=text("'server'")
+    )
     error_type: Mapped[str | None] = mapped_column(String(100))
     error_message: Mapped[str | None] = mapped_column(Text)
     created_at: Mapped[datetime | None] = mapped_column(DateTime, server_default=func.now())

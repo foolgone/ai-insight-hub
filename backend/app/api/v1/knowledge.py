@@ -6,7 +6,7 @@ import uuid
 from fastapi import APIRouter, Depends, Query, Response, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import require_roles
+from app.api.deps import require_llm_credential, require_roles
 from app.api.pagination import PaginationParams
 from app.core.database import get_db
 from app.models import User
@@ -34,6 +34,7 @@ WRITE_ROLES = ("admin", "user")
     response_model_by_alias=False,
     status_code=status.HTTP_202_ACCEPTED,
     summary="提交知识提取任务（202）",
+    dependencies=[Depends(require_llm_credential)],
 )
 async def extract_knowledge(
     datasource_id: uuid.UUID,

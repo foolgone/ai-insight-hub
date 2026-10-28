@@ -99,6 +99,7 @@ class CostTracker:
         datasource_id: uuid.UUID | None = None,
         agent_name: str | None = None,
         agent_version: str | None = None,
+        key_source: str = "server",
     ) -> LlmCall:
         """写入一次成功的 LLM 调用（幂等 upsert）。"""
         usage = response.usage
@@ -125,6 +126,7 @@ class CostTracker:
             "status": "success",
             "error_type": None,
             "error_message": None,
+            "key_source": key_source,
         }
         row = await self._upsert(values)
         record_llm_call(
@@ -151,6 +153,7 @@ class CostTracker:
         agent_name: str | None = None,
         agent_version: str | None = None,
         duration_seconds: float | None = None,
+        key_source: str = "server",
     ) -> LlmCall:
         """把失败写回同一幂等键对应的行（D-03：按 task_id + 真实 attempt 回写）。"""
         zero = Decimal("0").quantize(_COST_QUANT)
@@ -176,6 +179,7 @@ class CostTracker:
             "status": "failed",
             "error_type": type(error).__name__,
             "error_message": str(error)[:1000],
+            "key_source": key_source,
         }
         row = await self._upsert(values)
         record_llm_call(
@@ -201,6 +205,7 @@ class CostTracker:
             "status",
             "error_type",
             "error_message",
+            "key_source",
         ]
         stmt: Any = pg_insert(LlmCall).values(**values)
         stmt = stmt.on_conflict_do_update(
@@ -212,13 +217,23 @@ class CostTracker:
         return row
 
     async def get_daily_cost(
-        self, *, user_id: uuid.UUID | None = None, now: datetime | None = None
+        self,
+        *,
+        user_id: uuid.UUID | None = None,
+        now: datetime | None = None,
+        only_server_key: bool = True,
     ) -> Decimal:
-        """当日（UTC）成功调用成本合计。"""
+        """当日（UTC）成功调用成本合计。
+
+        BYOK 成本隔离：默认只统计 ``key_source='server'``（用户自付的调用不触发降级）；
+        用量报表用 ``get_usage_stats``，不过滤来源。
+        """
         stmt = select(func.coalesce(func.sum(LlmCall.total_cost), 0)).where(
             LlmCall.status == "success",
             LlmCall.created_at >= _day_start(now),
         )
+        if only_server_key:
+            stmt = stmt.where(LlmCall.key_source == "server")
         if user_id is not None:
             stmt = stmt.where(LlmCall.user_id == user_id)
         value = await self._session.scalar(stmt)

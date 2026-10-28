@@ -8,7 +8,7 @@ from pathlib import Path
 from fastapi import APIRouter, Depends, File, Query, UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import require_roles
+from app.api.deps import require_llm_credential, require_roles
 from app.api.pagination import PaginationParams
 from app.core.config import settings
 from app.core.database import get_db
@@ -155,6 +155,7 @@ def _allowed_extensions() -> set[str]:
     response_model=UploadResponse,
     response_model_by_alias=False,
     summary="上传数据文件并自动入队清洗（202 + task_id）",
+    dependencies=[Depends(require_llm_credential)],
 )
 async def upload_file(
     datasource_id: uuid.UUID,
@@ -254,6 +255,7 @@ async def upload_file(
     response_model=CleanResponse,
     response_model_by_alias=False,
     summary="触发数据清洗（202 + task_id；同数据源同类任务在跑返回 409）",
+    dependencies=[Depends(require_llm_credential)],
 )
 async def clean_datasource(
     datasource_id: uuid.UUID,

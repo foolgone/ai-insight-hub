@@ -53,6 +53,11 @@ jobs:
       E2E_BROWSER_CHANNEL: chromium
       E2E_BASE_URL: http://127.0.0.1:5173
       E2E_API_ORIGIN: http://127.0.0.1:8000
+      # BYOK：E2E 无真实 Key，开启服务端 Key 回退保持既有链路
+      BYOK_ENABLED: "true"
+      ALLOW_SERVER_KEY_FALLBACK: "true"
+      CREDENTIAL_ENCRYPTION_KEY: "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
+      SEED_DEMO_PASSWORD: "demo123"
       # Vite 代理 target 为 localhost:8000；强制 IPv4 优先，避免 Node 20 解析到 ::1
       NODE_OPTIONS: --dns-result-order=ipv4first
     steps:

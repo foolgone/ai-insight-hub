@@ -30,7 +30,8 @@ from app.core.config import settings
 from app.core.cost_tracker import CostTracker, compute_cost
 from app.core.degradation import DegradationLevel
 from app.core.degradation_manager import DegradationManager
-from app.core.llm import LLMClient, LLMResponse, LLMUsage, Message
+from app.core.exceptions import LLMCredentialInvalidError, LLMCredentialNotConfiguredError
+from app.core.llm import LLMAuthenticationError, LLMClient, LLMResponse, LLMUsage, Message
 from app.core.metrics import record_agent_invocation
 from app.core.retry_config import RetryConfig
 from app.utils.retry import async_retry
@@ -174,6 +175,29 @@ class BaseAgent(ABC):
         token_usage = {"input": 0, "output": 0}
         guard_hits: list[str] = []
 
+        # ── BYOK：解析本次调用使用的凭据（必须在 try 之外，异常向上冒泡） ──
+        # 只有"有 user_id + session"且未开 fallback 时才要求用户 Key；
+        # session 为 None 的 POC/单测路径保持现状（走 self.llm）。
+        byok_key: str | None = None
+        agent_llm = self.llm
+        if not settings.ALLOW_SERVER_KEY_FALLBACK and user_id is not None and session is not None:
+            # 延迟 import，避免 agents 与 services 的模块级循环依赖
+            from app.services.credential_service import credential_service
+
+            credential = await credential_service.get_credential(session, user_id)
+            if credential is None:
+                raise LLMCredentialNotConfiguredError()
+            if credential.status != "active":
+                raise LLMCredentialInvalidError()
+            byok_key = credential_service.decrypt_credential(credential)
+            agent_llm = LLMClient(
+                model=self.config.model,
+                timeout=self.config.timeout,
+                api_key=byok_key,
+            )
+        # ── END BYOK ──
+        key_source = "user" if byok_key is not None else "server"
+
         try:
             # 输入来自用户数据（不可信）：先中和显式 Prompt 注入，再校验/组装 messages
             sanitized_input, guard_hits = neutralize_payload(input_data)
@@ -203,7 +227,7 @@ class BaseAgent(ABC):
             async def _call(attempt: int) -> LLMResponse:
                 nonlocal attempts
                 attempts = attempt
-                response = await self.llm.chat(
+                response = await agent_llm.chat(
                     messages,
                     model=model,
                     temperature=self.config.temperature,
@@ -220,7 +244,7 @@ class BaseAgent(ABC):
                 payload = await _parse_structured(
                     self.output_schema,
                     text=response.content,
-                    llm=self.llm,
+                    llm=agent_llm,
                     usage_collector=repair_usage,
                 )
             data = self._validate_output(payload)
@@ -260,6 +284,7 @@ class BaseAgent(ABC):
                 user_id=user_id,
                 datasource_id=datasource_id,
                 duration=duration,
+                key_source=key_source,
             )
             record_agent_invocation(
                 agent=self.config.name, status="success", duration_seconds=duration
@@ -282,7 +307,23 @@ class BaseAgent(ABC):
                 user_id=user_id,
                 datasource_id=datasource_id,
                 duration=duration,
+                key_source=key_source,
             )
+
+            # ── BYOK：用户 Key 失效 → 幂等标记 invalid，抛可读错误（不回退服务端 Key） ──
+            if (
+                isinstance(exc, LLMAuthenticationError)
+                and byok_key is not None
+                and user_id is not None
+            ):
+                from app.services.credential_service import credential_service
+
+                await credential_service.mark_invalid(user_id)
+                record_agent_invocation(
+                    agent=self.config.name, status="failed", duration_seconds=duration
+                )
+                raise LLMCredentialInvalidError() from exc
+
             record_agent_invocation(
                 agent=self.config.name, status="failed", duration_seconds=duration
             )
@@ -319,6 +360,7 @@ class BaseAgent(ABC):
         user_id: uuid.UUID | None,
         datasource_id: uuid.UUID | None,
         duration: float,
+        key_source: str = "server",
     ) -> None:
         if session is None or not settings.LLM_CALL_LOG_ENABLED:
             return
@@ -337,6 +379,7 @@ class BaseAgent(ABC):
                 datasource_id=datasource_id,
                 agent_name=self.config.name,
                 agent_version=self.config.version,
+                key_source=key_source,
             )
         except Exception as exc:  # noqa: BLE001 - 追踪失败不应影响业务结果
             logger.opt(exception=exc).error("cost tracking failed")
@@ -352,6 +395,7 @@ class BaseAgent(ABC):
         user_id: uuid.UUID | None,
         datasource_id: uuid.UUID | None,
         duration: float,
+        key_source: str = "server",
     ) -> None:
         if session is None or not settings.LLM_CALL_LOG_ENABLED:
             return
@@ -366,6 +410,7 @@ class BaseAgent(ABC):
                 agent_name=self.config.name,
                 agent_version=self.config.version,
                 duration_seconds=duration,
+                key_source=key_source,
             )
         except Exception as exc:  # noqa: BLE001
             logger.opt(exception=exc).error("failure tracking failed")

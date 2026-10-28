@@ -6,7 +6,7 @@ import uuid
 from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import require_roles
+from app.api.deps import require_llm_credential, require_roles
 from app.api.pagination import PaginationParams
 from app.core.database import get_db
 from app.models import User
@@ -41,6 +41,7 @@ MAX_ESTIMATED_RECORDS = 100
     response_model_by_alias=False,
     status_code=status.HTTP_202_ACCEPTED,
     summary="提交质量评估任务（202）",
+    dependencies=[Depends(require_llm_credential)],
 )
 async def analyze_quality(
     datasource_id: uuid.UUID,
@@ -145,6 +146,7 @@ async def review_quality_analysis(
     response_model_by_alias=False,
     status_code=status.HTTP_202_ACCEPTED,
     summary="提交洞察分析任务（202）",
+    dependencies=[Depends(require_llm_credential)],
 )
 async def analyze_insights(
     datasource_id: uuid.UUID,

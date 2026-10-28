@@ -56,6 +56,11 @@ jobs:
         env:
           DATABASE_URL: postgresql://aiinsight:dev_password@localhost:5432/aiinsight_test
           REDIS_URL: redis://localhost:6379/0
+          # BYOK：CI 无真实 Key，存量用例依赖 fallback=true 保持 202 行为
+          BYOK_ENABLED: "true"
+          ALLOW_SERVER_KEY_FALLBACK: "true"
+          CREDENTIAL_ENCRYPTION_KEY: "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
+          SEED_DEMO_PASSWORD: "demo123"
         run: pytest -m "not prompt" --cov=app --cov-report=term-missing --cov-fail-under=80
       - name: 代码质量
         run: |

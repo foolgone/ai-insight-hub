@@ -13,8 +13,11 @@ from collections.abc import Callable
 from fastapi import Depends, Header
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import settings
 from app.core.database import get_db
 from app.core.exceptions import (
+    LLMCredentialInvalidError,
+    LLMCredentialNotConfiguredError,
     PermissionDeniedError,
     TokenExpiredError,
     UserNotFoundError,
@@ -22,6 +25,7 @@ from app.core.exceptions import (
 from app.core.redis import is_token_blacklisted
 from app.core.security import decode_token
 from app.models import User
+from app.services.credential_service import credential_service
 
 
 async def get_token_payload(
@@ -74,9 +78,30 @@ def assert_owner(resource_user_id: uuid.UUID | None, current_user: User) -> None
         raise PermissionDeniedError("Access to another user's resource is forbidden")
 
 
+async def require_llm_credential(
+    user: User = Depends(get_current_user),
+    session: AsyncSession = Depends(get_db),
+) -> User:
+    """BYOK 守门（AI 触发端点专用）。
+
+    - ``ALLOW_SERVER_KEY_FALLBACK=true``（开发/CI）→ 放行，行为与现状一致；
+    - 无凭据 → 428 ``LLM_CREDENTIAL_NOT_CONFIGURED``（不入队、不发 LLM）；
+    - 凭据已标记 invalid → 400 ``LLM_CREDENTIAL_INVALID``（引导更新）。
+    """
+    if settings.ALLOW_SERVER_KEY_FALLBACK:
+        return user
+    credential = await credential_service.get_credential(session, user.id)
+    if credential is None:
+        raise LLMCredentialNotConfiguredError()
+    if credential.status != "active":
+        raise LLMCredentialInvalidError()
+    return user
+
+
 __all__ = [
     "assert_owner",
     "get_current_user",
     "get_token_payload",
+    "require_llm_credential",
     "require_roles",
 ]
