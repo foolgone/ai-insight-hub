@@ -37,6 +37,7 @@ from app.models import (  # noqa: E402
     Report,
     User,
 )
+from app.services import storage_service  # noqa: E402
 
 DEMO_EMAIL = "demo@example.com"
 DEMO_DATASOURCE_ID = uuid.UUID("00000000-0000-0000-0000-000000000010")
@@ -196,6 +197,20 @@ async def _seed_report(session, user: User, datasource: DataSource) -> None:
     report_id = uuid.uuid5(DEMO_DATASOURCE_ID, "report-comprehensive-1")
     if await session.get(Report, report_id) is not None:
         return
+
+    markdown = (
+        "# 电商客服质量综合报告（示例）\n\n"
+        "## 质量概览\n\n平均 83.7 分，好评率 67%。\n\n"
+        "## 主要问题\n\n退款时效表述模糊；发票类问题缺少标准答案。\n\n"
+        "## 建议\n\n补充退款时效 FAQ；将专票问题纳入知识库。\n"
+    )
+    # 同时落一份文件，保证报告页面「下载」可用（MinIO 不可用时自动回退本地）
+    stored = storage_service.save_bytes(
+        markdown.encode(),
+        object_name=f"reports/{report_id}.md",
+        content_type="text/markdown",
+    )
+
     session.add(
         Report(
             id=report_id,
@@ -205,6 +220,8 @@ async def _seed_report(session, user: User, datasource: DataSource) -> None:
             report_type="comprehensive",
             format="markdown",
             status="completed",
+            file_path=stored.object_name,
+            file_size=stored.size,
             data={
                 "summary": "整体质量 83.7 分；退款时效与专票问答为主要短板。",
                 "sections": [
