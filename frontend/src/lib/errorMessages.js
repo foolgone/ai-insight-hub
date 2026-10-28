@@ -20,6 +20,9 @@ const MESSAGES = {
   REPORT_FORMAT_INVALID: '报告类型或格式不受支持',
   INSUFFICIENT_CREDITS: '当日/当月成本额度已用尽',
   RATE_LIMIT_EXCEEDED: '请求过于频繁，请稍后再试',
+  LLM_CREDENTIAL_NOT_CONFIGURED: '请先配置自己的 API Key 后再使用 AI 功能',
+  LLM_CREDENTIAL_INVALID: 'API Key 无效或已失效，请更新',
+  LLM_CREDENTIAL_DECRYPT_FAILED: '凭据解密失败，请联系管理员重新配置',
   INTERNAL_ERROR: '服务器异常，请稍后重试',
 }
 

@@ -1,9 +1,10 @@
 import { Outlet } from 'react-router-dom'
 import { Header } from './Header'
 import { Sidebar } from './Sidebar'
+import { APIKeyModalHost } from '../APIKeyModal'
 
 /**
- * 应用主布局（03 §1.1）：Header + Sidebar + 内容区。
+ * 应用主布局（03 §1.1）：Header + Sidebar + 内容区 + 全局凭据弹窗宿主（BYOK D11）。
  */
 export function AppLayout() {
   return (
@@ -17,6 +18,7 @@ export function AppLayout() {
           </div>
         </main>
       </div>
+      <APIKeyModalHost />
     </div>
   )
 }

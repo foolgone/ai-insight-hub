@@ -2,6 +2,7 @@ import axios from 'axios'
 import { API_PREFIX, endpoints } from './endpoints'
 import { getAccessToken, setAccessToken } from '../lib/token'
 import { clearAuth, loadAuth } from '../lib/authStorage'
+import { openCredentialModal } from '../lib/credentialGate'
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || API_PREFIX
 
@@ -108,6 +109,11 @@ apiClient.interceptors.response.use(
       unauthorizedHandler()
     }
 
-    return Promise.reject(normalizeError(error))
+    const normalized = normalizeError(error)
+    // BYOK：未配置 Key 触发 AI 操作 → 全局打开凭据设置弹窗（D11）
+    if (normalized.code === 'LLM_CREDENTIAL_NOT_CONFIGURED') {
+      openCredentialModal()
+    }
+    return Promise.reject(normalized)
   }
 )

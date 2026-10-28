@@ -4,6 +4,7 @@ import { Button } from '../../components/Button'
 import { Checkbox } from '../../components/Checkbox'
 import { Input } from '../../components/Input'
 import { useAuth } from '../../hooks/useAuth'
+import { DEMO_ACCOUNT } from '../../lib/demoAccount'
 import { getErrorMessage } from '../../lib/errorMessages'
 import { notify } from '../../lib/toast'
 
@@ -18,6 +19,12 @@ export default function Login() {
   const [remember, setRemember] = useState(true)
   const [errors, setErrors] = useState({})
   const [submitting, setSubmitting] = useState(false)
+
+  const prefillDemo = () => {
+    setForm({ email: DEMO_ACCOUNT.email, password: DEMO_ACCOUNT.password })
+    setErrors({})
+    // 不自动提交：让访客自己点登录
+  }
 
   const updateField = (field, value) => {
     setForm(current => ({ ...current, [field]: value }))
@@ -129,6 +136,15 @@ export default function Login() {
         <p className="mt-6 text-center text-xs text-gray-500">
           账号由管理员创建，MVP 不提供注册与找回密码
         </p>
+
+        <div className="mt-3 flex items-center justify-between rounded bg-gray-50 px-3 py-2 text-xs text-gray-600">
+          <span>
+            体验账号：{DEMO_ACCOUNT.email} / {DEMO_ACCOUNT.password}
+          </span>
+          <button type="button" className="text-primary-600 hover:underline" onClick={prefillDemo}>
+            点击预填
+          </button>
+        </div>
       </main>
     </div>
   )

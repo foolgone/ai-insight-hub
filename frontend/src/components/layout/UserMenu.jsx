@@ -1,7 +1,9 @@
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
 import { useNavigate } from 'react-router-dom'
-import { LuLogOut } from 'react-icons/lu'
+import { LuKey, LuLogOut } from 'react-icons/lu'
 import { useAuth } from '../../hooks/useAuth'
+import { useCredentialStatusQuery } from '../../hooks/useLlmCredential'
+import { useCredentialGate } from '../../lib/credentialGate'
 import { notify } from '../../lib/toast'
 
 const ROLE_LABELS = {
@@ -16,11 +18,15 @@ const ROLE_LABELS = {
 export function UserMenu() {
   const navigate = useNavigate()
   const { user, logout } = useAuth()
+  const openCredentialModal = useCredentialGate(state => state.openModal)
+  const { data: credentialStatus } = useCredentialStatusQuery({ enabled: Boolean(user) })
 
   if (!user) return null
 
   const displayName = user.name || user.email
   const roleLabel = ROLE_LABELS[user.role] || user.role
+  // 后端关闭 BYOK 时隐藏入口（默认显示，功能由后端守门兜底）
+  const showCredentialEntry = credentialStatus?.byok_enabled !== false
 
   const handleLogout = async () => {
     await logout()
@@ -61,6 +67,15 @@ export function UserMenu() {
               <p className="mt-0.5 truncate text-xs text-gray-400">{user.email}</p>
             ) : null}
           </div>
+          {showCredentialEntry ? (
+            <DropdownMenu.Item
+              onSelect={openCredentialModal}
+              className="flex cursor-pointer items-center gap-2 rounded px-3 py-2 text-sm text-gray-700 outline-none focus:bg-gray-100"
+            >
+              <LuKey className="h-4 w-4" aria-hidden="true" />
+              API Key 管理
+            </DropdownMenu.Item>
+          ) : null}
           <DropdownMenu.Item
             onSelect={handleLogout}
             className="flex cursor-pointer items-center gap-2 rounded px-3 py-2 text-sm text-error-600 outline-none focus:bg-error-50"
