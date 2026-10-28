@@ -103,20 +103,18 @@ async def test_verify_failure_returns_400_and_not_saved(client, auth_headers, mo
 
 
 async def test_trigger_endpoint_returns_428_without_key(client, auth_headers):
-    response = await client.post(
-        f"/api/v1/datasources/{uuid.uuid4()}/clean", headers=auth_headers
-    )
+    response = await client.post(f"/api/v1/datasources/{uuid.uuid4()}/clean", headers=auth_headers)
     assert response.status_code == 428
     assert response.json()["error"]["code"] == "LLM_CREDENTIAL_NOT_CONFIGURED"
 
 
 async def test_audit_written_without_secret(client, auth_headers, db_session, test_user):
-    await client.put(
-        "/api/v1/users/me/llm-credential", json={"api_key": KEY}, headers=auth_headers
-    )
+    await client.put("/api/v1/users/me/llm-credential", json={"api_key": KEY}, headers=auth_headers)
     rows = (
-        await db_session.execute(select(AuditLog).where(AuditLog.user_id == test_user.id))
-    ).scalars().all()
+        (await db_session.execute(select(AuditLog).where(AuditLog.user_id == test_user.id)))
+        .scalars()
+        .all()
+    )
     actions = {row.action for row in rows}
     assert "credential_configured" in actions
     for row in rows:

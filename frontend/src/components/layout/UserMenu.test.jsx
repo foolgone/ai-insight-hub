@@ -13,6 +13,11 @@ vi.mock('../../api/auth', () => ({
   fetchCurrentUser: vi.fn(),
 }))
 
+// BYOK 入口依赖凭据状态查询：测试里直接 mock，避免引入 QueryClientProvider
+vi.mock('../../hooks/useLlmCredential', () => ({
+  useCredentialStatusQuery: () => ({ data: { byok_enabled: true } }),
+}))
+
 const ADMIN = { id: 'u1', email: 'admin@example.com', name: '张三', role: 'admin' }
 
 function renderMenu() {
