@@ -27,7 +27,8 @@ _pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 def upgrade() -> None:
-    password = os.getenv("SEED_DEMO_PASSWORD", DEFAULT_DEMO_PASSWORD)
+    # 空字符串也回落到默认值（避免 SEED_DEMO_PASSWORD= 造成"空密码"演示账号）
+    password = os.getenv("SEED_DEMO_PASSWORD") or DEFAULT_DEMO_PASSWORD
     password_hash = _pwd_context.hash(password)
     op.get_bind().execute(
         sa.text(
