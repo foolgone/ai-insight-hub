@@ -162,6 +162,7 @@ grafana_data/
 
 # Playwright E2E 产物与测试凭据
 frontend/e2e/.auth/
+frontend/e2e/.artifacts/
 frontend/test-results/
 frontend/playwright-report/
 frontend/blob-report/
