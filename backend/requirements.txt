@@ -42,6 +42,8 @@ boto3==1.34.28
 
 # 认证
 python-jose[cryptography]==3.3.0
+# BYOK 凭据加密（Fernet）；显式声明，勿只依赖 python-jose 的 extras 间接带入
+cryptography==50.0.2
 passlib[bcrypt]==1.7.4
 # passlib 1.7.4 与 bcrypt>=4.1 不兼容（__about__ 已移除），显式锁定
 bcrypt==4.0.1

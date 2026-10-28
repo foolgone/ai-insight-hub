@@ -1,7 +1,7 @@
 """错误码与统一错误响应（API 设计 §3.4 / §12）。
 
 约定：
-- **业务错误码严格取自 API §12.2 的 25 条，不得自造**；
+- **业务错误码严格取自 API §12.2 的 28 条，不得自造**；
 - 框架层错误（Pydantic 校验失败、未映射的路由/方法错误）使用 ``FrameworkErrorCode``，
   它们不属于业务错误码，仅用于保证错误响应结构统一；
 - 统一响应体：``{"error": {"code": ..., "message": ..., "details": {...}}}``。
@@ -22,7 +22,7 @@ from app.core.sentry import capture_exception
 
 
 class ErrorCode(str, Enum):
-    """业务错误码（API §12.2，共 25 条，不得自造）。"""
+    """业务错误码（API §12.2，共 28 条，不得自造）。"""
 
     # 401
     AUTH_INVALID_CREDENTIALS = "AUTH_INVALID_CREDENTIALS"
@@ -56,6 +56,10 @@ class ErrorCode(str, Enum):
     # 401 / 403（API Key，Phase 2）
     API_KEY_INVALID = "API_KEY_INVALID"
     API_KEY_SCOPE_DENIED = "API_KEY_SCOPE_DENIED"
+    # 428 / 400 / 500（BYOK：用户自带 LLM API Key，需求 §7）
+    LLM_CREDENTIAL_NOT_CONFIGURED = "LLM_CREDENTIAL_NOT_CONFIGURED"
+    LLM_CREDENTIAL_INVALID = "LLM_CREDENTIAL_INVALID"
+    LLM_CREDENTIAL_DECRYPT_FAILED = "LLM_CREDENTIAL_DECRYPT_FAILED"
     # 500
     INTERNAL_ERROR = "INTERNAL_ERROR"
 
@@ -93,6 +97,9 @@ ERROR_STATUS: dict[ErrorCode | FrameworkErrorCode, int] = {
     ErrorCode.RATE_LIMIT_EXCEEDED: 429,
     ErrorCode.DATASOURCE_QUOTA_EXCEEDED: 429,
     ErrorCode.INSUFFICIENT_CREDITS: 429,
+    ErrorCode.LLM_CREDENTIAL_NOT_CONFIGURED: 428,
+    ErrorCode.LLM_CREDENTIAL_INVALID: 400,
+    ErrorCode.LLM_CREDENTIAL_DECRYPT_FAILED: 500,
     ErrorCode.INTERNAL_ERROR: 500,
 }
 

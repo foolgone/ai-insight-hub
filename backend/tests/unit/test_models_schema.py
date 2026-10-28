@@ -23,6 +23,7 @@ EXPECTED_TABLES = {
     "prompt_usage_logs",
     "version_rollback_logs",
     "llm_calls",
+    "user_llm_credentials",
 }
 
 
@@ -30,9 +31,9 @@ def _table(name: str):
     return Base.metadata.tables[name]
 
 
-def test_all_15_tables_registered() -> None:
+def test_all_tables_registered() -> None:
     assert set(Base.metadata.tables) == EXPECTED_TABLES
-    assert len(Base.metadata.tables) == 15
+    assert len(Base.metadata.tables) == 16
 
 
 @pytest.mark.parametrize(

@@ -148,6 +148,20 @@ class Settings(BaseSettings):
     MAX_UPLOAD_SIZE_MB: int = 50
     ALLOWED_UPLOAD_EXTENSIONS: str = "csv,json,xlsx,txt"
 
+    # ---------------- BYOK：用户自带 LLM API Key ----------------
+    # 总开关；false 时忽略用户凭据、隐藏前端入口（回退现状：服务端 Key）
+    BYOK_ENABLED: bool = True
+    # 32 字节 base64 Fernet 密钥；缺失/非法时拒绝保存与解密（fail closed，不退化为明文）
+    # 生成：python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+    CREDENTIAL_ENCRYPTION_KEY: str = ""
+    # 仅开发/CI/E2E：无用户 Key 时回退服务端 DEEPSEEK_API_KEY；生产必须 false
+    # 设为 true 即为 BYOK 的整体回滚开关（行为回到"全部用服务端 Key"）
+    ALLOW_SERVER_KEY_FALLBACK: bool = False
+    # verify 端点限流（次/分钟/用户）
+    LLM_CREDENTIAL_VERIFY_PER_MINUTE: int = 5
+    # demo 账号种子密码（迁移 011 使用；生产用 Secrets 覆盖）
+    SEED_DEMO_PASSWORD: str = "demo123"
+
 
 @lru_cache
 def get_settings() -> Settings:

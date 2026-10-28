@@ -51,18 +51,21 @@ BUSINESS_CODES = {
     "API_KEY_INVALID",
     "API_KEY_SCOPE_DENIED",
     "WEBHOOK_NOT_FOUND",
+    "LLM_CREDENTIAL_NOT_CONFIGURED",
+    "LLM_CREDENTIAL_INVALID",
+    "LLM_CREDENTIAL_DECRYPT_FAILED",
     "INTERNAL_ERROR",
 }
 
 
 def test_business_codes_match_api_design_exactly() -> None:
     assert {code.value for code in ErrorCode} == BUSINESS_CODES
-    assert len(ErrorCode) == 25
+    assert len(ErrorCode) == 28
 
 
 def test_error_status_covers_all_business_codes() -> None:
     assert set(ERROR_STATUS) == set(ErrorCode)
-    assert set(ERROR_STATUS.values()) <= {401, 403, 404, 409, 413, 415, 422, 429, 500}
+    assert set(ERROR_STATUS.values()) <= {400, 401, 403, 404, 409, 413, 415, 422, 428, 429, 500}
 
 
 def test_error_payload_shape() -> None:
@@ -90,7 +93,7 @@ def test_exception_classes_map_to_business_codes(name: str) -> None:
     assert issubclass(cls, AIInsightHubException)
     instance = cls()
     assert instance.code in ERROR_STATUS
-    assert instance.status_code in {401, 403, 404, 409, 413, 415, 422, 429, 500}
+    assert instance.status_code in {400, 401, 403, 404, 409, 413, 415, 422, 428, 429, 500}
     assert instance.message
 
 

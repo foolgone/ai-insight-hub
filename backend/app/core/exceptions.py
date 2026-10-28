@@ -166,6 +166,28 @@ class InsufficientCreditsError(AIInsightHubException):
     default_message = "Cost quota exhausted"
 
 
+# --------------------------------------------------------------------------- BYOK 凭据
+class LLMCredentialNotConfiguredError(AIInsightHubException):
+    """未配置用户 Key 且未开启 fallback（428）。"""
+
+    code = ErrorCode.LLM_CREDENTIAL_NOT_CONFIGURED
+    default_message = "请先配置您自己的 DeepSeek API Key"
+
+
+class LLMCredentialInvalidError(AIInsightHubException):
+    """Key 格式非法 / 连通性校验失败 / 已标记 invalid（400）。"""
+
+    code = ErrorCode.LLM_CREDENTIAL_INVALID
+    default_message = "API Key 无效或已失效，请更新后再试"
+
+
+class LLMCredentialDecryptError(AIInsightHubException):
+    """加密密钥缺失/非法，或密文无法解密（500）。"""
+
+    code = ErrorCode.LLM_CREDENTIAL_DECRYPT_FAILED
+    default_message = "凭据解密失败，加密密钥可能已更换"
+
+
 # --------------------------------------------------------------------------- 内部错误
 class InternalError(AIInsightHubException):
     code = ErrorCode.INTERNAL_ERROR
@@ -186,6 +208,9 @@ __all__ = [
     "FileTooLargeError",
     "InsufficientCreditsError",
     "InternalError",
+    "LLMCredentialDecryptError",
+    "LLMCredentialInvalidError",
+    "LLMCredentialNotConfiguredError",
     "PermissionDeniedError",
     "RateLimitExceededError",
     "RefreshTokenInvalidError",

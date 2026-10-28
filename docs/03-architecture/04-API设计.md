@@ -484,6 +484,41 @@ GET /api/v1/datasources?status=active&type=customer_service
 
 ---
 
+### 4.4 用户自带 LLM API Key（BYOK）
+
+> 端点固定 `/users/me`，不接受任何 `user_id` 参数；admin 也只能读写自己的凭据。
+> 响应**永不返回**明文或密文，只回 `key_hint`（前 5 位 + `…` + 后 4 位）。
+
+#### 4.4.1 保存（或覆盖）凭据
+
+**PUT** `/api/v1/users/me/llm-credential`
+
+**请求体**：
+```json
+{ "api_key": "sk-xxxxxxxxxxxxxxxx", "base_url": null, "model": null }
+```
+
+- 保存前**强制**调用一次 LLM 做连通性校验（`max_tokens=1`），失败不入库；
+- 非空 `base_url` 直接 `400`（Phase 1 仅支持 DeepSeek 官方端点，SSRF 防护）；
+- `CREDENTIAL_ENCRYPTION_KEY` 缺失/非法 → `500`，且不落任何明文。
+
+**响应**：
+```json
+{ "configured": true, "provider": "deepseek", "key_hint": "sk-x…a1b2", "status": "active", "verified_at": "2026-10-28T12:00:00" }
+```
+
+#### 4.4.2 查询状态
+
+**GET** `/api/v1/users/me/llm-credential` → 同上；未配置时返回 `{ "configured": false }`。
+
+#### 4.4.3 删除
+
+**DELETE** `/api/v1/users/me/llm-credential` → `204`；删除后 AI 触发端点恢复 `428`。
+
+**说明**：不提供独立 `POST /verify`——前端只有"验证并保存"一个入口（需求 D4）。
+
+---
+
 ## 5. 数据源管理
 
 ### 5.1 创建数据源
@@ -1686,6 +1721,7 @@ data: {"items":[{"id":"...","task_type":"clean","status":"running","progress":45
 | 413 | 上传文件过大 |
 | 415 | 上传文件格式不支持 |
 | 422 | 请求体校验失败 |
+| 428 | 请求需要先满足前置条件（未配置用户 LLM 凭据，BYOK） |
 | 429 | 请求过于频繁 / 配额或成本额度超限 |
 | 500 | 服务器内部错误 |
 | 503 | 服务不可用 |
@@ -1720,6 +1756,9 @@ data: {"items":[{"id":"...","task_type":"clean","status":"running","progress":45
 | `API_KEY_INVALID` | 401 | API Key 无效/已吊销/已过期 | Phase 2 |
 | `API_KEY_SCOPE_DENIED` | 403 | API Key 作用域不足 | Phase 2 |
 | `WEBHOOK_NOT_FOUND` | 404 | Webhook 配置不存在 | `/api/v1/webhooks`、`/api/v1/webhooks/{id}`（Phase 2） |
+| `LLM_CREDENTIAL_NOT_CONFIGURED` | 428 | 未配置用户自带 LLM Key（且未开启 `ALLOW_SERVER_KEY_FALLBACK`） | `.../upload`、`.../clean`、`.../analyze/quality`、`.../analyze/insights`、`.../extract-knowledge`、`.../reports` |
+| `LLM_CREDENTIAL_INVALID` | 400 | Key 格式非法 / 连通性校验失败 / 已被标记失效 | `PUT/GET /api/v1/users/me/llm-credential`、上述 6 个触发端点 |
+| `LLM_CREDENTIAL_DECRYPT_FAILED` | 500 | 加密密钥缺失或密文无法解密（fail closed） | `PUT/GET /api/v1/users/me/llm-credential`、Agent 调用 |
 | `INTERNAL_ERROR` | 500 | 服务器内部错误 | 全部 |
 
 ---
