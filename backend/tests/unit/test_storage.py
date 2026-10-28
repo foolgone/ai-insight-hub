@@ -65,3 +65,45 @@ def test_minio_strict_mode_raises(tmp_path: Path, monkeypatch) -> None:
 
     with pytest.raises(ConnectionError):
         storage_service.save_upload(b"fail", datasource_id="ds-4", filename="a.txt")
+
+
+def test_auto_read_prefers_local_when_present(tmp_path: Path, monkeypatch) -> None:
+    """MinIO 不可用时写入本地的对象，auto 读取应直接命中本地（不访问 MinIO）。"""
+    monkeypatch.setattr(settings, "STORAGE_BACKEND", "auto")
+    monkeypatch.setattr(settings, "STORAGE_LOCAL_DIR", str(tmp_path))
+    target = tmp_path / "reports" / "r1.md"
+    target.parent.mkdir(parents=True)
+    target.write_bytes(b"local-report")
+
+    def _unexpected_minio():
+        raise AssertionError("auto 读取本地命中时不应访问 MinIO")
+
+    monkeypatch.setattr(storage_service, "_minio_client", _unexpected_minio)
+
+    assert storage_service.read_bytes("reports/r1.md") == b"local-report"
+
+
+def test_auto_read_falls_back_to_minio_when_local_missing(tmp_path: Path, monkeypatch) -> None:
+    """对象当初写入 MinIO（本地无副本）时，auto 读取应回退到 MinIO。"""
+    monkeypatch.setattr(settings, "STORAGE_BACKEND", "auto")
+    monkeypatch.setattr(settings, "STORAGE_LOCAL_DIR", str(tmp_path))
+
+    class _Response:
+        def read(self) -> bytes:
+            return b"minio-report"
+
+        def close(self) -> None:
+            ...
+
+        def release_conn(self) -> None:
+            ...
+
+    class _Client:
+        def get_object(self, bucket: str, object_name: str) -> _Response:
+            assert bucket == settings.MINIO_BUCKET_UPLOADS
+            assert object_name == "reports/r2.md"
+            return _Response()
+
+    monkeypatch.setattr(storage_service, "_minio_client", lambda: _Client())
+
+    assert storage_service.read_bytes("reports/r2.md") == b"minio-report"

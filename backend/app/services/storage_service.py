@@ -116,9 +116,20 @@ def save_upload(
 
 
 def read_upload(object_name: str, *, backend: str | None = None) -> bytes:
-    """读取已存储文件（本地回退实现；MinIO 读取待 B-313 清洗链路使用）。"""
+    """读取已存储文件。
+
+    - ``backend='minio'``：只读 MinIO；
+    - ``backend='local'``：只读本地；
+    - ``auto``（默认）：本地存在则读本地（MinIO 不可用时的回退产物），
+      本地不存在则读 MinIO（对象当初成功写入了 MinIO）。
+    """
     selected = (backend or settings.STORAGE_BACKEND or "auto").lower()
-    if selected == "minio":
+    local_path = Path(settings.STORAGE_LOCAL_DIR).resolve() / object_name
+
+    if selected == "local" or (selected == "auto" and local_path.is_file()):
+        return local_path.read_bytes()
+
+    if selected in ("minio", "auto"):
         bucket = settings.MINIO_BUCKET_UPLOADS
         response = _minio_client().get_object(bucket, object_name)
         try:
@@ -126,7 +137,8 @@ def read_upload(object_name: str, *, backend: str | None = None) -> bytes:
         finally:
             response.close()
             response.release_conn()
-    return (Path(settings.STORAGE_LOCAL_DIR).resolve() / object_name).read_bytes()
+
+    raise FileNotFoundError(f"存储对象不存在：{object_name}")
 
 
 def save_bytes(
