@@ -1,6 +1,7 @@
 """B-304 文件解析器测试（CSV/JSON/XLSX/TXT）。"""
 from __future__ import annotations
 
+import json
 from io import BytesIO
 
 import pytest
@@ -60,6 +61,16 @@ def test_parse_xlsx() -> None:
     assert parsed.encoding is None
     assert parsed.record_count == 2
     assert parsed.records[0]["user_message"] == "你好"
+
+
+def test_parse_xlsx_raw_text_is_row_json() -> None:
+    """xlsx 没有原文：raw_text 必须是逐行 JSON，否则清洗 Agent 拿不到对话内容。"""
+    parsed = parse_upload(_xlsx_bytes(), "data.xlsx")
+
+    assert parsed.raw_text
+    rows = json.loads(parsed.raw_text)
+    assert rows[0]["user_message"] == "你好"
+    assert rows[1]["ai_response"] == "5999 元"
 
 
 def test_parse_txt() -> None:

@@ -459,6 +459,22 @@ class CleaningState(Enum):
     FAILED = "failed"
 ```
 
+> **实现说明（2026-11-05 与代码对齐）**
+>
+> - **去重实现**：使用 `app/agents/tools/cleaning_tools.detect_duplicates()`
+>   （`difflib.SequenceMatcher`，零依赖），不引入 scikit-learn/TF-IDF；
+>   阈值取 `CleaningConfig.dedup_threshold`（默认 0.95）。
+> - **去重口径**：相似度 ≥ 阈值的对话**保留记录、只打 `duplicate` 标签**（清洗阶段不删数据，
+>   与「宁低分不丢弃」一致）；完全相同对话的合并仍由 LLM 按 Prompt 规则处理，
+>   精确去重另由 `app/services/knowledge_dedup.py` 在知识提取阶段执行。
+> - **状态机落地**：由 `app/services/cleaning_service.py` 的 `_advance_state()` 驱动并校验，
+>   状态写入 `tasks.current_step`（格式 `<阶段> <i/n>`）；允许
+>   `pending → parsing → normalizing → deduplicating → validating → completed`，
+>   `validating` 可回到下一条的 `normalizing`，任一步异常 → `failed`，非法跳转直接抛错。
+> - **工具接线现状**：5 个工具中 `normalize_text` 已接入清洗输入预处理；
+>   `parse_csv` / `parse_json` / `extract_timestamp` 为可复用纯函数，当前由 LLM 直接解析，
+>   未做 tool-calling（ADR-001 后无框架工具循环）。
+
 ---
 
 #### 性能指标

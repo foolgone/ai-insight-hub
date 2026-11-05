@@ -26,12 +26,33 @@ from app.core.exceptions import (
     TaskAlreadyRunningError,
 )
 from app.models import CleanedData, DataSource, RawData, Task, User
-from app.schemas.agents.cleaning import CleaningConfig, CleaningInput
+from app.schemas.agents.cleaning import CleaningConfig, CleaningInput, CleaningState
 from app.schemas.base import Pagination
 
 ACTIVE_STATUSES = ("pending", "running")
 CLEAN_TASK_TYPE = "clean"
 DIALOGUE_NAMESPACE = uuid.UUID("6f1a6d1e-2b7f-4c5e-9a10-3c2b1d4e5f60")
+# 近似重复检测是 O(n²) 文本比较，超过该条数跳过（避免大文件把任务拖死）
+NEAR_DUP_MAX_ITEMS = 2000
+
+# 清洗状态机：6 态 + 失败，逐条记录循环（VALIDATING 后可回到下一条的 NORMALIZING）
+_ALLOWED_TRANSITIONS: dict[CleaningState, set[CleaningState]] = {
+    CleaningState.PENDING: {CleaningState.PARSING, CleaningState.FAILED},
+    CleaningState.PARSING: {CleaningState.NORMALIZING, CleaningState.FAILED},
+    CleaningState.NORMALIZING: {
+        CleaningState.DEDUPLICATING,
+        CleaningState.VALIDATING,  # 抽取失败时跳过去重，直接进入校验
+        CleaningState.FAILED,
+    },
+    CleaningState.DEDUPLICATING: {CleaningState.VALIDATING, CleaningState.FAILED},
+    CleaningState.VALIDATING: {
+        CleaningState.NORMALIZING,
+        CleaningState.COMPLETED,
+        CleaningState.FAILED,
+    },
+    CleaningState.COMPLETED: set(),
+    CleaningState.FAILED: set(),
+}
 
 _CLEANED_SORTABLE: dict[str, InstrumentedAttribute] = {
     "timestamp": CleanedData.timestamp,
@@ -149,15 +170,71 @@ def _config_from_params(params: dict[str, Any]) -> CleaningConfig:
 
 
 def _raw_text(raw: RawData) -> str:
+    """取交给清洗 Agent 的文本：原文优先，其次逐行记录，最后退化为元数据 JSON。"""
     content = raw.raw_content or {}
     text = content.get("text")
     if text:
         return str(text)
-    return json.dumps(content, ensure_ascii=False)
+    records = content.get("records")
+    if records:
+        return json.dumps(records, ensure_ascii=False, default=str)
+    return json.dumps(content, ensure_ascii=False, default=str)
 
 
 def _dialogue_uuid(raw_id: uuid.UUID, dialogue_id: str) -> uuid.UUID:
     return uuid.uuid5(DIALOGUE_NAMESPACE, f"{raw_id}:{dialogue_id}")
+
+
+# --------------------------------------------------------------------------- 状态机
+
+
+def _current_state(task: Task) -> CleaningState | None:
+    """从 ``current_step`` 前缀解析当前状态（兼容历史值如 ``loading_raw_data``）。"""
+    prefix = (task.current_step or "").split(" ", 1)[0]
+    try:
+        return CleaningState(prefix)
+    except ValueError:
+        return None
+
+
+def _advance_state(task: Task, state: CleaningState, *, detail: str | None = None) -> None:
+    """推进清洗状态机；非法跳转直接抛错（防止状态回退/越级）。"""
+    current = _current_state(task)
+    if current is not None and state not in _ALLOWED_TRANSITIONS[current]:
+        raise ValueError(f"illegal cleaning state transition: {current.value} -> {state.value}")
+    task.current_step = f"{state.value} {detail}" if detail else state.value
+
+
+# --------------------------------------------------------------------------- 去重
+
+
+def _mark_near_duplicates(dialogues: list[dict[str, Any]], *, threshold: float) -> int:
+    """标记近似重复对话（相似度 ≥ threshold），返回新增标记条数。
+
+    策略：**保留记录、只打 ``duplicate`` 标签**——清洗阶段不删数据（宁低分不丢弃），
+    下游知识提取还有一层精确去重（``knowledge_dedup.dedupe_dialogues``）。
+    """
+    if len(dialogues) < 2:
+        return 0
+    if len(dialogues) > NEAR_DUP_MAX_ITEMS:
+        logger.warning(
+            "skip near-duplicate detection: too many dialogues={} limit={}",
+            len(dialogues),
+            NEAR_DUP_MAX_ITEMS,
+        )
+        return 0
+
+    from app.agents.tools import cleaning_tools
+
+    pairs = cleaning_tools.detect_duplicates(dialogues, threshold=threshold)
+    marked = 0
+    for _first, duplicate in pairs:
+        item = dialogues[duplicate]
+        issues = item.setdefault("issues", [])
+        if "duplicate" not in issues:
+            issues.append("duplicate")
+            marked += 1
+    return marked
 
 
 async def _persist_dialogues(
@@ -219,13 +296,17 @@ async def _execute_clean(
     task.status = "running"
     task.started_at = _now_naive()
     task.progress = 5
-    task.current_step = "loading_raw_data"
+    # 重跑（历史任务已是终态）时把状态机复位，避免终态 -> PARSING 的非法跳转
+    if _current_state(task) in (CleaningState.COMPLETED, CleaningState.FAILED):
+        task.current_step = CleaningState.PENDING.value
+    _advance_state(task, CleaningState.PARSING, detail="loading raw data")
     await session.flush()
 
     cleaned_total = 0
     quality_total = 0.0
     raw_records = 0
     failed_raw = 0
+    near_duplicates = 0
     datasource: DataSource | None = None
 
     try:
@@ -236,6 +317,8 @@ async def _execute_clean(
         config = _config_from_params(task.params or {})
 
         for index, raw in enumerate(raw_items, start=1):
+            # 状态机：NORMALIZING（文本归一化 + LLM 抽取）→ DEDUPLICATING → VALIDATING
+            _advance_state(task, CleaningState.NORMALIZING, detail=f"{index}/{raw_records}")
             agent = _build_agent()
             result = await agent.clean(
                 CleaningInput(
@@ -254,10 +337,20 @@ async def _execute_clean(
                 failed_raw += 1
                 raw.status = "failed"
                 raw.error_message = "; ".join(result.errors)[:1000] or "cleaning failed"
+                # 失败记录同样走完校验阶段，保证下一条能从 VALIDATING 回到 NORMALIZING
+                _advance_state(task, CleaningState.VALIDATING, detail=f"{index}/{raw_records}")
                 await session.flush()
                 continue
 
+            _advance_state(task, CleaningState.DEDUPLICATING, detail=f"{index}/{raw_records}")
             data = result.data or {}
+            if config.remove_duplicates:
+                near_duplicates += _mark_near_duplicates(
+                    data.get("dialogues") or [],
+                    threshold=config.dedup_threshold,
+                )
+
+            _advance_state(task, CleaningState.VALIDATING, detail=f"{index}/{raw_records}")
             created, raw_quality = await _persist_dialogues(
                 session,
                 raw=raw,
@@ -271,7 +364,6 @@ async def _execute_clean(
             raw.status = "completed"
             raw.processed_at = _now_naive()
             task.progress = min(90, 5 + int(index / raw_records * 85))
-            task.current_step = f"cleaned {index}/{raw_records}"
             await session.flush()
 
         datasource = await session.get(DataSource, task.datasource_id)
@@ -290,7 +382,11 @@ async def _execute_clean(
 
         task.status = "completed" if cleaned_total else "failed"
         task.progress = 100
-        task.current_step = "completed" if cleaned_total else "no_records_cleaned"
+        _advance_state(
+            task,
+            CleaningState.COMPLETED if cleaned_total else CleaningState.FAILED,
+            detail=None if cleaned_total else "no_records_cleaned",
+        )
         task.completed_at = _now_naive()
         if task.started_at is not None:
             task.duration = round((task.completed_at - task.started_at).total_seconds(), 3)
@@ -298,6 +394,7 @@ async def _execute_clean(
             "raw_records": raw_records,
             "failed_raw_records": failed_raw,
             "cleaned_records": cleaned_total,
+            "near_duplicate_records": near_duplicates,
         }
         if cleaned_total == 0:
             task.error_message = "no dialogues were cleaned"
@@ -321,7 +418,10 @@ async def _execute_clean(
         logger.opt(exception=exc).error("clean task failed task={}", task.id)
         task.status = "failed"
         task.error_message = str(exc)[:1000]
-        task.current_step = "failed"
+        try:
+            _advance_state(task, CleaningState.FAILED)
+        except ValueError:  # 已处于终态（如 completed）时直接兜底写入
+            task.current_step = CleaningState.FAILED.value
         task.completed_at = _now_naive()
         await session.flush()
         if commit:

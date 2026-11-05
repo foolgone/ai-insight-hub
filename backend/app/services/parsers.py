@@ -2,7 +2,7 @@
 
 支持 CSV / JSON / XLSX / TXT，统一输出 ``ParsedUpload``：
 - ``records``：结构化行（list[dict]），供后续清洗 Agent 使用；
-- ``raw_text``：文本原文（xlsx 为二进制格式，raw_text 为空）；
+- ``raw_text``：交给清洗 Agent 的文本表示（xlsx 无原始文本，按行 JSON 序列化）；
 - 解析失败抛 ``ParseError``，由 API 层映射为 415 ``FILE_FORMAT_INVALID``。
 """
 from __future__ import annotations
@@ -129,7 +129,10 @@ def _parse_xlsx(content: bytes) -> ParsedUpload:
         )
     if not records:
         raise ParseError("XLSX 没有可解析的数据行")
-    return ParsedUpload(format="xlsx", encoding=None, records=records, raw_text="")
+    # xlsx 没有"原文"：把逐行记录序列化成 JSON 文本，清洗 Agent 才能读到对话内容。
+    # 单元格可能是 datetime/date 等非 JSON 类型，用 default=str 兜底。
+    raw_text = json.dumps(records, ensure_ascii=False, default=str)
+    return ParsedUpload(format="xlsx", encoding=None, records=records, raw_text=raw_text)
 
 
 def _parse_txt(content: bytes) -> ParsedUpload:

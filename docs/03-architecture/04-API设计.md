@@ -1481,11 +1481,15 @@ file: <binary>
   "task_name": "数据清洗",
   "status": "running",
   "progress": 45,
-  "current_step": "正在清洗第 450/1000 条",
+  "current_step": "normalizing 450/1000",
   "started_at": "2025-01-15T10:30:00Z",
   "estimated_completion": "2025-01-15T10:32:00Z"
 }
 ```
+
+> `current_step` 格式为 `<清洗阶段> <已处理/总数>`（非清洗任务为自由文本，如 `loading_cleaned_data`）。
+> 清洗阶段取自状态机：`parsing` → `normalizing` → `deduplicating` → `validating` → `completed`，
+> 任一阶段异常为 `failed`；单条记录失败时该条走 `validating` 后继续下一条。
 
 **状态**：
 - `pending`: 排队中
@@ -1593,7 +1597,7 @@ file: <binary>
 ```
 event: tasks
 data: {"items":[{"id":"...","task_type":"clean","status":"running","progress":45,
-       "current_step":"cleaning","error_message":null,"completed_at":null}]}
+       "current_step":"normalizing 450/1000","error_message":null,"completed_at":null}]}
 ```
 
 - 数据未变化不重复推送；每 15s 一条 `: keep-alive` 心跳；
