@@ -521,6 +521,7 @@ async def _execute_report(
         result = await agent.generate(
             payload.model_dump(mode="json"),
             session=session,
+            task_id=task.id if task is not None else None,
             user_id=report.user_id,
             scope=f"report:{report.id}",
             datasource_id=report.datasource_id,

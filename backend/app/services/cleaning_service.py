@@ -439,6 +439,12 @@ async def _execute_clean(
             datasource.statistics = statistics
             datasource.workflow_status = "data_cleaned"
 
+        # 最后一条处理期间可能被取消：收尾前复查数据库状态（避免覆盖 cancelled）
+        from app.services import task_service
+
+        if task.status != "cancelled" and await task_service.is_cancelled(session, task.id):
+            await session.refresh(task)
+
         task.result = {
             "raw_records": raw_records,
             "failed_raw_records": failed_raw,

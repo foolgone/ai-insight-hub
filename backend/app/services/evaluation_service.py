@@ -213,6 +213,12 @@ async def _execute_evaluation(
             task.current_step = f"evaluated {index}/{len(targets)}"
             await session.flush()
 
+        # 最后一条处理期间可能被取消：收尾前复查数据库状态（避免覆盖 cancelled）
+        from app.services import task_service
+
+        if task.status != "cancelled" and await task_service.is_cancelled(session, task.id):
+            await session.refresh(task)
+
         task.result = {
             "evaluated": evaluated,
             "failed": failed,
