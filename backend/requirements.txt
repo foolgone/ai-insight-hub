@@ -51,6 +51,8 @@ python-dotenv==1.0.0
 
 # 任务队列
 celery==5.3.6
+# 锁定 kombu：5.4+ 要求 redis-py>=6.1，与 redis==5.0.1 冲突（worker 启动报 VersionMismatch）
+kombu==5.3.7
 celery-redbeat==2.2.0
 
 # 日志
