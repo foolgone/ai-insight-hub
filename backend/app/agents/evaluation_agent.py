@@ -20,6 +20,7 @@ from app.agents.base import (
     AgentInputError,
     AgentOutputError,
     BaseAgent,
+    load_prompt_version,
 )
 from app.schemas.agents.evaluation import (
     DIMENSION_LABELS,
@@ -64,7 +65,11 @@ class QualityEvaluationAgent(BaseAgent):
     output_schema = EvaluationLLMOutput
 
     def __init__(self, config: AgentConfig | None = None, *, llm: Any = None) -> None:
-        super().__init__(config or AgentConfig(name="evaluation_agent"), llm=llm)
+        super().__init__(
+            config
+            or AgentConfig(name="evaluation_agent", version=load_prompt_version(PROMPT_DIR)),
+            llm=llm,
+        )
         self._active_input: EvaluationInput | None = None
 
     # -- BaseAgent hooks ---------------------------------------------------

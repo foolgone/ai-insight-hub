@@ -45,6 +45,12 @@ class AnalysisResult(Base):
         ),
         CheckConstraint("confidence >= 0 AND confidence <= 1", name="confidence_range"),
         Index("idx_analysis_datasource_id", "datasource_id", "created_at"),
+        Index(
+            "idx_analysis_ds_type_created",
+            "datasource_id",
+            "analysis_type",
+            text("created_at DESC"),
+        ),
         Index("idx_analysis_data_id", "data_id"),
         Index("idx_analysis_type", "analysis_type"),
         Index("idx_analysis_created_at", "created_at"),
@@ -59,8 +65,8 @@ class AnalysisResult(Base):
         ForeignKey("data_sources.id", ondelete="CASCADE"),
         nullable=False,
     )
-    # 逻辑外键 -> cleaned_data(id)
-    data_id: Mapped[uuid.UUID] = mapped_column(PG_UUID(as_uuid=True), nullable=False)
+    # 逻辑外键 -> cleaned_data(id)；洞察等「数据源级」结果没有单条对话，允许为空
+    data_id: Mapped[uuid.UUID | None] = mapped_column(PG_UUID(as_uuid=True))
     analysis_type: Mapped[str] = mapped_column(String(50), nullable=False)
     result: Mapped[dict[str, Any]] = mapped_column(JSONB, nullable=False)
     agent_name: Mapped[str] = mapped_column(String(100), nullable=False)

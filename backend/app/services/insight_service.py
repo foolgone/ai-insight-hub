@@ -17,7 +17,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import assert_owner
 from app.core.exceptions import DataSourceNotFoundError
-from app.models import CleanedData, DataSource, Task, User
+from app.models import AnalysisResult, CleanedData, DataSource, Task, User
 from app.schemas.insight import (
     InsightPainPoint,
     InsightRequest,
@@ -162,11 +162,36 @@ async def _execute_insight(
             },
             session=session,
             task_id=task.id,
+            scope="insight",
             user_id=task.user_id,
             datasource_id=task.datasource_id,
         )
         if not result.success or not result.data:
             raise RuntimeError("insight analysis failed: " + "; ".join(result.errors))
+
+        # Agent 调用期间可能被取消：复查数据库状态，避免覆盖 cancelled
+        from app.services import task_service
+
+        if await task_service.is_cancelled(session, task.id):
+            await session.refresh(task)
+            return {"status": "cancelled", "task_id": str(task.id)}
+
+        # 报告只认 analysis_results（analysis_type='insight'）作为洞察数据源；
+        # 洞察是「数据源级」结果，没有单条对话，data_id 置空（迁移 012）。
+        session.add(
+            AnalysisResult(
+                datasource_id=task.datasource_id,
+                data_id=None,
+                analysis_type="insight",
+                result=result.data,
+                agent_name=str(result.metadata.get("agent", "insight_agent")),
+                agent_version=str(result.metadata.get("version", "v1.0.0")),
+                ai_model=str(result.metadata.get("model", "")) or None,
+                processing_duration=result.duration,
+                token_usage=result.token_usage,
+                cost=float(result.cost),
+            )
+        )
 
         task.status = "completed"
         task.progress = 100

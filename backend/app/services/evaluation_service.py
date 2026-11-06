@@ -157,6 +157,12 @@ async def _execute_evaluation(
         config = _config_from_params(task.params or {})
 
         for index, item in enumerate(targets, start=1):
+            from app.services import task_service
+
+            if await task_service.is_cancelled(session, task.id):
+                await session.refresh(task)
+                break
+
             agent = _build_agent()
             result = await agent.evaluate(
                 {
@@ -171,6 +177,7 @@ async def _execute_evaluation(
                 },
                 session=session,
                 task_id=task.id,
+                scope=f"eval:{item.id}",
                 user_id=task.user_id,
                 datasource_id=task.datasource_id,
             )
@@ -206,18 +213,32 @@ async def _execute_evaluation(
             task.current_step = f"evaluated {index}/{len(targets)}"
             await session.flush()
 
-        task.status = "completed" if evaluated else "failed"
-        task.progress = 100
-        task.current_step = "completed" if evaluated else "no_records_evaluated"
-        task.completed_at = _now_naive()
-        if task.started_at is not None:
-            task.duration = round((task.completed_at - task.started_at).total_seconds(), 3)
         task.result = {
             "evaluated": evaluated,
             "failed": failed,
             "needs_review": needs_review,
             "total": len(targets),
         }
+
+        # 用户取消：保留已评估结果，状态保持 cancelled
+        if task.status == "cancelled":
+            await session.flush()
+            if commit:
+                await session.commit()
+            logger.info("evaluation task cancelled task={} evaluated={}", task.id, evaluated)
+            return {
+                "status": "cancelled",
+                "task_id": str(task.id),
+                "evaluated": evaluated,
+                "needs_review": needs_review,
+            }
+
+        task.status = "completed" if evaluated else "failed"
+        task.progress = 100
+        task.current_step = "completed" if evaluated else "no_records_evaluated"
+        task.completed_at = _now_naive()
+        if task.started_at is not None:
+            task.duration = round((task.completed_at - task.started_at).total_seconds(), 3)
         if not evaluated:
             task.error_message = "no dialogues were evaluated"
         await session.flush()

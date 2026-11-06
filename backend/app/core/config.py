@@ -161,6 +161,8 @@ class Settings(BaseSettings):
     LLM_CREDENTIAL_VERIFY_PER_MINUTE: int = 5
     # demo 账号种子密码（迁移 011 使用；生产用 Secrets 覆盖）
     SEED_DEMO_PASSWORD: str = "demo123"
+    # demo 账号邮箱：禁止改密/删除，避免演示环境被破坏（P1-4）
+    DEMO_ACCOUNT_EMAIL: str = "demo@example.com"
 
 
 @lru_cache

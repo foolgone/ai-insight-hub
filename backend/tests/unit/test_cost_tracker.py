@@ -67,3 +67,18 @@ def test_compute_cost_zero_price_returns_zero(monkeypatch) -> None:
 )
 def test_idempotency_key(task_id, attempt, expected) -> None:
     assert CostTracker.idempotency_key(task_id, attempt) == expected
+
+
+@pytest.mark.parametrize(
+    ("task_id", "attempt", "scope", "expected"),
+    [
+        ("task-1", 0, "clean:raw-1", "task-1:clean:raw-1:0"),
+        ("task-1", 2, "insight", "task-1:insight:2"),
+        (None, 0, "report:r-1", "adhoc:report:r-1:0"),
+        ("task-1", 1, None, "task-1:1"),
+        ("task-1", 1, "", "task-1:1"),
+    ],
+)
+def test_idempotency_key_with_scope(task_id, attempt, scope, expected) -> None:
+    """同一任务的多次业务调用必须落不同行（P0-2）。"""
+    assert CostTracker.idempotency_key(task_id, attempt, scope=scope) == expected

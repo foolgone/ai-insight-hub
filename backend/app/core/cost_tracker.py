@@ -1,7 +1,8 @@
 """成本追踪（B-306；成本管理 §3 / 数据库设计 §3.13 / D-03 幂等口径）。
 
 - 成本 = (输入 token × P_IN + 输出 token × P_OUT) / 1_000_000，单价只来自配置；
-- 每次 LLM 调用写一行 ``llm_calls``，幂等键 ``f"{task_id or 'adhoc'}:{attempt}"``，
+- 每次 LLM 调用写一行 ``llm_calls``，幂等键 ``f"{task_id or 'adhoc'}:{scope}:{attempt}"``
+  （``scope`` 标识同一任务内的第几次业务调用，如 ``clean:<raw_id>``）；
   重复上报走 ``ON CONFLICT DO UPDATE``（不重复计费、失败回写同一行）；
 - 成本对账只认本表聚合；Prometheus 只是进程内指标（见 ``09-可观测``）。
 """
@@ -85,7 +86,19 @@ class CostTracker:
         self._session = session
 
     @staticmethod
-    def idempotency_key(task_id: uuid.UUID | str | None, attempt: int) -> str:
+    def idempotency_key(
+        task_id: uuid.UUID | str | None,
+        attempt: int,
+        *,
+        scope: str | None = None,
+    ) -> str:
+        """幂等键：``{task_id}:{scope}:{attempt}``；无 ``scope`` 时保持旧格式。
+
+        ``attempt`` 由 ``async_retry`` 提供，每次 Agent 调用都从 0 起，
+        单靠它无法区分「同一任务内的多次调用」，必须由调用方给出 ``scope``。
+        """
+        if scope:
+            return f"{task_id or 'adhoc'}:{scope}:{attempt}"
         return f"{task_id or 'adhoc'}:{attempt}"
 
     async def track(
@@ -95,6 +108,7 @@ class CostTracker:
         service: str = _DEFAULT_SERVICE,
         task_id: uuid.UUID | str | None = None,
         attempt: int = 0,
+        scope: str | None = None,
         user_id: uuid.UUID | None = None,
         datasource_id: uuid.UUID | None = None,
         agent_name: str | None = None,
@@ -104,7 +118,7 @@ class CostTracker:
         """写入一次成功的 LLM 调用（幂等 upsert）。"""
         usage = response.usage
         breakdown = compute_cost(usage)
-        key = self.idempotency_key(task_id, attempt)
+        key = self.idempotency_key(task_id, attempt, scope=scope)
         values: dict[str, Any] = {
             "id": uuid.uuid4(),
             "user_id": user_id,
@@ -148,6 +162,7 @@ class CostTracker:
         service: str = _DEFAULT_SERVICE,
         task_id: uuid.UUID | str | None = None,
         attempt: int = 0,
+        scope: str | None = None,
         user_id: uuid.UUID | None = None,
         datasource_id: uuid.UUID | None = None,
         agent_name: str | None = None,
@@ -155,9 +170,9 @@ class CostTracker:
         duration_seconds: float | None = None,
         key_source: str = "server",
     ) -> LlmCall:
-        """把失败写回同一幂等键对应的行（D-03：按 task_id + 真实 attempt 回写）。"""
+        """把失败写回同一幂等键对应的行（D-03：按 task_id + scope + 真实 attempt 回写）。"""
         zero = Decimal("0").quantize(_COST_QUANT)
-        key = self.idempotency_key(task_id, attempt)
+        key = self.idempotency_key(task_id, attempt, scope=scope)
         values: dict[str, Any] = {
             "id": uuid.uuid4(),
             "user_id": user_id,

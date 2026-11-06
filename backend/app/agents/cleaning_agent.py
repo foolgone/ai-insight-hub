@@ -16,6 +16,7 @@ from app.agents.base import (
     AgentInputError,
     AgentOutputError,
     BaseAgent,
+    load_prompt_version,
 )
 from app.agents.tools import cleaning_tools
 from app.schemas.agents.cleaning import (
@@ -43,7 +44,11 @@ class DataCleaningAgent(BaseAgent):
     output_schema = CleaningOutput
 
     def __init__(self, config: AgentConfig | None = None, *, llm: Any = None) -> None:
-        super().__init__(config or AgentConfig(name="cleaning_agent"), llm=llm)
+        super().__init__(
+            config
+            or AgentConfig(name="cleaning_agent", version=load_prompt_version(PROMPT_DIR)),
+            llm=llm,
+        )
         self._examples: list[dict[str, Any]] | None = None
 
     # -- BaseAgent hooks ---------------------------------------------------

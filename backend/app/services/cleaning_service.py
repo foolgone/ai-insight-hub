@@ -15,6 +15,7 @@ from typing import Any
 
 from loguru import logger
 from sqlalchemy import func, select
+from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import InstrumentedAttribute
 
@@ -181,6 +182,35 @@ def _raw_text(raw: RawData) -> str:
     return json.dumps(content, ensure_ascii=False, default=str)
 
 
+def _read_full_upload(raw: RawData) -> str | None:
+    """入库文本被截断时，按 file_info.object_name 从对象存储读原文重新解析（P1-1）。"""
+    file_info = raw.file_info or {}
+    object_name = file_info.get("object_name")
+    if not object_name:
+        return None
+    try:
+        from app.services import parsers, storage_service
+
+        content = storage_service.read_upload(
+            object_name, backend=file_info.get("storage_backend")
+        )
+        parsed = parsers.parse_upload(content, file_info.get("filename") or "upload.bin")
+        return parsed.raw_text
+    except Exception as exc:  # noqa: BLE001 - 存储不可用/文件缺失时回退入库文本
+        logger.warning("read full upload failed raw={} error={}", raw.id, exc)
+        return None
+
+
+def _load_raw_text(raw: RawData) -> str:
+    """优先返回完整文本：入库文本被截断时从对象存储读取（P1-1）。"""
+    content = raw.raw_content or {}
+    if content.get("truncated"):
+        full_text = _read_full_upload(raw)
+        if full_text:
+            return full_text
+    return _raw_text(raw)
+
+
 def _dialogue_uuid(raw_id: uuid.UUID, dialogue_id: str) -> uuid.UUID:
     return uuid.uuid5(DIALOGUE_NAMESPACE, f"{raw_id}:{dialogue_id}")
 
@@ -237,6 +267,19 @@ def _mark_near_duplicates(dialogues: list[dict[str, Any]], *, threshold: float) 
     return marked
 
 
+def _parse_timestamp(value: Any) -> datetime | None:
+    """解析对话时间戳；缺失/非法返回 None（不伪造当前时间，P1-6）。"""
+    if not isinstance(value, str):
+        return None
+    try:
+        parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    if parsed.tzinfo is not None:
+        parsed = parsed.astimezone(timezone.utc).replace(tzinfo=None)
+    return parsed
+
+
 async def _persist_dialogues(
     session: AsyncSession,
     *,
@@ -245,43 +288,49 @@ async def _persist_dialogues(
     agent_version: str,
     duration: float,
     token_usage: dict[str, int],
-) -> tuple[int, float]:
-    """写入 cleaned_data，返回 (条数, 质量分合计)。"""
+) -> tuple[int, float, int]:
+    """写入 cleaned_data（幂等），返回 (实际新增条数, 新增质量分合计, 候选条数)。
+
+    ``(raw_data_id, dialogue_id)`` 唯一索引 + ``ON CONFLICT DO NOTHING``：
+    同一 raw_data 重跑不会重复插入，也不会因唯一约束报错（P1-5）。
+    """
     dialogues = result_data.get("dialogues") or []
-    created = 0
-    quality_total = 0.0
-    for item in dialogues:
-        dialogue_id = str(item.get("dialogue_id") or created + 1)
-        timestamp = item.get("timestamp")
-        parsed_ts: datetime | None = None
-        if isinstance(timestamp, str):
-            try:
-                parsed_ts = datetime.fromisoformat(timestamp.replace("Z", "+00:00"))
-                if parsed_ts.tzinfo is not None:
-                    parsed_ts = parsed_ts.astimezone(timezone.utc).replace(tzinfo=None)
-            except ValueError:
-                parsed_ts = None
+    rows: list[dict[str, Any]] = []
+    for index, item in enumerate(dialogues, start=1):
+        dialogue_id = str(item.get("dialogue_id") or index)
+        parsed_ts = _parse_timestamp(item.get("timestamp"))
         score = float(item.get("quality_score") or 0)
         score = min(100.0, max(0.0, score))
-        session.add(
-            CleanedData(
-                datasource_id=raw.datasource_id,
-                raw_data_id=raw.id,
-                dialogue_id=_dialogue_uuid(raw.id, dialogue_id),
-                timestamp=parsed_ts or _now_naive(),
-                user_message=str(item.get("user_message") or ""),
-                ai_response=str(item.get("ai_response") or ""),
-                metadata_={"agent": "cleaning_agent", "source_dialogue_id": dialogue_id},
-                quality_score=score,
-                issues=list(item.get("issues") or []),
-                agent_version=agent_version,
-                processing_duration=duration,
-                token_usage=token_usage,
-            )
+        issues = list(item.get("issues") or [])
+        if parsed_ts is None and "missing_timestamp" not in issues:
+            issues.append("missing_timestamp")
+        rows.append(
+            {
+                "datasource_id": raw.datasource_id,
+                "raw_data_id": raw.id,
+                "dialogue_id": _dialogue_uuid(raw.id, dialogue_id),
+                "timestamp": parsed_ts,
+                "user_message": str(item.get("user_message") or ""),
+                "ai_response": str(item.get("ai_response") or ""),
+                "metadata": {"agent": "cleaning_agent", "source_dialogue_id": dialogue_id},
+                "quality_score": score,
+                "issues": issues,
+                "agent_version": agent_version,
+                "processing_duration": duration,
+                "token_usage": token_usage,
+            }
         )
-        created += 1
-        quality_total += score
-    return created, quality_total
+    if not rows:
+        return 0, 0.0, 0
+
+    stmt = (
+        pg_insert(CleanedData.__table__)
+        .values(rows)
+        .on_conflict_do_nothing(index_elements=["raw_data_id", "dialogue_id"])
+        .returning(CleanedData.__table__.c.id, CleanedData.__table__.c.quality_score)
+    )
+    inserted = (await session.execute(stmt)).all()
+    return len(inserted), sum(float(row.quality_score or 0) for row in inserted), len(rows)
 
 
 async def _execute_clean(
@@ -304,6 +353,7 @@ async def _execute_clean(
 
     cleaned_total = 0
     quality_total = 0.0
+    candidate_total = 0
     raw_records = 0
     failed_raw = 0
     near_duplicates = 0
@@ -317,18 +367,26 @@ async def _execute_clean(
         config = _config_from_params(task.params or {})
 
         for index, raw in enumerate(raw_items, start=1):
+            # 取消生效：每处理完一个条目检查一次数据库状态（轻量 SELECT）
+            from app.services import task_service
+
+            if await task_service.is_cancelled(session, task.id):
+                await session.refresh(task)
+                break
+
             # 状态机：NORMALIZING（文本归一化 + LLM 抽取）→ DEDUPLICATING → VALIDATING
             _advance_state(task, CleaningState.NORMALIZING, detail=f"{index}/{raw_records}")
             agent = _build_agent()
             result = await agent.clean(
                 CleaningInput(
                     datasource_id=raw.datasource_id,
-                    raw_data=_raw_text(raw),
+                    raw_data=_load_raw_text(raw),
                     data_type=(raw.raw_content or {}).get("format") or "txt",
                     config=config,
                 ).model_dump(mode="json"),
                 session=session,
                 task_id=task.id,
+                scope=f"clean:{raw.id}",
                 user_id=task.user_id,
                 datasource_id=raw.datasource_id,
             )
@@ -351,7 +409,7 @@ async def _execute_clean(
                 )
 
             _advance_state(task, CleaningState.VALIDATING, detail=f"{index}/{raw_records}")
-            created, raw_quality = await _persist_dialogues(
+            created, raw_quality, candidates = await _persist_dialogues(
                 session,
                 raw=raw,
                 result_data=data,
@@ -361,6 +419,7 @@ async def _execute_clean(
             )
             cleaned_total += created
             quality_total += raw_quality
+            candidate_total += candidates
             raw.status = "completed"
             raw.processed_at = _now_naive()
             task.progress = min(90, 5 + int(index / raw_records * 85))
@@ -380,23 +439,39 @@ async def _execute_clean(
             datasource.statistics = statistics
             datasource.workflow_status = "data_cleaned"
 
-        task.status = "completed" if cleaned_total else "failed"
-        task.progress = 100
-        _advance_state(
-            task,
-            CleaningState.COMPLETED if cleaned_total else CleaningState.FAILED,
-            detail=None if cleaned_total else "no_records_cleaned",
-        )
-        task.completed_at = _now_naive()
-        if task.started_at is not None:
-            task.duration = round((task.completed_at - task.started_at).total_seconds(), 3)
         task.result = {
             "raw_records": raw_records,
             "failed_raw_records": failed_raw,
             "cleaned_records": cleaned_total,
+            "skipped_existing_records": max(0, candidate_total - cleaned_total),
             "near_duplicate_records": near_duplicates,
         }
-        if cleaned_total == 0:
+
+        # 用户取消：保留已清洗结果，状态保持 cancelled，不覆盖为 completed/failed
+        if task.status == "cancelled":
+            await session.flush()
+            if commit:
+                await session.commit()
+            logger.info("clean task cancelled task={} cleaned={}", task.id, cleaned_total)
+            return {
+                "status": "cancelled",
+                "task_id": str(task.id),
+                "cleaned_records": cleaned_total,
+            }
+
+        # 有候选记录即视为完成：重跑时全部命中唯一索引（0 条新增）也应成功返回
+        has_records = bool(cleaned_total or candidate_total)
+        task.status = "completed" if has_records else "failed"
+        task.progress = 100
+        _advance_state(
+            task,
+            CleaningState.COMPLETED if has_records else CleaningState.FAILED,
+            detail=None if has_records else "no_records_cleaned",
+        )
+        task.completed_at = _now_naive()
+        if task.started_at is not None:
+            task.duration = round((task.completed_at - task.started_at).total_seconds(), 3)
+        if not has_records:
             task.error_message = "no dialogues were cleaned"
         await session.flush()
         if commit:

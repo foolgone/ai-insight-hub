@@ -64,6 +64,19 @@ def enqueue_report(report: Report) -> str:
     return str(generate_report_task.delay(str(report.id)))
 
 
+async def _report_task(session: AsyncSession, report_id: uuid.UUID) -> Task | None:
+    """按 ``task.params.report_id`` 找报告对应的任务（兼容改造前无任务的历史报告）。"""
+    return await session.scalar(
+        select(Task)
+        .where(
+            Task.task_type == "report",
+            Task.params["report_id"].astext == str(report_id),
+        )
+        .order_by(Task.created_at.desc())
+        .limit(1)
+    )
+
+
 # --------------------------------------------------------------------------- 数据聚合
 
 
@@ -433,7 +446,8 @@ async def create_report(
     report_type: str,
     format: str,
     config: ReportConfig,
-) -> Report:
+) -> tuple[Report, Task]:
+    """创建报告记录 + 对应任务记录（task_type=report，params.report_id 关联）。"""
     await _datasource_or_404(session, datasource_id, user)
     validate_create(report_type=report_type, format=format)
 
@@ -449,7 +463,20 @@ async def create_report(
     session.add(report)
     await session.flush()
     await session.refresh(report)
-    return report
+
+    task = Task(
+        task_type="report",
+        task_name=f"生成报告：{title}"[:255],
+        datasource_id=datasource_id,
+        user_id=user.id,
+        params={"report_id": str(report.id)},
+        status="pending",
+        progress=0,
+    )
+    session.add(task)
+    await session.flush()
+    await session.refresh(task)
+    return report, task
 
 
 async def _execute_report(
@@ -459,9 +486,25 @@ async def _execute_report(
     if report is None:
         return {"status": "missing", "report_id": str(report_id)}
 
+    task = await _report_task(session, report_id)
+    if task is not None and task.status == "cancelled":
+        report.status = "failed"
+        report.error_message = "cancelled by user"
+        report.completed_at = _now_naive()
+        await session.flush()
+        if commit:
+            await session.commit()
+        return {"status": "cancelled", "report_id": str(report_id)}
+
     started = time.perf_counter()
     report.status = "generating"
     report.error_message = None
+    if task is not None:
+        task.status = "running"
+        task.started_at = _now_naive()
+        task.progress = 5
+        task.current_step = "generating"
+        task.error_message = None
     await session.flush()
 
     try:
@@ -479,10 +522,23 @@ async def _execute_report(
             payload.model_dump(mode="json"),
             session=session,
             user_id=report.user_id,
+            scope=f"report:{report.id}",
             datasource_id=report.datasource_id,
         )
         if not result.success or not result.data:
             raise RuntimeError("report generation failed: " + "; ".join(result.errors))
+
+        # Agent 调用期间可能被取消：复查数据库状态，避免覆盖 cancelled
+        if task is not None:
+            await session.refresh(task)
+            if task.status == "cancelled":
+                report.status = "failed"
+                report.error_message = "cancelled by user"
+                report.completed_at = _now_naive()
+                await session.flush()
+                if commit:
+                    await session.commit()
+                return {"status": "cancelled", "report_id": str(report.id)}
 
         output = result.data
         if report.format == "markdown":
@@ -507,6 +563,14 @@ async def _execute_report(
         report.generation_duration = round(time.perf_counter() - started, 3)
         report.completed_at = now
         report.expires_at = now + timedelta(days=30)
+        if task is not None and task.status != "cancelled":
+            task.status = "completed"
+            task.progress = 100
+            task.current_step = "completed"
+            task.completed_at = now
+            if task.started_at is not None:
+                task.duration = round((now - task.started_at).total_seconds(), 3)
+            task.result = {"report_id": str(report.id), "file_size": stored.size}
         await session.flush()
         if commit:
             await session.commit()
@@ -521,6 +585,16 @@ async def _execute_report(
         report.error_message = str(exc)[:1000]
         report.generation_duration = round(time.perf_counter() - started, 3)
         report.completed_at = _now_naive()
+        if task is not None:
+            try:
+                await session.refresh(task)
+            except Exception:  # noqa: BLE001 - 刷新失败不掩盖原始错误
+                pass
+            if task.status != "cancelled":
+                task.status = "failed"
+                task.error_message = str(exc)[:1000]
+                task.current_step = "failed"
+                task.completed_at = _now_naive()
         await session.flush()
         if commit:
             await session.commit()

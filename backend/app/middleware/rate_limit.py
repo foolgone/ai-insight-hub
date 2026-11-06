@@ -19,6 +19,23 @@ from app.core.redis import get_redis
 EXEMPT_PATHS = {"/health", "/metrics", "/docs", "/openapi.json", "/redoc"}
 
 
+def _client_ip(request: Request) -> str:
+    """取真实客户端 IP：``X-Forwarded-For`` 首段 → ``X-Real-IP`` → socket 地址。
+
+    Nginx 反代后 ``request.client.host`` 恒为代理 IP，若不解析转发头，
+    所有用户会共用一个限流桶（P1-2）。
+    """
+    forwarded = request.headers.get("x-forwarded-for")
+    if forwarded:
+        first = forwarded.split(",")[0].strip()
+        if first:
+            return first
+    real_ip = request.headers.get("x-real-ip")
+    if real_ip and real_ip.strip():
+        return real_ip.strip()
+    return request.client.host if request.client else "unknown"
+
+
 class RateLimitMiddleware(BaseHTTPMiddleware):
     """基于 Redis 的固定窗口限流。"""
 
@@ -26,7 +43,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         if not settings.RATE_LIMIT_ENABLED or request.url.path in EXEMPT_PATHS:
             return await call_next(request)
 
-        client = request.client.host if request.client else "unknown"
+        client = _client_ip(request)
         window = int(time.time() // 60)
         key = f"ratelimit:{client}:{window}"
         redis = get_redis()

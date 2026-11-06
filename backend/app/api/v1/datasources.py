@@ -212,6 +212,7 @@ async def upload_file(
             "size": len(content),
             "mime_type": file.content_type,
             "upload_url": stored.url,
+            "object_name": stored.object_name,
             "storage_backend": stored.backend,
         },
         status="pending",

@@ -332,21 +332,36 @@ async def _execute_extraction(
             },
             session=session,
             task_id=task.id,
+            scope="extract",
             user_id=task.user_id,
             datasource_id=datasource_id,
         )
         if not result.success or not result.data:
             raise RuntimeError("knowledge extraction failed: " + "; ".join(result.errors))
 
+        # Agent 调用期间可能被取消：保留种子知识、状态保持 cancelled
+        from app.services import task_service
+
+        if await task_service.is_cancelled(session, task.id):
+            await session.refresh(task)
+            return {"status": "cancelled", "task_id": str(task.id), "faqs_inserted": 0}
+
         data = result.data
         faqs = list(data.get("faqs") or [])
         source_ids_expanded = knowledge_dedup.expand_source_ids(faqs, duplicate_map)
-        removed = await _replace_seed_knowledge(session, datasource_id)
-        inserted = await _insert_extracted_faqs(
-            session,
-            datasource_id=datasource_id,
-            faqs=faqs,
-        )
+        if faqs:
+            removed = await _replace_seed_knowledge(session, datasource_id)
+            inserted = await _insert_extracted_faqs(
+                session,
+                datasource_id=datasource_id,
+                faqs=faqs,
+            )
+        else:
+            # 合法空结果（如数据无新知识）：保留种子 FAQ，避免知识库被清空（P1-3）
+            logger.warning(
+                "extraction returned no faqs, keep seed knowledge datasource={}", datasource_id
+            )
+            removed, inserted = 0, 0
         task.status = "completed"
         task.progress = 100
         task.current_step = "completed"

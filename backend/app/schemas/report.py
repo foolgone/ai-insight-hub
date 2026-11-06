@@ -21,6 +21,7 @@ class ReportCreate(BaseSchema):
 
 class ReportCreateResponse(BaseSchema):
     id: uuid.UUID
+    task_id: uuid.UUID | None = None
     title: str
     report_type: str
     format: str

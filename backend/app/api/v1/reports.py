@@ -40,7 +40,7 @@ async def create_report(
     user: User = Depends(require_roles(*WRITE_ROLES)),
     session: AsyncSession = Depends(get_db),
 ) -> ReportCreateResponse:
-    report = await report_service.create_report(
+    report, task = await report_service.create_report(
         session,
         user=user,
         datasource_id=datasource_id,
@@ -49,12 +49,14 @@ async def create_report(
         format=payload.format,
         config=payload.config,
     )
-    # Celery 任务 id 由 tasks 表跟踪；Report 模型无 celery_task_id 列，不写幽灵属性
-    report_service.enqueue_report(report)
+    # 报告生成纳入统一任务体系（task_type=report）：可查进度、可取消/重试
+    task.celery_task_id = report_service.enqueue_report(report)
     await session.flush()
     await session.refresh(report)
+    await session.refresh(task)
     return ReportCreateResponse(
         id=report.id,
+        task_id=task.id,
         title=report.title,
         report_type=report.report_type,
         format=report.format,

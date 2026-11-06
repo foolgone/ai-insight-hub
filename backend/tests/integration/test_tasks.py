@@ -3,9 +3,14 @@ from __future__ import annotations
 
 import pytest
 
+from app.services import task_service
 from tests.factories import TaskFactory, UserFactory, persist
 
 pytestmark = pytest.mark.integration
+
+
+async def _fake_dispatch(task):
+    return "celery-retry-1"
 
 
 async def _make_task(db_session, *, user, **overrides):
@@ -58,7 +63,10 @@ async def test_cancel_finished_task_conflict(client, auth_headers, db_session, t
     assert response.json()["error"]["code"] == "TASK_NOT_CANCELLABLE"
 
 
-async def test_retry_failed_task(client, auth_headers, db_session, test_user) -> None:
+async def test_retry_failed_task(client, auth_headers, db_session, test_user, monkeypatch) -> None:
+    monkeypatch.setattr(
+        task_service, "_dispatch_retry", lambda session, task: _fake_dispatch(task)
+    )
     task = await _make_task(db_session, user=test_user, status="failed", error_message="boom")
 
     response = await client.post(f"/api/v1/tasks/{task.id}/retry", headers=auth_headers)
@@ -68,6 +76,8 @@ async def test_retry_failed_task(client, auth_headers, db_session, test_user) ->
     assert body["status"] == "pending"
     assert body["retry_count"] == 1
     assert body["message"] == "Task queued for retry"
+    await db_session.refresh(task)
+    assert task.celery_task_id == "celery-retry-1"
 
 
 async def test_retry_non_failed_task_conflict(client, auth_headers, db_session, test_user) -> None:

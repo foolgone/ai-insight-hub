@@ -5,7 +5,8 @@ from typing import Any
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.errors import FrameworkErrorCode
+from app.core.config import settings
+from app.core.errors import ErrorCode, FrameworkErrorCode
 from app.core.exceptions import AIInsightHubException
 from app.core.security import hash_password, verify_password
 from app.models import User
@@ -28,7 +29,14 @@ async def change_password(
     current_password: str,
     new_password: str,
 ) -> None:
-    """修改密码：原密码错误返回 400（API §4.3）。"""
+    """修改密码：原密码错误返回 400（API §4.3）；demo 账号禁止改密（P1-4）。"""
+    if user.email == settings.DEMO_ACCOUNT_EMAIL:
+        raise AIInsightHubException(
+            "Demo account password is protected",
+            code=ErrorCode.AUTH_FORBIDDEN,
+            status_code=403,
+            details={"reason": "demo_account_protected"},
+        )
     if not verify_password(current_password, user.password_hash):
         raise AIInsightHubException(
             "Current password is incorrect",

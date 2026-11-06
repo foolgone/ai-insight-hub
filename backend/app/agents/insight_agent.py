@@ -18,6 +18,7 @@ from app.agents.base import (
     AgentInputError,
     AgentOutputError,
     BaseAgent,
+    load_prompt_version,
 )
 from app.schemas.agents.insight import (
     SENTIMENT_LABELS,
@@ -60,6 +61,7 @@ class InsightAnalysisAgent(BaseAgent):
             config
             or AgentConfig(
                 name="insight_agent",
+                version=load_prompt_version(PROMPT_DIR),
                 temperature=0.3,
                 timeout=120,
                 max_tokens=4096,

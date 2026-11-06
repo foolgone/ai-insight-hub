@@ -13,12 +13,14 @@
 """
 from __future__ import annotations
 
+import re
 import time
 import uuid
 from abc import ABC, abstractmethod
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
 from decimal import Decimal
+from pathlib import Path
 from typing import Any
 
 from loguru import logger
@@ -89,6 +91,25 @@ class ReportError(AgentError):
 
 
 # --------------------------------------------------------------------------- 配置/结果
+
+
+def load_prompt_version(prompt_dir: Path, *, default: str = "v1.0.0") -> str:
+    """从 ``<prompt_dir>/version.txt`` 读取当前 Prompt 版本。
+
+    该文件是多版本串联的 changelog，**首个 ``vX.Y.Z`` 行**即当前版本；
+    缺失或不可读时回退 ``default``（不阻塞 Agent 执行）。
+    """
+    path = prompt_dir / "version.txt"
+    if not path.is_file():
+        return default
+    try:
+        for line in path.read_text(encoding="utf-8").splitlines():
+            match = re.match(r"\s*(v\d+\.\d+\.\d+)", line)
+            if match:
+                return match.group(1)
+    except OSError:
+        return default
+    return default
 
 
 @dataclass
@@ -164,10 +185,15 @@ class BaseAgent(ABC):
         *,
         session: AsyncSession | None = None,
         task_id: uuid.UUID | str | None = None,
+        scope: str | None = None,
         user_id: uuid.UUID | None = None,
         datasource_id: uuid.UUID | None = None,
     ) -> AgentResult:
-        """执行 Agent；任何异常都收敛为 ``AgentResult(success=False)``。"""
+        """执行 Agent；任何异常都收敛为 ``AgentResult(success=False)``。
+
+        ``scope`` 标识同一任务内的第几次业务调用（如 ``clean:<raw_id>``），
+        用于成本表幂等键，避免同任务多次调用互相覆盖。
+        """
         started = time.perf_counter()
         model = self.config.model
         level = DegradationLevel.NORMAL
@@ -281,6 +307,7 @@ class BaseAgent(ABC):
                 model=model,
                 task_id=task_id,
                 attempt=attempts,
+                scope=scope,
                 user_id=user_id,
                 datasource_id=datasource_id,
                 duration=duration,
@@ -304,6 +331,7 @@ class BaseAgent(ABC):
                 model=model,
                 task_id=task_id,
                 attempt=attempts,
+                scope=scope,
                 user_id=user_id,
                 datasource_id=datasource_id,
                 duration=duration,
@@ -357,6 +385,7 @@ class BaseAgent(ABC):
         model: str,
         task_id: uuid.UUID | str | None,
         attempt: int,
+        scope: str | None = None,
         user_id: uuid.UUID | None,
         datasource_id: uuid.UUID | None,
         duration: float,
@@ -375,6 +404,7 @@ class BaseAgent(ABC):
                 response=synthetic,
                 task_id=task_id,
                 attempt=attempt,
+                scope=scope,
                 user_id=user_id,
                 datasource_id=datasource_id,
                 agent_name=self.config.name,
@@ -392,6 +422,7 @@ class BaseAgent(ABC):
         model: str,
         task_id: uuid.UUID | str | None,
         attempt: int,
+        scope: str | None = None,
         user_id: uuid.UUID | None,
         datasource_id: uuid.UUID | None,
         duration: float,
@@ -405,6 +436,7 @@ class BaseAgent(ABC):
                 model=model,
                 task_id=task_id,
                 attempt=attempt,
+                scope=scope,
                 user_id=user_id,
                 datasource_id=datasource_id,
                 agent_name=self.config.name,
@@ -449,4 +481,5 @@ __all__ = [
     "ExtractionError",
     "InsightError",
     "ReportError",
+    "load_prompt_version",
 ]

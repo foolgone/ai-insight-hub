@@ -1069,6 +1069,10 @@ file: <binary>
 - `202`: 任务已入队
 - `429`: 成本额度用尽（`INSUFFICIENT_CREDITS`）
 
+> 落库口径（2026-11-06）：洞察结果除写入 `tasks.result` 外，同时写入
+> `analysis_results`（`analysis_type='insight'`，`data_id=NULL` 表示数据源级结果）；
+> 报告生成只读取 `analysis_results` 中的最新洞察，因此洞察必须先于报告执行。
+
 ---
 
 ### 7.4 获取洞察结果
@@ -1354,6 +1358,7 @@ file: <binary>
 ```json
 {
   "id": "b1d5f7a2-3c4e-4d6b-9f80-2a3b4c5d6e7f",
+  "task_id": "6ba7b810-9dad-41d1-80b4-00c04fd430c8",
   "title": "2025年1月质量分析报告",
   "report_type": "quality",
   "format": "markdown",
@@ -1361,6 +1366,10 @@ file: <binary>
   "created_at": "2025-01-15T10:30:00Z"
 }
 ```
+
+> 报告生成已纳入统一任务体系（`tasks.task_type='report'`，`params.report_id` 关联报告）：
+> 可在 `GET /api/v1/tasks?task_type=report` 查看进度，并支持取消/重试；
+> `task_id` 为新增字段（向后兼容，旧客户端可忽略）。
 
 **状态码**：
 - `202`: 已受理，生成中
@@ -1560,6 +1569,12 @@ file: <binary>
 - `404`: 任务不存在（`TASK_NOT_FOUND`）
 - `409`: 任务已结束无法取消（`TASK_NOT_CANCELLABLE`）
 
+> 取消语义（2026-11-06）：
+> - 服务端先 `revoke`（不 terminate）排队中的 Celery 任务；
+> - worker 在逐条循环中每处理完一条检查一次数据库状态，命中后停止并**保留已处理结果**；
+> - 状态保持 `cancelled`，不会被收尾逻辑覆盖为 `completed`；
+> - 报告任务取消后，对应 `reports.status` 置为 `failed`。
+
 ---
 
 ### 10.4 重试失败任务
@@ -1581,6 +1596,9 @@ file: <binary>
 **状态码**：
 - `202`: 已重新入队
 - `409`: 任务不是失败状态（`TASK_NOT_RETRYABLE`）
+
+> 重试语义（2026-11-06）：按 `task_type` 分派到对应 `enqueue_*` 重新投递 Celery，
+> 并回写新的 `celery_task_id`；同时清空上一次的 `result` / `current_step` / 错误信息。
 
 ---
 

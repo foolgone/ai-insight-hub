@@ -16,6 +16,7 @@ from app.agents.base import (
     AgentInputError,
     AgentOutputError,
     BaseAgent,
+    load_prompt_version,
 )
 from app.schemas.agents.extraction import (
     MAX_DIALOGUES_PER_RUN,
@@ -41,7 +42,11 @@ class KnowledgeExtractionAgent(BaseAgent):
     output_schema = ExtractionLLMOutput
 
     def __init__(self, config: AgentConfig | None = None, *, llm: Any = None) -> None:
-        super().__init__(config or AgentConfig(name="extraction_agent"), llm=llm)
+        super().__init__(
+            config
+            or AgentConfig(name="extraction_agent", version=load_prompt_version(PROMPT_DIR)),
+            llm=llm,
+        )
         self._active_input: ExtractionInput | None = None
         self._examples: list[dict[str, Any]] | None = None
 

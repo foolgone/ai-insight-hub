@@ -149,6 +149,8 @@ class CleanedData(Base):
         Index("idx_cleaned_data_timestamp", "timestamp"),
         Index("idx_cleaned_data_quality_score", "quality_score"),
         Index("idx_cleaned_data_raw_data_id", "raw_data_id"),
+        # 清洗幂等：同一 raw_data 的同一 dialogue 只允许一行（P1-5）
+        Index("uk_cleaned_raw_dialogue", "raw_data_id", "dialogue_id", unique=True),
         Index(
             "idx_cleaned_data_ds_quality",
             "datasource_id",
@@ -180,7 +182,8 @@ class CleanedData(Base):
         nullable=False,
     )
     dialogue_id: Mapped[uuid.UUID] = mapped_column(PG_UUID(as_uuid=True), nullable=False)
-    timestamp: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    # 时间戳解析失败时存 NULL（不伪造当前时间，P1-6）
+    timestamp: Mapped[datetime | None] = mapped_column(DateTime)
     user_message: Mapped[str] = mapped_column(Text, nullable=False)
     ai_response: Mapped[str] = mapped_column(Text, nullable=False)
     metadata_: Mapped[dict[str, Any] | None] = mapped_column(
