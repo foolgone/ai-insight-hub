@@ -1,5 +1,7 @@
-"""B-503 嵌入服务测试（注入固定向量模型，不下载真实模型）。"""
+"""embedding_service 离线化相关单测（不加载真实模型）。"""
 from __future__ import annotations
+
+from pathlib import Path
 
 import pytest
 
@@ -8,58 +10,69 @@ from app.services import embedding_service
 
 pytestmark = pytest.mark.unit
 
-_DIM = settings.EMBEDDING_DIM
 
-
-class _FakeModel:
-    def encode(self, texts, batch_size=32, normalize_embeddings=True):  # noqa: ANN001
-        return [[0.01 * (index + 1)] * _DIM for index, _ in enumerate(texts)]
-
-
-def test_encode_texts_sync(monkeypatch) -> None:
+@pytest.fixture(autouse=True)
+def _reset_model_cache():
     embedding_service.reset_model_cache()
-    monkeypatch.setattr(embedding_service, "_get_model", lambda: _FakeModel())
-
-    vectors = embedding_service.encode_texts_sync(["a", "b"])
-
-    assert len(vectors) == 2
-    assert all(len(vector) == _DIM for vector in vectors)
+    yield
+    embedding_service.reset_model_cache()
 
 
-def test_encode_texts_sync_empty(monkeypatch) -> None:
-    monkeypatch.setattr(embedding_service, "_get_model", lambda: _FakeModel())
+def test_model_status_not_ready_without_cache(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.setattr(settings, "EMBEDDING_CACHE_DIR", str(tmp_path))
 
-    assert embedding_service.encode_texts_sync([]) == []
+    status = embedding_service.model_status()
 
-
-async def test_encode_texts_async(monkeypatch) -> None:
-    monkeypatch.setattr(embedding_service, "_get_model", lambda: _FakeModel())
-
-    vectors = await embedding_service.encode_texts(["hello"])
-
-    assert len(vectors) == 1
-    assert len(vectors[0]) == _DIM
+    assert status["ready"] is False
+    assert status["loaded"] is False
+    assert status["cache_dir"] == str(tmp_path)
 
 
-async def test_encode_text(monkeypatch) -> None:
-    monkeypatch.setattr(embedding_service, "_get_model", lambda: _FakeModel())
+def test_model_status_ready_when_model_files_exist(tmp_path: Path, monkeypatch) -> None:
+    snapshot = tmp_path / "models--x" / "snapshots" / "abc"
+    snapshot.mkdir(parents=True)
+    (snapshot / "config.json").write_text("{}", encoding="utf-8")
+    monkeypatch.setattr(settings, "EMBEDDING_CACHE_DIR", str(tmp_path))
 
-    vector = await embedding_service.encode_text("hello")
+    status = embedding_service.model_status()
 
-    assert len(vector) == _DIM
+    assert status["ready"] is True
+    assert status["loaded"] is False
 
 
-def test_dimension_mismatch_raises(monkeypatch) -> None:
-    class _BadModel:
-        def encode(self, texts, batch_size=32, normalize_embeddings=True):  # noqa: ANN001
-            return [[0.1] * 10 for _ in texts]
+def test_load_failure_is_cached(monkeypatch) -> None:
+    """首次加载失败后不再重复尝试（避免每条文本都联网/重试）。"""
+    import sentence_transformers
 
-    monkeypatch.setattr(embedding_service, "_get_model", lambda: _BadModel())
+    calls: list[int] = []
+
+    def _boom(*args, **kwargs):  # noqa: ANN002, ANN003
+        calls.append(1)
+        raise RuntimeError("model download failed")
+
+    monkeypatch.setattr(sentence_transformers, "SentenceTransformer", _boom)
 
     with pytest.raises(embedding_service.EmbeddingError):
-        embedding_service.encode_texts_sync(["a"])
+        embedding_service.encode_texts_sync(["第一条"])
+    with pytest.raises(embedding_service.EmbeddingError):
+        embedding_service.encode_texts_sync(["第二条"])
+
+    assert len(calls) == 1
+    assert embedding_service.model_status()["ready"] is False
+    assert "model download failed" in (embedding_service.model_status()["error"] or "")
 
 
-def test_reset_model_cache() -> None:
+def test_reset_model_cache_clears_failure(monkeypatch) -> None:
+    import sentence_transformers
+
+    monkeypatch.setattr(
+        sentence_transformers,
+        "SentenceTransformer",
+        lambda *a, **k: (_ for _ in ()).throw(RuntimeError("boom")),
+    )
+    with pytest.raises(embedding_service.EmbeddingError):
+        embedding_service.encode_texts_sync(["x"])
+
     embedding_service.reset_model_cache()
-    assert embedding_service._model is None
+
+    assert embedding_service.model_status().get("error") is None

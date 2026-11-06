@@ -24,3 +24,6 @@ docs/
 # VCS
 .git/
 .gitignore
+
+# embedding 模型缓存（构建时下载到镜像内，不入上下文）
+.models/

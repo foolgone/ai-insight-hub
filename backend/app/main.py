@@ -23,6 +23,7 @@ from app.core.exceptions import AIInsightHubException
 from app.core.sentry import init_sentry
 from app.middleware.degradation_middleware import DegradationMiddleware
 from app.middleware.rate_limit import RateLimitMiddleware
+from app.services import embedding_service
 from app.utils.logger import logger, setup_logging
 
 # 结构化日志（Loguru）：启动即落文件日志（B-202）
@@ -76,11 +77,12 @@ async def root():
 
 @app.get("/health")
 async def health_check():
-    """健康检查"""
+    """健康检查（含 embedding 模型就绪状态，不触发模型加载）"""
     return {
         "status": "healthy",
         "service": "ai-insight-hub-api",
         "version": settings.APP_VERSION,
+        "embedding": embedding_service.model_status(),
     }
 
 
@@ -91,6 +93,7 @@ async def api_health_check():
         "status": "healthy",
         "service": "ai-insight-hub-api",
         "version": settings.APP_VERSION,
+        "embedding": embedding_service.model_status(),
     }
 
 
