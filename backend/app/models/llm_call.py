@@ -38,6 +38,8 @@ class LlmCall(Base):
         Index("idx_llm_calls_user_date", "user_id", "created_at"),
         Index("idx_llm_calls_datasource_date", "datasource_id", "created_at"),
         Index("idx_llm_calls_service_model", "service", "model", "created_at"),
+        # BYOK 成本隔离：降级统计只聚合 key_source='server'（迁移 010）
+        Index("idx_llm_calls_key_source_date", "key_source", "created_at"),
     )
 
     id: Mapped[uuid.UUID] = mapped_column(
