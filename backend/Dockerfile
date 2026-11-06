@@ -2,7 +2,6 @@ FROM python:3.11-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    PIP_NO_CACHE_DIR=1 \
     TZ=Asia/Shanghai
 
 WORKDIR /app
@@ -13,9 +12,11 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt ./
-# pip 源可配置：国内网络构建时传 --build-arg PIP_INDEX_URL=https://pypi.tuna.tsinghua.edu.cn/simple
+# pip 源可配置：国内网络构建时传 --build-arg PIP_INDEX_URL=<镜像源>
+# 例：https://mirrors.cloud.tencent.com/pypi/simple
 ARG PIP_INDEX_URL=https://pypi.org/simple
-RUN pip install --no-cache-dir --retries 5 --timeout 120 -i "${PIP_INDEX_URL}" -r requirements.txt
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install --retries 10 --timeout 300 -i "${PIP_INDEX_URL}" -r requirements.txt
 
 COPY . .
 
