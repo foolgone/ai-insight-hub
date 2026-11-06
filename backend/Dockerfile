@@ -15,6 +15,12 @@ COPY requirements.txt ./
 # pip 源可配置：国内网络构建时传 --build-arg PIP_INDEX_URL=<镜像源>
 # 例：https://mirrors.cloud.tencent.com/pypi/simple
 ARG PIP_INDEX_URL=https://pypi.org/simple
+# 可选：先装 CPU 版 torch（云端 2G 精简镜像推荐），避免 requirements 拉取 CUDA 版
+# 例：--build-arg TORCH_INDEX_URL=https://download.pytorch.org/whl/cpu
+ARG TORCH_INDEX_URL=
+RUN if [ -n "${TORCH_INDEX_URL}" ]; then \
+      pip install --no-cache-dir --index-url "${TORCH_INDEX_URL}" torch; \
+    fi
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install --retries 10 --timeout 300 -i "${PIP_INDEX_URL}" -r requirements.txt
 
