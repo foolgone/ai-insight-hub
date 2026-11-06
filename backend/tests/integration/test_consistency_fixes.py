@@ -12,7 +12,7 @@ import uuid
 from typing import Any
 
 import pytest
-from sqlalchemy import select
+from sqlalchemy import select, update
 
 from app.agents.base import AgentResult
 from app.core.cost_tracker import CostTracker
@@ -235,6 +235,98 @@ async def test_cleaning_missing_timestamp_stored_as_null(db_session, monkeypatch
     ).scalar_one()
     assert row.timestamp is None
     assert "missing_timestamp" in (row.issues or [])
+
+
+async def test_clean_finalize_preserves_cancelled(db_session, monkeypatch) -> None:
+    """收尾前复查取消：最后一条处理完时被取消，不得覆盖为 completed。"""
+    from app.services import task_service
+
+    _, _, task = await _cleaning_setup(db_session)
+    monkeypatch.setattr(
+        cleaning_service, "_build_agent", lambda: _CleaningAgent(_cleaning_result())
+    )
+
+    async def fake_is_cancelled(session, task_id):
+        await session.execute(
+            update(Task).where(Task.id == task_id).values(status="cancelled")
+        )
+        return True
+
+    monkeypatch.setattr(task_service, "is_cancelled", fake_is_cancelled)
+
+    outcome = await cleaning_service.run_clean_task(str(task.id), session=db_session)
+
+    assert outcome["status"] == "cancelled"
+    await db_session.refresh(task)
+    assert task.status == "cancelled"
+
+
+class _EvaluationAgent:
+    def __init__(self, result: AgentResult) -> None:
+        self._result = result
+
+    async def evaluate(self, input_data, **kwargs) -> AgentResult:
+        return self._result
+
+
+def _evaluation_result() -> AgentResult:
+    return AgentResult(
+        success=True,
+        data={
+            "overall_score": 80,
+            "needs_review": False,
+            "quality_level": "good",
+            "dimensions": {},
+        },
+        metadata={"agent": "evaluation_agent", "version": "v1.0.0"},
+        duration=0.1,
+        token_usage={"input": 10, "output": 5},
+    )
+
+
+async def test_evaluation_finalize_preserves_cancelled(db_session, monkeypatch) -> None:
+    from app.services import evaluation_service, task_service
+
+    user = UserFactory()
+    await persist(db_session, user)
+    datasource = DataSourceFactory(user_id=user.id)
+    await persist(db_session, datasource)
+    raw = RawDataFactory(datasource_id=datasource.id)
+    await persist(db_session, raw)
+    await persist(
+        db_session,
+        CleanedDataFactory(
+            datasource_id=datasource.id,
+            raw_data_id=raw.id,
+            user_message="退货怎么处理",
+            ai_response="7 天无理由",
+        ),
+    )
+    task = TaskFactory(
+        user_id=user.id,
+        datasource_id=datasource.id,
+        task_type="evaluate",
+        status="pending",
+        params={},
+    )
+    await persist(db_session, task)
+    monkeypatch.setattr(
+        evaluation_service, "_build_agent", lambda: _EvaluationAgent(_evaluation_result())
+    )
+
+    async def fake_is_cancelled(session, task_id):
+        await session.execute(
+            update(Task).where(Task.id == task_id).values(status="cancelled")
+        )
+        return True
+
+    monkeypatch.setattr(task_service, "is_cancelled", fake_is_cancelled)
+
+    outcome = await evaluation_service.run_evaluation_task(str(task.id), session=db_session)
+
+    assert outcome["status"] == "cancelled"
+    await db_session.refresh(task)
+    assert task.status == "cancelled"
 
 
 # --------------------------------------------------------------------- P0-2
