@@ -5,6 +5,7 @@ import uuid
 
 import pytest
 
+from app.core.config import settings
 from app.core.security import hash_password
 from tests.factories import UserFactory, persist
 
@@ -90,6 +91,31 @@ async def test_change_password_flow(client) -> None:
         "/api/v1/auth/login", json={"email": email, "password": "newsecret123"}
     )
     assert new_login.status_code == 200
+
+
+async def test_demo_account_cannot_change_password(client) -> None:
+    """demo 账号禁止改密，避免演示环境被破坏（P1-4）。"""
+    login = await client.post(
+        "/api/v1/auth/login",
+        json={
+            "email": settings.DEMO_ACCOUNT_EMAIL,
+            "password": settings.SEED_DEMO_PASSWORD,
+        },
+    )
+    assert login.status_code == 200, login.text
+    headers = _auth(login.json()["access_token"])
+
+    response = await client.post(
+        "/api/v1/users/me/password",
+        headers=headers,
+        json={
+            "current_password": settings.SEED_DEMO_PASSWORD,
+            "new_password": "hacked123",
+        },
+    )
+    assert response.status_code == 403
+    assert response.json()["error"]["code"] == "AUTH_FORBIDDEN"
+    assert response.json()["error"]["details"]["reason"] == "demo_account_protected"
 
 
 async def test_viewer_is_read_only(client, db_session) -> None:

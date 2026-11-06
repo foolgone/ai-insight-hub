@@ -39,6 +39,23 @@ async def test_rate_limit_returns_429_with_headers(client, monkeypatch) -> None:
     await _clear_rate_limit_keys()
 
 
+async def test_forwarded_for_uses_separate_buckets(client, monkeypatch) -> None:
+    """反代后按真实客户端 IP 分桶（P1-2），而不是共用代理 IP。"""
+    monkeypatch.setattr(settings, "RATE_LIMIT_ENABLED", True)
+    monkeypatch.setattr(settings, "RATE_LIMIT_PER_MINUTE", 1)
+    await _clear_rate_limit_keys()
+
+    first = await client.get("/api/v1/health", headers={"X-Forwarded-For": "203.0.113.1"})
+    other = await client.get("/api/v1/health", headers={"X-Forwarded-For": "203.0.113.2"})
+    assert first.status_code == 200
+    assert other.status_code == 200
+
+    again = await client.get("/api/v1/health", headers={"X-Forwarded-For": "203.0.113.1"})
+    assert again.status_code == 429
+
+    await _clear_rate_limit_keys()
+
+
 async def test_exempt_health_path_is_not_limited(client, monkeypatch) -> None:
     monkeypatch.setattr(settings, "RATE_LIMIT_ENABLED", True)
     monkeypatch.setattr(settings, "RATE_LIMIT_PER_MINUTE", 1)

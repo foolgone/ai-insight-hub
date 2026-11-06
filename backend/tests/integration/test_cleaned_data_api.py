@@ -44,6 +44,7 @@ async def test_list_and_detail(client, auth_headers, db_session) -> None:
     listed = await client.get(
         f"/api/v1/datasources/{datasource_id}/cleaned-data",
         headers=auth_headers,
+        params={"sort": "-quality_score"},
     )
 
     assert listed.status_code == 200, listed.text
