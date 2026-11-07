@@ -141,7 +141,7 @@ export function Chart({
       {loading ? (
         <Skeleton variant="card" />
       ) : !hasData || allZero ? (
-        <Empty title={emptyText} description="数据接入后展示" />
+        <Empty className="border-0 py-10" title={emptyText} description="数据接入后展示" />
       ) : (
         <div className="w-full" style={{ height }}>
           <ResponsiveContainer width="100%" height="100%">

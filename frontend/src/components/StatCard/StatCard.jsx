@@ -49,9 +49,7 @@ export function StatCard({ title, value, icon, trend, color = 'primary', classNa
           <span aria-hidden="true">{trend.direction === 'up' ? '↑' : '↓'}</span>{' '}
           {Math.abs(trend.value)}%
         </p>
-      ) : (
-        <p className="mt-3 font-mono text-[11px] tracking-wide text-gray-400">—</p>
-      )}
+      ) : null}
     </div>
   )
 }

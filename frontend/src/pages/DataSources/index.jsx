@@ -130,12 +130,13 @@ export default function DataSources() {
           variant="outline"
           icon={<LuRefreshCw className="h-4 w-4" />}
           onClick={() => query.refetch()}
+          className="justify-self-start"
         >
           刷新
         </Button>
       </div>
 
-      <div className="mt-4 overflow-hidden rounded-md border border-gray-200 bg-white">
+      <div className="mt-4 overflow-hidden border border-gray-200 bg-white">
         {query.isLoading ? <PageLoading label="正在加载数据源..." /> : null}
 
         {query.isError ? (
