@@ -44,10 +44,10 @@ export function Checkbox({
         disabled={disabled}
         aria-label={ariaLabel}
         className={clsx(
-          'flex h-5 w-5 shrink-0 items-center justify-center rounded border border-gray-300 bg-white text-white transition-colors',
+          'flex h-5 w-5 shrink-0 items-center justify-center rounded-sm border border-gray-400 bg-white text-white transition-colors',
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2',
-          'data-[state=checked]:border-primary-500 data-[state=checked]:bg-primary-500',
-          'data-[state=indeterminate]:border-primary-500 data-[state=indeterminate]:bg-primary-500',
+          'data-[state=checked]:border-gray-900 data-[state=checked]:bg-gray-900',
+          'data-[state=indeterminate]:border-gray-900 data-[state=indeterminate]:bg-gray-900',
           'disabled:cursor-not-allowed disabled:opacity-50'
         )}
       >

@@ -1,55 +1,57 @@
 import clsx from 'clsx'
 
-const COLORS = {
-  primary: 'bg-primary-50 text-primary-600',
-  success: 'bg-success-50 text-success-600',
-  warning: 'bg-warning-50 text-warning-600',
-  error: 'bg-error-50 text-error-600',
+const DOT_COLORS = {
+  primary: 'bg-primary-500',
+  success: 'bg-success-500',
+  warning: 'bg-warning-500',
+  error: 'bg-error-500',
+  info: 'bg-info-500',
 }
 
 /**
- * 统计卡片（02 §3.3）：图标 + 数值 + 趋势。
+ * 统计卡片（编辑部风格）：细线顶栏 + 衬线大数字，不使用图标色块。
  * @param {{
  *   title: string,
  *   value: string|number,
- *   icon: React.ReactNode,
+ *   icon?: React.ReactNode,
  *   trend?: { value: number, direction: 'up'|'down' },
- *   color?: 'primary'|'success'|'warning'|'error',
+ *   color?: 'primary'|'success'|'warning'|'error'|'info',
  *   className?: string,
  * }} props
  */
 export function StatCard({ title, value, icon, trend, color = 'primary', className }) {
   return (
-    <div
-      className={clsx(
-        'flex items-start justify-between gap-3 rounded-md border border-gray-200 bg-white p-5',
-        className
-      )}
-    >
-      <div className="min-w-0">
-        <p className="text-sm text-gray-600">{title}</p>
-        <p className="mt-1 text-3xl font-bold text-gray-900">{value}</p>
-        {trend ? (
-          <p
-            className={clsx(
-              'mt-1 text-xs font-medium',
-              trend.direction === 'up' ? 'text-success-600' : 'text-error-600'
-            )}
-          >
-            <span aria-hidden="true">{trend.direction === 'up' ? '↑' : '↓'}</span>{' '}
-            {Math.abs(trend.value)}%
-          </p>
+    <div className={clsx('group relative border-t border-gray-300 pt-4', className)}>
+      <div className="flex items-start justify-between gap-3">
+        <p className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.18em] text-gray-500">
+          <span
+            className={clsx('h-1.5 w-1.5 rounded-full', DOT_COLORS[color] || DOT_COLORS.primary)}
+            aria-hidden="true"
+          />
+          {title}
+        </p>
+        {icon ? (
+          <span className="text-gray-300 transition-colors group-hover:text-gray-500" aria-hidden="true">
+            {icon}
+          </span>
         ) : null}
       </div>
-      <div
-        className={clsx(
-          'grid h-10 w-10 shrink-0 place-items-center rounded-md',
-          COLORS[color] || COLORS.primary
-        )}
-        aria-hidden="true"
-      >
-        {icon}
-      </div>
+      <p className="mt-4 font-display text-4xl font-normal leading-none tracking-tight text-gray-900 num">
+        {value}
+      </p>
+      {trend ? (
+        <p
+          className={clsx(
+            'mt-3 font-mono text-[11px] tracking-wide',
+            trend.direction === 'up' ? 'text-success-600' : 'text-error-600'
+          )}
+        >
+          <span aria-hidden="true">{trend.direction === 'up' ? '↑' : '↓'}</span>{' '}
+          {Math.abs(trend.value)}%
+        </p>
+      ) : (
+        <p className="mt-3 font-mono text-[11px] tracking-wide text-gray-400">—</p>
+      )}
     </div>
   )
 }

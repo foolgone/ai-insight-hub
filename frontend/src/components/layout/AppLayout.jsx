@@ -13,7 +13,7 @@ export function AppLayout() {
       <div className="flex flex-1">
         <Sidebar />
         <main className="min-w-0 flex-1">
-          <div className="mx-auto w-full max-w-[1600px] p-4 md:p-6 lg:p-8">
+          <div className="mx-auto w-full max-w-[1440px] px-4 py-6 md:px-8 md:py-10 lg:px-10">
             <Outlet />
           </div>
         </main>

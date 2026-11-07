@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { LuFilePlus2, LuRefreshCw } from 'react-icons/lu'
 import { AsyncState } from '../../components/common/AsyncState'
 import { PageLoading } from '../../components/common/PageLoading'
+import { PageHeader } from '../../components/common/PageHeader'
 import { Button } from '../../components/Button'
 import { Empty } from '../../components/Empty'
 import { Pagination } from '../../components/Pagination'
@@ -76,31 +77,31 @@ export default function Reports() {
 
   return (
     <section className="space-y-6">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900 lg:text-3xl">报告中心</h1>
-          <p className="mt-1 text-sm text-gray-500">
-            按需生成 4 类分析报告（markdown / excel / pdf），生成中每 3 秒刷新状态。
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            icon={<LuRefreshCw className="h-4 w-4" />}
-            onClick={() => reportsQuery.refetch()}
-            disabled={!currentDatasourceId}
-          >
-            刷新
-          </Button>
-          <Button
-            icon={<LuFilePlus2 className="h-4 w-4" />}
-            onClick={() => setCreateOpen(true)}
-            disabled={!currentDatasourceId}
-          >
-            生成报告
-          </Button>
-        </div>
-      </div>
+      <PageHeader
+        index="06"
+        eyebrow="Reports"
+        title="报告中心"
+        description="按需生成 4 类分析报告（markdown / excel / pdf），生成中每 3 秒刷新状态。"
+        actions={
+          <>
+            <Button
+              variant="outline"
+              icon={<LuRefreshCw className="h-4 w-4" />}
+              onClick={() => reportsQuery.refetch()}
+              disabled={!currentDatasourceId}
+            >
+              刷新
+            </Button>
+            <Button
+              icon={<LuFilePlus2 className="h-4 w-4" />}
+              onClick={() => setCreateOpen(true)}
+              disabled={!currentDatasourceId}
+            >
+              生成报告
+            </Button>
+          </>
+        }
+      />
 
       {!currentDatasourceId ? (
         <Empty

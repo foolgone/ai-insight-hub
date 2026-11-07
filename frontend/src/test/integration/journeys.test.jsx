@@ -154,7 +154,7 @@ describe('页面级集成（F-502）', () => {
     renderAt('/data-sources')
 
     expect(
-      await screen.findByRole('heading', { name: '欢迎使用 AI Insight Hub' })
+      await screen.findByRole('heading', { name: '欢迎回来' })
     ).toBeInTheDocument()
   })
 

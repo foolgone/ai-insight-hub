@@ -24,7 +24,8 @@ const MENU_ITEMS = [
 ]
 
 /**
- * 侧边栏（04 §3.2）：桌面 240/64px 两态，移动端抽屉。
+ * 侧边栏（编辑部风格）：墨色底、等宽分组标签、朱砂色激活线。
+ * 桌面 240/64px 两态，移动端抽屉。
  */
 export function Sidebar() {
   const isMobile = useMediaQuery('(max-width: 767px)')
@@ -47,7 +48,7 @@ export function Sidebar() {
         <button
           type="button"
           aria-label="关闭菜单遮罩"
-          className="fixed inset-0 z-30 bg-black/40"
+          className="fixed inset-0 z-30 bg-gray-900/50"
           onClick={closeMobile}
         />
       ) : null}
@@ -56,10 +57,10 @@ export function Sidebar() {
         aria-hidden={hiddenOnMobile ? true : undefined}
         inert={hiddenOnMobile ? '' : undefined}
         className={clsx(
-          'flex shrink-0 flex-col border-r border-gray-200 bg-white transition-transform duration-300',
+          'flex shrink-0 flex-col border-r border-gray-900 bg-gray-900 text-gray-100 transition-transform duration-300',
           isMobile
             ? clsx(
-                'fixed inset-y-0 left-0 z-40 w-60 shadow-lg',
+                'fixed inset-y-0 left-0 z-40 w-64 shadow-xl',
                 mobileOpen ? 'translate-x-0' : '-translate-x-full'
               )
             : collapsed
@@ -69,24 +70,31 @@ export function Sidebar() {
       >
         <div
           className={clsx(
-            'flex h-14 items-center gap-2 border-b border-gray-100 px-3 md:h-16',
+            'flex h-16 items-center gap-3 border-b border-white/10 px-4',
             !showLabel && 'justify-center px-0'
           )}
         >
           <div
-            className="grid h-8 w-8 shrink-0 place-items-center rounded-md bg-primary-600 text-xs font-bold text-white"
+            className="grid h-8 w-8 shrink-0 place-items-center border border-white/25 font-display text-[13px] leading-none text-gray-50"
             aria-hidden="true"
           >
             AI
           </div>
           {showLabel ? (
-            <span className="truncate text-sm font-semibold text-gray-900">AI Insight Hub</span>
+            <div className="min-w-0">
+              <p className="truncate font-display text-[15px] leading-tight text-gray-50">
+                AI Insight Hub
+              </p>
+              <p className="mt-0.5 font-mono text-[9px] uppercase tracking-[0.2em] text-gray-500">
+                Intelligence
+              </p>
+            </div>
           ) : null}
           {isMobile ? (
             <button
               type="button"
               aria-label="关闭菜单"
-              className="ml-auto flex h-9 w-9 items-center justify-center rounded-md text-gray-500 hover:bg-gray-100"
+              className="ml-auto flex h-9 w-9 items-center justify-center text-gray-400 transition-colors hover:text-gray-50"
               onClick={closeMobile}
             >
               <LuChevronLeft className="h-4 w-4" aria-hidden="true" />
@@ -94,55 +102,62 @@ export function Sidebar() {
           ) : null}
         </div>
 
-        <nav aria-label="主菜单" className="flex-1 space-y-1 overflow-y-auto p-2">
-          {MENU_ITEMS.map(item => {
-            const Icon = item.icon
-            return (
-              <NavLink
-                key={item.key}
-                to={item.path}
-                end={item.path === '/dashboard'}
-                title={item.label}
-                className={({ isActive }) =>
-                  clsx(
-                    'relative flex h-11 items-center gap-3 rounded-md px-3 text-sm transition-colors',
-                    isActive
-                      ? 'bg-primary-50 font-medium text-primary-600'
-                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                  )
-                }
-              >
-                {({ isActive }) => (
-                  <>
-                    {isActive ? (
-                      <span
-                        className="absolute inset-y-2 left-0 w-[3px] rounded-r bg-primary-600"
-                        aria-hidden="true"
-                      />
-                    ) : null}
-                    <Icon className="h-5 w-5 shrink-0" aria-hidden="true" />
-                    {showLabel ? <span className="truncate">{item.label}</span> : null}
-                  </>
-                )}
-              </NavLink>
-            )
-          })}
+        <nav aria-label="主菜单" className="flex-1 overflow-y-auto py-4">
+          {showLabel ? (
+            <p className="px-4 pb-2 font-mono text-[9px] uppercase tracking-[0.22em] text-gray-600">
+              Workspace
+            </p>
+          ) : null}
+          <div className="space-y-0.5 px-2">
+            {MENU_ITEMS.map(item => {
+              const Icon = item.icon
+              return (
+                <NavLink
+                  key={item.key}
+                  to={item.path}
+                  end={item.path === '/dashboard'}
+                  title={item.label}
+                  className={({ isActive }) =>
+                    clsx(
+                      'relative flex h-10 items-center gap-3 px-3 text-[13px] transition-colors',
+                      isActive
+                        ? 'bg-white/[0.06] text-gray-50'
+                        : 'text-gray-400 hover:bg-white/[0.04] hover:text-gray-100'
+                    )
+                  }
+                >
+                  {({ isActive }) => (
+                    <>
+                      {isActive ? (
+                        <span
+                          className="absolute inset-y-1 left-0 w-[2px] bg-primary-500"
+                          aria-hidden="true"
+                        />
+                      ) : null}
+                      <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
+                      {showLabel ? <span className="truncate">{item.label}</span> : null}
+                    </>
+                  )}
+                </NavLink>
+              )
+            })}
+          </div>
         </nav>
 
         {!isMobile ? (
-          <div className="border-t border-gray-100 p-2">
+          <div className="border-t border-white/10 p-2">
             <button
               type="button"
               onClick={toggleSidebar}
               aria-label={collapsed ? '展开侧边栏' : '折叠侧边栏'}
               aria-expanded={!collapsed}
-              className="flex h-10 w-full items-center justify-center gap-2 rounded-md text-sm text-gray-500 hover:bg-gray-50"
+              className="flex h-9 w-full items-center justify-center gap-2 font-mono text-[10px] uppercase tracking-[0.16em] text-gray-500 transition-colors hover:text-gray-100"
             >
               {collapsed ? (
-                <LuChevronRight className="h-4 w-4" aria-hidden="true" />
+                <LuChevronRight className="h-3.5 w-3.5" aria-hidden="true" />
               ) : (
                 <>
-                  <LuChevronLeft className="h-4 w-4" aria-hidden="true" />
+                  <LuChevronLeft className="h-3.5 w-3.5" aria-hidden="true" />
                   <span>收起</span>
                 </>
               )}

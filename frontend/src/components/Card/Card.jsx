@@ -1,7 +1,7 @@
 import clsx from 'clsx'
 
 /**
- * 卡片（02 §3.2）。
+ * 卡片（编辑部风格）：细线边框、无阴影、衬线小标题。
  * @param {{
  *   title?: React.ReactNode,
  *   extra?: React.ReactNode,
@@ -29,28 +29,28 @@ export function Card({
     <section
       aria-busy={loading || undefined}
       className={clsx(
-        'rounded-md bg-white transition-shadow',
+        'bg-white transition-colors',
         bordered && 'border border-gray-200',
-        variant === 'flat'
-          ? 'shadow-none'
-          : variant === 'hoverable' || hoverable
-            ? 'hover:shadow-md'
-            : 'shadow',
+        (variant === 'hoverable' || hoverable) && 'hover:border-gray-400',
         className
       )}
     >
       {title || extra ? (
-        <header className="flex items-center justify-between gap-3 border-b border-gray-100 px-6 py-4">
-          {title ? <h2 className="text-lg font-semibold text-gray-900">{title}</h2> : null}
+        <header className="flex items-baseline justify-between gap-3 border-b border-gray-200 px-5 py-4">
+          {title ? (
+            <h2 className="font-display text-lg font-normal tracking-tight text-gray-900">
+              {title}
+            </h2>
+          ) : null}
           {extra ? <div className="shrink-0">{extra}</div> : null}
         </header>
       ) : null}
 
-      <div className="p-6">
+      <div className="p-5">
         {loading ? (
           <div className="space-y-3" role="status" aria-label="加载中">
             {[0, 1, 2].map(index => (
-              <div key={index} className="h-4 animate-pulse rounded bg-gray-200" />
+              <div key={index} className="h-3 animate-pulse bg-gray-100" />
             ))}
           </div>
         ) : (
@@ -59,7 +59,7 @@ export function Card({
       </div>
 
       {footer ? (
-        <footer className="border-t border-gray-100 px-6 py-4 text-sm text-gray-600">
+        <footer className="border-t border-gray-200 px-5 py-3 font-mono text-[11px] tracking-wide text-gray-500">
           {footer}
         </footer>
       ) : null}

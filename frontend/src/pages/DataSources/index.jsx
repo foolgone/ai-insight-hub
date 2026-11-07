@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { LuPlus, LuRefreshCw } from 'react-icons/lu'
 import { AsyncState } from '../../components/common/AsyncState'
 import { PageLoading } from '../../components/common/PageLoading'
+import { PageHeader } from '../../components/common/PageHeader'
 import { Button } from '../../components/Button'
 import { Input } from '../../components/Input'
 import { Select } from '../../components/Select'
@@ -82,19 +83,19 @@ export default function DataSources() {
 
   return (
     <section>
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900 lg:text-3xl">数据源管理</h1>
-          <p className="mt-1 text-sm text-gray-500">
-            按数据源隔离导入与分析，支持 CSV / JSON / XLSX / TXT（≤ 50MB）
-          </p>
-        </div>
-        {canWrite ? (
-          <Button icon={<LuPlus className="h-4 w-4" />} onClick={openCreate}>
-            新建数据源
-          </Button>
-        ) : null}
-      </div>
+      <PageHeader
+        index="02"
+        eyebrow="Data Sources"
+        title="数据源管理"
+        description="按数据源隔离导入与分析，支持 CSV / JSON / XLSX / TXT（≤ 50MB）"
+        actions={
+          canWrite ? (
+            <Button icon={<LuPlus className="h-4 w-4" />} onClick={openCreate}>
+              新建数据源
+            </Button>
+          ) : null
+        }
+      />
 
       <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <Input

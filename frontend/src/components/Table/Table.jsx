@@ -92,7 +92,7 @@ export function Table({
   const totalPages = pagination ? Math.max(1, Math.ceil(pagination.total / pagination.pageSize)) : 1
 
   return (
-    <div className={clsx('overflow-hidden rounded-md border border-gray-200 bg-white', className)}>
+    <div className={clsx('overflow-hidden border border-gray-200 bg-white', className)}>
       <div
         className="overflow-x-auto"
         tabIndex={0}
@@ -101,7 +101,7 @@ export function Table({
       >
         <table aria-busy={loading || undefined} className="min-w-full border-collapse text-sm">
           <caption className="sr-only">{caption}</caption>
-          <thead className="bg-gray-50 text-left text-gray-700">
+          <thead className="border-b border-gray-300 text-left text-gray-500">
             <tr>
               {rowSelection ? (
                 <th scope="col" className="w-12 px-4 py-3">
@@ -128,7 +128,7 @@ export function Table({
                   }
                   style={column.width ? { width: column.width } : undefined}
                   className={clsx(
-                    'whitespace-nowrap px-4 py-3 font-semibold',
+                    'whitespace-nowrap px-4 py-3 font-mono text-[10px] font-medium uppercase tracking-[0.14em]',
                     column.fixed === 'left' && 'sticky left-0 z-10 bg-gray-50'
                   )}
                 >
@@ -157,7 +157,7 @@ export function Table({
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-200">
+          <tbody className="divide-y divide-gray-100">
             {loading ? (
               Array.from({ length: 5 }).map((_, index) => (
                 <tr key={`skeleton-${index}`}>
@@ -168,7 +168,7 @@ export function Table({
               ))
             ) : sortedData.length === 0 ? (
               <tr>
-                <td colSpan={columnCount} className="px-4 py-10 text-center text-gray-500">
+                <td colSpan={columnCount} className="px-4 py-14 text-center font-mono text-[11px] uppercase tracking-[0.14em] text-gray-400">
                   {emptyText}
                 </td>
               </tr>
@@ -176,7 +176,7 @@ export function Table({
               sortedData.map(record => {
                 const key = resolveRowKey(record, rowKey)
                 return (
-                  <tr key={key} className="hover:bg-gray-50">
+                  <tr key={key} className="transition-colors hover:bg-gray-50">
                     {rowSelection ? (
                       <td className="px-4 py-3">
                         <Checkbox
@@ -190,7 +190,7 @@ export function Table({
                       <td
                         key={column.key}
                         className={clsx(
-                          'px-4 py-3 text-gray-700',
+                          'px-4 py-3.5 text-[13px] text-gray-700',
                           column.fixed === 'left' && 'sticky left-0 z-10 bg-white'
                         )}
                       >
@@ -213,7 +213,7 @@ export function Table({
       </div>
 
       {pagination && pagination.total > 0 ? (
-        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-gray-200 px-4 py-2 text-xs text-gray-500">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-gray-200 px-4 py-2.5 font-mono text-[11px] tracking-wide text-gray-500">
           <span>共 {pagination.total} 条</span>
           <div className="flex items-center gap-2">
             <button
@@ -221,7 +221,7 @@ export function Table({
               aria-label="上一页"
               disabled={pagination.current <= 1}
               onClick={() => pagination.onChange(pagination.current - 1, pagination.pageSize)}
-              className="rounded border border-gray-300 px-2 py-1 disabled:cursor-not-allowed disabled:opacity-50"
+              className="border border-gray-300 px-2.5 py-1 transition-colors hover:border-gray-900 disabled:cursor-not-allowed disabled:opacity-40"
             >
               上一页
             </button>
@@ -233,7 +233,7 @@ export function Table({
               aria-label="下一页"
               disabled={pagination.current >= totalPages}
               onClick={() => pagination.onChange(pagination.current + 1, pagination.pageSize)}
-              className="rounded border border-gray-300 px-2 py-1 disabled:cursor-not-allowed disabled:opacity-50"
+              className="border border-gray-300 px-2.5 py-1 transition-colors hover:border-gray-900 disabled:cursor-not-allowed disabled:opacity-40"
             >
               下一页
             </button>

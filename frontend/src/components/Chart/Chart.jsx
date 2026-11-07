@@ -30,8 +30,28 @@ const PALETTE = [
   'var(--chart-error)',
 ]
 
+const AXIS_TICK = { fill: '#7C776A', fontSize: 10, fontFamily: 'monospace' }
+const AXIS_LINE = { stroke: '#E7E2D6' }
+const GRID_STROKE = '#E7E2D6'
+const TOOLTIP_STYLE = {
+  background: '#FAF8F3',
+  border: '1px solid #E7E2D6',
+  borderRadius: 0,
+  fontSize: 12,
+  fontFamily: 'monospace',
+  color: '#17160F',
+  boxShadow: 'none',
+}
+const LEGEND_STYLE = {
+  fontSize: 10,
+  fontFamily: 'monospace',
+  letterSpacing: '0.08em',
+  color: '#7C776A',
+  paddingTop: 8,
+}
+
 /**
- * 图表容器（02 §3.4）：line / bar / pie / area，带加载/空态/工具栏。
+ * 图表容器（编辑部风格）：细线坐标、点状网格、朱砂主色、环形饼图。
  * @param {{
  *   title: string,
  *   type?: 'line'|'bar'|'pie'|'area',
@@ -66,10 +86,10 @@ export function Chart({
   return (
     <section
       aria-label={title}
-      className={clsx('rounded-md border border-gray-200 bg-white p-4', className)}
+      className={clsx('border border-gray-200 bg-white p-5', className)}
     >
-      <header className="mb-3 flex items-center justify-between gap-2">
-        <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
+      <header className="mb-4 flex items-baseline justify-between gap-2 border-b border-gray-100 pb-3">
+        <h3 className="font-display text-lg font-normal tracking-tight text-gray-900">{title}</h3>
         {showActions ? (
           <div className="flex items-center gap-1">
             {onRefresh ? (
@@ -77,7 +97,7 @@ export function Chart({
                 size="sm"
                 variant="ghost"
                 aria-label="刷新图表"
-                icon={<LuRefreshCw className="h-4 w-4" />}
+                icon={<LuRefreshCw className="h-3.5 w-3.5" />}
                 onClick={onRefresh}
               />
             ) : null}
@@ -86,7 +106,7 @@ export function Chart({
                 size="sm"
                 variant="ghost"
                 aria-label="导出图表"
-                icon={<LuDownload className="h-4 w-4" />}
+                icon={<LuDownload className="h-3.5 w-3.5" />}
                 onClick={onExport}
               />
             ) : null}
@@ -124,56 +144,67 @@ export function Chart({
           <ResponsiveContainer width="100%" height="100%">
             {type === 'pie' ? (
               <PieChart>
-                <Pie data={data} dataKey="value" nameKey="name" outerRadius="70%">
+                <Pie
+                  data={data}
+                  dataKey="value"
+                  nameKey="name"
+                  innerRadius="54%"
+                  outerRadius="76%"
+                  paddingAngle={2}
+                  stroke="#FAF8F3"
+                  strokeWidth={2}
+                >
                   {data.map((entry, index) => (
                     <Cell key={entry.name || index} fill={PALETTE[index % PALETTE.length]} />
                   ))}
                 </Pie>
-                <RechartsTooltip />
-                {showLegend ? <Legend /> : null}
+                <RechartsTooltip contentStyle={TOOLTIP_STYLE} />
+                {showLegend ? <Legend wrapperStyle={LEGEND_STYLE} /> : null}
               </PieChart>
             ) : type === 'bar' ? (
-              <BarChart data={data}>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid, #E5E7EB)" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <RechartsTooltip />
-                {showLegend ? <Legend /> : null}
-                <Bar dataKey="value" fill="var(--chart-primary)" radius={[4, 4, 0, 0]} />
+              <BarChart data={data} barCategoryGap="28%">
+                <CartesianGrid stroke={GRID_STROKE} strokeDasharray="2 6" vertical={false} />
+                <XAxis dataKey="name" tick={AXIS_TICK} axisLine={AXIS_LINE} tickLine={false} />
+                <YAxis tick={AXIS_TICK} axisLine={false} tickLine={false} width={32} />
+                <RechartsTooltip contentStyle={TOOLTIP_STYLE} cursor={{ fill: 'rgba(23,22,15,0.03)' }} />
+                {showLegend ? <Legend wrapperStyle={LEGEND_STYLE} /> : null}
+                <Bar dataKey="value" fill="var(--chart-primary)" radius={[0, 0, 0, 0]} />
               </BarChart>
             ) : type === 'area' ? (
               <AreaChart data={data}>
                 <defs>
                   <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="var(--chart-primary)" stopOpacity={0.35} />
+                    <stop offset="0%" stopColor="var(--chart-primary)" stopOpacity={0.18} />
                     <stop offset="100%" stopColor="var(--chart-primary)" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <RechartsTooltip />
-                {showLegend ? <Legend /> : null}
+                <CartesianGrid stroke={GRID_STROKE} strokeDasharray="2 6" vertical={false} />
+                <XAxis dataKey="name" tick={AXIS_TICK} axisLine={AXIS_LINE} tickLine={false} />
+                <YAxis tick={AXIS_TICK} axisLine={false} tickLine={false} width={32} />
+                <RechartsTooltip contentStyle={TOOLTIP_STYLE} />
+                {showLegend ? <Legend wrapperStyle={LEGEND_STYLE} /> : null}
                 <Area
                   type="monotone"
                   dataKey="value"
                   stroke="var(--chart-primary)"
+                  strokeWidth={1.5}
                   fill={`url(#${gradientId})`}
                 />
               </AreaChart>
             ) : (
               <LineChart data={data}>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <RechartsTooltip />
-                {showLegend ? <Legend /> : null}
+                <CartesianGrid stroke={GRID_STROKE} strokeDasharray="2 6" vertical={false} />
+                <XAxis dataKey="name" tick={AXIS_TICK} axisLine={AXIS_LINE} tickLine={false} />
+                <YAxis tick={AXIS_TICK} axisLine={false} tickLine={false} width={32} />
+                <RechartsTooltip contentStyle={TOOLTIP_STYLE} />
+                {showLegend ? <Legend wrapperStyle={LEGEND_STYLE} /> : null}
                 <Line
                   type="monotone"
                   dataKey="value"
                   stroke="var(--chart-primary)"
-                  strokeWidth={2}
+                  strokeWidth={1.5}
                   dot={false}
+                  activeDot={{ r: 3, fill: 'var(--chart-primary)', stroke: '#FAF8F3', strokeWidth: 2 }}
                 />
               </LineChart>
             )}

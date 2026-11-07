@@ -22,20 +22,26 @@ export function Breadcrumb() {
   const hasChild = Boolean(child)
 
   return (
-    <nav aria-label="面包屑" className="flex min-w-0 items-center gap-2 text-sm">
+    <nav
+      aria-label="面包屑"
+      className="flex min-w-0 items-center gap-2 font-mono text-[10px] uppercase tracking-[0.16em]"
+    >
       {hasChild ? (
-        <Link to={`/${root}`} className="truncate text-gray-500 hover:text-primary-600">
+        <Link
+          to={`/${root}`}
+          className="truncate text-gray-500 transition-colors hover:text-gray-900"
+        >
           {rootLabel}
         </Link>
       ) : (
-        <span className="truncate font-medium text-gray-900">{rootLabel}</span>
+        <span className="truncate text-gray-900">{rootLabel}</span>
       )}
       {hasChild ? (
         <>
           <span className="text-gray-400" aria-hidden="true">
             /
           </span>
-          <span className="truncate text-gray-900">详情</span>
+          <span className="truncate text-gray-700">详情</span>
         </>
       ) : null}
     </nav>

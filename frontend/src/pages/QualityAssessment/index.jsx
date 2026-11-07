@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { LuPlus, LuRefreshCw } from 'react-icons/lu'
 import { AsyncState } from '../../components/common/AsyncState'
 import { PageLoading } from '../../components/common/PageLoading'
+import { PageHeader } from '../../components/common/PageHeader'
 import { Badge } from '../../components/Badge'
 import { Button } from '../../components/Button'
 import { Empty } from '../../components/Empty'
@@ -126,33 +127,33 @@ export default function QualityAssessment() {
 
   return (
     <section className="space-y-6">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900 lg:text-3xl">质量评估</h1>
-          <p className="mt-1 text-sm text-gray-500">
-            5 维质量评估（0–100），等级按分数计算；4 档分布取最近 100 条样本。
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            icon={<LuRefreshCw className="h-4 w-4" />}
-            onClick={() => {
-              listQuery.refetch()
-              overviewQuery.refetch()
-            }}
-          >
-            刷新
-          </Button>
-          <Button
-            icon={<LuPlus className="h-4 w-4" />}
-            onClick={() => setCreateOpen(true)}
-            disabled={!currentDatasourceId}
-          >
-            新建评估任务
-          </Button>
-        </div>
-      </div>
+      <PageHeader
+        index="04"
+        eyebrow="Evaluation"
+        title="质量评估"
+        description="5 维质量评估（0–100），等级按分数计算；4 档分布取最近 100 条样本。"
+        actions={
+          <>
+            <Button
+              variant="outline"
+              icon={<LuRefreshCw className="h-4 w-4" />}
+              onClick={() => {
+                listQuery.refetch()
+                overviewQuery.refetch()
+              }}
+            >
+              刷新
+            </Button>
+            <Button
+              icon={<LuPlus className="h-4 w-4" />}
+              onClick={() => setCreateOpen(true)}
+              disabled={!currentDatasourceId}
+            >
+              新建评估任务
+            </Button>
+          </>
+        }
+      />
 
       {!currentDatasourceId ? (
         <Empty

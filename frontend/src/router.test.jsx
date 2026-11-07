@@ -102,7 +102,7 @@ describe('AppRoutes', () => {
     renderAt('/login')
 
     expect(
-      await screen.findByRole('heading', { name: '欢迎使用 AI Insight Hub' })
+      await screen.findByRole('heading', { name: '欢迎回来' })
     ).toBeInTheDocument()
   })
 

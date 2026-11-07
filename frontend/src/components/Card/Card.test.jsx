@@ -25,13 +25,13 @@ describe('Card', () => {
     const { container } = render(<Card variant="flat">内容</Card>)
 
     expect(container.firstChild).not.toHaveClass('shadow')
-    expect(container.firstChild).toHaveClass('shadow-none')
+    expect(container.firstChild).toHaveClass('border')
   })
 
-  it('hoverable 时带 hover 阴影', () => {
+  it('hoverable 时带 hover 边框', () => {
     const { container } = render(<Card hoverable>内容</Card>)
 
-    expect(container.firstChild).toHaveClass('hover:shadow-md')
+    expect(container.firstChild).toHaveClass('hover:border-gray-400')
   })
 
   it('loading 时渲染骨架并标记 aria-busy', () => {

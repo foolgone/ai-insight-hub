@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { LuDownload, LuPlus, LuSparkles } from 'react-icons/lu'
 import { AsyncState } from '../../components/common/AsyncState'
 import { PageLoading } from '../../components/common/PageLoading'
+import { PageHeader } from '../../components/common/PageHeader'
 import { Badge } from '../../components/Badge'
 import { Button } from '../../components/Button'
 import { Empty } from '../../components/Empty'
@@ -99,39 +100,39 @@ export default function KnowledgeBase() {
 
   return (
     <section className="space-y-6">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900 lg:text-3xl">知识库</h1>
-          <p className="mt-1 text-sm text-gray-500">
-            从清洗结果提取 FAQ、管理知识条目与盲区；知识检索返回相似度。
-          </p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <Button
-            variant="outline"
-            icon={<LuSparkles className="h-4 w-4" />}
-            onClick={() => setExtractOpen(true)}
-            disabled={!currentDatasourceId}
-          >
-            提取知识
-          </Button>
-          <Button
-            variant="outline"
-            icon={<LuDownload className="h-4 w-4" />}
-            onClick={handleExport}
-            disabled={!currentDatasourceId || faqItems.length === 0}
-          >
-            导出 CSV
-          </Button>
-          <Button
-            icon={<LuPlus className="h-4 w-4" />}
-            onClick={() => setDrawerState({ open: true, faq: null, prefill: '' })}
-            disabled={!currentDatasourceId}
-          >
-            新建条目
-          </Button>
-        </div>
-      </div>
+      <PageHeader
+        index="05"
+        eyebrow="Knowledge"
+        title="知识库"
+        description="从清洗结果提取 FAQ、管理知识条目与盲区；知识检索返回相似度。"
+        actions={
+          <>
+            <Button
+              variant="outline"
+              icon={<LuSparkles className="h-4 w-4" />}
+              onClick={() => setExtractOpen(true)}
+              disabled={!currentDatasourceId}
+            >
+              提取知识
+            </Button>
+            <Button
+              variant="outline"
+              icon={<LuDownload className="h-4 w-4" />}
+              onClick={handleExport}
+              disabled={!currentDatasourceId || faqItems.length === 0}
+            >
+              导出 CSV
+            </Button>
+            <Button
+              icon={<LuPlus className="h-4 w-4" />}
+              onClick={() => setDrawerState({ open: true, faq: null, prefill: '' })}
+              disabled={!currentDatasourceId}
+            >
+              新建条目
+            </Button>
+          </>
+        }
+      />
 
       {!currentDatasourceId ? (
         <Empty

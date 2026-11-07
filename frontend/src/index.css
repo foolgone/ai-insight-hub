@@ -10,17 +10,86 @@
     --chart-info: theme('colors.info.500');
     --chart-error: theme('colors.error.500');
     --chart-grid: theme('colors.gray.200');
+    --paper: theme('colors.gray.50');
+    --ink: theme('colors.gray.900');
+    --line: theme('colors.gray.200');
   }
 
   html {
     @apply font-sans;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
   }
 
   body {
     @apply m-0 bg-gray-50 text-gray-700 antialiased;
+    font-feature-settings: 'ss01' on, 'cv01' on;
   }
 
   #root {
     @apply min-h-screen;
+  }
+
+  ::selection {
+    background: theme('colors.primary.100');
+    color: theme('colors.gray.900');
+  }
+
+  /* 细滚动条：与暖纸底一致，不抢视觉 */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: theme('colors.gray.300') transparent;
+  }
+  *::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  *::-webkit-scrollbar-thumb {
+    background: theme('colors.gray.300');
+    border-radius: 9999px;
+  }
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  /* 键盘焦点：墨色细环 + 朱砂偏移，替代默认蓝环 */
+  :focus-visible {
+    outline: 2px solid theme('colors.primary.500');
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  /* 等宽小标签：用于页面眉题、表头、元信息 */
+  .eyebrow {
+    @apply font-mono text-[10px] uppercase tracking-[0.18em] text-gray-500;
+  }
+
+  /* 衬线大标题：页面主标题 / 登录页主张 */
+  .display-title {
+    @apply font-display font-normal tracking-tight text-gray-900;
+  }
+
+  /* 数字：等宽 + 表格数字，避免跳动 */
+  .num {
+    @apply font-mono tabular-nums;
+  }
+
+  /* 极细分割线 */
+  .rule {
+    @apply border-gray-200;
+  }
+
+  /* 登录页左侧的网格纸纹理 */
+  .grid-paper {
+    background-image:
+      linear-gradient(to right, rgba(243, 240, 232, 0.06) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(243, 240, 232, 0.06) 1px, transparent 1px);
+    background-size: 56px 56px;
+  }
+
+  /* 链接：下划线从细到实，替代默认蓝色文字 */
+  .link-quiet {
+    @apply text-gray-700 underline decoration-gray-300 decoration-1 underline-offset-4 transition-colors hover:text-gray-900 hover:decoration-primary-500;
   }
 }

@@ -10,6 +10,7 @@ import {
 } from 'react-icons/lu'
 import { AsyncState } from '../../components/common/AsyncState'
 import { PageLoading } from '../../components/common/PageLoading'
+import { PageHeader } from '../../components/common/PageHeader'
 import { Button } from '../../components/Button'
 import { Chart } from '../../components/Chart'
 import { Empty } from '../../components/Empty'
@@ -95,32 +96,32 @@ export default function Dashboard() {
 
   return (
     <section className="space-y-6">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900 lg:text-3xl">Dashboard</h1>
-          <p className="mt-1 text-sm text-gray-500">
-            数据源、清洗、知识库与报告的概览，每 30 秒自动刷新。
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            icon={<LuRefreshCw className="h-4 w-4" />}
-            onClick={() => refetch()}
-          >
-            刷新
-          </Button>
-          <Button
-            variant="outline"
-            icon={<LuDownload className="h-4 w-4" />}
-            onClick={handleExport}
-          >
-            导出
-          </Button>
-        </div>
-      </div>
+      <PageHeader
+        index="01"
+        eyebrow="Overview"
+        title="Dashboard"
+        description="数据源、清洗、知识库与报告的概览，每 30 秒自动刷新。"
+        actions={
+          <>
+            <Button
+              variant="outline"
+              icon={<LuRefreshCw className="h-4 w-4" />}
+              onClick={() => refetch()}
+            >
+              刷新
+            </Button>
+            <Button
+              variant="outline"
+              icon={<LuDownload className="h-4 w-4" />}
+              onClick={handleExport}
+            >
+              导出
+            </Button>
+          </>
+        }
+      />
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 lg:gap-10">
         {stats.map(stat => (
           <StatCard
             key={stat.key}
@@ -132,8 +133,14 @@ export default function Dashboard() {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <Chart title="处理量趋势（最近 7 天）" type="line" data={trendData} height={320} />
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <Chart
+          title="处理量趋势（最近 7 天）"
+          type="line"
+          data={trendData}
+          height={320}
+          className="lg:col-span-2"
+        />
         {currentDatasourceId ? (
           <Chart
             title="质量分布（最近 100 条样本）"
@@ -142,9 +149,11 @@ export default function Dashboard() {
             height={320}
           />
         ) : (
-          <div className="rounded-md border border-gray-200 bg-white p-4">
-            <h3 className="text-lg font-semibold text-gray-900">质量分布</h3>
-            <div className="mt-3">
+          <div className="border border-gray-200 bg-white p-5">
+            <h3 className="border-b border-gray-100 pb-3 font-display text-lg font-normal text-gray-900">
+              质量分布
+            </h3>
+            <div className="mt-4">
               <Empty
                 title="尚未选择数据源"
                 description="在顶部「数据源选择器」中选择数据源后展示质量分布。"
@@ -154,10 +163,10 @@ export default function Dashboard() {
         )}
       </div>
 
-      <div className="rounded-md border border-gray-200 bg-white p-4">
-        <div className="mb-3 flex items-center justify-between gap-2">
-          <h2 className="text-lg font-semibold text-gray-900">最近任务</h2>
-          <Link to="/data-cleaning" className="text-sm text-primary-600 hover:text-primary-700">
+      <div className="border border-gray-200 bg-white">
+        <div className="flex items-baseline justify-between gap-2 border-b border-gray-200 px-5 py-4">
+          <h2 className="font-display text-lg font-normal text-gray-900">最近任务</h2>
+          <Link to="/data-cleaning" className="link-quiet font-mono text-[10px] uppercase tracking-[0.14em]">
             查看全部
           </Link>
         </div>

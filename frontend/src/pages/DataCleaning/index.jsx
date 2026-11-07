@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { LuPlus, LuRefreshCw } from 'react-icons/lu'
 import { Badge } from '../../components/Badge'
+import { PageHeader } from '../../components/common/PageHeader'
 import { Button } from '../../components/Button'
 import { Checkbox } from '../../components/Checkbox'
 import { DatePicker } from '../../components/DatePicker'
@@ -244,26 +245,26 @@ export default function DataCleaning() {
 
   return (
     <section className="space-y-6">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900 lg:text-3xl">数据清洗</h1>
-          <p className="mt-1 text-sm text-gray-500">
-            清洗任务异步执行，进行中的任务每 3 秒自动刷新进度。
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            icon={<LuRefreshCw className="h-4 w-4" />}
-            onClick={() => tasksQuery.refetch()}
-          >
-            刷新
-          </Button>
-          <Button icon={<LuPlus className="h-4 w-4" />} onClick={() => setCreateOpen(true)}>
-            新建清洗任务
-          </Button>
-        </div>
-      </div>
+      <PageHeader
+        index="03"
+        eyebrow="Cleaning"
+        title="数据清洗"
+        description="清洗任务异步执行，进行中的任务每 3 秒自动刷新进度。"
+        actions={
+          <>
+            <Button
+              variant="outline"
+              icon={<LuRefreshCw className="h-4 w-4" />}
+              onClick={() => tasksQuery.refetch()}
+            >
+              刷新
+            </Button>
+            <Button icon={<LuPlus className="h-4 w-4" />} onClick={() => setCreateOpen(true)}>
+              新建清洗任务
+            </Button>
+          </>
+        }
+      />
 
       <div className="rounded-md border border-gray-200 bg-white p-4">
         <Tabs

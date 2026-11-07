@@ -5,33 +5,29 @@ import { DataSourceSelector } from './DataSourceSelector'
 import { UserMenu } from './UserMenu'
 
 /**
- * 顶部导航（03 §2.1）：Logo + 面包屑 + 数据源选择器插槽 + 用户菜单。
- * P2/F-106 在此接入全局数据源选择器。
+ * 顶部导航（编辑部风格）：纸色半透明页头、等宽面包屑、右侧数据源与用户菜单。
  */
 export function Header() {
   const openMobileSidebar = useUiStore(state => state.openMobileSidebar)
 
   return (
-    <header className="sticky top-0 z-20 flex h-14 items-center gap-3 border-b border-gray-200 bg-white px-3 md:h-16 md:px-4">
+    <header className="sticky top-0 z-20 flex h-14 items-center gap-3 border-b border-gray-200 bg-gray-50/90 px-3 backdrop-blur md:h-16 md:px-8">
       <button
         type="button"
         aria-label="打开菜单"
-        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md text-gray-600 hover:bg-gray-100 md:hidden"
+        className="flex h-9 w-9 shrink-0 items-center justify-center text-gray-600 transition-colors hover:text-gray-900 md:hidden"
         onClick={openMobileSidebar}
       >
         <LuMenu className="h-5 w-5" aria-hidden="true" />
       </button>
 
-      <div className="flex shrink-0 items-center gap-2">
+      <div className="flex shrink-0 items-center gap-2 md:hidden">
         <div
-          className="grid h-9 w-9 place-items-center rounded-md bg-primary-600 text-sm font-bold text-white"
+          className="grid h-8 w-8 place-items-center border border-gray-900 font-display text-[12px] leading-none text-gray-900"
           aria-hidden="true"
         >
           AI
         </div>
-        <span className="hidden text-base font-semibold text-gray-900 sm:inline">
-          AI Insight Hub
-        </span>
       </div>
 
       <div className="hidden min-w-0 flex-1 md:block">

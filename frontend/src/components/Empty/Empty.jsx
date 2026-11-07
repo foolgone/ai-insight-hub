@@ -1,8 +1,7 @@
 import clsx from 'clsx'
-import { LuInbox } from 'react-icons/lu'
 
 /**
- * 空状态（02 §3.6）。
+ * 空状态（编辑部风格）：不放大图标，用衬线标题 + 等宽说明。
  * @param {{
  *   icon?: React.ReactNode,
  *   title?: string,
@@ -15,16 +14,24 @@ export function Empty({ icon, title = '暂无数据', description, action, class
   return (
     <div
       className={clsx(
-        'flex flex-col items-center justify-center gap-2 rounded-md border border-dashed border-gray-300 bg-white px-6 py-10 text-center',
+        'flex flex-col items-center justify-center gap-3 border border-dashed border-gray-300 px-6 py-14 text-center',
         className
       )}
     >
-      <div className="text-gray-300" aria-hidden="true">
-        {icon || <LuInbox className="h-12 w-12" />}
-      </div>
-      <p className="text-base text-gray-600">{title}</p>
-      {description ? <p className="text-sm text-gray-500">{description}</p> : null}
-      {action ? <div className="mt-2">{action}</div> : null}
+      {icon ? (
+        <div className="text-gray-300" aria-hidden="true">
+          {icon}
+        </div>
+      ) : (
+        <div className="h-px w-10 bg-gray-300" aria-hidden="true" />
+      )}
+      <p className="font-display text-lg font-normal text-gray-700">{title}</p>
+      {description ? (
+        <p className="max-w-md font-mono text-[10px] uppercase leading-relaxed tracking-[0.16em] text-gray-400">
+          {description}
+        </p>
+      ) : null}
+      {action ? <div className="mt-1">{action}</div> : null}
     </div>
   )
 }

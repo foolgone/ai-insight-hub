@@ -46,10 +46,10 @@ export function Input({
     <div className="w-full">
       <div
         className={clsx(
-          'flex h-10 items-center gap-2 rounded border bg-white px-3 transition-colors focus-within:ring-2',
+          'flex h-10 items-center gap-2 rounded-sm border bg-white px-3 transition-colors focus-within:ring-1',
           hasError
             ? 'border-error-500 focus-within:ring-error-500'
-            : 'border-gray-300 focus-within:border-primary-500 focus-within:ring-primary-500',
+            : 'border-gray-300 focus-within:border-gray-900 focus-within:ring-gray-900',
           disabled && 'cursor-not-allowed bg-gray-50 opacity-60'
         )}
       >

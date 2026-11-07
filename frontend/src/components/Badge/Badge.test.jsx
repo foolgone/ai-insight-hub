@@ -14,7 +14,7 @@ describe('Badge', () => {
     ['warning', 'bg-warning-50'],
     ['error', 'bg-error-50'],
     ['info', 'bg-info-50'],
-    ['default', 'bg-gray-100'],
+    ['default', 'border-gray-300'],
   ])('variant=%s 应用对应背景色', (variant, className) => {
     render(<Badge variant={variant}>标签</Badge>)
 
@@ -24,7 +24,7 @@ describe('Badge', () => {
   it('size=sm 使用小号样式', () => {
     render(<Badge size="sm">小</Badge>)
 
-    expect(screen.getByText('小')).toHaveClass('text-xs')
+    expect(screen.getByText('小')).toHaveClass('text-[11px]')
   })
 
   it('支持追加自定义类名', () => {
