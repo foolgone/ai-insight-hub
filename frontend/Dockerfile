@@ -10,13 +10,17 @@ ENV VITE_API_URL=$VITE_API_URL
 ENV VITE_APP_VERSION=$VITE_APP_VERSION
 
 COPY frontend/package.json frontend/package-lock.json ./
-RUN npm ci
+# npm 源可配置：国内构建默认走 npmmirror
+ARG NPM_REGISTRY=https://registry.npmmirror.com
+RUN npm config set registry $NPM_REGISTRY && npm ci
 
 COPY frontend/ ./
 RUN npm run build
 
 FROM nginx:1.27-alpine
 COPY nginx/nginx.conf /etc/nginx/nginx.conf
+# 共用路由片段（80 与 8443 两个 server 块 include 同一份，避免配置重复）
+COPY nginx/snippets/ /etc/nginx/snippets/
 COPY --from=build /app/dist /usr/share/nginx/html
 
 EXPOSE 80
