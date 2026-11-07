@@ -78,7 +78,7 @@ export function DataSourceSelector() {
         <button
           type="button"
           aria-label="数据源选择器"
-          className="flex h-9 max-w-[220px] items-center gap-2 rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-700 transition-colors hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+          className="flex h-8 max-w-[220px] items-center gap-2 rounded-sm border border-gray-300 bg-transparent px-2.5 text-[12px] text-gray-700 transition-colors hover:border-gray-900 hover:text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
         >
           <LuDatabase className="h-4 w-4 shrink-0 text-gray-400" aria-hidden="true" />
           <span className="hidden truncate sm:inline">{triggerLabel}</span>
@@ -90,7 +90,7 @@ export function DataSourceSelector() {
         <Popover.Content
           sideOffset={6}
           align="end"
-          className="z-50 w-72 rounded-md border border-gray-200 bg-white shadow-lg focus:outline-none"
+          className="z-50 w-72 rounded-none border border-gray-300 bg-white shadow-md focus:outline-none"
         >
           {isError ? (
             <div className="flex items-center justify-between gap-2 p-3 text-sm text-error-600">

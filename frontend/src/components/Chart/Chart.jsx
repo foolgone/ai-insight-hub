@@ -72,7 +72,7 @@ export function Chart({
   data = [],
   loading = false,
   height = 300,
-  showLegend = true,
+  showLegend = undefined,
   showToolbar = true,
   onRefresh,
   onExport,
@@ -82,6 +82,8 @@ export function Chart({
   const gradientId = `chart-gradient-${String(useId()).replace(/:/g, '')}`
   const hasData = Array.isArray(data) && data.length > 0
   const showActions = showToolbar && (onRefresh || onExport)
+  // 单序列的线/柱/面积图不显示图例（只有一个 "value"，是噪音）；饼图默认显示
+  const legendVisible = showLegend ?? type === 'pie'
 
   return (
     <section
@@ -159,7 +161,7 @@ export function Chart({
                   ))}
                 </Pie>
                 <RechartsTooltip contentStyle={TOOLTIP_STYLE} />
-                {showLegend ? <Legend wrapperStyle={LEGEND_STYLE} /> : null}
+                {legendVisible ? <Legend wrapperStyle={LEGEND_STYLE} /> : null}
               </PieChart>
             ) : type === 'bar' ? (
               <BarChart data={data} barCategoryGap="28%">
@@ -167,7 +169,7 @@ export function Chart({
                 <XAxis dataKey="name" tick={AXIS_TICK} axisLine={AXIS_LINE} tickLine={false} />
                 <YAxis tick={AXIS_TICK} axisLine={false} tickLine={false} width={32} />
                 <RechartsTooltip contentStyle={TOOLTIP_STYLE} cursor={{ fill: 'rgba(23,22,15,0.03)' }} />
-                {showLegend ? <Legend wrapperStyle={LEGEND_STYLE} /> : null}
+                {legendVisible ? <Legend wrapperStyle={LEGEND_STYLE} /> : null}
                 <Bar dataKey="value" fill="var(--chart-primary)" radius={[0, 0, 0, 0]} />
               </BarChart>
             ) : type === 'area' ? (
@@ -182,7 +184,7 @@ export function Chart({
                 <XAxis dataKey="name" tick={AXIS_TICK} axisLine={AXIS_LINE} tickLine={false} />
                 <YAxis tick={AXIS_TICK} axisLine={false} tickLine={false} width={32} />
                 <RechartsTooltip contentStyle={TOOLTIP_STYLE} />
-                {showLegend ? <Legend wrapperStyle={LEGEND_STYLE} /> : null}
+                {legendVisible ? <Legend wrapperStyle={LEGEND_STYLE} /> : null}
                 <Area
                   type="monotone"
                   dataKey="value"
@@ -197,7 +199,7 @@ export function Chart({
                 <XAxis dataKey="name" tick={AXIS_TICK} axisLine={AXIS_LINE} tickLine={false} />
                 <YAxis tick={AXIS_TICK} axisLine={false} tickLine={false} width={32} />
                 <RechartsTooltip contentStyle={TOOLTIP_STYLE} />
-                {showLegend ? <Legend wrapperStyle={LEGEND_STYLE} /> : null}
+                {legendVisible ? <Legend wrapperStyle={LEGEND_STYLE} /> : null}
                 <Line
                   type="monotone"
                   dataKey="value"
@@ -214,3 +216,4 @@ export function Chart({
     </section>
   )
 }
+

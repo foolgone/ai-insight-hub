@@ -8,10 +8,10 @@ import { APIKeyModalHost } from '../APIKeyModal'
  */
 export function AppLayout() {
   return (
-    <div className="flex min-h-screen flex-col bg-gray-50">
-      <Header />
-      <div className="flex flex-1">
-        <Sidebar />
+    <div className="flex min-h-screen bg-gray-50">
+      <Sidebar />
+      <div className="flex min-w-0 flex-1 flex-col">
+        <Header />
         <main className="min-w-0 flex-1">
           <div className="mx-auto w-full max-w-[1440px] px-4 py-6 md:px-8 md:py-10 lg:px-10">
             <Outlet />
