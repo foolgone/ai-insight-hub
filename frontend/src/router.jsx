@@ -3,24 +3,52 @@ import { Navigate, Route, Routes } from 'react-router-dom'
 import { ProtectedRoute } from './components/auth/ProtectedRoute'
 import { PublicOnlyRoute } from './components/auth/PublicOnlyRoute'
 import { AppLayout } from './components/layout/AppLayout'
+import { PageLoading } from './components/common/PageLoading'
 
-const Login = lazy(() => import('./pages/Login'))
-const Dashboard = lazy(() => import('./pages/Dashboard'))
-const DataSources = lazy(() => import('./pages/DataSources'))
-const DataCleaning = lazy(() => import('./pages/DataCleaning'))
-const QualityAssessment = lazy(() => import('./pages/QualityAssessment'))
-const QualityAssessmentDetail = lazy(() => import('./pages/QualityAssessment/Detail'))
-const KnowledgeBase = lazy(() => import('./pages/KnowledgeBase'))
-const Reports = lazy(() => import('./pages/Reports'))
-const NotFound = lazy(() => import('./pages/NotFound'))
+/**
+ * 懒加载 + 可预加载：路由 chunk 在空闲时提前拉取，切换栏目不再等网络。
+ */
+function lazyWithPreload(factory) {
+  const Component = lazy(factory)
+  Component.preload = factory
+  return Component
+}
+
+const Login = lazyWithPreload(() => import('./pages/Login'))
+const Dashboard = lazyWithPreload(() => import('./pages/Dashboard'))
+const DataSources = lazyWithPreload(() => import('./pages/DataSources'))
+const DataCleaning = lazyWithPreload(() => import('./pages/DataCleaning'))
+const QualityAssessment = lazyWithPreload(() => import('./pages/QualityAssessment'))
+const QualityAssessmentDetail = lazyWithPreload(() => import('./pages/QualityAssessment/Detail'))
+const KnowledgeBase = lazyWithPreload(() => import('./pages/KnowledgeBase'))
+const Reports = lazyWithPreload(() => import('./pages/Reports'))
+const NotFound = lazyWithPreload(() => import('./pages/NotFound'))
+
+const ROUTE_COMPONENTS = [
+  Dashboard,
+  DataSources,
+  DataCleaning,
+  QualityAssessment,
+  QualityAssessmentDetail,
+  KnowledgeBase,
+  Reports,
+  NotFound,
+]
+
+/** 空闲时预取业务路由 chunk（失败静默，不阻塞主流程）。 */
+export function preloadRoutes() {
+  for (const component of ROUTE_COMPONENTS) {
+    component.preload().catch(() => {})
+  }
+}
 
 /** 路由表（D-F06 / §7.1）：8 个业务路由 + 404。 */
 export function AppRoutes() {
   return (
     <Suspense
       fallback={
-        <div role="status" className="p-8 text-sm text-gray-500">
-          加载中...
+        <div className="grid min-h-screen place-items-center bg-gray-50">
+          <PageLoading label="正在加载..." />
         </div>
       }
     >

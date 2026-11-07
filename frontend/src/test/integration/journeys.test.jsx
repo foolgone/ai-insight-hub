@@ -176,7 +176,7 @@ describe('页面级集成（F-502）', () => {
     renderAt('/data-sources')
 
     expect(await screen.findByText('客服1月')).toBeInTheDocument()
-    await user.click(screen.getByRole('button', { name: '新建数据源' }))
+    await user.click(await screen.findByRole('button', { name: '新建数据源' }))
 
     expect(await screen.findByRole('dialog', { name: '新建数据源' })).toBeInTheDocument()
   })
