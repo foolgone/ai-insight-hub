@@ -22,15 +22,15 @@ describe('DataSourceCard', () => {
     expect(screen.getByRole('heading', { name: '客服对话-2026年1月' })).toBeInTheDocument()
     expect(screen.getByText('已就绪')).toBeInTheDocument()
     expect(screen.getByText('客服对话')).toBeInTheDocument()
-    expect(screen.getByText('12345 条')).toBeInTheDocument()
-    expect(screen.getByText('12000 条')).toBeInTheDocument()
+    expect(screen.getByText('12345')).toBeInTheDocument()
+    expect(screen.getByText('12000')).toBeInTheDocument()
     expect(screen.getByText('85.5')).toBeInTheDocument()
   })
 
   it('无统计数据时显示默认值', () => {
     render(<DataSourceCard datasource={{ ...DATASOURCE, statistics: null }} />)
 
-    expect(screen.getAllByText('0 条').length).toBe(2)
+    expect(screen.getAllByText('0').length).toBe(2)
     expect(screen.getByText('—')).toBeInTheDocument()
   })
 

@@ -25,34 +25,36 @@ export function DataSourceCard({ datasource, actions }) {
             })}
             aria-hidden="true"
           />
-          <h3 className="truncate text-lg font-semibold text-gray-900">{datasource.name}</h3>
+          <h3 className="truncate font-display text-lg font-normal tracking-tight text-gray-900">
+            {datasource.name}
+          </h3>
           <Badge variant={status.variant} size="sm">
             {status.label}
           </Badge>
         </div>
 
-        <dl className="mt-2 flex flex-wrap gap-x-6 gap-y-1 text-xs text-gray-500">
+        <dl className="mt-2 flex flex-wrap gap-x-6 gap-y-1 font-mono text-[11px] tracking-wide text-gray-500">
           <div className="flex gap-1">
-            <dt>类型：</dt>
-            <dd className="text-gray-700">{typeLabel}</dd>
+            <dt>类型</dt>
+            <dd className="text-gray-800">{typeLabel}</dd>
           </div>
           <div className="flex gap-1">
-            <dt>数据量：</dt>
-            <dd className="text-gray-700">{statistics.total_records ?? 0} 条</dd>
+            <dt>数据量</dt>
+            <dd className="text-gray-800 num">{statistics.total_records ?? 0}</dd>
           </div>
           <div className="flex gap-1">
-            <dt>已清洗：</dt>
-            <dd className="text-gray-700">{statistics.cleaned_records ?? 0} 条</dd>
+            <dt>已清洗</dt>
+            <dd className="text-gray-800 num">{statistics.cleaned_records ?? 0}</dd>
           </div>
           <div className="flex gap-1">
-            <dt>质量均分：</dt>
-            <dd className="text-gray-700">
+            <dt>质量均分</dt>
+            <dd className="text-gray-800 num">
               {Number(statistics.quality_score_avg || 0).toFixed(1)}
             </dd>
           </div>
           <div className="flex gap-1">
-            <dt>最后处理：</dt>
-            <dd className="text-gray-700">{formatDateTime(statistics.last_processed_at)}</dd>
+            <dt>最后处理</dt>
+            <dd className="text-gray-800">{formatDateTime(statistics.last_processed_at)}</dd>
           </div>
         </dl>
       </div>

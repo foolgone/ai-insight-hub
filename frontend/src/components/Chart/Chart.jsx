@@ -23,11 +23,11 @@ import { Empty } from '../Empty'
 import { Skeleton } from '../Skeleton'
 
 const PALETTE = [
-  'var(--chart-primary)',
+  '#17160F',
   'var(--chart-success)',
   'var(--chart-warning)',
   'var(--chart-info)',
-  'var(--chart-error)',
+  'var(--chart-primary)',
 ]
 
 const AXIS_TICK = { fill: '#7C776A', fontSize: 10, fontFamily: 'monospace' }
@@ -81,6 +81,7 @@ export function Chart({
 }) {
   const gradientId = `chart-gradient-${String(useId()).replace(/:/g, '')}`
   const hasData = Array.isArray(data) && data.length > 0
+  const allZero = hasData && data.every(item => !Number(item.value))
   const showActions = showToolbar && (onRefresh || onExport)
   // 单序列的线/柱/面积图不显示图例（只有一个 "value"，是噪音）；饼图默认显示
   const legendVisible = showLegend ?? type === 'pie'
@@ -139,7 +140,7 @@ export function Chart({
 
       {loading ? (
         <Skeleton variant="card" />
-      ) : !hasData ? (
+      ) : !hasData || allZero ? (
         <Empty title={emptyText} description="数据接入后展示" />
       ) : (
         <div className="w-full" style={{ height }}>

@@ -40,15 +40,15 @@ export function UserMenu() {
         <button
           type="button"
           aria-label="打开用户菜单"
-          className="flex shrink-0 items-center gap-2 rounded-full px-1 py-1 hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+          className="flex shrink-0 items-center gap-2 px-1 py-1 transition-colors hover:text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
         >
           <span
-            className="grid h-8 w-8 place-items-center rounded-full bg-primary-100 text-xs font-medium text-primary-700"
+            className="grid h-7 w-7 place-items-center border border-gray-900 font-display text-[12px] leading-none text-gray-900"
             aria-hidden="true"
           >
             {displayName.slice(0, 1).toUpperCase()}
           </span>
-          <span className="hidden max-w-32 truncate text-sm text-gray-700 md:inline">
+          <span className="hidden max-w-32 truncate font-mono text-[11px] tracking-wide text-gray-600 md:inline">
             {displayName}
           </span>
         </button>
@@ -58,13 +58,15 @@ export function UserMenu() {
         <DropdownMenu.Content
           sideOffset={8}
           align="end"
-          className="z-50 min-w-48 rounded-md border border-gray-200 bg-white p-1 shadow-lg focus:outline-none"
+          className="z-50 min-w-48 rounded-none border border-gray-300 bg-white p-1 shadow-md focus:outline-none"
         >
           <div className="border-b border-gray-100 px-3 py-2">
-            <p className="truncate text-sm font-medium text-gray-900">{displayName}</p>
-            <p className="mt-0.5 text-xs text-gray-500">{roleLabel}</p>
+            <p className="truncate font-display text-sm text-gray-900">{displayName}</p>
+            <p className="mt-0.5 font-mono text-[10px] uppercase tracking-[0.14em] text-gray-500">
+              {roleLabel}
+            </p>
             {user.email ? (
-              <p className="mt-0.5 truncate text-xs text-gray-400">{user.email}</p>
+              <p className="mt-1 truncate font-mono text-[10px] text-gray-400">{user.email}</p>
             ) : null}
           </div>
           {showCredentialEntry ? (
