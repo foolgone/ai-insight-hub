@@ -182,7 +182,7 @@ export function DataSourceTypeManager({ open, onClose }) {
                     <span className="font-mono text-[11px] text-gray-400">{item.code}</span>
                     {item.is_system ? (
                       <span className="bg-gray-100 px-1.5 py-0.5 text-[10px] text-gray-500">
-                        内置
+                        默认
                       </span>
                     ) : null}
                     {item.is_active ? null : (

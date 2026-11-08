@@ -43,7 +43,7 @@ export default function DataSources() {
   const [uploadTarget, setUploadTarget] = useState(null)
   const [deleteTarget, setDeleteTarget] = useState(null)
   const [typeManagerOpen, setTypeManagerOpen] = useState(false)
-  const { canWrite, isAdmin } = usePermissions()
+  const { canWrite } = usePermissions()
   const { options: typeOptions } = useDatasourceTypeOptions()
 
   const typeFilterOptions = useMemo(
@@ -91,7 +91,7 @@ export default function DataSources() {
         description="按数据源隔离导入与分析，支持 CSV / JSON / XLSX / TXT（≤ 50MB）"
         actions={
           <div className="flex items-center gap-2">
-            {isAdmin ? (
+            {canWrite ? (
               <Button
                 variant="outline"
                 icon={<LuSettings2 className="h-4 w-4" />}
@@ -240,7 +240,7 @@ export default function DataSources() {
         onClose={() => setDeleteTarget(null)}
       />
 
-      {isAdmin ? (
+      {canWrite ? (
         <DataSourceTypeManager
           open={typeManagerOpen}
           onClose={() => setTypeManagerOpen(false)}

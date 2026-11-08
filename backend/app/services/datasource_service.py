@@ -65,8 +65,8 @@ async def _get_or_404(session: AsyncSession, datasource_id: uuid.UUID, user: Use
 
 
 async def create(session: AsyncSession, *, user: User, data: DataSourceCreate) -> DataSource:
-    # 类型必须是字典表中存在且启用的 code（迁移 014 起取代数据库 CHECK 约束）
-    await datasource_type_service.ensure_usable(session, data.type)
+    # 类型必须是该用户字典表中存在且启用的 code（迁移 015 起按用户隔离）
+    await datasource_type_service.ensure_usable(session, user.id, data.type)
 
     used = int(
         await session.scalar(
@@ -141,7 +141,7 @@ async def update(
     if "description" in payload:
         datasource.description = payload["description"]
     if payload.get("type") is not None:
-        await datasource_type_service.ensure_usable(session, payload["type"])
+        await datasource_type_service.ensure_usable(session, user.id, payload["type"])
         datasource.type = payload["type"]
     if data.config is not None:
         merged = dict(datasource.config or {})

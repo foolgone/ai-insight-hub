@@ -45,12 +45,12 @@ describe('DataSourceTypeManager', () => {
     deleteMutation.mutateAsync.mockResolvedValue(undefined)
   })
 
-  it('展示类型、标识、内置标记与使用量', () => {
+  it('展示类型、标识、默认标记与使用量', () => {
     render(<DataSourceTypeManager open onClose={() => {}} />)
 
     expect(screen.getByText('客服对话')).toBeInTheDocument()
     expect(screen.getByText('customer_service')).toBeInTheDocument()
-    expect(screen.getByText('内置')).toBeInTheDocument()
+    expect(screen.getByText('默认')).toBeInTheDocument()
     expect(screen.getByText('3 个数据源')).toBeInTheDocument()
     expect(screen.getByText('售后')).toBeInTheDocument()
   })

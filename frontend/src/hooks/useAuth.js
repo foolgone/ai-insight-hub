@@ -1,5 +1,6 @@
 import { useCallback } from 'react'
 import * as authApi from '../api/auth'
+import { queryClient } from '../lib/queryClient'
 import { useAuthStore } from '../stores/authStore'
 
 /**
@@ -21,6 +22,8 @@ export function useAuth() {
   const login = useCallback(
     async ({ email, password, remember: rememberMe = false }) => {
       const data = await authApi.login({ email, password })
+      // 多租户：换账号前清空上一个用户的缓存（类型/数据源等按 token 隔离的数据）
+      queryClient.clear()
       setSession({
         user: data.user,
         accessToken: data.access_token,
@@ -39,6 +42,8 @@ export function useAuth() {
       // 登出接口失败不阻塞本地清理（token 可能已过期）
     }
     clearSession()
+    // 多租户：清空缓存，避免下一个登录用户看到上一个用户的数据
+    queryClient.clear()
   }, [clearSession])
 
   return {

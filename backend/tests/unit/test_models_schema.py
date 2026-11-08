@@ -44,7 +44,7 @@ def test_all_tables_registered() -> None:
         ("data_sources", {"id", "user_id", "type", "status", "workflow_status", "config"}),
         (
             "datasource_types",
-            {"id", "code", "label", "sort_order", "is_system", "is_active"},
+            {"id", "owner_user_id", "code", "label", "sort_order", "is_system", "is_active"},
         ),
         ("raw_data", {"id", "datasource_id", "raw_content", "file_info", "status"}),
         ("cleaned_data", {"id", "datasource_id", "raw_data_id", "embedding", "issues"}),
