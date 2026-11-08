@@ -111,3 +111,79 @@ async def test_transcribe_file_requires_configuration() -> None:
             await media_service._transcribe_file(Path("missing.mp3"))
     finally:
         settings.ASR_ENABLED = monkeypatch_off
+
+
+class _FakeResponse:
+    def __init__(self, status_code: int, payload: dict | None = None) -> None:
+        self.status_code = status_code
+        self._payload = payload or {}
+        self.text = "error"
+
+    def json(self):
+        return self._payload
+
+
+class _FakeClient:
+    responses: list[_FakeResponse] = []
+    calls: int = 0
+
+    def __init__(self, *args, **kwargs) -> None:
+        pass
+
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, *args):
+        return None
+
+    async def post(self, *args, **kwargs):
+        _FakeClient.calls += 1
+        return _FakeClient.responses.pop(0)
+
+
+@pytest.mark.asyncio
+async def test_transcribe_file_parses_segments(tmp_path: Path, monkeypatch) -> None:
+    audio = tmp_path / "a.mp3"
+    audio.write_bytes(b"fake")
+    _FakeClient.calls = 0
+    _FakeClient.responses = [
+        _FakeResponse(
+            200,
+            {
+                "text": "你好 世界",
+                "language": "zh",
+                "duration": 2.0,
+                "segments": [
+                    {"start": 0.0, "end": 1.0, "text": "你好"},
+                    {"start": 1.0, "end": 2.0, "text": "世界"},
+                ],
+            },
+        )
+    ]
+    monkeypatch.setattr(media_service.httpx, "AsyncClient", _FakeClient)
+    monkeypatch.setattr(settings, "ASR_ENABLED", True)
+    monkeypatch.setattr(settings, "ASR_API_KEY", "test-key")
+
+    result = await media_service._transcribe_file(audio, offset=10.0)
+
+    assert result.text == "你好 世界"
+    assert result.segments[0].start == 10.0
+    assert result.segments[1].end == 12.0
+    assert _FakeClient.calls == 1
+
+
+@pytest.mark.asyncio
+async def test_transcribe_file_does_not_retry_4xx(tmp_path: Path, monkeypatch) -> None:
+    audio = tmp_path / "a.mp3"
+    audio.write_bytes(b"fake")
+    _FakeClient.calls = 0
+    _FakeClient.responses = [_FakeResponse(401), _FakeResponse(200, {"segments": []})]
+    monkeypatch.setattr(media_service.httpx, "AsyncClient", _FakeClient)
+    monkeypatch.setattr(settings, "ASR_ENABLED", True)
+    monkeypatch.setattr(settings, "ASR_API_KEY", "bad-key")
+
+    with pytest.raises(media_service.AsrRequestError):
+        await media_service._transcribe_file(audio)
+
+    assert _FakeClient.calls == 1
+
