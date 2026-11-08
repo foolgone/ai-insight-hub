@@ -23,6 +23,7 @@ const LABEL_CLASS = 'mb-1 block font-mono text-[10px] uppercase tracking-[0.14em
 /**
  * 语音转写（ASR）配置面板：地址 / Key / 模型 / 语言全部由用户填写，
  * 加密存服务端（与模型 API Key 同一套凭据表），保存前服务端会真调一次转写接口。
+ * 已配置时可在状态卡里直接「删除配置」——二次确认后从服务器彻底删除。
  */
 export function AsrKeyPanel() {
   const [baseUrl, setBaseUrl] = useState('')
@@ -30,6 +31,7 @@ export function AsrKeyPanel() {
   const [model, setModel] = useState('')
   const [language, setLanguage] = useState('zh')
   const [showKey, setShowKey] = useState(false)
+  const [confirmingDelete, setConfirmingDelete] = useState(false)
 
   const { data: status } = useAsrCredentialStatusQuery()
   const saveMutation = useSaveAsrCredential()
@@ -52,12 +54,14 @@ export function AsrKeyPanel() {
   const handleDelete = async () => {
     try {
       await deleteMutation.mutateAsync()
+      setApiKey('')
+      setShowKey(false)
+      setConfirmingDelete(false)
     } catch {
-      // 失败文案由下方 error 区域展示
+      // 失败文案在状态卡下方展示
     }
   }
 
-  const error = saveMutation.error ?? deleteMutation.error
   const canSave =
     baseUrl.trim().length > 0 && apiKey.trim().length >= 8 && model.trim().length > 0
 
@@ -70,28 +74,73 @@ export function AsrKeyPanel() {
       </p>
 
       {status?.configured ? (
-        <div className="mb-4 border border-gray-200 bg-gray-50 px-3 py-2">
-          <div className="flex flex-wrap items-center gap-2 text-sm">
-            <span className="font-mono text-[12px] text-gray-900">{status.base_url}</span>
-            <span
-              className={
-                status.status === 'active'
-                  ? 'bg-green-100 px-2 py-0.5 text-[11px] text-green-700'
-                  : 'bg-red-100 px-2 py-0.5 text-[11px] text-red-700'
-              }
-            >
-              {status.status === 'active' ? '正常' : '无效'}
-            </span>
+        confirmingDelete ? (
+          <div className="mb-4 border border-error-200 bg-error-50 px-3 py-2.5">
+            <p className="text-sm font-medium text-error-700">从服务器删除语音转写配置？</p>
+            <p className="mt-1 text-xs text-error-600">
+              删除后服务器上不再保留该 Key 与服务地址，音视频上传将被拒绝，直到重新配置。
+            </p>
+            <div className="mt-2.5 flex gap-2">
+              <Button
+                variant="danger"
+                size="sm"
+                loading={deleteMutation.isPending}
+                onClick={handleDelete}
+              >
+                确认删除
+              </Button>
+              <Button
+                variant="secondary"
+                size="sm"
+                disabled={deleteMutation.isPending}
+                onClick={() => setConfirmingDelete(false)}
+              >
+                取消
+              </Button>
+            </div>
           </div>
-          <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[11px] text-gray-500">
-            <span>model {status.model}</span>
-            <span>lang {status.language || 'zh'}</span>
-            <span>key {status.key_hint}</span>
-            {status.verified_at ? (
-              <span>验证于 {new Date(status.verified_at).toLocaleString()}</span>
-            ) : null}
+        ) : (
+          <div className="mb-4 border border-gray-200 bg-gray-50 px-3 py-2.5">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-center gap-2 text-sm">
+                  <span className="truncate font-mono text-[12px] text-gray-900">
+                    {status.base_url}
+                  </span>
+                  <span
+                    className={
+                      status.status === 'active'
+                        ? 'bg-green-100 px-2 py-0.5 text-[11px] text-green-700'
+                        : 'bg-red-100 px-2 py-0.5 text-[11px] text-red-700'
+                    }
+                  >
+                    {status.status === 'active' ? '正常' : '无效'}
+                  </span>
+                </div>
+                <p className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[11px] text-gray-500">
+                  <span>model {status.model}</span>
+                  <span>lang {status.language || 'zh'}</span>
+                  <span>key {status.key_hint}</span>
+                  {status.verified_at ? (
+                    <span>验证于 {new Date(status.verified_at).toLocaleString()}</span>
+                  ) : null}
+                </p>
+              </div>
+              <Button
+                variant="danger"
+                size="sm"
+                className="shrink-0"
+                onClick={() => setConfirmingDelete(true)}
+              >
+                删除配置
+              </Button>
+            </div>
           </div>
-        </div>
+        )
+      ) : null}
+
+      {deleteMutation.error ? (
+        <p className="mb-3 text-xs text-error-600">{getErrorMessage(deleteMutation.error)}</p>
       ) : null}
 
       <div className="space-y-3">
@@ -113,12 +162,7 @@ export function AsrKeyPanel() {
             <label htmlFor="asr-model" className={LABEL_CLASS}>
               模型
             </label>
-            <Input
-              id="asr-model"
-              value={model}
-              onChange={setModel}
-              placeholder="whisper-1"
-            />
+            <Input id="asr-model" value={model} onChange={setModel} placeholder="whisper-1" />
           </div>
           <div>
             <label htmlFor="asr-language" className={LABEL_CLASS}>
@@ -146,7 +190,7 @@ export function AsrKeyPanel() {
               onChange={setApiKey}
               placeholder="sk-xxxxxxxxxxxxxxxx"
               autoComplete="new-password"
-              error={error ? getErrorMessage(error) : undefined}
+              error={saveMutation.error ? getErrorMessage(saveMutation.error) : undefined}
             />
             <Button
               variant="outline"
@@ -166,16 +210,6 @@ export function AsrKeyPanel() {
       </p>
 
       <footer className="mt-6 flex flex-col-reverse gap-2 border-t border-gray-100 pt-4 sm:flex-row sm:justify-end">
-        {status?.configured ? (
-          <Button
-            variant="danger"
-            size="sm"
-            loading={deleteMutation.isPending}
-            onClick={handleDelete}
-          >
-            删除
-          </Button>
-        ) : null}
         <Button
           size="sm"
           loading={saveMutation.isPending}
