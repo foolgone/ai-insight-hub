@@ -209,7 +209,8 @@ ASR 的 `base_url` / `api_key` / `model` / `language` 属于**用户自己的服
 MEDIA_UPLOAD_EXTENSIONS: str = "mp3,wav,m4a,mp4,mov"
 ASR_ENABLED: bool = True          # 功能总开关（关闭时媒体上传 415、配置端点 404）
 ASR_TIMEOUT: int = 300            # 单次 HTTP 超时
-ASR_CHUNK_SECONDS: int = 600      # 单文件切片时长
+ASR_CHUNK_SECONDS: int = 600      # 标准接口单文件切片时长
+ASR_CHAT_CHUNK_SECONDS: int = 240 # 千问 chat 协议切片（单次上限 5 分钟）
 ASR_MAX_RETRIES: int = 2          # 网络/5xx 重试次数（4xx 不重试）
 ASR_PRICE_PER_MINUTE: float = 0.006  # 仅用于成本估算展示
 ASR_ALLOW_HTTP: bool = False      # SSRF：默认强制 https
@@ -366,8 +367,24 @@ timestamp_granularities[]=segment
 
 - `channels == 1` 且 ASR 无 speaker 标签：
   - 生成 **1 条**记录：`user_message=完整转写`、`ai_response=""`、`issues=["asr_transcript","mono_speaker_unknown"]`；
-  - 前端/文档提示：单声道仅适合文本分析，质量评估结果可能不准确；
+  - **评估入口直接排除**：`evaluation_service._load_targets` 过滤 `ai_response` 为空的记录，
+    避免「客户说了话、客服没回」造成误导性低分；被跳过的数量写入 `task.result.skipped_no_reply`；
+  - 若数据源**全部**是单声道记录，任务失败并提示「只有单声道转写记录（没有客服回复），
+    不参与对话质量评估」；这些数据仍可用于知识提取与经营洞察；
   - 后续可接支持 diarization 的 provider，在同一接口返回 `speaker` 字段。
+
+### 6.5.1 接口协议（按模型名自动识别）
+
+| 协议 | 端点 | 输入 | 时间戳 | 典型模型 |
+| --- | --- | --- | --- | --- |
+| `transcriptions` | `POST {base}/audio/transcriptions` | multipart 文件 | 有 `segments` | `whisper-1`、`whisper-large-v3`、SenseVoice |
+| `chat_audio` | `POST {base}/chat/completions` | `input_audio`（base64 Data URI） | **无** | `qwen3-asr-flash` |
+
+- 识别规则：模型名以 `qwen3-asr` / `qwen-audio-asr` / `qwen2-audio` 开头 → `chat_audio`，其余走标准接口；
+- 千问单次上限 5 分钟、base64 后 10MB，因此 `chat_audio` 用更短的切片
+  `ASR_CHAT_CHUNK_SECONDS=240`；无时间戳时用「切片偏移 + 返回时长」构造粗粒度 segment，
+  双声道按片配对（粒度约 4 分钟），单声道仍是整段文本；
+- 千问的 `asr_options`（`language` / `enable_itn`）是非标准参数，放在请求体顶层。
 
 ### 6.6 错误类型
 

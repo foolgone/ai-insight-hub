@@ -275,3 +275,68 @@ async def test_review_not_found(client, auth_headers) -> None:
     )
 
     assert reviewed.status_code == 404
+
+
+async def test_mono_records_are_skipped_in_evaluation(db_session, monkeypatch) -> None:
+    """单声道 ASR 记录（ai_response 为空）不参与对话质量评估。"""
+    _, datasource, task = await _setup(db_session)
+    raw = RawDataFactory(datasource_id=datasource.id)
+    await persist(db_session, raw)
+    await persist(
+        db_session,
+        CleanedDataFactory(
+            datasource_id=datasource.id,
+            raw_data_id=raw.id,
+            dialogue_id=uuid.uuid4(),
+            user_message="整段单声道转写文本",
+            ai_response="",
+            quality_score=None,
+            issues=["asr_transcript", "mono_speaker_unknown"],
+        ),
+    )
+    monkeypatch.setattr(evaluation_service, "_build_agent", lambda: _FakeAgent(_success_result()))
+
+    outcome = await evaluation_service.run_evaluation_task(str(task.id), session=db_session)
+
+    assert outcome["status"] == "completed"
+    assert outcome["evaluated"] == 2
+
+    await db_session.refresh(task)
+    assert task.result["total"] == 2
+    assert task.result["skipped_no_reply"] == 1
+
+
+async def test_only_mono_records_fail_with_clear_reason(db_session, monkeypatch) -> None:
+    user = UserFactory()
+    await persist(db_session, user)
+    datasource = DataSourceFactory(user_id=user.id)
+    await persist(db_session, datasource)
+    raw = RawDataFactory(datasource_id=datasource.id)
+    await persist(db_session, raw)
+    await persist(
+        db_session,
+        CleanedDataFactory(
+            datasource_id=datasource.id,
+            raw_data_id=raw.id,
+            dialogue_id=uuid.uuid4(),
+            user_message="整段单声道转写文本",
+            ai_response="",
+            quality_score=None,
+            issues=["asr_transcript", "mono_speaker_unknown"],
+        ),
+    )
+    task = TaskFactory(
+        user_id=user.id,
+        datasource_id=datasource.id,
+        task_type="evaluate",
+        status="pending",
+        params={"data_ids": [], "config": {}},
+    )
+    await persist(db_session, task)
+    monkeypatch.setattr(evaluation_service, "_build_agent", lambda: _FakeAgent(_success_result()))
+
+    outcome = await evaluation_service.run_evaluation_task(str(task.id), session=db_session)
+
+    assert outcome["status"] == "failed"
+    await db_session.refresh(task)
+    assert "单声道" in (task.error_message or "")

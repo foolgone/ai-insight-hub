@@ -2,13 +2,14 @@
 
 设计见 ``docs/04-development/19-音视频ASR转写MVP设计.md``：
 - ffprobe/ffmpeg 抽音轨、拆双声道、按需切片；
-- 调用 OpenAI 兼容的 ``/audio/transcriptions``；
+- 按模型自动选择协议：OpenAI ``/audio/transcriptions`` 或千问 ``/chat/completions``；
 - 双声道按 L/R 配对成 ``user_message`` / ``ai_response``；
 - 结果写入 ``raw_data.raw_content``，不新建表。
 """
 from __future__ import annotations
 
 import asyncio
+import base64
 import json
 import subprocess
 import tempfile
@@ -23,7 +24,11 @@ from loguru import logger
 
 from app.core.config import settings
 from app.services import storage_service
-from app.services.asr_service import AsrConfig
+from app.services.asr_service import (
+    PROTOCOL_CHAT_AUDIO,
+    AsrConfig,
+    build_chat_audio_payload,
+)
 
 
 class MediaError(Exception):
@@ -182,15 +187,15 @@ async def chunk_audio(path: Path, chunk_seconds: int) -> list[tuple[Path, float]
     return [(item, index * float(chunk_seconds)) for index, item in enumerate(files)]
 
 
-async def _transcribe_file(path: Path, config: AsrConfig, *, offset: float = 0.0) -> AsrResult:
-    data = {
-        "model": config.model,
-        "response_format": "verbose_json",
-        "timestamp_granularities[]": "segment",
-    }
-    if config.language and config.language != "auto":
-        data["language"] = config.language
-    content = path.read_bytes()
+async def _post_asr(
+    url: str,
+    headers: dict[str, str],
+    *,
+    data: dict | None = None,
+    files: dict | None = None,
+    json_body: dict | None = None,
+) -> dict:
+    """带重试的 ASR 请求：5xx/网络错误重试，4xx 不重试。"""
     retries = max(0, settings.ASR_MAX_RETRIES)
     last_error: Exception | None = None
 
@@ -198,10 +203,11 @@ async def _transcribe_file(path: Path, config: AsrConfig, *, offset: float = 0.0
         try:
             async with httpx.AsyncClient(timeout=settings.ASR_TIMEOUT) as client:
                 response = await client.post(
-                    config.endpoint,
-                    headers={"Authorization": f"Bearer {config.api_key}"},
+                    url,
+                    headers=headers,
                     data=data,
-                    files={"file": (path.name, content, "audio/mpeg")},
+                    files=files,
+                    json=json_body,
                 )
             if response.status_code >= 500:
                 raise AsrRequestError(f"ASR 服务异常：{response.status_code}")
@@ -211,8 +217,7 @@ async def _transcribe_file(path: Path, config: AsrConfig, *, offset: float = 0.0
                     f"ASR 请求失败：{response.status_code} {response.text[:300]}",
                     retryable=False,
                 )
-            payload = response.json()
-            break
+            return response.json()
         except AsrRequestError as exc:
             last_error = exc
             if not exc.retryable or attempt >= retries:
@@ -223,8 +228,34 @@ async def _transcribe_file(path: Path, config: AsrConfig, *, offset: float = 0.0
             if attempt >= retries:
                 raise AsrRequestError(f"ASR 网络错误：{exc}") from exc
             await asyncio.sleep(2**attempt)
-    else:  # pragma: no cover - 循环内已抛错
-        raise AsrRequestError(f"ASR 请求失败：{last_error}")
+    # pragma: no cover - 循环内已抛错
+    raise AsrRequestError(f"ASR 请求失败：{last_error}")
+
+
+async def _transcribe_file(path: Path, config: AsrConfig, *, offset: float = 0.0) -> AsrResult:
+    """按协议分发：标准 /audio/transcriptions 或千问 chat/completions。"""
+    if config.effective_protocol == PROTOCOL_CHAT_AUDIO:
+        return await _transcribe_chat_audio(path, config, offset=offset)
+    return await _transcribe_transcriptions(path, config, offset=offset)
+
+
+async def _transcribe_transcriptions(
+    path: Path, config: AsrConfig, *, offset: float = 0.0
+) -> AsrResult:
+    data = {
+        "model": config.model,
+        "response_format": "verbose_json",
+        "timestamp_granularities[]": "segment",
+    }
+    if config.language and config.language != "auto":
+        data["language"] = config.language
+    content = path.read_bytes()
+    payload = await _post_asr(
+        config.endpoint,
+        {"Authorization": f"Bearer {config.api_key}"},
+        data=data,
+        files={"file": (path.name, content, "audio/mpeg")},
+    )
 
     segments_payload = payload.get("segments") or []
     segments: list[AsrSegment] = []
@@ -252,6 +283,56 @@ async def _transcribe_file(path: Path, config: AsrConfig, *, offset: float = 0.0
     )
 
 
+async def _transcribe_chat_audio(
+    path: Path, config: AsrConfig, *, offset: float = 0.0
+) -> AsrResult:
+    """千问 Qwen3-ASR：base64 Data URI + chat/completions，无时间戳。"""
+    data_uri = "data:audio/mpeg;base64," + base64.b64encode(path.read_bytes()).decode()
+    payload = await _post_asr(
+        config.endpoint,
+        {"Authorization": f"Bearer {config.api_key}"},
+        json_body=build_chat_audio_payload(config, data_uri),
+    )
+
+    choices = payload.get("choices") or []
+    message = (choices[0] or {}).get("message") if choices else None
+    message = message or {}
+    raw_content = message.get("content")
+    if isinstance(raw_content, list):
+        text = " ".join(
+            str(item.get("text") or "") for item in raw_content if isinstance(item, dict)
+        ).strip()
+    else:
+        text = str(raw_content or "").strip()
+    if not text:
+        raise AsrRequestError("ASR 返回空转写")
+
+    usage = payload.get("usage") or {}
+    duration = float(usage.get("seconds") or 0)
+    annotations = message.get("annotations") or []
+    language = config.language or "zh"
+    for item in annotations:
+        if isinstance(item, dict) and item.get("language"):
+            language = str(item["language"])
+            break
+
+    # 无时间戳：用切片偏移构造一段粗粒度 segment（单声道/按片配对都依赖它）
+    return AsrResult(
+        text=text,
+        segments=[AsrSegment(start=offset, end=offset + duration, text=text)],
+        language=language,
+        duration=duration,
+        cost_estimate=round(duration / 60 * settings.ASR_PRICE_PER_MINUTE, 6),
+    )
+
+
+def _chunk_seconds(protocol: str) -> int:
+    """千问单次上限 5 分钟，这里按 4 分钟切片；标准接口沿用 ASR_CHUNK_SECONDS。"""
+    if protocol == PROTOCOL_CHAT_AUDIO:
+        return max(30, min(settings.ASR_CHAT_CHUNK_SECONDS, 240))
+    return settings.ASR_CHUNK_SECONDS
+
+
 async def _transcribe_track(
     path: Path,
     config: AsrConfig,
@@ -259,7 +340,7 @@ async def _transcribe_track(
     speaker: str | None,
     progress: Callable[[str], Awaitable[None]] | None,
 ) -> tuple[AsrResult, int]:
-    chunks = await chunk_audio(path, settings.ASR_CHUNK_SECONDS)
+    chunks = await chunk_audio(path, _chunk_seconds(config.effective_protocol))
     all_segments: list[AsrSegment] = []
     texts: list[str] = []
     language = config.language or "zh"

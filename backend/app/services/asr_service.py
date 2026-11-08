@@ -3,9 +3,17 @@
 配置来自用户在「语音转写设置」里填写的内容（密文存 ``user_llm_credentials``，
 ``provider='asr'``），**不再读 ``.env``**。``.env`` 只保留 ops 级旋钮
 （开关、超时、切片、重试、单价、SSRF 白名单）。
+
+支持两种接口协议（按模型名自动识别）：
+- ``transcriptions``：OpenAI 标准 ``POST /audio/transcriptions``（multipart 文件），
+  返回 ``text`` + ``segments``（有时间戳）；
+- ``chat_audio``：千问 Qwen3-ASR 的 OpenAI 兼容形态
+  ``POST /chat/completions`` + ``input_audio``（base64 Data URI），
+  **不返回时间戳**，按切片偏移量构造粗粒度 segment。
 """
 from __future__ import annotations
 
+import base64
 import io
 import math
 import struct
@@ -24,8 +32,11 @@ from app.services.credential_service import PROVIDER_ASR, credential_service
 
 __all__ = [
     "AsrConfig",
-    "DEFAULT_ASR_MODEL",
     "DEFAULT_ASR_LANGUAGE",
+    "DEFAULT_ASR_MODEL",
+    "PROTOCOL_CHAT_AUDIO",
+    "PROTOCOL_TRANSCRIPTIONS",
+    "detect_protocol",
     "resolve_for_user",
     "verify_config",
 ]
@@ -33,6 +44,20 @@ __all__ = [
 DEFAULT_ASR_MODEL = "whisper-1"
 DEFAULT_ASR_LANGUAGE = "zh"
 SUPPORTED_LANGUAGES = {"zh", "en", "ja", "ko", "yue", "auto"}
+
+PROTOCOL_TRANSCRIPTIONS = "transcriptions"
+PROTOCOL_CHAT_AUDIO = "chat_audio"
+
+# 千问系列走 chat/completions + input_audio（不返回时间戳）
+_CHAT_AUDIO_MODEL_PREFIXES = ("qwen3-asr", "qwen-audio-asr", "qwen2-audio")
+
+
+def detect_protocol(model: str | None) -> str:
+    """按模型名判断接口协议；未知模型一律按标准 transcriptions 处理。"""
+    name = (model or "").strip().lower()
+    if name.startswith(_CHAT_AUDIO_MODEL_PREFIXES):
+        return PROTOCOL_CHAT_AUDIO
+    return PROTOCOL_TRANSCRIPTIONS
 
 
 @dataclass(frozen=True)
@@ -43,10 +68,21 @@ class AsrConfig:
     api_key: str
     model: str
     language: str | None = None
+    # 留空则按 model 自动识别，调用方无需关心
+    protocol: str = ""
+
+    @property
+    def effective_protocol(self) -> str:
+        return self.protocol or detect_protocol(self.model)
 
     @property
     def endpoint(self) -> str:
-        return f"{self.base_url.rstrip('/')}/audio/transcriptions"
+        path = (
+            "/chat/completions"
+            if self.effective_protocol == PROTOCOL_CHAT_AUDIO
+            else "/audio/transcriptions"
+        )
+        return f"{self.base_url.rstrip('/')}{path}"
 
 
 async def resolve_for_user(session: AsyncSession, user_id: uuid.UUID) -> AsrConfig:
@@ -65,6 +101,7 @@ async def resolve_for_user(session: AsyncSession, user_id: uuid.UUID) -> AsrConf
         api_key=credential_service.decrypt_credential(row),
         model=row.model,
         language=row.language or DEFAULT_ASR_LANGUAGE,
+        protocol=detect_protocol(row.model),
     )
 
 
@@ -84,28 +121,52 @@ def _probe_wav(seconds: float = 1.0, rate: int = 16000) -> bytes:
     return buffer.getvalue()
 
 
+def build_chat_audio_payload(config: AsrConfig, data_uri: str) -> dict:
+    """千问 chat/completions 请求体（``asr_options`` 是非标准参数，放顶层）。"""
+    payload: dict = {
+        "model": config.model,
+        "messages": [
+            {
+                "role": "user",
+                "content": [{"type": "input_audio", "input_audio": {"data": data_uri}}],
+            }
+        ],
+        "stream": False,
+    }
+    asr_options: dict = {"enable_itn": True}
+    if config.language and config.language != "auto":
+        asr_options["language"] = config.language
+    payload["asr_options"] = asr_options
+    return payload
+
+
 async def verify_config(config: AsrConfig) -> tuple[bool, str | None]:
-    """真调一次 ``/audio/transcriptions``（1 秒音频）：返回 (是否可用, 失败原因)。"""
+    """真调一次转写接口（1 秒音频）：返回 (是否可用, 失败原因)。"""
     try:
         assert_safe_base_url(config.base_url)
     except UnsafeUrlError as exc:
         return False, str(exc)
 
-    payload = {
-        "model": config.model,
-        "response_format": "json",
-    }
-    if config.language and config.language != "auto":
-        payload["language"] = config.language
-
+    headers = {"Authorization": f"Bearer {config.api_key}"}
     try:
         async with httpx.AsyncClient(timeout=min(settings.ASR_TIMEOUT, 60)) as client:
-            response = await client.post(
-                config.endpoint,
-                headers={"Authorization": f"Bearer {config.api_key}"},
-                data=payload,
-                files={"file": ("probe.wav", _probe_wav(), "audio/wav")},
-            )
+            if config.effective_protocol == PROTOCOL_CHAT_AUDIO:
+                data_uri = "data:audio/wav;base64," + base64.b64encode(_probe_wav()).decode()
+                response = await client.post(
+                    config.endpoint,
+                    headers=headers,
+                    json=build_chat_audio_payload(config, data_uri),
+                )
+            else:
+                payload = {"model": config.model, "response_format": "json"}
+                if config.language and config.language != "auto":
+                    payload["language"] = config.language
+                response = await client.post(
+                    config.endpoint,
+                    headers=headers,
+                    data=payload,
+                    files={"file": ("probe.wav", _probe_wav(), "audio/wav")},
+                )
     except httpx.HTTPError as exc:
         logger.info("asr verify network error base_url={} error={}", config.base_url, exc)
         return False, f"无法连接转写服务：{exc}"
@@ -114,4 +175,6 @@ async def verify_config(config: AsrConfig) -> tuple[bool, str | None]:
         return True, None
     if response.status_code in (401, 403):
         return False, "API Key 无效或无权限"
+    if response.status_code == 404:
+        return False, "转写接口不存在（请检查服务地址与模型名是否匹配）"
     return False, f"转写服务返回 {response.status_code}：{response.text[:200]}"

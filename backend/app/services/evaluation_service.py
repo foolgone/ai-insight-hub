@@ -96,14 +96,30 @@ async def create_evaluation_task(
     return task
 
 
-async def _load_targets(session: AsyncSession, task: Task) -> list[CleanedData]:
+async def _load_targets(session: AsyncSession, task: Task) -> tuple[list[CleanedData], int]:
+    """加载可评估的对话。
+
+    单声道 ASR 记录（``ai_response`` 为空）没有「客服回复」，拿去评对话质量会
+    得出误导性结论，因此在评估入口直接排除；它们仍可用于知识提取与洞察。
+    返回 ``(可评估记录, 被跳过的无回复记录数)``。
+    """
     params = task.params or {}
     data_ids = params.get("data_ids") or []
-    stmt = select(CleanedData).where(CleanedData.datasource_id == task.datasource_id)
+    filters = [CleanedData.datasource_id == task.datasource_id]
     if data_ids:
-        stmt = stmt.where(CleanedData.id.in_([uuid.UUID(str(item)) for item in data_ids]))
-    stmt = stmt.order_by(CleanedData.created_at.asc()).limit(MAX_ITEMS_PER_TASK)
-    return list((await session.execute(stmt)).scalars().all())
+        filters.append(CleanedData.id.in_([uuid.UUID(str(item)) for item in data_ids]))
+
+    total = int(
+        await session.scalar(select(func.count()).select_from(CleanedData).where(*filters)) or 0
+    )
+    stmt = (
+        select(CleanedData)
+        .where(*filters, func.trim(CleanedData.ai_response) != "")
+        .order_by(CleanedData.created_at.asc())
+        .limit(MAX_ITEMS_PER_TASK)
+    )
+    rows = list((await session.execute(stmt)).scalars().all())
+    return rows, max(0, total - len(rows))
 
 
 async def _knowledge_snippets(
@@ -150,8 +166,10 @@ async def _execute_evaluation(
     failed = 0
     needs_review = 0
     try:
-        targets = await _load_targets(session, task)
+        targets, skipped_no_reply = await _load_targets(session, task)
         if not targets:
+            if skipped_no_reply:
+                raise ValueError("当前数据源只有单声道转写记录（没有客服回复），不参与对话质量评估；" "这些数据仍可用于知识提取与经营洞察")
             raise ValueError("no cleaned data to evaluate")
         knowledge = await _knowledge_snippets(session, datasource_id)
         config = _config_from_params(task.params or {})
@@ -224,6 +242,7 @@ async def _execute_evaluation(
             "failed": failed,
             "needs_review": needs_review,
             "total": len(targets),
+            "skipped_no_reply": skipped_no_reply,
         }
 
         # 用户取消：保留已评估结果，状态保持 cancelled

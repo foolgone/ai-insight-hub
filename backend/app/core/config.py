@@ -158,6 +158,8 @@ class Settings(BaseSettings):
     # 单次 HTTP 超时（秒）、单文件切片时长（秒）、失败重试次数
     ASR_TIMEOUT: int = 300
     ASR_CHUNK_SECONDS: int = 600
+    # 千问 Qwen3-ASR 单次上限 5 分钟：chat 协议单独用更短的切片（<=240s）
+    ASR_CHAT_CHUNK_SECONDS: int = 240
     ASR_MAX_RETRIES: int = 2
     # 成本估算单价（仅用于任务结果展示，不参与计费）
     ASR_PRICE_PER_MINUTE: float = 0.006

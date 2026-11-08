@@ -201,3 +201,73 @@ async def test_transcribe_file_omits_language_when_auto(tmp_path: Path, monkeypa
 
     assert "language" not in _FakeClient.last["data"]
     assert settings.ASR_TIMEOUT > 0
+
+
+QWEN_CONFIG = AsrConfig(
+    base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",
+    api_key="sk-test",
+    model="qwen3-asr-flash",
+    language="zh",
+)
+
+
+@pytest.mark.asyncio
+async def test_transcribe_file_chat_audio(tmp_path: Path, monkeypatch) -> None:
+    """千问：走 chat/completions + base64，无时间戳时用切片偏移构造 segment。"""
+    audio = tmp_path / "a.mp3"
+    audio.write_bytes(b"fake-mp3")
+    _FakeClient.calls = 0
+    _FakeClient.last = {}
+    _FakeClient.responses = [
+        _FakeResponse(
+            200,
+            {
+                "choices": [
+                    {
+                        "message": {
+                            "content": "你好世界",
+                            "annotations": [{"type": "audio_info", "language": "zh"}],
+                        }
+                    }
+                ],
+                "usage": {"seconds": 3, "total_tokens": 60},
+            },
+        )
+    ]
+    monkeypatch.setattr(media_service.httpx, "AsyncClient", _FakeClient)
+
+    result = await media_service._transcribe_file(audio, QWEN_CONFIG, offset=120.0)
+
+    assert result.text == "你好世界"
+    assert result.language == "zh"
+    assert result.duration == 3.0
+    assert result.segments[0].start == 120.0
+    assert result.segments[0].end == 123.0
+
+    assert _FakeClient.last["url"] == (
+        "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions"
+    )
+    body = _FakeClient.last["json"]
+    assert body["model"] == "qwen3-asr-flash"
+    assert body["asr_options"] == {"enable_itn": True, "language": "zh"}
+    data_uri = body["messages"][0]["content"][0]["input_audio"]["data"]
+    assert data_uri.startswith("data:audio/mpeg;base64,")
+
+
+@pytest.mark.asyncio
+async def test_transcribe_chat_audio_empty_text_raises(tmp_path: Path, monkeypatch) -> None:
+    audio = tmp_path / "a.mp3"
+    audio.write_bytes(b"fake-mp3")
+    _FakeClient.calls = 0
+    _FakeClient.responses = [
+        _FakeResponse(200, {"choices": [{"message": {"content": "  "}}], "usage": {}})
+    ]
+    monkeypatch.setattr(media_service.httpx, "AsyncClient", _FakeClient)
+
+    with pytest.raises(media_service.AsrRequestError):
+        await media_service._transcribe_file(audio, QWEN_CONFIG)
+
+
+def test_chunk_seconds_by_protocol() -> None:
+    assert media_service._chunk_seconds(media_service.PROTOCOL_CHAT_AUDIO) <= 240
+    assert media_service._chunk_seconds("transcriptions") == settings.ASR_CHUNK_SECONDS
