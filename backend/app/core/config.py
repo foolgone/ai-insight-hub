@@ -147,6 +147,20 @@ class Settings(BaseSettings):
     # ---------------- 文件上传 ----------------
     MAX_UPLOAD_SIZE_MB: int = 50
     ALLOWED_UPLOAD_EXTENSIONS: str = "csv,json,xlsx,txt"
+    # 音视频上传（ASR 转写后复用清洗链路；见 docs/04-development/19-音视频ASR转写MVP设计.md）
+    MEDIA_UPLOAD_EXTENSIONS: str = "mp3,wav,m4a,mp4,mov"
+
+    # ---------------- ASR（云转写，OpenAI 兼容接口） ----------------
+    ASR_ENABLED: bool = False
+    ASR_PROVIDER: str = "openai_compatible"
+    ASR_BASE_URL: str = "https://api.openai.com/v1"
+    ASR_API_KEY: str = ""
+    ASR_MODEL: str = "whisper-1"
+    ASR_LANGUAGE: str = "zh"
+    ASR_TIMEOUT: int = 300
+    ASR_CHUNK_SECONDS: int = 600
+    ASR_MAX_RETRIES: int = 2
+    ASR_PRICE_PER_MINUTE: float = 0.006
 
     # ---------------- BYOK：用户自带 LLM API Key ----------------
     # 总开关；false 时忽略用户凭据、隐藏前端入口（回退现状：服务端 Key）

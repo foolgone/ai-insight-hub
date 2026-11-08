@@ -18,6 +18,7 @@ class TaskListItem(ORMSchema):
     task_type: str
     status: str
     progress: int | None = None
+    current_step: str | None = None
     duration: float | None = None
     created_at: datetime | None = None
     completed_at: datetime | None = None

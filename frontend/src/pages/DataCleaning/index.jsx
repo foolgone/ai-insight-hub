@@ -144,6 +144,17 @@ export default function DataCleaning() {
       render: value => <Progress percent={value || 0} showPercent />,
     },
     {
+      key: 'current_step',
+      title: '阶段',
+      dataIndex: 'current_step',
+      render: value =>
+        value ? (
+          <span className="font-mono text-[11px] tracking-wide text-gray-500">{value}</span>
+        ) : (
+          '—'
+        ),
+    },
+    {
       key: 'created_at',
       title: '创建时间',
       dataIndex: 'created_at',

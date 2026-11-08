@@ -6,7 +6,7 @@ import { useUploadDataSourceFile } from '../../hooks/useDataSources'
 import { getErrorMessage } from '../../lib/errorMessages'
 import { notify } from '../../lib/toast'
 
-const ACCEPT = '.csv,.json,.xlsx,.txt'
+const ACCEPT = '.csv,.json,.xlsx,.txt,.mp3,.wav,.m4a,.mp4,.mov'
 const MAX_FILE_SIZE = 50 * 1024 * 1024
 
 /**
@@ -98,7 +98,8 @@ export function UploadDataModal({ datasource, open, onClose }) {
           </p>
         ) : null}
         <p className="text-xs text-gray-500">
-          支持 CSV / JSON / XLSX / TXT，单文件 ≤ 50MB；上传后自动入队清洗。
+          支持 CSV / JSON / XLSX / TXT / MP3 / WAV / M4A / MP4 / MOV，单文件 ≤ 50MB；
+          音视频会先转写为文本再进入清洗；建议上传双声道通话录音（左客户 / 右坐席）。
         </p>
       </div>
     </Modal>

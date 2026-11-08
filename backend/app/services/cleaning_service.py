@@ -29,6 +29,7 @@ from app.core.exceptions import (
 from app.models import CleanedData, DataSource, RawData, Task, User
 from app.schemas.agents.cleaning import CleaningConfig, CleaningInput, CleaningState
 from app.schemas.base import Pagination
+from app.services import media_service
 
 ACTIVE_STATUSES = ("pending", "running")
 CLEAN_TASK_TYPE = "clean"
@@ -288,8 +289,8 @@ async def _persist_dialogues(
     agent_version: str,
     duration: float,
     token_usage: dict[str, int],
-) -> tuple[int, float, int]:
-    """写入 cleaned_data（幂等），返回 (实际新增条数, 新增质量分合计, 候选条数)。
+) -> tuple[int, float, int, int]:
+    """写入 cleaned_data（幂等），返回 (新增条数, 质量分合计, 候选条数, 有分数条数)。
 
     ``(raw_data_id, dialogue_id)`` 唯一索引 + ``ON CONFLICT DO NOTHING``：
     同一 raw_data 重跑不会重复插入，也不会因唯一约束报错（P1-5）。
@@ -299,8 +300,8 @@ async def _persist_dialogues(
     for index, item in enumerate(dialogues, start=1):
         dialogue_id = str(item.get("dialogue_id") or index)
         parsed_ts = _parse_timestamp(item.get("timestamp"))
-        score = float(item.get("quality_score") or 0)
-        score = min(100.0, max(0.0, score))
+        raw_score = item.get("quality_score")
+        score = None if raw_score is None else min(100.0, max(0.0, float(raw_score)))
         issues = list(item.get("issues") or [])
         if parsed_ts is None and "missing_timestamp" not in issues:
             issues.append("missing_timestamp")
@@ -312,7 +313,12 @@ async def _persist_dialogues(
                 "timestamp": parsed_ts,
                 "user_message": str(item.get("user_message") or ""),
                 "ai_response": str(item.get("ai_response") or ""),
-                "metadata": {"agent": "cleaning_agent", "source_dialogue_id": dialogue_id},
+                "metadata": {
+                    "agent": item.get("source") or "cleaning_agent",
+                    "source": item.get("source"),
+                    "source_dialogue_id": dialogue_id,
+                    "speaker_pair": item.get("speaker_pair"),
+                },
                 "quality_score": score,
                 "issues": issues,
                 "agent_version": agent_version,
@@ -321,7 +327,7 @@ async def _persist_dialogues(
             }
         )
     if not rows:
-        return 0, 0.0, 0
+        return 0, 0.0, 0, 0
 
     stmt = (
         pg_insert(CleanedData.__table__)
@@ -330,7 +336,8 @@ async def _persist_dialogues(
         .returning(CleanedData.__table__.c.id, CleanedData.__table__.c.quality_score)
     )
     inserted = (await session.execute(stmt)).all()
-    return len(inserted), sum(float(row.quality_score or 0) for row in inserted), len(rows)
+    scored = [float(row.quality_score) for row in inserted if row.quality_score is not None]
+    return len(inserted), sum(scored), len(rows), len(scored)
 
 
 async def _execute_clean(
@@ -354,6 +361,8 @@ async def _execute_clean(
     cleaned_total = 0
     quality_total = 0.0
     candidate_total = 0
+    scored_total = 0
+    asr_summary: dict[str, Any] | None = None
     raw_records = 0
     failed_raw = 0
     near_duplicates = 0
@@ -374,34 +383,72 @@ async def _execute_clean(
                 await session.refresh(task)
                 break
 
-            # 状态机：NORMALIZING（文本归一化 + LLM 抽取）→ DEDUPLICATING → VALIDATING
-            _advance_state(task, CleaningState.NORMALIZING, detail=f"{index}/{raw_records}")
-            agent = _build_agent()
-            result = await agent.clean(
-                CleaningInput(
-                    datasource_id=raw.datasource_id,
-                    raw_data=_load_raw_text(raw),
-                    data_type=(raw.raw_content or {}).get("format") or "txt",
-                    config=config,
-                ).model_dump(mode="json"),
-                session=session,
-                task_id=task.id,
-                scope=f"clean:{raw.id}",
-                user_id=task.user_id,
-                datasource_id=raw.datasource_id,
-            )
+            content = raw.raw_content or {}
+            is_media = content.get("format") == "media"
 
-            if not result.success:
-                failed_raw += 1
-                raw.status = "failed"
-                raw.error_message = "; ".join(result.errors)[:1000] or "cleaning failed"
-                # 失败记录同样走完校验阶段，保证下一条能从 VALIDATING 回到 NORMALIZING
-                _advance_state(task, CleaningState.VALIDATING, detail=f"{index}/{raw_records}")
-                await session.flush()
-                continue
+            if is_media:
+                asr = content.get("asr") or {}
+                if asr.get("status") != "completed":
+                    task.current_step = f"parsing asr {index}/{raw_records}"
+                    task.progress = max(task.progress or 5, 10)
+                    await session.flush()
+
+                    async def _report(step: str) -> None:
+                        task.current_step = step
+                        task.progress = min(40, (task.progress or 10) + 3)
+                        await session.flush()
+
+                    try:
+                        transcript = await media_service.transcribe_media(
+                            raw, progress=_report
+                        )
+                    except Exception:
+                        raw.status = "failed"
+                        raise
+                    raw.raw_content = {**content, **transcript}
+                    asr_summary = transcript.get("asr")
+                    await session.flush()
+
+                _advance_state(task, CleaningState.NORMALIZING, detail=f"{index}/{raw_records}")
+                data = {"dialogues": (raw.raw_content or {}).get("records") or []}
+                if not data["dialogues"]:
+                    raise ValueError("media transcript has no records")
+                agent_version = "asr-1.0"
+                duration = 0.0
+                token_usage = {"input": 0, "output": 0}
+            else:
+                # 状态机：NORMALIZING（文本归一化 + LLM 抽取）→ DEDUPLICATING → VALIDATING
+                _advance_state(task, CleaningState.NORMALIZING, detail=f"{index}/{raw_records}")
+                agent = _build_agent()
+                result = await agent.clean(
+                    CleaningInput(
+                        datasource_id=raw.datasource_id,
+                        raw_data=_load_raw_text(raw),
+                        data_type=content.get("format") or "txt",
+                        config=config,
+                    ).model_dump(mode="json"),
+                    session=session,
+                    task_id=task.id,
+                    scope=f"clean:{raw.id}",
+                    user_id=task.user_id,
+                    datasource_id=raw.datasource_id,
+                )
+
+                if not result.success:
+                    failed_raw += 1
+                    raw.status = "failed"
+                    raw.error_message = "; ".join(result.errors)[:1000] or "cleaning failed"
+                    # 失败记录同样走完校验阶段，保证下一条能从 VALIDATING 回到 NORMALIZING
+                    _advance_state(task, CleaningState.VALIDATING, detail=f"{index}/{raw_records}")
+                    await session.flush()
+                    continue
+
+                data = result.data or {}
+                agent_version = str(result.metadata.get("version", "v1.0.0"))
+                duration = result.duration
+                token_usage = result.token_usage
 
             _advance_state(task, CleaningState.DEDUPLICATING, detail=f"{index}/{raw_records}")
-            data = result.data or {}
             if config.remove_duplicates:
                 near_duplicates += _mark_near_duplicates(
                     data.get("dialogues") or [],
@@ -409,17 +456,18 @@ async def _execute_clean(
                 )
 
             _advance_state(task, CleaningState.VALIDATING, detail=f"{index}/{raw_records}")
-            created, raw_quality, candidates = await _persist_dialogues(
+            created, raw_quality, candidates, scored = await _persist_dialogues(
                 session,
                 raw=raw,
                 result_data=data,
-                agent_version=str(result.metadata.get("version", "v1.0.0")),
-                duration=result.duration,
-                token_usage=result.token_usage,
+                agent_version=agent_version,
+                duration=duration,
+                token_usage=token_usage,
             )
             cleaned_total += created
             quality_total += raw_quality
             candidate_total += candidates
+            scored_total += scored
             raw.status = "completed"
             raw.processed_at = _now_naive()
             task.progress = min(90, 5 + int(index / raw_records * 85))
@@ -432,7 +480,9 @@ async def _execute_clean(
                 {
                     "total_records": int(statistics.get("total_records", 0)) + raw_records,
                     "cleaned_records": int(statistics.get("cleaned_records", 0)) + cleaned_total,
-                    "quality_score_avg": round(quality_total / cleaned_total, 2),
+                    "quality_score_avg": (
+                        round(quality_total / scored_total, 2) if scored_total else 0.0
+                    ),
                     "last_processed_at": _now_naive().isoformat(),
                 }
             )
@@ -452,6 +502,8 @@ async def _execute_clean(
             "skipped_existing_records": max(0, candidate_total - cleaned_total),
             "near_duplicate_records": near_duplicates,
         }
+        if asr_summary:
+            task.result["asr"] = asr_summary
 
         # 用户取消：保留已清洗结果，状态保持 cancelled，不覆盖为 completed/failed
         if task.status == "cancelled":

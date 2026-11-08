@@ -149,6 +149,14 @@ def _allowed_extensions() -> set[str]:
     }
 
 
+def _media_extensions() -> set[str]:
+    return {
+        item.strip().lower().lstrip(".")
+        for item in settings.MEDIA_UPLOAD_EXTENSIONS.split(",")
+        if item.strip()
+    }
+
+
 @router.post(
     "/{datasource_id}/upload",
     status_code=202,
@@ -182,14 +190,26 @@ async def upload_file(
     # 415：扩展名不在白名单
     extension = Path(filename).suffix.lower().lstrip(".")
     allowed = _allowed_extensions()
-    if extension not in allowed:
-        raise FileFormatInvalidError(details={"filename": filename, "allowed": sorted(allowed)})
+    media_exts = _media_extensions()
+    is_media = extension in media_exts
+    if extension not in allowed and not is_media:
+        raise FileFormatInvalidError(
+            details={"filename": filename, "allowed": sorted(allowed | media_exts)}
+        )
 
-    # 解析失败同样归为 415（FILE_FORMAT_INVALID）
-    try:
-        parsed = parsers.parse_upload(content, filename)
-    except parsers.ParseError as exc:
-        raise FileFormatInvalidError(str(exc), details={"filename": filename}) from exc
+    if is_media and not settings.ASR_ENABLED:
+        raise FileFormatInvalidError(
+            "音视频上传需要启用 ASR（ASR_ENABLED=true）",
+            details={"filename": filename, "reason": "asr_disabled"},
+        )
+
+    # 文本类解析失败归为 415；媒体不解析，交由 clean 任务转写
+    parsed = None
+    if not is_media:
+        try:
+            parsed = parsers.parse_upload(content, filename)
+        except parsers.ParseError as exc:
+            raise FileFormatInvalidError(str(exc), details={"filename": filename}) from exc
 
     stored = storage_service.save_upload(
         content,
@@ -198,15 +218,28 @@ async def upload_file(
         content_type=file.content_type,
     )
 
-    raw_data = RawData(
-        datasource_id=datasource.id,
-        raw_content={
+    if is_media:
+        raw_content = {
+            "format": "media",
+            "media": {
+                "filename": filename,
+                "mime_type": file.content_type,
+                "size": len(content),
+            },
+            "asr": {"status": "pending"},
+        }
+    else:
+        raw_content = {
             "text": parsed.raw_text[:MAX_RAW_TEXT_CHARS],
             "format": parsed.format,
             "encoding": parsed.encoding,
             "record_count": parsed.record_count,
             "truncated": len(parsed.raw_text) > MAX_RAW_TEXT_CHARS,
-        },
+        }
+
+    raw_data = RawData(
+        datasource_id=datasource.id,
+        raw_content=raw_content,
         file_info={
             "filename": filename,
             "size": len(content),

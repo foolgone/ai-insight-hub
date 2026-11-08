@@ -6,9 +6,9 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
-# 系统依赖：psycopg/asyncpg 编译与健康检查（curl）
+# 系统依赖：psycopg/asyncpg 编译、健康检查（curl）、音视频转写（ffmpeg/ffprobe）
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends build-essential curl libpq-dev \
+    && apt-get install -y --no-install-recommends build-essential curl libpq-dev ffmpeg \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt ./
