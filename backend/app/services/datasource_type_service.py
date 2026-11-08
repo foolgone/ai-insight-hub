@@ -52,9 +52,7 @@ def _normalize_code(raw: str | None) -> str:
     if not code:
         return f"t_{uuid.uuid4().hex[:8]}"
     if not CODE_PATTERN.match(code):
-        raise DataSourceTypeInvalidError(
-            "类型标识只能包含小写字母、数字和下划线，且以字母开头（2-50 位）"
-        )
+        raise DataSourceTypeInvalidError("类型标识只能包含小写字母、数字和下划线，且以字母开头（2-50 位）")
     return code
 
 
@@ -154,9 +152,7 @@ async def get(session: AsyncSession, user_id: uuid.UUID, type_id: uuid.UUID) -> 
     return row
 
 
-async def ensure_usable(
-    session: AsyncSession, user_id: uuid.UUID, code: str
-) -> DataSourceType:
+async def ensure_usable(session: AsyncSession, user_id: uuid.UUID, code: str) -> DataSourceType:
     """校验类型归属当前用户且启用；未知/停用 → 400。"""
     await ensure_user_defaults(session, user_id)
     row = await session.scalar(
@@ -174,9 +170,7 @@ async def ensure_usable(
 
 async def _next_sort_order(session: AsyncSession, user_id: uuid.UUID) -> int:
     current = await session.scalar(
-        select(func.max(DataSourceType.sort_order)).where(
-            DataSourceType.owner_user_id == user_id
-        )
+        select(func.max(DataSourceType.sort_order)).where(DataSourceType.owner_user_id == user_id)
     )
     return int(current or 0) + 10
 

@@ -168,7 +168,10 @@ export function Table({
               ))
             ) : sortedData.length === 0 ? (
               <tr>
-                <td colSpan={columnCount} className="px-4 py-14 text-center font-mono text-[11px] uppercase tracking-[0.14em] text-gray-400">
+                <td
+                  colSpan={columnCount}
+                  className="px-4 py-14 text-center font-mono text-[11px] uppercase tracking-[0.14em] text-gray-400"
+                >
                   {emptyText}
                 </td>
               </tr>

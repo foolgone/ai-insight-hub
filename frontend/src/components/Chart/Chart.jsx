@@ -87,10 +87,7 @@ export function Chart({
   const legendVisible = showLegend ?? type === 'pie'
 
   return (
-    <section
-      aria-label={title}
-      className={clsx('border border-gray-200 bg-white p-5', className)}
-    >
+    <section aria-label={title} className={clsx('border border-gray-200 bg-white p-5', className)}>
       <header className="mb-4 flex items-baseline justify-between gap-2 border-b border-gray-100 pb-3">
         <h3 className="font-display text-lg font-normal tracking-tight text-gray-900">{title}</h3>
         {showActions ? (
@@ -169,7 +166,10 @@ export function Chart({
                 <CartesianGrid stroke={GRID_STROKE} strokeDasharray="2 6" vertical={false} />
                 <XAxis dataKey="name" tick={AXIS_TICK} axisLine={AXIS_LINE} tickLine={false} />
                 <YAxis tick={AXIS_TICK} axisLine={false} tickLine={false} width={32} />
-                <RechartsTooltip contentStyle={TOOLTIP_STYLE} cursor={{ fill: 'rgba(23,22,15,0.03)' }} />
+                <RechartsTooltip
+                  contentStyle={TOOLTIP_STYLE}
+                  cursor={{ fill: 'rgba(23,22,15,0.03)' }}
+                />
                 {legendVisible ? <Legend wrapperStyle={LEGEND_STYLE} /> : null}
                 <Bar dataKey="value" fill="var(--chart-primary)" radius={[0, 0, 0, 0]} />
               </BarChart>
@@ -207,7 +207,12 @@ export function Chart({
                   stroke="var(--chart-primary)"
                   strokeWidth={1.5}
                   dot={false}
-                  activeDot={{ r: 3, fill: 'var(--chart-primary)', stroke: '#FAF8F3', strokeWidth: 2 }}
+                  activeDot={{
+                    r: 3,
+                    fill: 'var(--chart-primary)',
+                    stroke: '#FAF8F3',
+                    strokeWidth: 2,
+                  }}
                 />
               </LineChart>
             )}
@@ -217,4 +222,3 @@ export function Chart({
     </section>
   )
 }
-

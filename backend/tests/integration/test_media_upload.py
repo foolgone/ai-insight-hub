@@ -52,9 +52,7 @@ async def test_upload_media_creates_media_raw_data(
     assert response.json()["task_id"]
 
     raw = (
-        await db_session.execute(
-            select(RawData).where(RawData.datasource_id == datasource_id)
-        )
+        await db_session.execute(select(RawData).where(RawData.datasource_id == datasource_id))
     ).scalar_one()
     assert raw.raw_content["format"] == "media"
     assert raw.raw_content["asr"]["status"] == "pending"
@@ -62,9 +60,7 @@ async def test_upload_media_creates_media_raw_data(
     assert raw.file_info["filename"] == "call.mp3"
 
 
-async def test_upload_media_rejected_when_asr_disabled(
-    client, auth_headers, monkeypatch
-) -> None:
+async def test_upload_media_rejected_when_asr_disabled(client, auth_headers, monkeypatch) -> None:
     monkeypatch.setattr(settings, "ASR_ENABLED", False)
     monkeypatch.setattr(credential_service, "get_credential", _active_any)
     datasource_id = await _datasource(client, auth_headers)
@@ -80,9 +76,7 @@ async def test_upload_media_rejected_when_asr_disabled(
     assert response.json()["error"]["details"]["reason"] == "asr_disabled"
 
 
-async def test_upload_media_requires_asr_credential(
-    client, auth_headers, monkeypatch
-) -> None:
+async def test_upload_media_requires_asr_credential(client, auth_headers, monkeypatch) -> None:
     """有 LLM Key 但没有语音转写配置 → 428，引导去前端配置。"""
     monkeypatch.setattr(settings, "ASR_ENABLED", True)
     monkeypatch.setattr(credential_service, "get_credential", _only_llm)
@@ -114,8 +108,6 @@ async def test_upload_text_unaffected_by_asr_config(
 
     assert response.status_code == 202, response.text
     raw = (
-        await db_session.execute(
-            select(RawData).where(RawData.datasource_id == datasource_id)
-        )
+        await db_session.execute(select(RawData).where(RawData.datasource_id == datasource_id))
     ).scalar_one()
     assert raw.raw_content["format"] != "media"

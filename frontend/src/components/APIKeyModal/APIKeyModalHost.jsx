@@ -14,12 +14,5 @@ export function APIKeyModalHost() {
   const closeModal = useCredentialGate(state => state.closeModal)
   const { user } = useAuth()
 
-  return (
-    <APIKeyModal
-      open={open}
-      onClose={closeModal}
-      isDemo={isDemoUser(user)}
-      initialTab={tab}
-    />
-  )
+  return <APIKeyModal open={open} onClose={closeModal} isDemo={isDemoUser(user)} initialTab={tab} />
 }

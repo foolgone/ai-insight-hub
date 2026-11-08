@@ -1,7 +1,10 @@
 // 全局测试 setup（与 docs/06-testing/04-前端测试规范.md §4.2 保持一致）
 import '@testing-library/jest-dom/vitest'
-import { cleanup } from '@testing-library/react'
+import { cleanup, configure } from '@testing-library/react'
 import { afterEach } from 'vitest'
+
+// 全量 + 覆盖率并发运行时渲染更慢：给 findBy* 更宽松的等待上限（不掩盖真实失败）
+configure({ asyncUtilTimeout: 3000 })
 
 // 每个用例后卸载组件，避免 DOM 残留
 afterEach(() => {

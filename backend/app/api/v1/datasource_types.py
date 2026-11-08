@@ -87,9 +87,7 @@ async def update_datasource_type(
     session: AsyncSession = Depends(get_db),
 ) -> DataSourceTypeItem:
     row = await datasource_type_service.update(session, user.id, type_id, payload)
-    rows = await datasource_type_service.list_types(
-        session, user_id=user.id, include_inactive=True
-    )
+    rows = await datasource_type_service.list_types(session, user_id=user.id, include_inactive=True)
     usage = next((count for item, count in rows if item.id == row.id), 0)
     return _to_item(row, usage)
 

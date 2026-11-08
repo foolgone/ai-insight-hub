@@ -153,9 +153,7 @@ describe('页面级集成（F-502）', () => {
   it('链路 2：未登录访问业务路由跳转登录页', async () => {
     renderAt('/data-sources')
 
-    expect(
-      await screen.findByRole('heading', { name: '欢迎回来' })
-    ).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '欢迎回来' })).toBeInTheDocument()
   })
 
   it('链路 3：数据源列表 → 打开新建 Drawer', async () => {

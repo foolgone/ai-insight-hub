@@ -27,6 +27,7 @@ ASR_CONFIG = asr_service.AsrConfig(
 async def _fake_resolve(_session, _user_id):
     return ASR_CONFIG
 
+
 RECORDS = [
     {
         "dialogue_id": "asr-1",

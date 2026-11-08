@@ -62,8 +62,7 @@ export function AsrKeyPanel() {
     }
   }
 
-  const canSave =
-    baseUrl.trim().length > 0 && apiKey.trim().length >= 8 && model.trim().length > 0
+  const canSave = baseUrl.trim().length > 0 && apiKey.trim().length >= 8 && model.trim().length > 0
 
   return (
     <div>
@@ -210,12 +209,7 @@ export function AsrKeyPanel() {
       </p>
 
       <footer className="mt-6 flex flex-col-reverse gap-2 border-t border-gray-100 pt-4 sm:flex-row sm:justify-end">
-        <Button
-          size="sm"
-          loading={saveMutation.isPending}
-          disabled={!canSave}
-          onClick={handleSave}
-        >
+        <Button size="sm" loading={saveMutation.isPending} disabled={!canSave} onClick={handleSave}>
           验证并保存
         </Button>
       </footer>

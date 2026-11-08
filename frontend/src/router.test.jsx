@@ -101,9 +101,7 @@ describe('AppRoutes', () => {
     useAuthStore.setState({ user: null })
     renderAt('/login')
 
-    expect(
-      await screen.findByRole('heading', { name: '欢迎回来' })
-    ).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '欢迎回来' })).toBeInTheDocument()
   })
 
   it('已登录访问 /login 重定向到 Dashboard', async () => {

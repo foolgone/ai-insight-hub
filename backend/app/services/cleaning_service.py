@@ -192,9 +192,7 @@ def _read_full_upload(raw: RawData) -> str | None:
     try:
         from app.services import parsers, storage_service
 
-        content = storage_service.read_upload(
-            object_name, backend=file_info.get("storage_backend")
-        )
+        content = storage_service.read_upload(object_name, backend=file_info.get("storage_backend"))
         parsed = parsers.parse_upload(content, file_info.get("filename") or "upload.bin")
         return parsed.raw_text
     except Exception as exc:  # noqa: BLE001 - 存储不可用/文件缺失时回退入库文本
@@ -330,7 +328,9 @@ async def _persist_dialogues(
         return 0, 0.0, 0, 0
 
     stmt = (
-        pg_insert(CleanedData.__table__)
+        # 用 Table 而非 ORM 实体做批量 upsert（避免 ORM 批量语义）；
+        # mypy 把 __table__ 推断成 FromClause，这里显式忽略参数类型
+        pg_insert(CleanedData.__table__)  # type: ignore[arg-type]
         .values(rows)
         .on_conflict_do_nothing(index_elements=["raw_data_id", "dialogue_id"])
         .returning(CleanedData.__table__.c.id, CleanedData.__table__.c.quality_score)
@@ -399,6 +399,8 @@ async def _execute_clean(
                         await session.flush()
 
                     try:
+                        if task.user_id is None:
+                            raise ValueError("clean task has no owner")
                         asr_config = await asr_service.resolve_for_user(session, task.user_id)
                         transcript = await media_service.transcribe_media(
                             raw, asr_config, progress=_report

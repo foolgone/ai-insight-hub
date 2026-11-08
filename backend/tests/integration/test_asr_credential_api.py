@@ -45,9 +45,7 @@ async def _save(client, auth_headers, **overrides):
         "language": "zh",
     }
     payload.update(overrides)
-    return await client.put(
-        "/api/v1/users/me/asr-credential", json=payload, headers=auth_headers
-    )
+    return await client.put("/api/v1/users/me/asr-credential", json=payload, headers=auth_headers)
 
 
 async def test_put_get_delete_roundtrip(client, auth_headers):

@@ -31,9 +31,7 @@ def test_pair_dialogues_lr() -> None:
         AsrSegment(start=13.0, end=14.0, text="可以申请补偿。", speaker="R"),
     ]
 
-    records = media_service._pair_dialogues(
-        left, right, anchor=datetime(2026, 11, 8, 10, 0, 0)
-    )
+    records = media_service._pair_dialogues(left, right, anchor=datetime(2026, 11, 8, 10, 0, 0))
 
     assert len(records) == 2
     assert records[0]["user_message"] == "我的订单怎么还没发货？"
@@ -53,9 +51,7 @@ def test_pair_dialogues_agent_starts_first() -> None:
         AsrSegment(start=7.0, end=8.0, text="好的。", speaker="R"),
     ]
 
-    records = media_service._pair_dialogues(
-        left, right, anchor=datetime(2026, 11, 8, 10, 0, 0)
-    )
+    records = media_service._pair_dialogues(left, right, anchor=datetime(2026, 11, 8, 10, 0, 0))
 
     assert len(records) == 1
     assert records[0]["user_message"] == "嗯嗯"
@@ -192,13 +188,14 @@ async def test_transcribe_file_omits_language_when_auto(tmp_path: Path, monkeypa
     audio = tmp_path / "a.mp3"
     audio.write_bytes(b"fake")
     _FakeClient.calls = 0
-    _FakeClient.responses = [
-        _FakeResponse(200, {"text": "hi", "duration": 1.0, "segments": []})
-    ]
+    _FakeClient.responses = [_FakeResponse(200, {"text": "hi", "duration": 1.0, "segments": []})]
     monkeypatch.setattr(media_service.httpx, "AsyncClient", _FakeClient)
 
     auto = AsrConfig(
-        base_url="https://asr.example.com/v1", api_key="k-1234567", model="whisper-1", language="auto"
+        base_url="https://asr.example.com/v1",
+        api_key="k-1234567",
+        model="whisper-1",
+        language="auto",
     )
     await media_service._transcribe_file(audio, auto)
 

@@ -23,7 +23,9 @@
 
   body {
     @apply m-0 bg-gray-50 text-gray-700 antialiased;
-    font-feature-settings: 'ss01' on, 'cv01' on;
+    font-feature-settings:
+      'ss01' on,
+      'cv01' on;
   }
 
   #root {

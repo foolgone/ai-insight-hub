@@ -182,9 +182,7 @@ async def chunk_audio(path: Path, chunk_seconds: int) -> list[tuple[Path, float]
     return [(item, index * float(chunk_seconds)) for index, item in enumerate(files)]
 
 
-async def _transcribe_file(
-    path: Path, config: AsrConfig, *, offset: float = 0.0
-) -> AsrResult:
+async def _transcribe_file(path: Path, config: AsrConfig, *, offset: float = 0.0) -> AsrResult:
     data = {
         "model": config.model,
         "response_format": "verbose_json",
@@ -427,7 +425,8 @@ async def transcribe_media(
                 anchor=raw.created_at or _now_naive(),
             )
             text = " ".join(
-                segment.text for segment in sorted(
+                segment.text
+                for segment in sorted(
                     left_result.segments + right_result.segments,
                     key=lambda item: item.start,
                 )

@@ -66,8 +66,7 @@ class QualityEvaluationAgent(BaseAgent):
 
     def __init__(self, config: AgentConfig | None = None, *, llm: Any = None) -> None:
         super().__init__(
-            config
-            or AgentConfig(name="evaluation_agent", version=load_prompt_version(PROMPT_DIR)),
+            config or AgentConfig(name="evaluation_agent", version=load_prompt_version(PROMPT_DIR)),
             llm=llm,
         )
         self._active_input: EvaluationInput | None = None

@@ -166,7 +166,10 @@ export default function Dashboard() {
       <div className="border border-gray-200 bg-white">
         <div className="flex items-baseline justify-between gap-2 border-b border-gray-200 px-5 py-4">
           <h2 className="font-display text-lg font-normal text-gray-900">最近任务</h2>
-          <Link to="/data-cleaning" className="link-quiet font-mono text-[10px] uppercase tracking-[0.14em]">
+          <Link
+            to="/data-cleaning"
+            className="link-quiet font-mono text-[10px] uppercase tracking-[0.14em]"
+          >
             查看全部
           </Link>
         </div>

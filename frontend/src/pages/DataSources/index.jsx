@@ -241,10 +241,7 @@ export default function DataSources() {
       />
 
       {canWrite ? (
-        <DataSourceTypeManager
-          open={typeManagerOpen}
-          onClose={() => setTypeManagerOpen(false)}
-        />
+        <DataSourceTypeManager open={typeManagerOpen} onClose={() => setTypeManagerOpen(false)} />
       ) : null}
     </section>
   )

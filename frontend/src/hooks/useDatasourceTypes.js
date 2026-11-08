@@ -25,7 +25,8 @@ export function useDatasourceTypeOptions({ includeInactive = false } = {}) {
   const query = useDatasourceTypesQuery({ includeInactive })
   const items = query.data?.items ?? []
   const options = items.map(item => ({ label: item.label, value: item.code }))
-  const labelOf = code => items.find(item => item.code === code)?.label || getDatasourceTypeLabel(code)
+  const labelOf = code =>
+    items.find(item => item.code === code)?.label || getDatasourceTypeLabel(code)
 
   return { ...query, items, options, labelOf }
 }

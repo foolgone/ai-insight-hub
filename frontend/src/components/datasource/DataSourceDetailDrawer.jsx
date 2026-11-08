@@ -54,8 +54,7 @@ export function DataSourceDetailDrawer({ datasource, open, onClose }) {
                 </Badge>
               </div>
               <p className="mt-1 text-xs text-gray-500">
-                {labelOf(datasource.type)} · 创建于{' '}
-                {formatDateTime(datasource.created_at)}
+                {labelOf(datasource.type)} · 创建于 {formatDateTime(datasource.created_at)}
               </p>
               {datasource.description ? (
                 <p className="mt-2 text-sm text-gray-600">{datasource.description}</p>

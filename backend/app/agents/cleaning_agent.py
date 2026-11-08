@@ -45,8 +45,7 @@ class DataCleaningAgent(BaseAgent):
 
     def __init__(self, config: AgentConfig | None = None, *, llm: Any = None) -> None:
         super().__init__(
-            config
-            or AgentConfig(name="cleaning_agent", version=load_prompt_version(PROMPT_DIR)),
+            config or AgentConfig(name="cleaning_agent", version=load_prompt_version(PROMPT_DIR)),
             llm=llm,
         )
         self._examples: list[dict[str, Any]] | None = None

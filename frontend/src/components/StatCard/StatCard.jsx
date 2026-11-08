@@ -31,7 +31,10 @@ export function StatCard({ title, value, icon, trend, color = 'primary', classNa
           {title}
         </p>
         {icon ? (
-          <span className="text-gray-300 transition-colors group-hover:text-gray-500" aria-hidden="true">
+          <span
+            className="text-gray-300 transition-colors group-hover:text-gray-500"
+            aria-hidden="true"
+          >
             {icon}
           </span>
         ) : null}

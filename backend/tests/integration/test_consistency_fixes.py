@@ -9,7 +9,6 @@
 from __future__ import annotations
 
 import uuid
-from typing import Any
 
 import pytest
 from sqlalchemy import select, update
@@ -87,9 +86,7 @@ async def test_insight_persists_analysis_result(db_session, monkeypatch) -> None
         params={},
     )
     await persist(db_session, task)
-    monkeypatch.setattr(
-        insight_service, "_build_agent", lambda: _InsightAgent(_insight_result())
-    )
+    monkeypatch.setattr(insight_service, "_build_agent", lambda: _InsightAgent(_insight_result()))
 
     outcome = await insight_service.run_insight_task(str(task.id), session=db_session)
 
@@ -206,11 +203,7 @@ async def test_clean_rerun_is_idempotent(db_session, monkeypatch) -> None:
     assert second["status"] == "completed"
     assert second["cleaned_records"] == 0
     rows = (
-        (
-            await db_session.execute(
-                select(CleanedData).where(CleanedData.raw_data_id == raw.id)
-            )
-        )
+        (await db_session.execute(select(CleanedData).where(CleanedData.raw_data_id == raw.id)))
         .scalars()
         .all()
     )
@@ -247,9 +240,7 @@ async def test_clean_finalize_preserves_cancelled(db_session, monkeypatch) -> No
     )
 
     async def fake_is_cancelled(session, task_id):
-        await session.execute(
-            update(Task).where(Task.id == task_id).values(status="cancelled")
-        )
+        await session.execute(update(Task).where(Task.id == task_id).values(status="cancelled"))
         return True
 
     monkeypatch.setattr(task_service, "is_cancelled", fake_is_cancelled)
@@ -315,9 +306,7 @@ async def test_evaluation_finalize_preserves_cancelled(db_session, monkeypatch) 
     )
 
     async def fake_is_cancelled(session, task_id):
-        await session.execute(
-            update(Task).where(Task.id == task_id).values(status="cancelled")
-        )
+        await session.execute(update(Task).where(Task.id == task_id).values(status="cancelled"))
         return True
 
     monkeypatch.setattr(task_service, "is_cancelled", fake_is_cancelled)

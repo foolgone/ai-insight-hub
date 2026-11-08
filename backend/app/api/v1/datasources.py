@@ -4,6 +4,7 @@ from __future__ import annotations
 import uuid
 from datetime import datetime
 from pathlib import Path
+from typing import Any
 
 from fastapi import APIRouter, Depends, File, Query, UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -232,7 +233,7 @@ async def upload_file(
     )
 
     if is_media:
-        raw_content = {
+        raw_content: dict[str, Any] = {
             "format": "media",
             "media": {
                 "filename": filename,
@@ -242,6 +243,8 @@ async def upload_file(
             "asr": {"status": "pending"},
         }
     else:
+        # 非媒体分支一定已在上面解析成功（失败会抛 415）
+        assert parsed is not None
         raw_content = {
             "text": parsed.raw_text[:MAX_RAW_TEXT_CHARS],
             "format": parsed.format,

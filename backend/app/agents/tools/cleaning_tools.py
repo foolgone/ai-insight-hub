@@ -9,6 +9,7 @@ from __future__ import annotations
 import csv
 import json
 import re
+from collections.abc import Sequence
 from datetime import datetime
 from difflib import SequenceMatcher
 from io import StringIO
@@ -82,7 +83,7 @@ def _dialogue_text(item: str | dict[str, Any]) -> str:
 
 
 def detect_duplicates(
-    items: list[str | dict[str, Any]], *, threshold: float = 0.95
+    items: Sequence[str | dict[str, Any]], *, threshold: float = 0.95
 ) -> list[tuple[int, int]]:
     """返回相似度 ≥ ``threshold`` 的下标对（默认 95%）。"""
     texts = [_dialogue_text(item) for item in items]

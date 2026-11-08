@@ -24,7 +24,8 @@ class EvaluationTaskResponse(BaseSchema):
 
 class QualityAnalysisItem(BaseSchema):
     id: uuid.UUID
-    data_id: uuid.UUID
+    # 洞察是数据源级结果，可能没有单条对话（迁移 012 起 data_id 可空）
+    data_id: uuid.UUID | None = None
     overall_score: float
     needs_review: bool
     quality_level: str | None = None

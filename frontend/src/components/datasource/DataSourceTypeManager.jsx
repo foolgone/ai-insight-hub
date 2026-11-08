@@ -51,8 +51,7 @@ export function DataSourceTypeManager({ open, onClose }) {
   }, [open])
 
   const items = data?.items ?? []
-  const busy =
-    createMutation.isPending || updateMutation.isPending || deleteMutation.isPending
+  const busy = createMutation.isPending || updateMutation.isPending || deleteMutation.isPending
 
   const handleCreate = async () => {
     if (!label.trim()) {
@@ -169,7 +168,11 @@ export function DataSourceTypeManager({ open, onClose }) {
                       className="w-40"
                       disabled={busy}
                     />
-                    <Button size="sm" loading={updateMutation.isPending} onClick={() => handleRename(item)}>
+                    <Button
+                      size="sm"
+                      loading={updateMutation.isPending}
+                      onClick={() => handleRename(item)}
+                    >
                       保存
                     </Button>
                     <Button size="sm" variant="ghost" onClick={() => setEditingId(null)}>

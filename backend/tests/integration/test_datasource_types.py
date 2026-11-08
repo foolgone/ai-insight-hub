@@ -23,7 +23,9 @@ async def _login(client, email: str, password: str) -> dict[str, str]:
     return {"Authorization": f"Bearer {response.json()['access_token']}"}
 
 
-async def _make_user_headers(client, db_session, *, role: str = "user", password: str = "user12345"):
+async def _make_user_headers(
+    client, db_session, *, role: str = "user", password: str = "user12345"
+):
     user = UserFactory(password_hash=hash_password(password), role=role)
     await persist(db_session, user)
     headers = await _login(client, user.email, password)
@@ -68,9 +70,7 @@ async def _create_datasource(client, headers, *, name: str, type_code: str):
     )
 
 
-async def test_defaults_provisioned_per_user(
-    client, auth_headers, second_user_headers
-) -> None:
+async def test_defaults_provisioned_per_user(client, auth_headers, second_user_headers) -> None:
     first = await _list(client, auth_headers)
     assert {item["code"] for item in first} == DEFAULT_CODES
     assert all(item["is_system"] is True for item in first)
@@ -105,9 +105,7 @@ async def test_create_update_delete_custom_type(client, auth_headers) -> None:
     assert "after_sales" not in {item["code"] for item in await _list(client, auth_headers)}
 
 
-async def test_types_are_isolated_between_users(
-    client, auth_headers, second_user_headers
-) -> None:
+async def test_types_are_isolated_between_users(client, auth_headers, second_user_headers) -> None:
     created = await _create_type(client, auth_headers, label="售后", code="after_sales")
     type_id = created.json()["id"]
 
@@ -132,9 +130,7 @@ async def test_types_are_isolated_between_users(
     assert mine[type_id]["label"] == "售后"
 
 
-async def test_same_code_allowed_across_users(
-    client, auth_headers, second_user_headers
-) -> None:
+async def test_same_code_allowed_across_users(client, auth_headers, second_user_headers) -> None:
     first = await _create_type(client, auth_headers, label="售后A", code="shared_code")
     second = await _create_type(client, second_user_headers, label="售后B", code="shared_code")
     assert first.status_code == 201
@@ -195,18 +191,16 @@ async def test_type_in_use_cannot_be_deleted(client, auth_headers) -> None:
     assert response.json()["error"]["details"]["usage_count"] == 1
 
 
-async def test_usage_count_is_owner_scoped(
-    client, auth_headers, second_user_headers
-) -> None:
+async def test_usage_count_is_owner_scoped(client, auth_headers, second_user_headers) -> None:
     """A 的数据源不会计入 B 同名类型的 usage_count。"""
-    assert (await _create_type(client, auth_headers, label="A", code="scoped_code")).status_code == 201
+    assert (
+        await _create_type(client, auth_headers, label="A", code="scoped_code")
+    ).status_code == 201
     assert (
         await _create_type(client, second_user_headers, label="B", code="scoped_code")
     ).status_code == 201
 
-    created = await _create_datasource(
-        client, auth_headers, name="A 的数据源", type_code="scoped_code"
-    )
+    created = await _create_datasource(client, auth_headers, name="A 的数据源", type_code="scoped_code")
     assert created.status_code == 201
 
     a_usage = next(
@@ -250,9 +244,7 @@ async def test_viewer_cannot_write(client, viewer_headers) -> None:
 
 
 async def test_create_datasource_with_unknown_type_rejected(client, auth_headers) -> None:
-    response = await _create_datasource(
-        client, auth_headers, name="未知类型", type_code="not_exists"
-    )
+    response = await _create_datasource(client, auth_headers, name="未知类型", type_code="not_exists")
     assert response.status_code == 400
     assert response.json()["error"]["code"] == "DATASOURCE_TYPE_INVALID"
 
@@ -296,9 +288,7 @@ async def test_update_datasource_type(client, auth_headers) -> None:
     created = await _create_type(client, auth_headers, label="售后", code="switch_type")
     assert created.status_code == 201
 
-    datasource = await _create_datasource(
-        client, auth_headers, name="可切换类型", type_code="other"
-    )
+    datasource = await _create_datasource(client, auth_headers, name="可切换类型", type_code="other")
     datasource_id = datasource.json()["id"]
 
     updated = await client.patch(

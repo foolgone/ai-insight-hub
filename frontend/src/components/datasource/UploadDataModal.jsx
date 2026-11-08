@@ -104,9 +104,7 @@ export function UploadDataModal({ datasource, open, onClose }) {
         ) : null}
         {mediaSelected && !asrReady ? (
           <div className="border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
-            <p>
-              检测到音视频文件：请先配置语音转写服务（服务地址 + API Key），否则无法转写。
-            </p>
+            <p>检测到音视频文件：请先配置语音转写服务（服务地址 + API Key），否则无法转写。</p>
             <button
               type="button"
               onClick={() => {

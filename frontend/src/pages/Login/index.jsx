@@ -70,7 +70,10 @@ export default function Login() {
     <div className="grid min-h-screen bg-gray-50 lg:grid-cols-[1.05fr_0.95fr]">
       {/* 左：编辑部式主张面板 */}
       <aside className="relative hidden flex-col justify-between overflow-hidden bg-gray-900 p-12 text-gray-100 lg:flex">
-        <div className="grid-paper pointer-events-none absolute inset-0 opacity-70" aria-hidden="true" />
+        <div
+          className="grid-paper pointer-events-none absolute inset-0 opacity-70"
+          aria-hidden="true"
+        />
         <div className="relative flex items-center gap-3">
           <div className="grid h-9 w-9 place-items-center border border-white/25 font-display text-[13px] leading-none text-gray-50">
             AI
