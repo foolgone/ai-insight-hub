@@ -67,9 +67,11 @@ export function AsrKeyPanel() {
   return (
     <div>
       <p className="mb-3 text-sm text-gray-600">
-        用于把客服通话录音/视频转成文字，再进入清洗与评估。支持任意 OpenAI 兼容的
+        用于把通话录音/视频转成文字，再进入清洗与评估。按模型名自动识别两类接口： OpenAI 标准的
         <span className="mx-1 font-mono text-[12px] text-gray-900">/audio/transcriptions</span>
-        服务（OpenAI / Groq / SiliconFlow / 自建）。Key 加密保存在本系统，不会明文回显。
+        （OpenAI / Groq / SiliconFlow / 自建），以及千问 Qwen3-ASR 的
+        <span className="mx-1 font-mono text-[12px] text-gray-900">/chat/completions</span>
+        （模型填 qwen3-asr-flash）。Key 加密保存在本系统，不会明文回显。
       </p>
 
       {status?.configured ? (
@@ -152,7 +154,7 @@ export function AsrKeyPanel() {
             value={baseUrl}
             onChange={setBaseUrl}
             placeholder="https://api.siliconflow.cn/v1"
-            helperText="必须以 https:// 开头；填写到 /v1 这一层即可"
+            helperText="必须以 https:// 开头，填到 /v1 这一层；千问填 https://dashscope.aliyuncs.com/compatible-mode/v1"
           />
         </div>
 
@@ -161,7 +163,13 @@ export function AsrKeyPanel() {
             <label htmlFor="asr-model" className={LABEL_CLASS}>
               模型
             </label>
-            <Input id="asr-model" value={model} onChange={setModel} placeholder="whisper-1" />
+            <Input
+              id="asr-model"
+              value={model}
+              onChange={setModel}
+              placeholder="whisper-1"
+              helperText="whisper-1 / qwen3-asr-flash（自动走千问接口）"
+            />
           </div>
           <div>
             <label htmlFor="asr-language" className={LABEL_CLASS}>
