@@ -10,7 +10,7 @@ const MESSAGES = {
   DATASOURCE_QUOTA_EXCEEDED: '数据源数量已达配额上限',
   CLEANED_DATA_NOT_FOUND: '清洗数据不存在',
   FILE_TOO_LARGE: '文件超过 50MB 限制',
-  FILE_FORMAT_INVALID: '文件格式不支持（CSV/JSON/XLSX/TXT）',
+  FILE_FORMAT_INVALID: '文件格式不支持（CSV/JSON/XLSX/TXT/音视频）',
   TASK_NOT_FOUND: '任务不存在',
   TASK_ALREADY_RUNNING: '已有同类任务在运行，请稍后再试',
   TASK_NOT_CANCELLABLE: '任务已结束，无法取消',
@@ -23,6 +23,8 @@ const MESSAGES = {
   LLM_CREDENTIAL_NOT_CONFIGURED: '请先配置自己的 API Key 后再使用 AI 功能',
   LLM_CREDENTIAL_INVALID: 'API Key 无效或已失效，请更新',
   LLM_CREDENTIAL_DECRYPT_FAILED: '凭据解密失败，请联系管理员重新配置',
+  ASR_CREDENTIAL_NOT_CONFIGURED: '请先在「语音转写设置」中配置 ASR 服务',
+  ASR_CREDENTIAL_INVALID: '语音转写配置无效或已失效，请更新',
   INTERNAL_ERROR: '服务器异常，请稍后重试',
 }
 

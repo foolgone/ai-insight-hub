@@ -112,7 +112,11 @@ apiClient.interceptors.response.use(
     const normalized = normalizeError(error)
     // BYOK：未配置 Key 触发 AI 操作 → 全局打开凭据设置弹窗（D11）
     if (normalized.code === 'LLM_CREDENTIAL_NOT_CONFIGURED') {
-      openCredentialModal()
+      openCredentialModal('llm')
+    }
+    // BYOK 扩展：上传音视频但未配置语音转写 → 直接定位到「语音转写」页
+    if (normalized.code === 'ASR_CREDENTIAL_NOT_CONFIGURED') {
+      openCredentialModal('asr')
     }
     return Promise.reject(normalized)
   }

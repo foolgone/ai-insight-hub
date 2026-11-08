@@ -54,13 +54,17 @@ BUSINESS_CODES = {
     "LLM_CREDENTIAL_NOT_CONFIGURED",
     "LLM_CREDENTIAL_INVALID",
     "LLM_CREDENTIAL_DECRYPT_FAILED",
+    # BYOK 扩展（语音转写配置）：与 LLM 凭据同构
+    "ASR_CREDENTIAL_NOT_CONFIGURED",
+    "ASR_CREDENTIAL_INVALID",
     "INTERNAL_ERROR",
 }
 
 
 def test_business_codes_match_api_design_exactly() -> None:
     assert {code.value for code in ErrorCode} == BUSINESS_CODES
-    assert len(ErrorCode) == 28
+    # API §12.2 原定 28 条 + BYOK 扩展 5 条（LLM 3 + ASR 2）
+    assert len(ErrorCode) == 30
 
 
 def test_error_status_covers_all_business_codes() -> None:

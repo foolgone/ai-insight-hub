@@ -14,6 +14,11 @@ vi.mock('../../api/datasources', () => ({
   uploadDataSourceFile: vi.fn(),
 }))
 
+// ASR 状态查询依赖后端；这里固定为「未配置」，验证音视频提示
+vi.mock('../../hooks/useAsrCredential', () => ({
+  useAsrCredentialStatusQuery: () => ({ data: { asr_enabled: true, configured: false } }),
+}))
+
 const DATASOURCE = { id: 'ds-1', name: '客服1月' }
 
 function renderModal(onClose = () => {}) {
@@ -54,5 +59,15 @@ describe('UploadDataModal', () => {
 
     await waitFor(() => expect(uploadDataSourceFile).toHaveBeenCalledWith('ds-1', file))
     await waitFor(() => expect(onClose).toHaveBeenCalled())
+  })
+
+  it('选择音视频且未配置语音转写时给出提示', async () => {
+    const user = userEvent.setup()
+    renderModal()
+
+    const file = new File(['x'], 'call.mp3', { type: 'audio/mpeg' })
+    await user.upload(screen.getByLabelText('数据文件'), file)
+
+    expect(screen.getByText(/请先在右上角用户菜单的「语音转写设置」中配置 ASR/)).toBeInTheDocument()
   })
 })

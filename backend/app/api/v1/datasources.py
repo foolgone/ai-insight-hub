@@ -12,7 +12,12 @@ from app.api.deps import require_llm_credential, require_roles
 from app.api.pagination import PaginationParams
 from app.core.config import settings
 from app.core.database import get_db
-from app.core.exceptions import FileFormatInvalidError, FileTooLargeError
+from app.core.exceptions import (
+    AsrCredentialInvalidError,
+    AsrCredentialNotConfiguredError,
+    FileFormatInvalidError,
+    FileTooLargeError,
+)
 from app.models import RawData, User
 from app.schemas.base import Page
 from app.schemas.cleaned_data import CleanedDataDetail, CleanedDataItem
@@ -31,6 +36,7 @@ from app.schemas.processing import (
     UploadResponse,
 )
 from app.services import cleaning_service, datasource_service, parsers, storage_service
+from app.services.credential_service import PROVIDER_ASR, credential_service
 
 router = APIRouter()
 
@@ -197,11 +203,18 @@ async def upload_file(
             details={"filename": filename, "allowed": sorted(allowed | media_exts)}
         )
 
-    if is_media and not settings.ASR_ENABLED:
-        raise FileFormatInvalidError(
-            "音视频上传需要启用 ASR（ASR_ENABLED=true）",
-            details={"filename": filename, "reason": "asr_disabled"},
-        )
+    if is_media:
+        # 音视频需要用户自己的 ASR 配置（BYOK）；功能关闭时仍按 415 拒绝
+        if not settings.ASR_ENABLED:
+            raise FileFormatInvalidError(
+                "音视频上传功能未开启",
+                details={"filename": filename, "reason": "asr_disabled"},
+            )
+        asr_row = await credential_service.get_credential(session, user.id, PROVIDER_ASR)
+        if asr_row is None:
+            raise AsrCredentialNotConfiguredError()
+        if asr_row.status != "active":
+            raise AsrCredentialInvalidError()
 
     # 文本类解析失败归为 415；媒体不解析，交由 clean 任务转写
     parsed = None

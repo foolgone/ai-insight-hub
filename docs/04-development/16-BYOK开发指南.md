@@ -474,6 +474,14 @@ from app.models.llm_credential import UserLLMCredential
 
 > **必须同步模型契约测试**：`backend/tests/unit/test_models_schema.py` 精确断言表集合与数量（`EXPECTED_TABLES` / `len(...) == 15`），加表后需改为 16 并补 `user_llm_credentials` 的列断言；`app/models/__init__.py` 文件头注释的"15 张表"也要一并更新。
 
+> **迁移 013 起的变更（语音转写 ASR 复用同一张表）**：唯一索引由
+> `uk_user_llm_credentials_user_id (user_id)` 改为
+> `uk_user_llm_credentials_user_provider (user_id, provider)`，并新增
+> `language` 列（ASR 识别语言）。`provider='deepseek'` 仍表示模型 Key，
+> `provider='asr'` 表示用户自己的转写服务配置；代码层
+> `credential_service` 的 `provider` 参数默认 `deepseek`，原调用方无需改动。
+> 详见 `docs/04-development/19-音视频ASR转写MVP设计.md` §5.3。
+
 > **不新增 `User.llm_credential` relationship**。原因：① `User` 当前没有任何 relationship，`users` 与凭据表由 DB 外键 + 凭据服务直接查询已足够；② SQLAlchemy 2.0 异步下访问未 eager-load 的 relationship 会触发 `MissingGreenlet`，多一处 lazy 关系就多一处踩坑点。若后续确需（如级联展示），必须 `lazy="selectin"` 并在查询中显式 eager load。
 
 ### 3.6 迁移 009 / 010

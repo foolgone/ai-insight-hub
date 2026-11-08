@@ -188,6 +188,20 @@ class LLMCredentialDecryptError(AIInsightHubException):
     default_message = "凭据解密失败，加密密钥可能已更换"
 
 
+class AsrCredentialNotConfiguredError(AIInsightHubException):
+    """未配置用户 ASR 转写配置却上传音视频（428）。"""
+
+    code = ErrorCode.ASR_CREDENTIAL_NOT_CONFIGURED
+    default_message = "请先在「语音转写设置」中配置 ASR 服务后再上传音视频"
+
+
+class AsrCredentialInvalidError(AIInsightHubException):
+    """ASR 配置非法（地址/格式/连通性校验失败）或已标记 invalid（400）。"""
+
+    code = ErrorCode.ASR_CREDENTIAL_INVALID
+    default_message = "语音转写配置无效或已失效，请更新后再试"
+
+
 # --------------------------------------------------------------------------- 内部错误
 class InternalError(AIInsightHubException):
     code = ErrorCode.INTERNAL_ERROR
@@ -199,6 +213,8 @@ __all__ = [
     "ApiKeyInvalidError",
     "ApiKeyNotFoundError",
     "ApiKeyScopeDeniedError",
+    "AsrCredentialInvalidError",
+    "AsrCredentialNotConfiguredError",
     "AuthenticationError",
     "CleanedDataNotFoundError",
     "DataSourceNotFoundError",

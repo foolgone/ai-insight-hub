@@ -16,6 +16,7 @@ export const endpoints = {
     password: '/users/me/password',
     llmCredential: '/users/me/llm-credential',
     llmCredentialVerify: '/users/me/llm-credential/verify',
+    asrCredential: '/users/me/asr-credential',
   },
   datasources: {
     root: '/datasources',

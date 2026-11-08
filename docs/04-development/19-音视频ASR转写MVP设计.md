@@ -197,23 +197,39 @@ else:
 - 上传响应结构不变（`task_id` / `file_info`）；
 - 50MB 限制沿用；超过返回 413。
 
-### 5.3 配置
+### 5.3 配置（用户级配置层，不写 `.env`）
 
-`backend/app/core/config.py`：
+ASR 的 `base_url` / `api_key` / `model` / `language` 属于**用户自己的服务凭据**，
+与 LLM API Key 同构：前端「语音转写设置」填写 → Fernet 加密 → 存
+`user_llm_credentials`（`provider='asr'`）→ worker 按任务归属用户解析。
+
+`backend/app/core/config.py` 只保留 ops 级旋钮：
 
 ```python
 MEDIA_UPLOAD_EXTENSIONS: str = "mp3,wav,m4a,mp4,mov"
-ASR_ENABLED: bool = False
-ASR_PROVIDER: str = "openai_compatible"
-ASR_BASE_URL: str = "https://api.openai.com/v1"
-ASR_API_KEY: str = ""
-ASR_MODEL: str = "whisper-1"
-ASR_LANGUAGE: str = "zh"
-ASR_TIMEOUT: int = 300
-ASR_CHUNK_SECONDS: int = 600
-ASR_MAX_RETRIES: int = 2
-ASR_PRICE_PER_MINUTE: float = 0.006
+ASR_ENABLED: bool = True          # 功能总开关（关闭时媒体上传 415、配置端点 404）
+ASR_TIMEOUT: int = 300            # 单次 HTTP 超时
+ASR_CHUNK_SECONDS: int = 600      # 单文件切片时长
+ASR_MAX_RETRIES: int = 2          # 网络/5xx 重试次数（4xx 不重试）
+ASR_PRICE_PER_MINUTE: float = 0.006  # 仅用于成本估算展示
+ASR_ALLOW_HTTP: bool = False      # SSRF：默认强制 https
+ASR_ALLOWED_HOSTS: str = ""       # SSRF：自建内网 ASR 的域名白名单
 ```
+
+**凭据表（迁移 013）**：`user_llm_credentials` 的唯一键由 `(user_id)` 改为
+`(user_id, provider)`，新增 `language` 列；`provider='deepseek'` 为模型 Key，
+`provider='asr'` 为语音转写配置。
+
+**端点**（与 LLM 凭据对称）：
+
+| 方法 | 路径 | 说明 |
+| --- | --- | --- |
+| `PUT` | `/api/v1/users/me/asr-credential` | 保存前服务端真调一次转写接口校验，失败不入库 |
+| `GET` | `/api/v1/users/me/asr-credential` | 只回 `base_url` / `model` / `language` / `key_hint` |
+| `DELETE` | `/api/v1/users/me/asr-credential` | 幂等删除（204） |
+
+**SSRF 防护**（`app/core/url_guard.py`）：只允许 `https`、禁止 URL 内嵌账号密码、
+域名解析到内网/回环/链路本地/保留段一律拒绝；`ASR_ALLOWED_HOSTS` 可放行自建内网服务。
 
 > **BYOK 守门说明**：`POST /upload` 目前带 `require_llm_credential` 依赖。
 > 媒体转写本身不调用 LLM，但后续评估/报告仍需要 BYOK，MVP 保持该守门不变；
@@ -222,6 +238,9 @@ ASR_PRICE_PER_MINUTE: float = 0.006
 > **ASR 关闭时**：`ASR_ENABLED=false` 时媒体上传直接返回 415
 > `FILE_FORMAT_INVALID`（`details.reason="asr_disabled"`），避免文件入库后无法处理；
 > 文本类格式不受影响。
+>
+> **未配置 ASR 时**：媒体上传返回 428 `ASR_CREDENTIAL_NOT_CONFIGURED`，
+> 前端 428 拦截器直接把弹窗定位到「语音转写」页；文本上传不受影响。
 
 ---
 

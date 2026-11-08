@@ -151,16 +151,19 @@ class Settings(BaseSettings):
     MEDIA_UPLOAD_EXTENSIONS: str = "mp3,wav,m4a,mp4,mov"
 
     # ---------------- ASR（云转写，OpenAI 兼容接口） ----------------
-    ASR_ENABLED: bool = False
-    ASR_PROVIDER: str = "openai_compatible"
-    ASR_BASE_URL: str = "https://api.openai.com/v1"
-    ASR_API_KEY: str = ""
-    ASR_MODEL: str = "whisper-1"
-    ASR_LANGUAGE: str = "zh"
+    # 功能总开关（ops 级）：false 时音视频上传 415、ASR 配置端点 404。
+    # base_url / api_key / model / language 由用户在「语音转写设置」里配置，
+    # 加密存 user_llm_credentials（provider='asr'），**不落 .env**。
+    ASR_ENABLED: bool = True
+    # 单次 HTTP 超时（秒）、单文件切片时长（秒）、失败重试次数
     ASR_TIMEOUT: int = 300
     ASR_CHUNK_SECONDS: int = 600
     ASR_MAX_RETRIES: int = 2
+    # 成本估算单价（仅用于任务结果展示，不参与计费）
     ASR_PRICE_PER_MINUTE: float = 0.006
+    # SSRF 防护：默认只允许 https 且禁止内网地址；自建内网 ASR 用白名单放开
+    ASR_ALLOW_HTTP: bool = False
+    ASR_ALLOWED_HOSTS: str = ""
 
     # ---------------- BYOK：用户自带 LLM API Key ----------------
     # 总开关；false 时忽略用户凭据、隐藏前端入口（回退现状：服务端 Key）

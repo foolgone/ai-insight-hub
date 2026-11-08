@@ -29,7 +29,7 @@ from app.core.exceptions import (
 from app.models import CleanedData, DataSource, RawData, Task, User
 from app.schemas.agents.cleaning import CleaningConfig, CleaningInput, CleaningState
 from app.schemas.base import Pagination
-from app.services import media_service
+from app.services import asr_service, media_service
 
 ACTIVE_STATUSES = ("pending", "running")
 CLEAN_TASK_TYPE = "clean"
@@ -399,8 +399,9 @@ async def _execute_clean(
                         await session.flush()
 
                     try:
+                        asr_config = await asr_service.resolve_for_user(session, task.user_id)
                         transcript = await media_service.transcribe_media(
-                            raw, progress=_report
+                            raw, asr_config, progress=_report
                         )
                     except Exception:
                         raw.status = "failed"

@@ -23,6 +23,7 @@ from loguru import logger
 
 from app.core.config import settings
 from app.services import storage_service
+from app.services.asr_service import AsrConfig
 
 
 class MediaError(Exception):
@@ -31,10 +32,6 @@ class MediaError(Exception):
 
 class MediaDecodeError(MediaError):
     """ffprobe/ffmpeg 失败或文件无音轨。"""
-
-
-class AsrNotConfiguredError(MediaError):
-    """ASR 未启用或未配置 Key。"""
 
 
 class AsrRequestError(MediaError):
@@ -185,19 +182,16 @@ async def chunk_audio(path: Path, chunk_seconds: int) -> list[tuple[Path, float]
     return [(item, index * float(chunk_seconds)) for index, item in enumerate(files)]
 
 
-async def _transcribe_file(path: Path, *, offset: float = 0.0) -> AsrResult:
-    if not settings.ASR_ENABLED:
-        raise AsrNotConfiguredError("ASR 未启用（ASR_ENABLED=false）")
-    if not settings.ASR_API_KEY:
-        raise AsrNotConfiguredError("ASR_API_KEY 未配置")
-
-    url = f"{settings.ASR_BASE_URL.rstrip('/')}/audio/transcriptions"
+async def _transcribe_file(
+    path: Path, config: AsrConfig, *, offset: float = 0.0
+) -> AsrResult:
     data = {
-        "model": settings.ASR_MODEL,
-        "language": settings.ASR_LANGUAGE,
+        "model": config.model,
         "response_format": "verbose_json",
         "timestamp_granularities[]": "segment",
     }
+    if config.language and config.language != "auto":
+        data["language"] = config.language
     content = path.read_bytes()
     retries = max(0, settings.ASR_MAX_RETRIES)
     last_error: Exception | None = None
@@ -206,8 +200,8 @@ async def _transcribe_file(path: Path, *, offset: float = 0.0) -> AsrResult:
         try:
             async with httpx.AsyncClient(timeout=settings.ASR_TIMEOUT) as client:
                 response = await client.post(
-                    url,
-                    headers={"Authorization": f"Bearer {settings.ASR_API_KEY}"},
+                    config.endpoint,
+                    headers={"Authorization": f"Bearer {config.api_key}"},
                     data=data,
                     files={"file": (path.name, content, "audio/mpeg")},
                 )
@@ -254,7 +248,7 @@ async def _transcribe_file(path: Path, *, offset: float = 0.0) -> AsrResult:
     return AsrResult(
         text=text or " ".join(item.text for item in segments),
         segments=segments,
-        language=str(payload.get("language") or settings.ASR_LANGUAGE),
+        language=str(payload.get("language") or config.language or "zh"),
         duration=duration,
         cost_estimate=round(duration / 60 * settings.ASR_PRICE_PER_MINUTE, 6),
     )
@@ -262,6 +256,7 @@ async def _transcribe_file(path: Path, *, offset: float = 0.0) -> AsrResult:
 
 async def _transcribe_track(
     path: Path,
+    config: AsrConfig,
     *,
     speaker: str | None,
     progress: Callable[[str], Awaitable[None]] | None,
@@ -269,14 +264,14 @@ async def _transcribe_track(
     chunks = await chunk_audio(path, settings.ASR_CHUNK_SECONDS)
     all_segments: list[AsrSegment] = []
     texts: list[str] = []
-    language = settings.ASR_LANGUAGE
+    language = config.language or "zh"
     duration = 0.0
     cost = 0.0
 
     for index, (chunk_path, offset) in enumerate(chunks, start=1):
         if progress is not None:
             await progress(f"parsing asr {index}/{len(chunks)}")
-        result = await _transcribe_file(chunk_path, offset=offset)
+        result = await _transcribe_file(chunk_path, config, offset=offset)
         language = result.language
         duration += result.duration
         cost += result.cost_estimate
@@ -383,10 +378,14 @@ def _mono_records(result: AsrResult, *, anchor: datetime) -> list[dict[str, Any]
 
 async def transcribe_media(
     raw: Any,
+    asr: AsrConfig,
     *,
     progress: Callable[[str], Awaitable[None]] | None = None,
 ) -> dict[str, Any]:
-    """下载媒体 → 抽音轨/拆声道 → ASR → 返回写回 ``raw_content`` 的字段。"""
+    """下载媒体 → 抽音轨/拆声道 → ASR → 返回写回 ``raw_content`` 的字段。
+
+    ``asr`` 由调用方按任务归属用户解析（见 ``asr_service.resolve_for_user``）。
+    """
     file_info = raw.file_info or {}
     object_name = file_info.get("object_name")
     filename = str(file_info.get("filename") or "upload.media")
@@ -417,10 +416,10 @@ async def transcribe_media(
             await extract_audio(input_path, left_path, channel="L")
             await extract_audio(input_path, right_path, channel="R")
             left_result, left_chunks = await _transcribe_track(
-                left_path, speaker="L", progress=progress
+                left_path, asr, speaker="L", progress=progress
             )
             right_result, right_chunks = await _transcribe_track(
-                right_path, speaker="R", progress=progress
+                right_path, asr, speaker="R", progress=progress
             )
             records = _pair_dialogues(
                 left_result.segments,
@@ -441,7 +440,7 @@ async def transcribe_media(
             mono_path = root / "mono.mp3"
             await extract_audio(input_path, mono_path)
             mono_result, chunks = await _transcribe_track(
-                mono_path, speaker=None, progress=progress
+                mono_path, asr, speaker=None, progress=progress
             )
             records = _mono_records(
                 mono_result,
@@ -473,8 +472,8 @@ async def transcribe_media(
                 "sample_rate": info.sample_rate,
             },
             "asr": {
-                "provider": settings.ASR_PROVIDER,
-                "model": settings.ASR_MODEL,
+                "provider": "openai_compatible",
+                "model": asr.model,
                 "language": language,
                 "status": "completed",
                 "chunks": chunks,
@@ -488,7 +487,6 @@ async def transcribe_media(
 
 
 __all__ = [
-    "AsrNotConfiguredError",
     "AsrRequestError",
     "MediaDecodeError",
     "MediaError",

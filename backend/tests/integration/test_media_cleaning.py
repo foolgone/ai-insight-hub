@@ -5,7 +5,7 @@ import pytest
 from sqlalchemy import select
 
 from app.models import CleanedData
-from app.services import cleaning_service, media_service
+from app.services import asr_service, cleaning_service, media_service
 from tests.factories import (
     DataSourceFactory,
     RawDataFactory,
@@ -15,6 +15,17 @@ from tests.factories import (
 )
 
 pytestmark = pytest.mark.integration
+
+ASR_CONFIG = asr_service.AsrConfig(
+    base_url="https://asr.example.com/v1",
+    api_key="test-key-1234",
+    model="whisper-1",
+    language="zh",
+)
+
+
+async def _fake_resolve(_session, _user_id):
+    return ASR_CONFIG
 
 RECORDS = [
     {
@@ -87,13 +98,15 @@ async def test_media_clean_writes_dialogues(db_session, monkeypatch) -> None:
     datasource, raw, task = await _setup(db_session)
     calls: list[str] = []
 
-    async def fake_transcribe(raw_data, *, progress=None):
+    async def fake_transcribe(raw_data, config, *, progress=None):
+        assert config == ASR_CONFIG
         calls.append(str(raw_data.id))
         if progress is not None:
             await progress("parsing asr 1/1")
         return TRANSCRIPT
 
     monkeypatch.setattr(media_service, "transcribe_media", fake_transcribe)
+    monkeypatch.setattr(asr_service, "resolve_for_user", _fake_resolve)
 
     outcome = await cleaning_service.run_clean_task(str(task.id), session=db_session)
 
@@ -128,11 +141,12 @@ async def test_media_clean_skips_asr_on_rerun(db_session, monkeypatch) -> None:
     _, _, task = await _setup(db_session)
     calls: list[str] = []
 
-    async def fake_transcribe(raw_data, *, progress=None):
+    async def fake_transcribe(raw_data, config, *, progress=None):
         calls.append(str(raw_data.id))
         return TRANSCRIPT
 
     monkeypatch.setattr(media_service, "transcribe_media", fake_transcribe)
+    monkeypatch.setattr(asr_service, "resolve_for_user", _fake_resolve)
 
     first = await cleaning_service.run_clean_task(str(task.id), session=db_session)
     second = await cleaning_service.run_clean_task(str(task.id), session=db_session)
@@ -146,10 +160,11 @@ async def test_media_clean_skips_asr_on_rerun(db_session, monkeypatch) -> None:
 async def test_media_clean_failure_marks_raw_failed(db_session, monkeypatch) -> None:
     _, raw, task = await _setup(db_session)
 
-    async def fake_transcribe(raw_data, *, progress=None):
+    async def fake_transcribe(raw_data, config, *, progress=None):
         raise media_service.MediaDecodeError("ffmpeg failed")
 
     monkeypatch.setattr(media_service, "transcribe_media", fake_transcribe)
+    monkeypatch.setattr(asr_service, "resolve_for_user", _fake_resolve)
 
     outcome = await cleaning_service.run_clean_task(str(task.id), session=db_session)
 
@@ -159,3 +174,21 @@ async def test_media_clean_failure_marks_raw_failed(db_session, monkeypatch) -> 
     await db_session.refresh(task)
     assert task.status == "failed"
     assert "ffmpeg failed" in (task.error_message or "")
+
+
+async def test_media_clean_fails_when_asr_not_configured(db_session, monkeypatch) -> None:
+    """未配置 ASR 时不静默跳过，任务失败且原因可读。"""
+    _, raw, task = await _setup(db_session)
+
+    async def _no_config(_session, _user_id):
+        raise asr_service.AsrCredentialNotConfiguredError()
+
+    monkeypatch.setattr(asr_service, "resolve_for_user", _no_config)
+
+    outcome = await cleaning_service.run_clean_task(str(task.id), session=db_session)
+
+    assert outcome["status"] == "failed"
+    await db_session.refresh(raw)
+    assert raw.status == "failed"
+    await db_session.refresh(task)
+    assert "语音转写" in (task.error_message or "")

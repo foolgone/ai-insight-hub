@@ -3,20 +3,39 @@ import { LuUpload } from 'react-icons/lu'
 import { Button } from '../Button'
 import { Modal } from '../Modal'
 import { useUploadDataSourceFile } from '../../hooks/useDataSources'
+import { useAsrCredentialStatusQuery } from '../../hooks/useAsrCredential'
 import { getErrorMessage } from '../../lib/errorMessages'
 import { notify } from '../../lib/toast'
 
 const ACCEPT = '.csv,.json,.xlsx,.txt,.mp3,.wav,.m4a,.mp4,.mov'
+const MEDIA_EXTENSIONS = ['.mp3', '.wav', '.m4a', '.mp4', '.mov']
 const MAX_FILE_SIZE = 50 * 1024 * 1024
+
+function isMediaFile(file) {
+  if (!file) return false
+  const name = file.name.toLowerCase()
+  return MEDIA_EXTENSIONS.some(ext => name.endsWith(ext))
+}
 
 /**
  * 给已有数据源追加数据文件（F-204）：上传成功后进入清洗队列（202）。
+ * 音视频需要用户先配置自己的语音转写服务（BYOK），未配置时给出就地提示。
  * @param {{ datasource: Object|null, open: boolean, onClose: () => void }} props
  */
 export function UploadDataModal({ datasource, open, onClose }) {
   const mutation = useUploadDataSourceFile()
+  const { data: asrStatus } = useAsrCredentialStatusQuery({ enabled: open })
   const [file, setFile] = useState(null)
   const [error, setError] = useState('')
+
+  useEffect(() => {
+    if (!open) return
+    setFile(null)
+    setError('')
+  }, [open])
+
+  const mediaSelected = isMediaFile(file)
+  const asrReady = asrStatus?.asr_enabled !== false && Boolean(asrStatus?.configured)
 
   useEffect(() => {
     if (!open) return
@@ -95,6 +114,12 @@ export function UploadDataModal({ datasource, open, onClose }) {
           <p className="flex items-center gap-2 text-xs text-gray-600">
             <LuUpload className="h-4 w-4 text-gray-400" aria-hidden="true" />
             {file.name}
+          </p>
+        ) : null}
+        {mediaSelected && !asrReady ? (
+          <p className="border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+            检测到音视频文件：请先在右上角用户菜单的「语音转写设置」中配置 ASR
+            服务地址与 Key，否则上传会被拒绝。
           </p>
         ) : null}
         <p className="text-xs text-gray-500">

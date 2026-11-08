@@ -1,6 +1,6 @@
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
 import { useNavigate } from 'react-router-dom'
-import { LuKey, LuLogOut } from 'react-icons/lu'
+import { LuKey, LuLogOut, LuMic } from 'react-icons/lu'
 import { useAuth } from '../../hooks/useAuth'
 import { useCredentialStatusQuery } from '../../hooks/useLlmCredential'
 import { useCredentialGate } from '../../lib/credentialGate'
@@ -71,11 +71,20 @@ export function UserMenu() {
           </div>
           {showCredentialEntry ? (
             <DropdownMenu.Item
-              onSelect={openCredentialModal}
+              onSelect={() => openCredentialModal('llm')}
               className="flex cursor-pointer items-center gap-2 rounded px-3 py-2 text-sm text-gray-700 outline-none focus:bg-gray-100"
             >
               <LuKey className="h-4 w-4" aria-hidden="true" />
               API Key 管理
+            </DropdownMenu.Item>
+          ) : null}
+          {showCredentialEntry ? (
+            <DropdownMenu.Item
+              onSelect={() => openCredentialModal('asr')}
+              className="flex cursor-pointer items-center gap-2 rounded px-3 py-2 text-sm text-gray-700 outline-none focus:bg-gray-100"
+            >
+              <LuMic className="h-4 w-4" aria-hidden="true" />
+              语音转写设置
             </DropdownMenu.Item>
           ) : null}
           <DropdownMenu.Item

@@ -8,9 +8,17 @@ import pytest
 
 from app.core.config import settings
 from app.services import media_service
+from app.services.asr_service import AsrConfig
 from app.services.media_service import AsrResult, AsrSegment
 
 pytestmark = pytest.mark.unit
+
+CONFIG = AsrConfig(
+    base_url="https://asr.example.com/v1",
+    api_key="test-key-1234",
+    model="whisper-1",
+    language="zh",
+)
 
 
 def test_pair_dialogues_lr() -> None:
@@ -81,7 +89,7 @@ async def test_transcribe_track_merges_segments(monkeypatch) -> None:
     async def fake_chunk(path: Path, seconds: int):
         return [(path, 0.0)]
 
-    async def fake_transcribe(path: Path, *, offset: float = 0.0):
+    async def fake_transcribe(path: Path, config: AsrConfig, *, offset: float = 0.0):
         return AsrResult(
             text="hello",
             segments=[AsrSegment(start=0.0 + offset, end=1.0 + offset, text="hello")],
@@ -94,23 +102,12 @@ async def test_transcribe_track_merges_segments(monkeypatch) -> None:
     monkeypatch.setattr(media_service, "_transcribe_file", fake_transcribe)
 
     result, chunks = await media_service._transcribe_track(
-        Path("left.mp3"), speaker="L", progress=None
+        Path("left.mp3"), CONFIG, speaker="L", progress=None
     )
 
     assert chunks == 1
     assert result.segments[0].speaker == "L"
     assert result.text == "hello"
-
-
-@pytest.mark.asyncio
-async def test_transcribe_file_requires_configuration() -> None:
-    monkeypatch_off = settings.ASR_ENABLED
-    settings.ASR_ENABLED = False
-    try:
-        with pytest.raises(media_service.AsrNotConfiguredError):
-            await media_service._transcribe_file(Path("missing.mp3"))
-    finally:
-        settings.ASR_ENABLED = monkeypatch_off
 
 
 class _FakeResponse:
@@ -126,6 +123,7 @@ class _FakeResponse:
 class _FakeClient:
     responses: list[_FakeResponse] = []
     calls: int = 0
+    last: dict = {}
 
     def __init__(self, *args, **kwargs) -> None:
         pass
@@ -136,8 +134,9 @@ class _FakeClient:
     async def __aexit__(self, *args):
         return None
 
-    async def post(self, *args, **kwargs):
+    async def post(self, url, **kwargs):
         _FakeClient.calls += 1
+        _FakeClient.last = {"url": url, **kwargs}
         return _FakeClient.responses.pop(0)
 
 
@@ -161,15 +160,17 @@ async def test_transcribe_file_parses_segments(tmp_path: Path, monkeypatch) -> N
         )
     ]
     monkeypatch.setattr(media_service.httpx, "AsyncClient", _FakeClient)
-    monkeypatch.setattr(settings, "ASR_ENABLED", True)
-    monkeypatch.setattr(settings, "ASR_API_KEY", "test-key")
 
-    result = await media_service._transcribe_file(audio, offset=10.0)
+    result = await media_service._transcribe_file(audio, CONFIG, offset=10.0)
 
     assert result.text == "你好 世界"
     assert result.segments[0].start == 10.0
     assert result.segments[1].end == 12.0
     assert _FakeClient.calls == 1
+    # 地址 / Key / 模型全部来自用户配置，不再读 .env
+    assert _FakeClient.last["url"] == "https://asr.example.com/v1/audio/transcriptions"
+    assert _FakeClient.last["headers"]["Authorization"] == "Bearer test-key-1234"
+    assert _FakeClient.last["data"]["model"] == "whisper-1"
 
 
 @pytest.mark.asyncio
@@ -179,11 +180,27 @@ async def test_transcribe_file_does_not_retry_4xx(tmp_path: Path, monkeypatch) -
     _FakeClient.calls = 0
     _FakeClient.responses = [_FakeResponse(401), _FakeResponse(200, {"segments": []})]
     monkeypatch.setattr(media_service.httpx, "AsyncClient", _FakeClient)
-    monkeypatch.setattr(settings, "ASR_ENABLED", True)
-    monkeypatch.setattr(settings, "ASR_API_KEY", "bad-key")
 
     with pytest.raises(media_service.AsrRequestError):
-        await media_service._transcribe_file(audio)
+        await media_service._transcribe_file(audio, CONFIG)
 
     assert _FakeClient.calls == 1
 
+
+@pytest.mark.asyncio
+async def test_transcribe_file_omits_language_when_auto(tmp_path: Path, monkeypatch) -> None:
+    audio = tmp_path / "a.mp3"
+    audio.write_bytes(b"fake")
+    _FakeClient.calls = 0
+    _FakeClient.responses = [
+        _FakeResponse(200, {"text": "hi", "duration": 1.0, "segments": []})
+    ]
+    monkeypatch.setattr(media_service.httpx, "AsyncClient", _FakeClient)
+
+    auto = AsrConfig(
+        base_url="https://asr.example.com/v1", api_key="k-1234567", model="whisper-1", language="auto"
+    )
+    await media_service._transcribe_file(audio, auto)
+
+    assert "language" not in _FakeClient.last["data"]
+    assert settings.ASR_TIMEOUT > 0
