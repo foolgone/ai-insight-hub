@@ -6,7 +6,7 @@ test.describe('认证与守卫', () => {
     await page.goto('/reports')
 
     await expect(page).toHaveURL(/\/login\?returnUrl=%2Freports/)
-    await expect(page.getByRole('heading', { name: '欢迎使用 AI Insight Hub' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: '欢迎回来' })).toBeVisible()
   })
 
   test('登录成功进入 Dashboard；登出后受保护路由不可达', async ({ page }) => {
@@ -29,6 +29,6 @@ test.describe('认证与守卫', () => {
 
     await expect(page.getByRole('alert')).toContainText('邮箱或密码错误')
     await expect(page).toHaveURL(/\/login/)
-    await expect(page.getByRole('heading', { name: '欢迎使用 AI Insight Hub' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: '欢迎回来' })).toBeVisible()
   })
 })
