@@ -26,9 +26,18 @@ vi.mock('../../hooks/useDatasourceTypes', () => ({
   }),
 }))
 
+// 语音转写配置状态：音视频上传前需要它
+let asrConfigured = false
+vi.mock('../../hooks/useAsrCredential', () => ({
+  useAsrCredentialStatusQuery: () => ({
+    data: { asr_enabled: true, configured: asrConfigured },
+  }),
+}))
+
 describe('CreateDataSourceDrawer', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    asrConfigured = false
     createDataSource.mockResolvedValue({ id: 'ds-1', name: '客服1月' })
     uploadDataSourceFile.mockResolvedValue({ task_id: 't-1', status: 'pending' })
   })
@@ -109,5 +118,44 @@ describe('CreateDataSourceDrawer', () => {
     await user.click(screen.getByRole('button', { name: '创建并上传' }))
 
     expect(await screen.findByText('数据源数量已达配额上限')).toBeInTheDocument()
+  })
+
+  it('选择音视频但未配置语音转写时禁用创建', async () => {
+    asrConfigured = false
+    const user = userEvent.setup()
+    render(<CreateDataSourceDrawer open onClose={() => {}} />)
+
+    await user.type(screen.getByLabelText(/名称/), '通话1月')
+    await user.click(screen.getByRole('button', { name: '下一步' }))
+    await user.upload(
+      screen.getByLabelText(/数据文件/),
+      new File(['x'], 'call.mp4', { type: 'video/mp4' })
+    )
+
+    expect(screen.getByText(/请先配置语音转写服务/)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '创建并上传' })).toBeDisabled()
+    expect(createDataSource).not.toHaveBeenCalled()
+  })
+
+  it('已配置语音转写时可直接创建并上传音视频', async () => {
+    asrConfigured = true
+    const onSuccess = vi.fn()
+    const user = userEvent.setup()
+    render(<CreateDataSourceDrawer open onClose={() => {}} onSuccess={onSuccess} />)
+
+    await user.type(screen.getByLabelText(/名称/), '通话1月')
+    await user.click(screen.getByRole('button', { name: '下一步' }))
+    const video = new File(['x'], 'call.mp4', { type: 'video/mp4' })
+    await user.upload(screen.getByLabelText(/数据文件/), video)
+    await user.click(screen.getByRole('button', { name: '创建并上传' }))
+
+    await waitFor(() =>
+      expect(createDataSource).toHaveBeenCalledWith({
+        name: '通话1月',
+        type: 'customer_service',
+      })
+    )
+    expect(uploadDataSourceFile).toHaveBeenCalledWith('ds-1', video)
+    await waitFor(() => expect(onSuccess).toHaveBeenCalled())
   })
 })

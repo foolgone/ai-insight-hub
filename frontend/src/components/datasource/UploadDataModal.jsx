@@ -6,17 +6,8 @@ import { useUploadDataSourceFile } from '../../hooks/useDataSources'
 import { useAsrCredentialStatusQuery } from '../../hooks/useAsrCredential'
 import { getErrorMessage } from '../../lib/errorMessages'
 import { openCredentialModal } from '../../lib/credentialGate'
+import { MAX_UPLOAD_BYTES, MEDIA_LABEL, UPLOAD_ACCEPT, isMediaFile } from '../../lib/mediaFile'
 import { notify } from '../../lib/toast'
-
-const ACCEPT = '.csv,.json,.xlsx,.txt,.mp3,.wav,.m4a,.mp4,.mov'
-const MEDIA_EXTENSIONS = ['.mp3', '.wav', '.m4a', '.mp4', '.mov']
-const MAX_FILE_SIZE = 50 * 1024 * 1024
-
-function isMediaFile(file) {
-  if (!file) return false
-  const name = file.name.toLowerCase()
-  return MEDIA_EXTENSIONS.some(ext => name.endsWith(ext))
-}
 
 /**
  * 给已有数据源追加数据文件（F-204）：上传成功后进入清洗队列（202）。
@@ -38,16 +29,10 @@ export function UploadDataModal({ datasource, open, onClose }) {
   const mediaSelected = isMediaFile(file)
   const asrReady = asrStatus?.asr_enabled !== false && Boolean(asrStatus?.configured)
 
-  useEffect(() => {
-    if (!open) return
-    setFile(null)
-    setError('')
-  }, [open])
-
   const handleFileChange = event => {
     const selected = event.target.files?.[0]
     if (!selected) return
-    if (selected.size > MAX_FILE_SIZE) {
+    if (selected.size > MAX_UPLOAD_BYTES) {
       setFile(null)
       setError('文件超过 50MB 限制')
       return
@@ -106,7 +91,7 @@ export function UploadDataModal({ datasource, open, onClose }) {
         <input
           id="upload-datasource-file"
           type="file"
-          accept={ACCEPT}
+          accept={UPLOAD_ACCEPT}
           onChange={handleFileChange}
           disabled={mutation.isPending}
           className="block w-full text-sm text-gray-500 file:mr-3 file:rounded-md file:border-0 file:bg-primary-50 file:px-3 file:py-2 file:text-sm file:font-medium file:text-primary-700 hover:file:bg-primary-100"
@@ -135,7 +120,7 @@ export function UploadDataModal({ datasource, open, onClose }) {
           </div>
         ) : null}
         <p className="text-xs text-gray-500">
-          支持 CSV / JSON / XLSX / TXT / MP3 / WAV / M4A / MP4 / MOV，单文件 ≤ 50MB；
+          支持 CSV / JSON / XLSX / TXT / {MEDIA_LABEL}，单文件 ≤ 50MB；
           音视频会先转写为文本再进入清洗；建议上传双声道通话录音（左客户 / 右坐席）。
         </p>
       </div>
