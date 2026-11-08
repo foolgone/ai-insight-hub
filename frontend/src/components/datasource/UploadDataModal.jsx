@@ -5,6 +5,7 @@ import { Modal } from '../Modal'
 import { useUploadDataSourceFile } from '../../hooks/useDataSources'
 import { useAsrCredentialStatusQuery } from '../../hooks/useAsrCredential'
 import { getErrorMessage } from '../../lib/errorMessages'
+import { openCredentialModal } from '../../lib/credentialGate'
 import { notify } from '../../lib/toast'
 
 const ACCEPT = '.csv,.json,.xlsx,.txt,.mp3,.wav,.m4a,.mp4,.mov'
@@ -83,7 +84,7 @@ export function UploadDataModal({ datasource, open, onClose }) {
             icon={<LuUpload className="h-4 w-4" />}
             onClick={handleSubmit}
             loading={mutation.isPending}
-            disabled={mutation.isPending}
+            disabled={mutation.isPending || (mediaSelected && !asrReady)}
           >
             上传
           </Button>
@@ -117,10 +118,21 @@ export function UploadDataModal({ datasource, open, onClose }) {
           </p>
         ) : null}
         {mediaSelected && !asrReady ? (
-          <p className="border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
-            检测到音视频文件：请先在右上角用户菜单的「语音转写设置」中配置 ASR
-            服务地址与 Key，否则上传会被拒绝。
-          </p>
+          <div className="border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+            <p>
+              检测到音视频文件：请先配置语音转写服务（服务地址 + API Key），否则无法转写。
+            </p>
+            <button
+              type="button"
+              onClick={() => {
+                onClose()
+                openCredentialModal('asr')
+              }}
+              className="mt-2 border border-amber-400 px-2 py-1 font-medium text-amber-900 transition-colors hover:bg-amber-100"
+            >
+              去配置语音转写
+            </button>
+          </div>
         ) : null}
         <p className="text-xs text-gray-500">
           支持 CSV / JSON / XLSX / TXT / MP3 / WAV / M4A / MP4 / MOV，单文件 ≤ 50MB；

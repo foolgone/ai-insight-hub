@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { UploadDataModal } from './UploadDataModal'
 import { uploadDataSourceFile } from '../../api/datasources'
+import { useCredentialGate } from '../../lib/credentialGate'
 
 vi.mock('../../api/datasources', () => ({
   listDataSources: vi.fn(),
@@ -68,6 +69,23 @@ describe('UploadDataModal', () => {
     const file = new File(['x'], 'call.mp3', { type: 'audio/mpeg' })
     await user.upload(screen.getByLabelText('数据文件'), file)
 
-    expect(screen.getByText(/请先在右上角用户菜单的「语音转写设置」中配置 ASR/)).toBeInTheDocument()
+    expect(screen.getByText(/请先配置语音转写服务/)).toBeInTheDocument()
+  })
+
+  it('未配置语音转写时禁用上传，并可跳转到配置页', async () => {
+    const onClose = vi.fn()
+    const user = userEvent.setup()
+    renderModal(onClose)
+
+    const file = new File(['x'], 'call.mp3', { type: 'audio/mpeg' })
+    await user.upload(screen.getByLabelText('数据文件'), file)
+
+    expect(screen.getByRole('button', { name: '上传' })).toBeDisabled()
+
+    await user.click(screen.getByRole('button', { name: '去配置语音转写' }))
+
+    expect(useCredentialGate.getState().open).toBe(true)
+    expect(useCredentialGate.getState().tab).toBe('asr')
+    expect(onClose).toHaveBeenCalled()
   })
 })
