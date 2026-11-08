@@ -5,15 +5,9 @@ import { Button } from '../Button'
 import { Input } from '../Input'
 import { Select } from '../Select'
 import { createDataSource, uploadDataSourceFile } from '../../api/datasources'
+import { useDatasourceTypeOptions } from '../../hooks/useDatasourceTypes'
 import { getErrorMessage } from '../../lib/errorMessages'
 import { notify } from '../../lib/toast'
-
-const TYPE_OPTIONS = [
-  { label: '客服对话', value: 'customer_service' },
-  { label: '销售', value: 'sales' },
-  { label: '支持', value: 'support' },
-  { label: '其他', value: 'other' },
-]
 
 const MAX_FILE_SIZE = 50 * 1024 * 1024
 const ACCEPT = '.csv,.json,.xlsx,.txt'
@@ -33,25 +27,36 @@ export function CreateDataSourceDrawer({ open, onClose, onSuccess }) {
   const [step, setStep] = useState(1)
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
-  const [type, setType] = useState('customer_service')
+  const [type, setType] = useState('')
   const [file, setFile] = useState(null)
   const [errors, setErrors] = useState({})
   const [submitting, setSubmitting] = useState(false)
+  const { options: typeOptions } = useDatasourceTypeOptions({ includeInactive: false })
 
   useEffect(() => {
     if (!open) return
     setStep(1)
     setName('')
     setDescription('')
-    setType('customer_service')
+    setType('')
     setFile(null)
     setErrors({})
     setSubmitting(false)
   }, [open])
 
+  // 类型字典异步加载：默认选中第一个可用类型
+  useEffect(() => {
+    if (!open || type) return
+    if (typeOptions.length > 0) setType(typeOptions[0].value)
+  }, [open, type, typeOptions])
+
   const goNext = () => {
     if (!name.trim()) {
       setErrors({ name: '请输入数据源名称' })
+      return
+    }
+    if (!type) {
+      setErrors({ type: '请选择数据源类型' })
       return
     }
     setErrors({})
@@ -177,9 +182,11 @@ export function CreateDataSourceDrawer({ open, onClose, onSuccess }) {
                 <div>
                   <span className="mb-1 block text-sm font-medium text-gray-700">类型</span>
                   <Select
-                    options={TYPE_OPTIONS}
+                    ariaLabel="数据源类型"
+                    options={typeOptions}
                     value={type}
                     onChange={value => setType(value)}
+                    error={errors.type}
                     disabled={submitting}
                   />
                 </div>

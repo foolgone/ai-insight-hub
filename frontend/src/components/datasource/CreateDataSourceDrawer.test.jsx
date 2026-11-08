@@ -13,6 +13,19 @@ vi.mock('../../api/datasources', () => ({
   uploadDataSourceFile: vi.fn(),
 }))
 
+// 类型字典走接口；测试固定内置四种，默认选中第一个
+vi.mock('../../hooks/useDatasourceTypes', () => ({
+  useDatasourceTypeOptions: () => ({
+    options: [
+      { label: '客服对话', value: 'customer_service' },
+      { label: '销售', value: 'sales' },
+      { label: '支持', value: 'support' },
+      { label: '其他', value: 'other' },
+    ],
+    labelOf: code => code,
+  }),
+}))
+
 describe('CreateDataSourceDrawer', () => {
   beforeEach(() => {
     vi.clearAllMocks()

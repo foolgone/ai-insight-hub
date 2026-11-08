@@ -10,6 +10,7 @@ pytestmark = pytest.mark.unit
 EXPECTED_TABLES = {
     "users",
     "data_sources",
+    "datasource_types",
     "raw_data",
     "cleaned_data",
     "analysis_results",
@@ -33,7 +34,7 @@ def _table(name: str):
 
 def test_all_tables_registered() -> None:
     assert set(Base.metadata.tables) == EXPECTED_TABLES
-    assert len(Base.metadata.tables) == 16
+    assert len(Base.metadata.tables) == 17
 
 
 @pytest.mark.parametrize(
@@ -41,6 +42,10 @@ def test_all_tables_registered() -> None:
     [
         ("users", {"id", "email", "password_hash", "role", "quota", "usage", "deleted_at"}),
         ("data_sources", {"id", "user_id", "type", "status", "workflow_status", "config"}),
+        (
+            "datasource_types",
+            {"id", "code", "label", "sort_order", "is_system", "is_active"},
+        ),
         ("raw_data", {"id", "datasource_id", "raw_content", "file_info", "status"}),
         ("cleaned_data", {"id", "datasource_id", "raw_data_id", "embedding", "issues"}),
         ("analysis_results", {"id", "datasource_id", "data_id", "analysis_type", "result"}),

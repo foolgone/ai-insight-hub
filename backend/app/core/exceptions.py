@@ -202,6 +202,26 @@ class AsrCredentialInvalidError(AIInsightHubException):
     default_message = "语音转写配置无效或已失效，请更新后再试"
 
 
+# --------------------------------------------------------------------------- 数据源类型字典
+class DataSourceTypeNotFoundError(AIInsightHubException):
+    code = ErrorCode.DATASOURCE_TYPE_NOT_FOUND
+    default_message = "数据源类型不存在"
+
+
+class DataSourceTypeInvalidError(AIInsightHubException):
+    """类型标识非法/重复、内置类型不可删、引用了不存在或已停用的类型（400）。"""
+
+    code = ErrorCode.DATASOURCE_TYPE_INVALID
+    default_message = "数据源类型无效"
+
+
+class DataSourceTypeInUseError(AIInsightHubException):
+    """类型仍被数据源引用，禁止删除（409）。"""
+
+    code = ErrorCode.DATASOURCE_TYPE_IN_USE
+    default_message = "该类型仍被数据源使用，无法删除"
+
+
 # --------------------------------------------------------------------------- 内部错误
 class InternalError(AIInsightHubException):
     code = ErrorCode.INTERNAL_ERROR
@@ -219,6 +239,9 @@ __all__ = [
     "CleanedDataNotFoundError",
     "DataSourceNotFoundError",
     "DataSourceQuotaExceededError",
+    "DataSourceTypeInUseError",
+    "DataSourceTypeInvalidError",
+    "DataSourceTypeNotFoundError",
     "FaqNotFoundError",
     "FileFormatInvalidError",
     "FileTooLargeError",

@@ -51,9 +51,7 @@ class DataSource(Base):
 
     __tablename__ = "data_sources"
     __table_args__ = (
-        CheckConstraint(
-            "type IN ('customer_service', 'sales', 'support', 'other')", name="type_valid"
-        ),
+        # type 的取值由 datasource_types 字典表约束（迁移 014 起，API 层校验）
         CheckConstraint(
             "status IN ('active', 'archived', 'processing', 'error')", name="status_valid"
         ),

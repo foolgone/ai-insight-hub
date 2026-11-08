@@ -63,8 +63,9 @@ async def test_create_rejects_invalid_type(client, auth_headers) -> None:
         json=_payload(type="unknown"),
     )
 
-    assert response.status_code == 422
-    assert response.json()["error"]["code"] == "VALIDATION_ERROR"
+    # 迁移 014 起类型由字典表校验：未知 code → 400 DATASOURCE_TYPE_INVALID
+    assert response.status_code == 400
+    assert response.json()["error"]["code"] == "DATASOURCE_TYPE_INVALID"
 
 
 async def test_create_rejects_invalid_dimensions(client, auth_headers) -> None:

@@ -4,15 +4,9 @@ import { Input } from '../Input'
 import { Modal } from '../Modal'
 import { Select } from '../Select'
 import { useUpdateDataSource } from '../../hooks/useDataSources'
+import { useDatasourceTypeOptions } from '../../hooks/useDatasourceTypes'
 import { getErrorMessage } from '../../lib/errorMessages'
 import { notify } from '../../lib/toast'
-
-const TYPE_OPTIONS = [
-  { label: '客服对话', value: 'customer_service' },
-  { label: '销售', value: 'sales' },
-  { label: '支持', value: 'support' },
-  { label: '其他', value: 'other' },
-]
 
 /**
  * 编辑数据源（F-204）：PATCH 局部更新名称/描述/类型。
@@ -20,6 +14,7 @@ const TYPE_OPTIONS = [
  */
 export function EditDataSourceModal({ datasource, open, onClose }) {
   const mutation = useUpdateDataSource()
+  const { options: typeOptions } = useDatasourceTypeOptions({ includeInactive: true })
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [type, setType] = useState('other')
@@ -110,7 +105,8 @@ export function EditDataSourceModal({ datasource, open, onClose }) {
         <div>
           <span className="mb-1 block text-sm font-medium text-gray-700">类型</span>
           <Select
-            options={TYPE_OPTIONS}
+            ariaLabel="数据源类型"
+            options={typeOptions}
             value={type}
             onChange={setType}
             disabled={mutation.isPending}

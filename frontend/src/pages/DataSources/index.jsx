@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { LuPlus, LuRefreshCw } from 'react-icons/lu'
+import { LuPlus, LuRefreshCw, LuSettings2 } from 'react-icons/lu'
 import { AsyncState } from '../../components/common/AsyncState'
 import { PageLoading } from '../../components/common/PageLoading'
 import { PageHeader } from '../../components/common/PageHeader'
@@ -11,10 +11,12 @@ import { DataSourceCard } from '../../components/business/DataSourceCard'
 import { CreateDataSourceDrawer } from '../../components/datasource/CreateDataSourceDrawer'
 import { DataSourceActions } from '../../components/datasource/DataSourceActions'
 import { DataSourceDetailDrawer } from '../../components/datasource/DataSourceDetailDrawer'
+import { DataSourceTypeManager } from '../../components/datasource/DataSourceTypeManager'
 import { DeleteDataSourceModal } from '../../components/datasource/DeleteDataSourceModal'
 import { EditDataSourceModal } from '../../components/datasource/EditDataSourceModal'
 import { UploadDataModal } from '../../components/datasource/UploadDataModal'
 import { useDataSourcesQuery } from '../../hooks/useDataSources'
+import { useDatasourceTypeOptions } from '../../hooks/useDatasourceTypes'
 import { usePermissions } from '../../hooks/usePermissions'
 
 const PAGE_SIZE = 20
@@ -25,14 +27,6 @@ const STATUS_OPTIONS = [
   { label: '已就绪', value: 'active' },
   { label: '已归档', value: 'archived' },
   { label: '异常', value: 'error' },
-]
-
-const TYPE_OPTIONS = [
-  { label: '全部类型', value: 'all' },
-  { label: '客服对话', value: 'customer_service' },
-  { label: '销售', value: 'sales' },
-  { label: '支持', value: 'support' },
-  { label: '其他', value: 'other' },
 ]
 
 export default function DataSources() {
@@ -48,7 +42,14 @@ export default function DataSources() {
   const [editTarget, setEditTarget] = useState(null)
   const [uploadTarget, setUploadTarget] = useState(null)
   const [deleteTarget, setDeleteTarget] = useState(null)
-  const { canWrite } = usePermissions()
+  const [typeManagerOpen, setTypeManagerOpen] = useState(false)
+  const { canWrite, isAdmin } = usePermissions()
+  const { options: typeOptions } = useDatasourceTypeOptions()
+
+  const typeFilterOptions = useMemo(
+    () => [{ label: '全部类型', value: 'all' }, ...typeOptions],
+    [typeOptions]
+  )
 
   const params = useMemo(
     () => ({
@@ -89,11 +90,22 @@ export default function DataSources() {
         title="数据源管理"
         description="按数据源隔离导入与分析，支持 CSV / JSON / XLSX / TXT（≤ 50MB）"
         actions={
-          canWrite ? (
-            <Button icon={<LuPlus className="h-4 w-4" />} onClick={openCreate}>
-              新建数据源
-            </Button>
-          ) : null
+          <div className="flex items-center gap-2">
+            {isAdmin ? (
+              <Button
+                variant="outline"
+                icon={<LuSettings2 className="h-4 w-4" />}
+                onClick={() => setTypeManagerOpen(true)}
+              >
+                类型管理
+              </Button>
+            ) : null}
+            {canWrite ? (
+              <Button icon={<LuPlus className="h-4 w-4" />} onClick={openCreate}>
+                新建数据源
+              </Button>
+            ) : null}
+          </div>
         }
       />
 
@@ -119,7 +131,7 @@ export default function DataSources() {
         />
         <Select
           ariaLabel="数据源类型筛选"
-          options={TYPE_OPTIONS}
+          options={typeFilterOptions}
           value={type || 'all'}
           onChange={value => {
             setType(value === 'all' ? '' : value)
@@ -227,6 +239,13 @@ export default function DataSources() {
         open={Boolean(deleteTarget)}
         onClose={() => setDeleteTarget(null)}
       />
+
+      {isAdmin ? (
+        <DataSourceTypeManager
+          open={typeManagerOpen}
+          onClose={() => setTypeManagerOpen(false)}
+        />
+      ) : null}
     </section>
   )
 }

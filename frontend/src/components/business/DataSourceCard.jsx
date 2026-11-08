@@ -1,6 +1,7 @@
 import clsx from 'clsx'
 import { Badge } from '../Badge'
-import { getDatasourceStatus, getDatasourceTypeLabel } from '../../lib/datasourceMeta'
+import { getDatasourceStatus } from '../../lib/datasourceMeta'
+import { useDatasourceTypeOptions } from '../../hooks/useDatasourceTypes'
 import { formatDateTime } from '../../lib/format'
 
 /**
@@ -10,7 +11,8 @@ import { formatDateTime } from '../../lib/format'
 export function DataSourceCard({ datasource, actions }) {
   const status = getDatasourceStatus(datasource.status)
   const statistics = datasource.statistics || {}
-  const typeLabel = getDatasourceTypeLabel(datasource.type)
+  const { labelOf } = useDatasourceTypeOptions()
+  const typeLabel = labelOf(datasource.type)
 
   return (
     <article className="flex flex-col gap-3 border-b border-gray-200 px-6 py-4 last:border-b-0 sm:flex-row sm:items-center sm:justify-between">

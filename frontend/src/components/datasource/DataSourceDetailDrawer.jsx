@@ -1,7 +1,8 @@
 import * as Dialog from '@radix-ui/react-dialog'
 import { LuCheckCircle2, LuClock, LuX } from 'react-icons/lu'
 import { Badge } from '../Badge'
-import { getDatasourceStatus, getDatasourceTypeLabel } from '../../lib/datasourceMeta'
+import { getDatasourceStatus } from '../../lib/datasourceMeta'
+import { useDatasourceTypeOptions } from '../../hooks/useDatasourceTypes'
 import { formatDateTime, formatNumber } from '../../lib/format'
 
 /**
@@ -9,6 +10,8 @@ import { formatDateTime, formatNumber } from '../../lib/format'
  * @param {{ datasource: Object|null, open: boolean, onClose: () => void }} props
  */
 export function DataSourceDetailDrawer({ datasource, open, onClose }) {
+  // hooks 必须在提前 return 之前调用
+  const { labelOf } = useDatasourceTypeOptions({ enabled: Boolean(datasource) })
   if (!datasource) return null
 
   const status = getDatasourceStatus(datasource.status)
@@ -51,7 +54,7 @@ export function DataSourceDetailDrawer({ datasource, open, onClose }) {
                 </Badge>
               </div>
               <p className="mt-1 text-xs text-gray-500">
-                {getDatasourceTypeLabel(datasource.type)} · 创建于{' '}
+                {labelOf(datasource.type)} · 创建于{' '}
                 {formatDateTime(datasource.created_at)}
               </p>
               {datasource.description ? (

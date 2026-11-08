@@ -1,6 +1,13 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { DataSourceDetailDrawer } from './DataSourceDetailDrawer'
+
+vi.mock('../../hooks/useDatasourceTypes', () => ({
+  useDatasourceTypeOptions: () => ({
+    options: [{ label: '客服对话', value: 'customer_service' }],
+    labelOf: code => ({ customer_service: '客服对话' })[code] || code,
+  }),
+}))
 
 const DATASOURCE = {
   id: 'ds-1',

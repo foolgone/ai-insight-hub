@@ -5,6 +5,7 @@ from app.api.v1 import (
     analysis,
     asr_credential,
     auth,
+    datasource_types,
     datasources,
     knowledge,
     llm_credential,
@@ -18,6 +19,9 @@ router.include_router(auth.router, prefix="/auth", tags=["认证"])
 router.include_router(users.router, prefix="/users", tags=["用户"])
 router.include_router(llm_credential.router, prefix="/users", tags=["用户"])
 router.include_router(asr_credential.router, prefix="/users", tags=["用户"])
+router.include_router(
+    datasource_types.router, prefix="/datasource-types", tags=["数据源"]
+)
 router.include_router(datasources.router, prefix="/datasources", tags=["数据源"])
 router.include_router(analysis.router, prefix="/datasources", tags=["分析"])
 router.include_router(knowledge.router, prefix="/datasources", tags=["知识库"])

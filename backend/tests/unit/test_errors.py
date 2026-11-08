@@ -57,14 +57,18 @@ BUSINESS_CODES = {
     # BYOK 扩展（语音转写配置）：与 LLM 凭据同构
     "ASR_CREDENTIAL_NOT_CONFIGURED",
     "ASR_CREDENTIAL_INVALID",
+    # 数据源类型字典（迁移 014）
+    "DATASOURCE_TYPE_NOT_FOUND",
+    "DATASOURCE_TYPE_INVALID",
+    "DATASOURCE_TYPE_IN_USE",
     "INTERNAL_ERROR",
 }
 
 
 def test_business_codes_match_api_design_exactly() -> None:
     assert {code.value for code in ErrorCode} == BUSINESS_CODES
-    # API §12.2 原定 28 条 + BYOK 扩展 5 条（LLM 3 + ASR 2）
-    assert len(ErrorCode) == 30
+    # API §12.2 原定 28 条 + BYOK 扩展 5 条（LLM 3 + ASR 2）+ 类型字典 3 条
+    assert len(ErrorCode) == 33
 
 
 def test_error_status_covers_all_business_codes() -> None:

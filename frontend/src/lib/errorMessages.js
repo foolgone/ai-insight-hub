@@ -25,6 +25,9 @@ const MESSAGES = {
   LLM_CREDENTIAL_DECRYPT_FAILED: '凭据解密失败，请联系管理员重新配置',
   ASR_CREDENTIAL_NOT_CONFIGURED: '请先在「语音转写设置」中配置 ASR 服务',
   ASR_CREDENTIAL_INVALID: '语音转写配置无效或已失效，请更新',
+  DATASOURCE_TYPE_NOT_FOUND: '数据源类型不存在',
+  DATASOURCE_TYPE_INVALID: '数据源类型无效（标识重复或已被停用）',
+  DATASOURCE_TYPE_IN_USE: '该类型仍被数据源使用，无法删除',
   INTERNAL_ERROR: '服务器异常，请稍后重试',
 }
 

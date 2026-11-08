@@ -17,7 +17,7 @@ EVALUATION_DIMENSIONS = (
     "hallucination",
 )
 
-DataSourceType = Literal["customer_service", "sales", "support", "other"]
+# 类型取值由 datasource_types 字典表约束（迁移 014 起在服务层校验）
 DataSourceStatus = Literal["active", "archived", "processing", "error"]
 
 
@@ -43,7 +43,8 @@ class DataSourceConfig(BaseSchema):
 class DataSourceCreate(BaseSchema):
     name: str = Field(min_length=1, max_length=255)
     description: str | None = None
-    type: DataSourceType
+    # 取值为 datasource_types.code；服务层校验存在且启用
+    type: str = Field(min_length=1, max_length=50)
     config: DataSourceConfig = Field(default_factory=DataSourceConfig)
     # 创建时可选初始化 12 条种子知识（B-502 冷启动）
     init_seed_knowledge: bool = False
@@ -52,6 +53,7 @@ class DataSourceCreate(BaseSchema):
 class DataSourceUpdate(BaseSchema):
     name: str | None = Field(default=None, min_length=1, max_length=255)
     description: str | None = None
+    type: str | None = Field(default=None, min_length=1, max_length=50)
     config: DataSourceConfig | None = None
 
 
@@ -110,7 +112,6 @@ __all__ = [
     "DataSourceResponse",
     "DataSourceStatistics",
     "DataSourceStatus",
-    "DataSourceType",
     "DataSourceUpdate",
     "DataSourceUpdateResponse",
 ]
