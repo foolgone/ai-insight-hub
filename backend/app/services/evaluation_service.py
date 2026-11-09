@@ -18,6 +18,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import assert_owner
 from app.api.pagination import PaginationParams, paginate
+from app.application import task_control
 from app.core.errors import FrameworkErrorCode
 from app.core.exceptions import (
     AIInsightHubException,
@@ -175,9 +176,7 @@ async def _execute_evaluation(
         config = _config_from_params(task.params or {})
 
         for index, item in enumerate(targets, start=1):
-            from app.services import task_service
-
-            if await task_service.is_cancelled(session, task.id):
+            if await task_control.is_cancelled(session, task.id):
                 await session.refresh(task)
                 break
 
@@ -232,9 +231,7 @@ async def _execute_evaluation(
             await session.flush()
 
         # 最后一条处理期间可能被取消：收尾前复查数据库状态（避免覆盖 cancelled）
-        from app.services import task_service
-
-        if task.status != "cancelled" and await task_service.is_cancelled(session, task.id):
+        if task.status != "cancelled" and await task_control.is_cancelled(session, task.id):
             await session.refresh(task)
 
         task.result = {

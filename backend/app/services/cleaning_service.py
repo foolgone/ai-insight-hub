@@ -26,10 +26,11 @@ from app.core.exceptions import (
     DataSourceNotFoundError,
     TaskAlreadyRunningError,
 )
-from app.application import media_pipeline, structure_service
+from app.application import media_pipeline, structure_service, task_control
 from app.models import CleanedData, DataSource, RawData, Task, User
 from app.schemas.agents.cleaning import CleaningConfig, CleaningInput, CleaningState
 from app.schemas.base import Pagination
+from app.services import parsers, storage_service
 
 ACTIVE_STATUSES = ("pending", "running")
 CLEAN_TASK_TYPE = "clean"
@@ -190,8 +191,6 @@ def _read_full_upload(raw: RawData) -> str | None:
     if not object_name:
         return None
     try:
-        from app.services import parsers, storage_service
-
         content = storage_service.read_upload(object_name, backend=file_info.get("storage_backend"))
         parsed = parsers.parse_upload(content, file_info.get("filename") or "upload.bin")
         return parsed.raw_text
@@ -378,9 +377,7 @@ async def _execute_clean(
 
         for index, raw in enumerate(raw_items, start=1):
             # 取消生效：每处理完一个条目检查一次数据库状态（轻量 SELECT）
-            from app.services import task_service
-
-            if await task_service.is_cancelled(session, task.id):
+            if await task_control.is_cancelled(session, task.id):
                 await session.refresh(task)
                 break
 
@@ -509,9 +506,7 @@ async def _execute_clean(
             datasource.workflow_status = "data_cleaned"
 
         # 最后一条处理期间可能被取消：收尾前复查数据库状态（避免覆盖 cancelled）
-        from app.services import task_service
-
-        if task.status != "cancelled" and await task_service.is_cancelled(session, task.id):
+        if task.status != "cancelled" and await task_control.is_cancelled(session, task.id):
             await session.refresh(task)
 
         task.result = {

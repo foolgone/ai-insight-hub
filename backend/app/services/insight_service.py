@@ -16,6 +16,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import assert_owner
+from app.application import task_control
 from app.core.exceptions import DataSourceNotFoundError
 from app.models import AnalysisResult, CleanedData, DataSource, Task, User
 from app.schemas.insight import (
@@ -170,9 +171,7 @@ async def _execute_insight(
             raise RuntimeError("insight analysis failed: " + "; ".join(result.errors))
 
         # Agent 调用期间可能被取消：复查数据库状态，避免覆盖 cancelled
-        from app.services import task_service
-
-        if await task_service.is_cancelled(session, task.id):
+        if await task_control.is_cancelled(session, task.id):
             await session.refresh(task)
             return {"status": "cancelled", "task_id": str(task.id)}
 
