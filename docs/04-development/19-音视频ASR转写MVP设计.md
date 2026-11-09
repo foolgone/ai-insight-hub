@@ -373,6 +373,12 @@ timestamp_granularities[]=segment
     不参与对话质量评估」；这些数据仍可用于知识提取与经营洞察；
   - 后续可接支持 diarization 的 provider，在同一接口返回 `speaker` 字段。
 
+> **双声道同源检测（dual-mono）**：桌面录制、会议录音常导出 2 声道但左右是同一路信号。
+> 仅凭 `channels == 2` 就按 L/R 配对，会得到 `user_message == ai_response` 的假对话。
+> 因此转写前用 `ffmpeg pan=mono|c0=c0-c1,astats` 计算 L-R 差分 RMS：
+> 低于 `ASR_DUAL_MONO_DB`（默认 -45 dB）即判定同源，改走单声道路径，
+> 并在 `raw_content.media.channel_mode` 标记 `dual_mono`。
+
 ### 6.5.1 接口协议（按模型名自动识别）
 
 | 协议 | 端点 | 输入 | 时间戳 | 典型模型 |

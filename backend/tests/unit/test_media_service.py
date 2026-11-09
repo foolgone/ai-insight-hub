@@ -271,3 +271,47 @@ async def test_transcribe_chat_audio_empty_text_raises(tmp_path: Path, monkeypat
 def test_chunk_seconds_by_protocol() -> None:
     assert media_service._chunk_seconds(media_service.PROTOCOL_CHAT_AUDIO) <= 240
     assert media_service._chunk_seconds("transcriptions") == settings.ASR_CHUNK_SECONDS
+
+
+class _Proc:
+    def __init__(self, returncode: int, stderr: str = "") -> None:
+        self.returncode = returncode
+        self.stderr = stderr
+
+
+@pytest.mark.asyncio
+async def test_channels_duplicated_detects_dual_mono(monkeypatch) -> None:
+    """左右同源（桌面录制）：L-R 差分接近静音。"""
+    monkeypatch.setattr(
+        media_service,
+        "_run",
+        lambda *args, **kwargs: _Proc(0, "RMS level dB: -85.685888\n"),
+    )
+    assert await media_service.channels_duplicated(Path("x.m4a")) is True
+
+
+@pytest.mark.asyncio
+async def test_channels_duplicated_detects_real_stereo(monkeypatch) -> None:
+    monkeypatch.setattr(
+        media_service,
+        "_run",
+        lambda *args, **kwargs: _Proc(0, "RMS level dB: -23.224764\n"),
+    )
+    assert await media_service.channels_duplicated(Path("x.m4a")) is False
+
+
+@pytest.mark.asyncio
+async def test_channels_duplicated_handles_inf_and_failure(monkeypatch) -> None:
+    monkeypatch.setattr(
+        media_service,
+        "_run",
+        lambda *args, **kwargs: _Proc(0, "RMS level dB: -inf\n"),
+    )
+    assert await media_service.channels_duplicated(Path("x.m4a")) is True
+
+    monkeypatch.setattr(
+        media_service,
+        "_run",
+        lambda *args, **kwargs: _Proc(1, "boom"),
+    )
+    assert await media_service.channels_duplicated(Path("x.m4a")) is False

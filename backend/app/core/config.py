@@ -160,6 +160,8 @@ class Settings(BaseSettings):
     ASR_CHUNK_SECONDS: int = 600
     # 千问 Qwen3-ASR 单次上限 5 分钟：chat 协议单独用更短的切片（<=240s）
     ASR_CHAT_CHUNK_SECONDS: int = 240
+    # 左右声道差分 RMS 低于该值（dB）视为「双声道同源」，按单声道处理
+    ASR_DUAL_MONO_DB: float = -45.0
     ASR_MAX_RETRIES: int = 2
     # 成本估算单价（仅用于任务结果展示，不参与计费）
     ASR_PRICE_PER_MINUTE: float = 0.006

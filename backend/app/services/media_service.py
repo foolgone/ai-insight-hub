@@ -11,6 +11,7 @@ from __future__ import annotations
 import asyncio
 import base64
 import json
+import re
 import subprocess
 import tempfile
 from collections.abc import Awaitable, Callable
@@ -154,6 +155,42 @@ async def extract_audio(
     proc = await asyncio.to_thread(_run, cmd)
     if proc.returncode != 0:
         raise MediaDecodeError(f"ffmpeg 抽音轨失败：{proc.stderr[-500:]}")
+
+
+async def channels_duplicated(path: Path) -> bool:
+    """判断左右声道是否同源（L-R 差分近似静音）。
+
+    桌面录制、会议录音常导出「双声道同源」：若按 L/R 当客户/坐席配对，
+    会出现 ``user_message`` 与 ``ai_response`` 完全相同（自己和自己对话）。
+    用 ffmpeg 计算 L-R 的 RMS（dB），低于 ``ASR_DUAL_MONO_DB`` 即视为同源。
+    """
+    proc = await asyncio.to_thread(
+        _run,
+        [
+            "ffmpeg",
+            "-v",
+            "info",
+            "-i",
+            str(path),
+            "-af",
+            "pan=mono|c0=c0-c1,astats=metadata=1:reset=0",
+            "-f",
+            "null",
+            "-",
+        ],
+    )
+    if proc.returncode != 0:
+        return False
+    matches = re.findall(r"RMS level dB:\s*(-inf|-?\d+(?:\.\d+)?)", proc.stderr or "")
+    if not matches:
+        return False
+    last = matches[-1]
+    if last == "-inf":
+        return True
+    try:
+        return float(last) <= settings.ASR_DUAL_MONO_DB
+    except ValueError:  # pragma: no cover - 正则已保证可解析
+        return False
 
 
 async def chunk_audio(path: Path, chunk_seconds: int) -> list[tuple[Path, float]]:
@@ -489,7 +526,11 @@ async def transcribe_media(
         if progress is not None:
             await progress("parsing asr extracting")
 
-        if info.channels >= 2:
+        # 双声道不一定是「左客户/右坐席」：桌面录制、会议录音常见左右同源，
+        # 强行拆分会导致 user_message 与 ai_response 完全相同（自己和自己对话）。
+        dual_mono = info.channels >= 2 and await channels_duplicated(input_path)
+
+        if info.channels >= 2 and not dual_mono:
             left_path = root / "left.mp3"
             right_path = root / "right.mp3"
             await extract_audio(input_path, left_path, channel="L")
@@ -516,6 +557,7 @@ async def transcribe_media(
             cost = left_result.cost_estimate + right_result.cost_estimate
             language = left_result.language or right_result.language
             chunks = left_chunks + right_chunks
+            channel_mode = "stereo"
         else:
             mono_path = root / "mono.mp3"
             await extract_audio(input_path, mono_path)
@@ -530,14 +572,16 @@ async def transcribe_media(
             duration = max(mono_result.duration, info.duration)
             cost = mono_result.cost_estimate
             language = mono_result.language
+            channel_mode = "dual_mono" if dual_mono else "mono"
 
         if not records:
             raise MediaDecodeError("转写结果为空")
 
         logger.info(
-            "media transcribed raw={} channels={} records={} chunks={}",
+            "media transcribed raw={} channels={} mode={} records={} chunks={}",
             raw.id,
             info.channels,
+            channel_mode,
             len(records),
             chunks,
         )
@@ -550,6 +594,7 @@ async def transcribe_media(
                 "duration": round(info.duration, 3),
                 "channels": info.channels,
                 "sample_rate": info.sample_rate,
+                "channel_mode": channel_mode,
             },
             "asr": {
                 "provider": "openai_compatible",
