@@ -26,10 +26,10 @@ from app.core.exceptions import (
     DataSourceNotFoundError,
     TaskAlreadyRunningError,
 )
+from app.application import media_pipeline
 from app.models import CleanedData, DataSource, RawData, Task, User
 from app.schemas.agents.cleaning import CleaningConfig, CleaningInput, CleaningState
 from app.schemas.base import Pagination
-from app.services import asr_service, media_service
 
 ACTIVE_STATUSES = ("pending", "running")
 CLEAN_TASK_TYPE = "clean"
@@ -393,27 +393,22 @@ async def _execute_clean(
                     task.progress = max(task.progress or 5, 10)
                     await session.flush()
 
-                    async def _report(step: str) -> None:
-                        task.current_step = step
-                        task.progress = min(40, (task.progress or 10) + 3)
-                        await session.flush()
-
-                    try:
-                        if task.user_id is None:
-                            raise ValueError("clean task has no owner")
-                        asr_config = await asr_service.resolve_for_user(session, task.user_id)
-                        transcript = await media_service.transcribe_media(
-                            raw, asr_config, progress=_report
-                        )
-                    except Exception:
-                        raw.status = "failed"
-                        raise
-                    raw.raw_content = {**content, **transcript}
-                    asr_summary = transcript.get("asr")
+                async def _report(step: str) -> None:
+                    task.current_step = step
+                    task.progress = min(40, (task.progress or 10) + 3)
                     await session.flush()
 
+                records, asr_result = await media_pipeline.prepare_media_records(
+                    raw,
+                    session=session,
+                    user_id=task.user_id,
+                    on_progress=_report,
+                )
+                if asr_result:
+                    asr_summary = asr_result
+
                 _advance_state(task, CleaningState.NORMALIZING, detail=f"{index}/{raw_records}")
-                data = {"dialogues": (raw.raw_content or {}).get("records") or []}
+                data = {"dialogues": records}
                 if not data["dialogues"]:
                     raise ValueError("media transcript has no records")
                 agent_version = "asr-1.0"
