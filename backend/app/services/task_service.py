@@ -11,6 +11,7 @@ from sqlalchemy.orm import InstrumentedAttribute
 
 from app.api.deps import assert_owner
 from app.api.pagination import PaginationParams, paginate
+from app.application import executors, task_control
 from app.core.exceptions import (
     TaskNotCancellableError,
     TaskNotFoundError,
@@ -64,9 +65,8 @@ async def get(session: AsyncSession, *, user: User, task_id: uuid.UUID) -> Task:
 
 
 async def is_cancelled(session: AsyncSession, task_id: uuid.UUID) -> bool:
-    """轻量查询任务是否已被取消（供 worker 循环内检查，绕开身份映射缓存）。"""
-    status = await session.scalar(select(Task.status).where(Task.id == task_id))
-    return status == "cancelled"
+    """兼容入口：实现已移到 ``application/task_control``。"""
+    return await task_control.is_cancelled(session, task_id)
 
 
 def _revoke(celery_task_id: str) -> None:
@@ -80,38 +80,16 @@ def _revoke(celery_task_id: str) -> None:
 
 
 async def _dispatch_retry(session: AsyncSession, task: Task) -> str:
-    """按 task_type 重新入队，返回新的 celery task id。"""
-    if task.task_type == "clean":
-        from app.services import cleaning_service
+    """按 task_type 重新入队，返回新的 celery task id。
 
-        return cleaning_service.enqueue_clean(task)
-    if task.task_type == "evaluate":
-        from app.services import evaluation_service
-
-        return evaluation_service.enqueue_evaluation(task)
-    if task.task_type == "extract":
-        from app.services import knowledge_service
-
-        return knowledge_service.enqueue_extract(task)
-    if task.task_type == "analyze":
-        from app.services import insight_service
-
-        return insight_service.enqueue_insight(task)
-    if task.task_type == "report":
-        from app.services import report_service
-
-        report_id = (task.params or {}).get("report_id")
-        if not report_id:
-            raise TaskNotRetryableError(
-                details={"task_type": task.task_type, "reason": "missing_report_id"}
-            )
-        report = await session.get(Report, uuid.UUID(str(report_id)))
-        if report is None:
-            raise TaskNotRetryableError(
-                details={"task_type": task.task_type, "reason": "report_not_found"}
-            )
-        return report_service.enqueue_report(report)
-    raise TaskNotRetryableError(details={"task_type": task.task_type, "reason": "unsupported_type"})
+    执行器注册表集中在 ``application/executors``，这里不再反向 import 各业务服务。
+    """
+    executor = executors.get_executor(task.task_type)
+    if executor is None:
+        raise TaskNotRetryableError(
+            details={"task_type": task.task_type, "reason": "unsupported_type"}
+        )
+    return await executor(session, task)
 
 
 async def cancel(session: AsyncSession, *, user: User, task_id: uuid.UUID) -> Task:

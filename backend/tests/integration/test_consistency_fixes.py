@@ -16,6 +16,7 @@ from sqlalchemy import select, update
 from app.agents.base import AgentResult
 from app.core.cost_tracker import CostTracker
 from app.core.llm import LLMResponse, LLMUsage
+from app.application import task_control
 from app.models import AnalysisResult, CleanedData, LlmCall, Task
 from app.services import cleaning_service, insight_service, report_service
 from tests.factories import (
@@ -232,8 +233,6 @@ async def test_cleaning_missing_timestamp_stored_as_null(db_session, monkeypatch
 
 async def test_clean_finalize_preserves_cancelled(db_session, monkeypatch) -> None:
     """收尾前复查取消：最后一条处理完时被取消，不得覆盖为 completed。"""
-    from app.services import task_service
-
     _, _, task = await _cleaning_setup(db_session)
     monkeypatch.setattr(
         cleaning_service, "_build_agent", lambda: _CleaningAgent(_cleaning_result())
@@ -243,7 +242,7 @@ async def test_clean_finalize_preserves_cancelled(db_session, monkeypatch) -> No
         await session.execute(update(Task).where(Task.id == task_id).values(status="cancelled"))
         return True
 
-    monkeypatch.setattr(task_service, "is_cancelled", fake_is_cancelled)
+    monkeypatch.setattr(task_control, "is_cancelled", fake_is_cancelled)
 
     outcome = await cleaning_service.run_clean_task(str(task.id), session=db_session)
 
@@ -276,7 +275,7 @@ def _evaluation_result() -> AgentResult:
 
 
 async def test_evaluation_finalize_preserves_cancelled(db_session, monkeypatch) -> None:
-    from app.services import evaluation_service, task_service
+    from app.services import evaluation_service
 
     user = UserFactory()
     await persist(db_session, user)
@@ -309,7 +308,7 @@ async def test_evaluation_finalize_preserves_cancelled(db_session, monkeypatch) 
         await session.execute(update(Task).where(Task.id == task_id).values(status="cancelled"))
         return True
 
-    monkeypatch.setattr(task_service, "is_cancelled", fake_is_cancelled)
+    monkeypatch.setattr(task_control, "is_cancelled", fake_is_cancelled)
 
     outcome = await evaluation_service.run_evaluation_task(str(task.id), session=db_session)
 

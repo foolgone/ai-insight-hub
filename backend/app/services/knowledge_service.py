@@ -20,6 +20,7 @@ from sqlalchemy.orm import InstrumentedAttribute
 
 from app.api.deps import assert_owner
 from app.api.pagination import PaginationParams, paginate
+from app.application import task_control
 from app.core.config import settings
 from app.core.exceptions import DataSourceNotFoundError, FaqNotFoundError
 from app.models import CleanedData, DataSource, KnowledgeBase, Task, User
@@ -340,9 +341,7 @@ async def _execute_extraction(
             raise RuntimeError("knowledge extraction failed: " + "; ".join(result.errors))
 
         # Agent 调用期间可能被取消：保留种子知识、状态保持 cancelled
-        from app.services import task_service
-
-        if await task_service.is_cancelled(session, task.id):
+        if await task_control.is_cancelled(session, task.id):
             await session.refresh(task)
             return {"status": "cancelled", "task_id": str(task.id), "faqs_inserted": 0}
 
