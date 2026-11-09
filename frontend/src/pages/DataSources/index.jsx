@@ -18,6 +18,7 @@ import { UploadDataModal } from '../../components/datasource/UploadDataModal'
 import { useDataSourcesQuery } from '../../hooks/useDataSources'
 import { useDatasourceTypeOptions } from '../../hooks/useDatasourceTypes'
 import { usePermissions } from '../../hooks/usePermissions'
+import { MAX_UPLOAD_LABEL } from '../../lib/mediaFile'
 
 const PAGE_SIZE = 20
 
@@ -88,7 +89,7 @@ export default function DataSources() {
         index="02"
         eyebrow="Data Sources"
         title="数据源管理"
-        description="按数据源隔离导入与分析，支持 CSV / JSON / XLSX / TXT（≤ 50MB）"
+        description={`按数据源隔离导入与分析，支持 CSV / JSON / XLSX / TXT / 音视频（≤ ${MAX_UPLOAD_LABEL}）`}
         actions={
           <div className="flex items-center gap-2">
             {canWrite ? (

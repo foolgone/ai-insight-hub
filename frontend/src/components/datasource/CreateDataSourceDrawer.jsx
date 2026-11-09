@@ -9,7 +9,13 @@ import { useDatasourceTypeOptions } from '../../hooks/useDatasourceTypes'
 import { useAsrCredentialStatusQuery } from '../../hooks/useAsrCredential'
 import { openCredentialModal } from '../../lib/credentialGate'
 import { getErrorMessage } from '../../lib/errorMessages'
-import { MAX_UPLOAD_BYTES, MEDIA_LABEL, UPLOAD_ACCEPT, isMediaFile } from '../../lib/mediaFile'
+import {
+  MAX_UPLOAD_BYTES,
+  MAX_UPLOAD_LABEL,
+  MEDIA_LABEL,
+  UPLOAD_ACCEPT,
+  isMediaFile,
+} from '../../lib/mediaFile'
 import { notify } from '../../lib/toast'
 
 function formatFileSize(size) {
@@ -73,7 +79,7 @@ export function CreateDataSourceDrawer({ open, onClose, onSuccess }) {
     if (!selected) return
     if (selected.size > MAX_UPLOAD_BYTES) {
       setFile(null)
-      setErrors({ file: '文件超过 50MB 限制' })
+      setErrors({ file: `文件超过 ${MAX_UPLOAD_LABEL} 限制` })
       return
     }
     setFile(selected)
@@ -125,7 +131,7 @@ export function CreateDataSourceDrawer({ open, onClose, onSuccess }) {
                 新建数据源
               </Dialog.Title>
               <p className="mt-1 text-xs text-gray-500">
-                上传对话数据文件（CSV/JSON/XLSX/TXT/音视频，≤ 50MB）
+                上传对话数据文件（CSV/JSON/XLSX/TXT/音视频，≤ {MAX_UPLOAD_LABEL}）
               </p>
             </div>
             <Dialog.Close asChild>
@@ -246,7 +252,7 @@ export function CreateDataSourceDrawer({ open, onClose, onSuccess }) {
                   </div>
                 ) : null}
                 <p className="text-xs text-gray-500">
-                  支持 CSV / JSON / XLSX / TXT / {MEDIA_LABEL}，单文件 ≤ 50MB；
+                  支持 CSV / JSON / XLSX / TXT / {MEDIA_LABEL}，单文件 ≤ {MAX_UPLOAD_LABEL}；
                   音视频会先转写为文本再进入清洗，建议上传双声道通话录音（左客户 / 右坐席）。
                 </p>
               </div>

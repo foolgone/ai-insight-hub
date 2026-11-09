@@ -187,7 +187,10 @@ async def test_prompt_injection_stays_inside_user_message() -> None:
 
 async def test_jwt_tampering_rejected(client) -> None:
     token, _jti, _expires = create_access_token(str(uuid.uuid4()), "user")
-    tampered = token[:-3] + ("a" if not token.endswith("a") else "b") + token[-2:]
+    # 用固定非法签名替换：原写法按末位字符判断、却改倒数第 3 位，
+    # 有概率改到相同字符导致 token 仍然有效（用户不存在 → 404，测试偶发失败）
+    header, payload, _signature = token.split(".")
+    tampered = f"{header}.{payload}.{'A' * 43}"
 
     response = await client.get(
         "/api/v1/users/me",

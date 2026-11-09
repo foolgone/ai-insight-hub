@@ -6,7 +6,13 @@ import { useUploadDataSourceFile } from '../../hooks/useDataSources'
 import { useAsrCredentialStatusQuery } from '../../hooks/useAsrCredential'
 import { getErrorMessage } from '../../lib/errorMessages'
 import { openCredentialModal } from '../../lib/credentialGate'
-import { MAX_UPLOAD_BYTES, MEDIA_LABEL, UPLOAD_ACCEPT, isMediaFile } from '../../lib/mediaFile'
+import {
+  MAX_UPLOAD_BYTES,
+  MAX_UPLOAD_LABEL,
+  MEDIA_LABEL,
+  UPLOAD_ACCEPT,
+  isMediaFile,
+} from '../../lib/mediaFile'
 import { notify } from '../../lib/toast'
 
 /**
@@ -34,7 +40,7 @@ export function UploadDataModal({ datasource, open, onClose }) {
     if (!selected) return
     if (selected.size > MAX_UPLOAD_BYTES) {
       setFile(null)
-      setError('文件超过 50MB 限制')
+      setError(`文件超过 ${MAX_UPLOAD_LABEL} 限制`)
       return
     }
     setFile(selected)
@@ -118,7 +124,7 @@ export function UploadDataModal({ datasource, open, onClose }) {
           </div>
         ) : null}
         <p className="text-xs text-gray-500">
-          支持 CSV / JSON / XLSX / TXT / {MEDIA_LABEL}，单文件 ≤ 50MB；
+          支持 CSV / JSON / XLSX / TXT / {MEDIA_LABEL}，单文件 ≤ {MAX_UPLOAD_LABEL}；
           音视频会先转写为文本再进入清洗；建议上传双声道通话录音（左客户 / 右坐席）。
         </p>
       </div>

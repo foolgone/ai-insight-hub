@@ -746,7 +746,7 @@ file: <binary>
 
 **支持格式**：CSV / JSON / Excel (xlsx) / TXT（`ALLOWED_UPLOAD_EXTENSIONS=csv,json,xlsx,txt`）
 
-**文件大小限制**：50 MB（`MAX_UPLOAD_SIZE_MB=50`）
+**文件大小限制**：100 MB（`MAX_UPLOAD_SIZE_MB=100`）
 
 **状态码**：
 - `202`: 已接收，异步处理中
@@ -1763,7 +1763,7 @@ data: {"items":[{"id":"...","task_type":"clean","status":"running","progress":45
 | `DATASOURCE_NOT_FOUND` | 404 | 数据源不存在 | `/api/v1/datasources`、`/api/v1/datasources/{id}` |
 | `DATASOURCE_QUOTA_EXCEEDED` | 429 | 数据源数量超配额 | `POST /api/v1/datasources` |
 | `CLEANED_DATA_NOT_FOUND` | 404 | 清洗数据不存在 | `GET /api/v1/datasources/{id}/cleaned-data/{data_id}` |
-| `FILE_TOO_LARGE` | 413 | 文件超过 50 MB | `POST /api/v1/datasources/{id}/upload` |
+| `FILE_TOO_LARGE` | 413 | 文件超过 100 MB | `POST /api/v1/datasources/{id}/upload` |
 | `FILE_FORMAT_INVALID` | 415 | 文件格式不支持 | `POST /api/v1/datasources/{id}/upload` |
 | `TASK_NOT_FOUND` | 404 | 任务不存在 | `/api/v1/tasks/{task_id}` |
 | `TASK_ALREADY_RUNNING` | 409 | 同类任务已在运行 | `.../clean`、`.../analyze/quality`、`.../analyze/insights` |
