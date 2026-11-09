@@ -4,6 +4,8 @@ from __future__ import annotations
 import pytest
 from sqlalchemy import select
 
+from app.agents.base import AgentResult
+from app.application import structure_service
 from app.models import CleanedData
 from app.services import asr_service, cleaning_service, media_service
 from tests.factories import (
@@ -193,3 +195,94 @@ async def test_media_clean_fails_when_asr_not_configured(db_session, monkeypatch
     assert raw.status == "failed"
     await db_session.refresh(task)
     assert "语音转写" in (task.error_message or "")
+
+
+class _FakeStructureAgent:
+    def __init__(self, data: dict) -> None:
+        self._data = data
+
+    async def structure(self, input_data, **kwargs) -> AgentResult:
+        return AgentResult(
+            success=True,
+            data=dict(self._data),
+            metadata={"agent": "structure_agent", "version": "v1.0.0", "model": "fake"},
+            duration=1.0,
+            token_usage={"input": 100, "output": 50},
+        )
+
+
+async def _setup_mono_ready(db_session) -> tuple:
+    """单声道且已转写完成的 raw（不会再调用 ASR）。"""
+    user = UserFactory()
+    await persist(db_session, user)
+    datasource = DataSourceFactory(user_id=user.id)
+    await persist(db_session, datasource)
+    raw = RawDataFactory(
+        datasource_id=datasource.id,
+        raw_content={
+            "format": "media",
+            "text": "面试官：请你做一下自我介绍。候选人：我做后端开发。" * 20,
+            "media": {"channel_mode": "dual_mono", "duration": 100.0},
+            "asr": {"status": "completed"},
+            "records": [
+                {
+                    "dialogue_id": "asr-1",
+                    "user_message": "整段转写",
+                    "ai_response": "",
+                    "speaker_pair": "mono",
+                    "quality_score": None,
+                    "issues": ["asr_transcript", "mono_speaker_unknown"],
+                }
+            ],
+        },
+        file_info={"filename": "call.mp4"},
+    )
+    await persist(db_session, raw)
+    task = TaskFactory(
+        user_id=user.id,
+        datasource_id=datasource.id,
+        task_type="clean",
+        status="pending",
+        params={"raw_data_id": str(raw.id)},
+    )
+    await persist(db_session, task)
+    return datasource, raw, task
+
+
+async def test_media_clean_structures_mono_into_qa(db_session, monkeypatch) -> None:
+    datasource, raw, task = await _setup_mono_ready(db_session)
+    payload = {
+        "content_type": "interview",
+        "structure": "qa",
+        "confidence": 0.9,
+        "qa": [
+            {"question": "请你做一下自我介绍。", "answer": "我做后端开发。", "quality_score": 80},
+            {"question": "你做过什么项目？", "answer": "一个执法平台。", "quality_score": 75},
+        ],
+    }
+    monkeypatch.setattr(structure_service, "_build_agent", lambda: _FakeStructureAgent(payload))
+
+    outcome = await cleaning_service.run_clean_task(str(task.id), session=db_session)
+
+    assert outcome["status"] == "completed"
+    assert outcome["cleaned_records"] == 2
+
+    rows = (
+        (
+            await db_session.execute(
+                select(CleanedData).where(CleanedData.datasource_id == datasource.id)
+            )
+        )
+        .scalars()
+        .all()
+    )
+    assert len(rows) == 2
+    assert {row.metadata_["source"] for row in rows} == {"asr_structured"}
+    assert all(row.quality_score is not None for row in rows)
+    assert rows[0].user_message == "请你做一下自我介绍。"
+
+    await db_session.refresh(raw)
+    assert raw.raw_content["structured"]["structure"] == "qa"
+
+    await db_session.refresh(task)
+    assert task.result["structure"]["structure"] == "qa"

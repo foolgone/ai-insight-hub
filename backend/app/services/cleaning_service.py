@@ -26,7 +26,7 @@ from app.core.exceptions import (
     DataSourceNotFoundError,
     TaskAlreadyRunningError,
 )
-from app.application import media_pipeline
+from app.application import media_pipeline, structure_service
 from app.models import CleanedData, DataSource, RawData, Task, User
 from app.schemas.agents.cleaning import CleaningConfig, CleaningInput, CleaningState
 from app.schemas.base import Pagination
@@ -363,6 +363,7 @@ async def _execute_clean(
     candidate_total = 0
     scored_total = 0
     asr_summary: dict[str, Any] | None = None
+    structure_summary: dict[str, Any] | None = None
     raw_records = 0
     failed_raw = 0
     near_duplicates = 0
@@ -406,6 +407,26 @@ async def _execute_clean(
                 )
                 if asr_result:
                     asr_summary = asr_result
+
+                # 单声道整段转写：交给 AI 判断做成 QA / 知识点 / 摘要
+                structured = await structure_service.apply(
+                    session,
+                    raw=raw,
+                    records=records,
+                    task_id=task.id,
+                    user_id=task.user_id,
+                    datasource_id=raw.datasource_id,
+                )
+                if structured:
+                    structure_summary = {
+                        "content_type": structured.get("content_type"),
+                        "structure": structured.get("structure"),
+                        "confidence": structured.get("confidence"),
+                    }
+                if structured and structured.get("structure") == "qa":
+                    qa_records = structure_service.qa_to_dialogues(structured)
+                    if qa_records:
+                        records = qa_records
 
                 _advance_state(task, CleaningState.NORMALIZING, detail=f"{index}/{raw_records}")
                 data = {"dialogues": records}
@@ -502,6 +523,8 @@ async def _execute_clean(
         }
         if asr_summary:
             task.result["asr"] = asr_summary
+        if structure_summary:
+            task.result["structure"] = structure_summary
 
         # 用户取消：保留已清洗结果，状态保持 cancelled，不覆盖为 completed/failed
         if task.status == "cancelled":

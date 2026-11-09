@@ -162,6 +162,12 @@ class Settings(BaseSettings):
     ASR_CHAT_CHUNK_SECONDS: int = 240
     # 左右声道差分 RMS 低于该值（dB）视为「双声道同源」，按单声道处理
     ASR_DUAL_MONO_DB: float = -45.0
+
+    # ---------------- 转写内容结构化（内容路由） ----------------
+    # 单声道整段转写后，用 LLM 判断内容类型并切成 QA / 知识点 / 摘要
+    MEDIA_STRUCTURE_ENABLED: bool = True
+    # 文本短于该长度不做结构化（收益低、浪费调用）
+    MEDIA_STRUCTURE_MIN_CHARS: int = 200
     ASR_MAX_RETRIES: int = 2
     # 成本估算单价（仅用于任务结果展示，不参与计费）
     ASR_PRICE_PER_MINUTE: float = 0.006
