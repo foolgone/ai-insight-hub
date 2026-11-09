@@ -17,6 +17,7 @@ import {
   useFaqInfiniteQuery,
   useGapsQuery,
   useKnowledgeSearchQuery,
+  useUpdateFaq,
 } from '../../hooks/useKnowledge'
 import { useDatasourceStore } from '../../stores/datasourceStore'
 import { downloadTextFile, toCsv } from '../../lib/download'
@@ -39,6 +40,13 @@ const PRIORITY_META = {
   low: { label: '低优先级', variant: 'default' },
 }
 
+const STATUS_OPTIONS = [
+  { label: '全部状态', value: 'all' },
+  { label: '待审核', value: 'needs_review' },
+  { label: '已启用', value: 'active' },
+  { label: '已归档', value: 'archived' },
+]
+
 const TABS = [
   { key: 'faq', label: '知识条目' },
   { key: 'gaps', label: '知识盲区' },
@@ -49,6 +57,7 @@ export default function KnowledgeBase() {
   const currentDatasourceId = useDatasourceStore(state => state.currentId)
   const [activeTab, setActiveTab] = useState('faq')
   const [category, setCategory] = useState('')
+  const [statusFilter, setStatusFilter] = useState('all')
   const [searchInput, setSearchInput] = useState('')
   const [searchTerm, setSearchTerm] = useState('')
   const [extractOpen, setExtractOpen] = useState(false)
@@ -56,12 +65,17 @@ export default function KnowledgeBase() {
 
   const faqQuery = useFaqInfiniteQuery(
     currentDatasourceId,
-    { limit: 10, ...(category ? { category } : {}) },
+    {
+      limit: 10,
+      ...(category ? { category } : {}),
+      ...(statusFilter !== 'all' ? { status: statusFilter } : {}),
+    },
     { enabled: Boolean(currentDatasourceId) && activeTab === 'faq' }
   )
   const gapsQuery = useGapsQuery(currentDatasourceId)
   const searchQuery = useKnowledgeSearchQuery(currentDatasourceId, searchTerm, { limit: 10 })
   const deleteMutation = useDeleteFaq()
+  const updateMutation = useUpdateFaq()
 
   const faqItems = useMemo(
     () => (faqQuery.data?.pages || []).flatMap(page => page.items || []),
@@ -76,6 +90,19 @@ export default function KnowledgeBase() {
     try {
       await deleteMutation.mutateAsync({ datasourceId: currentDatasourceId, faqId: faq.id })
       notify.success('知识条目已删除')
+    } catch (error) {
+      notify.error(getErrorMessage(error))
+    }
+  }
+
+  const handleApprove = async faq => {
+    try {
+      await updateMutation.mutateAsync({
+        datasourceId: currentDatasourceId,
+        faqId: faq.id,
+        payload: { status: 'active' },
+      })
+      notify.success('知识条目已审核通过')
     } catch (error) {
       notify.error(getErrorMessage(error))
     }
@@ -145,13 +172,23 @@ export default function KnowledgeBase() {
 
           {activeTab === 'faq' ? (
             <div className="space-y-4">
-              <div className="max-w-xs">
-                <Select
-                  ariaLabel="知识分类筛选"
-                  options={CATEGORY_OPTIONS}
-                  value={category || 'all'}
-                  onChange={value => setCategory(value === 'all' ? '' : value)}
-                />
+              <div className="flex flex-wrap gap-3">
+                <div className="w-40">
+                  <Select
+                    ariaLabel="知识分类筛选"
+                    options={CATEGORY_OPTIONS}
+                    value={category || 'all'}
+                    onChange={value => setCategory(value === 'all' ? '' : value)}
+                  />
+                </div>
+                <div className="w-36">
+                  <Select
+                    ariaLabel="知识状态筛选"
+                    options={STATUS_OPTIONS}
+                    value={statusFilter}
+                    onChange={setStatusFilter}
+                  />
+                </div>
               </div>
 
               {faqQuery.isLoading ? <PageLoading label="正在加载知识条目..." /> : null}
@@ -173,6 +210,7 @@ export default function KnowledgeBase() {
                         entry={faq}
                         onEdit={() => setDrawerState({ open: true, faq, prefill: '' })}
                         onDelete={() => handleDelete(faq)}
+                        onApprove={() => handleApprove(faq)}
                       />
                     ))}
                     {faqQuery.hasNextPage ? (

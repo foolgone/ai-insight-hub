@@ -9,6 +9,11 @@ const SOURCE_LABELS = {
   extracted: '提取',
 }
 
+const STATUS_META = {
+  needs_review: { label: '待审核', variant: 'warning' },
+  archived: { label: '已归档', variant: 'default' },
+}
+
 /**
  * 知识条目卡片（02 §6.4 / 03 §3.6）。
  * @param {{
@@ -16,12 +21,21 @@ const SOURCE_LABELS = {
  *   canWrite?: boolean,
  *   onEdit?: () => void,
  *   onDelete?: () => void,
+ *   onApprove?: () => void,
  *   searchSimilarity?: number,
  * }} props
  */
-export function KnowledgeEntryCard({ entry, canWrite = true, onEdit, onDelete, searchSimilarity }) {
+export function KnowledgeEntryCard({
+  entry,
+  canWrite = true,
+  onEdit,
+  onDelete,
+  onApprove,
+  searchSimilarity,
+}) {
   const tags = Array.isArray(entry.tags) ? entry.tags : []
   const visibleTags = tags.slice(0, 3)
+  const statusMeta = STATUS_META[entry.status] || null
 
   return (
     <article className="rounded-md border border-gray-200 bg-white p-4">
@@ -29,6 +43,11 @@ export function KnowledgeEntryCard({ entry, canWrite = true, onEdit, onDelete, s
         <div className="min-w-0">
           <h3 className="text-base font-semibold text-gray-900">{entry.question}</h3>
           <div className="mt-1 flex flex-wrap items-center gap-1.5 text-xs text-gray-500">
+            {statusMeta ? (
+              <Badge variant={statusMeta.variant} size="sm">
+                {statusMeta.label}
+              </Badge>
+            ) : null}
             {entry.category ? (
               <Badge variant="info" size="sm">
                 {entry.category}
@@ -50,6 +69,11 @@ export function KnowledgeEntryCard({ entry, canWrite = true, onEdit, onDelete, s
 
         {canWrite ? (
           <div className="flex shrink-0 items-center gap-1">
+            {onApprove && entry.status === 'needs_review' ? (
+              <Button size="sm" variant="primary" onClick={onApprove}>
+                审核通过
+              </Button>
+            ) : null}
             {onEdit ? (
               <Button size="sm" variant="ghost" onClick={onEdit}>
                 编辑

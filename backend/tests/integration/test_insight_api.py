@@ -8,6 +8,7 @@ import pytest
 from app.agents.base import AgentResult
 from app.services import insight_service
 from tests.factories import (
+    AnalysisResultFactory,
     CleanedDataFactory,
     DataSourceFactory,
     RawDataFactory,
@@ -211,3 +212,40 @@ async def test_insight_task_registered() -> None:
     from app.core.celery import celery_app
 
     assert "tasks.analyze_insights" in celery_app.tasks
+
+
+async def test_transcript_summaries_endpoint(client, auth_headers, db_session) -> None:
+    """内容路由产出的摘要（analysis_type=other）可通过专用端点读取。"""
+    created = await client.post(
+        "/api/v1/datasources",
+        headers=auth_headers,
+        json={"name": "summary-ds", "type": "customer_service"},
+    )
+    datasource_id = uuid.UUID(created.json()["id"])
+
+    await persist(
+        db_session,
+        AnalysisResultFactory(
+            datasource_id=datasource_id,
+            data_id=None,
+            analysis_type="other",
+            result={
+                "kind": "transcript_summary",
+                "content_type": "meeting",
+                "summary": "讨论了三个议题，结论是先做 P1。",
+                "confidence": 0.8,
+            },
+            agent_name="structure_agent",
+        ),
+    )
+
+    response = await client.get(
+        f"/api/v1/datasources/{datasource_id}/analysis/summaries",
+        headers=auth_headers,
+    )
+
+    assert response.status_code == 200
+    items = response.json()["items"]
+    assert len(items) == 1
+    assert items[0]["content_type"] == "meeting"
+    assert items[0]["summary"].startswith("讨论了三个议题")

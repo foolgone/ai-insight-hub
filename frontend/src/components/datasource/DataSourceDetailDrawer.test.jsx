@@ -9,6 +9,12 @@ vi.mock('../../hooks/useDatasourceTypes', () => ({
   }),
 }))
 
+let summaries = []
+
+vi.mock('../../hooks/useInsights', () => ({
+  useSummariesQuery: () => ({ data: { items: summaries } }),
+}))
+
 const DATASOURCE = {
   id: 'ds-1',
   name: '客服对话-2026年1月',
@@ -65,5 +71,22 @@ describe('DataSourceDetailDrawer', () => {
     )
 
     expect(container).toBeEmptyDOMElement()
+  })
+
+  it('有转写摘要时展示摘要块', () => {
+    summaries = [
+      {
+        id: 's-1',
+        content_type: 'meeting',
+        summary: '讨论了三个议题，结论是先做 P1。',
+        confidence: 0.8,
+        created_at: '2026-11-09T12:00:00Z',
+      },
+    ]
+    render(<DataSourceDetailDrawer datasource={DATASOURCE} open onClose={() => {}} />)
+
+    expect(screen.getByRole('region', { name: '转写摘要' })).toBeInTheDocument()
+    expect(screen.getByText(/讨论了三个议题/)).toBeInTheDocument()
+    summaries = []
   })
 })

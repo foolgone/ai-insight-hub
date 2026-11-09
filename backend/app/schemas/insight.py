@@ -50,10 +50,26 @@ class InsightResponse(BaseModel):
     created_at: datetime | None = None
 
 
+class TranscriptSummaryItem(BaseModel):
+    """转写文本的结构化摘要（analysis_type='other'，kind='transcript_summary'）。"""
+
+    id: uuid.UUID
+    content_type: str | None = None
+    summary: str
+    confidence: float | None = None
+    created_at: datetime | None = None
+
+
+class TranscriptSummaryList(BaseModel):
+    items: list[TranscriptSummaryItem] = Field(default_factory=list)
+
+
 __all__ = [
     "InsightPainPoint",
     "InsightRequest",
     "InsightResponse",
     "InsightTaskResponse",
     "InsightTopQuestion",
+    "TranscriptSummaryItem",
+    "TranscriptSummaryList",
 ]

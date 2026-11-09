@@ -490,3 +490,44 @@ async def test_extraction_question_selection_falls_back_on_embedding_error(
     stats = task.result["statistics"]
     assert stats["question_select_mode"] == "fallback"
     assert "RuntimeError" in (stats["fallback_reason"] or "")
+
+
+async def test_faq_list_filters_by_status(client, auth_headers, db_session) -> None:
+    """待审核（needs_review）条目可按 status 过滤，供前端审核入口使用。"""
+    created = await client.post(
+        "/api/v1/datasources",
+        headers=auth_headers,
+        json={"name": "kb-status-ds", "type": "customer_service"},
+    )
+    datasource_id = uuid.UUID(created.json()["id"])
+
+    await persist(
+        db_session,
+        KnowledgeBaseFactory(
+            datasource_id=datasource_id,
+            question="待审核问题",
+            answer="答案 A",
+            status="needs_review",
+            source="extracted",
+        ),
+    )
+    await persist(
+        db_session,
+        KnowledgeBaseFactory(
+            datasource_id=datasource_id,
+            question="已启用问题",
+            answer="答案 B",
+            status="active",
+            source="manual",
+        ),
+    )
+
+    response = await client.get(
+        f"/api/v1/datasources/{datasource_id}/knowledge/faq?status=needs_review",
+        headers=auth_headers,
+    )
+
+    assert response.status_code == 200
+    items = response.json()["items"]
+    assert [item["question"] for item in items] == ["待审核问题"]
+    assert items[0]["status"] == "needs_review"

@@ -55,4 +55,17 @@ describe('KnowledgeEntryCard', () => {
     expect(screen.queryByRole('button', { name: '编辑' })).toBeNull()
     expect(screen.queryByRole('button', { name: '删除' })).toBeNull()
   })
+
+  it('待审核条目展示状态与「审核通过」入口', async () => {
+    const onApprove = vi.fn()
+    const user = userEvent.setup()
+    render(
+      <KnowledgeEntryCard entry={{ ...ENTRY, status: 'needs_review' }} onApprove={onApprove} />
+    )
+
+    expect(screen.getByText('待审核')).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: '审核通过' }))
+    expect(onApprove).toHaveBeenCalledTimes(1)
+  })
 })

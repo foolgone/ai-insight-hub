@@ -36,6 +36,7 @@ export const endpoints = {
     qualityReview: (id, resultId) => `/datasources/${id}/analysis/quality/${resultId}/review`,
     insights: id => `/datasources/${id}/analyze/insights`,
     insightsResults: id => `/datasources/${id}/analysis/insights`,
+    summaries: id => `/datasources/${id}/analysis/summaries`,
   },
   knowledge: {
     extract: id => `/datasources/${id}/extract-knowledge`,

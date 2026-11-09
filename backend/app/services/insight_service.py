@@ -229,6 +229,28 @@ async def run_insight_task(task_id: str, *, session: AsyncSession | None = None)
     return result
 
 
+async def list_transcript_summaries(
+    session: AsyncSession,
+    *,
+    user: User,
+    datasource_id: uuid.UUID,
+    limit: int = 20,
+) -> list[AnalysisResult]:
+    """转写文本的结构化摘要（``analysis_type='other'``，``kind='transcript_summary'``）。"""
+    await _datasource_or_404(session, datasource_id, user)
+    stmt = (
+        select(AnalysisResult)
+        .where(
+            AnalysisResult.datasource_id == datasource_id,
+            AnalysisResult.analysis_type == "other",
+            AnalysisResult.result["kind"].astext == "transcript_summary",
+        )
+        .order_by(AnalysisResult.created_at.desc())
+        .limit(limit)
+    )
+    return list((await session.execute(stmt)).scalars().all())
+
+
 async def get_latest_insights(
     session: AsyncSession,
     *,
