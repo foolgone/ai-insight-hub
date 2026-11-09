@@ -1,3 +1,5 @@
+import { MAX_UPLOAD_LABEL } from './mediaFile'
+
 /** 21 个 MVP 可达业务错误码 → 中文文案（F-105）。 */
 const MESSAGES = {
   AUTH_INVALID_CREDENTIALS: '邮箱或密码错误',
@@ -9,7 +11,7 @@ const MESSAGES = {
   DATASOURCE_NOT_FOUND: '数据源不存在',
   DATASOURCE_QUOTA_EXCEEDED: '数据源数量已达配额上限',
   CLEANED_DATA_NOT_FOUND: '清洗数据不存在',
-  FILE_TOO_LARGE: '文件超过 50MB 限制',
+  FILE_TOO_LARGE: `文件超过 ${MAX_UPLOAD_LABEL} 限制`,
   FILE_FORMAT_INVALID: '文件格式不支持（CSV/JSON/XLSX/TXT/音视频）',
   TASK_NOT_FOUND: '任务不存在',
   TASK_ALREADY_RUNNING: '已有同类任务在运行，请稍后再试',

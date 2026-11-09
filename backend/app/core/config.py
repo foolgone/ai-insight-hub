@@ -145,7 +145,7 @@ class Settings(BaseSettings):
     RATE_LIMIT_PER_HOUR: int = 1000
 
     # ---------------- 文件上传 ----------------
-    MAX_UPLOAD_SIZE_MB: int = 50
+    MAX_UPLOAD_SIZE_MB: int = 100
     ALLOWED_UPLOAD_EXTENSIONS: str = "csv,json,xlsx,txt"
     # 音视频上传（ASR 转写后复用清洗链路；见 docs/04-development/19-音视频ASR转写MVP设计.md）
     MEDIA_UPLOAD_EXTENSIONS: str = "mp3,wav,m4a,mp4,mov"

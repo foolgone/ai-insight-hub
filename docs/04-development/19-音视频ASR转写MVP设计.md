@@ -24,7 +24,7 @@
 | 项 | MVP 行为 |
 |---|---|
 | 输入格式 | 音频：mp3 / wav / m4a；视频：mp4 / mov |
-| 文件大小 | 沿用 50MB（更大文件后续改流式上传） |
+| 文件大小 | 沿用 100MB（更大文件后续改流式上传） |
 | 声道 | **优先双声道**（左客户 / 右坐席）；单声道降级为单段文本 |
 | ASR | OpenAI 兼容转写接口（可配置 base_url/model） |
 | 说话人 | 双声道按声道区分；不做本地 diarization |
@@ -195,7 +195,7 @@ else:
 - `file_info` 增加 `object_name` / `storage_backend`（当前已有）；
 - `raw_content.media.duration/channels` 在上传时未知，留空，由 worker `ffprobe` 回填；
 - 上传响应结构不变（`task_id` / `file_info`）；
-- 50MB 限制沿用；超过返回 413。
+- 100MB 限制沿用；超过返回 413。
 
 ### 5.3 配置（用户级配置层，不写 `.env`）
 
@@ -490,7 +490,7 @@ const ACCEPT = '.csv,.json,.xlsx,.txt,.mp3,.wav,.m4a,.mp4,.mov'
 
 文案：
 
-> 支持 CSV / JSON / XLSX / TXT / MP3 / WAV / M4A / MP4 / MOV，单文件 ≤ 50MB；
+> 支持 CSV / JSON / XLSX / TXT / MP3 / WAV / M4A / MP4 / MOV，单文件 ≤ 100MB；
 > 音视频会先转写为文本再进入清洗；建议上传双声道通话录音。
 
 ### 8.2 任务阶段
@@ -593,7 +593,7 @@ const ACCEPT = '.csv,.json,.xlsx,.txt,.mp3,.wav,.m4a,.mp4,.mov'
 | 风险 | 应对 |
 |---|---|
 | 云 ASR 不支持中文说话人分离 | 双声道方案不依赖 diarization；单声道降级 |
-| 50MB 视频时长有限 | 后续改流式上传 + 200MB；MVP 先限制 |
+| 100MB 视频时长有限 | 后续改流式上传（分片直传） |
 | 长音频超过 Celery 30 分钟 | 切片 + 进度；必要时提高 `task_time_limit` |
 | ASR 成本不可见 | `task.result.asr.cost_estimate`；后续接成本页 |
 | 单声道评估失真 | 打 `mono_speaker_unknown`，前端提示，评估可跳过空 `ai_response` |

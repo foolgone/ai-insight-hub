@@ -57,13 +57,16 @@ export async function deleteDataSource(id, { force = false } = {}) {
 
 /**
  * 上传数据文件（POST /datasources/{id}/upload，202）。
+ * 大文件（≤100MB）传输可能超过默认 30s 超时，这里单独放宽到 10 分钟。
  * @param {string} id
- * @param {File} file CSV/JSON/XLSX/TXT，≤50MB
+ * @param {File} file CSV/JSON/XLSX/TXT/音视频，≤100MB
  * @returns {Promise<{ task_id: string, status: string, message: string, file_info: Object }>}
  */
 export async function uploadDataSourceFile(id, file) {
   const formData = new FormData()
   formData.append('file', file)
-  const { data } = await apiClient.post(endpoints.datasources.upload(id), formData)
+  const { data } = await apiClient.post(endpoints.datasources.upload(id), formData, {
+    timeout: 10 * 60 * 1000,
+  })
   return data
 }
