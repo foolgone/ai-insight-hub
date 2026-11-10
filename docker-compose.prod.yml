@@ -119,7 +119,7 @@ services:
       WORKER_METRICS_ENABLED: "true"
     volumes:
       - api_storage:/app/.storage
-    command: ["celery", "-A", "app.core.celery:celery_app", "worker", "-l", "info", "--concurrency=1"]
+    command: ["celery", "-A", "app.core.celery:celery_app", "worker", "-l", "info", "--concurrency=${CELERY_CONCURRENCY:-2}", "-Q", "clean,default"]
     depends_on:
       postgres:
         condition: service_healthy

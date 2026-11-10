@@ -1,0 +1,134 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="1000" viewBox="0 0 1440 1000" font-family="'JetBrains Mono','SF Mono',Consolas,monospace">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#17160F"/>
+    </marker>
+    <marker id="arrow-dash" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#C8452A"/>
+    </marker>
+  </defs>
+
+  <rect width="1440" height="1000" fill="#FAF8F3"/>
+
+  <text x="60" y="62" font-family="Georgia,'Songti SC',serif" font-size="30" fill="#17160F">AI Insight Hub · 当前系统架构</text>
+  <text x="60" y="88" font-size="12" fill="#6B675C">2026-11-10 · MVP + 内容路由（P1–P4）与分层改造后</text>
+
+  <!-- ============ 主链路 ============ -->
+  <text x="60" y="132" font-size="11" letter-spacing="2" fill="#C8452A">REQUEST PATH</text>
+
+  <!-- Client -->
+  <rect x="60" y="146" width="820" height="92" fill="#FFFFFF" stroke="#17160F" stroke-width="1.2"/>
+  <text x="80" y="174" font-size="15" fill="#17160F" font-weight="bold">浏览器 / React SPA</text>
+  <text x="80" y="198" font-size="12" fill="#4A463C">页面：Dashboard · 数据源 · 数据清洗 · 质量评估 · 知识库 · 报告中心</text>
+  <text x="80" y="220" font-size="12" fill="#4A463C">React Query（服务端状态）· Zustand（会话/数据源选择）· SSE（任务进度）</text>
+
+  <line x1="470" y1="238" x2="470" y2="262" stroke="#17160F" stroke-width="1.2" marker-end="url(#arrow)"/>
+
+  <!-- Nginx -->
+  <rect x="60" y="264" width="820" height="76" fill="#FFFFFF" stroke="#17160F" stroke-width="1.2"/>
+  <text x="80" y="292" font-size="15" fill="#17160F" font-weight="bold">Nginx 1.27（80 / 8443 TLS）</text>
+  <text x="80" y="316" font-size="12" fill="#4A463C">静态资源 · /api 反向代理 · SSE 关闭缓冲 · client_max_body_size 120m</text>
+
+  <line x1="470" y1="340" x2="470" y2="364" stroke="#17160F" stroke-width="1.2" marker-end="url(#arrow)"/>
+
+  <!-- FastAPI -->
+  <rect x="60" y="366" width="820" height="76" fill="#FFFFFF" stroke="#17160F" stroke-width="1.2"/>
+  <text x="80" y="394" font-size="15" fill="#17160F" font-weight="bold">FastAPI（uvicorn · api 容器）</text>
+  <text x="80" y="418" font-size="12" fill="#4A463C">api/v1 路由 · JWT 鉴权 · RBAC · 统一错误码 · BYOK 守门（428）</text>
+
+  <line x1="470" y1="442" x2="470" y2="466" stroke="#17160F" stroke-width="1.2" marker-end="url(#arrow)"/>
+
+  <!-- Application -->
+  <rect x="60" y="468" width="820" height="96" fill="#F3EFE6" stroke="#17160F" stroke-width="1.2"/>
+  <text x="80" y="496" font-size="15" fill="#17160F" font-weight="bold">application/ · 用例编排</text>
+  <text x="80" y="520" font-size="12" fill="#4A463C">media_pipeline（转写）· structure_service（QA/知识点/摘要路由）</text>
+  <text x="80" y="542" font-size="12" fill="#4A463C">task_control（取消查询）· executors（task_type → 入队注册表）</text>
+
+  <line x1="470" y1="564" x2="470" y2="588" stroke="#17160F" stroke-width="1.2" marker-end="url(#arrow)"/>
+
+  <!-- Agents -->
+  <rect x="60" y="590" width="820" height="96" fill="#FFFFFF" stroke="#17160F" stroke-width="1.2"/>
+  <text x="80" y="618" font-size="15" fill="#17160F" font-weight="bold">agents/ · LLM 能力（BaseAgent：BYOK / 重试 / 成本 / 降级）</text>
+  <text x="80" y="642" font-size="12" fill="#4A463C">cleaning（文本→对话）· structure（转写→QA/知识点/摘要）</text>
+  <text x="80" y="664" font-size="12" fill="#4A463C">evaluation（质量评估）· extraction（知识提取）· insight（洞察）· report（报告）</text>
+
+  <line x1="470" y1="686" x2="470" y2="710" stroke="#17160F" stroke-width="1.2" marker-end="url(#arrow)"/>
+
+  <!-- Data -->
+  <rect x="60" y="712" width="250" height="86" fill="#FFFFFF" stroke="#17160F" stroke-width="1.2"/>
+  <text x="78" y="738" font-size="13" fill="#17160F" font-weight="bold">PostgreSQL 14 + pgvector</text>
+  <text x="78" y="760" font-size="11" fill="#4A463C">业务表 + 向量索引</text>
+  <text x="78" y="780" font-size="11" fill="#4A463C">15 张表 + 凭据表</text>
+
+  <rect x="330" y="712" width="250" height="86" fill="#FFFFFF" stroke="#17160F" stroke-width="1.2"/>
+  <text x="348" y="738" font-size="13" fill="#17160F" font-weight="bold">Redis 7</text>
+  <text x="348" y="760" font-size="11" fill="#4A463C">Celery broker / result</text>
+  <text x="348" y="780" font-size="11" fill="#4A463C">限流计数 · token 黑名单</text>
+
+  <rect x="600" y="712" width="280" height="86" fill="#FFFFFF" stroke="#17160F" stroke-width="1.2"/>
+  <text x="618" y="738" font-size="13" fill="#17160F" font-weight="bold">MinIO / S3（或本地回退）</text>
+  <text x="618" y="760" font-size="11" fill="#4A463C">原始上传文件 · 报告产物</text>
+  <text x="618" y="780" font-size="11" fill="#4A463C">object_name + storage_backend</text>
+
+  <!-- ============ 异步与外部 ============ -->
+  <text x="940" y="132" font-size="11" letter-spacing="2" fill="#C8452A">ASYNC &amp; EXTERNAL</text>
+
+  <!-- Worker -->
+  <rect x="940" y="146" width="440" height="130" fill="#FFFFFF" stroke="#17160F" stroke-width="1.2"/>
+  <text x="960" y="174" font-size="15" fill="#17160F" font-weight="bold">Celery worker（worker 容器）</text>
+  <text x="960" y="198" font-size="12" fill="#4A463C">任务：clean · evaluate · extract · analyze · report</text>
+  <text x="960" y="220" font-size="12" fill="#4A463C">clean 内部：ffmpeg 抽音轨 → 分片 ASR → 结构化 → 落库</text>
+  <text x="960" y="242" font-size="12" fill="#4A463C">与 api 共用镜像，通过 executors 注册表分发</text>
+  <text x="960" y="264" font-size="11" fill="#8A8578">进度写入 tasks.current_step / progress，前端 SSE 读取</text>
+
+  <!-- Beat -->
+  <rect x="940" y="296" width="440" height="66" fill="#FFFFFF" stroke="#17160F" stroke-width="1.2"/>
+  <text x="960" y="322" font-size="15" fill="#17160F" font-weight="bold">Celery beat</text>
+  <text x="960" y="344" font-size="12" fill="#4A463C">定时任务：成本监控 / 配额检查</text>
+
+  <!-- External -->
+  <rect x="940" y="382" width="440" height="118" fill="#FFFFFF" stroke="#C8452A" stroke-width="1.2"/>
+  <text x="960" y="408" font-size="15" fill="#C8452A" font-weight="bold">外部服务（BYOK，按用户配置）</text>
+  <text x="960" y="432" font-size="12" fill="#4A463C">LLM：DeepSeek（OpenAI 兼容 /chat/completions）</text>
+  <text x="960" y="454" font-size="12" fill="#4A463C">ASR-A：OpenAI /audio/transcriptions（whisper 类）</text>
+  <text x="960" y="476" font-size="12" fill="#4A463C">ASR-B：千问 /chat/completions（qwen3-asr-flash）</text>
+
+  <!-- Observability -->
+  <rect x="940" y="520" width="440" height="92" fill="#FFFFFF" stroke="#17160F" stroke-width="1.2"/>
+  <text x="960" y="546" font-size="15" fill="#17160F" font-weight="bold">可观测</text>
+  <text x="960" y="570" font-size="12" fill="#4A463C">Prometheus + Grafana（worker 指标端口）</text>
+  <text x="960" y="592" font-size="12" fill="#4A463C">Sentry（5xx）· Loguru 结构化日志 · llm_calls 成本表</text>
+
+  <!-- Security note -->
+  <rect x="940" y="632" width="440" height="96" fill="#F3EFE6" stroke="#17160F" stroke-width="1.2"/>
+  <text x="960" y="658" font-size="15" fill="#17160F" font-weight="bold">安全与凭据</text>
+  <text x="960" y="682" font-size="12" fill="#4A463C">JWT access（内存）+ refresh（HttpOnly Cookie）</text>
+  <text x="960" y="704" font-size="12" fill="#4A463C">用户 Key：Fernet 加密存库，只回显 key_hint</text>
+
+  <!-- Deployment -->
+  <rect x="940" y="748" width="440" height="86" fill="#FFFFFF" stroke="#17160F" stroke-width="1.2"/>
+  <text x="960" y="774" font-size="15" fill="#17160F" font-weight="bold">部署</text>
+  <text x="960" y="798" font-size="12" fill="#4A463C">Docker Compose：api / worker / beat / nginx /</text>
+  <text x="960" y="820" font-size="12" fill="#4A463C">postgres / redis / minio（+ prometheus / grafana）</text>
+
+  <!-- Arrows to async/external -->
+  <path d="M 880 404 L 940 211" stroke="#C8452A" stroke-width="1.3" stroke-dasharray="6 4" fill="none" marker-end="url(#arrow-dash)"/>
+  <text x="884" y="330" font-size="11" fill="#C8452A">入队</text>
+
+  <path d="M 1230 276 L 1230 382" stroke="#C8452A" stroke-width="1.3" stroke-dasharray="6 4" fill="none" marker-end="url(#arrow-dash)"/>
+  <text x="1238" y="334" font-size="11" fill="#C8452A">调用</text>
+
+  <path d="M 1380 211 L 1380 500" stroke="#17160F" stroke-width="0" fill="none"/>
+
+  <!-- Legend -->
+  <line x1="60" y1="860" x2="120" y2="860" stroke="#17160F" stroke-width="1.4" marker-end="url(#arrow)"/>
+  <text x="132" y="864" font-size="11" fill="#4A463C">同步请求</text>
+  <line x1="230" y1="860" x2="290" y2="860" stroke="#C8452A" stroke-width="1.4" stroke-dasharray="6 4" marker-end="url(#arrow-dash)"/>
+  <text x="302" y="864" font-size="11" fill="#4A463C">异步任务 / 外部调用</text>
+
+  <text x="60" y="900" font-size="11" fill="#8A8578">注：worker 与 api 共用镜像；clean 任务按 raw_data_id 处理，媒体分支见 application/media_pipeline.py</text>
+
+  <!-- Layer brackets -->
+  <line x1="40" y1="146" x2="40" y2="798" stroke="#D8D2C4" stroke-width="1"/>
+  <text x="24" y="480" font-size="10" fill="#8A8578" transform="rotate(-90 24 480)" text-anchor="middle">SERVER</text>
+</svg>

@@ -172,3 +172,10 @@ frontend/.playwright/
 ops/acceptance/screenshots/
 ops/acceptance/*.log
 ops/acceptance/axe-details.json
+
+# 部署打包产物与临时工作目录（本机生成，不入库）
+deploy-*.tar.gz
+deploy-*.tar
+.deploy-*/
+.vm-diff/
+.acl-recovery/

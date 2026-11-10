@@ -156,8 +156,9 @@ async def test_media_clean_skips_asr_on_rerun(db_session, monkeypatch) -> None:
 
     assert first["status"] == "completed"
     assert second["status"] == "completed"
+    # acks_late 重投递：已完成任务直接返回，不会再次触发转写
+    assert second.get("redelivered") is True
     assert len(calls) == 1
-    assert second["cleaned_records"] == 0
 
 
 async def test_media_clean_failure_marks_raw_failed(db_session, monkeypatch) -> None:
