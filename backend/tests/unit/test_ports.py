@@ -1,39 +1,51 @@
-"""端口（Port）契约测试：确保具体实现始终满足 Protocol。
+"""端口（Port）契约测试。
 
-这层测试的价值：把「可替换性」变成可验证的事实。实现方只要签名漂移，
-这里会立刻失败，而不是等到某天换供应商时才发现业务代码被写死。
+注意：``runtime_checkable`` 的 ``isinstance`` **只校验方法名存在**，
+不校验签名——签名错误它照样返回 True。真正的一致性保证来自 mypy：
+注入点都带 ``LLMPort`` / ``TranscriberPort`` 注解（``app/agents/base.py``、
+``app/application/media_pipeline.py``），CI 的 ``mypy app`` 会校验调用方传进去的
+实现是否匹配。
 """
 from __future__ import annotations
 
 import pytest
 
 from app.core.llm import LLMClient
-from app.ports import AsrConfig, LLMPort, StoragePort, TranscriberPort
+from app.ports import AsrConfig, LLMPort, TranscriberPort
 from app.ports.asr import (
     PROTOCOL_CHAT_AUDIO,
     PROTOCOL_TRANSCRIPTIONS,
     detect_protocol,
 )
-from app.services import media_service, storage_service
+from app.services import media_service
 
 pytestmark = pytest.mark.unit
 
 
-def test_llm_client_satisfies_port() -> None:
+def test_llm_client_exposes_port_methods() -> None:
+    """只断言方法齐备；签名一致性由 mypy 在注入点校验。"""
     client = LLMClient(model="deepseek-chat", timeout=5)
     assert isinstance(client, LLMPort)
+    assert callable(client.chat)
+    assert callable(client.aclose)
 
 
-def test_storage_module_satisfies_port() -> None:
-    # 模块级函数实现：模块对象本身即满足协议，无需包一层类
-    assert isinstance(storage_service, StoragePort)
-    for name in ("save_upload", "read_upload", "save_bytes", "read_bytes"):
-        assert callable(getattr(storage_service, name))
-
-
-def test_media_module_satisfies_transcriber_port() -> None:
+def test_media_module_exposes_transcriber_methods() -> None:
     assert isinstance(media_service, TranscriberPort)
-    assert callable(getattr(media_service, "transcribe_media"))
+    assert callable(media_service.transcribe_media)
+
+
+def test_runtime_checkable_does_not_validate_signatures() -> None:
+    """把这个坑固化成测试：签名完全错误的对象也会被 isinstance 判定通过。"""
+
+    class _WrongSignature:
+        def chat(self) -> None:  # 端口要求 (messages, *, model, ...) -> LLMResponse
+            return None
+
+        async def aclose(self) -> None:
+            return None
+
+    assert isinstance(_WrongSignature(), LLMPort)
 
 
 def test_asr_protocol_detection_moved_to_ports() -> None:
