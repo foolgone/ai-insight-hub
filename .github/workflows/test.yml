@@ -70,6 +70,12 @@ jobs:
         run: mypy app
       - name: 分层依赖约束（import-linter）
         run: lint-imports
+      - name: 写路径约束（api/application 不得直接写库）
+        run: |
+          if grep -rn "session\.add(\|session\.delete(" app/api app/application; then
+            echo "::error::api/application 层不得直接 session.add/delete，请改用 app.repositories"
+            exit 1
+          fi
 
   frontend:
     name: 前端测试
