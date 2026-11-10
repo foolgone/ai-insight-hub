@@ -57,6 +57,6 @@ async def prepare_media_records(
         raw.status = "failed"
         raise
 
-    raw.raw_content = {**content, **transcript}
+    raw.raw_content = {**content, **transcript.to_dict()}
     await session.flush()
-    return list(transcript.get("records") or []), transcript.get("asr")
+    return list(transcript.records), transcript.asr
