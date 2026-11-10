@@ -68,6 +68,8 @@ jobs:
           flake8 app tests
       - name: 类型检查（阻塞，mypy）
         run: mypy app
+      - name: 分层依赖约束（import-linter）
+        run: lint-imports
 
   frontend:
     name: 前端测试

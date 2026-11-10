@@ -9,8 +9,8 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import InstrumentedAttribute
 
-from app.api.deps import assert_owner
-from app.api.pagination import PaginationParams, paginate
+from app.core.ownership import assert_owner
+from app.core.pagination import PaginationParams, paginate
 from app.application import executors, task_control
 from app.core.exceptions import (
     TaskNotCancellableError,

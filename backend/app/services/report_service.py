@@ -21,8 +21,8 @@ from loguru import logger
 from sqlalchemy import Float, case, cast, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import assert_owner
-from app.api.pagination import PaginationParams, paginate
+from app.core.ownership import assert_owner
+from app.core.pagination import PaginationParams, paginate
 from app.core.exceptions import (
     DataSourceNotFoundError,
     ReportFormatInvalidError,

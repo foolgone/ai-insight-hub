@@ -15,7 +15,7 @@ from loguru import logger
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import assert_owner
+from app.core.ownership import assert_owner
 from app.application import task_control
 from app.core.exceptions import DataSourceNotFoundError
 from app.models import AnalysisResult, CleanedData, DataSource, Task, User

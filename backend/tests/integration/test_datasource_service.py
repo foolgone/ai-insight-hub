@@ -5,7 +5,7 @@ import uuid
 
 import pytest
 
-from app.api.pagination import PaginationParams
+from app.core.pagination import PaginationParams
 from app.core.exceptions import DataSourceNotFoundError, DataSourceQuotaExceededError
 from app.schemas.datasource import DataSourceCreate, DataSourceUpdate
 from app.services import datasource_service
