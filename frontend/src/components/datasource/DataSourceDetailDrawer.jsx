@@ -3,6 +3,7 @@ import { LuCheckCircle2, LuClock, LuX } from 'react-icons/lu'
 import { Badge } from '../Badge'
 import { getDatasourceStatus } from '../../lib/datasourceMeta'
 import { useDatasourceTypeOptions } from '../../hooks/useDatasourceTypes'
+import { useSummariesQuery } from '../../hooks/useInsights'
 import { formatDateTime, formatNumber } from '../../lib/format'
 
 /**
@@ -12,6 +13,8 @@ import { formatDateTime, formatNumber } from '../../lib/format'
 export function DataSourceDetailDrawer({ datasource, open, onClose }) {
   // hooks 必须在提前 return 之前调用
   const { labelOf } = useDatasourceTypeOptions({ enabled: Boolean(datasource) })
+  const { data: summariesData } = useSummariesQuery(datasource?.id)
+  const summaries = summariesData?.items || []
   if (!datasource) return null
 
   const status = getDatasourceStatus(datasource.status)
@@ -60,6 +63,31 @@ export function DataSourceDetailDrawer({ datasource, open, onClose }) {
                 <p className="mt-2 text-sm text-gray-600">{datasource.description}</p>
               ) : null}
             </div>
+
+            {summaries.length > 0 ? (
+              <section aria-label="转写摘要">
+                <h4 className="text-sm font-semibold text-gray-900">转写摘要</h4>
+                <p className="mt-1 text-xs text-gray-500">
+                  单声道录音由 AI 判断内容类型后生成；摘要不参与对话质量评估。
+                </p>
+                <div className="mt-3 space-y-2">
+                  {summaries.map(item => (
+                    <div key={item.id} className="border border-gray-200 bg-gray-50 px-3 py-2">
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[10px] uppercase tracking-[0.14em] text-gray-500">
+                        <span>{item.content_type || 'other'}</span>
+                        {item.confidence !== null && item.confidence !== undefined ? (
+                          <span>置信度 {Math.round(Number(item.confidence) * 100)}%</span>
+                        ) : null}
+                        <span>{formatDateTime(item.created_at)}</span>
+                      </div>
+                      <p className="mt-1 whitespace-pre-wrap text-sm text-gray-700">
+                        {item.summary}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            ) : null}
 
             <section aria-label="处理进度">
               <h4 className="text-sm font-semibold text-gray-900">处理进度</h4>

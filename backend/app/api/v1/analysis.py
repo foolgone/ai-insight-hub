@@ -23,6 +23,8 @@ from app.schemas.insight import (
     InsightRequest,
     InsightResponse,
     InsightTaskResponse,
+    TranscriptSummaryItem,
+    TranscriptSummaryList,
 )
 from app.services import evaluation_service, insight_service
 
@@ -187,6 +189,36 @@ async def get_insights(
         start=start,
         end=end,
     )
+
+
+@router.get(
+    "/{datasource_id}/analysis/summaries",
+    response_model=TranscriptSummaryList,
+    response_model_by_alias=False,
+    summary="转写文本的结构化摘要列表（内容路由产出）",
+)
+async def list_transcript_summaries(
+    datasource_id: uuid.UUID,
+    limit: int = Query(default=20, ge=1, le=50),
+    user: User = Depends(require_roles(*READ_ROLES)),
+    session: AsyncSession = Depends(get_db),
+) -> TranscriptSummaryList:
+    rows = await insight_service.list_transcript_summaries(
+        session, user=user, datasource_id=datasource_id, limit=limit
+    )
+    items: list[TranscriptSummaryItem] = []
+    for row in rows:
+        payload = row.result or {}
+        items.append(
+            TranscriptSummaryItem(
+                id=row.id,
+                content_type=payload.get("content_type"),
+                summary=str(payload.get("summary") or ""),
+                confidence=payload.get("confidence"),
+                created_at=row.created_at,
+            )
+        )
+    return TranscriptSummaryList(items=items)
 
 
 __all__ = ["router"]

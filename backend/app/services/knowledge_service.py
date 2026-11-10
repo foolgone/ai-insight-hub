@@ -455,6 +455,7 @@ async def list_faqs(
     params: PaginationParams,
     category: str | None = None,
     min_frequency: int | None = None,
+    status: str | None = None,
 ) -> tuple[list[KnowledgeBase], Any]:
     await _datasource_or_404(session, datasource_id, user)
     stmt = select(KnowledgeBase).where(KnowledgeBase.datasource_id == datasource_id)
@@ -462,6 +463,8 @@ async def list_faqs(
         stmt = stmt.where(KnowledgeBase.category == category)
     if min_frequency is not None:
         stmt = stmt.where(KnowledgeBase.frequency >= min_frequency)
+    if status:
+        stmt = stmt.where(KnowledgeBase.status == status)
     return await paginate(session, stmt, params, sortable=_SORTABLE)
 
 

@@ -66,6 +66,7 @@ async def list_faqs(
     params: PaginationParams = Depends(),
     category: str | None = Query(default=None),
     min_frequency: int | None = Query(default=None, ge=1),
+    status: str | None = Query(default=None),
     user: User = Depends(require_roles(*READ_ROLES)),
     session: AsyncSession = Depends(get_db),
 ) -> Page[FAQItem]:
@@ -76,6 +77,7 @@ async def list_faqs(
         params=params,
         category=category,
         min_frequency=min_frequency,
+        status=status,
     )
     return Page[FAQItem](
         items=[FAQItem.model_validate(item) for item in rows],
