@@ -14,7 +14,8 @@ from typing import TypeVar
 
 from pydantic import BaseModel, ValidationError
 
-from app.core.llm import LLMClient, LLMUsage
+from app.core.llm import LLMUsage
+from app.ports.llm import LLMPort
 
 TModel = TypeVar("TModel", bound=BaseModel)
 
@@ -68,7 +69,7 @@ async def parse_with_repair(
     *,
     text: str,
     schema: type[TModel],
-    llm: LLMClient,
+    llm: LLMPort,
     max_attempts: int = 2,
     usage_collector: list[LLMUsage] | None = None,
 ) -> TModel:

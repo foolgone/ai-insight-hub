@@ -19,7 +19,6 @@ import math
 import struct
 import uuid
 import wave
-from dataclasses import dataclass
 
 import httpx
 from loguru import logger
@@ -28,6 +27,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.config import settings
 from app.core.exceptions import AsrCredentialInvalidError, AsrCredentialNotConfiguredError
 from app.core.url_guard import UnsafeUrlError, assert_safe_base_url
+from app.ports.asr import (
+    PROTOCOL_CHAT_AUDIO,
+    PROTOCOL_TRANSCRIPTIONS,
+    AsrConfig,
+    detect_protocol,
+)
 from app.services.credential_service import PROVIDER_ASR, credential_service
 
 __all__ = [
@@ -44,45 +49,6 @@ __all__ = [
 DEFAULT_ASR_MODEL = "whisper-1"
 DEFAULT_ASR_LANGUAGE = "zh"
 SUPPORTED_LANGUAGES = {"zh", "en", "ja", "ko", "yue", "auto"}
-
-PROTOCOL_TRANSCRIPTIONS = "transcriptions"
-PROTOCOL_CHAT_AUDIO = "chat_audio"
-
-# 千问系列走 chat/completions + input_audio（不返回时间戳）
-_CHAT_AUDIO_MODEL_PREFIXES = ("qwen3-asr", "qwen-audio-asr", "qwen2-audio")
-
-
-def detect_protocol(model: str | None) -> str:
-    """按模型名判断接口协议；未知模型一律按标准 transcriptions 处理。"""
-    name = (model or "").strip().lower()
-    if name.startswith(_CHAT_AUDIO_MODEL_PREFIXES):
-        return PROTOCOL_CHAT_AUDIO
-    return PROTOCOL_TRANSCRIPTIONS
-
-
-@dataclass(frozen=True)
-class AsrConfig:
-    """一次转写所需的完整配置（明文 Key 只在内存中）。"""
-
-    base_url: str
-    api_key: str
-    model: str
-    language: str | None = None
-    # 留空则按 model 自动识别，调用方无需关心
-    protocol: str = ""
-
-    @property
-    def effective_protocol(self) -> str:
-        return self.protocol or detect_protocol(self.model)
-
-    @property
-    def endpoint(self) -> str:
-        path = (
-            "/chat/completions"
-            if self.effective_protocol == PROTOCOL_CHAT_AUDIO
-            else "/audio/transcriptions"
-        )
-        return f"{self.base_url.rstrip('/')}{path}"
 
 
 async def resolve_for_user(session: AsyncSession, user_id: uuid.UUID) -> AsrConfig:

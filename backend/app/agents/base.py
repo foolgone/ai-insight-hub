@@ -36,6 +36,7 @@ from app.core.exceptions import LLMCredentialInvalidError, LLMCredentialNotConfi
 from app.core.llm import LLMAuthenticationError, LLMClient, LLMResponse, LLMUsage, Message
 from app.core.metrics import record_agent_invocation
 from app.core.retry_config import RetryConfig
+from app.ports.llm import LLMPort
 from app.utils.retry import async_retry
 from app.utils.retry_guard import CostAwareRetryGuard
 
@@ -150,9 +151,10 @@ class BaseAgent(ABC):
     #: 子类可声明输出 Schema；声明后 invoke 会走结构化输出兜底
     output_schema: type[BaseModel] | None = None
 
-    def __init__(self, config: AgentConfig, *, llm: LLMClient | None = None) -> None:
+    def __init__(self, config: AgentConfig, *, llm: LLMPort | None = None) -> None:
         self.config = config
-        self.llm = llm or LLMClient(model=config.model, timeout=config.timeout)
+        # 依赖端口而不是具体客户端：测试可注入 fake，换供应商只改实现
+        self.llm: LLMPort = llm or LLMClient(model=config.model, timeout=config.timeout)
         self.tools: dict[str, Any] = {}
         self._prompt: str | None = None
         self._init_tools()
@@ -452,7 +454,7 @@ async def _parse_structured(
     schema: type[BaseModel],
     *,
     text: str,
-    llm: LLMClient,
+    llm: LLMPort,
     usage_collector: list[LLMUsage],
 ) -> BaseModel:
     """延迟导入避免模块循环（structured_output 依赖 llm，不依赖 base）。"""

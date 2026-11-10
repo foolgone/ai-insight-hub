@@ -61,3 +61,16 @@ forbidden_modules =
     app.tasks
 # 只约束直接 import：api → services → tasks 是允许的（service 负责入队）
 allow_indirect_imports = True
+
+
+[importlinter:contract:ports-are-inner]
+name = 端口层（app.ports）不得依赖实现层
+type = forbidden
+source_modules =
+    app.ports
+forbidden_modules =
+    app.api
+    app.services
+    app.application
+    app.agents
+    app.tasks
