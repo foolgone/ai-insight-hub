@@ -3,6 +3,6 @@
 分层位置：``api → services → repositories → models``。
 仓储层不得反向依赖 services / application / agents / api（import-linter 有契约守着）。
 """
-from app.repositories import cleaned_data, knowledge_base
+from app.repositories import analysis_results, cleaned_data, knowledge_base, raw_data
 
-__all__ = ["cleaned_data", "knowledge_base"]
+__all__ = ["analysis_results", "cleaned_data", "knowledge_base", "raw_data"]
