@@ -1,23 +1,25 @@
 """端口（Port）：业务代码依赖的抽象接口。
 
-这里是「六边形架构」里的内圈边界：application / agents / services 依赖这些
-Protocol，而不是依赖具体实现（MinIO、DeepSeek、千问）。
+这里是「六边形架构」里的内圈边界：application / agents 依赖这些 Protocol，
+而不是依赖具体实现（DeepSeek、千问 ASR）。
 
-好处：
-- 换供应商只改 ``infrastructure`` 侧的实现，业务代码不动；
-- 测试可以传 fake 对象，不需要 mock 具体类的内部细节；
-- import-linter 可以约束「端口不得依赖实现」。
+当前端口（都对应**真实的替换需求**，不是为抽象而抽象）：
 
-当前实现映射（用结构类型匹配，无需继承）：
+| 端口 | 现有实现 | 为什么需要 |
+| --- | --- | --- |
+| ``LLMPort`` | ``app.core.llm.LLMClient`` | 单测注入 fake；BYOK 每用户 Key 需要不同实例 |
+| ``TranscriberPort`` | ``app.services.media_service`` | 供应商协议差异大（whisper / 千问）；单测注入 fake |
 
-| 端口 | 现有实现 |
-| --- | --- |
-| ``LLMPort`` | ``app.core.llm.LLMClient`` |
-| ``StoragePort`` | ``app.services.storage_service``（模块级函数） |
-| ``TranscriberPort`` | ``app.services.media_service.transcribe_media`` 所属模块 |
+**签名一致性由 mypy 保证**（注入点都带 ``LLMPort`` / ``TranscriberPort`` 注解），
+``runtime_checkable`` 的 ``isinstance`` 只校验「方法名存在」，不要用它当签名检查。
+
+刻意**没有**做的端口：
+
+- ``StoragePort``：存储只在 ``minio`` / ``local`` 之间切换，且是模块内部按
+  ``STORAGE_BACKEND`` 决定的，没有运行时替换需求。早期版本定义过一个，
+  但生产代码 0 调用、且静态上不可满足（模块函数 vs 带 self 的方法），已删除。
 """
 from app.ports.asr import AsrConfig, TranscriberPort
 from app.ports.llm import LLMPort
-from app.ports.storage import StoragePort, StoredFileLike
 
-__all__ = ["AsrConfig", "LLMPort", "StoragePort", "StoredFileLike", "TranscriberPort"]
+__all__ = ["AsrConfig", "LLMPort", "TranscriberPort"]

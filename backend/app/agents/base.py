@@ -144,6 +144,21 @@ class AgentResult:
 
 # --------------------------------------------------------------------------- 基类
 
+#: 进程级共享的 LLM 客户端（按 model + timeout 复用）。
+#: 之前每个 agent 实例、每次 BYOK 调用都新建 httpx 连接池且从不关闭，
+#: 长驻 worker 会持续泄漏文件描述符。
+_LLM_CLIENTS: dict[tuple[str, float], LLMClient] = {}
+
+
+def _shared_llm(model: str, timeout: float) -> LLMClient:
+    """取共享客户端（服务端 Key 场景）；进程内复用，避免连接池泄漏。"""
+    key = (model, float(timeout))
+    client = _LLM_CLIENTS.get(key)
+    if client is None:
+        client = LLMClient(model=model, timeout=timeout)
+        _LLM_CLIENTS[key] = client
+    return client
+
 
 class BaseAgent(ABC):
     """所有 Agent 的基类。"""
@@ -154,7 +169,7 @@ class BaseAgent(ABC):
     def __init__(self, config: AgentConfig, *, llm: LLMPort | None = None) -> None:
         self.config = config
         # 依赖端口而不是具体客户端：测试可注入 fake，换供应商只改实现
-        self.llm: LLMPort = llm or LLMClient(model=config.model, timeout=config.timeout)
+        self.llm: LLMPort = llm or _shared_llm(config.model, config.timeout)
         self.tools: dict[str, Any] = {}
         self._prompt: str | None = None
         self._init_tools()
@@ -372,6 +387,11 @@ class BaseAgent(ABC):
                 duration=duration,
                 token_usage=token_usage,
             )
+
+        finally:
+            # BYOK 是每次调用临时新建的客户端，必须关闭，否则连接池随调用累积
+            if byok_key is not None and agent_llm is not self.llm:
+                await agent_llm.aclose()
 
     # -- 内部辅助 ---------------------------------------------------------
     async def _resolve_level(

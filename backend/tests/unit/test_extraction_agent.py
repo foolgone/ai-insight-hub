@@ -73,9 +73,12 @@ def _valid_output(
 
 
 def _agent(llm: _FakeLLM) -> KnowledgeExtractionAgent:
+    # embed 由调用方注入（生产里是 embedding_service.encode_texts_sync），
+    # 这里在调用时取模块属性，monkeypatch 仍然生效
     return KnowledgeExtractionAgent(
         AgentConfig(name="extraction_agent", max_retries=0, retry_base_delay=0.0),
         llm=llm,
+        embed=embedding_service.encode_texts_sync,
     )
 
 

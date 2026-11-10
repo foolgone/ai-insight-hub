@@ -8,6 +8,7 @@
 from __future__ import annotations
 
 import json
+from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
@@ -26,10 +27,12 @@ from app.schemas.agents.extraction import (
     ExtractionLLMOutput,
     ExtractionOutput,
 )
-from app.services import embedding_service
 
 PROMPT_DIR = Path(__file__).resolve().parents[1] / "prompts" / "extraction"
 FEW_SHOT_LIMIT = 2
+
+#: 批量向量化回调：由调用方注入（agent 不依赖 services 层的具体实现）
+EmbedTexts = Callable[[list[str]], list[list[float]]]
 
 
 def _normalize_question(text: str) -> str:
@@ -41,7 +44,14 @@ class KnowledgeExtractionAgent(BaseAgent):
 
     output_schema = ExtractionLLMOutput
 
-    def __init__(self, config: AgentConfig | None = None, *, llm: Any = None) -> None:
+    def __init__(
+        self,
+        config: AgentConfig | None = None,
+        *,
+        llm: Any = None,
+        embed: EmbedTexts | None = None,
+    ) -> None:
+        self._embed = embed
         super().__init__(
             config or AgentConfig(name="extraction_agent", version=load_prompt_version(PROMPT_DIR)),
             llm=llm,
@@ -51,7 +61,8 @@ class KnowledgeExtractionAgent(BaseAgent):
 
     # -- BaseAgent hooks ---------------------------------------------------
     def _init_tools(self) -> None:
-        self.tools = {"embed": embedding_service.encode_texts_sync}
+        # 未注入时不做批量 embedding（由服务层决定是否提供），避免 agents → services 反向依赖
+        self.tools = {"embed": self._embed} if self._embed is not None else {}
 
     def _load_prompt(self) -> str:
         if self._prompt is None:
@@ -155,12 +166,18 @@ class KnowledgeExtractionAgent(BaseAgent):
             if len(faqs) >= config.max_faqs:
                 break
 
+        embed = self._embed
+        if embed is None:
+            warnings.append("embedding skipped: no embed function injected")
         for faq in faqs:
+            if embed is None:
+                faq.embedding = None
+                continue
             text = faq.question
             if faq.variations:
                 text = f"{text} {' '.join(faq.variations)}"
             try:
-                faq.embedding = embedding_service.encode_texts_sync([text])[0]
+                faq.embedding = embed([text])[0]
             except Exception as exc:  # noqa: BLE001 - 单条失败不阻塞整批
                 embedding_failed += 1
                 warnings.append(f"embedding failed for {faq.question}: {exc}")

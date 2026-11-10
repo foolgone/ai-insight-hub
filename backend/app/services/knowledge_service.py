@@ -50,7 +50,7 @@ def _now_naive() -> datetime:
 def _build_agent():  # noqa: ANN202 - 允许测试 monkeypatch
     from app.agents.extraction_agent import KnowledgeExtractionAgent
 
-    return KnowledgeExtractionAgent()
+    return KnowledgeExtractionAgent(embed=embedding_service.encode_texts_sync)
 
 
 def enqueue_extract(task: Task) -> str:
