@@ -13,6 +13,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import require_roles
+from app.api.deps import pagination_params
 from app.core.pagination import PaginationParams
 from app.composition import executors
 from app.core.database import SessionLocal, get_db
@@ -67,7 +68,7 @@ async def _task_snapshots(user: User) -> list[dict[str, Any]]:
     summary="任务列表（分页/过滤）",
 )
 async def list_tasks(
-    params: PaginationParams = Depends(),
+    params: PaginationParams = Depends(pagination_params),
     datasource_id: uuid.UUID | None = Query(default=None),
     task_type: str | None = Query(default=None),
     status: str | None = Query(default=None),

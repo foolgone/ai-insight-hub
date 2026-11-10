@@ -11,7 +11,8 @@ from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import InstrumentedAttribute
 
-from app.core.pagination import PaginationParams, paginate
+from app.core.pagination import PaginationParams
+from app.repositories.pagination import paginate
 from app.models import CleanedData
 from app.schemas.base import Pagination
 

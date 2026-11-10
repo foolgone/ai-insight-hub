@@ -14,7 +14,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import InstrumentedAttribute
 
 from app.core.ownership import assert_owner
-from app.core.pagination import PaginationParams, paginate
+from app.core.pagination import PaginationParams
+from app.repositories.pagination import paginate
 from app.core.exceptions import (
     DataSourceNotFoundError,
     DataSourceQuotaExceededError,
