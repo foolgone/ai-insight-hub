@@ -11,6 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import require_llm_credential, require_roles
 from app.core.pagination import PaginationParams
+from app.repositories import raw_data as raw_data_repo
 from app.core.config import settings
 from app.core.database import get_db
 from app.core.exceptions import (
@@ -266,7 +267,7 @@ async def upload_file(
         },
         status="pending",
     )
-    session.add(raw_data)
+    await raw_data_repo.add(session, raw_data)
     await session.flush()
     await session.refresh(raw_data)
 

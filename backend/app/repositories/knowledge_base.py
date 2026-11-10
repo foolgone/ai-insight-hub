@@ -63,6 +63,21 @@ async def get(session: AsyncSession, faq_id: uuid.UUID) -> KnowledgeBase | None:
     return await session.get(KnowledgeBase, faq_id)
 
 
+async def add(session: AsyncSession, faq: KnowledgeBase) -> KnowledgeBase:
+    """写入一条 FAQ（调用方负责 flush/commit）。"""
+    session.add(faq)
+    return faq
+
+
+async def add_all(session: AsyncSession, faqs: list[KnowledgeBase]) -> list[KnowledgeBase]:
+    session.add_all(faqs)
+    return faqs
+
+
+async def delete_faq(session: AsyncSession, faq: KnowledgeBase) -> None:
+    await session.delete(faq)
+
+
 async def existing_questions(session: AsyncSession, datasource_id: uuid.UUID) -> list[str]:
     """已提取的问题（排除种子数据），供提取 Agent 去重。"""
     rows = (
@@ -168,6 +183,7 @@ __all__ = [
     "SORTABLE",
     "count_by_source",
     "count_by_status",
+    "delete_faq",
     "delete_seed",
     "existing_questions",
     "get",

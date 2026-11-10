@@ -20,6 +20,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
 from app.models import AnalysisResult, KnowledgeBase, RawData
+from app.repositories import analysis_results as analysis_repo
+from app.repositories import knowledge_base as knowledge_repo
 
 __all__ = [
     "apply",
@@ -138,7 +140,8 @@ async def _persist_knowledge(
         if not title or not content:
             continue
         tags = [str(tag).strip()[:50] for tag in (item.get("tags") or []) if str(tag).strip()]
-        session.add(
+        await knowledge_repo.add(
+            session,
             KnowledgeBase(
                 datasource_id=datasource_id,
                 question=title[:2000],
@@ -149,7 +152,7 @@ async def _persist_knowledge(
                 is_seed=False,
                 confidence=payload.get("confidence"),
                 status="needs_review",
-            )
+            ),
         )
         created += 1
     if created:
@@ -164,7 +167,8 @@ async def _persist_summary(
     summary = str(payload.get("summary") or "").strip()
     if not summary:
         return False
-    session.add(
+    await analysis_repo.add(
+        session,
         AnalysisResult(
             datasource_id=datasource_id,
             data_id=None,
@@ -180,7 +184,7 @@ async def _persist_summary(
             agent_version=str((payload.get("agent") or {}).get("version") or "v1.0.0"),
             ai_model=(payload.get("agent") or {}).get("model"),
             confidence=payload.get("confidence"),
-        )
+        ),
     )
     await session.flush()
     return True
