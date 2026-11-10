@@ -9,7 +9,7 @@ from __future__ import annotations
 import uuid
 from collections.abc import Callable
 
-from fastapi import Depends, Header
+from fastapi import Depends, Header, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
@@ -21,6 +21,7 @@ from app.core.exceptions import (
     TokenExpiredError,
     UserNotFoundError,
 )
+from app.core.pagination import PaginationParams
 from app.core.redis import is_token_blacklisted
 from app.core.security import decode_token
 from app.models import User
@@ -89,9 +90,19 @@ async def require_llm_credential(
     return user
 
 
+async def pagination_params(
+    page: int = Query(1, ge=1, description="页码（从 1 开始）"),
+    limit: int = Query(20, ge=1, le=100, description="每页条数（默认 20，最大 100）"),
+    sort: str | None = Query(None, description="排序字段，前缀 - 表示降序（如 -created_at）"),
+) -> PaginationParams:
+    """分页查询参数依赖（HTTP 侧校验，service/仓储只接收中立对象）。"""
+    return PaginationParams(page=page, limit=limit, sort=sort)
+
+
 __all__ = [
     "get_current_user",
     "get_token_payload",
+    "pagination_params",
     "require_llm_credential",
     "require_roles",
 ]

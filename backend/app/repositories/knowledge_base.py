@@ -12,7 +12,8 @@ from sqlalchemy import Select, delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import InstrumentedAttribute
 
-from app.core.pagination import PaginationParams, paginate
+from app.core.pagination import PaginationParams
+from app.repositories.pagination import paginate
 from app.models import KnowledgeBase
 from app.schemas.base import Pagination
 

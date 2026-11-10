@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.composition import enqueue
 from app.api.deps import require_llm_credential, require_roles
+from app.api.deps import pagination_params
 from app.core.pagination import PaginationParams
 from app.core.database import get_db
 from app.models import User
@@ -87,7 +88,7 @@ async def analyze_quality(
 )
 async def list_quality_analysis(
     datasource_id: uuid.UUID,
-    params: PaginationParams = Depends(),
+    params: PaginationParams = Depends(pagination_params),
     user: User = Depends(require_roles(*READ_ROLES)),
     session: AsyncSession = Depends(get_db),
 ) -> QualityAnalysisListResponse:

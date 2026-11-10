@@ -4,7 +4,8 @@ from __future__ import annotations
 import pytest
 from sqlalchemy import select
 
-from app.core.pagination import PaginationParams, paginate
+from app.core.pagination import PaginationParams
+from app.repositories.pagination import paginate
 from app.models import DataSource
 from tests.factories import DataSourceFactory, UserFactory, persist
 

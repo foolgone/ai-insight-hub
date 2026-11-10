@@ -17,7 +17,8 @@ from sqlalchemy import Float, case, cast, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.ownership import assert_owner
-from app.core.pagination import PaginationParams, paginate
+from app.core.pagination import PaginationParams
+from app.repositories.pagination import paginate
 from app.repositories import cleaned_data as cleaned_repo
 from app.application import task_control
 from app.core.errors import FrameworkErrorCode

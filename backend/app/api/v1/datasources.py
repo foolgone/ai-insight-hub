@@ -11,6 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.composition import enqueue
 from app.api.deps import require_llm_credential, require_roles
+from app.api.deps import pagination_params
 from app.core.pagination import PaginationParams
 from app.repositories import raw_data as raw_data_repo
 from app.core.config import settings
@@ -75,7 +76,7 @@ async def create_datasource(
     summary="数据源列表（分页/过滤/排序）",
 )
 async def list_datasources(
-    params: PaginationParams = Depends(),
+    params: PaginationParams = Depends(pagination_params),
     status: str | None = Query(default=None, description="按状态过滤"),
     type: str | None = Query(default=None, description="按类型过滤"),  # noqa: A002
     user: User = Depends(require_roles(*READ_ROLES)),
@@ -355,7 +356,7 @@ async def clean_datasource(
 )
 async def list_cleaned_data(
     datasource_id: uuid.UUID,
-    params: PaginationParams = Depends(),
+    params: PaginationParams = Depends(pagination_params),
     quality_score_min: float | None = Query(default=None, ge=0, le=100),
     quality_score_max: float | None = Query(default=None, ge=0, le=100),
     has_issues: bool | None = Query(default=None, description="是否只看有问题/无问题数据"),
