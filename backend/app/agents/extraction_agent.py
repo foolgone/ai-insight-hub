@@ -50,11 +50,13 @@ class KnowledgeExtractionAgent(BaseAgent):
         *,
         llm: Any = None,
         embed: EmbedTexts | None = None,
+        credentials: Any = None,
     ) -> None:
         self._embed = embed
         super().__init__(
             config or AgentConfig(name="extraction_agent", version=load_prompt_version(PROMPT_DIR)),
             llm=llm,
+            credentials=credentials,
         )
         self._active_input: ExtractionInput | None = None
         self._examples: list[dict[str, Any]] | None = None

@@ -36,6 +36,7 @@ from app.models import (
 from app.schemas.agents.evaluation import EvaluationConfig
 from app.schemas.analysis import QualityAnalysisSummary
 from app.schemas.base import Pagination
+from app.services.credential_service import credential_service
 from app.services import cleaning_service
 
 EVALUATE_TASK_TYPE = "evaluate"
@@ -50,7 +51,7 @@ def _now_naive() -> datetime:
 def _build_agent():  # noqa: ANN202 - 允许测试 monkeypatch
     from app.agents.evaluation_agent import QualityEvaluationAgent
 
-    return QualityEvaluationAgent()
+    return QualityEvaluationAgent(credentials=credential_service)
 
 
 async def _datasource_or_404(

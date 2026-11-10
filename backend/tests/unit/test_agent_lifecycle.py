@@ -88,24 +88,25 @@ async def test_byok_client_is_closed_after_invoke(monkeypatch) -> None:
         return client
 
     class _Credential:
+        api_key = "sk-user"
         status = "active"
 
-    class _CredentialService:
-        async def get_credential(self, session, user_id):  # noqa: ANN001, ANN202
+    class _CredentialResolver:
+        async def resolve_api_key(self, session, user_id):  # noqa: ANN001, ANN202
             return _Credential()
 
-        def decrypt_credential(self, credential):  # noqa: ANN001, ANN202
-            return "sk-user"
+        async def mark_invalid(self, user_id):  # noqa: ANN001, ANN202
+            return False
 
     monkeypatch.setattr(agent_base, "LLMClient", _make_client)
     monkeypatch.setattr(agent_base.settings, "ALLOW_SERVER_KEY_FALLBACK", False)
     agent_base._LLM_CLIENTS.clear()
 
-    import app.services.credential_service as credential_module
-
-    monkeypatch.setattr(credential_module, "credential_service", _CredentialService())
-
-    agent = _Agent(AgentConfig(name="unit-agent", max_retries=0), llm=None)
+    agent = _Agent(
+        AgentConfig(name="unit-agent", max_retries=0),
+        llm=None,
+        credentials=_CredentialResolver(),
+    )
     result = await agent.invoke({"q": "hi"}, session=_Session(), user_id=uuid.uuid4())
 
     assert result.success is True

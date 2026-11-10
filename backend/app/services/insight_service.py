@@ -26,6 +26,7 @@ from app.schemas.insight import (
     InsightResponse,
     InsightTopQuestion,
 )
+from app.services.credential_service import credential_service
 from app.services import cleaning_service
 
 INSIGHT_TASK_TYPE = "analyze"
@@ -39,7 +40,7 @@ def _now_naive() -> datetime:
 def _build_agent():  # noqa: ANN202 - 允许测试 monkeypatch
     from app.agents.insight_agent import InsightAnalysisAgent
 
-    return InsightAnalysisAgent()
+    return InsightAnalysisAgent(credentials=credential_service)
 
 
 async def _datasource_or_404(

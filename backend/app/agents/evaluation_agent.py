@@ -64,10 +64,17 @@ class QualityEvaluationAgent(BaseAgent):
 
     output_schema = EvaluationLLMOutput
 
-    def __init__(self, config: AgentConfig | None = None, *, llm: Any = None) -> None:
+    def __init__(
+        self,
+        config: AgentConfig | None = None,
+        *,
+        llm: Any = None,
+        credentials: Any = None,
+    ) -> None:
         super().__init__(
             config or AgentConfig(name="evaluation_agent", version=load_prompt_version(PROMPT_DIR)),
             llm=llm,
+            credentials=credentials,
         )
         self._active_input: EvaluationInput | None = None
 

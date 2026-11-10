@@ -31,8 +31,7 @@ layers =
     app.core
 # 欠账 1（已清）：service 曾直接持有 Celery 任务对象，现已迁到 app.composition.enqueue
 ignore_imports =
-# 欠账 2：agent 取 BYOK 凭据时直接依赖 credential_service（应下沉为端口）
-    app.agents.base -> app.services.credential_service
+# 欠账 2（已清）：agent 取 BYOK 凭据改为 CredentialPort 注入
 # 欠账 3：core 里混了需要 models/schemas 的模块（分页参数、成本记录、归属校验）
     app.core.pagination -> app.schemas.base
     app.core.cost_tracker -> app.models
