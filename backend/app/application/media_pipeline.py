@@ -18,11 +18,13 @@ from typing import Any
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import RawData
-from app.services import asr_service, media_service
+from app.ports.asr import AsrConfig, TranscriberPort
 
 __all__ = ["prepare_media_records"]
 
 ProgressCallback = Callable[[str], Awaitable[None]]
+#: 解析「当前用户的 ASR 配置」；由调用方注入（application 不依赖 services）
+AsrResolver = Callable[[AsyncSession, uuid.UUID], Awaitable[AsrConfig]]
 
 
 async def prepare_media_records(
@@ -30,11 +32,16 @@ async def prepare_media_records(
     *,
     session: AsyncSession,
     user_id: uuid.UUID | None,
+    transcriber: TranscriberPort,
+    resolve_asr: AsrResolver,
     on_progress: ProgressCallback | None = None,
 ) -> tuple[list[dict[str, Any]], dict[str, Any] | None]:
     """确保媒体 raw 已完成转写，返回 ``(records, asr 摘要)``。
 
     ``asr 摘要`` 只在本次真正调用转写时返回；已转写过的 raw 返回 ``None``。
+
+    依赖通过参数注入（``transcriber`` / ``resolve_asr``），本模块只依赖端口，
+    不 import 具体实现——换 ASR 供应商或写单测都不需要动这里。
     """
     content = raw.raw_content or {}
     asr = content.get("asr") or {}
@@ -44,8 +51,8 @@ async def prepare_media_records(
     try:
         if user_id is None:
             raise ValueError("clean task has no owner")
-        asr_config = await asr_service.resolve_for_user(session, user_id)
-        transcript = await media_service.transcribe_media(raw, asr_config, progress=on_progress)
+        asr_config = await resolve_asr(session, user_id)
+        transcript = await transcriber.transcribe_media(raw, asr_config, progress=on_progress)
     except Exception:
         raw.status = "failed"
         raise

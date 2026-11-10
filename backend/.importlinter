@@ -87,3 +87,18 @@ forbidden_modules =
     app.application
     app.agents
     app.tasks
+
+
+[importlinter:contract:application-helpers-are-pure]
+name = application 编排模块不依赖实现层（executors 是组合根，豁免）
+type = forbidden
+source_modules =
+    app.application.media_pipeline
+    app.application.structure_service
+    app.application.task_control
+forbidden_modules =
+    app.api
+    app.services
+    app.tasks
+# 只看直接 import：经 agents 间接引用 services 属于下一层内部实现细节
+allow_indirect_imports = True
