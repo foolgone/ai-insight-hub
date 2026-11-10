@@ -167,3 +167,34 @@ async def test_run_clean_task_missing_task(db_session) -> None:
     outcome = await cleaning_service.run_clean_task(str(uuid.uuid4()), session=db_session)
 
     assert outcome["status"] == "missing"
+
+
+async def test_completed_task_redelivery_is_skipped(db_session) -> None:
+    """acks_late 重投递：已完成的任务直接返回，不重复处理。"""
+    user = UserFactory()
+    await persist(db_session, user)
+    datasource = DataSourceFactory(user_id=user.id)
+    await persist(db_session, datasource)
+    task = TaskFactory(
+        user_id=user.id,
+        datasource_id=datasource.id,
+        task_type="clean",
+        status="completed",
+        params={"data_ids": []},
+    )
+    await persist(db_session, task)
+
+    outcome = await cleaning_service.run_clean_task(str(task.id), session=db_session)
+
+    assert outcome["status"] == "completed"
+    assert outcome.get("redelivered") is True
+    rows = (
+        (
+            await db_session.execute(
+                select(CleanedData).where(CleanedData.datasource_id == datasource.id)
+            )
+        )
+        .scalars()
+        .all()
+    )
+    assert rows == []

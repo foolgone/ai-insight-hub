@@ -51,6 +51,19 @@ celery_app.conf.update(
     broker_connection_retry_on_startup=True,
     task_always_eager=settings.CELERY_TASK_ALWAYS_EAGER,
     task_eager_propagates=True,
+    # ---- 可用性：崩溃重投递与队列隔离 ----
+    # 默认 at-most-once（评估/提取/洞察/报告重跑会产生重复结果，不开启 acks_late）；
+    # 幂等的清洗任务在任务装饰器上单独开启 acks_late=True。
+    task_acks_late=False,
+    # worker 进程被杀时把任务退回队列（只对 acks_late=True 的任务生效）
+    task_reject_on_worker_lost=True,
+    # 长任务场景下不要预取：避免一个 worker 囤积任务、其他 worker 空闲
+    worker_prefetch_multiplier=1,
+    # 可见性超时必须大于 task_time_limit(1800s)，否则任务会被重复投递
+    broker_transport_options={"visibility_timeout": 3600},
+    # 清洗（含音视频转写）走独立队列，避免长时间任务阻塞评估/报告
+    task_default_queue="default",
+    task_routes={"tasks.clean_datasource": {"queue": "clean"}},
     # B-608：每日成本对账/告警（成本只认 llm_calls 聚合）
     beat_schedule={
         "daily-cost-monitor": {

@@ -200,9 +200,9 @@ async def test_clean_rerun_is_idempotent(db_session, monkeypatch) -> None:
 
     second = await cleaning_service.run_clean_task(str(task.id), session=db_session)
 
-    # 重跑全部命中唯一索引：0 条新增，但任务仍成功
+    # acks_late 重投递：任务已完成 → 直接返回既有结果，不再重复处理
     assert second["status"] == "completed"
-    assert second["cleaned_records"] == 0
+    assert second.get("redelivered") is True
     rows = (
         (await db_session.execute(select(CleanedData).where(CleanedData.raw_data_id == raw.id)))
         .scalars()
@@ -210,7 +210,7 @@ async def test_clean_rerun_is_idempotent(db_session, monkeypatch) -> None:
     )
     assert len(rows) == 1
     await db_session.refresh(task)
-    assert task.result["skipped_existing_records"] == 1
+    assert task.result["cleaned_records"] == 1
 
 
 async def test_cleaning_missing_timestamp_stored_as_null(db_session, monkeypatch) -> None:

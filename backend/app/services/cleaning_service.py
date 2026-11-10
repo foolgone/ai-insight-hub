@@ -347,6 +347,14 @@ async def _execute_clean(
         return {"status": "missing", "task_id": str(task_id)}
     if task.status == "cancelled":
         return {"status": "cancelled", "task_id": str(task_id)}
+    if task.status == "completed":
+        # acks_late 重投递：任务已完成（可能在 ack 前崩溃），直接返回避免重复处理
+        return {
+            **(task.result or {}),
+            "status": "completed",
+            "task_id": str(task_id),
+            "redelivered": True,
+        }
 
     task.status = "running"
     task.started_at = _now_naive()
