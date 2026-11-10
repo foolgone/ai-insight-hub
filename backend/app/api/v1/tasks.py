@@ -13,7 +13,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import require_roles
-from app.api.pagination import PaginationParams
+from app.core.pagination import PaginationParams
 from app.core.database import SessionLocal, get_db
 from app.models import Task, User
 from app.schemas.base import Page

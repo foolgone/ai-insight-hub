@@ -2,8 +2,7 @@
 
 - ``get_token_payload``：解析 ``Authorization: Bearer <access>`` 并检查黑名单；
 - ``get_current_user``：加载登录用户（不存在/软删 → USER_NOT_FOUND，停用 → AUTH_FORBIDDEN）；
-- ``require_roles``：角色白名单（admin/user/viewer）；
-- ``assert_owner``：资源归属校验（admin 全通，其余必须本人）。
+- ``require_roles``：角色白名单（admin/user/viewer）。
 """
 from __future__ import annotations
 
@@ -70,14 +69,6 @@ def require_roles(*roles: str) -> Callable:
     return dependency
 
 
-def assert_owner(resource_user_id: uuid.UUID | None, current_user: User) -> None:
-    """校验资源归属：admin 全通，其余必须本人（越权 → 403）。"""
-    if current_user.role == "admin":
-        return
-    if resource_user_id is None or resource_user_id != current_user.id:
-        raise PermissionDeniedError("Access to another user's resource is forbidden")
-
-
 async def require_llm_credential(
     user: User = Depends(get_current_user),
     session: AsyncSession = Depends(get_db),
@@ -99,7 +90,6 @@ async def require_llm_credential(
 
 
 __all__ = [
-    "assert_owner",
     "get_current_user",
     "get_token_payload",
     "require_llm_credential",

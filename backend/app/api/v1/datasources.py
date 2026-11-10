@@ -10,7 +10,7 @@ from fastapi import APIRouter, Depends, File, Query, UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import require_llm_credential, require_roles
-from app.api.pagination import PaginationParams
+from app.core.pagination import PaginationParams
 from app.core.config import settings
 from app.core.database import get_db
 from app.core.exceptions import (

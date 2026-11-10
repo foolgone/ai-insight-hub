@@ -1,8 +1,11 @@
-"""分页 / 过滤 / 排序依赖（API 设计 §3.2、§3.3）。
+"""分页 / 过滤 / 排序（分层中立，供 API 依赖注入与 service 层共用）。
 
 - 查询参数：``page``（从 1）/ ``limit``（默认 20，上限 100）/ ``sort``（``-`` 前缀为降序）；
 - 排序字段必须显式白名单（``sortable``），防止任意列排序导致的信息泄露；
 - 响应分页对象见 ``app.schemas.base.Page``。
+
+放在 ``app.core`` 而不是 ``app.api``：分页是查询能力，service 层直接从这里导入，
+避免「服务层依赖 HTTP 层」的分层倒置。
 """
 from collections.abc import Mapping
 from typing import Annotated, Any

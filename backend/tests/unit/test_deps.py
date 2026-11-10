@@ -5,7 +5,7 @@ import uuid
 
 import pytest
 
-from app.api.deps import assert_owner
+from app.core.ownership import assert_owner
 from app.core.exceptions import PermissionDeniedError
 from tests.factories import UserFactory
 

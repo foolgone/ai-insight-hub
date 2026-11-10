@@ -19,8 +19,8 @@ from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import InstrumentedAttribute
 
-from app.api.deps import assert_owner
-from app.api.pagination import PaginationParams, paginate
+from app.core.ownership import assert_owner
+from app.core.pagination import PaginationParams, paginate
 from app.core.exceptions import (
     CleanedDataNotFoundError,
     DataSourceNotFoundError,

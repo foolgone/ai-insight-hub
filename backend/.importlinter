@@ -1,0 +1,63 @@
+# 分层依赖约束（import-linter）
+#
+# 目标结构：api → application/services → agents → models/schemas → core
+# 现状还做不到严格单向（services 与 application 互相调用），因此先固化
+# 「不许回退」的四条硬边界；等 P2/P3 抽完端口与仓储后再升级为 layers 契约。
+#
+# 运行：cd backend && lint-imports
+
+[importlinter]
+root_package = app
+include_external_packages = False
+
+
+[importlinter:contract:http-layer-not-depended-on]
+name = HTTP 层（app.api）不得被业务层依赖
+type = forbidden
+source_modules =
+    app.services
+    app.application
+    app.agents
+    app.tasks
+    app.models
+    app.schemas
+forbidden_modules =
+    app.api
+
+
+[importlinter:contract:core-is-leaf]
+name = app.core 不依赖业务层
+type = forbidden
+source_modules =
+    app.core
+forbidden_modules =
+    app.api
+    app.services
+    app.application
+    app.agents
+    app.tasks
+
+
+[importlinter:contract:data-layer-is-leaf]
+name = models / schemas 不依赖上层
+type = forbidden
+source_modules =
+    app.models
+    app.schemas
+forbidden_modules =
+    app.api
+    app.services
+    app.application
+    app.agents
+    app.tasks
+
+
+[importlinter:contract:api-not-import-tasks]
+name = API 不得直接 import Celery 任务
+type = forbidden
+source_modules =
+    app.api
+forbidden_modules =
+    app.tasks
+# 只约束直接 import：api → services → tasks 是允许的（service 负责入队）
+allow_indirect_imports = True
