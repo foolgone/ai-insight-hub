@@ -29,7 +29,7 @@ from app.repositories import cleaned_data as cleaned_repo
 from app.models import CleanedData, DataSource, RawData, Task, User
 from app.schemas.agents.cleaning import CleaningConfig, CleaningInput, CleaningState
 from app.schemas.base import Pagination
-from app.services import parsers, storage_service
+from app.services import asr_service, media_service, parsers, storage_service
 
 ACTIVE_STATUSES = ("pending", "running")
 CLEAN_TASK_TYPE = "clean"
@@ -393,6 +393,8 @@ async def _execute_clean(
                     raw,
                     session=session,
                     user_id=task.user_id,
+                    transcriber=media_service,
+                    resolve_asr=asr_service.resolve_for_user,
                     on_progress=_report,
                 )
                 if asr_result:
