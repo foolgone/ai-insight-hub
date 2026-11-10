@@ -14,16 +14,17 @@ from datetime import datetime, timezone
 from typing import Any, Literal, cast
 
 from loguru import logger
-from sqlalchemy import delete, func, select
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import InstrumentedAttribute
 
 from app.core.ownership import assert_owner
-from app.core.pagination import PaginationParams, paginate
+from app.core.pagination import PaginationParams
 from app.application import task_control
 from app.core.config import settings
 from app.core.exceptions import DataSourceNotFoundError, FaqNotFoundError
-from app.models import CleanedData, DataSource, KnowledgeBase, Task, User
+from app.repositories import cleaned_data as cleaned_repo
+from app.repositories import knowledge_base as knowledge_repo
+from app.models import DataSource, KnowledgeBase, Task, User
 from app.schemas.agents.extraction import MAX_DIALOGUES_PER_RUN, MAX_EXISTING_QUESTIONS
 from app.schemas.knowledge import (
     FAQCreate,
@@ -40,10 +41,6 @@ from app.services import cleaning_service, embedding_service, knowledge_dedup, o
 EXTRACT_TASK_TYPE = "extract"
 MAX_DIALOGUES = 200
 MAX_GAP_ITEMS = 200
-_SORTABLE: dict[str, InstrumentedAttribute] = {
-    "frequency": KnowledgeBase.frequency,
-    "created_at": KnowledgeBase.created_at,
-}
 
 
 def _now_naive() -> datetime:
@@ -75,7 +72,7 @@ async def _datasource_or_404(
 async def _faq_or_404(
     session: AsyncSession, *, datasource_id: uuid.UUID, faq_id: uuid.UUID
 ) -> KnowledgeBase:
-    faq = await session.get(KnowledgeBase, faq_id)
+    faq = await knowledge_repo.get(session, faq_id)
     if faq is None or faq.datasource_id != datasource_id:
         raise FaqNotFoundError(details={"faq_id": str(faq_id)})
     return faq
@@ -119,13 +116,9 @@ async def create_extraction_task(
 
 
 async def _load_dialogues(session: AsyncSession, datasource_id: uuid.UUID) -> list[dict[str, Any]]:
-    stmt = (
-        select(CleanedData)
-        .where(CleanedData.datasource_id == datasource_id)
-        .order_by(CleanedData.created_at.desc())
-        .limit(MAX_DIALOGUES)
+    rows = await cleaned_repo.list_for_analysis(
+        session, datasource_id, limit=MAX_DIALOGUES, newest_first=True
     )
-    rows = list((await session.execute(stmt)).scalars().all())
     return [
         {
             "dialogue_id": str(row.dialogue_id),
@@ -137,30 +130,12 @@ async def _load_dialogues(session: AsyncSession, datasource_id: uuid.UUID) -> li
 
 
 async def _existing_questions(session: AsyncSession, datasource_id: uuid.UUID) -> list[str]:
-    rows = (
-        (
-            await session.execute(
-                select(KnowledgeBase.question).where(
-                    KnowledgeBase.datasource_id == datasource_id,
-                    KnowledgeBase.is_seed.is_(False),
-                )
-            )
-        )
-        .scalars()
-        .all()
-    )
-    return [str(item) for item in rows]
+    return await knowledge_repo.existing_questions(session, datasource_id)
 
 
 async def _replace_seed_knowledge(session: AsyncSession, datasource_id: uuid.UUID) -> int:
     """先删 ``is_seed`` 再插入 ``extracted``（B-504 口径）。"""
-    result = await session.execute(
-        delete(KnowledgeBase).where(
-            KnowledgeBase.datasource_id == datasource_id,
-            KnowledgeBase.is_seed.is_(True),
-        )
-    )
-    return int(result.rowcount or 0)
+    return await knowledge_repo.delete_seed(session, datasource_id)
 
 
 def _parse_source_ids(values: list[Any]) -> list[uuid.UUID] | None:
@@ -458,14 +433,14 @@ async def list_faqs(
     status: str | None = None,
 ) -> tuple[list[KnowledgeBase], Any]:
     await _datasource_or_404(session, datasource_id, user)
-    stmt = select(KnowledgeBase).where(KnowledgeBase.datasource_id == datasource_id)
-    if category:
-        stmt = stmt.where(KnowledgeBase.category == category)
-    if min_frequency is not None:
-        stmt = stmt.where(KnowledgeBase.frequency >= min_frequency)
-    if status:
-        stmt = stmt.where(KnowledgeBase.status == status)
-    return await paginate(session, stmt, params, sortable=_SORTABLE)
+    return await knowledge_repo.list_for_datasource(
+        session,
+        datasource_id,
+        params=params,
+        category=category,
+        min_frequency=min_frequency,
+        status=status,
+    )
 
 
 async def create_faq(
@@ -553,22 +528,13 @@ async def search_faqs(
         logger.warning("knowledge search falls back to trigram: {}", exc)
         query_vector = None
 
-    trigram = func.similarity(KnowledgeBase.question, query)
-    if query_vector is not None:
-        vector_similarity = 1 - KnowledgeBase.embedding.cosine_distance(query_vector)
-        score = trigram * 0.4 + func.coalesce(vector_similarity, 0.0) * 0.6
-    else:
-        score = trigram
-    stmt = (
-        select(KnowledgeBase, score.label("similarity"))
-        .where(
-            KnowledgeBase.datasource_id == datasource_id,
-            KnowledgeBase.status == "active",
-        )
-        .order_by(score.desc())
-        .limit(limit)
+    rows = await knowledge_repo.search(
+        session,
+        datasource_id,
+        query=query,
+        query_vector=query_vector,
+        limit=limit,
     )
-    rows = (await session.execute(stmt)).all()
 
     results: list[SearchItem] = []
     for faq, similarity in rows:

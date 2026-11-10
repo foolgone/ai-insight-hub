@@ -23,12 +23,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.ownership import assert_owner
 from app.core.pagination import PaginationParams, paginate
+from app.repositories import cleaned_data as cleaned_repo
 from app.core.exceptions import (
     DataSourceNotFoundError,
     ReportFormatInvalidError,
     ReportNotFoundError,
 )
-from app.models import AnalysisResult, CleanedData, DataSource, Report, Task, User
+from app.models import AnalysisResult, DataSource, Report, Task, User
 from app.schemas.agents.report import (
     REPORT_TYPE_LABELS,
     REPORT_TYPES,
@@ -194,14 +195,7 @@ async def _collect_data(session: AsyncSession, report: Report) -> dict[str, Any]
         data["knowledge"] = await _knowledge_data(session, report.datasource_id)
     if report.report_type in ("insight", "comprehensive"):
         data["insight"] = await _insight_data(session, report.datasource_id)
-    data["dialogue_count"] = int(
-        await session.scalar(
-            select(func.count())
-            .select_from(CleanedData)
-            .where(CleanedData.datasource_id == report.datasource_id)
-        )
-        or 0
-    )
+    data["dialogue_count"] = await cleaned_repo.count_for_datasource(session, report.datasource_id)
     return data
 
 

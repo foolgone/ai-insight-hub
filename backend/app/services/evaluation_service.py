@@ -18,6 +18,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.ownership import assert_owner
 from app.core.pagination import PaginationParams, paginate
+from app.repositories import cleaned_data as cleaned_repo
 from app.application import task_control
 from app.core.errors import FrameworkErrorCode
 from app.core.exceptions import (
@@ -106,20 +107,17 @@ async def _load_targets(session: AsyncSession, task: Task) -> tuple[list[Cleaned
     """
     params = task.params or {}
     data_ids = params.get("data_ids") or []
-    filters = [CleanedData.datasource_id == task.datasource_id]
-    if data_ids:
-        filters.append(CleanedData.id.in_([uuid.UUID(str(item)) for item in data_ids]))
+    parsed_ids = [uuid.UUID(str(item)) for item in data_ids] or None
+    datasource_id = task.datasource_id
+    if datasource_id is None:
+        return [], 0
 
-    total = int(
-        await session.scalar(select(func.count()).select_from(CleanedData).where(*filters)) or 0
+    total, rows = await cleaned_repo.load_evaluable(
+        session,
+        datasource_id=datasource_id,
+        data_ids=parsed_ids,
+        limit=MAX_ITEMS_PER_TASK,
     )
-    stmt = (
-        select(CleanedData)
-        .where(*filters, func.trim(CleanedData.ai_response) != "")
-        .order_by(CleanedData.created_at.asc())
-        .limit(MAX_ITEMS_PER_TASK)
-    )
-    rows = list((await session.execute(stmt)).scalars().all())
     return rows, max(0, total - len(rows))
 
 

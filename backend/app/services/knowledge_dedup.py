@@ -15,10 +15,9 @@ import uuid
 from typing import Any
 
 from loguru import logger
-from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models import KnowledgeBase
+from app.repositories import knowledge_base as knowledge_repo
 from app.services import embedding_service
 
 _WHITESPACE = re.compile(r"[\s\u3000]+")
@@ -180,18 +179,9 @@ async def select_relevant_questions(
         vectors = await embedding_service.encode_texts([query])
         if not vectors or not vectors[0]:
             return list(legacy_questions), "fallback", "empty_embedding"
-        stmt = (
-            select(KnowledgeBase.question)
-            .where(
-                KnowledgeBase.datasource_id == datasource_id,
-                KnowledgeBase.is_seed.is_(False),
-                KnowledgeBase.embedding.is_not(None),
-            )
-            .order_by(KnowledgeBase.embedding.cosine_distance(vectors[0]))
-            .limit(top_k)
+        questions = await knowledge_repo.nearest_questions(
+            session, datasource_id, query_vector=vectors[0], limit=top_k
         )
-        rows = (await session.execute(stmt)).scalars().all()
-        questions = [str(item) for item in rows]
         if not questions:
             return list(legacy_questions), "fallback", "no_candidates_with_embedding"
         return questions, "embedding_topk", None

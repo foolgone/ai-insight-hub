@@ -15,18 +15,17 @@ from typing import Any
 
 from loguru import logger
 from sqlalchemy import func, select
-from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import InstrumentedAttribute
 
 from app.core.ownership import assert_owner
-from app.core.pagination import PaginationParams, paginate
+from app.core.pagination import PaginationParams
 from app.core.exceptions import (
     CleanedDataNotFoundError,
     DataSourceNotFoundError,
     TaskAlreadyRunningError,
 )
 from app.application import media_pipeline, structure_service, task_control
+from app.repositories import cleaned_data as cleaned_repo
 from app.models import CleanedData, DataSource, RawData, Task, User
 from app.schemas.agents.cleaning import CleaningConfig, CleaningInput, CleaningState
 from app.schemas.base import Pagination
@@ -55,12 +54,6 @@ _ALLOWED_TRANSITIONS: dict[CleaningState, set[CleaningState]] = {
     },
     CleaningState.COMPLETED: set(),
     CleaningState.FAILED: set(),
-}
-
-_CLEANED_SORTABLE: dict[str, InstrumentedAttribute] = {
-    "timestamp": CleanedData.timestamp,
-    "quality_score": CleanedData.quality_score,
-    "created_at": CleanedData.created_at,
 }
 
 
@@ -326,16 +319,8 @@ async def _persist_dialogues(
     if not rows:
         return 0, 0.0, 0, 0
 
-    stmt = (
-        # 用 Table 而非 ORM 实体做批量 upsert（避免 ORM 批量语义）；
-        # mypy 把 __table__ 推断成 FromClause，这里显式忽略参数类型
-        pg_insert(CleanedData.__table__)  # type: ignore[arg-type]
-        .values(rows)
-        .on_conflict_do_nothing(index_elements=["raw_data_id", "dialogue_id"])
-        .returning(CleanedData.__table__.c.id, CleanedData.__table__.c.quality_score)
-    )
-    inserted = (await session.execute(stmt)).all()
-    scored = [float(row.quality_score) for row in inserted if row.quality_score is not None]
+    inserted = await cleaned_repo.insert_ignore_conflicts(session, rows)
+    scored = [float(score) for _, score in inserted if score is not None]
     return len(inserted), sum(scored), len(rows), len(scored)
 
 
@@ -621,23 +606,16 @@ async def list_cleaned_data(
         raise DataSourceNotFoundError(details={"datasource_id": str(datasource_id)})
     assert_owner(datasource.user_id, user)
 
-    stmt = select(CleanedData).where(CleanedData.datasource_id == datasource_id)
-    if quality_score_min is not None:
-        stmt = stmt.where(CleanedData.quality_score >= quality_score_min)
-    if quality_score_max is not None:
-        stmt = stmt.where(CleanedData.quality_score <= quality_score_max)
-    if has_issues is True:
-        stmt = stmt.where(func.cardinality(CleanedData.issues) > 0)
-    elif has_issues is False:
-        stmt = stmt.where(
-            (CleanedData.issues.is_(None)) | (func.cardinality(CleanedData.issues) == 0)
-        )
-    if date_from is not None:
-        stmt = stmt.where(CleanedData.timestamp >= date_from)
-    if date_to is not None:
-        stmt = stmt.where(CleanedData.timestamp <= date_to)
-
-    return await paginate(session, stmt, params, sortable=_CLEANED_SORTABLE)
+    return await cleaned_repo.list_for_datasource(
+        session,
+        datasource_id,
+        params=params,
+        quality_score_min=quality_score_min,
+        quality_score_max=quality_score_max,
+        has_issues=has_issues,
+        date_from=date_from,
+        date_to=date_to,
+    )
 
 
 async def get_cleaned_data(
@@ -652,7 +630,7 @@ async def get_cleaned_data(
         raise DataSourceNotFoundError(details={"datasource_id": str(datasource_id)})
     assert_owner(datasource.user_id, user)
 
-    item = await session.get(CleanedData, data_id)
+    item = await cleaned_repo.get(session, data_id)
     if item is None or item.datasource_id != datasource_id:
         raise CleanedDataNotFoundError(details={"data_id": str(data_id)})
     return item

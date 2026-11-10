@@ -74,3 +74,16 @@ forbidden_modules =
     app.application
     app.agents
     app.tasks
+
+
+[importlinter:contract:repositories-are-inner]
+name = 仓储层（app.repositories）不得依赖上层
+type = forbidden
+source_modules =
+    app.repositories
+forbidden_modules =
+    app.api
+    app.services
+    app.application
+    app.agents
+    app.tasks

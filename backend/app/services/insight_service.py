@@ -18,7 +18,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.ownership import assert_owner
 from app.application import task_control
 from app.core.exceptions import DataSourceNotFoundError
-from app.models import AnalysisResult, CleanedData, DataSource, Task, User
+from app.repositories import cleaned_data as cleaned_repo
+from app.models import AnalysisResult, DataSource, Task, User
 from app.schemas.insight import (
     InsightPainPoint,
     InsightRequest,
@@ -103,16 +104,17 @@ async def _load_dialogues(
     datasource_id: uuid.UUID,
     time_range: dict[str, str] | None,
 ) -> list[dict[str, Any]]:
-    stmt = select(CleanedData).where(CleanedData.datasource_id == datasource_id)
+    start = end = None
     if time_range:
         start = _parse_bound(time_range.get("start"))
         end = _parse_bound(time_range.get("end"))
-        if start is not None:
-            stmt = stmt.where(CleanedData.timestamp >= start)
-        if end is not None:
-            stmt = stmt.where(CleanedData.timestamp <= end)
-    stmt = stmt.order_by(CleanedData.timestamp.asc()).limit(MAX_DIALOGUES)
-    rows = list((await session.execute(stmt)).scalars().all())
+    rows = await cleaned_repo.list_for_analysis(
+        session,
+        datasource_id,
+        limit=MAX_DIALOGUES,
+        date_from=start,
+        date_to=end,
+    )
     return [
         {
             "dialogue_id": str(row.dialogue_id),
