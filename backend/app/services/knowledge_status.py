@@ -10,10 +10,9 @@ from __future__ import annotations
 import uuid
 from enum import Enum
 
-from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models import KnowledgeBase
+from app.repositories import knowledge_base as knowledge_repo
 
 COLD_START_THRESHOLD = 1
 READY_THRESHOLD = 50
@@ -40,30 +39,12 @@ async def count_knowledge(
     *,
     status: str | None = "active",
 ) -> int:
-    stmt = (
-        select(func.count())
-        .select_from(KnowledgeBase)
-        .where(KnowledgeBase.datasource_id == datasource_id)
-    )
-    if status is not None:
-        stmt = stmt.where(KnowledgeBase.status == status)
-    return int(await session.scalar(stmt) or 0)
+    return await knowledge_repo.count_by_status(session, datasource_id, status=status)
 
 
 async def _count_by_source(session: AsyncSession, datasource_id: uuid.UUID) -> dict[str, int]:
-    rows = (
-        await session.execute(
-            select(KnowledgeBase.source, func.count())
-            .where(
-                KnowledgeBase.datasource_id == datasource_id,
-                KnowledgeBase.status == "active",
-            )
-            .group_by(KnowledgeBase.source)
-        )
-    ).all()
     counts = {"seed": 0, "extracted": 0, "manual": 0}
-    for source, count in rows:
-        counts[str(source)] = int(count)
+    counts.update(await knowledge_repo.count_by_source(session, datasource_id))
     return counts
 
 
