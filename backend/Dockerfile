@@ -13,8 +13,9 @@ RUN apt-get update \
 
 COPY requirements.txt ./
 # pip 源可配置：国内网络构建时传 --build-arg PIP_INDEX_URL=<镜像源>
-# 例：https://mirrors.cloud.tencent.com/pypi/simple
-ARG PIP_INDEX_URL=https://pypi.org/simple
+# 默认走腾讯云镜像：直连 pypi.org 在国内实测约 20 kB/s（torch 539MB 要数小时），
+# 换镜像后同一台机器可在数分钟内完成。海外构建可显式传 --build-arg PIP_INDEX_URL=https://pypi.org/simple
+ARG PIP_INDEX_URL=https://mirrors.cloud.tencent.com/pypi/simple
 # 可选：先装 CPU 版 torch（云端 2G 精简镜像推荐），避免 requirements 拉取 CUDA 版
 # 例：--build-arg TORCH_INDEX_URL=https://download.pytorch.org/whl/cpu
 ARG TORCH_INDEX_URL=
