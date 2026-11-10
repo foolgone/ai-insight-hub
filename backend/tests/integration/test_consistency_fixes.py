@@ -13,12 +13,13 @@ import uuid
 import pytest
 from sqlalchemy import select, update
 
+from app.composition import enqueue
 from app.agents.base import AgentResult
 from app.core.cost_tracker import CostTracker
 from app.core.llm import LLMResponse, LLMUsage
 from app.application import task_control
 from app.models import AnalysisResult, CleanedData, LlmCall, Task
-from app.services import cleaning_service, insight_service, report_service
+from app.services import cleaning_service, insight_service
 from tests.factories import (
     CleanedDataFactory,
     DataSourceFactory,
@@ -110,7 +111,7 @@ async def test_insight_persists_analysis_result(db_session, monkeypatch) -> None
 
 
 async def test_create_report_creates_task(client, auth_headers, db_session, monkeypatch) -> None:
-    monkeypatch.setattr(report_service, "enqueue_report", lambda report: "celery-report-1")
+    monkeypatch.setattr(enqueue, "enqueue_report", lambda report_id: "celery-report-1")
     created_ds = await client.post(
         "/api/v1/datasources",
         headers=auth_headers,

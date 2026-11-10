@@ -5,6 +5,7 @@ import uuid
 
 import pytest
 
+from app.composition import enqueue
 from app.agents.base import AgentResult
 from app.services import insight_service
 from tests.factories import (
@@ -126,7 +127,7 @@ async def test_analyze_insights_endpoint(client, auth_headers, monkeypatch) -> N
         json={"name": "insight-ds", "type": "customer_service"},
     )
     datasource_id = response.json()["id"]
-    monkeypatch.setattr(insight_service, "enqueue_insight", lambda task: "celery-insight")
+    monkeypatch.setattr(enqueue, "enqueue_insight", lambda task_id: "celery-insight")
 
     submitted = await client.post(
         f"/api/v1/datasources/{datasource_id}/analyze/insights",

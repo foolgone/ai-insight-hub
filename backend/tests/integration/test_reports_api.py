@@ -5,6 +5,7 @@ import uuid
 
 import pytest
 
+from app.composition import enqueue
 from app.agents.base import AgentResult
 from app.models import Report
 from app.services import report_service
@@ -52,7 +53,7 @@ async def _datasource(client, auth_headers, name: str = "report-ds") -> str:
 
 def _patch_agent(monkeypatch, result: AgentResult | None = None) -> None:
     monkeypatch.setattr(report_service, "_build_agent", lambda: _FakeAgent(result or _result()))
-    monkeypatch.setattr(report_service, "enqueue_report", lambda report: "celery-report")
+    monkeypatch.setattr(enqueue, "enqueue_report", lambda report_id: "celery-report")
 
 
 async def test_markdown_report_lifecycle(client, auth_headers, db_session, monkeypatch) -> None:

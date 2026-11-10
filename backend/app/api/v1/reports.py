@@ -6,6 +6,7 @@ import uuid
 from fastapi import APIRouter, Depends, Response, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.composition import enqueue
 from app.api.deps import require_llm_credential, require_roles
 from app.core.pagination import PaginationParams
 from app.core.database import get_db
@@ -50,7 +51,7 @@ async def create_report(
         config=payload.config,
     )
     # 报告生成纳入统一任务体系（task_type=report）：可查进度、可取消/重试
-    task.celery_task_id = report_service.enqueue_report(report)
+    task.celery_task_id = enqueue.enqueue_report(str(report.id))
     await session.flush()
     await session.refresh(report)
     await session.refresh(task)

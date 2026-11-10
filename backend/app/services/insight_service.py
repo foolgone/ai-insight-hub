@@ -42,12 +42,6 @@ def _build_agent():  # noqa: ANN202 - 允许测试 monkeypatch
     return InsightAnalysisAgent()
 
 
-def enqueue_insight(task: Task) -> str:
-    from app.tasks.insight import analyze_insights_task
-
-    return str(analyze_insights_task.delay(str(task.id)))
-
-
 async def _datasource_or_404(
     session: AsyncSession, datasource_id: uuid.UUID, user: User
 ) -> DataSource:
@@ -317,7 +311,6 @@ async def get_latest_insights(
 __all__ = [
     "INSIGHT_TASK_TYPE",
     "create_insight_task",
-    "enqueue_insight",
     "get_latest_insights",
     "run_insight_task",
 ]

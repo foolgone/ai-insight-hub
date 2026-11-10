@@ -4,9 +4,9 @@ from __future__ import annotations
 import pytest
 from sqlalchemy import select
 
+from app.composition import enqueue
 from app.core.config import settings
 from app.models import RawData
-from app.services import cleaning_service
 from app.services.credential_service import credential_service
 
 pytestmark = pytest.mark.integration
@@ -39,7 +39,7 @@ async def test_upload_media_creates_media_raw_data(
 ) -> None:
     monkeypatch.setattr(settings, "ASR_ENABLED", True)
     monkeypatch.setattr(credential_service, "get_credential", _active_any)
-    monkeypatch.setattr(cleaning_service, "enqueue_clean", lambda task: "celery-media-1")
+    monkeypatch.setattr(enqueue, "enqueue_clean", lambda task_id: "celery-media-1")
     datasource_id = await _datasource(client, auth_headers)
 
     response = await client.post(
@@ -97,7 +97,7 @@ async def test_upload_text_unaffected_by_asr_config(
 ) -> None:
     monkeypatch.setattr(settings, "ASR_ENABLED", True)
     monkeypatch.setattr(credential_service, "get_credential", _only_llm)
-    monkeypatch.setattr(cleaning_service, "enqueue_clean", lambda task: "celery-text-1")
+    monkeypatch.setattr(enqueue, "enqueue_clean", lambda task_id: "celery-text-1")
     datasource_id = await _datasource(client, auth_headers)
 
     response = await client.post(

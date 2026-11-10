@@ -126,14 +126,6 @@ async def create_clean_task(
     return task
 
 
-def enqueue_clean(task: Task) -> str:
-    """提交 Celery 任务并返回 celery task id（测试可 monkeypatch）。"""
-    from app.tasks.cleaning import clean_datasource
-
-    result = clean_datasource.delay(str(task.id))
-    return str(result.id)
-
-
 def _build_agent():  # noqa: ANN202 - 允许测试 monkeypatch 返回替身
     from app.agents.cleaning_agent import DataCleaningAgent
 
@@ -643,7 +635,6 @@ __all__ = [
     "CLEAN_TASK_TYPE",
     "count_pending_records",
     "create_clean_task",
-    "enqueue_clean",
     "ensure_no_running_task",
     "get_cleaned_data",
     "list_cleaned_data",

@@ -14,6 +14,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import require_roles
 from app.core.pagination import PaginationParams
+from app.composition import executors
 from app.core.database import SessionLocal, get_db
 from app.models import Task, User
 from app.schemas.base import Page
@@ -177,7 +178,9 @@ async def retry_task(
     user: User = Depends(require_roles(*WRITE_ROLES)),
     session: AsyncSession = Depends(get_db),
 ) -> TaskRetryResponse:
-    task = await task_service.retry(session, user=user, task_id=task_id)
+    task = await task_service.retry(
+        session, user=user, task_id=task_id, dispatch=executors.dispatch
+    )
     return TaskRetryResponse(
         id=task.id,
         status=task.status,

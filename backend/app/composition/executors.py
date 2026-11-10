@@ -16,7 +16,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.exceptions import TaskNotRetryableError
 from app.models import Report, Task
 
-__all__ = ["Executor", "get_executor"]
+__all__ = ["Executor", "dispatch", "get_executor"]
 
 Executor = Callable[[AsyncSession, Task], Awaitable[str]]
 
@@ -24,32 +24,30 @@ _REGISTRY: dict[str, Executor] | None = None
 
 
 async def _enqueue_clean(_session: AsyncSession, task: Task) -> str:
-    from app.services import cleaning_service
+    from app.composition import enqueue
 
-    return cleaning_service.enqueue_clean(task)
+    return enqueue.enqueue_clean(str(task.id))
 
 
 async def _enqueue_evaluate(_session: AsyncSession, task: Task) -> str:
-    from app.services import evaluation_service
+    from app.composition import enqueue
 
-    return evaluation_service.enqueue_evaluation(task)
+    return enqueue.enqueue_evaluation(str(task.id))
 
 
 async def _enqueue_extract(_session: AsyncSession, task: Task) -> str:
-    from app.services import knowledge_service
+    from app.composition import enqueue
 
-    return knowledge_service.enqueue_extract(task)
+    return enqueue.enqueue_extract(str(task.id))
 
 
 async def _enqueue_insight(_session: AsyncSession, task: Task) -> str:
-    from app.services import insight_service
+    from app.composition import enqueue
 
-    return insight_service.enqueue_insight(task)
+    return enqueue.enqueue_insight(str(task.id))
 
 
 async def _enqueue_report(session: AsyncSession, task: Task) -> str:
-    from app.services import report_service
-
     report_id = (task.params or {}).get("report_id")
     if not report_id:
         raise TaskNotRetryableError(
@@ -60,7 +58,9 @@ async def _enqueue_report(session: AsyncSession, task: Task) -> str:
         raise TaskNotRetryableError(
             details={"task_type": task.task_type, "reason": "report_not_found"}
         )
-    return report_service.enqueue_report(report)
+    from app.composition import enqueue
+
+    return enqueue.enqueue_report(str(report.id))
 
 
 def _build_registry() -> dict[str, Executor]:
@@ -79,3 +79,13 @@ def get_executor(task_type: str) -> Executor | None:
     if _REGISTRY is None:
         _REGISTRY = _build_registry()
     return _REGISTRY.get(task_type)
+
+
+async def dispatch(session: AsyncSession, task: Task) -> str:
+    """按 ``task_type`` 重新入队（供 service 以回调形式注入）。"""
+    executor = get_executor(task.task_type)
+    if executor is None:
+        raise TaskNotRetryableError(
+            details={"task_type": task.task_type, "reason": "unsupported_type"}
+        )
+    return await executor(session, task)
