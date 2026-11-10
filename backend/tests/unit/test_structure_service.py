@@ -156,7 +156,7 @@ async def test_apply_skips_short_text(monkeypatch) -> None:
 @pytest.mark.asyncio
 async def test_apply_qa_writes_structured(monkeypatch) -> None:
     monkeypatch.setattr(settings, "MEDIA_STRUCTURE_ENABLED", True)
-    monkeypatch.setattr(structure_service, "_build_agent", lambda: _FakeAgent(QA_PAYLOAD))
+    monkeypatch.setattr(structure_service, "_build_agent", lambda *_: _FakeAgent(QA_PAYLOAD))
 
     raw = _Raw(_media_content())
     result = await structure_service.apply(
@@ -178,7 +178,7 @@ async def test_apply_qa_writes_structured(monkeypatch) -> None:
 async def test_apply_reuses_existing_structured(monkeypatch) -> None:
     monkeypatch.setattr(settings, "MEDIA_STRUCTURE_ENABLED", True)
 
-    def _boom():
+    def _boom(*_args, **_kwargs):
         raise AssertionError("should not call agent")
 
     monkeypatch.setattr(structure_service, "_build_agent", _boom)
@@ -198,7 +198,7 @@ async def test_apply_reuses_existing_structured(monkeypatch) -> None:
 @pytest.mark.asyncio
 async def test_apply_knowledge_persists_rows(monkeypatch) -> None:
     monkeypatch.setattr(settings, "MEDIA_STRUCTURE_ENABLED", True)
-    monkeypatch.setattr(structure_service, "_build_agent", lambda: _FakeAgent(KNOWLEDGE_PAYLOAD))
+    monkeypatch.setattr(structure_service, "_build_agent", lambda *_: _FakeAgent(KNOWLEDGE_PAYLOAD))
 
     session = _Session()
     raw = _Raw(_media_content())
@@ -223,7 +223,7 @@ async def test_apply_knowledge_persists_rows(monkeypatch) -> None:
 @pytest.mark.asyncio
 async def test_apply_summary_persists_analysis(monkeypatch) -> None:
     monkeypatch.setattr(settings, "MEDIA_STRUCTURE_ENABLED", True)
-    monkeypatch.setattr(structure_service, "_build_agent", lambda: _FakeAgent(SUMMARY_PAYLOAD))
+    monkeypatch.setattr(structure_service, "_build_agent", lambda *_: _FakeAgent(SUMMARY_PAYLOAD))
 
     session = _Session()
     raw = _Raw(_media_content())

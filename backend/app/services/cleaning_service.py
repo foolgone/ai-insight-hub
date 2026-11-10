@@ -30,6 +30,7 @@ from app.models import CleanedData, DataSource, RawData, Task, User
 from app.schemas.agents.cleaning import CleaningConfig, CleaningInput, CleaningState
 from app.schemas.base import Pagination
 from app.services import asr_service, media_service, parsers, storage_service
+from app.services.credential_service import credential_service
 
 ACTIVE_STATUSES = ("pending", "running")
 CLEAN_TASK_TYPE = "clean"
@@ -129,7 +130,7 @@ async def create_clean_task(
 def _build_agent():  # noqa: ANN202 - 允许测试 monkeypatch 返回替身
     from app.agents.cleaning_agent import DataCleaningAgent
 
-    return DataCleaningAgent()
+    return DataCleaningAgent(credentials=credential_service)
 
 
 async def _load_raw_items(session: AsyncSession, task: Task) -> list[RawData]:
@@ -400,6 +401,7 @@ async def _execute_clean(
                     task_id=task.id,
                     user_id=task.user_id,
                     datasource_id=raw.datasource_id,
+                    credentials=credential_service,
                 )
                 if structured:
                     structure_summary = {
@@ -435,6 +437,7 @@ async def _execute_clean(
                     scope=f"clean:{raw.id}",
                     user_id=task.user_id,
                     datasource_id=raw.datasource_id,
+                    credentials=credential_service,
                 )
 
                 if not result.success:

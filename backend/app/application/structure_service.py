@@ -20,6 +20,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
 from app.models import AnalysisResult, KnowledgeBase, RawData
+from app.ports.credential import CredentialPort
 from app.repositories import analysis_results as analysis_repo
 from app.repositories import knowledge_base as knowledge_repo
 
@@ -33,10 +34,10 @@ MAX_KNOWLEDGE_ITEMS = 100
 SCHEMA_VERSION = 1
 
 
-def _build_agent():  # noqa: ANN202 - 允许测试 monkeypatch
+def _build_agent(credentials=None):  # noqa: ANN001, ANN202 - 允许测试 monkeypatch
     from app.agents.structure_agent import TranscriptStructureAgent
 
-    return TranscriptStructureAgent()
+    return TranscriptStructureAgent(credentials=credentials)
 
 
 def _is_single_blob(records: list[dict[str, Any]]) -> bool:
@@ -99,8 +100,9 @@ async def _run_agent(
     text: str,
     duration: float | None,
     channel_mode: str | None,
+    credentials: CredentialPort | None = None,
 ) -> dict[str, Any] | None:
-    agent = _build_agent()
+    agent = _build_agent(credentials)
     result = await agent.structure(
         {"text": text, "duration": duration, "channel_mode": channel_mode},
         session=session,
@@ -198,8 +200,12 @@ async def apply(
     task_id: uuid.UUID,
     user_id: uuid.UUID | None,
     datasource_id: uuid.UUID,
+    credentials: CredentialPort | None = None,
 ) -> dict[str, Any] | None:
-    """对单声道整段转写做结构化，并按形态分流；不可用时返回 ``None``。"""
+    """对单声道整段转写做结构化，并按形态分流；不可用时返回 ``None``。
+
+    ``credentials`` 由调用方（services 层）注入，application 不依赖 services。
+    """
     if not settings.MEDIA_STRUCTURE_ENABLED:
         return None
 
@@ -224,6 +230,7 @@ async def apply(
         text=text,
         duration=media.get("duration"),
         channel_mode=media.get("channel_mode"),
+        credentials=credentials,
     )
     if payload is None:
         return None

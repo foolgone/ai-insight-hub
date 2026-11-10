@@ -28,6 +28,7 @@ from app.core.exceptions import (
     LLMCredentialNotConfiguredError,
 )
 from app.core.llm import LLMClient, LLMError
+from app.ports.credential import ApiCredential
 from app.models.llm_credential import UserLLMCredential
 from app.models.security import AuditLog
 
@@ -77,6 +78,18 @@ class CredentialService:
                 UserLLMCredential.provider == provider,
             )
         )
+
+    async def resolve_api_key(
+        self, session: AsyncSession, user_id: uuid.UUID, provider: str = PROVIDER_LLM
+    ) -> ApiCredential | None:
+        """凭据端口的实现：返回解密后的明文 Key（未配置 → ``None``）。
+
+        Agent 通过 ``CredentialPort`` 调用，不需要知道表结构、加密方式与审计。
+        """
+        row = await self.get_credential(session, user_id, provider)
+        if row is None:
+            return None
+        return ApiCredential(api_key=self.decrypt_credential(row), status=row.status)
 
     async def get_status(
         self, session: AsyncSession, user_id: uuid.UUID, provider: str = PROVIDER_LLM

@@ -43,7 +43,13 @@ class ReportGenerationAgent(BaseAgent):
 
     output_schema = ReportLLMOutput
 
-    def __init__(self, config: AgentConfig | None = None, *, llm: Any = None) -> None:
+    def __init__(
+        self,
+        config: AgentConfig | None = None,
+        *,
+        llm: Any = None,
+        credentials: Any = None,
+    ) -> None:
         super().__init__(
             config
             or AgentConfig(
@@ -52,6 +58,7 @@ class ReportGenerationAgent(BaseAgent):
                 temperature=0.3,
             ),
             llm=llm,
+            credentials=credentials,
         )
         self._active_input: ReportInput | None = None
 

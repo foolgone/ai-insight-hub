@@ -36,6 +36,7 @@ from app.core.exceptions import LLMCredentialInvalidError, LLMCredentialNotConfi
 from app.core.llm import LLMAuthenticationError, LLMClient, LLMResponse, LLMUsage, Message
 from app.core.metrics import record_agent_invocation
 from app.core.retry_config import RetryConfig
+from app.ports.credential import CredentialPort
 from app.ports.llm import LLMPort
 from app.utils.retry import async_retry
 from app.utils.retry_guard import CostAwareRetryGuard
@@ -166,8 +167,16 @@ class BaseAgent(ABC):
     #: 子类可声明输出 Schema；声明后 invoke 会走结构化输出兜底
     output_schema: type[BaseModel] | None = None
 
-    def __init__(self, config: AgentConfig, *, llm: LLMPort | None = None) -> None:
+    def __init__(
+        self,
+        config: AgentConfig,
+        *,
+        llm: LLMPort | None = None,
+        credentials: CredentialPort | None = None,
+    ) -> None:
         self.config = config
+        # BYOK 凭据通过端口注入（agents 不依赖 services）
+        self.credentials = credentials
         # 依赖端口而不是具体客户端：测试可注入 fake，换供应商只改实现
         self.llm: LLMPort = llm or _shared_llm(config.model, config.timeout)
         self.tools: dict[str, Any] = {}
@@ -224,15 +233,15 @@ class BaseAgent(ABC):
         byok_key: str | None = None
         agent_llm = self.llm
         if not settings.ALLOW_SERVER_KEY_FALLBACK and user_id is not None and session is not None:
-            # 延迟 import，避免 agents 与 services 的模块级循环依赖
-            from app.services.credential_service import credential_service
-
-            credential = await credential_service.get_credential(session, user_id)
+            if self.credentials is None:
+                # 未注入凭据端口 → 无法解析用户 Key，按「未配置」处理（fail closed）
+                raise LLMCredentialNotConfiguredError()
+            credential = await self.credentials.resolve_api_key(session, user_id)
             if credential is None:
                 raise LLMCredentialNotConfiguredError()
             if credential.status != "active":
                 raise LLMCredentialInvalidError()
-            byok_key = credential_service.decrypt_credential(credential)
+            byok_key = credential.api_key
             agent_llm = LLMClient(
                 model=self.config.model,
                 timeout=self.config.timeout,
@@ -360,10 +369,9 @@ class BaseAgent(ABC):
                 isinstance(exc, LLMAuthenticationError)
                 and byok_key is not None
                 and user_id is not None
+                and self.credentials is not None
             ):
-                from app.services.credential_service import credential_service
-
-                await credential_service.mark_invalid(user_id)
+                await self.credentials.mark_invalid(user_id)
                 record_agent_invocation(
                     agent=self.config.name, status="failed", duration_seconds=duration
                 )

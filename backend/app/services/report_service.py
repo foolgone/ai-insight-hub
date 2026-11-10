@@ -37,6 +37,7 @@ from app.schemas.agents.report import (
     ReportConfig,
     ReportInput,
 )
+from app.services.credential_service import credential_service
 from app.services import knowledge_status, storage_service
 
 TEMPLATE_DIR = Path(__file__).resolve().parents[1] / "templates" / "reports"
@@ -56,7 +57,7 @@ def _now_naive() -> datetime:
 def _build_agent():  # noqa: ANN202 - 允许测试 monkeypatch
     from app.agents.report_agent import ReportGenerationAgent
 
-    return ReportGenerationAgent()
+    return ReportGenerationAgent(credentials=credential_service)
 
 
 async def _report_task(session: AsyncSession, report_id: uuid.UUID) -> Task | None:

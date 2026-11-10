@@ -261,7 +261,7 @@ async def test_media_clean_structures_mono_into_qa(db_session, monkeypatch) -> N
             {"question": "你做过什么项目？", "answer": "一个执法平台。", "quality_score": 75},
         ],
     }
-    monkeypatch.setattr(structure_service, "_build_agent", lambda: _FakeStructureAgent(payload))
+    monkeypatch.setattr(structure_service, "_build_agent", lambda *_: _FakeStructureAgent(payload))
 
     outcome = await cleaning_service.run_clean_task(str(task.id), session=db_session)
 
