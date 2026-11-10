@@ -6,6 +6,7 @@ import uuid
 from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.composition import enqueue
 from app.api.deps import require_llm_credential, require_roles
 from app.core.pagination import PaginationParams
 from app.core.database import get_db
@@ -67,7 +68,7 @@ async def analyze_quality(
         data_ids=request.data_ids,
         config=config,
     )
-    task.celery_task_id = evaluation_service.enqueue_evaluation(task)
+    task.celery_task_id = enqueue.enqueue_evaluation(str(task.id))
     await session.flush()
     await session.refresh(task)
 
@@ -163,7 +164,7 @@ async def analyze_insights(
     task = await insight_service.create_insight_task(
         session, user=user, datasource_id=datasource.id, request=request
     )
-    task.celery_task_id = insight_service.enqueue_insight(task)
+    task.celery_task_id = enqueue.enqueue_insight(str(task.id))
     await session.flush()
     await session.refresh(task)
     return InsightTaskResponse(task_id=task.id, status="pending")

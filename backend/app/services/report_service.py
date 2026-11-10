@@ -59,12 +59,6 @@ def _build_agent():  # noqa: ANN202 - 允许测试 monkeypatch
     return ReportGenerationAgent()
 
 
-def enqueue_report(report: Report) -> str:
-    from app.tasks.report import generate_report_task
-
-    return str(generate_report_task.delay(str(report.id)))
-
-
 async def _report_task(session: AsyncSession, report_id: uuid.UUID) -> Task | None:
     """按 ``task.params.report_id`` 找报告对应的任务（兼容改造前无任务的历史报告）。"""
     return await session.scalar(
@@ -670,7 +664,6 @@ __all__ = [
     "create_report",
     "delete_report",
     "download_report",
-    "enqueue_report",
     "get_report",
     "list_reports",
     "render_excel",

@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import uuid
+from collections.abc import Awaitable, Callable
 from datetime import datetime, timezone
 
 from loguru import logger
@@ -12,7 +13,6 @@ from sqlalchemy.orm import InstrumentedAttribute
 from app.core.ownership import assert_owner
 from app.core.pagination import PaginationParams, paginate
 from app.application import task_control
-from app.composition import executors
 from app.core.exceptions import (
     TaskNotCancellableError,
     TaskNotFoundError,
@@ -20,6 +20,9 @@ from app.core.exceptions import (
 )
 from app.models import Report, Task, User
 from app.schemas.base import Pagination
+
+#: 重新入队的回调（由 API 层注入组合根实现，service 不依赖 Celery）
+DispatchFn = Callable[[AsyncSession, Task], Awaitable[str]]
 
 CANCELLABLE_STATUSES = {"pending", "running"}
 _SORTABLE: dict[str, InstrumentedAttribute] = {
@@ -80,17 +83,12 @@ def _revoke(celery_task_id: str) -> None:
         logger.warning("celery revoke failed task_id={} error={}", celery_task_id, exc)
 
 
-async def _dispatch_retry(session: AsyncSession, task: Task) -> str:
+async def _dispatch_retry(session: AsyncSession, task: Task, dispatch: DispatchFn) -> str:
     """按 task_type 重新入队，返回新的 celery task id。
 
     执行器注册表集中在 ``composition/executors``，这里不再反向 import 各业务服务。
     """
-    executor = executors.get_executor(task.task_type)
-    if executor is None:
-        raise TaskNotRetryableError(
-            details={"task_type": task.task_type, "reason": "unsupported_type"}
-        )
-    return await executor(session, task)
+    return await dispatch(session, task)
 
 
 async def cancel(session: AsyncSession, *, user: User, task_id: uuid.UUID) -> Task:
@@ -119,7 +117,9 @@ async def cancel(session: AsyncSession, *, user: User, task_id: uuid.UUID) -> Ta
     return task
 
 
-async def retry(session: AsyncSession, *, user: User, task_id: uuid.UUID) -> Task:
+async def retry(
+    session: AsyncSession, *, user: User, task_id: uuid.UUID, dispatch: DispatchFn
+) -> Task:
     task = await _get_or_404(session, task_id, user)
     if task.status != "failed":
         raise TaskNotRetryableError(details={"status": task.status})
@@ -135,7 +135,7 @@ async def retry(session: AsyncSession, *, user: User, task_id: uuid.UUID) -> Tas
     task.retry_count = (task.retry_count or 0) + 1
 
     # 真正重新入队（此前只改状态，任务永不执行）
-    task.celery_task_id = await _dispatch_retry(session, task)
+    task.celery_task_id = await _dispatch_retry(session, task, dispatch)
 
     await session.flush()
     await session.refresh(task)

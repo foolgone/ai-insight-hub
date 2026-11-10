@@ -9,6 +9,7 @@ from typing import Any
 from fastapi import APIRouter, Depends, File, Query, UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.composition import enqueue
 from app.api.deps import require_llm_credential, require_roles
 from app.core.pagination import PaginationParams
 from app.repositories import raw_data as raw_data_repo
@@ -283,7 +284,7 @@ async def upload_file(
             "config": {"remove_duplicates": True, "normalize_text": True},
         },
     )
-    task.celery_task_id = cleaning_service.enqueue_clean(task)
+    task.celery_task_id = enqueue.enqueue_clean(str(task.id))
     await session.flush()
     await session.refresh(task)
 
@@ -335,7 +336,7 @@ async def clean_datasource(
             "config": request.config.model_dump(),
         },
     )
-    task.celery_task_id = cleaning_service.enqueue_clean(task)
+    task.celery_task_id = enqueue.enqueue_clean(str(task.id))
     await session.flush()
     await session.refresh(task)
 

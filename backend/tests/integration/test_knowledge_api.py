@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 import pytest
 from sqlalchemy import select
 
+from app.composition import enqueue
 from app.agents.base import AgentResult
 from app.models import KnowledgeBase
 from app.services import knowledge_dedup, knowledge_service
@@ -113,11 +114,6 @@ async def _setup(db_session) -> tuple:
 async def test_run_extraction_replaces_seed_and_saves_gaps(db_session, monkeypatch) -> None:
     _, datasource, task = await _setup(db_session)
     monkeypatch.setattr(knowledge_service, "_build_agent", lambda: _FakeAgent(_success_result()))
-    monkeypatch.setattr(
-        knowledge_service,
-        "enqueue_extract",
-        lambda task: "celery-knowledge",
-    )
 
     outcome = await knowledge_service.run_extraction_task(str(task.id), session=db_session)
 
@@ -152,7 +148,7 @@ async def test_extract_endpoint_returns_202(client, auth_headers, monkeypatch) -
         json={"name": "knowledge-extract-ds", "type": "customer_service"},
     )
     datasource_id = response.json()["id"]
-    monkeypatch.setattr(knowledge_service, "enqueue_extract", lambda task: "celery-knowledge")
+    monkeypatch.setattr(enqueue, "enqueue_extract", lambda task_id: "celery-knowledge")
 
     submitted = await client.post(
         f"/api/v1/datasources/{datasource_id}/extract-knowledge",

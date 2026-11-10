@@ -6,6 +6,7 @@ import uuid
 from fastapi import APIRouter, Depends, Query, Response, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.composition import enqueue
 from app.api.deps import require_llm_credential, require_roles
 from app.core.pagination import PaginationParams
 from app.core.database import get_db
@@ -49,7 +50,7 @@ async def extract_knowledge(
     task = await knowledge_service.create_extraction_task(
         session, user=user, datasource_id=datasource.id, request=request
     )
-    task.celery_task_id = knowledge_service.enqueue_extract(task)
+    task.celery_task_id = enqueue.enqueue_extract(str(task.id))
     await session.flush()
     await session.refresh(task)
     return KnowledgeExtractionResponse(task_id=task.id, status="pending")

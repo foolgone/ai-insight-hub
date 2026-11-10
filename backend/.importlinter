@@ -29,13 +29,8 @@ layers =
     app.models
     app.schemas
     app.core
-# 欠账 1：service 直接持有 Celery 任务对象（应改为 TaskEnqueuer 端口 + 组合根装配）
+# 欠账 1（已清）：service 曾直接持有 Celery 任务对象，现已迁到 app.composition.enqueue
 ignore_imports =
-    app.services.cleaning_service -> app.tasks.cleaning
-    app.services.evaluation_service -> app.tasks.evaluation
-    app.services.insight_service -> app.tasks.insight
-    app.services.knowledge_service -> app.tasks.knowledge
-    app.services.report_service -> app.tasks.report
 # 欠账 2：agent 取 BYOK 凭据时直接依赖 credential_service（应下沉为端口）
     app.agents.base -> app.services.credential_service
 # 欠账 3：core 里混了需要 models/schemas 的模块（分页参数、成本记录、归属校验）

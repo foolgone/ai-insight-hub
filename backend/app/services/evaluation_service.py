@@ -53,12 +53,6 @@ def _build_agent():  # noqa: ANN202 - 允许测试 monkeypatch
     return QualityEvaluationAgent()
 
 
-def enqueue_evaluation(task: Task) -> str:
-    from app.tasks.evaluation import evaluate_datasource
-
-    return str(evaluate_datasource.delay(str(task.id)).id)
-
-
 async def _datasource_or_404(
     session: AsyncSession, datasource_id: uuid.UUID, user: User
 ) -> DataSource:
@@ -436,7 +430,6 @@ async def review_analysis_result(
 __all__ = [
     "EVALUATE_TASK_TYPE",
     "create_evaluation_task",
-    "enqueue_evaluation",
     "list_analysis_results",
     "review_analysis_result",
     "run_evaluation_task",

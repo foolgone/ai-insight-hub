@@ -6,6 +6,7 @@ import uuid
 import pytest
 from sqlalchemy import select
 
+from app.composition import enqueue
 from app.agents.base import AgentResult
 from app.models import AnalysisResult
 from app.services import evaluation_service
@@ -168,7 +169,7 @@ async def test_analyze_quality_endpoint_queues_task(client, auth_headers, monkey
         json={"name": "evaluate-ds", "type": "customer_service"},
     )
     datasource_id = response.json()["id"]
-    monkeypatch.setattr(evaluation_service, "enqueue_evaluation", lambda task: "celery-123")
+    monkeypatch.setattr(enqueue, "enqueue_evaluation", lambda task_id: "celery-123")
 
     submitted = await client.post(
         f"/api/v1/datasources/{datasource_id}/analyze/quality",

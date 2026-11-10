@@ -7,6 +7,7 @@ from typing import Any
 import pytest
 from sqlalchemy import func, select
 
+from app.composition import enqueue
 from app.agents.base import AgentResult
 from app.models import (
     AnalysisResult,
@@ -137,13 +138,13 @@ class ReportAgent:
 
 async def test_full_pipeline_e2e(client, auth_headers, db_session, monkeypatch) -> None:
     monkeypatch.setattr(cleaning_service, "_build_agent", lambda: CleanAgent())
-    monkeypatch.setattr(cleaning_service, "enqueue_clean", lambda task: "celery-clean")
+    monkeypatch.setattr(enqueue, "enqueue_clean", lambda task_id: "celery-clean")
     monkeypatch.setattr(evaluation_service, "_build_agent", lambda: EvalAgent())
-    monkeypatch.setattr(evaluation_service, "enqueue_evaluation", lambda task: "celery-eval")
+    monkeypatch.setattr(enqueue, "enqueue_evaluation", lambda task_id: "celery-eval")
     monkeypatch.setattr(knowledge_service, "_build_agent", lambda: ExtractAgent())
-    monkeypatch.setattr(knowledge_service, "enqueue_extract", lambda task: "celery-extract")
+    monkeypatch.setattr(enqueue, "enqueue_extract", lambda task_id: "celery-extract")
     monkeypatch.setattr(report_service, "_build_agent", lambda: ReportAgent())
-    monkeypatch.setattr(report_service, "enqueue_report", lambda report: "celery-report")
+    monkeypatch.setattr(enqueue, "enqueue_report", lambda report_id: "celery-report")
 
     # 1) 数据源 + 上传
     created = await client.post(

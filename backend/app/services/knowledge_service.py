@@ -53,12 +53,6 @@ def _build_agent():  # noqa: ANN202 - 允许测试 monkeypatch
     return KnowledgeExtractionAgent(embed=embedding_service.encode_texts_sync)
 
 
-def enqueue_extract(task: Task) -> str:
-    from app.tasks.knowledge import extract_knowledge_task
-
-    return str(extract_knowledge_task.delay(str(task.id)))
-
-
 async def _datasource_or_404(
     session: AsyncSession, datasource_id: uuid.UUID, user: User
 ) -> DataSource:
@@ -608,7 +602,6 @@ __all__ = [
     "create_extraction_task",
     "create_faq",
     "delete_faq",
-    "enqueue_extract",
     "list_faqs",
     "list_gaps",
     "run_extraction_task",

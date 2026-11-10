@@ -7,10 +7,10 @@ from pathlib import Path
 import pytest
 from sqlalchemy import select
 
+from app.composition import enqueue
 from app.core.config import settings
 from app.core.security import hash_password
 from app.models import DataSource, RawData, Task
-from app.services import cleaning_service
 from tests.factories import UserFactory, persist
 
 pytestmark = pytest.mark.integration
@@ -37,7 +37,7 @@ async def test_upload_creates_raw_data_and_task(
     client, auth_headers, db_session, monkeypatch, tmp_path
 ) -> None:
     _local_storage(monkeypatch, tmp_path)
-    monkeypatch.setattr(cleaning_service, "enqueue_clean", lambda task: "fake-celery-id")
+    monkeypatch.setattr(enqueue, "enqueue_clean", lambda task_id: "fake-celery-id")
     datasource_id = await _create_datasource(client, auth_headers)
 
     response = await client.post(
@@ -142,7 +142,7 @@ async def test_upload_viewer_forbidden(client, db_session) -> None:
 async def test_clean_enqueues_and_guards_duplicate(
     client, auth_headers, db_session, monkeypatch
 ) -> None:
-    monkeypatch.setattr(cleaning_service, "enqueue_clean", lambda task: "clean-celery-id")
+    monkeypatch.setattr(enqueue, "enqueue_clean", lambda task_id: "clean-celery-id")
     datasource_id = await _create_datasource(client, auth_headers)
 
     first = await client.post(
@@ -168,7 +168,7 @@ async def test_clean_enqueues_and_guards_duplicate(
 
 
 async def test_clean_other_user_forbidden(client, auth_headers, db_session, monkeypatch) -> None:
-    monkeypatch.setattr(cleaning_service, "enqueue_clean", lambda task: "id")
+    monkeypatch.setattr(enqueue, "enqueue_clean", lambda task_id: "id")
     datasource_id = await _create_datasource(client, auth_headers)
 
     other = UserFactory(password_hash=hash_password("other12345"))

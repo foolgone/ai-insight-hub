@@ -14,10 +14,11 @@ from pathlib import Path
 import pytest
 from starlette.requests import Request
 
+from app.composition import enqueue, executors
 from app.agents.base import load_prompt_version
 from app.core.exceptions import TaskNotRetryableError
 from app.models import RawData, Task
-from app.services import cleaning_service, task_service
+from app.services import task_service
 from app.services.cleaning_service import _load_raw_text, _parse_timestamp
 from app.middleware.rate_limit import _client_ip
 
@@ -103,13 +104,13 @@ def test_load_raw_text_uses_records_when_no_text() -> None:
 
 @pytest.mark.asyncio
 async def test_dispatch_retry_clean(monkeypatch) -> None:
-    monkeypatch.setattr(cleaning_service, "enqueue_clean", lambda task: "celery-clean-1")
+    monkeypatch.setattr(enqueue, "enqueue_clean", lambda task_id: "celery-clean-1")
     task = Task(task_type="clean", params={})
-    assert await task_service._dispatch_retry(session=None, task=task) == "celery-clean-1"
+    assert await task_service._dispatch_retry(None, task, executors.dispatch) == "celery-clean-1"
 
 
 @pytest.mark.asyncio
 async def test_dispatch_retry_unknown_type_raises() -> None:
     task = Task(task_type="unknown", params={})
     with pytest.raises(TaskNotRetryableError):
-        await task_service._dispatch_retry(session=None, task=task)
+        await task_service._dispatch_retry(None, task, executors.dispatch)
