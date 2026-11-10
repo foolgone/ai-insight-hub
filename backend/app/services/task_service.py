@@ -11,7 +11,8 @@ from sqlalchemy.orm import InstrumentedAttribute
 
 from app.core.ownership import assert_owner
 from app.core.pagination import PaginationParams, paginate
-from app.application import executors, task_control
+from app.application import task_control
+from app.composition import executors
 from app.core.exceptions import (
     TaskNotCancellableError,
     TaskNotFoundError,
@@ -82,7 +83,7 @@ def _revoke(celery_task_id: str) -> None:
 async def _dispatch_retry(session: AsyncSession, task: Task) -> str:
     """按 task_type 重新入队，返回新的 celery task id。
 
-    执行器注册表集中在 ``application/executors``，这里不再反向 import 各业务服务。
+    执行器注册表集中在 ``composition/executors``，这里不再反向 import 各业务服务。
     """
     executor = executors.get_executor(task.task_type)
     if executor is None:

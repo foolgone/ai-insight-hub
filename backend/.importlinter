@@ -1,14 +1,47 @@
 # 分层依赖约束（import-linter）
 #
-# 目标结构：api → application/services → agents → models/schemas → core
-# 现状还做不到严格单向（services 与 application 互相调用），因此先固化
-# 「不许回退」的四条硬边界；等 P2/P3 抽完端口与仓储后再升级为 layers 契约。
+# 真实分层（从外到内，上层可依赖下层）：
+#   api → tasks → services → application → agents → repositories → ports → models → schemas → core
+#
+# 组合根 app.composition 不在分层栈里：装配代码天生知道所有实现。
+#
+# `ignore_imports` 是**显式登记的欠账**，不是永久豁免：
+# 每修掉一条就从这里删一行；新增的越界会立刻 BROKEN。
 #
 # 运行：cd backend && lint-imports
 
 [importlinter]
 root_package = app
 include_external_packages = False
+
+
+[importlinter:contract:declared-layers]
+name = 声明的分层结构（现存欠账显式豁免）
+type = layers
+layers =
+    app.api
+    app.tasks
+    app.services
+    app.application
+    app.agents
+    app.repositories
+    app.ports
+    app.models
+    app.schemas
+    app.core
+# 欠账 1：service 直接持有 Celery 任务对象（应改为 TaskEnqueuer 端口 + 组合根装配）
+ignore_imports =
+    app.services.cleaning_service -> app.tasks.cleaning
+    app.services.evaluation_service -> app.tasks.evaluation
+    app.services.insight_service -> app.tasks.insight
+    app.services.knowledge_service -> app.tasks.knowledge
+    app.services.report_service -> app.tasks.report
+# 欠账 2：agent 取 BYOK 凭据时直接依赖 credential_service（应下沉为端口）
+    app.agents.base -> app.services.credential_service
+# 欠账 3：core 里混了需要 models/schemas 的模块（分页参数、成本记录、归属校验）
+    app.core.pagination -> app.schemas.base
+    app.core.cost_tracker -> app.models
+    app.core.ownership -> app.models
 
 
 [importlinter:contract:http-layer-not-depended-on]
@@ -21,21 +54,10 @@ source_modules =
     app.tasks
     app.models
     app.schemas
+    app.ports
+    app.repositories
 forbidden_modules =
     app.api
-
-
-[importlinter:contract:core-is-leaf]
-name = app.core 不依赖业务层
-type = forbidden
-source_modules =
-    app.core
-forbidden_modules =
-    app.api
-    app.services
-    app.application
-    app.agents
-    app.tasks
 
 
 [importlinter:contract:data-layer-is-leaf]
@@ -50,17 +72,8 @@ forbidden_modules =
     app.application
     app.agents
     app.tasks
-
-
-[importlinter:contract:api-not-import-tasks]
-name = API 不得直接 import Celery 任务
-type = forbidden
-source_modules =
-    app.api
-forbidden_modules =
-    app.tasks
-# 只约束直接 import：api → services → tasks 是允许的（service 负责入队）
-allow_indirect_imports = True
+    app.repositories
+    app.ports
 
 
 [importlinter:contract:ports-are-inner]
@@ -87,18 +100,3 @@ forbidden_modules =
     app.application
     app.agents
     app.tasks
-
-
-[importlinter:contract:application-helpers-are-pure]
-name = application 编排模块不依赖实现层（executors 是组合根，豁免）
-type = forbidden
-source_modules =
-    app.application.media_pipeline
-    app.application.structure_service
-    app.application.task_control
-forbidden_modules =
-    app.api
-    app.services
-    app.tasks
-# 只看直接 import：经 agents 间接引用 services 属于下一层内部实现细节
-allow_indirect_imports = True

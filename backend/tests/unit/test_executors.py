@@ -1,11 +1,11 @@
-"""任务执行器注册表单测（application/executors）。"""
+"""任务执行器注册表单测（composition/executors）。"""
 from __future__ import annotations
 
 from types import SimpleNamespace
 
 import pytest
 
-from app.application import executors
+from app.composition import executors
 from app.core.exceptions import TaskNotRetryableError
 
 pytestmark = pytest.mark.unit
