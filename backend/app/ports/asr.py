@@ -50,12 +50,33 @@ class AsrConfig:
         return f"{self.base_url.rstrip('/')}{path}"
 
 
+@dataclass(frozen=True)
+class Transcript:
+    """转写结果（顶层结构类型化，避免「魔法 key」耦合）。
+
+    ``records`` 内部仍是字典（那是下游 schema 的事），但顶层字段不再靠约定。
+    """
+
+    text: str
+    records: list[dict[str, Any]]
+    media: dict[str, Any]
+    asr: dict[str, Any]
+
+    def to_dict(self) -> dict[str, Any]:
+        """写回 ``raw_content`` 时用的字典形态（与历史数据结构保持一致）。"""
+        return {
+            "text": self.text,
+            "media": self.media,
+            "asr": self.asr,
+            "records": self.records,
+        }
+
+
 @runtime_checkable
 class TranscriberPort(Protocol):
     """转写接口。
 
     实现方：``app.services.media_service``（模块对象，含 ``transcribe_media``）。
-    返回写回 ``raw_content`` 的字段字典（``transcript`` / ``segments`` / ``channel_mode`` 等）。
     """
 
     async def transcribe_media(
@@ -64,7 +85,7 @@ class TranscriberPort(Protocol):
         asr: AsrConfig,
         *,
         progress: Callable[[str], Awaitable[None]] | None = None,
-    ) -> dict[str, Any]:
+    ) -> Transcript:
         ...
 
 
@@ -72,6 +93,7 @@ __all__ = [
     "AsrConfig",
     "PROTOCOL_CHAT_AUDIO",
     "PROTOCOL_TRANSCRIPTIONS",
+    "Transcript",
     "TranscriberPort",
     "detect_protocol",
 ]

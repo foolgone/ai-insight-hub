@@ -9,6 +9,7 @@ import uuid
 import pytest
 
 from app.application import media_pipeline
+from app.ports.asr import Transcript
 
 pytestmark = pytest.mark.unit
 
@@ -30,7 +31,7 @@ class _Session:
 class _Transcriber:
     """满足 TranscriberPort 的假实现。"""
 
-    def __init__(self, *, result: dict | None = None, error: Exception | None = None) -> None:
+    def __init__(self, *, result: Transcript | None = None, error: Exception | None = None) -> None:
         self.result = result
         self.error = error
         self.calls = 0
@@ -43,19 +44,20 @@ class _Transcriber:
             self.progress_calls.append("parsing asr 1/1")
         if self.error is not None:
             raise self.error
-        return self.result or {}
+        assert self.result is not None, "fake 未配置转写结果"
+        return self.result
 
 
 async def _resolve_asr(_session, _user_id):  # noqa: ANN001, ANN202
     return object()
 
 
-TRANSCRIPT = {
-    "text": "你好",
-    "media": {"channel_mode": "mono"},
-    "asr": {"status": "completed", "model": "qwen3-asr-flash", "chunks": 1},
-    "records": [{"dialogue_id": "asr-1", "user_message": "你好", "ai_response": ""}],
-}
+TRANSCRIPT = Transcript(
+    text="你好",
+    media={"channel_mode": "mono"},
+    asr={"status": "completed", "model": "qwen3-asr-flash", "chunks": 1},
+    records=[{"dialogue_id": "asr-1", "user_message": "你好", "ai_response": ""}],
+)
 
 
 @pytest.mark.asyncio
@@ -102,8 +104,8 @@ async def test_transcribes_and_writes_back() -> None:
         on_progress=_report,
     )
 
-    assert records == TRANSCRIPT["records"]
-    assert summary == TRANSCRIPT["asr"]
+    assert records == TRANSCRIPT.records
+    assert summary == TRANSCRIPT.asr
     assert raw.raw_content["text"] == "你好"
     assert raw.raw_content["format"] == "media"  # 原有字段保留
     assert session.flushed == 1

@@ -7,6 +7,7 @@ from sqlalchemy import select
 from app.agents.base import AgentResult
 from app.application import structure_service
 from app.models import CleanedData
+from app.ports.asr import Transcript
 from app.services import asr_service, cleaning_service, media_service
 from tests.factories import (
     DataSourceFactory,
@@ -106,7 +107,7 @@ async def test_media_clean_writes_dialogues(db_session, monkeypatch) -> None:
         calls.append(str(raw_data.id))
         if progress is not None:
             await progress("parsing asr 1/1")
-        return TRANSCRIPT
+        return Transcript(**TRANSCRIPT)
 
     monkeypatch.setattr(media_service, "transcribe_media", fake_transcribe)
     monkeypatch.setattr(asr_service, "resolve_for_user", _fake_resolve)
@@ -146,7 +147,7 @@ async def test_media_clean_skips_asr_on_rerun(db_session, monkeypatch) -> None:
 
     async def fake_transcribe(raw_data, config, *, progress=None):
         calls.append(str(raw_data.id))
-        return TRANSCRIPT
+        return Transcript(**TRANSCRIPT)
 
     monkeypatch.setattr(media_service, "transcribe_media", fake_transcribe)
     monkeypatch.setattr(asr_service, "resolve_for_user", _fake_resolve)

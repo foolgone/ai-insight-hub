@@ -24,6 +24,7 @@ import httpx
 from loguru import logger
 
 from app.core.config import settings
+from app.ports.asr import Transcript
 from app.services import storage_service
 from app.services.asr_service import (
     PROTOCOL_CHAT_AUDIO,
@@ -497,8 +498,8 @@ async def transcribe_media(
     asr: AsrConfig,
     *,
     progress: Callable[[str], Awaitable[None]] | None = None,
-) -> dict[str, Any]:
-    """下载媒体 → 抽音轨/拆声道 → ASR → 返回写回 ``raw_content`` 的字段。
+) -> Transcript:
+    """下载媒体 → 抽音轨/拆声道 → ASR → 返回类型化的 ``Transcript``。
 
     ``asr`` 由调用方按任务归属用户解析（见 ``asr_service.resolve_for_user``）。
     """
@@ -585,9 +586,9 @@ async def transcribe_media(
             len(records),
             chunks,
         )
-        return {
-            "text": text,
-            "media": {
+        return Transcript(
+            text=text,
+            media={
                 "filename": filename,
                 "mime_type": file_info.get("mime_type"),
                 "size": file_info.get("size"),
@@ -596,7 +597,7 @@ async def transcribe_media(
                 "sample_rate": info.sample_rate,
                 "channel_mode": channel_mode,
             },
-            "asr": {
+            asr={
                 "provider": "openai_compatible",
                 "model": asr.model,
                 "language": language,
@@ -607,8 +608,8 @@ async def transcribe_media(
                 "finished_at": _now_naive().isoformat(),
                 "error": None,
             },
-            "records": records,
-        }
+            records=records,
+        )
 
 
 __all__ = [
