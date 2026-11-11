@@ -263,7 +263,6 @@ async def upload_file(
             "filename": filename,
             "size": len(content),
             "mime_type": file.content_type,
-            "upload_url": stored.url,
             "object_name": stored.object_name,
             "storage_backend": stored.backend,
         },
@@ -296,7 +295,6 @@ async def upload_file(
             filename=filename,
             size=len(content),
             mime_type=file.content_type,
-            upload_url=stored.url,
             storage_backend=stored.backend,
         ),
     )

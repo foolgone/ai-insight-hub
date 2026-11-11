@@ -52,6 +52,8 @@ async def test_upload_creates_raw_data_and_task(
     assert body["file_info"]["filename"] == "data.csv"
     assert body["file_info"]["size"] == len(CSV_CONTENT)
     assert body["file_info"]["storage_backend"] == "local"
+    # 内部对象地址不返回给前端（避免暴露内网主机名与桶结构）
+    assert "upload_url" not in body["file_info"]
 
     task = await db_session.get(Task, uuid.UUID(body["task_id"]))
     assert task is not None
@@ -68,6 +70,7 @@ async def test_upload_creates_raw_data_and_task(
     assert len(raw_data) == 1
     assert raw_data[0].status == "pending"
     assert raw_data[0].file_info["filename"] == "data.csv"
+    assert "upload_url" not in raw_data[0].file_info
     assert raw_data[0].raw_content["record_count"] == 2
 
     datasource = await db_session.get(DataSource, uuid.UUID(datasource_id))
