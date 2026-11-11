@@ -6,8 +6,34 @@ on:
   pull_request:
 
 jobs:
+  # 变更范围判断：文档类 PR 不必跑后端/前端全量测试（约 7 分钟）。
+  # 注意：这里**不能**用 workflow 级 paths 过滤——那样 required check 不会产生，
+  # PR 会永远停在 "Expected — Waiting for status to be reported"。
+  # 用 job 级 if 让检查记录仍存在（skipped 视为通过），分支保护不受影响。
+  changes:
+    name: 变更范围
+    runs-on: ubuntu-latest
+    outputs:
+      backend: ${{ steps.filter.outputs.backend }}
+      frontend: ${{ steps.filter.outputs.frontend }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            backend:
+              - 'backend/**'
+              - '.github/workflows/test.yml'
+            frontend:
+              - 'frontend/**'
+              - 'nginx/**'
+              - '.github/workflows/test.yml'
+
   backend:
     name: 后端测试
+    needs: changes
+    if: needs.changes.outputs.backend == 'true'
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -79,6 +105,8 @@ jobs:
 
   frontend:
     name: 前端测试
+    needs: changes
+    if: needs.changes.outputs.frontend == 'true'
     runs-on: ubuntu-latest
     defaults:
       run:

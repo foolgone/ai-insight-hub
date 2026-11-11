@@ -5,6 +5,7 @@ on:
     paths:
       - "frontend/**"
       - "backend/**"
+      - "nginx/**"
       - ".github/workflows/e2e.yml"
   workflow_dispatch:
 
