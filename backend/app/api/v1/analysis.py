@@ -20,6 +20,8 @@ from app.schemas.analysis import (
     QualityAnalysisListResponse,
     ReviewRequest,
     ReviewResponse,
+    RunComparison,
+    RunListResponse,
 )
 from app.schemas.insight import (
     InsightRequest,
@@ -28,7 +30,7 @@ from app.schemas.insight import (
     TranscriptSummaryItem,
     TranscriptSummaryList,
 )
-from app.services import evaluation_service, insight_service
+from app.services import evaluation_service, insight_service, run_service
 
 router = APIRouter()
 
@@ -141,6 +143,51 @@ async def review_quality_analysis(
         needs_review=False,
         decision=payload.decision,
         message="Review recorded",
+    )
+
+
+@router.get(
+    "/{datasource_id}/runs",
+    response_model=RunListResponse,
+    response_model_by_alias=False,
+    summary="批次列表（每次评估任务为一个批次，含样本数与平均分）",
+)
+async def list_runs(
+    datasource_id: uuid.UUID,
+    task_type: str = Query(default="evaluate"),
+    limit: int = Query(default=20, ge=1, le=50),
+    user: User = Depends(require_roles(*READ_ROLES)),
+    session: AsyncSession = Depends(get_db),
+) -> RunListResponse:
+    items = await run_service.list_runs(
+        session,
+        user=user,
+        datasource_id=datasource_id,
+        task_type=task_type,
+        limit=limit,
+    )
+    return RunListResponse(items=items)
+
+
+@router.get(
+    "/{datasource_id}/runs/{base_run_id}/compare/{target_run_id}",
+    response_model=RunComparison,
+    response_model_by_alias=False,
+    summary="批次对比（target 相对 base：分数/维度/对话/问题）",
+)
+async def compare_runs(
+    datasource_id: uuid.UUID,
+    base_run_id: uuid.UUID,
+    target_run_id: uuid.UUID,
+    user: User = Depends(require_roles(*READ_ROLES)),
+    session: AsyncSession = Depends(get_db),
+) -> RunComparison:
+    return await run_service.compare_runs(
+        session,
+        user=user,
+        datasource_id=datasource_id,
+        base_task_id=base_run_id,
+        target_task_id=target_run_id,
     )
 
 

@@ -178,6 +178,7 @@ async def _execute_insight(
             AnalysisResult(
                 datasource_id=task.datasource_id,
                 data_id=None,
+                task_id=task.id,
                 analysis_type="insight",
                 result=result.data,
                 agent_name=str(result.metadata.get("agent", "insight_agent")),

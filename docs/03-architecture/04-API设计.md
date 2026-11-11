@@ -1038,6 +1038,71 @@ file: <binary>
 
 ---
 
+### 7.2.2 批次列表（每次评估任务为一个批次）
+
+**GET** `/api/v1/datasources/{datasource_id}/runs`
+
+**所需角色**：admin / user（自己的）；viewer ✅（只读）
+
+**查询参数**：`task_type`（默认 `evaluate`）、`limit`（默认 20，上限 50）
+
+**响应**：
+```json
+{
+  "items": [
+    {
+      "task_id": "3e7a91c2-d4b8-4f2e-9a3d-1c2b3a4d5e6f",
+      "task_type": "evaluate",
+      "status": "completed",
+      "created_at": "2026-11-11T10:00:00",
+      "completed_at": "2026-11-11T10:04:12",
+      "sample_count": 100,
+      "avg_overall_score": 72.4,
+      "evaluated": 100,
+      "needs_review": 7
+    }
+  ]
+}
+```
+
+> `sample_count` / `avg_overall_score` 只统计带 `task_id` 归属的结果。迁移 016 之前产生的历史批次没有批次归属，`sample_count` 为 0，不能参与对比（接口会说明原因）。
+
+---
+
+### 7.2.3 批次对比（target 相对 base）
+
+**GET** `/api/v1/datasources/{datasource_id}/runs/{base_run_id}/compare/{target_run_id}`
+
+**所需角色**：admin / user（自己的）；viewer ✅（只读）
+
+**响应**（节选）：
+```json
+{
+  "base":   {"task_id": "run-a", "sample_count": 100, "avg_overall_score": 72.4, "needs_review": 7, "bands": {"excellent": 12, "good": 40, "fair": 33, "poor": 15}},
+  "target": {"task_id": "run-b", "sample_count": 100, "avg_overall_score": 78.9, "needs_review": 4, "bands": {"excellent": 20, "good": 45, "fair": 28, "poor": 7}},
+  "delta":  {"avg_overall_score": 6.5, "sample_count": 0, "needs_review": -3, "bands": {"excellent": 8, "good": 5, "fair": -5, "poor": -8}},
+  "dimensions": [{"name": "accuracy", "base": 70.1, "target": 81.2, "delta": 11.1}],
+  "regressions": [{"data_id": "…", "base_score": 90, "target_score": 70, "delta": -20}],
+  "improvements": [{"data_id": "…", "base_score": 60, "target_score": 85, "delta": 25}],
+  "added_items": 0,
+  "removed_items": 0,
+  "issues_added": ["回答超出知识库范围（3 条）"],
+  "issues_removed": ["未回答运费问题（2 条）"]
+}
+```
+
+- `regressions` / `improvements`：按 `data_id` 对齐同一条对话，只列分差 ≥ 1 的 Top 5，用于直接定位「改坏了哪条」；
+- `added_items` / `removed_items`：两次批次样本不完全一致时给出，避免把样本变化误读成质量变化；
+- `issues_*`：issues 为模型自由文本，仅做去空白/大小写归一化后求差集，**作为线索而非精确指标**。
+
+**状态码**：
+- `200`: 对比成功
+- `409`: 批次未完成，或该批次没有带归属的结果（历史批次）
+- `422`: 基线与对比是同一批次，或不是评估任务
+- `404`: 批次不属于该数据源
+
+---
+
 ### 7.3 触发洞察分析
 
 **POST** `/api/v1/datasources/{datasource_id}/analyze/insights`

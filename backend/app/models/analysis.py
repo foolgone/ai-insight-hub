@@ -54,6 +54,8 @@ class AnalysisResult(Base):
         Index("idx_analysis_data_id", "data_id"),
         Index("idx_analysis_type", "analysis_type"),
         Index("idx_analysis_created_at", "created_at"),
+        # 批次（= 一次评估/洞察任务）查询：支持「本次 vs 上次」对比
+        Index("idx_analysis_task_id", "task_id"),
         Index("idx_analysis_result", "result", postgresql_using="gin"),
     )
 
@@ -67,6 +69,9 @@ class AnalysisResult(Base):
     )
     # 逻辑外键 -> cleaned_data(id)；洞察等「数据源级」结果没有单条对话，允许为空
     data_id: Mapped[uuid.UUID | None] = mapped_column(PG_UUID(as_uuid=True))
+    # 逻辑外键 -> tasks(id)：一次任务 = 一个批次（run），用于「本次 vs 上次」对比。
+    # 历史数据不回填（宁可留空，不伪造归属）；洞察/摘要也带 task_id，便于按批次追溯。
+    task_id: Mapped[uuid.UUID | None] = mapped_column(PG_UUID(as_uuid=True))
     analysis_type: Mapped[str] = mapped_column(String(50), nullable=False)
     result: Mapped[dict[str, Any]] = mapped_column(JSONB, nullable=False)
     agent_name: Mapped[str] = mapped_column(String(100), nullable=False)

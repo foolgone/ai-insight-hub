@@ -5,6 +5,14 @@ import { taskKeys } from './useTasks'
 export const qualityKeys = {
   all: ['quality'],
   list: (datasourceId, params) => ['quality', datasourceId, 'list', params],
+  runs: datasourceId => ['quality', datasourceId, 'runs'],
+  compare: (datasourceId, baseRunId, targetRunId) => [
+    'quality',
+    datasourceId,
+    'compare',
+    baseRunId,
+    targetRunId,
+  ],
 }
 
 /**
@@ -18,6 +26,36 @@ export function useQualityResultsQuery(datasourceId, params = {}, options = {}) 
     queryKey: qualityKeys.list(datasourceId, params),
     queryFn: () => qualityApi.listQualityResults(datasourceId, params),
     enabled: Boolean(datasourceId),
+    ...options,
+  })
+}
+
+/**
+ * 批次列表（每次评估任务一个批次；无数据源时不请求）。
+ * @param {string|null|undefined} datasourceId
+ * @param {Object} [options]
+ */
+export function useQualityRunsQuery(datasourceId, options = {}) {
+  return useQuery({
+    queryKey: qualityKeys.runs(datasourceId),
+    queryFn: () => qualityApi.listQualityRuns(datasourceId, { limit: 20 }),
+    enabled: Boolean(datasourceId),
+    ...options,
+  })
+}
+
+/**
+ * 批次对比（两个批次都选定且不同才请求）。
+ * @param {string|null|undefined} datasourceId
+ * @param {string|null|undefined} baseRunId
+ * @param {string|null|undefined} targetRunId
+ * @param {Object} [options]
+ */
+export function useQualityRunComparisonQuery(datasourceId, baseRunId, targetRunId, options = {}) {
+  return useQuery({
+    queryKey: qualityKeys.compare(datasourceId, baseRunId, targetRunId),
+    queryFn: () => qualityApi.compareQualityRuns(datasourceId, baseRunId, targetRunId),
+    enabled: Boolean(datasourceId && baseRunId && targetRunId && baseRunId !== targetRunId),
     ...options,
   })
 }

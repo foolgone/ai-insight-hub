@@ -47,3 +47,26 @@ export async function reviewQuality(datasourceId, resultId, payload) {
   )
   return data
 }
+
+/**
+ * 批次列表（每次评估任务为一个批次）。
+ * @param {string} datasourceId
+ * @param {{ task_type?: string, limit?: number }} [params]
+ */
+export async function listQualityRuns(datasourceId, params = {}) {
+  const { data } = await apiClient.get(endpoints.analysis.qualityRuns(datasourceId), { params })
+  return data
+}
+
+/**
+ * 批次对比（target 相对 base）。
+ * @param {string} datasourceId
+ * @param {string} baseRunId
+ * @param {string} targetRunId
+ */
+export async function compareQualityRuns(datasourceId, baseRunId, targetRunId) {
+  const { data } = await apiClient.get(
+    endpoints.analysis.qualityRunCompare(datasourceId, baseRunId, targetRunId)
+  )
+  return data
+}

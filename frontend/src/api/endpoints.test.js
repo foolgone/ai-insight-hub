@@ -34,6 +34,10 @@ describe('endpoints', () => {
     )
     expect(endpoints.analysis.insights('ds-1')).toBe('/datasources/ds-1/analyze/insights')
     expect(endpoints.analysis.insightsResults('ds-1')).toBe('/datasources/ds-1/analysis/insights')
+    expect(endpoints.analysis.qualityRuns('ds-1')).toBe('/datasources/ds-1/runs')
+    expect(endpoints.analysis.qualityRunCompare('ds-1', 'run-a', 'run-b')).toBe(
+      '/datasources/ds-1/runs/run-a/compare/run-b'
+    )
   })
 
   it('知识库 / 报告 / 任务路径', () => {

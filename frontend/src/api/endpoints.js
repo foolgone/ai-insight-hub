@@ -34,6 +34,10 @@ export const endpoints = {
     quality: id => `/datasources/${id}/analyze/quality`,
     qualityResults: id => `/datasources/${id}/analysis/quality`,
     qualityReview: (id, resultId) => `/datasources/${id}/analysis/quality/${resultId}/review`,
+    // 批次（一次评估任务）与批次对比
+    qualityRuns: id => `/datasources/${id}/runs`,
+    qualityRunCompare: (id, baseRunId, targetRunId) =>
+      `/datasources/${id}/runs/${baseRunId}/compare/${targetRunId}`,
     insights: id => `/datasources/${id}/analyze/insights`,
     insightsResults: id => `/datasources/${id}/analysis/insights`,
     summaries: id => `/datasources/${id}/analysis/summaries`,
