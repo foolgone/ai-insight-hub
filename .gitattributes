@@ -1,0 +1,4 @@
+# Shell 脚本会直接在 Linux/容器里执行。
+# Windows 检出若变成 CRLF，会报 `bad interpreter: /usr/bin/env bash^M`，
+# 且 tar 打包部署会把 CRLF 一起带到服务器，所以这里强制 LF。
+*.sh text eol=lf
