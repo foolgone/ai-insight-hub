@@ -169,9 +169,19 @@ class CostTracker:
         agent_version: str | None = None,
         duration_seconds: float | None = None,
         key_source: str = "server",
+        usage: LLMUsage | None = None,
     ) -> LlmCall:
-        """把失败写回同一幂等键对应的行（D-03：按 task_id + scope + 真实 attempt 回写）。"""
+        """把失败写回同一幂等键对应的行（D-03：按 task_id + scope + 真实 attempt 回写）。
+
+        ``usage`` 为失败前实际消耗的 token（例如输出校验失败、但模型已经生成）；
+        不传则记为 0——早期实现一律记 0，导致失败调用的成本被漏算。
+        """
         zero = Decimal("0").quantize(_COST_QUANT)
+        if usage is not None and (usage.input_tokens or usage.output_tokens):
+            breakdown = compute_cost(usage)
+        else:
+            breakdown = CostBreakdown(input_cost=zero, output_cost=zero, total_cost=zero)
+        tokens = usage or LLMUsage(input_tokens=0, output_tokens=0)
         key = self.idempotency_key(task_id, attempt, scope=scope)
         values: dict[str, Any] = {
             "id": uuid.uuid4(),
@@ -184,12 +194,12 @@ class CostTracker:
             "model": model,
             "agent_name": agent_name,
             "agent_version": agent_version,
-            "input_tokens": 0,
-            "output_tokens": 0,
-            "total_tokens": 0,
-            "input_cost": zero,
-            "output_cost": zero,
-            "total_cost": zero,
+            "input_tokens": tokens.input_tokens,
+            "output_tokens": tokens.output_tokens,
+            "total_tokens": tokens.total_tokens,
+            "input_cost": breakdown.input_cost,
+            "output_cost": breakdown.output_cost,
+            "total_cost": breakdown.total_cost,
             "duration": duration_seconds,
             "status": "failed",
             "error_type": type(error).__name__,

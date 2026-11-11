@@ -8,6 +8,7 @@ import pytest
 from app.agents.base import AgentResult
 from app.application import structure_service
 from app.core.config import settings
+from app.services import cleaning_service
 
 pytestmark = pytest.mark.unit
 
@@ -242,3 +243,141 @@ async def test_apply_summary_persists_analysis(monkeypatch) -> None:
     assert row.analysis_type == "other"
     assert row.result["kind"] == "transcript_summary"
     assert row.result["summary"].startswith("讨论了三个议题")
+
+
+# --------------------------------------------------------------------------- 分块 / 部分失败
+
+
+class _SeqAgent:
+    """按调用顺序返回预设结果：dict 表示成功，`{"__fail__": msg}` 表示失败。"""
+
+    def __init__(self, results: list[dict]) -> None:
+        self._results = list(results)
+        self.calls = 0
+
+    async def structure(self, input_data, **kwargs) -> AgentResult:
+        self.calls += 1
+        item = self._results.pop(0) if self._results else {"__fail__": "no more results"}
+        if "__fail__" in item:
+            return AgentResult(
+                success=False,
+                data=None,
+                errors=[f"AgentOutputError: {item['__fail__']}"],
+                duration=1.0,
+                token_usage={"input": 10, "output": 0},
+            )
+        return AgentResult(
+            success=True,
+            data=dict(item),
+            metadata={"agent": "structure_agent", "version": "v1.0.0", "model": "fake"},
+            duration=1.0,
+            token_usage={"input": 100, "output": 50},
+        )
+
+
+def _qa_payload(question: str) -> dict:
+    return {
+        "content_type": "interview",
+        "structure": "qa",
+        "confidence": 0.9,
+        "qa": [{"question": question, "answer": f"{question} 的回答", "quality_score": 80}],
+    }
+
+
+def _chunked_text() -> str:
+    # 400 句 × 17 字 ≈ 6800 字，确保被切成多块
+    return "面试官：请介绍一下你的项目经历。" * 400
+
+
+@pytest.mark.asyncio
+async def test_apply_splits_long_transcript_and_merges(monkeypatch) -> None:
+    monkeypatch.setattr(settings, "MEDIA_STRUCTURE_ENABLED", True)
+    text = _chunked_text()
+    expected_chunks = len(structure_service.split_transcript(text))
+    assert expected_chunks > 1
+
+    agent = _SeqAgent([_qa_payload(f"第{i}问") for i in range(expected_chunks)])
+    monkeypatch.setattr(structure_service, "_build_agent", lambda *_: agent)
+    raw = _Raw(_media_content(text))
+    result = await structure_service.apply(
+        _Session(),
+        raw=raw,
+        records=MONO_RECORD,
+        task_id=uuid.uuid4(),
+        user_id=uuid.uuid4(),
+        datasource_id=uuid.uuid4(),
+    )
+
+    assert agent.calls == expected_chunks
+    assert result["structure"] == "qa"
+    assert len(result["qa"]) == expected_chunks  # 每块的问答都保留
+    assert result["merge"]["chunks_total"] == expected_chunks
+    assert not result.get("partial")
+    assert raw.raw_content["structured"]["structure"] == "qa"
+
+
+@pytest.mark.asyncio
+async def test_apply_partial_failure_keeps_successful_chunks(monkeypatch) -> None:
+    monkeypatch.setattr(settings, "MEDIA_STRUCTURE_ENABLED", True)
+    text = _chunked_text()
+    expected_chunks = len(structure_service.split_transcript(text))
+    assert expected_chunks >= 3
+
+    failure = {"__fail__": "structure=summary but summary is empty"}
+    results: list[dict] = []
+    for index in range(expected_chunks):
+        results.append(failure if index == 1 else _qa_payload(f"第{index}问"))
+    agent = _SeqAgent(results)
+    monkeypatch.setattr(structure_service, "_build_agent", lambda *_: agent)
+
+    raw = _Raw(_media_content(text))
+    result = await structure_service.apply(
+        _Session(),
+        raw=raw,
+        records=MONO_RECORD,
+        task_id=uuid.uuid4(),
+        user_id=uuid.uuid4(),
+        datasource_id=uuid.uuid4(),
+    )
+
+    assert result["structure"] == "qa"
+    assert result["partial"] is True
+    assert len(result["failed_chunks"]) == 1
+    assert len(result["qa"]) == expected_chunks - 1
+
+
+@pytest.mark.asyncio
+async def test_apply_total_failure_writes_structure_error(monkeypatch) -> None:
+    monkeypatch.setattr(settings, "MEDIA_STRUCTURE_ENABLED", True)
+    text = _chunked_text()
+    expected_chunks = len(structure_service.split_transcript(text))
+    results = [
+        {"__fail__": "structure=summary but summary is empty"} for _ in range(expected_chunks)
+    ]
+    agent = _SeqAgent(results)
+    monkeypatch.setattr(structure_service, "_build_agent", lambda *_: agent)
+
+    raw = _Raw(_media_content(text))
+    result = await structure_service.apply(
+        _Session(),
+        raw=raw,
+        records=MONO_RECORD,
+        task_id=uuid.uuid4(),
+        user_id=uuid.uuid4(),
+        datasource_id=uuid.uuid4(),
+    )
+
+    assert result is None
+    assert "structured" not in raw.raw_content
+    error = raw.raw_content["structure_error"]
+    assert "summary is empty" in error["message"]
+    assert error["chunks"] == expected_chunks
+
+
+def test_mark_structure_unparsed_adds_issue_once() -> None:
+    records = [{"issues": ["asr_transcript"]}, {"issues": []}]
+    cleaning_service._mark_structure_unparsed(records)  # noqa: SLF001
+    cleaning_service._mark_structure_unparsed(records)  # noqa: SLF001 - 幂等
+
+    assert records[0]["issues"] == ["asr_transcript", "structure_unparsed"]
+    assert records[1]["issues"] == ["structure_unparsed"]
