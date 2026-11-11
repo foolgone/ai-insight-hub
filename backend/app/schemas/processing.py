@@ -12,8 +12,9 @@ class FileInfo(BaseSchema):
     filename: str
     size: int
     mime_type: str | None = None
-    upload_url: str | None = None
     storage_backend: str | None = None
+    # 刻意不返回 upload_url：内部对象地址（http://minio:9000/<bucket>/<object>）
+    # 对前端无用，且会暴露内网主机名与桶结构。需要下载走 API 鉴权代理。
 
 
 class UploadResponse(BaseSchema):
