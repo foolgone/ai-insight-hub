@@ -11,6 +11,7 @@ import { Pagination } from '../../components/Pagination'
 import { Progress } from '../../components/Progress'
 import { Table } from '../../components/Table'
 import { CreateEvaluationModal } from '../../components/quality/CreateEvaluationModal'
+import { RunComparisonPanel } from '../../components/quality/RunComparisonPanel'
 import { useQualityResultsQuery } from '../../hooks/useQuality'
 import { useDatasourceStore } from '../../stores/datasourceStore'
 import { formatDateTime } from '../../lib/format'
@@ -185,6 +186,8 @@ export default function QualityAssessment() {
           </div>
 
           <OverviewCards distribution={distribution} />
+
+          <RunComparisonPanel datasourceId={currentDatasourceId} />
 
           <div className="rounded-md border border-gray-200 bg-white p-4">
             <h2 className="mb-3 text-lg font-semibold text-gray-900">评估结果</h2>

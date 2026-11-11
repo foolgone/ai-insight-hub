@@ -163,7 +163,11 @@ async def _persist_knowledge(
 
 
 async def _persist_summary(
-    session: AsyncSession, *, datasource_id: uuid.UUID, payload: dict[str, Any]
+    session: AsyncSession,
+    *,
+    datasource_id: uuid.UUID,
+    task_id: uuid.UUID,
+    payload: dict[str, Any],
 ) -> bool:
     """摘要落库（``analysis_type='other'``，不污染洞察视图）。"""
     summary = str(payload.get("summary") or "").strip()
@@ -174,6 +178,7 @@ async def _persist_summary(
         AnalysisResult(
             datasource_id=datasource_id,
             data_id=None,
+            task_id=task_id,
             analysis_type="other",
             result={
                 "kind": "transcript_summary",
@@ -240,7 +245,9 @@ async def apply(
     if structure == "knowledge":
         await _persist_knowledge(session, datasource_id=datasource_id, payload=payload)
     elif structure == "summary":
-        await _persist_summary(session, datasource_id=datasource_id, payload=payload)
+        await _persist_summary(
+            session, datasource_id=datasource_id, task_id=task_id, payload=payload
+        )
     await session.flush()
 
     logger.info(

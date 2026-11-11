@@ -71,8 +71,93 @@ class AnalysisResultModel(BaseModel):
     suggestions: list[str] = Field(default_factory=list)
 
 
+# --------------------------------------------------------------------------- 批次（run）与对比
+
+
+class RunItem(BaseSchema):
+    """一个批次 = 一次任务。``sample_count`` 只统计带 task_id 归属的结果。"""
+
+    task_id: uuid.UUID
+    task_type: str
+    status: str
+    created_at: datetime | None = None
+    completed_at: datetime | None = None
+    sample_count: int = 0
+    avg_overall_score: float | None = None
+    evaluated: int | None = None
+    needs_review: int | None = None
+
+
+class RunListResponse(BaseSchema):
+    items: list[RunItem]
+
+
+class ScoreBands(BaseSchema):
+    """4 档分布（阈值与前端 ``lib/quality.js``、后端 ``quality_level_for`` 一致）。"""
+
+    excellent: int = 0
+    good: int = 0
+    fair: int = 0
+    poor: int = 0
+
+
+class RunOverview(BaseSchema):
+    task_id: uuid.UUID
+    status: str
+    completed_at: datetime | None = None
+    sample_count: int = 0
+    avg_overall_score: float = 0.0
+    needs_review: int = 0
+    dimension_averages: dict[str, float] = Field(default_factory=dict)
+    bands: ScoreBands = Field(default_factory=ScoreBands)
+
+
+class RunDelta(BaseSchema):
+    avg_overall_score: float = 0.0
+    sample_count: int = 0
+    needs_review: int = 0
+    dimension_averages: dict[str, float] = Field(default_factory=dict)
+    bands: ScoreBands = Field(default_factory=ScoreBands)
+
+
+class DimensionDelta(BaseSchema):
+    name: str
+    base: float
+    target: float
+    delta: float
+
+
+class DialogueDelta(BaseSchema):
+    """同一条对话在两个批次里的分数变化（按 data_id 对齐）。"""
+
+    data_id: uuid.UUID
+    base_score: float
+    target_score: float
+    delta: float
+
+
+class RunComparison(BaseSchema):
+    """两个批次的对比结果（target 相对 base 的变化）。"""
+
+    base: RunOverview
+    target: RunOverview
+    delta: RunDelta
+    dimensions: list[DimensionDelta]
+    # 分数变化最大的几条对话，便于直接定位「改坏了/改好了哪条」
+    regressions: list[DialogueDelta]
+    improvements: list[DialogueDelta]
+    # 只在一侧出现的对话数（批次样本不完全相同时给出，避免误读平均分变化）
+    added_items: int = 0
+    removed_items: int = 0
+    # 问题文本来自 LLM 自由文本，仅做归一化后对比，作为线索而非精确指标
+    issues_added: list[str] = Field(default_factory=list)
+    issues_removed: list[str] = Field(default_factory=list)
+
+
 __all__ = [
     "AnalysisResultModel",
+    "DialogueDelta",
+    "DimensionDelta",
     "EvaluationRequest",
     "EvaluationTaskResponse",
     "QualityAnalysisItem",
@@ -80,4 +165,10 @@ __all__ = [
     "QualityAnalysisSummary",
     "ReviewRequest",
     "ReviewResponse",
+    "RunComparison",
+    "RunDelta",
+    "RunItem",
+    "RunListResponse",
+    "RunOverview",
+    "ScoreBands",
 ]

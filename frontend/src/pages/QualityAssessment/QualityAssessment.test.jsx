@@ -4,13 +4,15 @@ import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import QualityAssessment from './index'
-import { listQualityResults } from '../../api/quality'
+import { listQualityResults, listQualityRuns } from '../../api/quality'
 import { useDatasourceStore } from '../../stores/datasourceStore'
 
 vi.mock('../../api/quality', () => ({
   triggerQuality: vi.fn(),
   listQualityResults: vi.fn(),
   reviewQuality: vi.fn(),
+  listQualityRuns: vi.fn(),
+  compareQualityRuns: vi.fn(),
 }))
 vi.mock('../../api/datasources', () => ({
   listDataSources: vi.fn(),
@@ -54,6 +56,8 @@ describe('QualityAssessmentPage', () => {
       pagination: { page: 1, limit: 10, total: 1, pages: 1 },
       summary: { total: 1, avg_overall_score: 82, needs_review_count: 1 },
     })
+    // 只有一个批次 → 批次对比面板展示引导态（不引入与 4 档概览重名的文案）
+    listQualityRuns.mockResolvedValue({ items: [] })
   })
 
   afterEach(() => useDatasourceStore.setState({ currentId: null }))

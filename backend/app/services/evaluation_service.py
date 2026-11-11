@@ -209,6 +209,8 @@ async def _execute_evaluation(
                 AnalysisResult(
                     datasource_id=task.datasource_id,
                     data_id=item.id,
+                    # 批次归属：同一次评估的所有结果共享 task_id，供「批次对比」使用
+                    task_id=task.id,
                     analysis_type="quality",
                     result=payload,
                     agent_name=str(result.metadata.get("agent", "evaluation_agent")),
