@@ -19,8 +19,14 @@ from app.schemas.agents.structure import StructureInput, StructureOutput
 
 PROMPT_DIR = Path(__file__).resolve().parents[1] / "prompts" / "structure"
 
-# 单次结构化的文本上限（约 2 万汉字），超出截断，避免 token 爆炸
+# 单次结构化的文本上限（约 2 万汉字）。超过由调用方分块（structure_service），
+# 这里只做兜底截断，避免误传超长文本把请求打爆。
 MAX_TEXT_CHARS = 30000
+# 结构化输出比其它 Agent 长（一组 QA 就要几十 token），全局 4096 会被截断；
+# 实测 39 分钟面试需要 6000+ 输出 token，这里单独放宽到 8192。
+STRUCTURE_MAX_TOKENS = 8192
+# 输出更长 → 生成时间更长；60s 容易在长录音上超时
+STRUCTURE_TIMEOUT = 120.0
 
 
 class TranscriptStructureAgent(BaseAgent):
@@ -36,7 +42,13 @@ class TranscriptStructureAgent(BaseAgent):
         credentials: Any = None,
     ) -> None:
         super().__init__(
-            config or AgentConfig(name="structure_agent", version=load_prompt_version(PROMPT_DIR)),
+            config
+            or AgentConfig(
+                name="structure_agent",
+                version=load_prompt_version(PROMPT_DIR),
+                max_tokens=STRUCTURE_MAX_TOKENS,
+                timeout=STRUCTURE_TIMEOUT,
+            ),
             llm=llm,
             credentials=credentials,
         )
@@ -70,6 +82,23 @@ class TranscriptStructureAgent(BaseAgent):
         if not payload.text.strip():
             raise AgentInputError("text must not be empty")
 
+    def _validate_parsed(self, model: Any) -> None:
+        """业务校验（进入修复轮）：形态与内容必须自洽。"""
+        if isinstance(model, StructureOutput):
+            output = model
+        else:  # pragma: no cover - parse_with_repair 只会传 schema 实例
+            return
+        if output.structure == "qa" and not output.qa:
+            raise ValueError("structure=qa but qa is empty; 请从原文切出问答对，或改选其它 structure")
+        if output.structure == "knowledge" and not output.knowledge:
+            raise ValueError(
+                "structure=knowledge but knowledge is empty; 请从原文提炼知识点，或改选其它 structure"
+            )
+        if output.structure == "summary" and not (output.summary or "").strip():
+            raise ValueError(
+                "structure=summary but summary is empty; 请用原文内容补全 summary，或改选 qa/knowledge"
+            )
+
     def _validate_output(self, data: Any) -> dict[str, Any]:
         if isinstance(data, StructureOutput):
             output = data
@@ -79,12 +108,11 @@ class TranscriptStructureAgent(BaseAgent):
             except Exception as exc:  # noqa: BLE001
                 raise AgentOutputError(f"invalid structure output: {exc}") from exc
 
-        if output.structure == "qa" and not output.qa:
-            raise AgentOutputError("structure=qa but qa is empty")
-        if output.structure == "knowledge" and not output.knowledge:
-            raise AgentOutputError("structure=knowledge but knowledge is empty")
-        if output.structure == "summary" and not (output.summary or "").strip():
-            raise AgentOutputError("structure=summary but summary is empty")
+        # 修复轮之后仍然不自洽 → 判失败（不写库，由调用方降级）
+        try:
+            self._validate_parsed(output)
+        except ValueError as exc:
+            raise AgentOutputError(str(exc)) from exc
         return output.model_dump(mode="json")
 
     # -- 便捷入口 ---------------------------------------------------------
@@ -93,4 +121,10 @@ class TranscriptStructureAgent(BaseAgent):
         return await self.invoke(input_data, **kwargs)
 
 
-__all__ = ["MAX_TEXT_CHARS", "PROMPT_DIR", "TranscriptStructureAgent"]
+__all__ = [
+    "MAX_TEXT_CHARS",
+    "PROMPT_DIR",
+    "STRUCTURE_MAX_TOKENS",
+    "STRUCTURE_TIMEOUT",
+    "TranscriptStructureAgent",
+]

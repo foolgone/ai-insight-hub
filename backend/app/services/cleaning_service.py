@@ -317,6 +317,15 @@ async def _persist_dialogues(
     return len(inserted), sum(scored), len(rows), len(scored)
 
 
+def _mark_structure_unparsed(records: list[dict[str, Any]]) -> None:
+    """结构化失败时给每条记录打标记，避免「一整段」看起来像正常结果。"""
+    for record in records:
+        issues = list(record.get("issues") or [])
+        if "structure_unparsed" not in issues:
+            issues.append("structure_unparsed")
+        record["issues"] = issues
+
+
 async def _execute_clean(
     task_id: uuid.UUID, session: AsyncSession, *, commit: bool
 ) -> dict[str, Any]:
@@ -349,6 +358,7 @@ async def _execute_clean(
     scored_total = 0
     asr_summary: dict[str, Any] | None = None
     structure_summary: dict[str, Any] | None = None
+    structure_error: str | None = None
     raw_records = 0
     failed_raw = 0
     near_duplicates = 0
@@ -408,9 +418,22 @@ async def _execute_clean(
                         "content_type": structured.get("content_type"),
                         "structure": structured.get("structure"),
                         "confidence": structured.get("confidence"),
+                        "chunks": (structured.get("merge") or {}).get("chunks"),
+                        "partial": bool(structured.get("partial")),
                     }
+                else:
+                    # 结构化失败不再静默：记录原因，并给对话打标记（前端可提示「未切分」）
+                    error_payload = (raw.raw_content or {}).get("structure_error") or {}
+                    if error_payload:
+                        structure_error = str(error_payload.get("message") or "")[:500]
+                        _mark_structure_unparsed(records)
                 if structured and structured.get("structure") == "qa":
                     qa_records = structure_service.qa_to_dialogues(structured)
+                    if structured.get("partial"):
+                        for record in qa_records:
+                            issues = list(record.get("issues") or [])
+                            issues.append("structure_partial")
+                            record["issues"] = issues
                     if qa_records:
                         records = qa_records
 
@@ -510,6 +533,8 @@ async def _execute_clean(
             task.result["asr"] = asr_summary
         if structure_summary:
             task.result["structure"] = structure_summary
+        if structure_error:
+            task.result["structure_error"] = structure_error
 
         # 用户取消：保留已清洗结果，状态保持 cancelled，不覆盖为 completed/failed
         if task.status == "cancelled":

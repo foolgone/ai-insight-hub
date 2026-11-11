@@ -17,7 +17,7 @@ import re
 import time
 import uuid
 from abc import ABC, abstractmethod
-from collections.abc import Mapping, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass, field
 from decimal import Decimal
 from pathlib import Path
@@ -204,6 +204,15 @@ class BaseAgent(ABC):
     def _validate_output(self, data: Any) -> dict[str, Any]:
         """输出校验/归一化；不合法抛 ``AgentOutputError``。"""
 
+    def _validate_parsed(self, model: Any) -> None:
+        """业务校验钩子：schema 合法但内容不可用时抛 ``ValueError``。
+
+        与 ``_validate_output`` 的区别：这里抛出的错误会**进入结构化修复轮**
+        （``parse_with_repair`` 的 validator），而不是直接判失败。
+        典型场景：模型选了 ``structure=summary`` 却返回空 summary。
+        """
+        return None
+
     # -- 对外唯一入口 -----------------------------------------------------
     async def invoke(
         self,
@@ -226,6 +235,8 @@ class BaseAgent(ABC):
         attempts = 0
         token_usage = {"input": 0, "output": 0}
         guard_hits: list[str] = []
+        # 修复轮也会消耗 token，失败时要一起记账（否则失败调用显示 0 token）
+        repair_usage: list[LLMUsage] = []
 
         # ── BYOK：解析本次调用使用的凭据（必须在 try 之外，异常向上冒泡） ──
         # 只有"有 user_id + session"且未开 fallback 时才要求用户 Key；
@@ -274,7 +285,6 @@ class BaseAgent(ABC):
                 max_retry_tokens=self.config.max_retry_tokens,
             )
             guard = CostAwareRetryGuard(self.config.max_retry_tokens)
-            repair_usage: list[LLMUsage] = []
 
             async def _call(attempt: int) -> LLMResponse:
                 nonlocal attempts
@@ -298,13 +308,13 @@ class BaseAgent(ABC):
                     text=response.content,
                     llm=agent_llm,
                     usage_collector=repair_usage,
+                    validator=self._validate_parsed,
                 )
             data = self._validate_output(payload)
 
             for usage in repair_usage:
                 token_usage["input"] += usage.input_tokens
                 token_usage["output"] += usage.output_tokens
-
             duration = time.perf_counter() - started
             usage_total = LLMUsage(
                 input_tokens=token_usage["input"],
@@ -362,6 +372,12 @@ class BaseAgent(ABC):
                 datasource_id=datasource_id,
                 duration=duration,
                 key_source=key_source,
+                usage=LLMUsage(
+                    input_tokens=token_usage["input"]
+                    + sum(item.input_tokens for item in repair_usage),
+                    output_tokens=token_usage["output"]
+                    + sum(item.output_tokens for item in repair_usage),
+                ),
             )
 
             # ── BYOK：用户 Key 失效 → 幂等标记 invalid，抛可读错误（不回退服务端 Key） ──
@@ -457,6 +473,7 @@ class BaseAgent(ABC):
         datasource_id: uuid.UUID | None,
         duration: float,
         key_source: str = "server",
+        usage: LLMUsage | None = None,
     ) -> None:
         if session is None or not settings.LLM_CALL_LOG_ENABLED:
             return
@@ -473,6 +490,7 @@ class BaseAgent(ABC):
                 agent_version=self.config.version,
                 duration_seconds=duration,
                 key_source=key_source,
+                usage=usage,
             )
         except Exception as exc:  # noqa: BLE001
             logger.opt(exception=exc).error("failure tracking failed")
@@ -484,6 +502,7 @@ async def _parse_structured(
     text: str,
     llm: LLMPort,
     usage_collector: list[LLMUsage],
+    validator: Callable[[Any], None] | None = None,
 ) -> BaseModel:
     """延迟导入避免模块循环（structured_output 依赖 llm，不依赖 base）。"""
     from app.agents.structured_output import parse_with_repair
@@ -493,6 +512,7 @@ async def _parse_structured(
         schema=schema,
         llm=llm,
         usage_collector=usage_collector,
+        validator=validator,
     )
 
 

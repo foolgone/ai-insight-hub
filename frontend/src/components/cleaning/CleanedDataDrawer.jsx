@@ -1,6 +1,7 @@
 import { Drawer } from '../Drawer'
 import { Badge } from '../Badge'
 import { formatDateTime } from '../../lib/format'
+import { hasStructureIssue, issueLabel } from '../../lib/issues'
 
 function Section({ title, children }) {
   return (
@@ -24,6 +25,18 @@ export function CleanedDataDrawer({ item, open, onClose }) {
   return (
     <Drawer open={open} onClose={onClose} title="清洗结果详情">
       <div className="space-y-5">
+        {hasStructureIssue(issues) ? (
+          <div
+            role="status"
+            className="rounded border border-warning-200 bg-warning-50 px-3 py-2 text-xs text-warning-800"
+          >
+            {issues.includes('structure_unparsed')
+              ? '这条录音已完成转写，但没有切分出问答对（保留整段文本）。'
+              : '这条录音只有部分内容切分成功，剩余内容保留为整段文本。'}
+            可在「数据清洗」页重试该任务重新切分；转写结果会复用，不会重复消耗转写额度。
+          </div>
+        ) : null}
+
         <div className="flex flex-wrap items-center gap-2 text-xs text-gray-500">
           <span>对话 ID：{item.dialogue_id}</span>
           <span>时间：{formatDateTime(item.timestamp)}</span>
@@ -53,7 +66,7 @@ export function CleanedDataDrawer({ item, open, onClose }) {
           {issues.length > 0 ? (
             <ul className="mt-2 list-inside list-disc space-y-1 text-xs text-gray-600">
               {issues.map(issue => (
-                <li key={issue}>{issue}</li>
+                <li key={issue}>{issueLabel(issue)}</li>
               ))}
             </ul>
           ) : null}

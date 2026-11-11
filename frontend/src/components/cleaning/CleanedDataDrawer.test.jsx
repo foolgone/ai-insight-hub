@@ -39,4 +39,42 @@ describe('CleanedDataDrawer', () => {
 
     expect(container).toBeEmptyDOMElement()
   })
+
+  it('结构化失败时展示「未切分」提示并把 issue 码翻成中文', () => {
+    render(
+      <CleanedDataDrawer
+        item={{
+          ...ITEM,
+          issues: ['asr_transcript', 'mono_speaker_unknown', 'structure_unparsed'],
+        }}
+        open
+        onClose={() => {}}
+      />
+    )
+
+    expect(screen.getByRole('status')).toHaveTextContent('没有切分出问答对')
+    expect(screen.getByText('来自 ASR 转写')).toBeInTheDocument()
+    expect(screen.getByText('单声道，说话人未知')).toBeInTheDocument()
+    expect(screen.getByText('未切分问答（整段保留）')).toBeInTheDocument()
+  })
+
+  it('部分切分时提示结果不完整', () => {
+    render(
+      <CleanedDataDrawer
+        item={{ ...ITEM, issues: ['structure_partial'] }}
+        open
+        onClose={() => {}}
+      />
+    )
+
+    expect(screen.getByRole('status')).toHaveTextContent('只有部分内容切分成功')
+  })
+
+  it('未知 issue 码原样展示，不吞掉信息', () => {
+    render(
+      <CleanedDataDrawer item={{ ...ITEM, issues: ['some_future_code'] }} open onClose={() => {}} />
+    )
+
+    expect(screen.getByText('some_future_code')).toBeInTheDocument()
+  })
 })

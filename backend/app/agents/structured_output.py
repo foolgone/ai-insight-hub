@@ -10,6 +10,7 @@
 from __future__ import annotations
 
 import json
+from collections.abc import Callable
 from typing import TypeVar
 
 from pydantic import BaseModel, ValidationError
@@ -72,14 +73,23 @@ async def parse_with_repair(
     llm: LLMPort,
     max_attempts: int = 2,
     usage_collector: list[LLMUsage] | None = None,
+    validator: Callable[[TModel], None] | None = None,
 ) -> TModel:
-    """解析结构化输出；失败时调用模型修复一次。"""
+    """解析结构化输出；失败时调用模型修复一次。
+
+    ``validator`` 用于**业务校验**（schema 合法但内容不可用，例如
+    ``structure=summary`` 却 ``summary`` 为空）。这类错误同样会进入修复轮，
+    否则模型返回一个「最小合法但空」的对象就能让整条链路静默降级。
+    """
     raw_output = text
     last_error: Exception | None = None
 
     for attempt in range(max_attempts):
         try:
-            return schema.model_validate_json(extract_json_text(raw_output))
+            model = schema.model_validate_json(extract_json_text(raw_output))
+            if validator is not None:
+                validator(model)
+            return model
         except (ValidationError, ValueError) as exc:
             last_error = exc
             if attempt + 1 >= max_attempts:
@@ -93,7 +103,13 @@ async def parse_with_repair(
                 },
                 {
                     "role": "user",
-                    "content": (f"原始输出：\n{raw_output}\n\n" f"校验错误：{exc}\n" "请返回修复后的 JSON。"),
+                    "content": (
+                        f"原始输出：\n{raw_output}\n\n"
+                        f"校验错误：{exc}\n\n"
+                        "请返回修复后的 JSON。若错误指出某个字段为空（如 summary / qa / knowledge），"
+                        "必须用原文中的真实内容补全，不得返回空字符串或空数组；"
+                        "如果确实没有该形态的内容，请改选与实际内容匹配的 structure。"
+                    ),
                 },
             ]
             response = await llm.chat(
