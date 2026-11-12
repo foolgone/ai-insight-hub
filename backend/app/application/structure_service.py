@@ -28,6 +28,7 @@ from app.repositories import knowledge_base as knowledge_repo
 
 __all__ = [
     "apply",
+    "is_single_mono",
     "merge_payloads",
     "qa_to_dialogues",
     "split_transcript",
@@ -244,7 +245,7 @@ def _build_agent(credentials=None):  # noqa: ANN001, ANN202 - 允许测试 monke
     return TranscriptStructureAgent(credentials=credentials)
 
 
-def _is_single_blob(records: list[dict[str, Any]]) -> bool:
+def is_single_mono(records: list[dict[str, Any]]) -> bool:
     """单声道/双声道同源：只有一条记录且没有说话人配对。"""
     if len(records) != 1:
         return False
@@ -427,7 +428,7 @@ async def apply(
     if isinstance(existing, dict):
         return existing
 
-    if not _is_single_blob(records):
+    if not is_single_mono(records):
         return None
 
     text = str(content.get("text") or "").strip()

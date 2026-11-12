@@ -17,11 +17,13 @@ from app.repositories import raw_data as raw_data_repo
 from app.core.config import settings
 from app.core.database import get_db
 from app.core.exceptions import (
+    AIInsightHubException,
     AsrCredentialInvalidError,
     AsrCredentialNotConfiguredError,
     FileFormatInvalidError,
     FileTooLargeError,
 )
+from app.core.errors import FrameworkErrorCode
 from app.models import RawData, User
 from app.schemas.base import Page
 from app.schemas.cleaned_data import CleanedDataDetail, CleanedDataItem
@@ -37,9 +39,18 @@ from app.schemas.processing import (
     CleanRequest,
     CleanResponse,
     FileInfo,
+    RawDataItem,
+    RawDataListResponse,
+    StructureResponse,
     UploadResponse,
 )
-from app.services import cleaning_service, datasource_service, parsers, storage_service
+from app.services import (
+    cleaning_service,
+    datasource_service,
+    parsers,
+    storage_service,
+    structure_task_service,
+)
 from app.services.credential_service import PROVIDER_ASR, credential_service
 
 router = APIRouter()
@@ -344,6 +355,70 @@ async def clean_datasource(
         estimated_duration=estimated_duration,
         message="Cleaning task queued",
     )
+
+
+@router.get(
+    "/{datasource_id}/raw-data",
+    response_model=RawDataListResponse,
+    response_model_by_alias=False,
+    summary="上传文件列表（转写 / 切分状态）",
+)
+async def list_raw_data(
+    datasource_id: uuid.UUID,
+    user: User = Depends(require_roles(*READ_ROLES)),
+    session: AsyncSession = Depends(get_db),
+) -> RawDataListResponse:
+    datasource = await datasource_service.get(session, user=user, datasource_id=datasource_id)
+    rows = await raw_data_repo.list_for_datasource(session, datasource.id)
+    items: list[RawDataItem] = []
+    for raw in reversed(rows):  # 最新上传在前
+        content = raw.raw_content or {}
+        media = content.get("media") or {}
+        file_info = raw.file_info or {}
+        state = structure_task_service.structure_state(raw)
+        items.append(
+            RawDataItem(
+                id=raw.id,
+                filename=file_info.get("filename"),
+                size=file_info.get("size"),
+                format=content.get("format"),
+                duration=media.get("duration"),
+                channels=media.get("channels"),
+                channel_mode=media.get("channel_mode"),
+                status=raw.status,
+                created_at=raw.created_at,
+                processed_at=raw.processed_at,
+                **state,
+            )
+        )
+    return RawDataListResponse(items=items)
+
+
+@router.post(
+    "/{datasource_id}/raw-data/{raw_id}/structure",
+    status_code=202,
+    response_model=StructureResponse,
+    response_model_by_alias=False,
+    summary="对已转写文件重新切分（202 + task_id）",
+    dependencies=[Depends(require_llm_credential)],
+)
+async def structure_raw_data(
+    datasource_id: uuid.UUID,
+    raw_id: uuid.UUID,
+    user: User = Depends(require_roles(*WRITE_ROLES)),
+    session: AsyncSession = Depends(get_db),
+) -> StructureResponse:
+    datasource = await datasource_service.get(session, user=user, datasource_id=datasource_id)
+    raw = await raw_data_repo.get(session, raw_id)
+    if raw is None or raw.datasource_id != datasource.id:
+        raise AIInsightHubException(
+            "Raw data not found", code=FrameworkErrorCode.HTTP_ERROR, status_code=404
+        )
+    task = await structure_task_service.create_structure_task(session, user_id=user.id, raw=raw)
+    task.celery_task_id = enqueue.enqueue_structure(str(task.id))
+    await session.flush()
+    await session.refresh(task)
+    return StructureResponse(task_id=task.id, message="Structure task queued")
 
 
 @router.get(

@@ -30,7 +30,7 @@ class Task(Base):
     __tablename__ = "tasks"
     __table_args__ = (
         CheckConstraint(
-            "task_type IN ('clean', 'evaluate', 'extract', 'analyze', 'report')",
+            "task_type IN ('clean', 'structure', 'evaluate', 'extract', 'analyze', 'report')",
             name="task_type_valid",
         ),
         CheckConstraint(

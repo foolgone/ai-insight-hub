@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import uuid
+from datetime import datetime
 
 from pydantic import Field
 
@@ -43,10 +44,44 @@ class CleanResponse(BaseSchema):
     message: str
 
 
+class RawDataItem(BaseSchema):
+    """一个上传文件的「转写 / 切分」状态（转写与拆分拆开后的列表）。"""
+
+    id: uuid.UUID
+    filename: str | None = None
+    size: int | None = None
+    format: str | None = None
+    duration: float | None = None
+    channels: int | None = None
+    channel_mode: str | None = None
+    asr_status: str = "pending"
+    # pending（未切分）/ done（已切分）/ failed（切分失败）
+    structure_status: str = "pending"
+    structure_kind: str | None = None
+    qa_count: int = 0
+    partial: bool = False
+    error: str | None = None
+    status: str = "pending"
+    created_at: datetime | None = None
+    processed_at: datetime | None = None
+
+
+class RawDataListResponse(BaseSchema):
+    items: list[RawDataItem]
+
+
+class StructureResponse(BaseSchema):
+    task_id: uuid.UUID
+    message: str
+
+
 __all__ = [
     "CleanRequest",
     "CleanResponse",
     "CleaningConfig",
     "FileInfo",
+    "RawDataItem",
+    "RawDataListResponse",
+    "StructureResponse",
     "UploadResponse",
 ]

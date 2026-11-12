@@ -875,6 +875,65 @@ file: <binary>
 
 ---
 
+### 6.5 上传文件列表（转写 / 切分状态）
+
+**GET** `/api/v1/datasources/{datasource_id}/raw-data`
+
+**所需角色**：admin / user（自己的）/ viewer（只读）
+
+> 转写与切分拆成两步后，按文件展示状态；只有音视频文件才需要切分。
+
+**响应**：
+```json
+{
+  "items": [
+    {
+      "id": "e8ecdae7-f2cd-430d-ae1b-100bef18ea01",
+      "filename": "众联一面.mp3",
+      "size": 56753537,
+      "format": "media",
+      "duration": 2364.696,
+      "channels": 1,
+      "channel_mode": "mono",
+      "asr_status": "completed",
+      "structure_status": "done",
+      "structure_kind": "qa",
+      "qa_count": 28,
+      "partial": false,
+      "error": null,
+      "status": "completed",
+      "created_at": "2026-11-11T12:20:30",
+      "processed_at": "2026-11-11T12:23:06"
+    }
+  ]
+}
+```
+
+`structure_status`：`pending`（未切分）/ `done`（已切分）/ `failed`（切分失败，`error` 给原因）。
+
+---
+
+### 6.6 重新切分（对已转写文件）
+
+**POST** `/api/v1/datasources/{datasource_id}/raw-data/{raw_id}/structure`
+
+**所需角色**：admin / user（自己的）；viewer ❌（需要已配置 LLM Key）
+
+**响应（202）**：
+```json
+{ "task_id": "46841467-8d43-46d5-bfe3-63dd93ceb0ed", "message": "Structure task queued" }
+```
+
+- 切分成功后**整体替换**该文件派生的对话（先删后写，不会重复）；
+- 同一文件同时只允许一个切分任务。
+
+**状态码**：
+- `202`: 已入队
+- `409`: 未完成转写 / 非音视频文件 / 双声道已配对 / 已有切分任务在跑
+- `404`: 文件不属于该数据源
+
+---
+
 ## 7. 分析与评估
 
 ### 7.1 触发质量评估

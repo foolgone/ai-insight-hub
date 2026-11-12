@@ -167,9 +167,20 @@ async def insert_ignore_conflicts(
     return [(row.id, row.quality_score) for row in inserted]
 
 
+async def delete_for_raw(session: AsyncSession, raw_data_id: uuid.UUID) -> int:
+    """删除某个原始文件派生的全部对话（切分重跑时用于「整体替换」）。"""
+    from sqlalchemy import delete
+
+    result = await session.execute(
+        delete(CleanedData).where(CleanedData.raw_data_id == raw_data_id)
+    )
+    return int(result.rowcount or 0)
+
+
 __all__ = [
     "SORTABLE",
     "count_for_datasource",
+    "delete_for_raw",
     "get",
     "insert_ignore_conflicts",
     "list_for_analysis",

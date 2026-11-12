@@ -5,7 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import DataCleaning from './index'
 import { cancelTask, listTasks, retryTask } from '../../api/tasks'
 import { listCleanedData } from '../../api/cleaning'
-import { listDataSources } from '../../api/datasources'
+import { listDataSources, listRawData } from '../../api/datasources'
 import { useDatasourceStore } from '../../stores/datasourceStore'
 
 vi.mock('../../api/tasks', () => ({
@@ -26,6 +26,8 @@ vi.mock('../../api/datasources', () => ({
   updateDataSource: vi.fn(),
   deleteDataSource: vi.fn(),
   uploadDataSourceFile: vi.fn(),
+  listRawData: vi.fn(),
+  structureRawData: vi.fn(),
 }))
 
 const RUNNING_TASK = {
@@ -82,6 +84,8 @@ describe('DataCleaningPage', () => {
     })
     cancelTask.mockResolvedValue({ status: 'cancelled' })
     retryTask.mockResolvedValue({ status: 'pending' })
+    // 无音视频文件时「转写文件」面板不渲染，避免影响既有断言
+    listRawData.mockResolvedValue({ items: [] })
   })
 
   afterEach(() => {

@@ -195,7 +195,7 @@ def _load_raw_text(raw: RawData) -> str:
     return _raw_text(raw)
 
 
-def _dialogue_uuid(raw_id: uuid.UUID, dialogue_id: str) -> uuid.UUID:
+def dialogue_uuid(raw_id: uuid.UUID, dialogue_id: str) -> uuid.UUID:
     return uuid.uuid5(DIALOGUE_NAMESPACE, f"{raw_id}:{dialogue_id}")
 
 
@@ -264,7 +264,7 @@ def _parse_timestamp(value: Any) -> datetime | None:
     return parsed
 
 
-async def _persist_dialogues(
+async def persist_dialogues(
     session: AsyncSession,
     *,
     raw: RawData,
@@ -292,7 +292,7 @@ async def _persist_dialogues(
             {
                 "datasource_id": raw.datasource_id,
                 "raw_data_id": raw.id,
-                "dialogue_id": _dialogue_uuid(raw.id, dialogue_id),
+                "dialogue_id": dialogue_uuid(raw.id, dialogue_id),
                 "timestamp": parsed_ts,
                 "user_message": str(item.get("user_message") or ""),
                 "ai_response": str(item.get("ai_response") or ""),
@@ -357,8 +357,8 @@ async def _execute_clean(
     candidate_total = 0
     scored_total = 0
     asr_summary: dict[str, Any] | None = None
-    structure_summary: dict[str, Any] | None = None
-    structure_error: str | None = None
+    # 转写完成后自动串接的切分任务（由 Celery 适配层入队）
+    structure_task_ids: list[str] = []
     raw_records = 0
     failed_raw = 0
     near_duplicates = 0
@@ -379,6 +379,7 @@ async def _execute_clean(
 
             content = raw.raw_content or {}
             is_media = content.get("format") == "media"
+            skip_persist = False
 
             if is_media:
                 asr = content.get("asr") or {}
@@ -403,39 +404,15 @@ async def _execute_clean(
                 if asr_result:
                     asr_summary = asr_result
 
-                # 单声道整段转写：交给 AI 判断做成 QA / 知识点 / 摘要
-                structured = await structure_service.apply(
-                    session,
-                    raw=raw,
-                    records=records,
-                    task_id=task.id,
-                    user_id=task.user_id,
-                    datasource_id=raw.datasource_id,
-                    credentials=credential_service,
-                )
-                if structured:
-                    structure_summary = {
-                        "content_type": structured.get("content_type"),
-                        "structure": structured.get("structure"),
-                        "confidence": structured.get("confidence"),
-                        "chunks": (structured.get("merge") or {}).get("chunks"),
-                        "partial": bool(structured.get("partial")),
-                    }
-                else:
-                    # 结构化失败不再静默：记录原因，并给对话打标记（前端可提示「未切分」）
-                    error_payload = (raw.raw_content or {}).get("structure_error") or {}
-                    if error_payload:
-                        structure_error = str(error_payload.get("message") or "")[:500]
-                        _mark_structure_unparsed(records)
-                if structured and structured.get("structure") == "qa":
-                    qa_records = structure_service.qa_to_dialogues(structured)
-                    if structured.get("partial"):
-                        for record in qa_records:
-                            issues = list(record.get("issues") or [])
-                            issues.append("structure_partial")
-                            record["issues"] = issues
-                    if qa_records:
-                        records = qa_records
+                # 转写与切分已拆开：单声道整段只做转写，切分交给独立的 structure 任务
+                if structure_service.is_single_mono(records):
+                    from app.services import structure_task_service
+
+                    structure_task = await structure_task_service.create_structure_task(
+                        session, user_id=task.user_id, raw=raw
+                    )
+                    structure_task_ids.append(str(structure_task.id))
+                    skip_persist = True
 
                 _advance_state(task, CleaningState.NORMALIZING, detail=f"{index}/{raw_records}")
                 data = {"dialogues": records}
@@ -485,7 +462,16 @@ async def _execute_clean(
                 )
 
             _advance_state(task, CleaningState.VALIDATING, detail=f"{index}/{raw_records}")
-            created, raw_quality, candidates, scored = await _persist_dialogues(
+            if skip_persist:
+                # 单声道媒体：对话行由 structure 任务落库（整体替换），这里不写
+                raw.status = "completed"
+                raw.processed_at = _now_naive()
+                task.progress = min(90, 5 + int(index / raw_records * 85))
+                task.current_step = f"transcribed {index}/{raw_records}, structure queued"
+                await session.flush()
+                continue
+
+            created, raw_quality, candidates, scored = await persist_dialogues(
                 session,
                 raw=raw,
                 result_data=data,
@@ -531,10 +517,10 @@ async def _execute_clean(
         }
         if asr_summary:
             task.result["asr"] = asr_summary
-        if structure_summary:
-            task.result["structure"] = structure_summary
-        if structure_error:
-            task.result["structure_error"] = structure_error
+        if structure_task_ids:
+            task.result["structure_queued"] = len(structure_task_ids)
+            # 落进 result：acks_late 重投递时也能补入队
+            task.result["structure_task_ids"] = list(structure_task_ids)
 
         # 用户取消：保留已清洗结果，状态保持 cancelled，不覆盖为 completed/failed
         if task.status == "cancelled":
@@ -546,10 +532,12 @@ async def _execute_clean(
                 "status": "cancelled",
                 "task_id": str(task.id),
                 "cleaned_records": cleaned_total,
+                "structure_task_ids": structure_task_ids,
             }
 
-        # 有候选记录即视为完成：重跑时全部命中唯一索引（0 条新增）也应成功返回
-        has_records = bool(cleaned_total or candidate_total)
+        # 有候选记录即视为完成：重跑时全部命中唯一索引（0 条新增）也应成功返回；
+        # 单声道媒体这条路径不写对话（交给 structure 任务），只看是否有待切分任务
+        has_records = bool(cleaned_total or candidate_total or structure_task_ids)
         task.status = "completed" if has_records else "failed"
         task.progress = 100
         _advance_state(
@@ -576,6 +564,7 @@ async def _execute_clean(
             "status": task.status,
             "task_id": str(task.id),
             "cleaned_records": cleaned_total,
+            "structure_task_ids": structure_task_ids,
         }
 
     except Exception as exc:  # noqa: BLE001 - 任务失败需落库
