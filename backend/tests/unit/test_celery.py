@@ -25,6 +25,21 @@ def test_celery_configuration() -> None:
     assert "tasks.ping" in celery_app.tasks
 
 
+def test_all_task_modules_are_registered() -> None:
+    """任务模块必须在 app/tasks/__init__ 里导入，否则 worker 会拒收（unregistered task）。"""
+    expected = {
+        "tasks.ping",
+        "tasks.clean_datasource",
+        "tasks.structure_raw",
+        "tasks.evaluate_datasource",
+        "tasks.extract_knowledge",
+        "tasks.analyze_insights",
+        "tasks.generate_report",
+    }
+    missing = expected - set(celery_app.tasks)
+    assert not missing, f"未注册的任务：{sorted(missing)}"
+
+
 def test_ping_runs_in_eager_mode(eager_mode) -> None:
     result = ping.delay()
 
