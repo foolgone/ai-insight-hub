@@ -251,7 +251,11 @@ async def _setup_mono_ready(db_session) -> tuple:
     return datasource, raw, task
 
 
-async def test_media_clean_structures_mono_into_qa(db_session, monkeypatch) -> None:
+async def test_media_clean_queues_structure_for_mono(db_session, monkeypatch) -> None:
+    """转写与切分拆开后：clean 只转写 + 排队 structure，对话由 structure 任务落库。"""
+    from app.models import Task
+    from app.services import structure_task_service
+
     datasource, raw, task = await _setup_mono_ready(db_session)
     payload = {
         "content_type": "interview",
@@ -267,7 +271,23 @@ async def test_media_clean_structures_mono_into_qa(db_session, monkeypatch) -> N
     outcome = await cleaning_service.run_clean_task(str(task.id), session=db_session)
 
     assert outcome["status"] == "completed"
-    assert outcome["cleaned_records"] == 2
+    # 单声道媒体不再在 clean 里写对话
+    assert outcome["cleaned_records"] == 0
+    structure_task_ids = outcome["structure_task_ids"]
+    assert len(structure_task_ids) == 1
+
+    structure_task = await db_session.get(Task, structure_task_ids[0])
+    assert structure_task is not None
+    assert structure_task.task_type == "structure"
+    assert structure_task.params["raw_data_id"] == str(raw.id)
+    assert structure_task.status == "pending"
+
+    # 执行切分任务：落 2 条问答
+    result = await structure_task_service.run_structure_task(
+        str(structure_task.id), session=db_session
+    )
+    assert result["status"] == "completed"
+    assert result["created"] == 2
 
     rows = (
         (
@@ -281,10 +301,23 @@ async def test_media_clean_structures_mono_into_qa(db_session, monkeypatch) -> N
     assert len(rows) == 2
     assert {row.metadata_["source"] for row in rows} == {"asr_structured"}
     assert all(row.quality_score is not None for row in rows)
-    assert rows[0].user_message == "请你做一下自我介绍。"
+    assert rows[0].user_message in {"请你做一下自我介绍。", "你做过什么项目？"}
 
     await db_session.refresh(raw)
     assert raw.raw_content["structured"]["structure"] == "qa"
 
-    await db_session.refresh(task)
-    assert task.result["structure"]["structure"] == "qa"
+    # 再切一次：整体替换，不产生重复（修复「重跑按位置合并」的问题）
+    again = await structure_task_service.run_structure_task(
+        str(structure_task.id), session=db_session
+    )
+    assert again["status"] == "completed"
+    rows_after = (
+        (
+            await db_session.execute(
+                select(CleanedData).where(CleanedData.datasource_id == datasource.id)
+            )
+        )
+        .scalars()
+        .all()
+    )
+    assert len(rows_after) == 2

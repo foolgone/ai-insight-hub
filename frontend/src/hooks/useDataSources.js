@@ -1,11 +1,14 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import * as datasourceApi from '../api/datasources'
+import { cleanedDataKeys } from './useCleaning'
+import { taskKeys } from './useTasks'
 
 /** 数据源 Query key（切源时只按 key 精确失效，不做全量刷新）。 */
 export const dataSourceKeys = {
   all: ['datasources'],
   list: params => ['datasources', 'list', params],
   detail: id => ['datasources', 'detail', id],
+  rawData: id => ['datasources', id, 'raw-data'],
 }
 
 /**
@@ -68,5 +71,37 @@ export function useUploadDataSourceFile() {
   return useMutation({
     mutationFn: ({ id, file }) => datasourceApi.uploadDataSourceFile(id, file),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: dataSourceKeys.all }),
+  })
+}
+
+/**
+ * 上传文件列表（转写 / 切分状态）；无数据源时不请求。
+ * @param {string|null|undefined} datasourceId
+ * @param {Object} [options]
+ */
+export function useRawDataQuery(datasourceId, options = {}) {
+  return useQuery({
+    queryKey: dataSourceKeys.rawData(datasourceId),
+    queryFn: () => datasourceApi.listRawData(datasourceId),
+    enabled: Boolean(datasourceId),
+    ...options,
+  })
+}
+
+/** 重新切分：失效文件列表、清洗结果与任务列表。 */
+export function useStructureRawData() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ datasourceId, rawId }) => datasourceApi.structureRawData(datasourceId, rawId),
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: dataSourceKeys.all })
+      queryClient.invalidateQueries({ queryKey: cleanedDataKeys.all })
+      queryClient.invalidateQueries({ queryKey: taskKeys.all })
+      if (variables?.datasourceId) {
+        queryClient.invalidateQueries({
+          queryKey: dataSourceKeys.rawData(variables.datasourceId),
+        })
+      }
+    },
   })
 }

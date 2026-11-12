@@ -70,3 +70,22 @@ export async function uploadDataSourceFile(id, file) {
   })
   return data
 }
+
+/**
+ * 上传文件列表（含转写 / 切分状态）。
+ * @param {string} id 数据源 ID
+ */
+export async function listRawData(id) {
+  const { data } = await apiClient.get(endpoints.datasources.rawData(id))
+  return data
+}
+
+/**
+ * 对已转写文件重新切分（202）。
+ * @param {string} id 数据源 ID
+ * @param {string} rawId 文件（raw_data）ID
+ */
+export async function structureRawData(id, rawId) {
+  const { data } = await apiClient.post(endpoints.datasources.rawDataStructure(id, rawId))
+  return data
+}

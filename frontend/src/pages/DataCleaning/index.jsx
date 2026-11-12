@@ -14,6 +14,7 @@ import { Tabs } from '../../components/Tabs'
 import { AgentStatusBadge } from '../../components/business/AgentStatusBadge'
 import { CleanedDataDrawer } from '../../components/cleaning/CleanedDataDrawer'
 import { CreateCleaningModal } from '../../components/cleaning/CreateCleaningModal'
+import { RawDataPanel } from '../../components/cleaning/RawDataPanel'
 import { useCleanedDataQuery } from '../../hooks/useCleaning'
 import { useTaskStream } from '../../hooks/useTaskStream'
 import { useCancelTask, useRetryTask, useTasksQuery } from '../../hooks/useTasks'
@@ -316,6 +317,8 @@ export default function DataCleaning() {
           ) : null}
         </div>
       </div>
+
+      <RawDataPanel datasourceId={currentDatasourceId} />
 
       <div id="cleaned-results" className="rounded-md border border-gray-200 bg-white p-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">

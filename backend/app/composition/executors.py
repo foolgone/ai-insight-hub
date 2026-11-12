@@ -63,9 +63,16 @@ async def _enqueue_report(session: AsyncSession, task: Task) -> str:
     return enqueue.enqueue_report(str(report.id))
 
 
+async def _enqueue_structure(_session: AsyncSession, task: Task) -> str:
+    from app.composition import enqueue
+
+    return enqueue.enqueue_structure(str(task.id))
+
+
 def _build_registry() -> dict[str, Executor]:
     return {
         "clean": _enqueue_clean,
+        "structure": _enqueue_structure,
         "evaluate": _enqueue_evaluate,
         "extract": _enqueue_extract,
         "analyze": _enqueue_insight,

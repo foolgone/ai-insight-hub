@@ -12,6 +12,7 @@ __all__ = [
     "enqueue_extract",
     "enqueue_insight",
     "enqueue_report",
+    "enqueue_structure",
 ]
 
 
@@ -43,3 +44,10 @@ def enqueue_report(report_id: str) -> str:
     from app.tasks.report import generate_report_task
 
     return str(generate_report_task.delay(report_id).id)
+
+
+def enqueue_structure(task_id: str) -> str:
+    """切分任务（转写之后的第二步，可单独重试）。"""
+    from app.tasks.structure import structure_raw
+
+    return str(structure_raw.delay(task_id).id)

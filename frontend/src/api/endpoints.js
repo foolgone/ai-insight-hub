@@ -25,6 +25,8 @@ export const endpoints = {
     clean: id => `/datasources/${id}/clean`,
     cleanedData: id => `/datasources/${id}/cleaned-data`,
     cleanedDataById: (id, dataId) => `/datasources/${id}/cleaned-data/${dataId}`,
+    rawData: id => `/datasources/${id}/raw-data`,
+    rawDataStructure: (id, rawId) => `/datasources/${id}/raw-data/${rawId}/structure`,
   },
   datasourceTypes: {
     root: '/datasource-types',

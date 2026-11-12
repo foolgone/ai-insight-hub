@@ -16,7 +16,21 @@ def clean_datasource(task_id: str) -> dict[str, Any]:
     """
     from app.services.cleaning_service import run_clean_task
 
-    return asyncio.run(run_clean_task(task_id))
+    result = asyncio.run(run_clean_task(task_id))
+
+    # 转写与切分已拆成两个任务：转写完成后自动串接切分（用户仍是一步操作）
+    for structure_task_id in result.get("structure_task_ids") or []:
+        try:
+            from app.tasks.structure import structure_raw
+
+            structure_raw.delay(structure_task_id)
+        except Exception:  # noqa: BLE001 - 入队失败不影响清洗结果，可手动重试
+            import logging
+
+            logging.getLogger(__name__).exception(
+                "enqueue structure task failed: %s", structure_task_id
+            )
+    return result
 
 
 __all__ = ["clean_datasource"]
