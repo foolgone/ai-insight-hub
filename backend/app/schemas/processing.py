@@ -61,6 +61,8 @@ class RawDataItem(BaseSchema):
     qa_count: int = 0
     partial: bool = False
     error: str | None = None
+    # 无需切分时的说明（短音频 / 结构化关闭）
+    note: str | None = None
     status: str = "pending"
     created_at: datetime | None = None
     processed_at: datetime | None = None

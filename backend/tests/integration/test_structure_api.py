@@ -110,6 +110,37 @@ async def test_list_raw_data_reports_done_and_failed(
     assert "summary is empty" in failed["error"]
 
 
+async def test_list_raw_data_reports_skipped_with_note(
+    client, auth_headers, db_session, test_user
+) -> None:
+    """短音频 / 关闭结构化：不切分但保留整段文本，状态为 skipped 且带说明。"""
+    datasource = DataSourceFactory(user_id=test_user.id)
+    await persist(db_session, datasource)
+    raw = RawDataFactory(
+        datasource_id=datasource.id,
+        raw_content={
+            "format": "media",
+            "text": "太短了。",
+            "media": {"channel_mode": "mono", "duration": 5.0, "channels": 1},
+            "asr": {"status": "completed"},
+            "records": [{"dialogue_id": "asr-1", "speaker_pair": "mono"}],
+            "structure_skipped": {"code": "text_too_short", "reason": "音频过短（转写文本低于结构化阈值），已保留整段文本"},
+        },
+        file_info={"filename": "short.mp3", "size": 10},
+    )
+    await persist(db_session, raw)
+
+    response = await client.get(
+        f"/api/v1/datasources/{datasource.id}/raw-data", headers=auth_headers
+    )
+
+    assert response.status_code == 200
+    item = response.json()["items"][0]
+    assert item["structure_status"] == "skipped"
+    assert "已保留整段文本" in item["note"]
+    assert item["structure_kind"] is None
+
+
 async def test_structure_endpoint_queues_task(
     client, auth_headers, db_session, test_user, monkeypatch
 ) -> None:

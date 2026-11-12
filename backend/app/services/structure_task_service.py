@@ -17,6 +17,7 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.application import structure_service
+from app.core.config import settings
 from app.core.errors import FrameworkErrorCode
 from app.core.exceptions import AIInsightHubException, TaskAlreadyRunningError
 from app.models import RawData, Task
@@ -25,6 +26,12 @@ from app.services import cleaning_service
 from app.services.credential_service import credential_service
 
 STRUCTURE_TASK_TYPE = "structure"
+
+# 无需切分时的兜底：保留整段文本为一条记录（不调用 LLM，不判失败）
+FALLBACK_REASONS = {
+    "structure_disabled": "内容结构化已关闭，已保留整段文本",
+    "text_too_short": "音频过短（转写文本低于结构化阈值），已保留整段文本",
+}
 
 __all__ = [
     "STRUCTURE_TASK_TYPE",
@@ -48,10 +55,13 @@ def structure_state(raw: RawData) -> dict[str, Any]:
     asr = content.get("asr") or {}
     structured = content.get("structured")
     error = content.get("structure_error") or {}
+    skipped = content.get("structure_skipped") or {}
     if isinstance(structured, dict):
         structure_status = "done"
     elif error:
         structure_status = "failed"
+    elif skipped:
+        structure_status = "skipped"
     else:
         structure_status = "pending"
     qa = (structured or {}).get("qa") if isinstance(structured, dict) else []
@@ -66,6 +76,8 @@ def structure_state(raw: RawData) -> dict[str, Any]:
         if isinstance(structured, dict)
         else False,
         "error": str(error.get("message"))[:500] if error and not structured else None,
+        # 无需切分时的说明（短音频 / 结构化关闭），已保留整段文本
+        "note": str(skipped.get("reason"))[:200] if skipped and not structured else None,
     }
 
 
@@ -80,6 +92,61 @@ def _assert_ready(raw: RawData) -> None:
     records = content.get("records") or []
     if not structure_service.is_single_mono(records):
         raise _conflict("双声道记录已按左右声道配对为对话，无需再切分")
+
+
+def _fallback_code(raw: RawData) -> str | None:
+    """本来就不需要切分的情况（关闭结构化 / 文本过短）→ 返回兜底原因码。"""
+    if not settings.MEDIA_STRUCTURE_ENABLED:
+        return "structure_disabled"
+    text = str((raw.raw_content or {}).get("text") or "").strip()
+    if len(text) < settings.MEDIA_STRUCTURE_MIN_CHARS:
+        return "text_too_short"
+    return None
+
+
+async def _apply_fallback(session: AsyncSession, raw: RawData, code: str) -> tuple[int, int]:
+    """把整段转写落成一条记录（替换旧结果），返回 ``(新增, 被替换)``。"""
+    content = raw.raw_content or {}
+    records = [item for item in (content.get("records") or []) if isinstance(item, dict)]
+    if not records:
+        records = [
+            {
+                "dialogue_id": "asr-1",
+                "timestamp": None,
+                "user_message": str(content.get("text") or "").strip(),
+                "ai_response": "",
+                "quality_score": None,
+                "issues": ["asr_transcript", "mono_speaker_unknown"],
+                "source": "asr",
+                "speaker_pair": "mono",
+            }
+        ]
+    for record in records:
+        issues = list(record.get("issues") or [])
+        if "structure_unparsed" not in issues:
+            issues.append("structure_unparsed")
+        record["issues"] = issues
+
+    removed = await cleaned_repo.delete_for_raw(session, raw.id)
+    created, _, _, _ = await cleaning_service.persist_dialogues(
+        session,
+        raw=raw,
+        result_data={"dialogues": records},
+        agent_version="asr-1.0",
+        duration=0.0,
+        token_usage={"input": 0, "output": 0},
+    )
+    updated = {
+        **content,
+        "structure_skipped": {
+            "code": code,
+            "reason": FALLBACK_REASONS[code],
+            "at": _now_naive().isoformat(),
+        },
+    }
+    updated.pop("structure_error", None)
+    raw.raw_content = updated
+    return created, removed
 
 
 async def _running_structure_task(session: AsyncSession, raw_id: uuid.UUID) -> Task | None:
@@ -165,6 +232,40 @@ async def _execute(task_id: uuid.UUID, session: AsyncSession, *, commit: bool) -
 
     try:
         _assert_ready(raw)
+
+        fallback = _fallback_code(raw)
+        if fallback is not None:
+            created, removed = await _apply_fallback(session, raw, fallback)
+            task.status = "completed"
+            task.progress = 100
+            task.current_step = "structure_skipped"
+            task.result = {
+                "structure": {"structure": "raw_text", "skipped_reason": fallback},
+                "replaced": removed,
+                "created": created,
+                "state": structure_state(raw),
+            }
+            await _refresh_datasource_statistics(session, raw.datasource_id)
+            task.completed_at = _now_naive()
+            if task.started_at is not None:
+                task.duration = round((task.completed_at - task.started_at).total_seconds(), 3)
+            await session.flush()
+            if commit:
+                await session.commit()
+            logger.info(
+                "structure task skipped task={} raw={} reason={} created={}",
+                task.id,
+                raw.id,
+                fallback,
+                created,
+            )
+            return {
+                "status": task.status,
+                "task_id": str(task.id),
+                "raw_data_id": str(raw.id),
+                **(task.result or {}),
+            }
+
         content = raw.raw_content or {}
         payload = await structure_service.apply(
             session,
@@ -184,6 +285,13 @@ async def _execute(task_id: uuid.UUID, session: AsyncSession, *, commit: bool) -
             task.error_message = state.get("error") or "structure failed"
             task.result = {"state": state}
         else:
+            # 切分成功：清掉之前可能残留的「无需切分」标记
+            if (raw.raw_content or {}).get("structure_skipped"):
+                raw.raw_content = {
+                    key: value
+                    for key, value in (raw.raw_content or {}).items()
+                    if key != "structure_skipped"
+                }
             # 整体替换：先删该文件派生的旧对话，再按新结果写入（避免新旧混排）
             removed = await cleaned_repo.delete_for_raw(session, raw.id)
             created = 0

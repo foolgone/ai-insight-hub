@@ -16,6 +16,8 @@ const STRUCTURE_STATUS = {
   done: { label: '已切分', variant: 'success' },
   pending: { label: '未切分', variant: 'warning' },
   failed: { label: '切分失败', variant: 'error' },
+  // 短音频 / 关闭结构化：不切分，但整段文本已保留
+  skipped: { label: '无需切分', variant: 'info' },
 }
 
 function formatDuration(seconds) {
@@ -141,6 +143,11 @@ export function RawDataPanel({ datasourceId = null }) {
                       {item.error ? (
                         <p className="mt-1 max-w-[280px] text-xs text-error-600" title={item.error}>
                           {item.error}
+                        </p>
+                      ) : null}
+                      {item.note ? (
+                        <p className="mt-1 max-w-[280px] text-xs text-gray-500" title={item.note}>
+                          {item.note}
                         </p>
                       ) : null}
                     </td>
