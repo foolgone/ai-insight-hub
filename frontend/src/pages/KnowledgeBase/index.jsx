@@ -15,12 +15,15 @@ import { ExtractKnowledgeModal } from '../../components/knowledge/ExtractKnowled
 import {
   useDeleteFaq,
   useFaqInfiniteQuery,
+  useCoverageQuery,
   useGapsQuery,
   useKnowledgeSearchQuery,
   useUpdateFaq,
+  useUpdateGap,
 } from '../../hooks/useKnowledge'
 import { useDatasourceStore } from '../../stores/datasourceStore'
 import { downloadTextFile, toCsv } from '../../lib/download'
+import { formatDateTime } from '../../lib/format'
 import { getErrorMessage } from '../../lib/errorMessages'
 import { notify } from '../../lib/toast'
 
@@ -53,11 +56,64 @@ const TABS = [
   { key: 'search', label: '知识检索' },
 ]
 
+const GAP_STATUS_OPTIONS = [
+  { label: '待处理', value: 'open' },
+  { label: '已采纳', value: 'adopted' },
+  { label: '已忽略', value: 'ignored' },
+  { label: '全部', value: 'all' },
+]
+
+const GAP_STATUS_META = {
+  open: { label: '待处理', variant: 'warning' },
+  adopted: { label: '已采纳', variant: 'success' },
+  ignored: { label: '已忽略', variant: 'default' },
+}
+
+/** 知识覆盖率（近 7 天对话能被现有 FAQ 语义命中的比例）。 */
+function CoverageStrip({ query }) {
+  if (query.isLoading) {
+    return <p className="text-sm text-gray-500">正在计算知识覆盖率...</p>
+  }
+  if (query.isError) {
+    return (
+      <p role="alert" className="text-sm text-error-600">
+        覆盖率暂时算不出来（{getErrorMessage(query.error)}）；不影响其他功能。
+      </p>
+    )
+  }
+  const data = query.data
+  if (!data) return null
+  const percent = Math.round((data.rate || 0) * 1000) / 10
+  return (
+    <div className="flex flex-wrap items-center gap-x-6 gap-y-2 rounded-md border border-gray-200 bg-white px-4 py-3">
+      <div>
+        <p className="text-xs text-gray-600">知识覆盖率（近 {data.days} 天）</p>
+        <p className="mt-1 text-2xl font-bold text-gray-900">{percent}%</p>
+      </div>
+      <p className="text-sm text-gray-600">
+        {data.covered} / {data.total} 条对话能被现有 FAQ 命中
+        <span className="ml-1 text-xs text-gray-500">
+          （top-1 相似度 ≥ {Math.round(data.threshold * 100)}%）
+        </span>
+      </p>
+      <p className="text-xs text-gray-500">
+        {data.method === 'trgm' ? '（按文本相似度估算；向量索引未就绪时自动降级） ' : ''}
+        {data.total === 0
+          ? '近 7 天没有可评估的对话'
+          : percent >= 80
+            ? '覆盖良好，继续按盲区补知识即可'
+            : '覆盖率偏低：优先处理下方「知识盲区」'}
+      </p>
+    </div>
+  )
+}
+
 export default function KnowledgeBase() {
   const currentDatasourceId = useDatasourceStore(state => state.currentId)
   const [activeTab, setActiveTab] = useState('faq')
   const [category, setCategory] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
+  const [gapStatus, setGapStatus] = useState('open')
   const [searchInput, setSearchInput] = useState('')
   const [searchTerm, setSearchTerm] = useState('')
   const [extractOpen, setExtractOpen] = useState(false)
@@ -72,7 +128,11 @@ export default function KnowledgeBase() {
     },
     { enabled: Boolean(currentDatasourceId) && activeTab === 'faq' }
   )
-  const gapsQuery = useGapsQuery(currentDatasourceId)
+  const gapsQuery = useGapsQuery(currentDatasourceId, {
+    ...(gapStatus === 'all' ? {} : { status: gapStatus }),
+  })
+  const coverageQuery = useCoverageQuery(currentDatasourceId, { days: 7, threshold: 0.8 })
+  const updateGapMutation = useUpdateGap()
   const searchQuery = useKnowledgeSearchQuery(currentDatasourceId, searchTerm, { limit: 10 })
   const deleteMutation = useDeleteFaq()
   const updateMutation = useUpdateFaq()
@@ -103,6 +163,29 @@ export default function KnowledgeBase() {
         payload: { status: 'active' },
       })
       notify.success('知识条目已审核通过')
+    } catch (error) {
+      notify.error(getErrorMessage(error))
+    }
+  }
+
+  const handleGapStatus = async (gap, status) => {
+    if (!gap.id) {
+      notify.error('该盲区缺少 id（历史数据），请重新提取知识后再试')
+      return
+    }
+    try {
+      await updateGapMutation.mutateAsync({
+        datasourceId: currentDatasourceId,
+        gapId: gap.id,
+        status,
+      })
+      notify.success(
+        status === 'adopted'
+          ? '已标记为已采纳'
+          : status === 'ignored'
+            ? '已忽略该盲区'
+            : '已恢复为待处理'
+      )
     } catch (error) {
       notify.error(getErrorMessage(error))
     }
@@ -168,6 +251,8 @@ export default function KnowledgeBase() {
         />
       ) : (
         <>
+          <CoverageStrip query={coverageQuery} />
+
           <Tabs items={TABS} value={activeTab} onChange={value => setActiveTab(value)} />
 
           {activeTab === 'faq' ? (
@@ -232,19 +317,45 @@ export default function KnowledgeBase() {
 
           {activeTab === 'gaps' ? (
             <div className="space-y-3">
+              <div className="flex flex-wrap items-center gap-3">
+                <div className="w-40">
+                  <Select
+                    ariaLabel="盲区状态筛选"
+                    options={GAP_STATUS_OPTIONS}
+                    value={gapStatus}
+                    onChange={setGapStatus}
+                  />
+                </div>
+                {gapsQuery.data?.summary ? (
+                  <p className="text-xs text-gray-500">
+                    待处理 {gapsQuery.data.summary.open_gaps ?? 0} · 已采纳{' '}
+                    {gapsQuery.data.summary.adopted_gaps ?? 0} · 已忽略{' '}
+                    {gapsQuery.data.summary.ignored_gaps ?? 0}
+                  </p>
+                ) : null}
+              </div>
+
               {gapsQuery.isLoading ? <PageLoading label="正在加载知识盲区..." /> : null}
               {gapsQuery.isError ? (
                 <AsyncState error={gapsQuery.error} onRetry={() => gapsQuery.refetch()} />
               ) : null}
               {!gapsQuery.isLoading && !gapsQuery.isError ? (
                 gaps.length === 0 ? (
-                  <Empty title="暂无知识盲区" description="知识提取完成后展示高频未覆盖问题。" />
+                  <Empty
+                    title="暂无知识盲区"
+                    description={
+                      gapStatus === 'open'
+                        ? '当前没有待处理的盲区；可切换状态查看历史。'
+                        : '该状态下没有盲区。'
+                    }
+                  />
                 ) : (
                   gaps.map(gap => {
                     const priority = PRIORITY_META[gap.priority] || PRIORITY_META.low
+                    const statusMeta = GAP_STATUS_META[gap.status] || GAP_STATUS_META.open
                     return (
                       <article
-                        key={`${gap.question}-${gap.category || ''}`}
+                        key={gap.id || gap.question}
                         className="flex flex-col gap-2 rounded-md border border-gray-200 bg-white p-4 sm:flex-row sm:items-center sm:justify-between"
                       >
                         <div className="min-w-0">
@@ -253,27 +364,61 @@ export default function KnowledgeBase() {
                             <Badge variant={priority.variant} size="sm">
                               {priority.label}
                             </Badge>
-                            {gap.category ? (
-                              <Badge variant="info" size="sm">
-                                {gap.category}
-                              </Badge>
-                            ) : null}
+                            <Badge variant={statusMeta.variant} size="sm">
+                              {statusMeta.label}
+                            </Badge>
                           </div>
-                          <p className="mt-1 text-xs text-gray-500">出现 {gap.frequency ?? 0} 次</p>
+                          <p className="mt-1 text-xs text-gray-500">
+                            累计出现 {gap.frequency ?? 0} 次
+                            {gap.last_seen ? ` · 最近 ${formatDateTime(gap.last_seen)}` : ''}
+                          </p>
                         </div>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() =>
-                            setDrawerState({
-                              open: true,
-                              faq: null,
-                              prefill: gap.question,
-                            })
-                          }
-                        >
-                          转为 FAQ
-                        </Button>
+                        <div className="flex flex-wrap gap-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() =>
+                              setDrawerState({
+                                open: true,
+                                faq: null,
+                                prefill: gap.question,
+                              })
+                            }
+                          >
+                            转为 FAQ
+                          </Button>
+                          {gap.status !== 'adopted' ? (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              loading={
+                                updateGapMutation.isPending &&
+                                updateGapMutation.variables?.gapId === gap.id
+                              }
+                              onClick={() => handleGapStatus(gap, 'adopted')}
+                            >
+                              标为已采纳
+                            </Button>
+                          ) : null}
+                          {gap.status !== 'ignored' ? (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleGapStatus(gap, 'ignored')}
+                            >
+                              忽略
+                            </Button>
+                          ) : null}
+                          {gap.status !== 'open' ? (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleGapStatus(gap, 'open')}
+                            >
+                              恢复待处理
+                            </Button>
+                          ) : null}
+                        </div>
                       </article>
                     )
                   })

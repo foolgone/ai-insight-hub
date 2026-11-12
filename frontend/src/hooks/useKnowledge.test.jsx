@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+﻿import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { act, renderHook, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import {
@@ -24,6 +24,8 @@ vi.mock('../api/knowledge', () => ({
   listFaq: vi.fn(),
   searchKnowledge: vi.fn(),
   listGaps: vi.fn(),
+  updateGap: vi.fn(),
+  getCoverage: vi.fn(),
   extractKnowledge: vi.fn(),
   createFaq: vi.fn(),
   updateFaq: vi.fn(),
@@ -65,7 +67,7 @@ describe('useKnowledge', () => {
 
     const gaps = renderHook(() => useGapsQuery('ds-1'), { wrapper })
     await waitFor(() => expect(gaps.result.current.isSuccess).toBe(true))
-    expect(listGaps).toHaveBeenCalledWith('ds-1')
+    expect(listGaps).toHaveBeenCalledWith('ds-1', {})
   })
 
   it('无数据源时 FAQ/搜索不请求', () => {

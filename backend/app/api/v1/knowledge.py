@@ -14,9 +14,12 @@ from app.core.database import get_db
 from app.models import User
 from app.schemas.base import Page
 from app.schemas.knowledge import (
+    CoverageResponse,
     FAQCreate,
     FAQItem,
     FAQUpdate,
+    GapItem,
+    GapUpdateRequest,
     GapsResponse,
     KnowledgeExtractionRequest,
     KnowledgeExtractionResponse,
@@ -115,14 +118,62 @@ async def search_knowledge(
     "/{datasource_id}/knowledge/gaps",
     response_model=GapsResponse,
     response_model_by_alias=False,
-    summary="知识盲区（最近一次提取结果）",
+    summary="知识盲区台账（累积，可筛选状态）",
 )
 async def list_gaps(
     datasource_id: uuid.UUID,
+    status: str | None = Query(default=None, pattern="^(open|adopted|ignored)$"),
     user: User = Depends(require_roles(*READ_ROLES)),
     session: AsyncSession = Depends(get_db),
 ) -> GapsResponse:
-    return await knowledge_service.list_gaps(session, user=user, datasource_id=datasource_id)
+    return await knowledge_service.list_gaps(
+        session, user=user, datasource_id=datasource_id, status=status
+    )
+
+
+@router.patch(
+    "/{datasource_id}/knowledge/gaps/{gap_id}",
+    response_model=GapItem,
+    response_model_by_alias=False,
+    summary="更新盲区状态（open / adopted / ignored）",
+)
+async def update_gap(
+    datasource_id: uuid.UUID,
+    gap_id: uuid.UUID,
+    payload: GapUpdateRequest,
+    user: User = Depends(require_roles(*WRITE_ROLES)),
+    session: AsyncSession = Depends(get_db),
+) -> GapItem:
+    return await knowledge_service.update_gap_status(
+        session,
+        user=user,
+        datasource_id=datasource_id,
+        gap_id=gap_id,
+        status=payload.status,
+        faq_id=payload.faq_id,
+    )
+
+
+@router.get(
+    "/{datasource_id}/knowledge/coverage",
+    response_model=CoverageResponse,
+    response_model_by_alias=False,
+    summary="知识覆盖率（最近 N 天对话被 FAQ 语义命中的比例）",
+)
+async def knowledge_coverage(
+    datasource_id: uuid.UUID,
+    days: int = Query(default=7, ge=1, le=90),
+    threshold: float = Query(default=0.8, ge=0.0, le=1.0),
+    user: User = Depends(require_roles(*READ_ROLES)),
+    session: AsyncSession = Depends(get_db),
+) -> CoverageResponse:
+    return await knowledge_service.coverage(
+        session,
+        user=user,
+        datasource_id=datasource_id,
+        days=days,
+        threshold=threshold,
+    )
 
 
 @router.post(

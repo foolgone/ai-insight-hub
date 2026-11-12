@@ -22,11 +22,33 @@ export async function searchKnowledge(datasourceId, params) {
 }
 
 /**
- * 知识盲区（GET .../knowledge/gaps）。
+ * 知识盲区台账（GET .../knowledge/gaps）。
  * @param {string} datasourceId
+ * @param {{ status?: 'open'|'adopted'|'ignored' }} [params]
  */
-export async function listGaps(datasourceId) {
-  const { data } = await apiClient.get(endpoints.knowledge.gaps(datasourceId))
+export async function listGaps(datasourceId, params = {}) {
+  const { data } = await apiClient.get(endpoints.knowledge.gaps(datasourceId), { params })
+  return data
+}
+
+/**
+ * 更新盲区状态（PATCH .../knowledge/gaps/{gap_id}）。
+ * @param {string} datasourceId
+ * @param {string} gapId
+ * @param {{ status: 'open'|'adopted'|'ignored', faq_id?: string }} payload
+ */
+export async function updateGap(datasourceId, gapId, payload) {
+  const { data } = await apiClient.patch(endpoints.knowledge.gapById(datasourceId, gapId), payload)
+  return data
+}
+
+/**
+ * 知识覆盖率（GET .../knowledge/coverage）。
+ * @param {string} datasourceId
+ * @param {{ days?: number, threshold?: number }} [params]
+ */
+export async function getCoverage(datasourceId, params = {}) {
+  const { data } = await apiClient.get(endpoints.knowledge.coverage(datasourceId), { params })
   return data
 }
 

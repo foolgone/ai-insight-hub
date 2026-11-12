@@ -10,23 +10,25 @@
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Any, Literal, cast
 
 from loguru import logger
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.ownership import assert_owner
 from app.core.pagination import PaginationParams
 from app.application import task_control
 from app.core.config import settings
-from app.core.exceptions import DataSourceNotFoundError, FaqNotFoundError
+from app.core.exceptions import DataSourceNotFoundError, FaqNotFoundError, GapNotFoundError
 from app.repositories import cleaned_data as cleaned_repo
 from app.repositories import knowledge_base as knowledge_repo
-from app.models import DataSource, KnowledgeBase, Task, User
+from app.repositories import knowledge_gaps as knowledge_gap_repo
+from app.models import CleanedData, DataSource, KnowledgeBase, Task, User
 from app.schemas.agents.extraction import MAX_DIALOGUES_PER_RUN, MAX_EXISTING_QUESTIONS
 from app.schemas.knowledge import (
+    CoverageResponse,
     FAQCreate,
     FAQUpdate,
     GapItem,
@@ -184,7 +186,11 @@ async def _save_gaps(
     stats: dict[str, Any],
     faq_count: int,
 ) -> None:
-    """盲区随提取任务持久化在 ``tasks.result``（D-02：不新建 gaps 表）。"""
+    """盲区写台账（累积） + 仍保留在 ``tasks.result``（兼容旧读法）。
+
+    台账化之后重跑不再覆盖：``hit_count`` 累加、``first_seen/last_seen`` 更新、
+    ``open/adopted/ignored`` 状态由人工流转。
+    """
     task.result = {
         **(task.result or {}),
         "gaps": gaps[:MAX_GAP_ITEMS],
@@ -192,6 +198,13 @@ async def _save_gaps(
         "statistics": stats,
         "faq_count": faq_count,
     }
+    if task.datasource_id is not None:
+        await knowledge_gap_repo.upsert_many(
+            session,
+            datasource_id=task.datasource_id,
+            gaps=gaps[:MAX_GAP_ITEMS],
+            task_id=task.id,
+        )
     await session.flush()
 
 
@@ -562,38 +575,43 @@ def _priority_for(frequency: int) -> PriorityLevel:
     return "low"
 
 
-async def list_gaps(session: AsyncSession, *, user: User, datasource_id: uuid.UUID) -> GapsResponse:
+async def list_gaps(
+    session: AsyncSession,
+    *,
+    user: User,
+    datasource_id: uuid.UUID,
+    status: str | None = None,
+) -> GapsResponse:
+    """盲区台账（累积，不再依赖最近一次提取任务的快照）。"""
     await _datasource_or_404(session, datasource_id, user)
 
-    latest_task = await session.scalar(
-        select(Task)
-        .where(
-            Task.datasource_id == datasource_id,
-            Task.task_type == EXTRACT_TASK_TYPE,
-            Task.status == "completed",
-        )
-        .order_by(Task.completed_at.desc())
-        .limit(1)
+    rows = await knowledge_gap_repo.list_for_datasource(
+        session, datasource_id, status=status, limit=MAX_GAP_ITEMS
     )
-    raw_gaps = ((latest_task.result or {}).get("gaps") if latest_task else []) or []
     gaps: list[GapItem] = []
-    for item in raw_gaps[:MAX_GAP_ITEMS]:
-        frequency = int(item.get("frequency", 1) or 1)
+    for row in rows:
+        frequency = int(row.hit_count or 1)
         priority: PriorityLevel = _priority_for(frequency)
-        raw_priority = item.get("priority")
-        if raw_priority in ("high", "medium", "low"):
-            priority = cast(PriorityLevel, raw_priority)
+        if row.priority in ("high", "medium", "low"):
+            priority = cast(PriorityLevel, row.priority)
         gaps.append(
             GapItem(
-                question=str(item.get("question", "")),
+                id=row.id,
+                question=row.question,
                 frequency=frequency,
-                category=str(item.get("category") or "其他"),
                 priority=priority,
-                suggested_answer=item.get("suggested_answer"),
+                status=cast(Any, row.status),
+                faq_id=row.faq_id,
+                first_seen=row.first_seen,
+                last_seen=row.last_seen,
             )
         )
+    counts = await knowledge_gap_repo.count_by_status(session, datasource_id)
     summary = GapsSummary(
-        total_gaps=len(gaps),
+        total_gaps=sum(counts.values()),
+        open_gaps=counts.get("open", 0),
+        adopted_gaps=counts.get("adopted", 0),
+        ignored_gaps=counts.get("ignored", 0),
         high_priority=sum(1 for gap in gaps if gap.priority == "high"),
         medium_priority=sum(1 for gap in gaps if gap.priority == "medium"),
         low_priority=sum(1 for gap in gaps if gap.priority == "low"),
@@ -601,8 +619,126 @@ async def list_gaps(session: AsyncSession, *, user: User, datasource_id: uuid.UU
     return GapsResponse(gaps=gaps, summary=summary)
 
 
+async def update_gap_status(
+    session: AsyncSession,
+    *,
+    user: User,
+    datasource_id: uuid.UUID,
+    gap_id: uuid.UUID,
+    status: str,
+    faq_id: uuid.UUID | None = None,
+) -> GapItem:
+    """盲区状态流转：open（待处理）/ adopted（已采纳为 FAQ）/ ignored（不处理）。"""
+    await _datasource_or_404(session, datasource_id, user)
+    gap = await knowledge_gap_repo.get(session, gap_id)
+    if gap is None or gap.datasource_id != datasource_id:
+        raise GapNotFoundError(details={"gap_id": str(gap_id)})
+    gap.status = status
+    if faq_id is not None:
+        gap.faq_id = faq_id
+    await session.flush()
+    await session.refresh(gap)
+    frequency = int(gap.hit_count or 1)
+    return GapItem(
+        id=gap.id,
+        question=gap.question,
+        frequency=frequency,
+        priority=_priority_for(frequency),
+        status=cast(Any, gap.status),
+        faq_id=gap.faq_id,
+        first_seen=gap.first_seen,
+        last_seen=gap.last_seen,
+    )
+
+
+async def coverage(
+    session: AsyncSession,
+    *,
+    user: User,
+    datasource_id: uuid.UUID,
+    days: int = 7,
+    threshold: float = 0.8,
+) -> CoverageResponse:
+    """知识覆盖率：最近 N 天的对话里，有多少能被现有 FAQ 命中。
+
+    - 有 embedding 的对话走向量（余弦相似度 ≥ 阈值）；
+    - 当前 `cleaned_data.embedding` 尚未全量回填，窗口内没有向量时**降级为文本相似度**
+      （pg_trgm），并在响应里标注 ``method="trgm"``，避免给出「0%」的假结论。
+    """
+    await _datasource_or_404(session, datasource_id, user)
+    since = _now_naive() - timedelta(days=days)
+    window = [
+        CleanedData.datasource_id == datasource_id,
+        CleanedData.created_at >= since,
+    ]
+
+    max_distance = max(0.0, min(1.0, 1.0 - threshold))
+    vector_match = (
+        select(KnowledgeBase.id)
+        .where(
+            KnowledgeBase.datasource_id == datasource_id,
+            KnowledgeBase.status == "active",
+            KnowledgeBase.embedding.isnot(None),
+            CleanedData.embedding.isnot(None),
+            CleanedData.embedding.cosine_distance(KnowledgeBase.embedding) <= max_distance,
+        )
+        .exists()
+    )
+    vector_row = (
+        await session.execute(
+            select(
+                func.count().label("total"),
+                func.count().filter(vector_match).label("covered"),
+            ).where(*window, CleanedData.embedding.isnot(None))
+        )
+    ).one()
+    total = int(vector_row.total or 0)
+    covered = int(vector_row.covered or 0)
+    if total:
+        return CoverageResponse(
+            datasource_id=datasource_id,
+            days=days,
+            threshold=threshold,
+            total=total,
+            covered=covered,
+            rate=round(covered / total, 4),
+            method="vector",
+        )
+
+    # 降级：文本相似度（pg_trgm），无需 embedding，历史数据也能给出参考值
+    text_match = (
+        select(KnowledgeBase.id)
+        .where(
+            KnowledgeBase.datasource_id == datasource_id,
+            KnowledgeBase.status == "active",
+            func.similarity(CleanedData.user_message, KnowledgeBase.question) >= threshold,
+        )
+        .exists()
+    )
+    text_row = (
+        await session.execute(
+            select(
+                func.count().label("total"),
+                func.count().filter(text_match).label("covered"),
+            ).where(*window)
+        )
+    ).one()
+    total = int(text_row.total or 0)
+    covered = int(text_row.covered or 0)
+    return CoverageResponse(
+        datasource_id=datasource_id,
+        days=days,
+        threshold=threshold,
+        total=total,
+        covered=covered,
+        rate=round(covered / total, 4) if total else 0.0,
+        method="trgm",
+    )
+
+
 __all__ = [
     "EXTRACT_TASK_TYPE",
+    "coverage",
     "create_extraction_task",
     "create_faq",
     "delete_faq",
@@ -610,5 +746,6 @@ __all__ = [
     "list_gaps",
     "run_extraction_task",
     "search_faqs",
+    "update_gap_status",
     "update_faq",
 ]

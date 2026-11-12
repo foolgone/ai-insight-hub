@@ -43,6 +43,7 @@ BUSINESS_CODES = {
     "TASK_NOT_CANCELLABLE",
     "TASK_NOT_RETRYABLE",
     "FAQ_NOT_FOUND",
+    "GAP_NOT_FOUND",
     "REPORT_NOT_FOUND",
     "REPORT_FORMAT_INVALID",
     "INSUFFICIENT_CREDITS",
@@ -67,8 +68,8 @@ BUSINESS_CODES = {
 
 def test_business_codes_match_api_design_exactly() -> None:
     assert {code.value for code in ErrorCode} == BUSINESS_CODES
-    # API §12.2 原定 28 条 + BYOK 扩展 5 条（LLM 3 + ASR 2）+ 类型字典 3 条
-    assert len(ErrorCode) == 33
+    # API §12.2 原定 28 条 + BYOK 扩展 5 条（LLM 3 + ASR 2）+ 类型字典 3 条 + 盲区台账 1 条
+    assert len(ErrorCode) == 34
 
 
 def test_error_status_covers_all_business_codes() -> None:

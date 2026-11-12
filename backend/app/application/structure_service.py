@@ -339,7 +339,11 @@ async def _run_agent(
 
 
 async def _persist_knowledge(
-    session: AsyncSession, *, datasource_id: uuid.UUID, payload: dict[str, Any]
+    session: AsyncSession,
+    *,
+    datasource_id: uuid.UUID,
+    raw_data_id: uuid.UUID,
+    payload: dict[str, Any],
 ) -> int:
     """知识点落库（待审核）。``knowledge_base.source`` 只允许 seed/manual/extracted。"""
     created = 0
@@ -355,6 +359,7 @@ async def _persist_knowledge(
             session,
             KnowledgeBase(
                 datasource_id=datasource_id,
+                raw_data_id=raw_data_id,
                 question=title[:2000],
                 answer=content,
                 category=str(payload.get("content_type") or "other")[:100],
@@ -376,6 +381,7 @@ async def _persist_summary(
     *,
     datasource_id: uuid.UUID,
     task_id: uuid.UUID,
+    raw_data_id: uuid.UUID,
     payload: dict[str, Any],
 ) -> bool:
     """摘要落库（``analysis_type='other'``，不污染洞察视图）。"""
@@ -388,6 +394,7 @@ async def _persist_summary(
             datasource_id=datasource_id,
             data_id=None,
             task_id=task_id,
+            raw_data_id=raw_data_id,
             analysis_type="other",
             result={
                 "kind": "transcript_summary",
@@ -488,10 +495,16 @@ async def apply(
     raw.raw_content = {**content, "structured": payload}
     structure = payload.get("structure")
     if structure == "knowledge":
-        await _persist_knowledge(session, datasource_id=datasource_id, payload=payload)
+        await _persist_knowledge(
+            session, datasource_id=datasource_id, raw_data_id=raw.id, payload=payload
+        )
     elif structure == "summary":
         await _persist_summary(
-            session, datasource_id=datasource_id, task_id=task_id, payload=payload
+            session,
+            datasource_id=datasource_id,
+            task_id=task_id,
+            raw_data_id=raw.id,
+            payload=payload,
         )
     await session.flush()
 

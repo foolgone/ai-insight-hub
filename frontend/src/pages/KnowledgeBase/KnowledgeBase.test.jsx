@@ -4,13 +4,22 @@ import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import KnowledgeBase from './index'
-import { extractKnowledge, listFaq, listGaps, searchKnowledge } from '../../api/knowledge'
+import {
+  extractKnowledge,
+  getCoverage,
+  listFaq,
+  listGaps,
+  searchKnowledge,
+  updateGap,
+} from '../../api/knowledge'
 import { useDatasourceStore } from '../../stores/datasourceStore'
 
 vi.mock('../../api/knowledge', () => ({
   listFaq: vi.fn(),
   searchKnowledge: vi.fn(),
   listGaps: vi.fn(),
+  updateGap: vi.fn(),
+  getCoverage: vi.fn(),
   extractKnowledge: vi.fn(),
   createFaq: vi.fn(),
   updateFaq: vi.fn(),
@@ -56,8 +65,25 @@ describe('KnowledgeBasePage', () => {
         pagination: { page: 2, has_next: false, total: 2 },
       })
     listGaps.mockResolvedValue({
-      gaps: [{ question: '支持分期吗？', frequency: 25, category: '支付', priority: 'high' }],
-      summary: {},
+      gaps: [
+        {
+          id: 'g-1',
+          question: '支持分期吗？',
+          frequency: 25,
+          priority: 'high',
+          status: 'open',
+          last_seen: '2026-11-12T10:00:00Z',
+        },
+      ],
+      summary: { total_gaps: 1, open_gaps: 1, adopted_gaps: 0, ignored_gaps: 0 },
+    })
+    getCoverage.mockResolvedValue({
+      datasource_id: 'ds-1',
+      days: 7,
+      threshold: 0.8,
+      total: 20,
+      covered: 13,
+      rate: 0.65,
     })
     searchKnowledge.mockResolvedValue({
       results: [{ ...FAQ, similarity: 0.92 }],
@@ -89,10 +115,29 @@ describe('KnowledgeBasePage', () => {
 
     expect(await screen.findByText('支持分期吗？')).toBeInTheDocument()
     expect(screen.getByText('高优先级')).toBeInTheDocument()
+    expect((await screen.findAllByText('待处理')).length).toBeGreaterThan(0)
 
     await user.click(screen.getByRole('button', { name: '转为 FAQ' }))
     expect(await screen.findByRole('dialog', { name: '新建知识条目' })).toBeInTheDocument()
     expect(screen.getByLabelText(/问题/)).toHaveValue('支持分期吗？')
+  })
+
+  it('覆盖率展示，并可忽略盲区（状态流转）', async () => {
+    const user = userEvent.setup()
+    updateGap.mockResolvedValue({ id: 'g-1', status: 'ignored' })
+    renderPage()
+
+    // 覆盖率卡片（近 7 天 13/20 = 65%）
+    expect(await screen.findByText('65%')).toBeInTheDocument()
+    expect(screen.getByText(/13 \/ 20 条对话/)).toBeInTheDocument()
+
+    await user.click(screen.getByRole('tab', { name: '知识盲区' }))
+    await screen.findByText('支持分期吗？')
+    await user.click(screen.getByRole('button', { name: '忽略' }))
+
+    await waitFor(() =>
+      expect(updateGap).toHaveBeenCalledWith('ds-1', 'g-1', { status: 'ignored' })
+    )
   })
 
   it('搜索 Tab 调用检索并展示相似度', async () => {

@@ -56,6 +56,8 @@ class AnalysisResult(Base):
         Index("idx_analysis_created_at", "created_at"),
         # 批次（= 一次评估/洞察任务）查询：支持「本次 vs 上次」对比
         Index("idx_analysis_task_id", "task_id"),
+        # 按文件归属（结构化摘要/知识点），重切时整体替换
+        Index("idx_analysis_raw_data_id", "raw_data_id"),
         Index("idx_analysis_result", "result", postgresql_using="gin"),
     )
 
@@ -72,6 +74,8 @@ class AnalysisResult(Base):
     # 逻辑外键 -> tasks(id)：一次任务 = 一个批次（run），用于「本次 vs 上次」对比。
     # 历史数据不回填（宁可留空，不伪造归属）；洞察/摘要也带 task_id，便于按批次追溯。
     task_id: Mapped[uuid.UUID | None] = mapped_column(PG_UUID(as_uuid=True))
+    # 逻辑外键 -> raw_data(id)：结构化为「摘要」时按文件归属，重切时整体替换
+    raw_data_id: Mapped[uuid.UUID | None] = mapped_column(PG_UUID(as_uuid=True))
     analysis_type: Mapped[str] = mapped_column(String(50), nullable=False)
     result: Mapped[dict[str, Any]] = mapped_column(JSONB, nullable=False)
     agent_name: Mapped[str] = mapped_column(String(100), nullable=False)
@@ -99,6 +103,8 @@ class KnowledgeBase(Base):
         Index("idx_kb_status", "status"),
         Index("idx_kb_is_seed", "datasource_id", "is_seed"),
         Index("idx_kb_source", "datasource_id", "source"),
+        # 按文件归属（结构化产出的知识点），重切时整体替换
+        Index("idx_kb_raw_data_id", "raw_data_id"),
         Index(
             "idx_kb_embedding",
             "embedding",
@@ -116,6 +122,8 @@ class KnowledgeBase(Base):
         ForeignKey("data_sources.id", ondelete="CASCADE"),
         nullable=False,
     )
+    # 逻辑外键 -> raw_data(id)：结构化产出的知识点按文件归属，重切时整体替换
+    raw_data_id: Mapped[uuid.UUID | None] = mapped_column(PG_UUID(as_uuid=True))
     question: Mapped[str] = mapped_column(Text, nullable=False)
     answer: Mapped[str] = mapped_column(Text, nullable=False)
     category: Mapped[str | None] = mapped_column(String(100))
@@ -136,3 +144,39 @@ class KnowledgeBase(Base):
     created_at: Mapped[datetime | None] = mapped_column(DateTime, server_default=func.now())
     updated_at: Mapped[datetime | None] = mapped_column(DateTime, server_default=func.now())
     last_used_at: Mapped[datetime | None] = mapped_column(DateTime)
+
+
+class KnowledgeGap(Base):
+    """知识盲区台账（按数据源累积，不随重跑覆盖）。
+
+    盲区以前只存在 ``tasks.result``（快照），重跑即覆盖；台账化之后可以：
+    - 累计出现次数（``hit_count``）与首次/最近出现时间；
+    - 流转状态：``open``（待处理）/ ``adopted``（已采纳为 FAQ）/ ``ignored``（确认不处理）。
+    """
+
+    __tablename__ = "knowledge_gaps"
+    __table_args__ = (
+        CheckConstraint("status IN ('open', 'adopted', 'ignored')", name="gap_status_valid"),
+        # 同一数据源内按归一化问题去重（question_key = md5(归一化文本)）
+        Index("uk_kb_gaps_datasource_key", "datasource_id", "question_key", unique=True),
+        Index("idx_kb_gaps_status", "datasource_id", "status", text("last_seen DESC")),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        PG_UUID(as_uuid=True), primary_key=True, server_default=text("gen_random_uuid()")
+    )
+    datasource_id: Mapped[uuid.UUID] = mapped_column(
+        PG_UUID(as_uuid=True),
+        ForeignKey("data_sources.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    question: Mapped[str] = mapped_column(Text, nullable=False)
+    question_key: Mapped[str] = mapped_column(String(64), nullable=False)
+    status: Mapped[str] = mapped_column(String(20), nullable=False, server_default=text("'open'"))
+    # 采纳后指向 knowledge_base.id（逻辑外键，FAQ 删除不阻塞台账）
+    faq_id: Mapped[uuid.UUID | None] = mapped_column(PG_UUID(as_uuid=True))
+    hit_count: Mapped[int] = mapped_column(Integer, nullable=False, server_default=_ONE)
+    priority: Mapped[str | None] = mapped_column(String(20))
+    source_task_id: Mapped[uuid.UUID | None] = mapped_column(PG_UUID(as_uuid=True))
+    first_seen: Mapped[datetime | None] = mapped_column(DateTime, server_default=func.now())
+    last_seen: Mapped[datetime | None] = mapped_column(DateTime, server_default=func.now())
