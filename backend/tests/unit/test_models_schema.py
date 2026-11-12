@@ -15,6 +15,7 @@ EXPECTED_TABLES = {
     "cleaned_data",
     "analysis_results",
     "knowledge_base",
+    "knowledge_gaps",
     "reports",
     "tasks",
     "api_keys",
@@ -34,7 +35,7 @@ def _table(name: str):
 
 def test_all_tables_registered() -> None:
     assert set(Base.metadata.tables) == EXPECTED_TABLES
-    assert len(Base.metadata.tables) == 17
+    assert len(Base.metadata.tables) == 18
 
 
 @pytest.mark.parametrize(

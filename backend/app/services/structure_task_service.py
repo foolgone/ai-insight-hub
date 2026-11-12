@@ -13,14 +13,14 @@ from datetime import datetime, timezone
 from typing import Any
 
 from loguru import logger
-from sqlalchemy import func, select
+from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.application import structure_service
 from app.core.config import settings
 from app.core.errors import FrameworkErrorCode
 from app.core.exceptions import AIInsightHubException, TaskAlreadyRunningError
-from app.models import RawData, Task
+from app.models import AnalysisResult, KnowledgeBase, RawData, Task
 from app.repositories import cleaned_data as cleaned_repo
 from app.services import cleaning_service
 from app.services.credential_service import credential_service
@@ -149,6 +149,40 @@ async def _apply_fallback(session: AsyncSession, raw: RawData, code: str) -> tup
     return created, removed
 
 
+async def _artifact_ids(
+    session: AsyncSession, raw_id: uuid.UUID
+) -> tuple[list[uuid.UUID], list[uuid.UUID]]:
+    """切分产物（知识点 / 摘要）按文件归属的旧记录 id，用于「替换」时精确删除。"""
+    knowledge_ids = list(
+        (await session.execute(select(KnowledgeBase.id).where(KnowledgeBase.raw_data_id == raw_id)))
+        .scalars()
+        .all()
+    )
+    summary_ids = list(
+        (
+            await session.execute(
+                select(AnalysisResult.id).where(
+                    AnalysisResult.raw_data_id == raw_id,
+                    AnalysisResult.analysis_type == "other",
+                )
+            )
+        )
+        .scalars()
+        .all()
+    )
+    return knowledge_ids, summary_ids
+
+
+async def _delete_artifacts(
+    session: AsyncSession, knowledge_ids: list[uuid.UUID], summary_ids: list[uuid.UUID]
+) -> None:
+    """删除上一次切分产出（只删捕获到的旧 id，不会误删本次新写入的行）。"""
+    if knowledge_ids:
+        await session.execute(delete(KnowledgeBase).where(KnowledgeBase.id.in_(knowledge_ids)))
+    if summary_ids:
+        await session.execute(delete(AnalysisResult).where(AnalysisResult.id.in_(summary_ids)))
+
+
 async def _running_structure_task(session: AsyncSession, raw_id: uuid.UUID) -> Task | None:
     return (
         (
@@ -267,6 +301,17 @@ async def _execute(task_id: uuid.UUID, session: AsyncSession, *, commit: bool) -
             }
 
         content = raw.raw_content or {}
+        # 显式重跑：清掉上一次的结构化结果/错误标记，否则 apply() 会直接复用旧结果
+        if any(key in content for key in ("structured", "structure_error", "structure_skipped")):
+            raw.raw_content = {
+                key: value
+                for key, value in content.items()
+                if key not in ("structured", "structure_error", "structure_skipped")
+            }
+            content = raw.raw_content
+            await session.flush()
+        # 先记下上一次切分产出的知识点/摘要，成功后精确删除（替换语义）
+        old_knowledge_ids, old_summary_ids = await _artifact_ids(session, raw.id)
         payload = await structure_service.apply(
             session,
             raw=raw,
@@ -306,6 +351,8 @@ async def _execute(task_id: uuid.UUID, session: AsyncSession, *, commit: bool) -
                         duration=0.0,
                         token_usage={"input": 0, "output": 0},
                     )
+            # 知识点 / 摘要同样整体替换（只删上一次捕获到的旧记录）
+            await _delete_artifacts(session, old_knowledge_ids, old_summary_ids)
             task.status = "completed"
             task.progress = 100
             task.current_step = "completed"
@@ -319,6 +366,10 @@ async def _execute(task_id: uuid.UUID, session: AsyncSession, *, commit: bool) -
                 },
                 "replaced": removed,
                 "created": created,
+                "replaced_artifacts": {
+                    "knowledge": len(old_knowledge_ids),
+                    "summary": len(old_summary_ids),
+                },
                 "state": state,
             }
             await _refresh_datasource_statistics(session, raw.datasource_id)

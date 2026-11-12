@@ -98,6 +98,11 @@ class FaqNotFoundError(AIInsightHubException):
     default_message = "FAQ not found"
 
 
+class GapNotFoundError(AIInsightHubException):
+    code = ErrorCode.GAP_NOT_FOUND
+    default_message = "Knowledge gap not found"
+
+
 class ReportNotFoundError(AIInsightHubException):
     code = ErrorCode.REPORT_NOT_FOUND
     default_message = "Report not found"
@@ -243,6 +248,7 @@ __all__ = [
     "DataSourceTypeInvalidError",
     "DataSourceTypeNotFoundError",
     "FaqNotFoundError",
+    "GapNotFoundError",
     "FileFormatInvalidError",
     "FileTooLargeError",
     "InsufficientCreditsError",

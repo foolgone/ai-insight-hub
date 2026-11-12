@@ -5,7 +5,8 @@ import { taskKeys } from './useTasks'
 export const knowledgeKeys = {
   all: ['knowledge'],
   faq: (datasourceId, params) => ['knowledge', 'faq', datasourceId, params],
-  gaps: datasourceId => ['knowledge', 'gaps', datasourceId],
+  gaps: (datasourceId, params) => ['knowledge', 'gaps', datasourceId, params],
+  coverage: datasourceId => ['knowledge', 'coverage', datasourceId],
   search: (datasourceId, params) => ['knowledge', 'search', datasourceId, params],
 }
 
@@ -45,14 +46,41 @@ export function useKnowledgeSearchQuery(datasourceId, term, params = {}) {
 }
 
 /**
- * 知识盲区。
+ * 知识盲区台账。
  * @param {string|null|undefined} datasourceId
+ * @param {{ status?: 'open'|'adopted'|'ignored' }} [params]
  */
-export function useGapsQuery(datasourceId) {
+export function useGapsQuery(datasourceId, params = {}) {
   return useQuery({
-    queryKey: knowledgeKeys.gaps(datasourceId),
-    queryFn: () => knowledgeApi.listGaps(datasourceId),
+    queryKey: knowledgeKeys.gaps(datasourceId, params),
+    queryFn: () => knowledgeApi.listGaps(datasourceId, params),
     enabled: Boolean(datasourceId),
+  })
+}
+
+/**
+ * 知识覆盖率（近 N 天对话被 FAQ 语义命中的比例）。
+ * @param {string|null|undefined} datasourceId
+ * @param {{ days?: number, threshold?: number }} [params]
+ */
+export function useCoverageQuery(datasourceId, params = {}) {
+  return useQuery({
+    queryKey: knowledgeKeys.coverage(datasourceId),
+    queryFn: () => knowledgeApi.getCoverage(datasourceId, params),
+    enabled: Boolean(datasourceId),
+  })
+}
+
+/** 盲区状态流转（open / adopted / ignored）。 */
+export function useUpdateGap() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ datasourceId, gapId, status, faqId }) =>
+      knowledgeApi.updateGap(datasourceId, gapId, {
+        status,
+        ...(faqId ? { faq_id: faqId } : {}),
+      }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: knowledgeKeys.all }),
   })
 }
 

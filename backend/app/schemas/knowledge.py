@@ -69,15 +69,27 @@ class SearchResponse(BaseSchema):
 
 
 class GapItem(BaseSchema):
+    id: uuid.UUID | None = None
     question: str
     frequency: int = 1
-    category: str = "其他"
     priority: Literal["high", "medium", "low"] = "low"
-    suggested_answer: str | None = None
+    # 台账状态：open（待处理）/ adopted（已采纳为 FAQ）/ ignored（确认不处理）
+    status: Literal["open", "adopted", "ignored"] = "open"
+    faq_id: uuid.UUID | None = None
+    first_seen: datetime | None = None
+    last_seen: datetime | None = None
+
+
+class GapUpdateRequest(BaseSchema):
+    status: Literal["open", "adopted", "ignored"]
+    faq_id: uuid.UUID | None = None
 
 
 class GapsSummary(BaseSchema):
     total_gaps: int = 0
+    open_gaps: int = 0
+    adopted_gaps: int = 0
+    ignored_gaps: int = 0
     high_priority: int = 0
     medium_priority: int = 0
     low_priority: int = 0
@@ -88,11 +100,28 @@ class GapsResponse(BaseSchema):
     summary: GapsSummary
 
 
+class CoverageResponse(BaseSchema):
+    """知识覆盖率：最近 N 天的对话里能被现有 FAQ 命中的比例。
+
+    ``method``：``vector``（向量余弦）或 ``trgm``（历史数据无向量时的文本相似度降级）。
+    """
+
+    datasource_id: uuid.UUID
+    days: int
+    threshold: float
+    total: int = 0
+    covered: int = 0
+    rate: float = 0.0
+    method: Literal["vector", "trgm"] = "vector"
+
+
 __all__ = [
+    "CoverageResponse",
     "FAQCreate",
     "FAQItem",
     "FAQUpdate",
     "GapItem",
+    "GapUpdateRequest",
     "GapsResponse",
     "GapsSummary",
     "KnowledgeExtractionRequest",

@@ -50,6 +50,8 @@ export const endpoints = {
     faqById: (id, faqId) => `/datasources/${id}/knowledge/faq/${faqId}`,
     search: id => `/datasources/${id}/knowledge/search`,
     gaps: id => `/datasources/${id}/knowledge/gaps`,
+    gapById: (id, gapId) => `/datasources/${id}/knowledge/gaps/${gapId}`,
+    coverage: id => `/datasources/${id}/knowledge/coverage`,
   },
   reports: {
     byDatasource: id => `/datasources/${id}/reports`,

@@ -269,6 +269,12 @@ async def test_gaps_api_after_extraction(
         result={"gaps": _GAPS, "gaps_count": 2},
     )
     await persist(db_session, completed)
+    # 盲区已台账化：列表读 knowledge_gaps 表（不再依赖 tasks.result 快照）
+    from app.repositories import knowledge_gaps as gap_repo
+
+    await gap_repo.upsert_many(
+        db_session, datasource_id=datasource_id, gaps=_GAPS, task_id=completed.id
+    )
 
     gaps = await client.get(
         f"/api/v1/datasources/{datasource_id}/knowledge/gaps",

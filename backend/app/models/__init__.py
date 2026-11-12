@@ -11,7 +11,7 @@ Alembic ``autogenerate`` 依赖本包导入全部模型；**新增模型后必�
 - 可观测：llm_calls（1 张）
 - 凭据：user_llm_credentials（1 张，BYOK）
 """
-from app.models.analysis import AnalysisResult, KnowledgeBase
+from app.models.analysis import AnalysisResult, KnowledgeBase, KnowledgeGap
 from app.models.base import Base
 from app.models.datasource import CleanedData, DataSource, RawData
 from app.models.datasource_type import DataSourceType
@@ -32,6 +32,7 @@ __all__ = [
     "DataSource",
     "DataSourceType",
     "KnowledgeBase",
+    "KnowledgeGap",
     "LlmCall",
     "PromptUsageLog",
     "PromptVersion",
