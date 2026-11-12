@@ -19,6 +19,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.ownership import assert_owner
 from app.core.pagination import PaginationParams
 from app.repositories.pagination import paginate
+from app.repositories import analysis_results as analysis_repo
 from app.repositories import cleaned_data as cleaned_repo
 from app.application import task_control
 from app.core.errors import FrameworkErrorCode
@@ -35,7 +36,8 @@ from app.models import (
     User,
 )
 from app.schemas.agents.evaluation import EvaluationConfig
-from app.schemas.analysis import QualityAnalysisSummary
+from app.schemas.agents.evaluation import ISSUE_CATEGORY_LABELS
+from app.schemas.analysis import IssueCategoriesResponse, IssueCategoryItem, QualityAnalysisSummary
 from app.schemas.base import Pagination
 from app.services.credential_service import credential_service
 from app.services import cleaning_service
@@ -377,6 +379,71 @@ async def list_analysis_results(
     return rows, pagination, summary
 
 
+async def top_issue_categories(
+    session: AsyncSession,
+    *,
+    user: User,
+    datasource_id: uuid.UUID,
+    run_id: uuid.UUID | None = None,
+    limit: int = 10,
+) -> IssueCategoriesResponse:
+    """某个评估批次（缺省=最近一次）的问题分类 TOP 列表（#6）。"""
+    await _datasource_or_404(session, datasource_id, user)
+
+    task: Task | None
+    if run_id is not None:
+        task = await session.get(Task, run_id)
+        if task is None or task.datasource_id != datasource_id:
+            raise AIInsightHubException(
+                "Run not found", code=FrameworkErrorCode.HTTP_ERROR, status_code=404
+            )
+        if task.task_type != EVALUATE_TASK_TYPE:
+            raise AIInsightHubException(
+                "Only evaluation runs have issue categories",
+                code=FrameworkErrorCode.HTTP_ERROR,
+                status_code=422,
+            )
+    else:
+        task = await session.scalar(
+            select(Task)
+            .where(
+                Task.datasource_id == datasource_id,
+                Task.task_type == EVALUATE_TASK_TYPE,
+                Task.status == "completed",
+            )
+            .order_by(Task.completed_at.desc())
+            .limit(1)
+        )
+
+    if task is None:
+        return IssueCategoriesResponse()
+
+    rows = await analysis_repo.list_for_task(session, task.id, analysis_type="quality")
+    counts: dict[str, int] = {}
+    samples: dict[str, list[str]] = {}
+    for row in rows:
+        for item in (row.result or {}).get("issue_items") or []:
+            if not isinstance(item, dict):
+                continue
+            category = str(item.get("category") or "other")
+            counts[category] = counts.get(category, 0) + 1
+            detail = str(item.get("detail") or "").strip()
+            bucket = samples.setdefault(category, [])
+            if detail and detail not in bucket and len(bucket) < 3:
+                bucket.append(detail)
+
+    items = [
+        IssueCategoryItem(
+            category=category,
+            label=ISSUE_CATEGORY_LABELS.get(category, category),
+            count=count,
+            samples=samples.get(category, []),
+        )
+        for category, count in sorted(counts.items(), key=lambda kv: (-kv[1], kv[0]))[:limit]
+    ]
+    return IssueCategoriesResponse(run_id=task.id, total_issues=sum(counts.values()), items=items)
+
+
 async def review_analysis_result(
     session: AsyncSession,
     *,
@@ -437,4 +504,5 @@ __all__ = [
     "list_analysis_results",
     "review_analysis_result",
     "run_evaluation_task",
+    "top_issue_categories",
 ]

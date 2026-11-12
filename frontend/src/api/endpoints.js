@@ -40,6 +40,9 @@ export const endpoints = {
     qualityRuns: id => `/datasources/${id}/runs`,
     qualityRunCompare: (id, baseRunId, targetRunId) =>
       `/datasources/${id}/runs/${baseRunId}/compare/${targetRunId}`,
+    insightRunCompare: (id, baseRunId, targetRunId) =>
+      `/datasources/${id}/runs/${baseRunId}/insight-compare/${targetRunId}`,
+    qualityIssues: id => `/datasources/${id}/analysis/quality/issues`,
     insights: id => `/datasources/${id}/analyze/insights`,
     insightsResults: id => `/datasources/${id}/analysis/insights`,
     summaries: id => `/datasources/${id}/analysis/summaries`,

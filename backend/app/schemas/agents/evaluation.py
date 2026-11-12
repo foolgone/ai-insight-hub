@@ -14,6 +14,36 @@ from pydantic import BaseModel, Field, field_validator
 
 DimensionName = Literal["accuracy", "completeness", "hallucination", "tone", "compliance"]
 
+# 问题分类（#6）：把自由文本 issue 归到可聚合的类别，支撑「TOP5 问题」与批次对比
+IssueCategory = Literal[
+    "hallucination",
+    "missing_knowledge",
+    "accuracy",
+    "tone",
+    "compliance",
+    "process",
+    "other",
+]
+
+ISSUE_CATEGORY_LABELS: dict[str, str] = {
+    "hallucination": "幻觉/编造",
+    "missing_knowledge": "知识缺失",
+    "accuracy": "事实不准",
+    "tone": "话术/语气",
+    "compliance": "合规风险",
+    "process": "流程/时效",
+    "other": "其他",
+}
+
+# 模型没给分类时的兜底映射（按维度归因）
+DIMENSION_TO_CATEGORY: dict[str, str] = {
+    "accuracy": "accuracy",
+    "completeness": "missing_knowledge",
+    "hallucination": "hallucination",
+    "tone": "tone",
+    "compliance": "compliance",
+}
+
 DIMENSION_NAMES: tuple[DimensionName, ...] = (
     "accuracy",
     "completeness",
@@ -47,6 +77,14 @@ class DimensionScore(BaseModel):
     issues: list[str] = Field(default_factory=list)
 
 
+class IssueItem(BaseModel):
+    """一条可聚合的问题（分类 + 维度 + 原文描述）。"""
+
+    category: IssueCategory = "other"
+    dimension: DimensionName | None = None
+    detail: str = ""
+
+
 class EvaluationConfig(BaseModel):
     dimensions: list[DimensionName] = Field(default_factory=lambda: list(DIMENSION_NAMES))
     threshold: float = Field(default=EVALUATION_THRESHOLD, ge=0, le=100)
@@ -72,6 +110,8 @@ class EvaluationLLMOutput(BaseModel):
 
     dimensions: dict[str, DimensionScore]
     suggestions: list[str] = Field(default_factory=list)
+    # 问题分类（可选）：模型按 category 归类；缺失时按维度兜底映射
+    issue_items: list[IssueItem] = Field(default_factory=list)
 
 
 class QualityLevel(str, Enum):
@@ -91,18 +131,24 @@ class EvaluationOutput(BaseModel):
     suggestions: list[str]
     quality_level: QualityLevel
     needs_review: bool
+    # 分类后的问题清单（聚合 TOP 问题 / 批次对比用）
+    issue_items: list[IssueItem] = Field(default_factory=list)
 
 
 __all__ = [
     "DIMENSION_LABELS",
     "DIMENSION_NAMES",
+    "DIMENSION_TO_CATEGORY",
     "DIMENSION_WEIGHTS",
     "EMPTY_KNOWLEDGE_HALLUCINATION_SCORE",
     "EVALUATION_THRESHOLD",
+    "ISSUE_CATEGORY_LABELS",
     "DimensionScore",
     "EvaluationConfig",
     "EvaluationInput",
     "EvaluationLLMOutput",
     "EvaluationOutput",
+    "IssueCategory",
+    "IssueItem",
     "QualityLevel",
 ]

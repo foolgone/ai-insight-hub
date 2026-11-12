@@ -70,3 +70,16 @@ export async function compareQualityRuns(datasourceId, baseRunId, targetRunId) {
   )
   return data
 }
+
+/**
+ * 洞察批次对比（情感分布 / 意图分布 / 痛点增减）。
+ * @param {string} datasourceId
+ * @param {string} baseRunId
+ * @param {string} targetRunId
+ */
+export async function compareInsightRuns(datasourceId, baseRunId, targetRunId) {
+  const { data } = await apiClient.get(
+    endpoints.analysis.insightRunCompare(datasourceId, baseRunId, targetRunId)
+  )
+  return data
+}

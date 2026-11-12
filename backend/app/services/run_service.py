@@ -25,9 +25,13 @@ from app.core.exceptions import AIInsightHubException, DataSourceNotFoundError
 from app.core.ownership import assert_owner
 from app.models import AnalysisResult, DataSource, Task, User
 from app.repositories import analysis_results as analysis_repo
+from app.schemas.agents.evaluation import ISSUE_CATEGORY_LABELS
 from app.schemas.analysis import (
     DialogueDelta,
     DimensionDelta,
+    InsightComparison,
+    InsightMetric,
+    IssueCategoryDelta,
     RunComparison,
     RunDelta,
     RunItem,
@@ -188,6 +192,40 @@ def _band_delta(base: ScoreBands, target: ScoreBands) -> ScoreBands:
     )
 
 
+def _category_counts(rows: list[AnalysisResult]) -> dict[str, int]:
+    """按问题分类聚合（#6）：旧数据没有 issue_items 时返回空字典。"""
+    counts: dict[str, int] = {}
+    for row in rows:
+        items = (row.result or {}).get("issue_items") or []
+        for item in items:
+            if not isinstance(item, dict):
+                continue
+            category = str(item.get("category") or "other")
+            counts[category] = counts.get(category, 0) + 1
+    return counts
+
+
+def _category_deltas(
+    base_rows: list[AnalysisResult], target_rows: list[AnalysisResult]
+) -> list[IssueCategoryDelta]:
+    base = _category_counts(base_rows)
+    target = _category_counts(target_rows)
+    categories = sorted(
+        base.keys() | target.keys(),
+        key=lambda key: (-(target.get(key, 0) + base.get(key, 0)), key),
+    )
+    return [
+        IssueCategoryDelta(
+            category=category,
+            label=ISSUE_CATEGORY_LABELS.get(category, category),
+            base=base.get(category, 0),
+            target=target.get(category, 0),
+            delta=target.get(category, 0) - base.get(category, 0),
+        )
+        for category in categories
+    ]
+
+
 def build_comparison(
     base_task: Task,
     base_rows: list[AnalysisResult],
@@ -239,6 +277,7 @@ def build_comparison(
         removed_items=removed,
         issues_added=issues_added,
         issues_removed=issues_removed,
+        categories=_category_deltas(base_rows, target_rows),
     )
 
 
@@ -382,4 +421,137 @@ async def compare_runs(
     return build_comparison(base_task, base_rows, target_task, target_rows)
 
 
-__all__ = ["build_comparison", "compare_runs", "list_runs"]
+# --------------------------------------------------------------------------- 洞察对比（#3）
+
+
+def _pain_point_map(payload: dict) -> dict[str, str]:
+    """痛点 → {归一化文本: 原文}；兼容 dict 的多种字段名与纯字符串。"""
+    mapping: dict[str, str] = {}
+    for item in payload.get("pain_points") or []:
+        if isinstance(item, dict):
+            text = str(
+                item.get("pain_point")
+                or item.get("issue")
+                or item.get("description")
+                or item.get("topic")
+                or ""
+            ).strip()
+            if not text:
+                text = str(item)[:120]
+        else:
+            text = str(item).strip()
+        if text:
+            mapping[_WHITESPACE.sub("", text).lower()] = text
+    return mapping
+
+
+def build_insight_comparison(
+    base_task: Task,
+    base_payload: dict,
+    target_task: Task,
+    target_payload: dict,
+) -> InsightComparison:
+    """两次洞察的对比：情感占比、意图分布、痛点增减（纯计算，便于单测）。"""
+    base_sentiment = base_payload.get("sentiment_distribution") or {}
+    target_sentiment = target_payload.get("sentiment_distribution") or {}
+    sentiment = [
+        InsightMetric(
+            name=str(name),
+            base=round(float(base_sentiment.get(name, 0) or 0), 4),
+            target=round(float(target_sentiment.get(name, 0) or 0), 4),
+            delta=round(
+                float(target_sentiment.get(name, 0) or 0) - float(base_sentiment.get(name, 0) or 0),
+                4,
+            ),
+        )
+        for name in sorted(base_sentiment.keys() | target_sentiment.keys())
+    ]
+
+    base_intents = base_payload.get("intent_distribution") or {}
+    target_intents = target_payload.get("intent_distribution") or {}
+    intents = [
+        InsightMetric(
+            name=str(name),
+            base=float(base_intents.get(name, 0) or 0),
+            target=float(target_intents.get(name, 0) or 0),
+            delta=float(target_intents.get(name, 0) or 0) - float(base_intents.get(name, 0) or 0),
+        )
+        for name in sorted(
+            base_intents.keys() | target_intents.keys(),
+            key=lambda key: -(
+                float(target_intents.get(key, 0) or 0) + float(base_intents.get(key, 0) or 0)
+            ),
+        )[:8]
+    ]
+
+    base_pains = _pain_point_map(base_payload)
+    target_pains = _pain_point_map(target_payload)
+    return InsightComparison(
+        base_task_id=base_task.id,
+        target_task_id=target_task.id,
+        base_completed_at=base_task.completed_at,
+        target_completed_at=target_task.completed_at,
+        sentiment=sentiment,
+        intents=intents,
+        pain_points_added=[target_pains[key] for key in target_pains.keys() - base_pains.keys()],
+        pain_points_removed=[base_pains[key] for key in base_pains.keys() - target_pains.keys()],
+    )
+
+
+async def compare_insights(
+    session: AsyncSession,
+    *,
+    user: User,
+    datasource_id: uuid.UUID,
+    base_task_id: uuid.UUID,
+    target_task_id: uuid.UUID,
+) -> InsightComparison:
+    """对比两次洞察分析（task_type=analyze，各取最新一条 insight 结果）。"""
+    await _datasource_or_404(session, datasource_id, user)
+    if base_task_id == target_task_id:
+        raise AIInsightHubException(
+            "Base and target run are the same task",
+            code=FrameworkErrorCode.HTTP_ERROR,
+            status_code=422,
+        )
+
+    base_task = await _task_or_404(session, datasource_id, base_task_id)
+    target_task = await _task_or_404(session, datasource_id, target_task_id)
+    for task in (base_task, target_task):
+        if task.task_type != "analyze":
+            raise AIInsightHubException(
+                "Only insight runs can be compared here",
+                code=FrameworkErrorCode.HTTP_ERROR,
+                status_code=422,
+            )
+        if task.status != "completed":
+            raise AIInsightHubException(
+                f"Run {task.id} is {task.status}; only completed runs can be compared",
+                code=FrameworkErrorCode.HTTP_ERROR,
+                status_code=409,
+            )
+
+    base_rows = await analysis_repo.list_for_task(session, base_task.id, analysis_type="insight")
+    target_rows = await analysis_repo.list_for_task(
+        session, target_task.id, analysis_type="insight"
+    )
+    if not base_rows or not target_rows:
+        raise AIInsightHubException(
+            "Insight run has no results (legacy runs created before batch tracking cannot "
+            "be compared; re-run the analysis)",
+            code=FrameworkErrorCode.HTTP_ERROR,
+            status_code=409,
+        )
+
+    return build_insight_comparison(
+        base_task, base_rows[0].result or {}, target_task, target_rows[0].result or {}
+    )
+
+
+__all__ = [
+    "build_comparison",
+    "build_insight_comparison",
+    "compare_insights",
+    "compare_runs",
+    "list_runs",
+]

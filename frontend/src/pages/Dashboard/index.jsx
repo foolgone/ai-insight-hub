@@ -17,6 +17,7 @@ import { Empty } from '../../components/Empty'
 import { StatCard } from '../../components/StatCard'
 import { Table } from '../../components/Table'
 import { AgentStatusBadge } from '../../components/business/AgentStatusBadge'
+import { InsightComparisonCard } from '../../components/insight/InsightComparisonCard'
 import { useDashboard } from '../../hooks/useDashboard'
 import { useDatasourceStore } from '../../stores/datasourceStore'
 import { downloadTextFile, toCsv } from '../../lib/download'
@@ -162,6 +163,8 @@ export default function Dashboard() {
           </div>
         )}
       </div>
+
+      <InsightComparisonCard datasourceId={currentDatasourceId} />
 
       <div className="border border-gray-200 bg-white">
         <div className="flex items-baseline justify-between gap-2 border-b border-gray-200 px-5 py-4">

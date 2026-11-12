@@ -5,7 +5,7 @@ import { taskKeys } from './useTasks'
 export const qualityKeys = {
   all: ['quality'],
   list: (datasourceId, params) => ['quality', datasourceId, 'list', params],
-  runs: datasourceId => ['quality', datasourceId, 'runs'],
+  runs: (datasourceId, params = {}) => ['quality', datasourceId, 'runs', params],
   compare: (datasourceId, baseRunId, targetRunId) => [
     'quality',
     datasourceId,
@@ -35,12 +35,26 @@ export function useQualityResultsQuery(datasourceId, params = {}, options = {}) 
  * @param {string|null|undefined} datasourceId
  * @param {Object} [options]
  */
-export function useQualityRunsQuery(datasourceId, options = {}) {
+export function useQualityRunsQuery(datasourceId, params = {}, options = {}) {
   return useQuery({
-    queryKey: qualityKeys.runs(datasourceId),
-    queryFn: () => qualityApi.listQualityRuns(datasourceId, { limit: 20 }),
+    queryKey: qualityKeys.runs(datasourceId, params),
+    queryFn: () => qualityApi.listQualityRuns(datasourceId, { limit: 20, ...params }),
     enabled: Boolean(datasourceId),
     ...options,
+  })
+}
+
+/**
+ * 洞察批次对比（两次 completed 的 analyze 任务）。
+ * @param {string|null|undefined} datasourceId
+ * @param {string|null|undefined} baseRunId
+ * @param {string|null|undefined} targetRunId
+ */
+export function useInsightRunComparisonQuery(datasourceId, baseRunId, targetRunId) {
+  return useQuery({
+    queryKey: ['quality', datasourceId, 'insight-compare', baseRunId, targetRunId],
+    queryFn: () => qualityApi.compareInsightRuns(datasourceId, baseRunId, targetRunId),
+    enabled: Boolean(datasourceId && baseRunId && targetRunId && baseRunId !== targetRunId),
   })
 }
 
