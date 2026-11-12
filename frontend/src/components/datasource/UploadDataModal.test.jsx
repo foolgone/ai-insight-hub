@@ -58,7 +58,9 @@ describe('UploadDataModal', () => {
     await user.upload(screen.getByLabelText('数据文件'), file)
     await user.click(screen.getByRole('button', { name: /上传/ }))
 
-    await waitFor(() => expect(uploadDataSourceFile).toHaveBeenCalledWith('ds-1', file))
+    await waitFor(() =>
+      expect(uploadDataSourceFile).toHaveBeenCalledWith('ds-1', file, expect.any(Function))
+    )
     await waitFor(() => expect(onClose).toHaveBeenCalled())
   })
 

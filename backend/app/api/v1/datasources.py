@@ -1,6 +1,8 @@
 """数据源接口（API 设计 §5、§6）。"""
 from __future__ import annotations
 
+import os
+import tempfile
 import uuid
 from datetime import datetime
 from pathlib import Path
@@ -62,6 +64,36 @@ WRITE_ROLES = ("admin", "user")
 MAX_RAW_TEXT_CHARS = 200_000
 # 粗估：每条原始记录约 0.2 秒
 SECONDS_PER_RECORD = 0.2
+
+# 流式落盘的分块大小（1MB）：避免 100MB 级音视频整块读进内存
+UPLOAD_CHUNK_BYTES = 1024 * 1024
+
+
+async def _spool_upload(file: UploadFile, max_bytes: int) -> tuple[Path, int]:
+    """把上传流写到临时文件，边写边校验大小；返回 ``(临时路径, 字节数)``。"""
+    fd, path_str = tempfile.mkstemp(prefix="aiih-upload-")
+    path = Path(path_str)
+    size = 0
+    try:
+        with os.fdopen(fd, "wb") as out:
+            while True:
+                chunk = await file.read(UPLOAD_CHUNK_BYTES)
+                if not chunk:
+                    break
+                size += len(chunk)
+                if size > max_bytes:
+                    raise FileTooLargeError(
+                        details={
+                            "filename": file.filename or "upload.bin",
+                            "size": size,
+                            "max_size_mb": settings.MAX_UPLOAD_SIZE_MB,
+                        }
+                    )
+                out.write(chunk)
+    except Exception:
+        path.unlink(missing_ok=True)
+        raise
+    return path, size
 
 
 @router.post(
@@ -195,15 +227,14 @@ async def upload_file(
     datasource = await datasource_service.get(session, user=user, datasource_id=datasource_id)
 
     filename = file.filename or "upload.bin"
-    content = await file.read()
-
-    # 413：超过大小上限
     max_bytes = settings.MAX_UPLOAD_SIZE_MB * 1024 * 1024
-    if len(content) > max_bytes:
+
+    # 413：Content-Length 已声明超限时直接拒绝（不必先落盘）
+    if file.size is not None and file.size > max_bytes:
         raise FileTooLargeError(
             details={
                 "filename": filename,
-                "size": len(content),
+                "size": file.size,
                 "max_size_mb": settings.MAX_UPLOAD_SIZE_MB,
             }
         )
@@ -231,84 +262,91 @@ async def upload_file(
         if asr_row.status != "active":
             raise AsrCredentialInvalidError()
 
-    # 文本类解析失败归为 415；媒体不解析，交由 clean 任务转写
-    parsed = None
-    if not is_media:
-        try:
-            parsed = parsers.parse_upload(content, filename)
-        except parsers.ParseError as exc:
-            raise FileFormatInvalidError(str(exc), details={"filename": filename}) from exc
+    # 流式落盘：大文件（音视频 100MB 级）不再整块读进内存
+    tmp_path, size = await _spool_upload(file, max_bytes)
 
-    stored = storage_service.save_upload(
-        content,
-        datasource_id=datasource.id,
-        filename=filename,
-        content_type=file.content_type,
-    )
+    try:
+        # 文本类解析失败归为 415；媒体不解析，交由 clean 任务转写
+        parsed = None
+        if not is_media:
+            try:
+                parsed = parsers.parse_upload(tmp_path.read_bytes(), filename)
+            except parsers.ParseError as exc:
+                raise FileFormatInvalidError(str(exc), details={"filename": filename}) from exc
 
-    if is_media:
-        raw_content: dict[str, Any] = {
-            "format": "media",
-            "media": {
-                "filename": filename,
-                "mime_type": file.content_type,
-                "size": len(content),
-            },
-            "asr": {"status": "pending"},
-        }
-    else:
-        # 非媒体分支一定已在上面解析成功（失败会抛 415）
-        assert parsed is not None
-        raw_content = {
-            "text": parsed.raw_text[:MAX_RAW_TEXT_CHARS],
-            "format": parsed.format,
-            "encoding": parsed.encoding,
-            "record_count": parsed.record_count,
-            "truncated": len(parsed.raw_text) > MAX_RAW_TEXT_CHARS,
-        }
-
-    raw_data = RawData(
-        datasource_id=datasource.id,
-        raw_content=raw_content,
-        file_info={
-            "filename": filename,
-            "size": len(content),
-            "mime_type": file.content_type,
-            "object_name": stored.object_name,
-            "storage_backend": stored.backend,
-        },
-        status="pending",
-    )
-    await raw_data_repo.add(session, raw_data)
-    await session.flush()
-    await session.refresh(raw_data)
-
-    datasource.workflow_status = "data_uploaded"
-
-    task = await cleaning_service.create_clean_task(
-        session,
-        user=user,
-        datasource_id=datasource.id,
-        task_name="上传后清洗",
-        params={
-            "raw_data_id": str(raw_data.id),
-            "config": {"remove_duplicates": True, "normalize_text": True},
-        },
-    )
-    task.celery_task_id = enqueue.enqueue_clean(str(task.id))
-    await session.flush()
-    await session.refresh(task)
-
-    return UploadResponse(
-        task_id=task.id,
-        status=task.status,
-        file_info=FileInfo(
+        stored = storage_service.save_upload_from_path(
+            tmp_path,
+            datasource_id=datasource.id,
             filename=filename,
-            size=len(content),
-            mime_type=file.content_type,
-            storage_backend=stored.backend,
-        ),
-    )
+            content_type=file.content_type,
+            size=size,
+        )
+
+        if is_media:
+            raw_content: dict[str, Any] = {
+                "format": "media",
+                "media": {
+                    "filename": filename,
+                    "mime_type": file.content_type,
+                    "size": size,
+                },
+                "asr": {"status": "pending"},
+            }
+        else:
+            # 非媒体分支一定已在上面解析成功（失败会抛 415）
+            assert parsed is not None
+            raw_content = {
+                "text": parsed.raw_text[:MAX_RAW_TEXT_CHARS],
+                "format": parsed.format,
+                "encoding": parsed.encoding,
+                "record_count": parsed.record_count,
+                "truncated": len(parsed.raw_text) > MAX_RAW_TEXT_CHARS,
+            }
+
+        raw_data = RawData(
+            datasource_id=datasource.id,
+            raw_content=raw_content,
+            file_info={
+                "filename": filename,
+                "size": size,
+                "mime_type": file.content_type,
+                "object_name": stored.object_name,
+                "storage_backend": stored.backend,
+            },
+            status="pending",
+        )
+        await raw_data_repo.add(session, raw_data)
+        await session.flush()
+        await session.refresh(raw_data)
+
+        datasource.workflow_status = "data_uploaded"
+
+        task = await cleaning_service.create_clean_task(
+            session,
+            user=user,
+            datasource_id=datasource.id,
+            task_name="上传后清洗",
+            params={
+                "raw_data_id": str(raw_data.id),
+                "config": {"remove_duplicates": True, "normalize_text": True},
+            },
+        )
+        task.celery_task_id = enqueue.enqueue_clean(str(task.id))
+        await session.flush()
+        await session.refresh(task)
+
+        return UploadResponse(
+            task_id=task.id,
+            status=task.status,
+            file_info=FileInfo(
+                filename=filename,
+                size=size,
+                mime_type=file.content_type,
+                storage_backend=stored.backend,
+            ),
+        )
+    finally:
+        tmp_path.unlink(missing_ok=True)
 
 
 @router.post(

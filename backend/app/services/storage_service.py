@@ -7,6 +7,7 @@
 """
 from __future__ import annotations
 
+import shutil
 import uuid as uuid_module
 from dataclasses import dataclass
 from io import BytesIO
@@ -115,6 +116,62 @@ def save_upload(
     return stored
 
 
+def save_upload_from_path(
+    path: Path,
+    *,
+    datasource_id: object,
+    filename: str,
+    content_type: str | None = None,
+    size: int | None = None,
+) -> StoredFile:
+    """从磁盘文件保存上传（大文件流式落盘后用，避免整文件进内存）。
+
+    - MinIO：``fput_object`` 直接从文件上传；
+    - 本地：移动到存储目录（跨设备时自动复制）。
+    """
+    backend = (settings.STORAGE_BACKEND or "auto").lower()
+    object_name = _object_name(datasource_id, filename)
+    file_size = int(size if size is not None else path.stat().st_size)
+
+    if backend in ("auto", "minio"):
+        try:
+            bucket = settings.MINIO_BUCKET_UPLOADS
+            client = _minio_client()
+            if not client.bucket_exists(bucket):
+                client.make_bucket(bucket)
+            client.fput_object(
+                bucket,
+                object_name,
+                str(path),
+                content_type=content_type or "application/octet-stream",
+            )
+            scheme = "https" if settings.MINIO_USE_SSL else "http"
+            logger.info("upload stored backend=minio object={} size={}", object_name, file_size)
+            return StoredFile(
+                object_name=object_name,
+                url=f"{scheme}://{settings.MINIO_ENDPOINT}/{bucket}/{object_name}",
+                backend="minio",
+                size=file_size,
+            )
+        except Exception as exc:  # noqa: BLE001 - 存储不可用需回退
+            if backend == "minio":
+                logger.opt(exception=exc).error("MinIO 上传失败（STORAGE_BACKEND=minio）")
+                raise
+            logger.warning("MinIO 不可用，回退本地存储：{}", exc)
+
+    root = Path(settings.STORAGE_LOCAL_DIR).resolve()
+    target = root / object_name
+    target.parent.mkdir(parents=True, exist_ok=True)
+    shutil.move(str(path), str(target))
+    logger.info("upload stored backend=local object={} size={}", object_name, file_size)
+    return StoredFile(
+        object_name=object_name,
+        url=str(target),
+        backend="local",
+        size=file_size,
+    )
+
+
 def read_upload(object_name: str, *, backend: str | None = None) -> bytes:
     """读取已存储文件。
 
@@ -185,4 +242,5 @@ __all__ = [
     "read_upload",
     "save_bytes",
     "save_upload",
+    "save_upload_from_path",
 ]

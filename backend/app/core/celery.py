@@ -70,6 +70,11 @@ celery_app.conf.update(
             "task": "tasks.monitor_cost",
             "schedule": crontab(hour=0, minute=5),
         },
+        # 周报（#5）：每周一 09:00；WEEKLY_DIGEST_ENABLED=false 时任务内直接跳过
+        "weekly-digest": {
+            "task": "tasks.weekly_digest",
+            "schedule": crontab(hour=9, minute=0, day_of_week=1),
+        },
     },
 )
 

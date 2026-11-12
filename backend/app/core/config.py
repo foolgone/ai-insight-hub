@@ -138,6 +138,10 @@ class Settings(BaseSettings):
     SMTP_USER: str = ""
     SMTP_PASSWORD: str = ""
     SMTP_FROM: str = "noreply@aiinsight.com"
+    SMTP_TIMEOUT: int = 20
+    # 周报开关与收件人（空 = 发给 SMTP_USER）
+    WEEKLY_DIGEST_ENABLED: bool = False
+    WEEKLY_DIGEST_TO: str = ""
 
     # ---------------- 速率限制 ----------------
     RATE_LIMIT_ENABLED: bool = True

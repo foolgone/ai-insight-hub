@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { LuUpload } from 'react-icons/lu'
 import { Button } from '../Button'
 import { Modal } from '../Modal'
+import { Progress } from '../Progress'
 import { useUploadDataSourceFile } from '../../hooks/useDataSources'
 import { useAsrCredentialStatusQuery } from '../../hooks/useAsrCredential'
 import { getErrorMessage } from '../../lib/errorMessages'
@@ -25,11 +26,13 @@ export function UploadDataModal({ datasource, open, onClose }) {
   const { data: asrStatus } = useAsrCredentialStatusQuery({ enabled: open })
   const [file, setFile] = useState(null)
   const [error, setError] = useState('')
+  const [progress, setProgress] = useState(0)
 
   useEffect(() => {
     if (!open) return
     setFile(null)
     setError('')
+    setProgress(0)
   }, [open])
 
   const mediaSelected = isMediaFile(file)
@@ -53,7 +56,12 @@ export function UploadDataModal({ datasource, open, onClose }) {
       return
     }
     try {
-      await mutation.mutateAsync({ id: datasource.id, file })
+      setProgress(0)
+      await mutation.mutateAsync({
+        id: datasource.id,
+        file,
+        onProgress: percent => setProgress(percent),
+      })
       notify.success('文件已上传，清洗任务已入队')
       onClose()
     } catch (submitError) {
@@ -107,6 +115,16 @@ export function UploadDataModal({ datasource, open, onClose }) {
             <LuUpload className="h-4 w-4 text-gray-400" aria-hidden="true" />
             {file.name}
           </p>
+        ) : null}
+        {mutation.isPending ? (
+          <div className="space-y-1">
+            <Progress percent={progress} />
+            <p className="text-xs text-gray-500">
+              {progress < 100
+                ? `正在上传... ${progress}%（大文件受上行带宽限制，耐心等待或关闭弹窗不影响后台处理）`
+                : '上传完成，正在入队清洗...'}
+            </p>
+          </div>
         ) : null}
         {mediaSelected && !asrReady ? (
           <div className="border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">

@@ -14,6 +14,7 @@ def ping() -> str:
 from app.tasks import (  # noqa: E402,F401
     cleaning,
     cost_monitor,
+    digest,
     evaluation,
     insight,
     knowledge,

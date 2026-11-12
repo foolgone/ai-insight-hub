@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+﻿import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { act, renderHook, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import {
@@ -8,6 +8,8 @@ import {
   useDeleteDataSource,
   useUpdateDataSource,
   useUploadDataSourceFile,
+  useRawDataQuery,
+  useStructureRawData,
 } from './useDataSources'
 import {
   createDataSource,
@@ -16,6 +18,8 @@ import {
   listDataSources,
   updateDataSource,
   uploadDataSourceFile,
+  listRawData,
+  structureRawData,
 } from '../api/datasources'
 
 vi.mock('../api/datasources', () => ({
@@ -25,6 +29,8 @@ vi.mock('../api/datasources', () => ({
   updateDataSource: vi.fn(),
   deleteDataSource: vi.fn(),
   uploadDataSourceFile: vi.fn(),
+  listRawData: vi.fn(),
+  structureRawData: vi.fn(),
 }))
 
 function wrapper({ children }) {
@@ -82,5 +88,30 @@ describe('useDataSources', () => {
     const file = new File(['x'], 'a.csv')
     await act(() => uploadHook.result.current.mutateAsync({ id: 'ds-1', file }))
     expect(uploadDataSourceFile).toHaveBeenCalledWith('ds-1', file)
+  })
+
+  it('上传可携带进度回调（#4）', async () => {
+    const uploadHook = renderHook(() => useUploadDataSourceFile(), { wrapper })
+    const file = new File(['x'], 'a.csv')
+    const onProgress = vi.fn()
+
+    await act(() => uploadHook.result.current.mutateAsync({ id: 'ds-1', file, onProgress }))
+
+    expect(uploadDataSourceFile).toHaveBeenCalledWith('ds-1', file, onProgress)
+  })
+
+  it('转写文件列表与会重新切分（#1）', async () => {
+    listRawData.mockResolvedValue({ items: [{ id: 'raw-1' }] })
+    structureRawData.mockResolvedValue({ task_id: 't-9' })
+
+    const rawHook = renderHook(() => useRawDataQuery('ds-1'), { wrapper })
+    await waitFor(() => expect(rawHook.result.current.isSuccess).toBe(true))
+    expect(listRawData).toHaveBeenCalledWith('ds-1')
+
+    const structureHook = renderHook(() => useStructureRawData(), { wrapper })
+    await act(() =>
+      structureHook.result.current.mutateAsync({ datasourceId: 'ds-1', rawId: 'raw-1' })
+    )
+    expect(structureRawData).toHaveBeenCalledWith('ds-1', 'raw-1')
   })
 })
