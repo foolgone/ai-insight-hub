@@ -16,6 +16,8 @@ from app.schemas.agents.evaluation import EvaluationConfig
 from app.schemas.analysis import (
     EvaluationRequest,
     EvaluationTaskResponse,
+    InsightComparison,
+    IssueCategoriesResponse,
     QualityAnalysisItem,
     QualityAnalysisListResponse,
     ReviewRequest,
@@ -183,6 +185,50 @@ async def compare_runs(
     session: AsyncSession = Depends(get_db),
 ) -> RunComparison:
     return await run_service.compare_runs(
+        session,
+        user=user,
+        datasource_id=datasource_id,
+        base_task_id=base_run_id,
+        target_task_id=target_run_id,
+    )
+
+
+@router.get(
+    "/{datasource_id}/analysis/quality/issues",
+    response_model=IssueCategoriesResponse,
+    response_model_by_alias=False,
+    summary="评估问题分类 TOP（按批次或最近一次，聚合幻觉/知识缺失/话术/合规等）",
+)
+async def list_issue_categories(
+    datasource_id: uuid.UUID,
+    run_id: uuid.UUID | None = Query(default=None),
+    limit: int = Query(default=10, ge=1, le=50),
+    user: User = Depends(require_roles(*READ_ROLES)),
+    session: AsyncSession = Depends(get_db),
+) -> IssueCategoriesResponse:
+    return await evaluation_service.top_issue_categories(
+        session,
+        user=user,
+        datasource_id=datasource_id,
+        run_id=run_id,
+        limit=limit,
+    )
+
+
+@router.get(
+    "/{datasource_id}/runs/{base_run_id}/insight-compare/{target_run_id}",
+    response_model=InsightComparison,
+    response_model_by_alias=False,
+    summary="洞察批次对比（情感分布 / 意图分布 / 痛点增减）",
+)
+async def compare_insight_runs(
+    datasource_id: uuid.UUID,
+    base_run_id: uuid.UUID,
+    target_run_id: uuid.UUID,
+    user: User = Depends(require_roles(*READ_ROLES)),
+    session: AsyncSession = Depends(get_db),
+) -> InsightComparison:
+    return await run_service.compare_insights(
         session,
         user=user,
         datasource_id=datasource_id,

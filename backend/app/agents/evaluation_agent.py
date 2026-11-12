@@ -25,6 +25,7 @@ from app.agents.base import (
 from app.schemas.agents.evaluation import (
     DIMENSION_LABELS,
     DIMENSION_NAMES,
+    DIMENSION_TO_CATEGORY,
     DIMENSION_WEIGHTS,
     EMPTY_KNOWLEDGE_HALLUCINATION_SCORE,
     DimensionScore,
@@ -32,6 +33,7 @@ from app.schemas.agents.evaluation import (
     EvaluationInput,
     EvaluationLLMOutput,
     EvaluationOutput,
+    IssueItem,
     QualityLevel,
 )
 
@@ -187,6 +189,8 @@ class QualityEvaluationAgent(BaseAgent):
             dimension_payload[dimension].get("issues") for dimension in enabled
         )
 
+        issue_items = self._collect_issue_items(llm_output, dimension_payload, enabled)
+
         output = EvaluationOutput(
             dialogue_id=str(dialogue.get("dialogue_id") or "unknown"),
             overall_score=overall_score,
@@ -200,8 +204,36 @@ class QualityEvaluationAgent(BaseAgent):
             suggestions=suggestions,
             quality_level=quality_level_for(overall_score),
             needs_review=overall_score < config.threshold,
+            issue_items=issue_items,
         )
         return output.model_dump(mode="json")
+
+    @staticmethod
+    def _collect_issue_items(
+        llm_output: EvaluationLLMOutput,
+        dimension_payload: dict[str, dict[str, Any]],
+        enabled: Sequence[str],
+    ) -> list[IssueItem]:
+        """模型给了分类就用模型的；没给则按维度兜底映射，保证可聚合。"""
+        items = [item for item in llm_output.issue_items if item.detail.strip()]
+        if items:
+            return items
+        fallback: list[IssueItem] = []
+        for dimension in enabled:
+            category = DIMENSION_TO_CATEGORY.get(dimension, "other")
+            for issue in dimension_payload[dimension].get("issues") or []:
+                text = str(issue).strip()
+                if not text:
+                    continue
+                mapped = "missing_knowledge" if text == "knowledge_base_empty" else category
+                fallback.append(
+                    IssueItem(
+                        category=mapped,  # type: ignore[arg-type]
+                        dimension=dimension,  # type: ignore[arg-type]
+                        detail=text,
+                    )
+                )
+        return fallback
 
     # -- 便捷入口 ---------------------------------------------------------
     async def evaluate(self, input_data: Any, **kwargs: Any):

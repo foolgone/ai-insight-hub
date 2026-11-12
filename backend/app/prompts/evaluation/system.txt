@@ -15,13 +15,28 @@
     "tone":          {"score": 0, "issues": []},
     "compliance":    {"score": 0, "issues": []}
   },
+  "issue_items": [
+    {"category": "missing_knowledge", "dimension": "completeness", "detail": "未说明退货运费由谁承担"}
+  ],
   "suggestions": []
 }
+
+`issue_items` 是**可聚合的问题清单**：把 dimensions 里每条 issue 也在这里出现一次，
+并归到下列 category 之一（用于统计 TOP 问题与前后对比）：
+
+- `hallucination`：编造事实 / 与知识库或原文冲突
+- `missing_knowledge`：知识库里没有、回答不了或答不全
+- `accuracy`：事实不准、数字/口径错误
+- `tone`：语气生硬、话术不规范、像机器人
+- `compliance`：承诺越界、隐私/合规风险
+- `process`：流程、时效、转人工等执行问题
+- `other`：无法归类
 
 ## 规则
 1. 只评估输入中 `dimensions` 列出的维度；未列出的维度可以省略。
 2. 每个维度 score 必须在 0-100；分数越高表示该维度质量越好。
 3. hallucinations（幻觉检测）分数越高表示**越少幻觉**。
 4. issues 只写具体问题（中文短语），没有问题时输出空数组。
-5. suggestions 汇总可执行的改进建议，不超过 5 条。
-6. 不要参考对话数据之外的假设；无法判断时给出保守分数并在 issues 说明原因。
+5. `issue_items` 与 issues 一一对应；没有问题时输出空数组。
+6. suggestions 汇总可执行的改进建议，不超过 5 条。
+7. 不要参考对话数据之外的假设；无法判断时给出保守分数并在 issues 说明原因。

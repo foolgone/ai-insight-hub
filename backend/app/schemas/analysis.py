@@ -136,6 +136,14 @@ class DialogueDelta(BaseSchema):
     delta: float
 
 
+class IssueCategoryDelta(BaseSchema):
+    category: str
+    label: str
+    base: int = 0
+    target: int = 0
+    delta: int = 0
+
+
 class RunComparison(BaseSchema):
     """两个批次的对比结果（target 相对 base 的变化）。"""
 
@@ -152,6 +160,46 @@ class RunComparison(BaseSchema):
     # 问题文本来自 LLM 自由文本，仅做归一化后对比，作为线索而非精确指标
     issues_added: list[str] = Field(default_factory=list)
     issues_removed: list[str] = Field(default_factory=list)
+    # 问题分类变化（#6）：可聚合的 TOP 问题类别，比自由文本稳定
+    categories: list[IssueCategoryDelta] = Field(default_factory=list)
+
+
+class IssueCategoryItem(BaseSchema):
+    category: str
+    label: str
+    count: int = 0
+    samples: list[str] = Field(default_factory=list)
+
+
+class IssueCategoriesResponse(BaseSchema):
+    """某个评估批次（或最近一次）的问题分类 TOP 列表。"""
+
+    run_id: uuid.UUID | None = None
+    total_issues: int = 0
+    items: list[IssueCategoryItem] = Field(default_factory=list)
+
+
+# --------------------------------------------------------------------------- 洞察批次对比（#3）
+
+
+class InsightMetric(BaseSchema):
+    name: str
+    base: float = 0.0
+    target: float = 0.0
+    delta: float = 0.0
+
+
+class InsightComparison(BaseSchema):
+    """两次洞察分析的对比（情感占比 / 意图分布 / 新增与消失的痛点）。"""
+
+    base_task_id: uuid.UUID
+    target_task_id: uuid.UUID
+    base_completed_at: datetime | None = None
+    target_completed_at: datetime | None = None
+    sentiment: list[InsightMetric] = Field(default_factory=list)
+    intents: list[InsightMetric] = Field(default_factory=list)
+    pain_points_added: list[str] = Field(default_factory=list)
+    pain_points_removed: list[str] = Field(default_factory=list)
 
 
 __all__ = [
@@ -160,6 +208,11 @@ __all__ = [
     "DimensionDelta",
     "EvaluationRequest",
     "EvaluationTaskResponse",
+    "InsightComparison",
+    "InsightMetric",
+    "IssueCategoriesResponse",
+    "IssueCategoryDelta",
+    "IssueCategoryItem",
     "QualityAnalysisItem",
     "QualityAnalysisListResponse",
     "QualityAnalysisSummary",

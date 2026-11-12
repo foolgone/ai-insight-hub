@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+﻿import { useMemo, useState } from 'react'
 import { Badge } from '../Badge'
 import { Empty } from '../Empty'
 import { Select } from '../Select'
@@ -236,6 +236,47 @@ function ComparisonBody({ comparison }) {
             ))}
           </tbody>
         </table>
+      </div>
+
+      <div>
+        <h3 className="mb-2 text-sm font-semibold text-gray-900">问题分类变化</h3>
+        {(comparison.categories || []).length === 0 ? (
+          <p className="text-sm text-gray-500">
+            该批次没有分类数据（升级前的评估结果没有 issue_items，需重新评估）
+          </p>
+        ) : (
+          <table className="w-full text-sm">
+            <caption className="sr-only">基线与对比批次的问题分类数量变化</caption>
+            <thead>
+              <tr className="border-b border-gray-200 text-left text-gray-600">
+                <th scope="col" className="py-2 font-medium">
+                  分类
+                </th>
+                <th scope="col" className="py-2 font-medium">
+                  基线
+                </th>
+                <th scope="col" className="py-2 font-medium">
+                  对比
+                </th>
+                <th scope="col" className="py-2 font-medium">
+                  变化
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {(comparison.categories || []).map(item => (
+                <tr key={item.category} className="border-b border-gray-100">
+                  <td className="py-2 text-gray-800">{item.label || item.category}</td>
+                  <td className="py-2 text-gray-700">{item.base}</td>
+                  <td className="py-2 text-gray-700">{item.target}</td>
+                  <td className="py-2">
+                    <Delta value={item.delta} suffix=" 条" />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">

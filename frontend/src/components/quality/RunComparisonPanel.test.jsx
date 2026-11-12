@@ -86,6 +86,10 @@ const COMPARISON = {
   removed_items: 0,
   issues_added: ['回答超出知识库范围（1 条）'],
   issues_removed: ['未回答运费问题（1 条）'],
+  categories: [
+    { category: 'missing_knowledge', label: '知识缺失', base: 2, target: 1, delta: -1 },
+    { category: 'hallucination', label: '幻觉/编造', base: 1, target: 0, delta: -1 },
+  ],
 }
 
 function renderPanel(props = {}) {
@@ -144,6 +148,15 @@ describe('RunComparisonPanel', () => {
 
     expect(screen.getByText('回答超出知识库范围（1 条）')).toBeInTheDocument()
     expect(screen.getByText('未回答运费问题（1 条）')).toBeInTheDocument()
+  })
+
+  it('展示问题分类变化（知识缺失/幻觉）', async () => {
+    renderPanel()
+
+    expect(await screen.findByText('知识缺失')).toBeInTheDocument()
+    expect(screen.getByText('幻觉/编造')).toBeInTheDocument()
+    // 分类差值（与「待复核」的 -1 条同文案，用 findAll）
+    expect(screen.getAllByText('-1.0 条').length).toBeGreaterThanOrEqual(2)
   })
 
   it('基线与对比选同一批次时给出提示且不请求', async () => {
