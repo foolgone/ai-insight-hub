@@ -69,7 +69,11 @@ export function useDeleteDataSource() {
 export function useUploadDataSourceFile() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: ({ id, file }) => datasourceApi.uploadDataSourceFile(id, file),
+    mutationFn: ({ id, file, onProgress }) =>
+      // 未传进度回调时保持两参调用，避免改变既有调用契约
+      onProgress
+        ? datasourceApi.uploadDataSourceFile(id, file, onProgress)
+        : datasourceApi.uploadDataSourceFile(id, file),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: dataSourceKeys.all }),
   })
 }

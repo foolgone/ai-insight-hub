@@ -62,11 +62,17 @@ export async function deleteDataSource(id, { force = false } = {}) {
  * @param {File} file CSV/JSON/XLSX/TXT/音视频，≤100MB
  * @returns {Promise<{ task_id: string, status: string, message: string, file_info: Object }>}
  */
-export async function uploadDataSourceFile(id, file) {
+export async function uploadDataSourceFile(id, file, onProgress) {
   const formData = new FormData()
   formData.append('file', file)
   const { data } = await apiClient.post(endpoints.datasources.upload(id), formData, {
     timeout: 10 * 60 * 1000,
+    // 大文件上传进度（#4）：用于弹窗里的进度条，避免只转圈
+    onUploadProgress: event => {
+      if (!onProgress) return
+      const total = event.total || file.size || 0
+      onProgress(total ? Math.min(100, Math.round((event.loaded / total) * 100)) : 0)
+    },
   })
   return data
 }

@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+﻿import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { apiClient } from './client'
 import {
   createDataSource,
@@ -7,6 +7,8 @@ import {
   listDataSources,
   updateDataSource,
   uploadDataSourceFile,
+  listRawData,
+  structureRawData,
 } from './datasources'
 
 const ORIGINAL_ADAPTER = apiClient.defaults.adapter
@@ -75,5 +77,29 @@ describe('datasources API', () => {
     expect(lastConfig.url).toBe('/datasources/ds-1/upload')
     expect(lastConfig.data).toBeInstanceOf(FormData)
     expect(lastConfig.data.get('file')).toBe(file)
+  })
+
+  it('转写文件列表与重新切分（#1）', async () => {
+    await listRawData('ds-1')
+    expect(lastConfig.url).toBe('/datasources/ds-1/raw-data')
+
+    await structureRawData('ds-1', 'raw-1')
+    expect(lastConfig.url).toBe('/datasources/ds-1/raw-data/raw-1/structure')
+  })
+
+  it('uploadDataSourceFile 透传上传进度（百分比）', async () => {
+    const file = new File(['abcdefghij'], 'data.csv', { type: 'text/csv' })
+    const percents = []
+    apiClient.defaults.adapter = async config => {
+      lastConfig = config
+      // 模拟 axios 的上传进度回调
+      config.onUploadProgress({ loaded: 5, total: 10 })
+      config.onUploadProgress({ loaded: 10, total: 10 })
+      return { data: { ok: true }, status: 200, statusText: 'OK', headers: {}, config }
+    }
+
+    await uploadDataSourceFile('ds-1', file, percent => percents.push(percent))
+
+    expect(percents).toEqual([50, 100])
   })
 })

@@ -18,6 +18,24 @@ def local_storage(tmp_path: Path, monkeypatch):
     return tmp_path
 
 
+def test_save_upload_from_path_moves_file(local_storage: Path, tmp_path: Path) -> None:
+    """流式落盘路径：临时文件被移动到存储目录，调用方无需再读进内存。"""
+    source = tmp_path / "streamed.tmp"
+    source.write_bytes(b"streamed-content")
+
+    stored = storage_service.save_upload_from_path(
+        source,
+        datasource_id="ds-1",
+        filename="big.mp3",
+        content_type="audio/mpeg",
+    )
+
+    assert stored.backend == "local"
+    assert stored.size == len(b"streamed-content")
+    assert not source.exists()
+    assert storage_service.read_upload(stored.object_name) == b"streamed-content"
+
+
 def test_save_and_read_local(local_storage: Path) -> None:
     stored = storage_service.save_upload(
         b"hello-storage",
