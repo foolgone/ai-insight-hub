@@ -10,6 +10,25 @@ vi.mock('../../api/datasources', () => ({
   structureRawData: vi.fn(),
 }))
 
+const MEDIA_SKIPPED = {
+  id: 'raw-4',
+  filename: '短录音.mp3',
+  size: 1024,
+  format: 'media',
+  duration: 8,
+  channels: 1,
+  channel_mode: 'mono',
+  asr_status: 'completed',
+  structure_status: 'skipped',
+  structure_kind: null,
+  qa_count: 0,
+  partial: false,
+  error: null,
+  note: '音频过短（转写文本低于结构化阈值），已保留整段文本',
+  status: 'completed',
+  created_at: '2026-11-12T10:00:00Z',
+}
+
 const MEDIA_PENDING = {
   id: 'raw-1',
   filename: '众联一面.mp3',
@@ -121,6 +140,19 @@ describe('RawDataPanel', () => {
 
     expect(await screen.findByText('structure=summary but summary is empty')).toBeInTheDocument()
     expect(screen.getByText('切分失败')).toBeInTheDocument()
+  })
+
+  it('无需切分时展示「无需切分」与原因（短音频兜底）', async () => {
+    listRawData.mockResolvedValue({ items: [MEDIA_SKIPPED] })
+
+    renderPanel()
+
+    expect(await screen.findByText('无需切分')).toBeInTheDocument()
+    expect(
+      screen.getByText('音频过短（转写文本低于结构化阈值），已保留整段文本')
+    ).toBeInTheDocument()
+    // 仍可手动切分（转写已完成）
+    expect(screen.getByRole('button', { name: '切分' })).toBeEnabled()
   })
 
   it('没有音视频文件时整个面板不渲染', async () => {

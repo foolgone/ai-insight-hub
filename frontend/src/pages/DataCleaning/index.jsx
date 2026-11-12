@@ -33,6 +33,7 @@ const TASK_TABS = [
 
 const TASK_TYPE_LABELS = {
   clean: '清洗',
+  structure: '转写切分',
   evaluate: '评估',
   extract: '提取',
   analyze: '洞察',
