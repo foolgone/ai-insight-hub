@@ -18,6 +18,7 @@ from app.tasks import (  # noqa: E402,F401
     insight,
     knowledge,
     report,
+    structure,
 )
 
 __all__ = ["ping"]
