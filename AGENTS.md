@@ -79,6 +79,7 @@ npm run build
 | 陷阱 | 说明 |
 | --- | --- |
 | `docker commit` 吞 entrypoint | 用 `--entrypoint sleep` 起的容器直接 commit，镜像 ENTRYPOINT 会变成 `sleep`；必须 `--change` 改回 |
+| 部署脚本不同步源码 | `unified_deploy.py cloud` 只重建镜像、不覆盖宿主机 `/opt/ai-insight-hub/backend`；2026-11-13 因此把坏代码又构建了一遍。**构建前先 `grep` 确认修复已进源码**；VM 上没有 `rsync`，用 `tar -xzf ... -C /root/ai-insight-hub --overwrite` |
 | api 重建后 502 | nginx 缓存上游 IP，需 `restart nginx` |
 | 云端全量构建极慢 | 直连 pypi 约 19 kB/s；Dockerfile 默认已用腾讯云镜像 |
 | `acks_late` 重投递 | 只对 `clean` 任务开启；已 `completed` 的任务会短路（`redelivered: true`） |
