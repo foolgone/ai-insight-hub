@@ -72,13 +72,14 @@ def _now_naive() -> datetime:
 
 
 async def count_pending_records(session: AsyncSession, datasource_id: uuid.UUID) -> int:
+    """待清洗记录数：包含上次清洗失败的（失败文件不重新上传也应能再洗一次）。"""
     return int(
         await session.scalar(
             select(func.count())
             .select_from(RawData)
             .where(
                 RawData.datasource_id == datasource_id,
-                RawData.status == "pending",
+                RawData.status.in_(("pending", "failed")),
             )
         )
         or 0
@@ -153,7 +154,8 @@ async def _load_raw_items(session: AsyncSession, task: Task) -> list[RawData]:
 
     stmt = select(RawData).where(
         RawData.datasource_id == task.datasource_id,
-        RawData.status == "pending",
+        # 上次失败的也纳入：否则「新建清洗任务」对失败文件永远返回空
+        RawData.status.in_(("pending", "failed")),
     )
     return list((await session.execute(stmt)).scalars().all())
 
@@ -523,6 +525,9 @@ async def _execute_clean(
                             f"cleaned batch {batch_index}/{len(batches)} {index}/{raw_records}"
                         )
                         await session.flush()
+                        if commit:
+                            # 长文本分批要几分钟，进度必须提交后才对前端可见
+                            await session.commit()
 
                 if failure is not None:
                     failed_raw += 1
@@ -571,6 +576,9 @@ async def _execute_clean(
             raw.processed_at = _now_naive()
             task.progress = min(90, 5 + int(index / raw_records * 85))
             await session.flush()
+            if commit:
+                # 与评估一致：进度要能立即可见（大文件清洗可能几分钟）
+                await session.commit()
 
         datasource = await session.get(DataSource, task.datasource_id)
         if datasource is not None and cleaned_total:

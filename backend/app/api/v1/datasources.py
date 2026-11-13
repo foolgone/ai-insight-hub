@@ -372,7 +372,14 @@ async def clean_datasource(
     record_count = len(request.data_ids) or pending
     estimated_duration = max(5.0, round(record_count * SECONDS_PER_RECORD, 1))
     if not record_count:
-        estimated_duration = 5.0
+        # 以前这里只把预估时长兜成 5 秒，结果建了一个注定失败的任务：
+        # worker 里才抛 "no raw data to clean"，前端看到一个 5% 失败的任务。
+        raise AIInsightHubException(
+            "该数据源没有待清洗文件（可选：重新上传文件，或对失败任务点「重试」）",
+            code=FrameworkErrorCode.BAD_REQUEST,
+            status_code=400,
+            details={"datasource_id": str(datasource.id), "pending_records": 0},
+        )
 
     task = await cleaning_service.create_clean_task(
         session,

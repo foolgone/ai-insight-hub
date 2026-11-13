@@ -1,6 +1,7 @@
 ﻿import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { CreateDataSourceDrawer } from './CreateDataSourceDrawer'
 import { createDataSource, uploadDataSourceFile } from '../../api/datasources'
 
@@ -35,6 +36,13 @@ vi.mock('../../hooks/useAsrCredential', () => ({
 }))
 
 describe('CreateDataSourceDrawer', () => {
+  let client
+
+  function renderDrawer(ui) {
+    client = new QueryClient({ defaultOptions: { queries: { retry: false, gcTime: 0 } } })
+    return render(<QueryClientProvider client={client}>{ui}</QueryClientProvider>)
+  }
+
   beforeEach(() => {
     vi.clearAllMocks()
     asrConfigured = false
@@ -44,7 +52,7 @@ describe('CreateDataSourceDrawer', () => {
 
   it('步骤 1 校验名称必填', async () => {
     const user = userEvent.setup()
-    render(<CreateDataSourceDrawer open onClose={() => {}} />)
+    renderDrawer(<CreateDataSourceDrawer open onClose={() => {}} />)
 
     await user.click(screen.getByRole('button', { name: '下一步' }))
 
@@ -53,7 +61,7 @@ describe('CreateDataSourceDrawer', () => {
 
   it('填写名称后进入步骤 2', async () => {
     const user = userEvent.setup()
-    render(<CreateDataSourceDrawer open onClose={() => {}} />)
+    renderDrawer(<CreateDataSourceDrawer open onClose={() => {}} />)
 
     await user.type(screen.getByLabelText(/名称/), '客服1月')
     await user.click(screen.getByRole('button', { name: '下一步' }))
@@ -63,7 +71,7 @@ describe('CreateDataSourceDrawer', () => {
 
   it('步骤 2 未选择文件时提示', async () => {
     const user = userEvent.setup()
-    render(<CreateDataSourceDrawer open onClose={() => {}} />)
+    renderDrawer(<CreateDataSourceDrawer open onClose={() => {}} />)
 
     await user.type(screen.getByLabelText(/名称/), '客服1月')
     await user.click(screen.getByRole('button', { name: '下一步' }))
@@ -76,7 +84,7 @@ describe('CreateDataSourceDrawer', () => {
   it('创建成功并上传后回调 onSuccess', async () => {
     const onSuccess = vi.fn()
     const user = userEvent.setup()
-    render(<CreateDataSourceDrawer open onClose={() => {}} onSuccess={onSuccess} />)
+    renderDrawer(<CreateDataSourceDrawer open onClose={() => {}} onSuccess={onSuccess} />)
 
     await user.type(screen.getByLabelText(/名称/), '客服1月')
     await user.click(screen.getByRole('button', { name: '下一步' }))
@@ -94,10 +102,28 @@ describe('CreateDataSourceDrawer', () => {
     await waitFor(() => expect(onSuccess).toHaveBeenCalledWith({ id: 'ds-1', name: '客服1月' }))
   })
 
+  it('创建成功后失效数据源列表缓存（#5）', async () => {
+    const user = userEvent.setup()
+    renderDrawer(<CreateDataSourceDrawer open onClose={() => {}} />)
+    const spy = vi.spyOn(client, 'invalidateQueries').mockResolvedValue()
+
+    await user.type(screen.getByLabelText(/名称/), '客服1月')
+    await user.click(screen.getByRole('button', { name: '下一步' }))
+    const file = new File(['a,b'], 'data.csv', { type: 'text/csv' })
+    await user.upload(screen.getByLabelText(/数据文件/), file)
+    await user.click(screen.getByRole('button', { name: '创建并上传' }))
+
+    // 直接调 api 不走 mutation，缓存不会自动失效 → 必须显式 invalidate
+    await waitFor(() => expect(spy).toHaveBeenCalled())
+    const keys = spy.mock.calls.map(([arg]) => JSON.stringify(arg?.queryKey ?? ''))
+    expect(keys.some(key => key.includes('datasources'))).toBe(true)
+    spy.mockRestore()
+  })
+
   it('取消关闭 Drawer', async () => {
     const onClose = vi.fn()
     const user = userEvent.setup()
-    render(<CreateDataSourceDrawer open onClose={onClose} />)
+    renderDrawer(<CreateDataSourceDrawer open onClose={onClose} />)
 
     await user.click(screen.getByRole('button', { name: '取消' }))
 
@@ -107,7 +133,7 @@ describe('CreateDataSourceDrawer', () => {
   it('创建失败展示错误文案', async () => {
     createDataSource.mockRejectedValue({ status: 429, code: 'DATASOURCE_QUOTA_EXCEEDED' })
     const user = userEvent.setup()
-    render(<CreateDataSourceDrawer open onClose={() => {}} />)
+    renderDrawer(<CreateDataSourceDrawer open onClose={() => {}} />)
 
     await user.type(screen.getByLabelText(/名称/), '客服1月')
     await user.click(screen.getByRole('button', { name: '下一步' }))
@@ -123,7 +149,7 @@ describe('CreateDataSourceDrawer', () => {
   it('选择音视频但未配置语音转写时禁用创建', async () => {
     asrConfigured = false
     const user = userEvent.setup()
-    render(<CreateDataSourceDrawer open onClose={() => {}} />)
+    renderDrawer(<CreateDataSourceDrawer open onClose={() => {}} />)
 
     await user.type(screen.getByLabelText(/名称/), '通话1月')
     await user.click(screen.getByRole('button', { name: '下一步' }))
@@ -141,7 +167,7 @@ describe('CreateDataSourceDrawer', () => {
     asrConfigured = true
     const onSuccess = vi.fn()
     const user = userEvent.setup()
-    render(<CreateDataSourceDrawer open onClose={() => {}} onSuccess={onSuccess} />)
+    renderDrawer(<CreateDataSourceDrawer open onClose={() => {}} onSuccess={onSuccess} />)
 
     await user.type(screen.getByLabelText(/名称/), '通话1月')
     await user.click(screen.getByRole('button', { name: '下一步' }))
