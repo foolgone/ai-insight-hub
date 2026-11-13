@@ -1,7 +1,9 @@
-# 数据库设计（Phase 1）
+# 数据库设计
 
-> 迁移：`019_qa_datasets`（revision `b2f7c1d9e4a3`，down_revision `9a4d2f8c6e15`）
+> Phase 1：迁移 `019_qa_datasets`（`b2f7c1d9e4a3`）
+> Phase 2：迁移 `020_rag_traces`（`c9d2a4f7b1e6`）
 > 原则：**只新增表，不改既有表**；旧链路（对话清洗/质量评估）零影响。
+> `rag_eval_results` 推迟到 Phase 3（与指标写入方一起建表，避免空表）。
 
 ---
 
@@ -131,3 +133,53 @@ alembic check: No new upgrade operations detected
 | `analysis_results` 复用 | 语义绑定 `cleaned_data`，混用会污染对话评测 |
 | DB 触发器保证不可变 | 规则需可测试、可回滚；服务层 + 测试已覆盖 |
 | 软删除 / 归档版本 | Phase 1 未提供删除数据集接口，避免误删；archive 状态字段已预留 |
+
+---
+
+## 6. Phase 2 增量（迁移 020：`rag_traces`）
+
+```
+qa_dataset_items 1─n rag_traces        （dataset_item_id，ON DELETE SET NULL）
+tasks            1─n rag_traces        （task_id，Phase 3 评测任务用）
+users            1─n rag_traces        （user_id，CASCADE）
+```
+
+| 列 | 类型 | 说明 |
+|---|---|---|
+| id | uuid | PK（对外叫 `trace_id`） |
+| user_id | uuid | FK users CASCADE |
+| dataset_item_id | uuid | FK qa_dataset_items SET NULL |
+| task_id | uuid | FK tasks SET NULL |
+| idempotency_key | varchar(120) | **唯一**；Phase 3 用 `task:{id}:item:{id}` 保证不重复执行 |
+| adapter | varchar(50) | `mock` / `weknora` |
+| mode | varchar(20) | CHECK `retrieve` / `query` |
+| context_source | varchar(20) | CHECK `hybrid_search` / `agent_chat` / `none` |
+| external_session_id | varchar(100) | WeKnora session id |
+| query / answer | text | 问题 / 最终回答（检索模式 answer 为空） |
+| retrieved_contexts | jsonb | `[{document_id, chunk_id, title, content, score, rank, metadata}]` |
+| raw_response | jsonb | 外部原始响应（超 200k 字符截断并标记） |
+| model_config / retrieval_config / prompt_snapshot | jsonb | 配置快照 |
+| latency_ms | int | 实测耗时（不伪造） |
+| token_usage | jsonb | 外部未提供则为 NULL |
+| missing | jsonb | 缺失字段名数组（区分「缺失」与「0」） |
+| status | varchar(20) | CHECK `success` / `failed` |
+| error_message | text | 失败原文（截断 2000 字） |
+
+索引：`uk_rag_traces_idempotency_key`（唯一）、`(user_id, created_at)`、`(task_id, status)`、`dataset_item_id`。
+
+### 未建的表现在建（有意为之）
+
+| 表 | 原因 |
+|---|---|
+| `rag_eval_results` | Phase 2 没有指标写入方；建表即空表。Phase 3 与指标一起落 |
+| `experiments` / `experiment_runs` | Phase 4 才使用 |
+
+### 迁移执行记录（2026-11-13）
+
+```
+alembic current : b2f7c1d9e4a3 -> c9d2a4f7b1e6 (head)
+alembic check   : No new upgrade operations detected
+```
+
+> 开发库（VM `aiinsight-postgres:5433`）中，本阶段曾提前创建的 `rag_eval_results`（0 行）
+> 已手工 DROP；生产库（`aiinsight-prod-postgres`）未做任何变更。

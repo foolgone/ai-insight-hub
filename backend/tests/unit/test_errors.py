@@ -1,4 +1,4 @@
-"""B-201 错误码与统一错误响应测试。"""
+﻿"""B-201 错误码与统一错误响应测试。"""
 from __future__ import annotations
 
 import json
@@ -67,6 +67,8 @@ BUSINESS_CODES = {
     "QA_DATASET_IMMUTABLE",
     "QA_DATASET_IMPORT_INVALID",
     "QA_DATASET_NAME_EXISTS",
+    # RAG Trace（迁移 020，Phase 2）
+    "RAG_TRACE_NOT_FOUND",
     "INTERNAL_ERROR",
 }
 
@@ -74,8 +76,8 @@ BUSINESS_CODES = {
 def test_business_codes_match_api_design_exactly() -> None:
     assert {code.value for code in ErrorCode} == BUSINESS_CODES
     # API §12.2 原定 28 条 + BYOK 扩展 5 条（LLM 3 + ASR 2）+ 类型字典 3 条 + 盲区台账 1 条
-    # + RAG 评测数据集 4 条（迁移 019）
-    assert len(ErrorCode) == 38
+    # + RAG 评测数据集 4 条（迁移 019）+ RAG Trace 1 条（迁移 020）
+    assert len(ErrorCode) == 39
 
 
 def test_error_status_covers_all_business_codes() -> None:

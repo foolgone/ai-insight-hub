@@ -1,4 +1,4 @@
-# 修复进度（按 Phase 记录）
+﻿# 修复进度（按 Phase 记录）
 
 > 每阶段完成后追加：改动文件、迁移、测试结果、遗留问题。
 > 上一阶段：`docs/repair/01-implementation-plan.md`
@@ -100,3 +100,99 @@ alembic check   : No new upgrade operations detected
 - 需要：WeKnora 的 `BASE_URL / API_KEY / AGENT_ID / KB_ID / TENANT_ID`（Q1 决策：先用 Mock，接口契约按外部脚本实现）；
 - 迁移 020：`rag_traces` / `rag_eval_results` / `experiments` / `experiment_runs`；
 - 验收：Mock 下跑通「建 trace → 查 trace」，真实联调视凭据。
+
+---
+
+## Phase 2 · RAGPort + WeKnora/Mock Adapter + Trace — 已完成（Mock 验证）
+
+**日期**：2026-11-13
+**范围**：新增 `RAGPort`、两个适配器、`rag_traces`（迁移 020）与 4 个 API。
+未实现：指标、Judge、实验、归因（Phase 3/4/5）。
+
+### 1. 改动文件
+
+| 类型 | 文件 | 说明 |
+|---|---|---|
+| 新增 | `backend/app/ports/rag.py` | `RAGPort` / `RAGResult` / `RetrievedContext`（统一结构） |
+| 新增 | `backend/app/services/rag/__init__.py` | 适配器工厂（`mock` / `weknora`，未知→400） |
+| 新增 | `backend/app/services/rag/weknora.py` | httpx + SSE 解析 + 重试 + 原始响应留存 |
+| 新增 | `backend/app/services/rag/mock.py` | 确定性 Mock（`model_config.mock=true`） |
+| 新增 | `backend/app/services/rag/execute.py` | 执行一次查询 → trace；幂等键；失败也落库 |
+| 新增 | `backend/app/models/rag.py` | `RagTrace` |
+| 新增 | `backend/app/repositories/rag_trace.py` | trace 读写 + 幂等键查询 |
+| 新增 | `backend/app/schemas/rag.py` | 请求/响应（`trace_id`/`execution_mode`/`context_available`） |
+| 新增 | `backend/app/api/v1/rag.py` | 4 个端点 |
+| 新增 | `backend/migrations/versions/20261113_2330_c9d2a4f7b1e6_020_rag_traces.py` | 迁移 020（只建 `rag_traces`） |
+| 新增 | `backend/tests/unit/test_rag_adapters.py` | 15 条 |
+| 新增 | `backend/tests/integration/test_rag_api.py` | 10 条 |
+| 修改 | `backend/app/core/config.py` | `RAG_ADAPTER / RAG_TIMEOUT_SECONDS / RAG_MAX_RETRIES / WEKNORA_*` |
+| 修改 | `backend/app/models/__init__.py` | 登记 `RagTrace`（22 张表） |
+| 修改 | `backend/app/api/v1/__init__.py` | 挂载 `/rag` |
+| 修改 | `backend/app/core/errors.py` / `exceptions.py` | `RAG_TRACE_NOT_FOUND`（404） |
+| 修改 | `backend/tests/unit/test_errors.py` | 错误码契约 38 → 39 |
+| 修改 | `backend/tests/unit/test_models_schema.py` | 表契约 21 → 22 + `rag_traces` 列断言 |
+| 修改 | `backend/tests/integration/test_openapi.py` | +4 条路径 |
+| 修改 | `frontend/src/lib/errorMessages.js` | `RAG_TRACE_NOT_FOUND` 文案 |
+
+### 2. 接口契约（WeKnora，实测反推）
+
+| 能力 | 请求 | 解析要点 |
+|---|---|---|
+| 建会话 | `POST /api/v1/sessions` `{title, description}` + `X-API-Key` | `data.id` |
+| 问答 | `POST /api/v1/agent-chat/{sid}` `{query, agent_enabled, agent_id}` | JSON：`data.answer` / `data.results`；SSE：`answer` 事件拼答案、`tool_result.data.results` 取上下文 |
+| 检索 | `POST /api/v1/knowledge-bases/{kb}/hybrid-search` `{query_text, match_count, vector_threshold, keyword_threshold}` + `X-API-Key`/`X-Tenant-ID` | `{success, data[]}`，字段 `knowledge_id / knowledge_title / content` |
+
+**待验证（无凭据，未联调）**
+
+1. `hybrid-search` 是否返回 `score`（当前有则取、无则 `null` + `missing`）；
+2. `agent-chat` 是否稳定返回上下文（不返回则 `context_source=none`）；
+3. 多 KB / 分页参数是否支持。
+
+### 3. 关键语义
+
+| 规则 | 实现 | 测试 |
+|---|---|---|
+| 检索上下文不得冒充生成上下文 | `context_source` 三态 + `missing` | `test_query_without_contexts_marks_none` |
+| 缺 answer / 空检索 | `answer=null` / `contexts=[]`，均记 `missing` | `test_query_missing_answer` / `test_retrieve_empty_result_is_success` |
+| 不伪造 score/token/latency | 缺失记入 `missing`；latency 为实测 | `test_retrieve_maps_contexts_and_marks_missing_score` |
+| 失败也留痕 | `status=failed` + 错误原文；API 仍 201 | `test_failed_adapter_is_persisted` |
+| SSE 中途断开 | 保留已收内容，不抛异常 | `test_sse_truncated_midstream_keeps_received_content` |
+| SSE 错误事件 | 抛 `WeKnoraError` → failed trace | `test_sse_error_event_raises` |
+| 重试边界 | 仅 429/502/503/504 重试，达到上限抛错 | `test_retry_on_429_then_success` / `test_retry_exhausted_raises` |
+| 幂等 | `idempotency_key` 唯一，重复调用复用 trace | `test_idempotent_execution_reuses_trace` |
+
+### 4. 测试结果
+
+| 项 | 结果 |
+|---|---|
+| 新增单测 | 15 passed（MockTransport，无网络） |
+| 新增集成 | 10 passed（mock 适配器） |
+| 后端全量 | **787 passed**（Phase 1 基线 760，净增 27：新增 25 + 契约参数化 2；无删除） |
+| 前端 | 77 文件全绿；95.58% / 83.35% / 81.26% |
+| lint-imports | 5 kept, 0 broken |
+| 迁移 | `c9d2a4f7b1e6 (head)`；`alembic check` 无漂移 |
+
+### 5. 与 Phase 0/本轮指令的差异
+
+| 项 | 方案 | 实际 | 原因 |
+|---|---|---|---|
+| `rag_eval_results` | 020 一起建 | **未建**（推迟 Phase 3） | 本轮指令「无使用场景可暂缓」+ 禁止空表 |
+| `experiments` / `experiment_runs` | 020 | 未建 | Phase 4 |
+| `rag_traces` 字段 | 基础字段 | +`context_source`、`missing`、`idempotency_key` | 区分「缺失/空」，并为 Phase 3 幂等做准备 |
+| API | 3 个（queries/traces/detail） | **4 个**（+`/rag/health`） | 外部服务可用性探测，避免把「未配置」误判为算法问题 |
+| 错误码 | 未列 | +`RAG_TRACE_NOT_FOUND` | 语义清晰，避免复用 QA 数据集错误码 |
+
+### 6. 真实联调状态
+
+- **已完成**：Mock 全链路（执行 → 标准化 → trace → API 查询）；
+- **未完成**：WeKnora 真实调用（缺 `WEKNORA_*` 凭据；不伪造成功）；
+- 真机联调只需配置环境变量后执行：
+  `POST /api/v1/rag/queries {"mode":"retrieve","adapter":"weknora","query":"…"}`。
+
+### 7. 遗留问题
+
+1. **Trace 无保留策略**（长期膨胀；Phase 6 加清理或分区）；
+2. **单条 trace 同步执行**（`POST /queries` 等待外部返回；批量评测在 Phase 3 走 Celery）；
+3. **WeKnora session 每查询新建**（隔离优先，成本是每题多一次调用）；
+4. **`raw_response` 上限 200k 字符**（超出截断并标记，未落对象存储）；
+5. **score 可能恒为 null**：Phase 3 的 MRR 仍可用排名，Context Precision 只能用 ID 命中率。

@@ -234,6 +234,13 @@ class QaDatasetNotFoundError(AIInsightHubException):
     default_message = "数据集不存在"
 
 
+class RagTraceNotFoundError(AIInsightHubException):
+    """RAG trace 不存在（404）。"""
+
+    code = ErrorCode.RAG_TRACE_NOT_FOUND
+    default_message = "RAG Trace 不存在"
+
+
 class QaDatasetImmutableError(AIInsightHubException):
     """已发布版本不可修改（409）。"""
 
@@ -289,6 +296,7 @@ __all__ = [
     "QaDatasetImportInvalidError",
     "QaDatasetNameExistsError",
     "QaDatasetNotFoundError",
+    "RagTraceNotFoundError",
     "RateLimitExceededError",
     "RefreshTokenInvalidError",
     "ReportFormatInvalidError",

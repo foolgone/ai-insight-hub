@@ -171,3 +171,86 @@ GET /qa-datasets/{id}/stats?version_id={vid}
 - Phase 2/3 的评测创建接口只需接收 `dataset_version_id`，即可锁定这一批不可变条目；
 - `rag_traces.dataset_item_id` 指向 `qa_dataset_items.id`，保证「指标 → 样本 → 版本」可追溯；
 - Phase 4 的实验对比要求「同数据集版本」，直接比较 `qa_dataset_versions.id`。
+
+---
+
+## 6. Phase 2 增量：RAG 执行与 Trace
+
+> 前缀 `/api/v1/rag`；错误码新增 `RAG_TRACE_NOT_FOUND`(404)。
+
+| # | 方法 | 路径 | 说明 |
+|---|---|---|---|
+| 1 | POST | `/rag/queries` | 执行一次检索/问答并落 trace（201） |
+| 2 | GET | `/rag/traces` | Trace 列表（task_id / dataset_item_id / status / adapter） |
+| 3 | GET | `/rag/traces/{trace_id}` | Trace 详情 |
+| 4 | GET | `/rag/health` | 适配器可用性（不返回密钥） |
+
+### 6.1 执行查询
+
+```json
+POST /rag/queries
+{
+  "dataset_item_id": "可选：数据集条目（问题取该条目）",
+  "query": "可选：临时问题（与 dataset_item_id 二选一）",
+  "mode": "retrieve | query",
+  "adapter": "mock | weknora（缺省取配置）",
+  "top_k": 5,
+  "config": {"vector_threshold": 0, "keyword_threshold": 0}
+}
+```
+
+响应（201）：
+
+```json
+{
+  "trace_id": "…",
+  "execution_mode": "query",
+  "adapter": "weknora",
+  "context_source": "agent_chat",
+  "context_available": true,
+  "query": "怎么退款？",
+  "answer": "…",
+  "retrieved_contexts": [
+    {"document_id": "k-1", "chunk_id": "c-1", "title": "退款说明",
+     "content": "…", "score": null, "rank": 1, "metadata": {}}
+  ],
+  "retrieved_scores": [null],
+  "model_config_snapshot": {"agent_id": "…"},
+  "retrieval_config": {"agent_enabled": true},
+  "prompt_snapshot": {},
+  "latency_ms": 1234,
+  "token_usage": null,
+  "missing": ["token_usage", "score"],
+  "execution_status": "success",
+  "error_message": null
+}
+```
+
+**失败也是 201**：trace 已落库（`execution_status=failed`，`error_message` 为外部错误原文），
+便于排查；只有「入参非法 / 无权限 / 条目不存在」才是 4xx。
+
+### 6.2 两种模式与上下文规则（Q2 决策）
+
+| 模式 | 调用 | `context_source` | 可用于 |
+|---|---|---|---|
+| `retrieve` | `hybrid-search` | `hybrid_search` | 检索指标（Phase 3） |
+| `query` | `sessions` + `agent-chat` | `agent_chat`（有上下文）/ `none`（无） | 回答类指标 |
+
+- **禁止**把 `retrieve` 的上下文当作 `query` 的生成上下文；
+- `query` 模式拿不到上下文 → `context_source="none"`、`context_available=false`、
+  `missing` 含 `retrieved_contexts`；Phase 3 的 Faithfulness 必须 skip 并记录原因；
+- 外部未提供 `score` / `token_usage` → `null` + `missing`，不补零。
+
+### 6.3 WeKnora 契约（实现依据，字段为实测反推）
+
+| 能力 | 请求 | 关键响应 |
+|---|---|---|
+| 建会话 | `POST /api/v1/sessions` `{title, description}`，Header `X-API-Key` | `data.id` |
+| 问答 | `POST /api/v1/agent-chat/{sid}` `{query, agent_enabled, agent_id}` | JSON 或 SSE；`answer` 事件拼答案，`tool_result.data.results` 为上下文 |
+| 检索 | `POST /api/v1/knowledge-bases/{kb}/hybrid-search` `{query_text, match_count, vector_threshold, keyword_threshold}`，Header `X-API-Key` + `X-Tenant-ID` | `{success, data:[{knowledge_id, knowledge_title, content, score?}]}` |
+
+**待验证项**（无真实凭据，未联调）：
+
+1. `hybrid-search` 是否返回 `score`（实现按「有则取、无则 null + missing」处理）；
+2. `agent-chat` 的 SSE 是否稳定包含 `tool_result`（若不含，则 `context_source=none`）；
+3. 分页/多 KB 参数是否支持（当前只支持单 `kb_id`）。

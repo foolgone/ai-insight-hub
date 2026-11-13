@@ -1,4 +1,4 @@
-"""API v1 路由聚合（B-212 逐步补齐各业务模块）。"""
+﻿"""API v1 路由聚合（B-212 逐步补齐各业务模块）。"""
 from fastapi import APIRouter
 
 from app.api.v1 import (
@@ -10,6 +10,7 @@ from app.api.v1 import (
     knowledge,
     llm_credential,
     qa_datasets,
+    rag,
     reports,
     tasks,
     users,
@@ -27,6 +28,7 @@ router.include_router(knowledge.router, prefix="/datasources", tags=["知识库"
 router.include_router(reports.datasource_router, prefix="/datasources", tags=["报告"])
 router.include_router(reports.router, prefix="/reports", tags=["报告"])
 router.include_router(qa_datasets.router, prefix="/qa-datasets", tags=["RAG 评测"])
+router.include_router(rag.router, prefix="/rag", tags=["RAG 评测"])
 router.include_router(tasks.router, prefix="/tasks", tags=["任务"])
 
 __all__ = ["router"]

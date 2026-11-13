@@ -1,4 +1,4 @@
-import { MAX_UPLOAD_LABEL } from './mediaFile'
+﻿import { MAX_UPLOAD_LABEL } from './mediaFile'
 
 /** 21 个 MVP 可达业务错误码 → 中文文案（F-105）。 */
 const MESSAGES = {
@@ -34,6 +34,7 @@ const MESSAGES = {
   QA_DATASET_IMMUTABLE: '已发布的数据集版本不可修改，请创建新版本',
   QA_DATASET_IMPORT_INVALID: '导入数据校验失败，请检查错误明细',
   QA_DATASET_NAME_EXISTS: '同名数据集已存在，请换一个名称',
+  RAG_TRACE_NOT_FOUND: 'RAG Trace 不存在或无权访问',
   INTERNAL_ERROR: '服务器异常，请稍后重试',
 }
 

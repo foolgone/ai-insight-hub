@@ -1,4 +1,4 @@
-"""B-204 ORM 模型契约测试（与数据库设计 §3 对齐）。"""
+﻿"""B-204 ORM 模型契约测试（与数据库设计 §3 对齐）。"""
 from __future__ import annotations
 
 import pytest
@@ -30,6 +30,8 @@ EXPECTED_TABLES = {
     "qa_datasets",
     "qa_dataset_versions",
     "qa_dataset_items",
+    # RAG Trace（迁移 020，Phase 2）
+    "rag_traces",
 }
 
 
@@ -39,7 +41,7 @@ def _table(name: str):
 
 def test_all_tables_registered() -> None:
     assert set(Base.metadata.tables) == EXPECTED_TABLES
-    assert len(Base.metadata.tables) == 21
+    assert len(Base.metadata.tables) == 22
 
 
 @pytest.mark.parametrize(
@@ -81,6 +83,20 @@ def test_all_tables_registered() -> None:
                 "gold_evidence",
                 "split",
                 "metadata",
+            },
+        ),
+        (
+            "rag_traces",
+            {
+                "id",
+                "user_id",
+                "dataset_item_id",
+                "adapter",
+                "mode",
+                "context_source",
+                "retrieved_contexts",
+                "status",
+                "missing",
             },
         ),
     ],
