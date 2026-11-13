@@ -48,6 +48,18 @@ from app.services import cleaning_service
 
 EVALUATE_TASK_TYPE = "evaluate"
 MAX_ITEMS_PER_TASK = 100
+# 每评估 N 条提交一次进度：一条要 5–10 秒，只 flush 的话前端看不到任何进展
+PROGRESS_COMMIT_EVERY = 5
+
+
+def should_commit_progress(*, commit: bool, index: int) -> bool:
+    """是否该把进度提交到数据库（让前端看到「第几条」）。
+
+    单测直接用自己的会话跑（``commit=False``）时绝不提交，避免把测试事务提交掉。
+    """
+    return bool(commit and index and index % PROGRESS_COMMIT_EVERY == 0)
+
+
 _SORTABLE = {"created_at": AnalysisResult.created_at}
 
 
@@ -162,6 +174,9 @@ async def _execute_evaluation(
     task.progress = 5
     task.current_step = "loading_cleaned_data"
     await session.flush()
+    if commit:
+        # 让前端立刻看到「运行中」，而不是等到第一条结果落库
+        await session.commit()
 
     evaluated = 0
     failed = 0
@@ -231,6 +246,10 @@ async def _execute_evaluation(
             task.progress = min(95, 5 + int(index / len(targets) * 90))
             task.current_step = f"evaluated {index}/{len(targets)}"
             await session.flush()
+            # 进度提交：flush 只在本事务可见，50 条要跑 8 分钟，前端会一直看到
+            # pending/0%。每 N 条提交一次，让「进行到第几条」对用户可见。
+            if should_commit_progress(commit=commit, index=index):
+                await session.commit()
 
         # 最后一条处理期间可能被取消：收尾前复查数据库状态（避免覆盖 cancelled）
         if task.status != "cancelled" and await task_control.is_cancelled(session, task.id):
@@ -504,9 +523,11 @@ async def review_analysis_result(
 
 __all__ = [
     "EVALUATE_TASK_TYPE",
+    "PROGRESS_COMMIT_EVERY",
     "create_evaluation_task",
     "list_analysis_results",
     "review_analysis_result",
     "run_evaluation_task",
+    "should_commit_progress",
     "top_issue_categories",
 ]

@@ -16,6 +16,7 @@ import { DeleteDataSourceModal } from '../../components/datasource/DeleteDataSou
 import { EditDataSourceModal } from '../../components/datasource/EditDataSourceModal'
 import { UploadDataModal } from '../../components/datasource/UploadDataModal'
 import { useDataSourcesQuery } from '../../hooks/useDataSources'
+import { useDatasourceStore } from '../../stores/datasourceStore'
 import { useDatasourceTypeOptions } from '../../hooks/useDatasourceTypes'
 import { usePermissions } from '../../hooks/usePermissions'
 import { MAX_UPLOAD_LABEL } from '../../lib/mediaFile'
@@ -46,6 +47,7 @@ export default function DataSources() {
   const [typeManagerOpen, setTypeManagerOpen] = useState(false)
   const { canWrite } = usePermissions()
   const { options: typeOptions } = useDatasourceTypeOptions()
+  const setCurrentId = useDatasourceStore(state => state.setCurrentId)
 
   const typeFilterOptions = useMemo(
     () => [{ label: '全部类型', value: 'all' }, ...typeOptions],
@@ -77,7 +79,9 @@ export default function DataSources() {
   const openCreate = () => setSearchParams({ action: 'create' })
   const closeCreate = () => setSearchParams({})
 
-  const handleCreated = () => {
+  const handleCreated = created => {
+    // 切到新数据源：否则跳转到清洗页后仍显示旧数据源，用户看不到刚上传的任务
+    if (created?.id) setCurrentId(created.id)
     setSearchParams({})
     query.refetch()
     navigate('/data-cleaning')

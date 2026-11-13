@@ -54,11 +54,33 @@ async def test_count_pending_records(db_session) -> None:
         db_session,
         RawDataFactory(datasource_id=datasource.id, status="pending"),
         RawDataFactory(datasource_id=datasource.id, status="completed"),
+        RawDataFactory(datasource_id=datasource.id, status="failed"),
     )
 
     count = await cleaning_service.count_pending_records(db_session, datasource.id)
 
-    assert count == 1
+    # 失败文件也算「可清洗」：否则用户只能重新上传（2026-11-13 E2E 反馈）
+    assert count == 2
+
+
+async def test_load_raw_items_includes_failed(db_session) -> None:
+    user, datasource = await _datasource(db_session)
+    failed = RawDataFactory(datasource_id=datasource.id, status="failed")
+    pending = RawDataFactory(datasource_id=datasource.id, status="pending")
+    done = RawDataFactory(datasource_id=datasource.id, status="completed")
+    await persist(db_session, failed, pending, done)
+    task = TaskFactory(
+        user_id=user.id,
+        datasource_id=datasource.id,
+        task_type="clean",
+        status="pending",
+        params={},
+    )
+    await persist(db_session, task)
+
+    items = await cleaning_service._load_raw_items(db_session, task)  # noqa: SLF001
+
+    assert {item.id for item in items} == {failed.id, pending.id}
 
 
 async def test_create_clean_task_persists_params(db_session) -> None:

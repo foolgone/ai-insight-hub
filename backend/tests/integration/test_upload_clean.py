@@ -1,4 +1,4 @@
-"""B-305 上传与清洗入队集成测试（413/415/409/202、raw_data 落库、celery_task_id 回写）。"""
+﻿"""B-305 上传与清洗入队集成测试（413/415/409/202、raw_data 落库、celery_task_id 回写）。"""
 from __future__ import annotations
 
 import uuid
@@ -11,7 +11,7 @@ from app.composition import enqueue
 from app.core.config import settings
 from app.core.security import hash_password
 from app.models import DataSource, RawData, Task
-from tests.factories import UserFactory, persist
+from tests.factories import RawDataFactory, UserFactory, persist
 
 pytestmark = pytest.mark.integration
 
@@ -147,6 +147,10 @@ async def test_clean_enqueues_and_guards_duplicate(
 ) -> None:
     monkeypatch.setattr(enqueue, "enqueue_clean", lambda task_id: "clean-celery-id")
     datasource_id = await _create_datasource(client, auth_headers)
+    await persist(
+        db_session,
+        RawDataFactory(datasource_id=uuid.UUID(datasource_id), status="pending"),
+    )
 
     first = await client.post(
         f"/api/v1/datasources/{datasource_id}/clean",
@@ -168,6 +172,26 @@ async def test_clean_enqueues_and_guards_duplicate(
     )
     assert second.status_code == 409
     assert second.json()["error"]["code"] == "TASK_ALREADY_RUNNING"
+
+
+async def test_clean_rejects_when_nothing_to_clean(client, auth_headers, monkeypatch) -> None:
+    """没有待清洗/失败文件时返回 400，而不是建一个注定 5% 失败的任务。
+
+    线上表现：点「新建清洗任务」→ 任务出现在列表 → 5% failed
+    `no raw data to clean`，用户以为系统坏了。
+    """
+    monkeypatch.setattr(enqueue, "enqueue_clean", lambda task_id: "id")
+    datasource_id = await _create_datasource(client, auth_headers)
+
+    response = await client.post(
+        f"/api/v1/datasources/{datasource_id}/clean",
+        headers=auth_headers,
+        json={},
+    )
+
+    assert response.status_code == 400, response.text
+    assert response.json()["error"]["code"] == "BAD_REQUEST"
+    assert "没有待清洗文件" in response.json()["error"]["message"]
 
 
 async def test_clean_other_user_forbidden(client, auth_headers, db_session, monkeypatch) -> None:

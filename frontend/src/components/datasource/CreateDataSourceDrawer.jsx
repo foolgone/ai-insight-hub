@@ -1,10 +1,13 @@
 import { useEffect, useState } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import * as Dialog from '@radix-ui/react-dialog'
 import { LuUpload, LuX } from 'react-icons/lu'
 import { Button } from '../Button'
 import { Input } from '../Input'
 import { Select } from '../Select'
 import { createDataSource, uploadDataSourceFile } from '../../api/datasources'
+import { dataSourceKeys } from '../../hooks/useDataSources'
+import { taskKeys } from '../../hooks/useTasks'
 import { useDatasourceTypeOptions } from '../../hooks/useDatasourceTypes'
 import { useAsrCredentialStatusQuery } from '../../hooks/useAsrCredential'
 import { openCredentialModal } from '../../lib/credentialGate'
@@ -31,6 +34,7 @@ function formatFileSize(size) {
  * @param {{ open: boolean, onClose: () => void, onSuccess?: (datasource: Object) => void }} props
  */
 export function CreateDataSourceDrawer({ open, onClose, onSuccess }) {
+  const queryClient = useQueryClient()
   const [step, setStep] = useState(1)
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
@@ -106,6 +110,12 @@ export function CreateDataSourceDrawer({ open, onClose, onSuccess }) {
         type,
       })
       await uploadDataSourceFile(created.id, file)
+      // 直接调用 api 而非 mutation，缓存不会自动失效：不刷新的话
+      // Header 数据源下拉/列表仍显示旧数据，用户以为没创建成功。
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: dataSourceKeys.all }),
+        queryClient.invalidateQueries({ queryKey: taskKeys.all }),
+      ])
       notify.success('数据源创建成功，已开始处理')
       onSuccess?.(created)
     } catch (error) {
