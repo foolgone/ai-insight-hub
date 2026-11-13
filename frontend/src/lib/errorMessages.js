@@ -30,6 +30,10 @@ const MESSAGES = {
   DATASOURCE_TYPE_NOT_FOUND: '数据源类型不存在',
   DATASOURCE_TYPE_INVALID: '数据源类型无效（标识重复或已被停用）',
   DATASOURCE_TYPE_IN_USE: '该类型仍被数据源使用，无法删除',
+  QA_DATASET_NOT_FOUND: '数据集不存在或无权访问',
+  QA_DATASET_IMMUTABLE: '已发布的数据集版本不可修改，请创建新版本',
+  QA_DATASET_IMPORT_INVALID: '导入数据校验失败，请检查错误明细',
+  QA_DATASET_NAME_EXISTS: '同名数据集已存在，请换一个名称',
   INTERNAL_ERROR: '服务器异常，请稍后重试',
 }
 

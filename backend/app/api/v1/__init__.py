@@ -9,6 +9,7 @@ from app.api.v1 import (
     datasources,
     knowledge,
     llm_credential,
+    qa_datasets,
     reports,
     tasks,
     users,
@@ -25,6 +26,7 @@ router.include_router(analysis.router, prefix="/datasources", tags=["分析"])
 router.include_router(knowledge.router, prefix="/datasources", tags=["知识库"])
 router.include_router(reports.datasource_router, prefix="/datasources", tags=["报告"])
 router.include_router(reports.router, prefix="/reports", tags=["报告"])
+router.include_router(qa_datasets.router, prefix="/qa-datasets", tags=["RAG 评测"])
 router.include_router(tasks.router, prefix="/tasks", tags=["任务"])
 
 __all__ = ["router"]
