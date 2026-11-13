@@ -44,7 +44,9 @@ def test_parse_json_single_object() -> None:
 
 
 def test_normalize_text() -> None:
-    assert normalize_text("  hello\u200b   world \n second  ") == "hello world second"
+    # 行内空白压平，但换行必须保留（行 = CSV 记录 / 对话边界）
+    assert normalize_text("  hello\u200b   world \n second  ") == "hello world\nsecond"
+    assert normalize_text("a\r\nb\rc") == "a\nb\nc"
     assert normalize_text("") == ""
 
 

@@ -13,10 +13,15 @@ import json
 from pathlib import Path
 from typing import Any
 
+import uuid
+
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.agents.base import (
     AgentConfig,
     AgentInputError,
     AgentOutputError,
+    AgentResult,
     BaseAgent,
     load_prompt_version,
 )
@@ -211,8 +216,29 @@ class InsightAnalysisAgent(BaseAgent):
         return output.model_dump(mode="json")
 
     # -- 便捷入口 ---------------------------------------------------------
-    async def analyze(self, input_data: Any, **kwargs: Any):
-        return await self.invoke(input_data, **kwargs)
+    async def analyze(
+        self,
+        input_data: Any,
+        *,
+        session: AsyncSession | None = None,
+        task_id: uuid.UUID | str | None = None,
+        scope: str | None = None,
+        user_id: uuid.UUID | None = None,
+        datasource_id: uuid.UUID | None = None,
+    ) -> AgentResult:
+        """执行洞察分析（等价于 ``invoke``）。
+
+        显式列出 ``invoke`` 的关键字参数，mypy 才能在调用点拦住不存在的参数；
+        凭据走构造函数注入，不要再往这里传 ``credentials=``。
+        """
+        return await self.invoke(
+            input_data,
+            session=session,
+            task_id=task_id,
+            scope=scope,
+            user_id=user_id,
+            datasource_id=datasource_id,
+        )
 
 
 __all__ = [

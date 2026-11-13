@@ -11,12 +11,18 @@ from __future__ import annotations
 import json
 import uuid
 from datetime import datetime, timezone
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from loguru import logger
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+
+if TYPE_CHECKING:
+    from app.agents.base import AgentResult
+    from app.agents.cleaning_agent import DataCleaningAgent
+
+from app.core.config import settings
 from app.core.ownership import assert_owner
 from app.core.pagination import PaginationParams
 from app.core.exceptions import (
@@ -127,7 +133,7 @@ async def create_clean_task(
     return task
 
 
-def _build_agent():  # noqa: ANN202 - 允许测试 monkeypatch 返回替身
+def _build_agent() -> DataCleaningAgent:  # 允许测试 monkeypatch 返回替身
     from app.agents.cleaning_agent import DataCleaningAgent
 
     return DataCleaningAgent(credentials=credential_service)
@@ -197,6 +203,49 @@ def _load_raw_text(raw: RawData) -> str:
 
 def dialogue_uuid(raw_id: uuid.UUID, dialogue_id: str) -> uuid.UUID:
     return uuid.uuid5(DIALOGUE_NAMESPACE, f"{raw_id}:{dialogue_id}")
+
+
+def _split_text_batches(text: str, *, max_chars: int | None = None) -> list[str]:
+    """按行把原始文本切成若干批，避免单次 LLM 输出被 max_tokens 截断。
+
+    - 未超限：原样返回单批（行为与改造前一致）；
+    - 超限：按行切分，每批重复 CSV 表头（首行含逗号时视为表头），
+      单行本身超过 ``max_chars`` 时硬切，宁可切碎也不丢内容。
+    """
+    limit = max_chars or settings.CLEAN_CHUNK_CHARS
+    if limit <= 0 or len(text) <= limit:
+        return [text]
+
+    lines = text.splitlines()
+    header = lines[0] if lines and "," in lines[0] else None
+    body = lines[1:] if header else lines
+
+    batches: list[str] = []
+    current: list[str] = []
+    size = 0
+
+    def flush() -> None:
+        nonlocal current, size
+        if not current:
+            return
+        payload = "\n".join(current)
+        batches.append(f"{header}\n{payload}" if header else payload)
+        current, size = [], 0
+
+    for line in body:
+        if len(line) > limit:
+            # 超长单行：先收掉已累积内容，再硬切
+            flush()
+            for start in range(0, len(line), limit):
+                batch = line[start : start + limit]
+                batches.append(f"{header}\n{batch}" if header else batch)
+            continue
+        if size + len(line) + 1 > limit and current:
+            flush()
+        current.append(line)
+        size += len(line) + 1
+    flush()
+    return batches or [text]
 
 
 # --------------------------------------------------------------------------- 状态机
@@ -380,6 +429,10 @@ async def _execute_clean(
             content = raw.raw_content or {}
             is_media = content.get("format") == "media"
             skip_persist = False
+            data: dict[str, Any] = {"dialogues": []}
+            agent_version = "v1.0.0"
+            duration = 0.0
+            token_usage: dict[str, int] = {"input": 0, "output": 0}
 
             if is_media:
                 asr = content.get("asr") or {}
@@ -424,35 +477,66 @@ async def _execute_clean(
             else:
                 # 状态机：NORMALIZING（文本归一化 + LLM 抽取）→ DEDUPLICATING → VALIDATING
                 _advance_state(task, CleaningState.NORMALIZING, detail=f"{index}/{raw_records}")
-                agent = _build_agent()
-                result = await agent.clean(
-                    CleaningInput(
-                        datasource_id=raw.datasource_id,
-                        raw_data=_load_raw_text(raw),
-                        data_type=content.get("format") or "txt",
-                        config=config,
-                    ).model_dump(mode="json"),
-                    session=session,
-                    task_id=task.id,
-                    scope=f"clean:{raw.id}",
-                    user_id=task.user_id,
-                    datasource_id=raw.datasource_id,
-                    credentials=credential_service,
-                )
+                batches = _split_text_batches(_load_raw_text(raw))
+                merged: list[dict[str, Any]] = []
+                agent_version = "v1.0.0"
+                duration = 0.0
+                token_usage = {"input": 0, "output": 0}
+                failure: AgentResult | None = None
 
-                if not result.success:
+                for batch_index, batch_text in enumerate(batches, start=1):
+                    agent = _build_agent()
+                    batch_result = await agent.clean(
+                        CleaningInput(
+                            datasource_id=raw.datasource_id,
+                            raw_data=batch_text,
+                            data_type=content.get("format") or "txt",
+                            config=config,
+                        ).model_dump(mode="json"),
+                        session=session,
+                        task_id=task.id,
+                        # 多批时幂等键必须区分，否则 llm_calls 里各批互相覆盖
+                        scope=(
+                            f"clean:{raw.id}"
+                            if len(batches) == 1
+                            else f"clean:{raw.id}:{batch_index}"
+                        ),
+                        user_id=task.user_id,
+                        datasource_id=raw.datasource_id,
+                    )
+                    if not batch_result.success:
+                        failure = batch_result
+                        break
+
+                    part = batch_result.data or {}
+                    merged.extend(part.get("dialogues") or [])
+                    agent_version = str(batch_result.metadata.get("version", agent_version))
+                    duration += batch_result.duration
+                    token_usage = {
+                        "input": token_usage["input"]
+                        + int(batch_result.token_usage.get("input", 0)),
+                        "output": token_usage["output"]
+                        + int(batch_result.token_usage.get("output", 0)),
+                    }
+                    if len(batches) > 1:
+                        task.current_step = (
+                            f"cleaned batch {batch_index}/{len(batches)} {index}/{raw_records}"
+                        )
+                        await session.flush()
+
+                if failure is not None:
                     failed_raw += 1
                     raw.status = "failed"
-                    raw.error_message = "; ".join(result.errors)[:1000] or "cleaning failed"
+                    raw.error_message = "; ".join(failure.errors)[:1000] or "cleaning failed"
                     # 失败记录同样走完校验阶段，保证下一条能从 VALIDATING 回到 NORMALIZING
                     _advance_state(task, CleaningState.VALIDATING, detail=f"{index}/{raw_records}")
                     await session.flush()
                     continue
 
-                data = result.data or {}
-                agent_version = str(result.metadata.get("version", "v1.0.0"))
-                duration = result.duration
-                token_usage = result.token_usage
+                # 分批后各批的 dialogue_id 会重复，统一重编号，避免唯一索引冲突丢数据
+                for seq, dialogue in enumerate(merged, start=1):
+                    dialogue["dialogue_id"] = str(seq)
+                data = {"dialogues": merged, "cleaned_records": len(merged)}
 
             _advance_state(task, CleaningState.DEDUPLICATING, detail=f"{index}/{raw_records}")
             if config.remove_duplicates:

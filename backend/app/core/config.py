@@ -54,6 +54,13 @@ class Settings(BaseSettings):
     DEFAULT_TEMPERATURE: float = 0.0
     DEFAULT_MAX_TOKENS: int = 4096
     DEFAULT_TIMEOUT: int = 60
+    # ---------------- 清洗：单次调用容量（2026-11-13 线上事故后引入） ----------------
+    # deepseek-flash 是推理模型，输出里夹着 reasoning_token：50 行 CSV 一次调用
+    # 就吃掉 7.3k 推理 + 4k 正文，4096 上限直接截断成非法 JSON → 「no dialogues」。
+    # 因此清洗既提高单次上限，也按 CLEAN_CHUNK_CHARS 分批，两者共同保证不截断。
+    CLEAN_MAX_TOKENS: int = 16384
+    # 每批喂给模型的字符数（约 20~30 行 CSV）；批内仍保留表头
+    CLEAN_CHUNK_CHARS: int = 4000
 
     # ---------------- 可观测：Celery worker 指标（Prometheus） ----------------
     # LLM/Agent 指标产生在 worker 进程；开启后 worker 在独立端口暴露 /metrics
