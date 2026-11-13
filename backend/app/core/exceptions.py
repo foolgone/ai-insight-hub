@@ -1,4 +1,4 @@
-"""领域异常体系（开发规范 §2.3 + API 设计 §12.2）。
+﻿"""领域异常体系（开发规范 §2.3 + API 设计 §12.2）。
 
 约定：
 - 所有领域异常继承 ``AIInsightHubException``；
@@ -227,6 +227,34 @@ class DataSourceTypeInUseError(AIInsightHubException):
     default_message = "该类型仍被数据源使用，无法删除"
 
 
+class QaDatasetNotFoundError(AIInsightHubException):
+    """数据集 / 版本 / 条目不存在或无权访问（404）。"""
+
+    code = ErrorCode.QA_DATASET_NOT_FOUND
+    default_message = "数据集不存在"
+
+
+class QaDatasetImmutableError(AIInsightHubException):
+    """已发布版本不可修改（409）。"""
+
+    code = ErrorCode.QA_DATASET_IMMUTABLE
+    default_message = "已发布的数据集版本不可修改，请创建新版本"
+
+
+class QaDatasetImportInvalidError(AIInsightHubException):
+    """导入校验失败（400），``details`` 携带逐行错误。"""
+
+    code = ErrorCode.QA_DATASET_IMPORT_INVALID
+    default_message = "导入数据校验失败"
+
+
+class QaDatasetNameExistsError(AIInsightHubException):
+    """同一用户下数据集重名（409）。"""
+
+    code = ErrorCode.QA_DATASET_NAME_EXISTS
+    default_message = "同名数据集已存在"
+
+
 # --------------------------------------------------------------------------- 内部错误
 class InternalError(AIInsightHubException):
     code = ErrorCode.INTERNAL_ERROR
@@ -257,6 +285,10 @@ __all__ = [
     "LLMCredentialInvalidError",
     "LLMCredentialNotConfiguredError",
     "PermissionDeniedError",
+    "QaDatasetImmutableError",
+    "QaDatasetImportInvalidError",
+    "QaDatasetNameExistsError",
+    "QaDatasetNotFoundError",
     "RateLimitExceededError",
     "RefreshTokenInvalidError",
     "ReportFormatInvalidError",

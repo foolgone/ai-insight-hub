@@ -36,6 +36,15 @@ EXPECTED_PATHS = {
     "/api/v1/tasks/{task_id}",
     "/api/v1/tasks/{task_id}/cancel",
     "/api/v1/tasks/{task_id}/retry",
+    # RAG 评测数据集（Phase 1，迁移 019）
+    "/api/v1/qa-datasets",
+    "/api/v1/qa-datasets/{dataset_id}",
+    "/api/v1/qa-datasets/{dataset_id}/versions",
+    "/api/v1/qa-datasets/{dataset_id}/versions/{version_id}/import",
+    "/api/v1/qa-datasets/{dataset_id}/versions/{version_id}/publish",
+    "/api/v1/qa-datasets/{dataset_id}/versions/{version_id}/items",
+    "/api/v1/qa-datasets/{dataset_id}/versions/{version_id}/items/{item_id}",
+    "/api/v1/qa-datasets/{dataset_id}/stats",
     "/health",
 }
 
