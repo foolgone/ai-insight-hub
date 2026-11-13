@@ -11,11 +11,15 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime, timedelta, timezone
-from typing import Any, Literal, cast
+from typing import TYPE_CHECKING, Any, Literal, cast
 
 from loguru import logger
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
+
+
+if TYPE_CHECKING:
+    from app.agents.extraction_agent import KnowledgeExtractionAgent
 
 from app.core.ownership import assert_owner
 from app.core.pagination import PaginationParams
@@ -50,7 +54,7 @@ def _now_naive() -> datetime:
     return datetime.now(timezone.utc).replace(tzinfo=None)
 
 
-def _build_agent():  # noqa: ANN202 - 允许测试 monkeypatch
+def _build_agent() -> KnowledgeExtractionAgent:  # 允许测试 monkeypatch
     from app.agents.extraction_agent import KnowledgeExtractionAgent
 
     return KnowledgeExtractionAgent(

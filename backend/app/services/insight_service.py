@@ -9,11 +9,15 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime, time, timezone
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from loguru import logger
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+
+
+if TYPE_CHECKING:
+    from app.agents.insight_agent import InsightAnalysisAgent
 
 from app.core.ownership import assert_owner
 from app.application import task_control
@@ -37,7 +41,7 @@ def _now_naive() -> datetime:
     return datetime.now(timezone.utc).replace(tzinfo=None)
 
 
-def _build_agent():  # noqa: ANN202 - 允许测试 monkeypatch
+def _build_agent() -> InsightAnalysisAgent:  # 允许测试 monkeypatch
     from app.agents.insight_agent import InsightAnalysisAgent
 
     return InsightAnalysisAgent(credentials=credential_service)

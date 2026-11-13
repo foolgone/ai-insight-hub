@@ -15,10 +15,14 @@ from __future__ import annotations
 import re
 import uuid
 from collections import Counter
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from loguru import logger
 from sqlalchemy.ext.asyncio import AsyncSession
+
+
+if TYPE_CHECKING:
+    from app.agents.structure_agent import TranscriptStructureAgent
 
 from app.core.config import settings
 from app.models import AnalysisResult, KnowledgeBase, RawData
@@ -239,7 +243,7 @@ def merge_payloads(payloads: list[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
-def _build_agent(credentials=None):  # noqa: ANN001, ANN202 - 允许测试 monkeypatch
+def _build_agent(credentials: Any = None) -> TranscriptStructureAgent:  # 允许测试 monkeypatch
     from app.agents.structure_agent import TranscriptStructureAgent
 
     return TranscriptStructureAgent(credentials=credentials)

@@ -15,11 +15,15 @@ import uuid
 from datetime import datetime, timedelta, timezone
 from io import BytesIO
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from loguru import logger
 from sqlalchemy import Float, case, cast, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
+
+
+if TYPE_CHECKING:
+    from app.agents.report_agent import ReportGenerationAgent
 
 from app.core.ownership import assert_owner
 from app.core.pagination import PaginationParams
@@ -55,7 +59,7 @@ def _now_naive() -> datetime:
     return datetime.now(timezone.utc).replace(tzinfo=None)
 
 
-def _build_agent():  # noqa: ANN202 - 允许测试 monkeypatch
+def _build_agent() -> ReportGenerationAgent:  # 允许测试 monkeypatch
     from app.agents.report_agent import ReportGenerationAgent
 
     return ReportGenerationAgent(credentials=credential_service)

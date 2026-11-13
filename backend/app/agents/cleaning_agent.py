@@ -11,14 +11,20 @@ import json
 from pathlib import Path
 from typing import Any
 
+import uuid
+
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.agents.base import (
     AgentConfig,
     AgentInputError,
     AgentOutputError,
+    AgentResult,
     BaseAgent,
     load_prompt_version,
 )
 from app.agents.tools import cleaning_tools
+from app.core.config import settings
 from app.schemas.agents.cleaning import (
     CleaningInput,
     CleaningOutput,
@@ -51,7 +57,13 @@ class DataCleaningAgent(BaseAgent):
         credentials: Any = None,
     ) -> None:
         super().__init__(
-            config or AgentConfig(name="cleaning_agent", version=load_prompt_version(PROMPT_DIR)),
+            config
+            or AgentConfig(
+                name="cleaning_agent",
+                version=load_prompt_version(PROMPT_DIR),
+                # 推理模型的输出里含 reasoning_token，4096 会把 20+ 行的批次截断
+                max_tokens=settings.CLEAN_MAX_TOKENS,
+            ),
             llm=llm,
             credentials=credentials,
         )
@@ -157,9 +169,29 @@ class DataCleaningAgent(BaseAgent):
         return payload
 
     # -- 便捷入口 ---------------------------------------------------------
-    async def clean(self, input_data: Any, **kwargs: Any):
-        """执行清洗（等价于 ``invoke``）。"""
-        return await self.invoke(input_data, **kwargs)
+    async def clean(
+        self,
+        input_data: Any,
+        *,
+        session: AsyncSession | None = None,
+        task_id: uuid.UUID | str | None = None,
+        scope: str | None = None,
+        user_id: uuid.UUID | None = None,
+        datasource_id: uuid.UUID | None = None,
+    ) -> AgentResult:
+        """执行清洗（等价于 ``invoke``）。
+
+        显式列出 ``invoke`` 的关键字参数，mypy 才能在调用点拦住不存在的参数；
+        凭据走构造函数注入，不要再往这里传 ``credentials=``。
+        """
+        return await self.invoke(
+            input_data,
+            session=session,
+            task_id=task_id,
+            scope=scope,
+            user_id=user_id,
+            datasource_id=datasource_id,
+        )
 
 
 __all__ = [

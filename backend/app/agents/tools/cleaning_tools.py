@@ -16,7 +16,11 @@ from io import StringIO
 from typing import Any
 
 _ZERO_WIDTH = re.compile(r"[\u200b-\u200d\ufeff]")
-_WHITESPACE = re.compile(r"\s+")
+# 只压平行内空白：不能把 \n 也换掉，否则 CSV 行 / 对话行会粘成一行
+_WHITESPACE = re.compile(r"[^\S\n]+")
+_LINE_BREAK = re.compile(r"\r\n?")
+_TRAILING_SPACE = re.compile(r" +\n")
+_LEADING_SPACE = re.compile(r"\n +")
 _TIMESTAMP_PATTERNS: tuple[tuple[re.Pattern[str], str], ...] = (
     (
         re.compile(r"(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2}):(\d{2})"),
@@ -36,9 +40,17 @@ _TIMESTAMP_PATTERNS: tuple[tuple[re.Pattern[str], str], ...] = (
 
 
 def normalize_text(text: str) -> str:
-    """标准化文本：去零宽字符、统一空白、去首尾空格。"""
+    """标准化文本：去零宽字符、统一换行、压平行内空白、去首尾空格。
+
+    必须保留换行：清洗的输入是 CSV / 逐行对话，行就是记录边界；
+    一旦把 ``\\n`` 压成空格，整个文件会变成一行，模型只能靠逗号猜结构。
+    """
     cleaned = _ZERO_WIDTH.sub("", text or "")
-    return _WHITESPACE.sub(" ", cleaned).strip()
+    cleaned = _LINE_BREAK.sub("\n", cleaned)
+    cleaned = _WHITESPACE.sub(" ", cleaned)
+    cleaned = _TRAILING_SPACE.sub("\n", cleaned)
+    cleaned = _LEADING_SPACE.sub("\n", cleaned)
+    return cleaned.strip()
 
 
 def parse_csv(text: str) -> list[dict[str, Any]]:
