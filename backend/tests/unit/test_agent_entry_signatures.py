@@ -42,8 +42,7 @@ def test_convenience_entry_mirrors_invoke(agent_cls, method_name: str) -> None:
     invoke_params = set(invoke.parameters) - {"self", "input_data"}
 
     assert "kwargs" not in entry_params, (
-        f"{agent_cls.__name__}.{method_name} 用 **kwargs 转发会吞掉拼错的参数，"
-        "请显式列出 invoke 的关键字参数"
+        f"{agent_cls.__name__}.{method_name} 用 **kwargs 转发会吞掉拼错的参数，" "请显式列出 invoke 的关键字参数"
     )
     assert entry_params == invoke_params, (
         f"{agent_cls.__name__}.{method_name} 与 invoke 参数不一致："
