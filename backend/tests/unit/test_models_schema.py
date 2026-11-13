@@ -1,4 +1,4 @@
-"""B-204 ORM 模型契约测试（与数据库设计 §3 对齐）。"""
+﻿"""B-204 ORM 模型契约测试（与数据库设计 §3 对齐）。"""
 from __future__ import annotations
 
 import pytest
@@ -26,6 +26,12 @@ EXPECTED_TABLES = {
     "version_rollback_logs",
     "llm_calls",
     "user_llm_credentials",
+    # RAG 评测数据集（迁移 019，Phase 1）
+    "qa_datasets",
+    "qa_dataset_versions",
+    "qa_dataset_items",
+    # RAG Trace（迁移 020，Phase 2）
+    "rag_traces",
 }
 
 
@@ -35,7 +41,7 @@ def _table(name: str):
 
 def test_all_tables_registered() -> None:
     assert set(Base.metadata.tables) == EXPECTED_TABLES
-    assert len(Base.metadata.tables) == 18
+    assert len(Base.metadata.tables) == 22
 
 
 @pytest.mark.parametrize(
@@ -60,6 +66,39 @@ def test_all_tables_registered() -> None:
         ("prompt_usage_logs", {"id", "prompt_version_id", "agent_name", "version", "cost"}),
         ("version_rollback_logs", {"id", "agent_name", "from_version", "to_version"}),
         ("llm_calls", {"id", "idempotency_key", "model", "total_cost", "status"}),
+        # RAG 评测数据集（迁移 019）
+        ("qa_datasets", {"id", "user_id", "name", "source_type", "created_at"}),
+        (
+            "qa_dataset_versions",
+            {"id", "dataset_id", "version", "status", "item_count", "checksum"},
+        ),
+        (
+            "qa_dataset_items",
+            {
+                "id",
+                "version_id",
+                "item_key",
+                "query",
+                "gold_answer",
+                "gold_evidence",
+                "split",
+                "metadata",
+            },
+        ),
+        (
+            "rag_traces",
+            {
+                "id",
+                "user_id",
+                "dataset_item_id",
+                "adapter",
+                "mode",
+                "context_source",
+                "retrieved_contexts",
+                "status",
+                "missing",
+            },
+        ),
     ],
 )
 def test_required_columns_exist(table: str, columns: set[str]) -> None:
