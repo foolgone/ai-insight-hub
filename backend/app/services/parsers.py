@@ -68,6 +68,22 @@ def parse_upload(content: bytes, filename: str) -> ParsedUpload:
 
 def _parse_csv(content: bytes) -> ParsedUpload:
     text, encoding = _decode(content)
+    rows = list(csv.reader(StringIO(text)))
+    if not rows:
+        raise ParseError("CSV 没有可解析的数据行（需包含表头）")
+
+    header = rows[0]
+    width = len(header)
+    # 列数不一致必须拒绝：表头 6 列、数据 7 行时，字段会整体错位，
+    # 系统仍会「成功」入库，但 user_message/ai_response 已经被别的列污染。
+    for line_no, row in enumerate(rows[1:], start=2):
+        if not row or not any(cell.strip() for cell in row):
+            continue
+        if len(row) != width:
+            raise ParseError(
+                f"CSV 第 {line_no} 行列数与表头不一致" f"（表头 {width} 列，该行 {len(row)} 列）；请修正表头后再上传"
+            )
+
     reader = csv.DictReader(StringIO(text))
     records = [
         {str(key): value for key, value in row.items() if key is not None}

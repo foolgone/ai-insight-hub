@@ -35,6 +35,29 @@ def test_parse_csv() -> None:
     assert "价格" in parsed.raw_text
 
 
+def test_parse_csv_rejects_column_mismatch() -> None:
+    """表头 6 列、数据 7 列时必须拒绝：否则字段错位后仍会「成功」入库。
+
+    真实样本（`语流毕昇_可沉淀知识_300.csv`）就缺了 `category_l1` 表头，
+    结果 `ai_response` 变成了「知识类,客户反馈…」，静默污染数据。
+    """
+    content = "q,a,b,c,d,e\n1,2,3,4,5,6,7\n".encode()
+
+    with pytest.raises(ParseError) as excinfo:
+        parse_upload(content, "bad.csv")
+
+    assert "第 2 行" in str(excinfo.value)
+    assert "表头 6 列" in str(excinfo.value)
+
+
+def test_parse_csv_allows_blank_lines() -> None:
+    content = "q,a\n1,2\n\n3,4\n".encode()
+
+    parsed = parse_upload(content, "ok.csv")
+
+    assert parsed.record_count == 2
+
+
 def test_parse_json_list() -> None:
     content = b'[{"q": "a", "a": "b"}, {"q": "c", "a": "d"}]'
 
