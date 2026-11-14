@@ -196,3 +196,86 @@ alembic check   : No new upgrade operations detected
 3. **WeKnora session 每查询新建**（隔离优先，成本是每题多一次调用）；
 4. **`raw_response` 上限 200k 字符**（超出截断并标记，未落对象存储）；
 5. **score 可能恒为 null**：Phase 3 的 MRR 仍可用排名，Context Precision 只能用 ID 命中率。
+
+---
+
+## Phase 3A · 确定性检索指标 — 已完成（待审核）
+
+**日期**：2026-11-14
+**范围**：仅纯函数与单测；不改数据库、不接入 LLM、不做批量任务（3B/3C 待审）。
+
+### 1. 改动文件
+
+| 类型 | 文件 | 说明 |
+|---|---|---|
+| 新增 | `backend/app/application/metrics.py` | 5 个纯函数 + 匹配/去重/规范化工具 |
+| 新增 | `backend/tests/unit/test_rag_metrics.py` | 37 条表驱动单测 |
+| 新增 | `docs/repair/04-evaluation-design.md` | 指标定义/匹配规则/Judge/表结构/任务设计/测试计划 |
+
+### 2. 指标与公式（已实现）
+
+| metric_name | 公式 | 跳过条件 |
+|---|---|---|
+| `hit_rate` | Top-K 内存在匹配 → 1，否则 0 | Gold 为空 |
+| `mrr` | `1 / 首个匹配排名`，未命中 0 | Gold 为空 |
+| `context_recall` | `命中 Gold 数 / Gold 总数` | Gold 为空 |
+| `context_precision_at_k` | `Top-K 相关数 / 实际返回数` | Gold 为空 / 检索为空 |
+| `context_precision_ap_at_k` | `(1/min(|G|,K))·Σ P@i·rel_i` | 同上 |
+
+- `value=None` 表示 skipped（**不是 0**）；
+- K 在 `details.k`，聚合时按 `metric_name + k` 分组；
+- 两个 Precision 使用不同 metric_name，禁止只写 `context_precision`。
+
+### 3. 匹配策略
+
+| Gold 粒度 | 匹配方式 |
+|---|---|
+| 有 `chunk_id` | 仅 `chunk_id` 相等（同文档其它 chunk 不算） |
+| 无 chunk、有 `document_id` | `document_id` 相等 |
+| 只有文本 | `NFKC + casefold + 去空白/标点` 后**完全相等** |
+
+- 不使用 embedding 相似度判定命中；
+- 检索结果按 `chunk_id → document_id → 规范化文本` 去重，保留首次排名；
+- Gold 按粒度+值去重；
+- 匹配依据（`chunk_id`/`document_id`/`text`）写入 `details`。
+
+### 4. 测试结果
+
+| 项 | 结果 |
+|---|---|
+| 新增单测 | **37 passed** |
+| 覆盖 | 完全/部分/未命中、Top-K 边界、空检索、空 Gold、文档级、chunk 级、重复检索、重复 Gold、文本规范化、混合粒度、K 非法、两种 Precision 口径、failed 结构 |
+| mypy | 0 issue（158 文件） |
+| black / flake8 | 通过 |
+| lint-imports | 5 kept, 0 broken |
+| 全量回归 | 见本次结果（基线 787，不得减少） |
+
+### 5. 与设计文档的差异
+
+无。实现与 `04-evaluation-design.md` 第 2 节一致；`failed_result()` 为 3C 预留（运行期异常用），本阶段未被指标函数调用。
+
+### 6. 遗留问题（3B/3C）
+
+1. 文本级匹配要求完全相等，实际命中率会低于文档/Chunk 级——按设计「宁缺毋滥」；
+2. 没有 `gold_evidence` 的样本（237 条 conv）在检索指标上会被 skip，聚合需单独展示 `skipped` 比例；
+3. 3C 需要实现「同一 trace 多 Judge 版本」的结果唯一键与聚合。
+
+### 7. 环境问题（已处理）
+
+本机与 VM 数据库存在时钟偏差（宿主 `2026-11-14 05:06 UTC`，DB `2026-11-13 15:24 UTC`），
+导致 `test_cost_monitor_alerts_when_limit_exceeded` 与 `test_cost_tracker_db` 失败：
+它们用「宿主日界」过滤由 DB 写入的时间戳。
+
+处理：`run_cost_monitor(..., *, now=None)` 增加显式注入口，两个测试改用 `select(func.now())`
+（DB 时间）；不传 `now` 时生产行为不变（仍用系统 UTC 时间）。
+
+### 8. 过程事故与修正（重要）
+
+新增测试文件最初命名为 `tests/unit/test_metrics.py`，**与既有的 Prometheus 指标测试重名**，
+覆盖后导致 4 个原有用例（`test_record_llm_call_updates_all_metrics` 等）消失。
+
+- 已重命名为 `tests/unit/test_rag_metrics.py`；
+- 原 `test_metrics.py` 已从 HEAD 还原；
+- 全量计数从 820 恢复到 **824**（基线 787 + 新增 37），证明无测试丢失。
+
+教训：新增测试文件前先检查同名；`git diff` 中出现的 `-def test_` 必须逐条确认为「重命名」而非「删除」。
