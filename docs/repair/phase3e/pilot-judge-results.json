@@ -1,0 +1,1377 @@
+{
+  "meta": {
+    "model": "qwen-max",
+    "temperature": 0.0
+  },
+  "items": [
+    {
+      "id": "Q01",
+      "category": "direct",
+      "question": "退款申请期限是多久？",
+      "answer": "退款申请期限为**订单签收后7天内**，可申请无理由退款<kb doc=\"phase3d_doc.md\" chunk_id=\"c65abc80-f589-49de-9a1f-77ad2689bdb9\" kb_id=\"4ae8e147-6f76-4330-93f1-d2b3fef3d9ba\" />。  \n\n需注意：  \n- 定制类商品、生鲜食品、已激活的虚拟商品**不支持无理由退款**<kb doc=\"phase3d_doc.md\" chunk_id=\"c65abc80-f589-49de-9a1f-77ad2689bdb9\" kb_id=\"4ae8e147-6f76-4330-93f1-d2b3fef3d9ba\" />；  \n- 生鲜食品如存在质量问题，须在签收后**24小时内**拍照反馈<kb doc=\"phase3d_doc.md\" chunk_id=\"b978479f-6440-4514-b220-6e48a9dbf1be\" kb_id=\"4ae8e147-6f76-4330-93f1-d2b3fef3d9ba\" />；  \n- 虚拟商品（如充值、会员、课程）一经售出**不支持退款**<kb doc=\"phase3d_doc.md\" chunk_id=\"b978479f-6440-4514-b220-6e48a9dbf1be\" kb_id=\"4ae8e147-6f76-4330-93f1-d2b3fef3d9ba\" />；  \n- 定制商品仅支持因**质量问题**退换，不支持无理由退换<kb doc=\"phase3d_doc.md\" chunk_id=\"b978479f-6440-4514-b220-6e48a9dbf1be\" kb_id=\"4ae8e147-6f76-4330-93f1-d2b3fef3d9ba\" />。",
+      "wall_latency_ms": 11416,
+      "outcomes": [
+        {
+          "metric": "faithfulness",
+          "status": "evaluated",
+          "score": 1.0,
+          "skipped_reason": null,
+          "latency_ms": 8552,
+          "error": null,
+          "judge_config": {
+            "agent": "rag_judge_faithfulness",
+            "model": "qwen-max",
+            "temperature": 0.0,
+            "max_tokens": 8192,
+            "prompt_version": "v1.0.0",
+            "prompt_sha256": "287053e9e67ad29fd2de597d1052b8d418040097910462e4a0f176b14295bfed",
+            "metric_version": "v1"
+          },
+          "token_usage": {
+            "input": 1936,
+            "output": 388
+          },
+          "cost": "0",
+          "details": {
+            "claims": [
+              {
+                "claim": "退款申请期限为订单签收后7天内",
+                "supported": true,
+                "evidence": [
+                  "订单签收后 7 天内可申请无理由退款。"
+                ],
+                "reason": "上下文明确说明了订单签收后7天内可以申请无理由退款"
+              },
+              {
+                "claim": "定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款",
+                "supported": true,
+                "evidence": [
+                  "定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。"
+                ],
+                "reason": "上下文明确列出了这些商品不支持无理由退款"
+              },
+              {
+                "claim": "生鲜食品如存在质量问题，须在签收后24小时内拍照反馈",
+                "supported": true,
+                "evidence": [
+                  "生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。"
+                ],
+                "reason": "上下文明确说明了生鲜食品的质量问题反馈时间"
+              },
+              {
+                "claim": "虚拟商品（如充值、会员、课程）一经售出不支持退款",
+                "supported": true,
+                "evidence": [
+                  "虚拟商品（充值、会员、课程）一经售出不支持退款。"
+                ],
+                "reason": "上下文明确说明了虚拟商品一经售出不支持退款"
+              },
+              {
+                "claim": "定制商品仅支持因质量问题退换，不支持无理由退换",
+                "supported": true,
+                "evidence": [
+                  "定制商品支持质量问题退换，不支持无理由退换。"
+                ],
+                "reason": "上下文明确说明了定制商品的退换政策"
+              }
+            ],
+            "supported_count": 5,
+            "claim_count": 5,
+            "reason": ""
+          }
+        },
+        {
+          "metric": "answer_correctness",
+          "status": "evaluated",
+          "score": 0.8,
+          "skipped_reason": null,
+          "latency_ms": 1546,
+          "error": null,
+          "judge_config": {
+            "agent": "rag_judge_answer_correctness",
+            "model": "qwen-max",
+            "temperature": 0.0,
+            "max_tokens": 8192,
+            "prompt_version": "v1.0.0",
+            "prompt_sha256": "106e11f2bc39806da5ecf090c6dbcd94d81ca5f53b968e5055d5a33833b30f94",
+            "metric_version": "v1"
+          },
+          "token_usage": {
+            "input": 890,
+            "output": 43
+          },
+          "cost": "0",
+          "details": {
+            "missing_points": [],
+            "wrong_facts": [],
+            "reason": "回答中包含了额外的信息，但关键事实正确且完整。"
+          }
+        },
+        {
+          "metric": "answer_relevancy",
+          "status": "evaluated",
+          "score": 0.9,
+          "skipped_reason": null,
+          "latency_ms": 1306,
+          "error": null,
+          "judge_config": {
+            "agent": "rag_judge_answer_relevancy",
+            "model": "qwen-max",
+            "temperature": 0.0,
+            "max_tokens": 8192,
+            "prompt_version": "v1.0.0",
+            "prompt_sha256": "27203126964ae0ca8f0bb8641cb3c2b145605cec706ef47c5432a0bbd6fad141",
+            "metric_version": "v1"
+          },
+          "token_usage": {
+            "input": 779,
+            "output": 36
+          },
+          "cost": "0",
+          "details": {
+            "reason": "回答了核心问题并提供了详细信息，但包含了一些与主要问题不太相关的额外内容"
+          }
+        }
+      ]
+    },
+    {
+      "id": "Q04",
+      "category": "direct",
+      "question": "目前支持哪种发票？",
+      "answer": "目前仅支持**电子发票**<kb doc=\"phase3d_doc.md\" chunk_id=\"c65abc80-f589-49de-9a1f-77ad2689bdb9\" kb_id=\"4ae8e147-6f76-4330-93f1-d2b3fef3d9ba\" />。  \n- 电子发票在提交申请后 **24 小时内**发送至下单时填写的邮箱；  \n- 发票抬头可在开具前修改；  \n- 已开具的电子发票如需更正，须先申请**红冲**，再重新开具；  \n- **不支持纸质发票**和**增值税专用发票**<kb doc=\"phase3d_doc.md\" chunk_id=\"c65abc80-f589-49de-9a1f-77ad2689bdb9\" kb_id=\"4ae8e147-6f76-4330-93f1-d2b3fef3d9ba\" />。",
+      "wall_latency_ms": 9138,
+      "outcomes": [
+        {
+          "metric": "faithfulness",
+          "status": "evaluated",
+          "score": 1.0,
+          "skipped_reason": null,
+          "latency_ms": 6483,
+          "error": null,
+          "judge_config": {
+            "agent": "rag_judge_faithfulness",
+            "model": "qwen-max",
+            "temperature": 0.0,
+            "max_tokens": 8192,
+            "prompt_version": "v1.0.0",
+            "prompt_sha256": "287053e9e67ad29fd2de597d1052b8d418040097910462e4a0f176b14295bfed",
+            "metric_version": "v1"
+          },
+          "token_usage": {
+            "input": 1142,
+            "output": 306
+          },
+          "cost": "0",
+          "details": {
+            "claims": [
+              {
+                "claim": "目前仅支持电子发票",
+                "supported": true,
+                "evidence": [
+                  "仅支持电子发票，提交申请后 24 小时内发送至下单邮箱。"
+                ],
+                "reason": "上下文明确指出仅支持电子发票"
+              },
+              {
+                "claim": "电子发票在提交申请后 24 小时内发送至下单时填写的邮箱",
+                "supported": true,
+                "evidence": [
+                  "仅支持电子发票，提交申请后 24 小时内发送至下单邮箱。"
+                ],
+                "reason": "上下文明确说明了电子发票的发送时间"
+              },
+              {
+                "claim": "发票抬头可在开具前修改",
+                "supported": true,
+                "evidence": [
+                  "发票抬头可在开具前修改；"
+                ],
+                "reason": "上下文明确提到发票抬头可以在开具前修改"
+              },
+              {
+                "claim": "已开具的电子发票如需更正，须先申请红冲，再重新开具",
+                "supported": true,
+                "evidence": [
+                  "已开具的发票需先申请红冲，再重新开具。"
+                ],
+                "reason": "上下文明确说明了更正已开具发票的流程"
+              },
+              {
+                "claim": "不支持纸质发票和增值税专用发票",
+                "supported": true,
+                "evidence": [
+                  "暂不支持纸质发票和增值税专用发票。"
+                ],
+                "reason": "上下文明确指出了不支持纸质发票和增值税专用发票"
+              }
+            ],
+            "supported_count": 5,
+            "claim_count": 5,
+            "reason": ""
+          }
+        },
+        {
+          "metric": "answer_correctness",
+          "status": "evaluated",
+          "score": 0.9,
+          "skipped_reason": null,
+          "latency_ms": 1663,
+          "error": null,
+          "judge_config": {
+            "agent": "rag_judge_answer_correctness",
+            "model": "qwen-max",
+            "temperature": 0.0,
+            "max_tokens": 8192,
+            "prompt_version": "v1.0.0",
+            "prompt_sha256": "106e11f2bc39806da5ecf090c6dbcd94d81ca5f53b968e5055d5a33833b30f94",
+            "metric_version": "v1"
+          },
+          "token_usage": {
+            "input": 594,
+            "output": 49
+          },
+          "cost": "0",
+          "details": {
+            "missing_points": [],
+            "wrong_facts": [],
+            "reason": "回答虽然包含额外信息，但所有信息都是正确的且核心信息与金标一致。"
+          }
+        },
+        {
+          "metric": "answer_relevancy",
+          "status": "evaluated",
+          "score": 1.0,
+          "skipped_reason": null,
+          "latency_ms": 990,
+          "error": null,
+          "judge_config": {
+            "agent": "rag_judge_answer_relevancy",
+            "model": "qwen-max",
+            "temperature": 0.0,
+            "max_tokens": 8192,
+            "prompt_version": "v1.0.0",
+            "prompt_sha256": "27203126964ae0ca8f0bb8641cb3c2b145605cec706ef47c5432a0bbd6fad141",
+            "metric_version": "v1"
+          },
+          "token_usage": {
+            "input": 493,
+            "output": 28
+          },
+          "cost": "0",
+          "details": {
+            "reason": "直接回答了支持的发票类型，并提供了相关细节"
+          }
+        }
+      ]
+    },
+    {
+      "id": "Q11",
+      "category": "multi",
+      "question": "签收第 5 天的定制商品可以无理由退款吗？",
+      "answer": "不可以。\n\n根据《售后服务政策（Phase 3E 验证文档 v2）》第1条“退款时效”明确规定：  \n**“订单签收后 7 天内可申请无理由退款。定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。”**<kb doc=\"phase3d_doc.md\" chunk_id=\"c65abc80-f589-49de-9a1f-77ad2689bdb9\" kb_id=\"4ae8e147-6f76-4330-93f1-d2b3fef3d9ba\" />\n\n虽然该定制商品处于签收后第5天（在7天时限内），但因其属于**定制类商品**，明确被排除在无理由退款适用范围之外。\n\n不过，若该定制商品存在**质量问题**，则仍可依据第12条“特殊商品”条款申请退换货：<kb doc=\"phase3d_doc.md\" chunk_id=\"b978479f-6440-4514-b220-6e48a9dbf1be\" kb_id=\"4ae8e147-6f76-4330-93f1-d2b3fef3d9ba\" />  \n> “定制商品支持质量问题退换，不支持无理由退换。”\n\n因此，用户当前仅可就质量问题发起售后申请，需提供相应凭证（如照片、视频等），由商家审核认定后处理。",
+      "wall_latency_ms": 12074,
+      "outcomes": [
+        {
+          "metric": "faithfulness",
+          "status": "evaluated",
+          "score": 0.8,
+          "skipped_reason": null,
+          "latency_ms": 9349,
+          "error": null,
+          "judge_config": {
+            "agent": "rag_judge_faithfulness",
+            "model": "qwen-max",
+            "temperature": 0.0,
+            "max_tokens": 8192,
+            "prompt_version": "v1.0.0",
+            "prompt_sha256": "287053e9e67ad29fd2de597d1052b8d418040097910462e4a0f176b14295bfed",
+            "metric_version": "v1"
+          },
+          "token_usage": {
+            "input": 1765,
+            "output": 405
+          },
+          "cost": "0",
+          "details": {
+            "claims": [
+              {
+                "claim": "订单签收后 7 天内可申请无理由退款。",
+                "supported": true,
+                "evidence": [
+                  "订单签收后 7 天内可申请无理由退款。"
+                ],
+                "reason": "上下文明确支持该陈述。"
+              },
+              {
+                "claim": "定制类商品不支持无理由退款。",
+                "supported": true,
+                "evidence": [
+                  "定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。"
+                ],
+                "reason": "上下文明确支持该陈述。"
+              },
+              {
+                "claim": "虽然该定制商品处于签收后第5天（在7天时限内），但因其属于定制类商品，明确被排除在无理由退款适用范围之外。",
+                "supported": true,
+                "evidence": [
+                  "订单签收后 7 天内可申请无理由退款。",
+                  "定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。"
+                ],
+                "reason": "上下文明确支持该陈述。"
+              },
+              {
+                "claim": "若该定制商品存在质量问题，则仍可依据第12条“特殊商品”条款申请退换货。",
+                "supported": true,
+                "evidence": [
+                  "定制商品支持质量问题退换，不支持无理由退换。"
+                ],
+                "reason": "上下文明确支持该陈述。"
+              },
+              {
+                "claim": "用户当前仅可就质量问题发起售后申请，需提供相应凭证（如照片、视频等），由商家审核认定后处理。",
+                "supported": false,
+                "evidence": [],
+                "reason": "上下文未明确说明需要提供哪些具体凭证以及审核流程。"
+              }
+            ],
+            "supported_count": 4,
+            "claim_count": 5,
+            "reason": ""
+          }
+        },
+        {
+          "metric": "answer_correctness",
+          "status": "evaluated",
+          "score": 0.9,
+          "skipped_reason": null,
+          "latency_ms": 1601,
+          "error": null,
+          "judge_config": {
+            "agent": "rag_judge_answer_correctness",
+            "model": "qwen-max",
+            "temperature": 0.0,
+            "max_tokens": 8192,
+            "prompt_version": "v1.0.0",
+            "prompt_sha256": "106e11f2bc39806da5ecf090c6dbcd94d81ca5f53b968e5055d5a33833b30f94",
+            "metric_version": "v1"
+          },
+          "token_usage": {
+            "input": 714,
+            "output": 47
+          },
+          "cost": "0",
+          "details": {
+            "missing_points": [],
+            "wrong_facts": [],
+            "reason": "回答内容正确，但提供了额外的详细信息，导致稍显冗长。"
+          }
+        },
+        {
+          "metric": "answer_relevancy",
+          "status": "evaluated",
+          "score": 1.0,
+          "skipped_reason": null,
+          "latency_ms": 1121,
+          "error": null,
+          "judge_config": {
+            "agent": "rag_judge_answer_relevancy",
+            "model": "qwen-max",
+            "temperature": 0.0,
+            "max_tokens": 8192,
+            "prompt_version": "v1.0.0",
+            "prompt_sha256": "27203126964ae0ca8f0bb8641cb3c2b145605cec706ef47c5432a0bbd6fad141",
+            "metric_version": "v1"
+          },
+          "token_usage": {
+            "input": 608,
+            "output": 36
+          },
+          "cost": "0",
+          "details": {
+            "reason": "直接回答了定制商品在签收第5天不能无理由退款，并解释了相关政策"
+          }
+        }
+      ]
+    },
+    {
+      "id": "Q17",
+      "category": "multi",
+      "question": "订单满 99 元包邮，退货时运费谁承担？",
+      "answer": "根据售后服务政策，订单满 99 元包邮适用于**正向发货环节**；而**退货时的运费承担方取决于退换货原因**：\n\n- 若因**质量问题**退换货，运费由**商家承担**；  \n- 若为**非质量问题**（如无理由退货），运费由**买家承担**。\n\n该规则与是否满 99 元无关，不因包邮资格而改变退货运费责任归属。",
+      "wall_latency_ms": 13800,
+      "outcomes": [
+        {
+          "metric": "faithfulness",
+          "status": "evaluated",
+          "score": 1.0,
+          "skipped_reason": null,
+          "latency_ms": 10892,
+          "error": null,
+          "judge_config": {
+            "agent": "rag_judge_faithfulness",
+            "model": "qwen-max",
+            "temperature": 0.0,
+            "max_tokens": 8192,
+            "prompt_version": "v1.0.0",
+            "prompt_sha256": "287053e9e67ad29fd2de597d1052b8d418040097910462e4a0f176b14295bfed",
+            "metric_version": "v1"
+          },
+          "token_usage": {
+            "input": 1518,
+            "output": 470
+          },
+          "cost": "0",
+          "details": {
+            "claims": [
+              {
+                "claim": "订单满 99 元包邮适用于正向发货环节",
+                "supported": true,
+                "evidence": [
+                  "单笔订单实付满 99 元包邮；未满 99 元收取 10 元运费。"
+                ],
+                "reason": "上下文明确说明了订单满 99 元包邮的条件，适用于正向发货环节。"
+              },
+              {
+                "claim": "退货时的运费承担方取决于退换货原因",
+                "supported": true,
+                "evidence": [
+                  "因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。"
+                ],
+                "reason": "上下文明确说明了退货运费的责任归属取决于退换货原因。"
+              },
+              {
+                "claim": "若因质量问题退换货，运费由商家承担",
+                "supported": true,
+                "evidence": [
+                  "因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。"
+                ],
+                "reason": "上下文明确说明了因质量问题退换货时，运费由商家承担。"
+              },
+              {
+                "claim": "若为非质量问题（如无理由退货），运费由买家承担",
+                "supported": true,
+                "evidence": [
+                  "因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。"
+                ],
+                "reason": "上下文明确说明了非质量问题退换货时，运费由买家承担。"
+              },
+              {
+                "claim": "该规则与是否满 99 元无关，不因包邮资格而改变退货运费责任归属",
+                "supported": true,
+                "evidence": [
+                  "因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。"
+                ],
+                "reason": "上下文中的退货运费责任归属没有提到与订单金额有关，因此可以推断该规则与是否满 99 元无关。"
+              }
+            ],
+            "supported_count": 5,
+            "claim_count": 5,
+            "reason": ""
+          }
+        },
+        {
+          "metric": "answer_correctness",
+          "status": "evaluated",
+          "score": 0.8,
+          "skipped_reason": null,
+          "latency_ms": 1641,
+          "error": null,
+          "judge_config": {
+            "agent": "rag_judge_answer_correctness",
+            "model": "qwen-max",
+            "temperature": 0.0,
+            "max_tokens": 8192,
+            "prompt_version": "v1.0.0",
+            "prompt_sha256": "106e11f2bc39806da5ecf090c6dbcd94d81ca5f53b968e5055d5a33833b30f94",
+            "metric_version": "v1"
+          },
+          "token_usage": {
+            "input": 478,
+            "output": 48
+          },
+          "cost": "0",
+          "details": {
+            "missing_points": [],
+            "wrong_facts": [],
+            "reason": "回答核心正确，但添加了不必要的细节，如正向发货环节的说明。"
+          }
+        },
+        {
+          "metric": "answer_relevancy",
+          "status": "evaluated",
+          "score": 1.0,
+          "skipped_reason": null,
+          "latency_ms": 1265,
+          "error": null,
+          "judge_config": {
+            "agent": "rag_judge_answer_relevancy",
+            "model": "qwen-max",
+            "temperature": 0.0,
+            "max_tokens": 8192,
+            "prompt_version": "v1.0.0",
+            "prompt_sha256": "27203126964ae0ca8f0bb8641cb3c2b145605cec706ef47c5432a0bbd6fad141",
+            "metric_version": "v1"
+          },
+          "token_usage": {
+            "input": 361,
+            "output": 40
+          },
+          "cost": "0",
+          "details": {
+            "reason": "直接、完整地回答了退货时运费由谁承担的问题，并详细说明了不同情况下的责任归属。"
+          }
+        }
+      ]
+    },
+    {
+      "id": "Q21",
+      "category": "constraint",
+      "question": "签收后第 10 天，普通商品还能无理由退款吗？",
+      "answer": "不可以。\n\n根据《售后服务政策（Phase 3E 验证文档 v2）》，**无理由退款仅限订单签收后 7 天内申请**<kb doc=\"phase3d_doc.md\" chunk_id=\"c65abc80-f589-49de-9a1f-77ad2689bdb9\" kb_id=\"4ae8e147-6f76-4330-93f1-d2b3fef3d9ba\" />。  \n签收第 10 天已超出该时效窗口（7 天），因此不支持无理由退款。\n\n⚠️ 注意：  \n- 该限制适用于“普通商品”（即非定制、非生鲜、非已激活虚拟商品）；  \n- 若商品存在**质量问题**，则不受 7 天无理由限制，仍可依据保修或退换货政策主张权益（如申请换货或质量退换，需提供凭证并符合相应条款）<kb doc=\"phase3d_doc.md\" chunk_id=\"c65abc80-f589-49de-9a1f-77ad2689bdb9\" kb_id=\"4ae8e147-6f76-4330-93f1-d2b3fef3d9ba\" /><kb doc=\"phase3d_doc.md\" chunk_id=\"b978479f-6440-4514-b220-6e48a9dbf1be\" kb_id=\"4ae8e147-6f76-4330-93f1-d2b3fef3d9ba\" />。\n\n如需进一步协助，建议联系客服（9:00–21:00）核实具体订单情况<kb doc=\"phase3d_doc.md\" chunk_id=\"b978479f-6440-4514-b220-6e48a9dbf1be\" kb_id=\"4ae8e147-6f76-4330-93f1-d2b3fef3d9ba\" />。",
+      "wall_latency_ms": 13873,
+      "outcomes": [
+        {
+          "metric": "faithfulness",
+          "status": "evaluated",
+          "score": 1.0,
+          "skipped_reason": null,
+          "latency_ms": 10894,
+          "error": null,
+          "judge_config": {
+            "agent": "rag_judge_faithfulness",
+            "model": "qwen-max",
+            "temperature": 0.0,
+            "max_tokens": 8192,
+            "prompt_version": "v1.0.0",
+            "prompt_sha256": "287053e9e67ad29fd2de597d1052b8d418040097910462e4a0f176b14295bfed",
+            "metric_version": "v1"
+          },
+          "token_usage": {
+            "input": 1915,
+            "output": 509
+          },
+          "cost": "0",
+          "details": {
+            "claims": [
+              {
+                "claim": "无理由退款仅限订单签收后 7 天内申请",
+                "supported": true,
+                "evidence": [
+                  "订单签收后 7 天内可申请无理由退款。"
+                ],
+                "reason": "上下文明确指出无理由退款的时间限制为签收后 7 天内。"
+              },
+              {
+                "claim": "签收第 10 天已超出该时效窗口（7 天），因此不支持无理由退款。",
+                "supported": true,
+                "evidence": [
+                  "订单签收后 7 天内可申请无理由退款。"
+                ],
+                "reason": "根据上下文，签收后 7 天内是无理由退款的唯一时间窗口，签收第 10 天显然超出了这个期限。"
+              },
+              {
+                "claim": "该限制适用于“普通商品”（即非定制、非生鲜、非已激活虚拟商品）",
+                "supported": true,
+                "evidence": [
+                  "定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。"
+                ],
+                "reason": "上下文明确了哪些类型的商品不支持无理由退款，从而推断出普通商品适用此规则。"
+              },
+              {
+                "claim": "若商品存在质量问题，则不受 7 天无理由限制，仍可依据保修或退换货政策主张权益",
+                "supported": true,
+                "evidence": [
+                  "电子产品自签收之日起保修 12 个月，配件保修 3 个月。",
+                  "因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。"
+                ],
+                "reason": "上下文提到质量问题可以进行退换货，并且运费由商家承担，这表明质量问题不受 7 天无理由退款限制。"
+              },
+              {
+                "claim": "如需进一步协助，建议联系客服（9:00–21:00）核实具体订单情况",
+                "supported": true,
+                "evidence": [
+                  "在线客服服务时间为每天 9:00-21:00。"
+                ],
+                "reason": "上下文明确指出了客服的服务时间。"
+              }
+            ],
+            "supported_count": 5,
+            "claim_count": 5,
+            "reason": ""
+          }
+        },
+        {
+          "metric": "answer_correctness",
+          "status": "evaluated",
+          "score": 0.9,
+          "skipped_reason": null,
+          "latency_ms": 1587,
+          "error": null,
+          "judge_config": {
+            "agent": "rag_judge_answer_correctness",
+            "model": "qwen-max",
+            "temperature": 0.0,
+            "max_tokens": 8192,
+            "prompt_version": "v1.0.0",
+            "prompt_sha256": "106e11f2bc39806da5ecf090c6dbcd94d81ca5f53b968e5055d5a33833b30f94",
+            "metric_version": "v1"
+          },
+          "token_usage": {
+            "input": 870,
+            "output": 50
+          },
+          "cost": "0",
+          "details": {
+            "missing_points": [],
+            "wrong_facts": [],
+            "reason": "回答在事实层面完全正确，但提供了额外的信息，使得答案比金标更详细。"
+          }
+        },
+        {
+          "metric": "answer_relevancy",
+          "status": "evaluated",
+          "score": 1.0,
+          "skipped_reason": null,
+          "latency_ms": 1390,
+          "error": null,
+          "judge_config": {
+            "agent": "rag_judge_answer_relevancy",
+            "model": "qwen-max",
+            "temperature": 0.0,
+            "max_tokens": 8192,
+            "prompt_version": "v1.0.0",
+            "prompt_sha256": "27203126964ae0ca8f0bb8641cb3c2b145605cec706ef47c5432a0bbd6fad141",
+            "metric_version": "v1"
+          },
+          "token_usage": {
+            "input": 758,
+            "output": 44
+          },
+          "cost": "0",
+          "details": {
+            "reason": "直接、完整地回答了问题，明确说明了签收后第10天不能无理由退款，并提供了相关政策依据。"
+          }
+        }
+      ]
+    },
+    {
+      "id": "Q23",
+      "category": "constraint",
+      "question": "生鲜食品签收后第 2 天发现质量问题，还能按政策反馈吗？",
+      "answer": "是的，可以按政策反馈。\n\n根据文档第12条“特殊商品”规定：  \n**生鲜食品质量问题需在签收后 24 小时内拍照反馈**<kb doc=\"phase3d_doc.md\" chunk_id=\"b978479f-6440-4514-b220-6e48a9dbf1be\" kb_id=\"4ae8e147-6f76-4330-93f1-d2b3fef3d9ba\" />。  \n\n您是在签收后第 2 天（即超过 24 小时）才发现并反馈，**已超出政策规定的反馈时效**，因此原则上不符合质量反馈受理条件。\n\n⚠️ 注意：该时限是硬性要求，文档未提及例外情形或宽限期。24 小时起算点为“签收完成时间”（非签收日零点），且须“拍照反馈”（需保留问题实物及包装证据）。\n\n✅ 建议操作：  \n- 若尚未超时，立即通过订单页面或联系在线客服（9:00–21:00）提交带时间水印的照片凭证；  \n- 若已超时，可尝试联系客服说明具体情况（如物流延误导致开箱延迟、问题明显且可验证等），但是否受理由商家个案判断，政策不保证支持。\n\n缺失信息：文档未说明超时后申诉渠道或人工复核机制。如需进一步协助，可提供签收时间截图和问题照片，由客服评估是否特批处理。",
+      "wall_latency_ms": 16980,
+      "outcomes": [
+        {
+          "metric": "faithfulness",
+          "status": "evaluated",
+          "score": 0.714286,
+          "skipped_reason": null,
+          "latency_ms": 14131,
+          "error": null,
+          "judge_config": {
+            "agent": "rag_judge_faithfulness",
+            "model": "qwen-max",
+            "temperature": 0.0,
+            "max_tokens": 8192,
+            "prompt_version": "v1.0.0",
+            "prompt_sha256": "287053e9e67ad29fd2de597d1052b8d418040097910462e4a0f176b14295bfed",
+            "metric_version": "v1"
+          },
+          "token_usage": {
+            "input": 1782,
+            "output": 632
+          },
+          "cost": "0",
+          "details": {
+            "claims": [
+              {
+                "claim": "生鲜食品质量问题需在签收后 24 小时内拍照反馈",
+                "supported": true,
+                "evidence": [
+                  "生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。"
+                ],
+                "reason": "上下文明确说明了这一规定"
+              },
+              {
+                "claim": "您是在签收后第 2 天（即超过 24 小时）才发现并反馈，已超出政策规定的反馈时效",
+                "supported": true,
+                "evidence": [
+                  "生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。"
+                ],
+                "reason": "根据上下文的规定，24 小时内反馈是硬性要求"
+              },
+              {
+                "claim": "该时限是硬性要求，文档未提及例外情形或宽限期",
+                "supported": true,
+                "evidence": [
+                  "生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。"
+                ],
+                "reason": "上下文没有提到任何例外情况或宽限期"
+              },
+              {
+                "claim": "24 小时起算点为“签收完成时间”（非签收日零点），且须“拍照反馈”（需保留问题实物及包装证据）",
+                "supported": false,
+                "evidence": [],
+                "reason": "上下文未具体说明24小时的起算点和反馈的具体形式"
+              },
+              {
+                "claim": "若尚未超时，立即通过订单页面或联系在线客服（9:00–21:00）提交带时间水印的照片凭证",
+                "supported": true,
+                "evidence": [
+                  "在线客服服务时间为每天 9:00-21:00。",
+                  "生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。"
+                ],
+                "reason": "上下文提到了在线客服的服务时间和需要拍照反馈"
+              },
+              {
+                "claim": "若已超时，可尝试联系客服说明具体情况（如物流延误导致开箱延迟、问题明显且可验证等），但是否受理由商家个案判断，政策不保证支持",
+                "supported": false,
+                "evidence": [],
+                "reason": "上下文未提及超时后的处理方式或商家的个案判断"
+              },
+              {
+                "claim": "文档未说明超时后申诉渠道或人工复核机制",
+                "supported": true,
+                "evidence": [],
+                "reason": "上下文确实没有提到超时后的申诉渠道或人工复核机制"
+              }
+            ],
+            "supported_count": 5,
+            "claim_count": 7,
+            "reason": ""
+          }
+        },
+        {
+          "metric": "answer_correctness",
+          "status": "evaluated",
+          "score": 0.8,
+          "skipped_reason": null,
+          "latency_ms": 1611,
+          "error": null,
+          "judge_config": {
+            "agent": "rag_judge_answer_correctness",
+            "model": "qwen-max",
+            "temperature": 0.0,
+            "max_tokens": 8192,
+            "prompt_version": "v1.0.0",
+            "prompt_sha256": "106e11f2bc39806da5ecf090c6dbcd94d81ca5f53b968e5055d5a33833b30f94",
+            "metric_version": "v1"
+          },
+          "token_usage": {
+            "input": 753,
+            "output": 50
+          },
+          "cost": "0",
+          "details": {
+            "missing_points": [],
+            "wrong_facts": [],
+            "reason": "回答虽然详细，但核心信息与金标一致，只是增加了额外的建议和解释。"
+          }
+        },
+        {
+          "metric": "answer_relevancy",
+          "status": "evaluated",
+          "score": 0.9,
+          "skipped_reason": null,
+          "latency_ms": 1235,
+          "error": null,
+          "judge_config": {
+            "agent": "rag_judge_answer_relevancy",
+            "model": "qwen-max",
+            "temperature": 0.0,
+            "max_tokens": 8192,
+            "prompt_version": "v1.0.0",
+            "prompt_sha256": "27203126964ae0ca8f0bb8641cb3c2b145605cec706ef47c5432a0bbd6fad141",
+            "metric_version": "v1"
+          },
+          "token_usage": {
+            "input": 625,
+            "output": 31
+          },
+          "cost": "0",
+          "details": {
+            "reason": "回答了核心问题，但包含了较多的额外建议和信息。"
+          }
+        }
+      ]
+    },
+    {
+      "id": "Q29",
+      "category": "unanswerable",
+      "question": "支持货到付款吗？",
+      "answer": "根据当前提供的售后服务政策文档（Phase 3E 验证文档 v2），**未提及“货到付款”这一支付方式**<kb doc=\"phase3d_doc.md\" chunk_id=\"c65abc80-f589-49de-9a1f-77ad2689bdb9\" kb_id=\"4ae8e147-6f76-4330-93f1-d2b3fef3d9ba\" />。文档详细说明了退款时效、换货、发票、发货、物流、运费、保修、优惠券、积分、客服及特殊商品售后规则，但**在所有章节（包括第5条“发货时效”、第6条“物流查询”、第7条“运费规则”等）中均未涉及支付方式，也未说明是否支持货到付款**<kb doc=\"phase3d_doc.md\" chunk_id=\"cdf680b6-0280-44fd-8003-73901ac3e13e\" kb_id=\"4ae8e147-6f76-4330-93f1-d2b3fef3d9ba\" /><kb doc=\"phase3d_doc.md\" chunk_id=\"b978479f-6440-4514-b220-6e48a9dbf1be\" kb_id=\"4ae8e147-6f76-4330-93f1-d2b3fef3d9ba\" />。\n\n因此，依据现有材料，**无法确认是否支持货到付款**。\n\n✅ 建议下一步：  \n请查阅网站结算页的支付选项，或直接联系在线客服（9:00–21:00）/拨打客服热线 400-800-1234 进行确认<kb doc=\"phase3d_doc.md\" chunk_id=\"b978479f-6440-4514-b220-6e48a9dbf1be\" kb_id=\"4ae8e147-6f76-4330-93f1-d2b3fef3d9ba\" />。",
+      "wall_latency_ms": 12526,
+      "outcomes": [
+        {
+          "metric": "faithfulness",
+          "status": "evaluated",
+          "score": 1.0,
+          "skipped_reason": null,
+          "latency_ms": 9480,
+          "error": null,
+          "judge_config": {
+            "agent": "rag_judge_faithfulness",
+            "model": "qwen-max",
+            "temperature": 0.0,
+            "max_tokens": 8192,
+            "prompt_version": "v1.0.0",
+            "prompt_sha256": "287053e9e67ad29fd2de597d1052b8d418040097910462e4a0f176b14295bfed",
+            "metric_version": "v1"
+          },
+          "token_usage": {
+            "input": 1918,
+            "output": 446
+          },
+          "cost": "0",
+          "details": {
+            "claims": [
+              {
+                "claim": "未提及“货到付款”这一支付方式",
+                "supported": true,
+                "evidence": [
+                  "售后服务政策（Phase 3E 验证文档 v2）"
+                ],
+                "reason": "上下文中的文档内容确实没有提到“货到付款”这种支付方式。"
+              },
+              {
+                "claim": "在所有章节（包括第5条“发货时效”、第6条“物流查询”、第7条“运费规则”等）中均未涉及支付方式，也未说明是否支持货到付款",
+                "supported": true,
+                "evidence": [
+                  "## 5. 发货时效\n现货商品在付款后 48 小时内发出；预售商品以商品页标注的发货时间为准。\n大件商品（家具、家电）发货时间为 5 个工作日内，配送前会电话预约。",
+                  "## 6. 物流查询\n订单发货后可在「我的订单」查看物流单号与实时轨迹。\n物流信息超过 24 小时未更新时，可联系客服协助核查。",
+                  "## 7. 运费规则\n单笔订单实付满 99 元包邮；未满 99 元收取 10 元运费。\n新疆、西藏、内蒙古等偏远地区运费为 20 元，不参与包邮活动。\n因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。"
+                ],
+                "reason": "这些章节的内容确实没有提及任何支付方式，也没有说明是否支持货到付款。"
+              },
+              {
+                "claim": "无法确认是否支持货到付款",
+                "supported": true,
+                "evidence": [
+                  "售后服务政策（Phase 3E 验证文档 v2）"
+                ],
+                "reason": "上下文中的文档内容确实没有提供关于货到付款的信息，因此无法确认是否支持。"
+              }
+            ],
+            "supported_count": 3,
+            "claim_count": 3,
+            "reason": ""
+          }
+        },
+        {
+          "metric": "answer_correctness",
+          "status": "evaluated",
+          "score": 1.0,
+          "skipped_reason": null,
+          "latency_ms": 1822,
+          "error": null,
+          "judge_config": {
+            "agent": "rag_judge_answer_correctness",
+            "model": "qwen-max",
+            "temperature": 0.0,
+            "max_tokens": 8192,
+            "prompt_version": "v1.0.0",
+            "prompt_sha256": "106e11f2bc39806da5ecf090c6dbcd94d81ca5f53b968e5055d5a33833b30f94",
+            "metric_version": "v1"
+          },
+          "token_usage": {
+            "input": 869,
+            "output": 54
+          },
+          "cost": "0",
+          "details": {
+            "missing_points": [],
+            "wrong_facts": [],
+            "reason": "模型回答正确且完整地指出了文档中未提及货到付款的信息，并建议了进一步确认的途径。"
+          }
+        },
+        {
+          "metric": "answer_relevancy",
+          "status": "evaluated",
+          "score": 0.6,
+          "skipped_reason": null,
+          "latency_ms": 1221,
+          "error": null,
+          "judge_config": {
+            "agent": "rag_judge_answer_relevancy",
+            "model": "qwen-max",
+            "temperature": 0.0,
+            "max_tokens": 8192,
+            "prompt_version": "v1.0.0",
+            "prompt_sha256": "27203126964ae0ca8f0bb8641cb3c2b145605cec706ef47c5432a0bbd6fad141",
+            "metric_version": "v1"
+          },
+          "token_usage": {
+            "input": 761,
+            "output": 31
+          },
+          "cost": "0",
+          "details": {
+            "reason": "回答了核心问题，但缺少明确结论，需要用户进一步确认"
+          }
+        }
+      ]
+    },
+    {
+      "id": "Q31",
+      "category": "unanswerable",
+      "question": "退货支持上门取件吗？",
+      "answer": "根据当前提供的《售后服务政策（Phase 3E 验证文档 v2）》<kb doc=\"phase3d_doc.md\" chunk_id=\"c65abc80-f589-49de-9a1f-77ad2689bdb9\" kb_id=\"4ae8e147-6f76-4330-93f1-d2b3fef3d9ba\" />，文档中**未提及“上门取件”服务**。\n\n具体相关条款如下：\n- **退款流程**：要求用户“在「我的订单」中选择退款，填写原因并上传凭证”，审核通过后“按原支付渠道退回”<kb doc=\"phase3d_doc.md\" chunk_id=\"c65abc80-f589-49de-9a1f-77ad2689bdb9\" kb_id=\"4ae8e147-6f76-4330-93f1-d2b3fef3d9ba\" />；\n- **换货政策**：明确说明“换货需先寄回原商品”，商家收到并验收后才寄出新品<kb doc=\"phase3d_doc.md\" chunk_id=\"c65abc80-f589-49de-9a1f-77ad2689bdb9\" kb_id=\"4ae8e147-6f76-4330-93f1-d2b3fef3d9ba\" />；\n- **运费规则**：仅区分“因质量问题产生的退换货运费由商家承担”或“非质量问题的退货运费由买家承担”，但未说明取件方式（如是否支持快递上门揽收）<kb doc=\"phase3d_doc.md\" chunk_id=\"cdf680b6-0280-44fd-8003-73901ac3e13e\" kb_id=\"4ae8e147-6f76-4330-93f1-d2b3fef3d9ba\" />；\n- **物流与客服**：虽有“物流查询”和“客服时间”条款，但未涉及退货物流的发起方式（如是否可预约上门取件）<kb doc=\"phase3d_doc.md\" chunk_id=\"cdf680b6-0280-44fd-8003-73901ac3e13e\" kb_id=\"4ae8e147-6f76-4330-93f1-d2b3fef3d9ba\" /><kb doc=\"phase3d_doc.md\" chunk_id=\"b978479f-6440-4514-b220-6e48a9dbf1be\" kb_id=\"4ae8e147-6f76-4330-93f1-d2b3fef3d9ba\" />。\n\n✅ **结论**：该政策文件**未规定支持上门取件**，也未禁止；是否提供此项服务属于未明示的操作细节，需进一步向客服确认。\n\n🔍 **建议下一步**：  \n拨打客服热线 400-800-1234（服务时间：9:00–21:00），或在在线客服时段内咨询“退货是否支持快递上门取件”，以获取实时操作支持。",
+      "wall_latency_ms": 22971,
+      "outcomes": [
+        {
+          "metric": "faithfulness",
+          "status": "evaluated",
+          "score": 1.0,
+          "skipped_reason": null,
+          "latency_ms": 19033,
+          "error": null,
+          "judge_config": {
+            "agent": "rag_judge_faithfulness",
+            "model": "qwen-max",
+            "temperature": 0.0,
+            "max_tokens": 8192,
+            "prompt_version": "v1.0.0",
+            "prompt_sha256": "287053e9e67ad29fd2de597d1052b8d418040097910462e4a0f176b14295bfed",
+            "metric_version": "v1"
+          },
+          "token_usage": {
+            "input": 2188,
+            "output": 893
+          },
+          "cost": "0",
+          "details": {
+            "claims": [
+              {
+                "claim": "根据当前提供的《售后服务政策（Phase 3E 验证文档 v2）》，文档中未提及“上门取件”服务。",
+                "supported": true,
+                "evidence": [
+                  "## 1. 退款时效\n订单签收后 7 天内可申请无理由退款。审核通过后，款项将在 1-3 个工作日内原路退回。\n定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。",
+                  "## 2. 退款流程\n在「我的订单」中选择退款，填写原因并上传凭证，商家会在 48 小时内审核。\n审核通过后按原支付渠道退回；审核驳回会显示原因，可补充材料后重新提交。",
+                  "## 3. 换货政策\n签收后 7 天内，商品未使用且包装完整可申请换货，同一订单仅支持一次换货。\n换货需先寄回原商品，商家收到并验收后 48 小时内寄出新品；运费由责任方承担。"
+                ],
+                "reason": "上下文中的相关条款未提到任何关于上门取件的信息。"
+              },
+              {
+                "claim": "退款流程要求用户在「我的订单」中选择退款，填写原因并上传凭证，审核通过后按原支付渠道退回。",
+                "supported": true,
+                "evidence": [
+                  "## 2. 退款流程\n在「我的订单」中选择退款，填写原因并上传凭证，商家会在 48 小时内审核。\n审核通过后按原支付渠道退回；审核驳回会显示原因，可补充材料后重新提交。"
+                ],
+                "reason": "上下文明确描述了退款流程。"
+              },
+              {
+                "claim": "换货政策明确说明换货需先寄回原商品，商家收到并验收后才寄出新品。",
+                "supported": true,
+                "evidence": [
+                  "## 3. 换货政策\n签收后 7 天内，商品未使用且包装完整可申请换货，同一订单仅支持一次换货。\n换货需先寄回原商品，商家收到并验收后 48 小时内寄出新品；运费由责任方承担。"
+                ],
+                "reason": "上下文明确描述了换货政策。"
+              },
+              {
+                "claim": "运费规则仅区分因质量问题产生的退换货运费由商家承担或非质量问题的退货运费由买家承担，但未说明取件方式。",
+                "supported": true,
+                "evidence": [
+                  "## 7. 运费规则\n单笔订单实付满 99 元包邮；未满 99 元收取 10 元运费。\n新疆、西藏、内蒙古等偏远地区运费为 20 元，不参与包邮活动。\n因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。"
+                ],
+                "reason": "上下文明确描述了运费规则，但未提及取件方式。"
+              },
+              {
+                "claim": "物流与客服条款虽有物流查询和客服时间条款，但未涉及退货物流的发起方式。",
+                "supported": true,
+                "evidence": [
+                  "## 6. 物流查询\n订单发货后可在「我的订单」查看物流单号与实时轨迹。\n物流信息超过 24 小时未更新时，可联系客服协助核查。",
+                  "## 11. 客服时间\n在线客服服务时间为每天 9:00-21:00。\n客服热线 400-800-1234，服务时间同上。\n非服务时间可留言，客服会在次日 12:00 前回复。"
+                ],
+                "reason": "上下文中的物流查询和客服时间条款未涉及退货物流的发起方式。"
+              }
+            ],
+            "supported_count": 5,
+            "claim_count": 5,
+            "reason": ""
+          }
+        },
+        {
+          "metric": "answer_correctness",
+          "status": "evaluated",
+          "score": 0.8,
+          "skipped_reason": null,
+          "latency_ms": 1865,
+          "error": null,
+          "judge_config": {
+            "agent": "rag_judge_answer_correctness",
+            "model": "qwen-max",
+            "temperature": 0.0,
+            "max_tokens": 8192,
+            "prompt_version": "v1.0.0",
+            "prompt_sha256": "106e11f2bc39806da5ecf090c6dbcd94d81ca5f53b968e5055d5a33833b30f94",
+            "metric_version": "v1"
+          },
+          "token_usage": {
+            "input": 1146,
+            "output": 49
+          },
+          "cost": "0",
+          "details": {
+            "missing_points": [],
+            "wrong_facts": [],
+            "reason": "回答详细解释了文档内容，但略显冗长，核心信息正确且完整。"
+          }
+        },
+        {
+          "metric": "answer_relevancy",
+          "status": "evaluated",
+          "score": 0.9,
+          "skipped_reason": null,
+          "latency_ms": 2070,
+          "error": null,
+          "judge_config": {
+            "agent": "rag_judge_answer_relevancy",
+            "model": "qwen-max",
+            "temperature": 0.0,
+            "max_tokens": 8192,
+            "prompt_version": "v1.0.0",
+            "prompt_sha256": "27203126964ae0ca8f0bb8641cb3c2b145605cec706ef47c5432a0bbd6fad141",
+            "metric_version": "v1"
+          },
+          "token_usage": {
+            "input": 1031,
+            "output": 37
+          },
+          "cost": "0",
+          "details": {
+            "reason": "回答了核心问题并提供了详细的政策说明，但需要用户进一步向客服确认具体操作细节"
+          }
+        }
+      ]
+    },
+    {
+      "id": "Q35",
+      "category": "ambiguous",
+      "question": "多久能到？",
+      "answer": "“多久能到？”取决于商品类型和发货时间，根据售后服务政策（Phase 3E 验证文档 v2）：\n\n- **现货商品**：付款后 **48 小时内发出**；  \n- **预售商品**：以商品页标注的发货时间为准；  \n- **大件商品（如家具、家电）**：发货时间为 **5 个工作日内**，且配送前会电话预约。\n\n发货后，物流时效未在文档中明确说明，但您可在「我的订单」中查看物流单号与实时轨迹；若物流信息 **超过 24 小时未更新**，可联系客服协助核查。\n\n✅ 建议操作：  \n1. 登录账户，进入「我的订单」确认是否已发货；  \n2. 查看物流单号并跟踪快递状态；  \n3. 若已发货但长时间无更新，拨打客服热线 400-800-1234（9:00–21:00）或在线留言。\n\n如您能提供具体订单号或商品类型（如是否为大件/预售/生鲜等），我可进一步帮您预估送达时间。",
+      "wall_latency_ms": 20419,
+      "outcomes": [
+        {
+          "metric": "faithfulness",
+          "status": "evaluated",
+          "score": 0.75,
+          "skipped_reason": null,
+          "latency_ms": 16933,
+          "error": null,
+          "judge_config": {
+            "agent": "rag_judge_faithfulness",
+            "model": "qwen-max",
+            "temperature": 0.0,
+            "max_tokens": 8192,
+            "prompt_version": "v1.0.0",
+            "prompt_sha256": "287053e9e67ad29fd2de597d1052b8d418040097910462e4a0f176b14295bfed",
+            "metric_version": "v1"
+          },
+          "token_usage": {
+            "input": 1672,
+            "output": 821
+          },
+          "cost": "0",
+          "details": {
+            "claims": [
+              {
+                "claim": "“多久能到？”取决于商品类型和发货时间",
+                "supported": true,
+                "evidence": [
+                  "现货商品在付款后 48 小时内发出；预售商品以商品页标注的发货时间为准。",
+                  "大件商品（家具、家电）发货时间为 5 个工作日内，配送前会电话预约。"
+                ],
+                "reason": "上下文明确说明了不同商品类型的发货时间。"
+              },
+              {
+                "claim": "根据售后服务政策（Phase 3E 验证文档 v2）",
+                "supported": true,
+                "evidence": [
+                  "# 售后服务政策（Phase 3E 验证文档 v2）"
+                ],
+                "reason": "上下文标题明确指出了该文档。"
+              },
+              {
+                "claim": "现货商品：付款后 48 小时内发出",
+                "supported": true,
+                "evidence": [
+                  "现货商品在付款后 48 小时内发出；预售商品以商品页标注的发货时间为准。"
+                ],
+                "reason": "上下文明确说明了现货商品的发货时间。"
+              },
+              {
+                "claim": "预售商品：以商品页标注的发货时间为准",
+                "supported": true,
+                "evidence": [
+                  "现货商品在付款后 48 小时内发出；预售商品以商品页标注的发货时间为准。"
+                ],
+                "reason": "上下文明确说明了预售商品的发货时间。"
+              },
+              {
+                "claim": "大件商品（如家具、家电）：发货时间为 5 个工作日内，且配送前会电话预约",
+                "supported": true,
+                "evidence": [
+                  "大件商品（家具、家电）发货时间为 5 个工作日内，配送前会电话预约。"
+                ],
+                "reason": "上下文明确说明了大件商品的发货时间和预约情况。"
+              },
+              {
+                "claim": "发货后，物流时效未在文档中明确说明",
+                "supported": true,
+                "evidence": [],
+                "reason": "上下文确实没有提到具体的物流时效。"
+              },
+              {
+                "claim": "您可在「我的订单」中查看物流单号与实时轨迹",
+                "supported": true,
+                "evidence": [
+                  "订单发货后可在「我的订单」查看物流单号与实时轨迹。"
+                ],
+                "reason": "上下文明确说明了可以在「我的订单」查看物流信息。"
+              },
+              {
+                "claim": "若物流信息超过 24 小时未更新，可联系客服协助核查",
+                "supported": true,
+                "evidence": [
+                  "物流信息超过 24 小时未更新时，可联系客服协助核查。"
+                ],
+                "reason": "上下文明确说明了物流信息未更新时可以联系客服。"
+              },
+              {
+                "claim": "建议操作：登录账户，进入「我的订单」确认是否已发货",
+                "supported": false,
+                "evidence": [],
+                "reason": "建议操作不是事实性陈述，不需要判断支持情况。"
+              },
+              {
+                "claim": "建议操作：查看物流单号并跟踪快递状态",
+                "supported": false,
+                "evidence": [],
+                "reason": "建议操作不是事实性陈述，不需要判断支持情况。"
+              },
+              {
+                "claim": "建议操作：若已发货但长时间无更新，拨打客服热线 400-800-1234（9:00–21:00）或在线留言",
+                "supported": false,
+                "evidence": [],
+                "reason": "建议操作不是事实性陈述，不需要判断支持情况。"
+              },
+              {
+                "claim": "客服热线 400-800-1234（9:00–21:00）",
+                "supported": true,
+                "evidence": [
+                  "客服热线 400-800-1234，服务时间同上。"
+                ],
+                "reason": "上下文明确说明了客服热线和服务时间。"
+              }
+            ],
+            "supported_count": 9,
+            "claim_count": 12,
+            "reason": ""
+          }
+        },
+        {
+          "metric": "answer_correctness",
+          "status": "evaluated",
+          "score": 0.3,
+          "skipped_reason": null,
+          "latency_ms": 1996,
+          "error": null,
+          "judge_config": {
+            "agent": "rag_judge_answer_correctness",
+            "model": "qwen-max",
+            "temperature": 0.0,
+            "max_tokens": 8192,
+            "prompt_version": "v1.0.0",
+            "prompt_sha256": "106e11f2bc39806da5ecf090c6dbcd94d81ca5f53b968e5055d5a33833b30f94",
+            "metric_version": "v1"
+          },
+          "token_usage": {
+            "input": 627,
+            "output": 57
+          },
+          "cost": "0",
+          "details": {
+            "missing_points": [
+              "需要收货地区信息才能判断送达时间"
+            ],
+            "wrong_facts": [],
+            "reason": "回答中未提及收货地区对送达时间的影响，且提供了过多不必要的细节"
+          }
+        },
+        {
+          "metric": "answer_relevancy",
+          "status": "evaluated",
+          "score": 0.9,
+          "skipped_reason": null,
+          "latency_ms": 1487,
+          "error": null,
+          "judge_config": {
+            "agent": "rag_judge_answer_relevancy",
+            "model": "qwen-max",
+            "temperature": 0.0,
+            "max_tokens": 8192,
+            "prompt_version": "v1.0.0",
+            "prompt_sha256": "27203126964ae0ca8f0bb8641cb3c2b145605cec706ef47c5432a0bbd6fad141",
+            "metric_version": "v1"
+          },
+          "token_usage": {
+            "input": 515,
+            "output": 35
+          },
+          "cost": "0",
+          "details": {
+            "reason": "回答了核心问题，提供了不同商品类型的发货时间，但物流时效未明确说明"
+          }
+        }
+      ]
+    },
+    {
+      "id": "Q36",
+      "category": "ambiguous",
+      "question": "能退吗？",
+      "answer": "能否退款，取决于具体商品类型和签收时间：\n\n- ✅ **可以无理由退款**：普通商品在**签收后 7 天内**可申请无理由退款；审核通过后，款项将在 **1–3 个工作日内原路退回**<kb doc=\"phase3d_doc.md\" chunk_id=\"c65abc80-f589-49de-9a1f-77ad2689bdb9\" kb_id=\"4ae8e147-6f76-4330-93f1-d2b3fef3d9ba\" />。  \n- ❌ **不支持无理由退款**的三类商品：  \n  - 定制类商品  \n  - 生鲜食品（质量问题除外，需签收后 **24 小时内**拍照反馈）<kb doc=\"phase3d_doc.md\" chunk_id=\"b978479f-6440-4514-b220-6e48a9dbf1be\" kb_id=\"4ae8e147-6f76-4330-93f1-d2b3fef3d9ba\" />  \n  - 已激活的虚拟商品（如充值、会员、课程等，一经售出**不支持退款**）<kb doc=\"phase3d_doc.md\" chunk_id=\"b978479f-6440-4514-b220-6e48a9dbf1be\" kb_id=\"4ae8e147-6f76-4330-93f1-d2b3fef3d9ba\" />\n\n此外：\n- 若因**商品质量问题**退换货，运费由商家承担；  \n- 若为**非质量问题退货**，运费由买家承担<kb doc=\"phase3d_doc.md\" chunk_id=\"cdf680b6-0280-44fd-8003-73901ac3e13e\" kb_id=\"4ae8e147-6f76-4330-93f1-d2b3fef3d9ba\" />。\n\n请确认您的商品类型及是否仍在签收后 7 天内。如需进一步协助（例如判断是否属于定制/虚拟类、是否已激活、或是否涉及质量问题），欢迎补充订单信息。",
+      "wall_latency_ms": 28346,
+      "outcomes": [
+        {
+          "metric": "faithfulness",
+          "status": "evaluated",
+          "score": 1.0,
+          "skipped_reason": null,
+          "latency_ms": 24911,
+          "error": null,
+          "judge_config": {
+            "agent": "rag_judge_faithfulness",
+            "model": "qwen-max",
+            "temperature": 0.0,
+            "max_tokens": 8192,
+            "prompt_version": "v1.0.0",
+            "prompt_sha256": "287053e9e67ad29fd2de597d1052b8d418040097910462e4a0f176b14295bfed",
+            "metric_version": "v1"
+          },
+          "token_usage": {
+            "input": 1959,
+            "output": 591
+          },
+          "cost": "0",
+          "details": {
+            "claims": [
+              {
+                "claim": "普通商品在签收后 7 天内可申请无理由退款",
+                "supported": true,
+                "evidence": [
+                  "订单签收后 7 天内可申请无理由退款。"
+                ],
+                "reason": "上下文明确提到普通商品在签收后 7 天内可以申请无理由退款。"
+              },
+              {
+                "claim": "审核通过后，款项将在 1–3 个工作日内原路退回",
+                "supported": true,
+                "evidence": [
+                  "审核通过后，款项将在 1-3 个工作日内原路退回。"
+                ],
+                "reason": "上下文明确提到审核通过后款项将在 1-3 个工作日内原路退回。"
+              },
+              {
+                "claim": "定制类商品不支持无理由退款",
+                "supported": true,
+                "evidence": [
+                  "定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。"
+                ],
+                "reason": "上下文明确提到定制类商品不支持无理由退款。"
+              },
+              {
+                "claim": "生鲜食品（质量问题除外，需签收后 24 小时内拍照反馈）不支持无理由退款",
+                "supported": true,
+                "evidence": [
+                  "生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。"
+                ],
+                "reason": "上下文明确提到生鲜食品签收后不支持无理由退货，并且质量问题需在签收后 24 小时内拍照反馈。"
+              },
+              {
+                "claim": "已激活的虚拟商品（如充值、会员、课程等，一经售出不支持退款）",
+                "supported": true,
+                "evidence": [
+                  "虚拟商品（充值、会员、课程）一经售出不支持退款。"
+                ],
+                "reason": "上下文明确提到已激活的虚拟商品一经售出不支持退款。"
+              },
+              {
+                "claim": "若因商品质量问题退换货，运费由商家承担",
+                "supported": true,
+                "evidence": [
+                  "因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。"
+                ],
+                "reason": "上下文明确提到因质量问题产生的退换货运费由商家承担。"
+              },
+              {
+                "claim": "若为非质量问题退货，运费由买家承担",
+                "supported": true,
+                "evidence": [
+                  "因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。"
+                ],
+                "reason": "上下文明确提到非质量问题的退货运费由买家承担。"
+              }
+            ],
+            "supported_count": 7,
+            "claim_count": 7,
+            "reason": ""
+          }
+        },
+        {
+          "metric": "answer_correctness",
+          "status": "evaluated",
+          "score": 0.2,
+          "skipped_reason": null,
+          "latency_ms": 2213,
+          "error": null,
+          "judge_config": {
+            "agent": "rag_judge_answer_correctness",
+            "model": "qwen-max",
+            "temperature": 0.0,
+            "max_tokens": 8192,
+            "prompt_version": "v1.0.0",
+            "prompt_sha256": "106e11f2bc39806da5ecf090c6dbcd94d81ca5f53b968e5055d5a33833b30f94",
+            "metric_version": "v1"
+          },
+          "token_usage": {
+            "input": 919,
+            "output": 69
+          },
+          "cost": "0",
+          "details": {
+            "missing_points": [
+              "信息不足：需要商品类型、签收时间、是否定制/生鲜/虚拟商品才能判断。"
+            ],
+            "wrong_facts": [],
+            "reason": "回答提供了详细的退款政策，但没有指出需要更多具体信息才能做出判断。"
+          }
+        },
+        {
+          "metric": "answer_relevancy",
+          "status": "evaluated",
+          "score": 0.9,
+          "skipped_reason": null,
+          "latency_ms": 1219,
+          "error": null,
+          "judge_config": {
+            "agent": "rag_judge_answer_relevancy",
+            "model": "qwen-max",
+            "temperature": 0.0,
+            "max_tokens": 8192,
+            "prompt_version": "v1.0.0",
+            "prompt_sha256": "27203126964ae0ca8f0bb8641cb3c2b145605cec706ef47c5432a0bbd6fad141",
+            "metric_version": "v1"
+          },
+          "token_usage": {
+            "input": 802,
+            "output": 33
+          },
+          "cost": "0",
+          "details": {
+            "reason": "详细回答了能否退款的具体条件，但没有直接给出一个明确的结论"
+          }
+        }
+      ]
+    }
+  ]
+}
