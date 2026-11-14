@@ -156,6 +156,9 @@ async def test_partial_support_computes_score_in_code() -> None:
     assert outcomes[0].score == pytest.approx(0.5)
     assert outcomes[0].details["supported_count"] == 1
     assert outcomes[0].details["claim_count"] == 2
+    # Phase 3E：token/成本随结果带出（默认 StubAgent 未消耗）
+    assert outcomes[0].details["token_usage"] == {"input": 0, "output": 0}
+    assert outcomes[0].details["cost"] == "0"
 
 
 async def test_correctness_requires_gold_answer() -> None:

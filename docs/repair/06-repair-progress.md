@@ -643,4 +643,46 @@ alembic check   : No new upgrade operations detected
 1. API Key 仍在本地临时文件，未纳入 `user_llm_credentials`；
 2. `hybrid-search` 无 chunk id，检索指标暂按 `document_id`；
 3. 镜像使用 `latest`，上线前锁定 digest；
-4. 真实 Judge 未开始（Phase 3E）。
+4. 真实 Judge 已进入 Phase 3E Pilot（见下节），尚未验收。
+
+---
+
+## Phase 3E · 真实 Judge 小样本 — Pilot 完成（待人工审核）
+
+**日期**：2026-11-14
+**报告**：`docs/repair/08-phase3e-judge-pilot.md`
+**数据**：`docs/repair/phase3e/`（candidates 40 / pilot labels 10 / pilot judge results 10）
+
+### 1. 结果
+
+| 项 | 结果 |
+|---|---|
+| 候选问题 | 40 条（自动构造，pending_human） |
+| 真实 WeKnora 结果 | 40 条 retrieve + query 全成功 |
+| Pilot Judge | qwen-max，10 条 × 3 指标 = 30 次调用 |
+| 结构化输出 | 30/30 evaluated，0 失败 |
+| 平均耗时 | Faithfulness 13.1s / Correctness 1.75s / Relevancy 1.33s |
+| Token | 输入 32,388 / 输出 6,328 |
+| 成本估算 | 约 ¥0.14（qwen-max 公开价估算；项目 cost 未配价） |
+
+### 2. 发现的问题（系统性）
+
+1. Correctness 漏判首句自相矛盾（Q23：回答先说“可以反馈”，又说“已超时不符合”）；
+2. Correctness 对模糊问题过度扣分（Q35/Q36 条件式回答被判 0.3/0.2）；
+3. Relevancy 误判“文档未提及”回答（Q29 判 0.6）；
+4. Faithfulness 未把结论句当作 claim，且把合理操作建议计入分母；
+5. 无答案/模糊问题缺少专门 rubric。
+
+### 3. 处置
+
+- **未修改 Prompt**（遵守“先给错误案例与建议，再决定”）；
+- 未跑完整 40 条（存在系统性偏差 + 人工 Gold 未完成）；
+- 建议 F1–F3 Prompt 修改（见报告第 6 节），版本升至 `v1.1.0` 后先重跑 10 条 Pilot；
+- 人工需审核 40 条候选参考答案、Gold Evidence 和 10 条 Claim 标签。
+
+### 4. 结论
+
+- 工程链路：✅ 通过
+- Judge 输出结构：✅ 通过
+- Judge 评分质量：❌ 暂不通过（E1–E5）
+- Phase 3E：**暂不宣布验收通过**；不进入 Phase 4。

@@ -124,6 +124,14 @@ def _judge_config(agent: RagJudgeAgent, *, model: str | None) -> dict[str, Any]:
     }
 
 
+def _usage_details(result: Any) -> dict[str, Any]:
+    """Phase 3E：把真实调用的 token/成本随结果带出（details 落库，不改表结构）。"""
+    return {
+        "token_usage": dict(getattr(result, "token_usage", None) or {}),
+        "cost": str(getattr(result, "cost", "") or "0"),
+    }
+
+
 def _payload(
     metric: RagJudgeMetric,
     *,
@@ -219,7 +227,7 @@ async def judge_trace(
                     metric_name=metric,
                     metric_version=agent.metric_version,
                     status="failed",
-                    details={"errors": list(result.errors)},
+                    details={"errors": list(result.errors), **_usage_details(result)},
                     judge_config=config,
                     raw_output=raw_output,
                     raw_truncated=raw_truncated,
@@ -245,7 +253,7 @@ async def judge_trace(
                         metric_version=agent.metric_version,
                         status="skipped",
                         skipped_reason=skipped_reason,
-                        details=details,
+                        details={**details, **_usage_details(result)},
                         judge_config=config,
                         raw_output=raw_output,
                         raw_truncated=raw_truncated,
@@ -259,7 +267,7 @@ async def judge_trace(
                     metric_version=agent.metric_version,
                     status="evaluated",
                     score=score,
-                    details=details,
+                    details={**details, **_usage_details(result)},
                     judge_config=config,
                     raw_output=raw_output,
                     raw_truncated=raw_truncated,
@@ -276,7 +284,7 @@ async def judge_trace(
                     metric_name=metric,
                     metric_version=agent.metric_version,
                     status="failed",
-                    details={"invalid_score": score_value},
+                    details={"invalid_score": score_value, **_usage_details(result)},
                     judge_config=config,
                     raw_output=raw_output,
                     raw_truncated=raw_truncated,
@@ -296,7 +304,8 @@ async def judge_trace(
                     key: value
                     for key, value in data.items()
                     if key in ("reason", "missing_points", "wrong_facts")
-                },
+                }
+                | _usage_details(result),
                 judge_config=config,
                 raw_output=raw_output,
                 raw_truncated=raw_truncated,

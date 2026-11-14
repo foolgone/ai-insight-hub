@@ -619,3 +619,4 @@ API 文档与前端都不得只显示其中一个。
 | 3B LLM Judge | ✅ 已实现（Agent + 3 Prompt + 编排服务 + 24 条测试） |
 | 3C 持久化与批量 | ✅ 已实现（迁移 021 + 2 表 + 8 API + Celery 执行/恢复/重试 + 聚合 + 28 条新增测试）；真实 WeKnora 联调未完成 |
 | 3D 真实 WeKnora 联调 | ✅ 本地 VM 完成（retrieve/query/Trace/批量 Run，详见 `07-phase3d-weknora.md`） |
+| 3E 真实 Judge 小样本 | ⏸ Pilot 10 条完成：结构 30/30；评分质量暂不通过（待人工 Gold + Prompt v1.1）；完整 40 条未跑 |
