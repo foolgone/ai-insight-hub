@@ -1,4 +1,4 @@
-﻿"""B-305 上传与清洗入队集成测试（413/415/409/202、raw_data 落库、celery_task_id 回写）。"""
+"""B-305 上传与清洗入队集成测试（413/415/409/202、raw_data 落库、celery_task_id 回写）。"""
 from __future__ import annotations
 
 import uuid

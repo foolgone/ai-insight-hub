@@ -75,6 +75,11 @@ celery_app.conf.update(
             "task": "tasks.weekly_digest",
             "schedule": crontab(hour=9, minute=0, day_of_week=1),
         },
+        # RAG 批量评测：心跳超时的 Run 标记 failed(stale_worker)，供用户重试
+        "recover-stale-rag-runs": {
+            "task": "tasks.recover_stale_rag_runs",
+            "schedule": crontab(minute="*/10"),
+        },
     },
 )
 

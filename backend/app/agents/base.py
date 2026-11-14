@@ -141,6 +141,8 @@ class AgentResult:
     duration: float = 0.0
     token_usage: dict[str, int] = field(default_factory=lambda: {"input": 0, "output": 0})
     cost: Decimal = Decimal("0")
+    # 最后一次实际用于解析的模型输出原文（含修复轮）；默认 None，不影响既有 Agent。
+    raw_text: str | None = None
 
 
 # --------------------------------------------------------------------------- 基类
@@ -237,6 +239,9 @@ class BaseAgent(ABC):
         guard_hits: list[str] = []
         # 修复轮也会消耗 token，失败时要一起记账（否则失败调用显示 0 token）
         repair_usage: list[LLMUsage] = []
+        # 结构化解析可能触发修复轮：记录「最终实际用于解析」的原始文本
+        raw_text_sink: list[str] = []
+        last_raw_text: str | None = None
 
         # ── BYOK：解析本次调用使用的凭据（必须在 try 之外，异常向上冒泡） ──
         # 只有"有 user_id + session"且未开 fallback 时才要求用户 Key；
@@ -300,6 +305,7 @@ class BaseAgent(ABC):
                 return response
 
             response = await async_retry(_call, config=retry_config, guard=guard)
+            last_raw_text = response.content
 
             payload: Any = response.content
             if self.output_schema is not None:
@@ -309,6 +315,7 @@ class BaseAgent(ABC):
                     llm=agent_llm,
                     usage_collector=repair_usage,
                     validator=self._validate_parsed,
+                    raw_sink=raw_text_sink,
                 )
             data = self._validate_output(payload)
 
@@ -336,6 +343,7 @@ class BaseAgent(ABC):
                 duration=duration,
                 token_usage=token_usage,
                 cost=cost,
+                raw_text=raw_text_sink[-1] if raw_text_sink else last_raw_text,
             )
             await self._track_success(
                 session,
@@ -410,6 +418,7 @@ class BaseAgent(ABC):
                 warnings=list(guard_hits),
                 duration=duration,
                 token_usage=token_usage,
+                raw_text=getattr(exc, "raw_output", None) or last_raw_text,
             )
 
         finally:
@@ -503,6 +512,7 @@ async def _parse_structured(
     llm: LLMPort,
     usage_collector: list[LLMUsage],
     validator: Callable[[Any], None] | None = None,
+    raw_sink: list[str] | None = None,
 ) -> BaseModel:
     """延迟导入避免模块循环（structured_output 依赖 llm，不依赖 base）。"""
     from app.agents.structured_output import parse_with_repair
@@ -513,6 +523,7 @@ async def _parse_structured(
         llm=llm,
         usage_collector=usage_collector,
         validator=validator,
+        raw_sink=raw_sink,
     )
 
 

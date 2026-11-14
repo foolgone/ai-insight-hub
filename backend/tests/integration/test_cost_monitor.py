@@ -6,6 +6,7 @@ from decimal import Decimal
 
 import pytest
 
+from sqlalchemy import func, select
 from app.core.config import settings
 from app.core.cost_tracker import CostTracker
 from app.core.llm import LLMResponse, LLMUsage
@@ -30,7 +31,9 @@ async def test_cost_monitor_alerts_when_limit_exceeded(db_session, monkeypatch) 
     tracker = CostTracker(db_session)
     await tracker.track(response=_response(), task_id=uuid.uuid4())
 
-    outcome = await run_cost_monitor(session=db_session)
+    # 用数据库时间：宿主与 DB 时钟可能不一致，按宿主日界会漏掉刚写入的行
+    db_now = await db_session.scalar(select(func.now()))
+    outcome = await run_cost_monitor(session=db_session, now=db_now)
 
     assert Decimal(outcome["total_cost"]) >= Decimal("1.0")
     assert outcome["ratio"] >= 2.0
