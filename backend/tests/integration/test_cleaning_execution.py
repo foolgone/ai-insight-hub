@@ -1,4 +1,4 @@
-﻿"""B-314 清洗执行集成测试（run_clean_task → cleaned_data / 状态推进）。"""
+"""B-314 清洗执行集成测试（run_clean_task → cleaned_data / 状态推进）。"""
 from __future__ import annotations
 
 import uuid
