@@ -468,7 +468,7 @@ alembic check   : No new upgrade operations detected
 | 新增 | `backend/app/core/advisory_lock.py` | 专用连接的会话级 advisory lock |
 | 新增 | `backend/app/tasks/rag_evaluation.py` | `tasks.rag_evaluation` + `tasks.recover_stale_rag_runs` |
 | 新增 | `backend/app/api/v1/rag_evaluations.py` | 8 个端点 |
-| 新增 | `backend/tests/integration/test_rag_evaluations.py` | 16 条集成测试 |
+| 新增 | `backend/tests/integration/test_rag_evaluations.py` | 19 条集成测试 |
 | 新增 | `backend/tests/unit/test_rag_evaluation_rules.py` | 9 条规则/聚合/Schema 单测 |
 | 修改 | `backend/app/models/__init__.py` | 登记 2 个模型（24 张表） |
 | 修改 | `backend/app/core/config.py` | `RAG_EVAL_MAX_ITEMS` / `SOFT_BUDGET_SECONDS` / `STALE_SECONDS` |
@@ -515,8 +515,8 @@ alembic check   : No new upgrade operations detected
 | 套件 | 数量 | 结果 |
 |---|---|---|
 | `tests/unit/test_rag_evaluation_rules.py` | 9 | 通过 |
-| `tests/integration/test_rag_evaluations.py` | 16 | 通过 |
-| 全量 `pytest -m "not prompt"` | 881 | 通过（0 failed / 0 error；较 Phase 3B 基线 851 增加 30） |
+| `tests/integration/test_rag_evaluations.py` | 19 | 通过 |
+| 全量 `pytest -m "not prompt"` | 884 | 通过（0 failed / 0 error；较 Phase 3B 基线 851 增加 33） |
 
 新增测试覆盖：全链路（retrieve / query）、单条失败隔离、全部失败、时间预算、取消、
 失败重试与指标级复用、父 Run 不变、已有子 Run 409、锁生命周期（互斥/释放/断连/不同 Run 并行）、
@@ -540,8 +540,64 @@ alembic check   : No new upgrade operations detected
 3. **Advisory lock 多进程验证**：集成测试覆盖同进程两个锁实例、断连释放、不同 Run 并行；
    真正的多 worker 并发需在联调/预发环境复测。
 4. **单条强制中断**：时间预算只在样本间检查，单条超长（如 Judge 卡住）由 Celery 硬超时 1800s 兜底；
-   该场景由 stale 回收标记 `failed(stale_worker)`，已提交结果保留。
-   若崩溃发生在全部结果写入之后、`finalize` 之前，Run 会停在 `failed(stale_worker)` 且没有可重试样本（重试返回 409），
-   需要为新 Run 重新提交。
+   心跳落后但 Worker 存活时，回收因抢不到锁而跳过，直至 Celery 硬超时终止进程后才标记 `failed(stale_worker)`；
+   已提交结果保留。若崩溃发生在全部结果写入之后、`finalize` 之前，Run 会停在 `failed(stale_worker)`
+   且没有可重试样本（重试返回 409），需要为新 Run 重新提交。
 5. **重试次数**：同一父 Run 只允许一次重试（409）；多次重试需以子 Run 为父新建，产品上可接受但未做 UI 引导。
 6. **前端未接入**：仅补错误码文案，无评测页面。
+
+---
+
+## Phase 3C · 最终核查（2026-11-14，冻结前）
+
+**触发**：审核要求只核查三个问题；已覆盖则不改代码，未覆盖则最小修复。
+
+### 1. 核查结论
+
+| # | 问题 | 结论 | 修复 |
+|---|---|---|---|
+| 1 | Trace 复用是否校验 KB / Top-K / 检索配置 | **未覆盖**：拿 Run 请求配置与适配器回显（`match_count` 等）比较，永远不相等；KB 未进入任何一侧 | 执行时把 Run 配置写入 `trace.retrieval_config._request_config`，复用只逐字比较该指纹；Run 配置快照增加 `knowledge_base_id/agent_id/tenant_id`（WeKnora） |
+| 2 | Judge 复用是否校验 Prompt SHA / 模型 / 参数 | **未覆盖**：只比 `metric_version` | `judge_config.metric_fingerprints` 记录 model/temperature/max_tokens/prompt_version/prompt_sha256/metric_version；重试时按**当前** Prompt/模型重算；复制前逐项比较 |
+| 3 | stale 回收后原 Worker 是否还能写 | **未覆盖**：回收不抢锁，活 Worker 会被误标；Worker 也不检查状态 | 回收先抢 Run 级 advisory lock（抢不到=Worker 存活，跳过）；Worker 每条前后 + 收尾前刷新状态，发现被回收/取消则回滚未提交结果 |
+
+### 2. 关键实现
+
+- `build_retrieval_config()`：创建 Run 时快照 `top_k/precision_mode/split`；WeKnora 额外快照 `knowledge_base_id/agent_id/tenant_id`。
+- `WeKnoraAdapter.retrieve/query`：优先使用 config 中的 KB/Agent（保证重试可复现）；未传时回退环境变量（Phase 2 行为不变）。
+- `_trace_reusable()`：`status=success` + adapter/mode/item + `_request_config` 完全相等；旧 Trace 不复用。
+- `build_judge_config()`：按当前 Prompt 文件 SHA/模型/参数生成指纹；`retry_run` 重算，不照抄父 Run。
+- `_parent_result_reusable()`：evaluated 的 Judge 结果要求四项指纹一致；skipped 只要求指标版本一致。
+- `recover_stale_runs()`：逐 Run `pg_try_advisory_lock`；抢锁后再次确认 `status=running` 与心跳仍超时，才标记 `failed(stale_worker)`。
+- Runner 栅栏：每条样本前后与收尾前 `refresh(run)`；被回收/取消 → `rollback` 未提交结果、跳过 finalize。
+
+### 3. 行为边界
+
+| 场景 | 行为 |
+|---|---|
+| Worker 存活但心跳落后 | 锁被占用 → stale 回收跳过；Run 保持 running，直至 Worker 恢复或 Celery 硬超时（1800s）杀掉进程 |
+| Worker 崩溃 | 连接关闭 → 锁自动释放 → 下次回收标记 `failed(stale_worker)` |
+| 回收与 Worker 写结果竞争 | 回收抢到锁后 Worker 已不持有锁；Worker 若仍能执行，写入前刷新状态失败 → 回滚 |
+| 父 Run 成功 Trace 但配置变更 | `_request_config` 不等 → 重新执行 RAG，不复用 |
+| Prompt/模型变更后重试 | Judge 指纹失配 → 该指标重新执行 |
+| skipped 结果 | 不依赖模型，按 `metric_version` 复用 |
+
+### 4. 测试
+
+| 套件 | 数量 | 结果 |
+|---|---|---|
+| 单测 `test_rag_evaluation_rules.py` | 9 | 通过 |
+| 集成 `test_rag_evaluations.py` | 19 | 通过 |
+| 全量 `pytest -m "not prompt"` | **884** | 通过（0 failed；Phase 3B 基线 851 + 33） |
+
+新增核查用例：
+
+- `test_retry_reuses_evaluated_results_and_reruns_failed_metric`：补充断言复用父 Trace（`trace_reused=True`、`source_trace_id` 指向父 Trace）。
+- `test_retry_does_not_reuse_when_judge_fingerprint_changes`：切换模型后，父结果全部不复制。
+- `test_retry_does_not_reuse_trace_when_retrieval_config_changes`：top_k 变化后重新执行 RAG、生成子 Run 自己的 Trace。
+- `test_recover_stale_skips_run_held_by_live_worker`：持锁时回收返回 0，释放后才标记失败。
+
+### 5. 冻结结论
+
+- 三个问题均已覆盖并有测试；代码冻结，不再增加 API/Agent/表结构。
+- 仍不宣布上线验收：**真实 WeKnora + 真实 Judge 联调未完成**。
+- 下一步优先级：真实数据可验证（1 条 retrieve + 1 条 query 最小联调），而非继续扩展功能。

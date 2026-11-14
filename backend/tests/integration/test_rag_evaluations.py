@@ -24,10 +24,11 @@ from app.models import (
     QaDatasetVersion,
     RagEvaluationResult,
     RagEvaluationRun,
+    RagTrace,
     Task,
 )
 from app.services.rag_evaluation_runner import execute_run
-from app.services.rag_evaluation_service import recover_stale_runs
+from app.services.rag_evaluation_service import build_judge_config, recover_stale_runs
 from app.services.rag_judge_service import JudgeOutcome
 from app.services.rag.mock import MockRAGAdapter
 from tests.factories import UserFactory, persist
@@ -327,8 +328,10 @@ async def test_retry_reuses_evaluated_results_and_reruns_failed_metric(
     state = {"fail_relevancy": True}
 
     async def fake_judge_trace(session, *, trace, item=None, metrics=None, agent_factory=None):
+        requested = list(metrics or [])
+        fingerprints = build_judge_config(requested)["metric_fingerprints"]
         rows = []
-        for metric in metrics or []:
+        for metric in requested:
             if metric == "answer_relevancy" and state["fail_relevancy"]:
                 rows.append(
                     JudgeOutcome(
@@ -336,7 +339,7 @@ async def test_retry_reuses_evaluated_results_and_reruns_failed_metric(
                         metric_version="v1",
                         status="failed",
                         error_message="judge timeout",
-                        judge_config={"model": "fake"},
+                        judge_config=fingerprints[metric],
                     )
                 )
             else:
@@ -347,7 +350,7 @@ async def test_retry_reuses_evaluated_results_and_reruns_failed_metric(
                         status="evaluated",
                         score=0.7,
                         details={"reason": "ok"},
-                        judge_config={"model": "fake"},
+                        judge_config=fingerprints[metric],
                     )
                 )
         return rows
@@ -388,6 +391,11 @@ async def test_retry_reuses_evaluated_results_and_reruns_failed_metric(
     )
     assert "reused_from_run_id" not in by_metric["answer_relevancy"]["details"]
     assert by_metric["answer_relevancy"]["status"] == "evaluated"
+    # 父 Trace 被复用（不再调用适配器）
+    assert by_metric["answer_relevancy"]["details"]["trace_reused"] is True
+    assert by_metric["answer_relevancy"]["details"]["source_trace_id"] == str(
+        by_metric["faithfulness"]["trace_id"]
+    )
 
     # 父 Run 结果保持不变
     parent_after = (
@@ -615,3 +623,129 @@ async def test_recover_stale_runs_marks_task_and_run_failed(test_user, db_sessio
     assert run.error_message == "stale_worker"
     assert task.status == "failed"
     assert task.error_message == "worker heartbeat timeout"
+
+
+async def test_retry_does_not_reuse_when_judge_fingerprint_changes(
+    client, auth_headers, test_user, db_session, monkeypatch
+) -> None:
+    """Prompt/模型参数变了 → 不得复制父 Run 的 evaluated 结果。"""
+    monkeypatch.setattr(enqueue, "enqueue_rag_evaluation", _fake_enqueue())
+    state = {"fail_relevancy": True}
+
+    async def fake_judge_trace(session, *, trace, item=None, metrics=None, agent_factory=None):
+        requested = list(metrics or [])
+        fingerprints = build_judge_config(requested)["metric_fingerprints"]
+        rows = []
+        for metric in requested:
+            failed = metric == "answer_relevancy" and state["fail_relevancy"]
+            rows.append(
+                JudgeOutcome(
+                    metric_name=metric,
+                    metric_version="v1",
+                    status="failed" if failed else "evaluated",
+                    score=None if failed else 0.6,
+                    error_message="judge timeout" if failed else None,
+                    details={} if failed else {"reason": "ok"},
+                    judge_config=fingerprints[metric],
+                )
+            )
+        return rows
+
+    monkeypatch.setattr("app.services.rag_evaluation_runner.judge_trace", fake_judge_trace)
+    _, version, _ = await _seed(
+        db_session, test_user, queries=["退款多久到账？"], evidence=[_evidence_doc()]
+    )
+    parent_created = await _create_run(client, auth_headers, version, execution_mode="query")
+    await execute_run(db_session, uuid.UUID(parent_created["run_id"]))
+    parent = await _get_run(client, auth_headers, parent_created["run_id"])
+    assert parent["status"] == "partial_failed"
+
+    state["fail_relevancy"] = False
+    monkeypatch.setattr(settings, "DEFAULT_LLM_MODEL", "another-model")
+    retry = await client.post(f"{BASE}/{parent_created['run_id']}/retry", headers=auth_headers)
+    assert retry.status_code == 202, retry.text
+    child_id = retry.json()["run_id"]
+    child = await _get_run(client, auth_headers, child_id)
+    assert child["judge_config"]["metric_fingerprints"]["faithfulness"]["model"] == (
+        "another-model"
+    )
+
+    await execute_run(db_session, uuid.UUID(child_id))
+    rows = (await client.get(f"{BASE}/{child_id}/results", headers=auth_headers)).json()["items"]
+    assert all("reused_from_run_id" not in row["details"] for row in rows)
+    assert {row["status"] for row in rows} == {"evaluated"}
+
+
+async def test_retry_does_not_reuse_trace_when_retrieval_config_changes(
+    client, auth_headers, test_user, db_session, monkeypatch
+) -> None:
+    """top_k/KB 等检索配置变化 → 不得复用父 Trace。"""
+    monkeypatch.setattr(enqueue, "enqueue_rag_evaluation", _fake_enqueue())
+    monkeypatch.setattr(
+        "app.services.rag_evaluation_runner.build_adapter",
+        lambda name=None: FlakyAdapter(),
+    )
+    _, version, _ = await _seed(
+        db_session,
+        test_user,
+        queries=["退款多久到账？", "fail 的问题"],
+        evidence=[_evidence_doc(), _evidence_doc()],
+    )
+    parent_created = await _create_run(client, auth_headers, version, metrics=["hit_rate"])
+    await execute_run(db_session, uuid.UUID(parent_created["run_id"]))
+    parent = await _get_run(client, auth_headers, parent_created["run_id"])
+    assert parent["status"] == "partial_failed"
+
+    retry = await client.post(f"{BASE}/{parent_created['run_id']}/retry", headers=auth_headers)
+    assert retry.status_code == 202, retry.text
+    child_id = retry.json()["run_id"]
+    child_row = await db_session.get(RagEvaluationRun, uuid.UUID(child_id))
+    assert child_row is not None
+    child_row.retrieval_config = {**dict(child_row.retrieval_config), "top_k": 9}
+    await db_session.flush()
+
+    await execute_run(db_session, uuid.UUID(child_id))
+    rows = (await client.get(f"{BASE}/{child_id}/results", headers=auth_headers)).json()["items"]
+    by_metric = {row["metric_name"]: row for row in rows}
+    assert by_metric["hit_rate"]["details"]["trace_reused"] is False
+    # 子 Run 生成了自己的 Trace
+    count = await db_session.scalar(
+        select(func.count())
+        .select_from(RagTrace)
+        .where(RagTrace.idempotency_key.like(f"rag_eval:{child_id}:%"))
+    )
+    assert count == 1
+
+
+async def test_recover_stale_skips_run_held_by_live_worker(test_user, db_session) -> None:
+    """Worker 仍持有 advisory lock 时，stale 回收不得标记失败。"""
+    from datetime import datetime, timedelta, timezone
+
+    _, version, _ = await _seed(db_session, test_user, queries=["q1"], evidence=[_evidence_doc()])
+    old = datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(hours=2)
+    run = RagEvaluationRun(
+        user_id=test_user.id,
+        dataset_name="stale-locked",
+        dataset_version_id=version.id,
+        execution_mode="retrieve",
+        adapter="mock",
+        status="running",
+        total_items=1,
+        started_at=old,
+        last_heartbeat_at=old,
+    )
+    await persist(db_session, run)
+
+    lock = AdvisoryLock.for_run(run.id)
+    assert await lock.acquire() is True
+    try:
+        assert await recover_stale_runs(db_session) == 0
+        await db_session.refresh(run)
+        assert run.status == "running"
+    finally:
+        await lock.release()
+
+    assert await recover_stale_runs(db_session) == 1
+    await db_session.refresh(run)
+    assert run.status == "failed"
+    assert run.error_message == "stale_worker"

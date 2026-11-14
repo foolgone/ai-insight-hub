@@ -508,9 +508,12 @@ Run 结束时写入 `aggregate`：
 - 每条样本使用独立 `SessionLocal()` 事务提交，**不影响锁连接**；
 - 释放必须使用**同一连接** `pg_advisory_unlock(key)`，随后关闭连接；
 - Worker 崩溃 → 进程退出 → 连接关闭 → PG 自动释放会话锁；
-- key 由 `run_id` 稳定派生（UUID 前 8 字节 mod 2^63），保证同一 Run 唯一、不同 Run 不冲突。
+- key 由 `run_id` 稳定派生（UUID 前 8 字节 mod 2^63），保证同一 Run 唯一、不同 Run 不冲突；
+- **stale 回收必须先抢同一把锁**：抢不到说明 Worker 仍存活，跳过（不标记失败）；
+- Worker 在每条样本前后与收尾前刷新 Run 状态，发现被回收/取消则回滚未提交结果并停止。
 
-集成测试：同一 Run 第二次获取失败；正常结束/异常退出后锁可再次获取；不同 Run 可同时持锁。
+集成测试：同一 Run 第二次获取失败；正常结束/异常退出后锁可再次获取；不同 Run 可同时持锁；
+锁被持有时 stale 回收不生效；释放后才标记 `failed(stale_worker)`。
 
 #### 2. 执行时间预算
 
@@ -535,9 +538,13 @@ Run 结束时写入 `aggregate`：
 | `trace.status` | 必须 `success`（失败 Trace 不复用） |
 | `trace.adapter` | 与当前 Run 相同 |
 | `trace.mode` | 与当前 Run 的 `execution_mode` 相同 |
-| `trace.retrieval_config` | 与当前 Run 的 retrieval_config **完全相等** |
+| `trace.retrieval_config._request_config` | 与当前 Run 的 retrieval_config **逐字相等**（含 KB / Agent / top_k / precision_mode / split） |
 | `trace.dataset_item_id` | 等于当前条目 |
 | 数据集 | 版本 id 相同且 checksum 一致 |
+
+适配器返回的 `match_count/vector_threshold` 等回显字段不能直接与请求配置比较；
+评测 Run 执行时把请求配置写入 trace 的 `retrieval_config._request_config`，复用只认这一份指纹。
+旧 Trace（无 `_request_config`）一律不复用。
 
 不一致 → 重新执行 RAG。复用时在结果 `details` 写
 `{"trace_reused": true, "trace_reused_from_run_id": "...", "source_trace_id": "..."}`。
@@ -548,10 +555,14 @@ Run 结束时写入 `aggregate`：
 
 | 父结果状态 | 子 Run 行为 |
 |---|---|
-| `evaluated` | **复制**结果（新 run_id，`details.reused_from_run_id`） |
-| `skipped` | **复制**结果（保留 skipped_reason） |
+| `evaluated`（检索指标） | **复制**结果（新 run_id，`details.reused_from_run_id`） |
+| `evaluated`（Judge 指标） | 仅当 `model / temperature / max_tokens / prompt_sha256` 与**当前**指纹一致才复制 |
+| `skipped` | **复制**结果（保留 skipped_reason；不依赖模型） |
 | `failed` | 重新执行 |
 | 无结果 | 执行该指标 |
+
+重试 Run 的 `judge_config.metric_fingerprints` 在**创建重试时按当前 Prompt/模型重新计算**，
+不直接照抄父 Run；Prompt 或模型参数变化会导致指纹失配 → 重新执行（安全方向）。
 
 只有当存在「failed / 无结果」指标时才执行 RAG；若全部可复用，则不调用适配器。
 RAG 执行失败且无有效 Trace → 该条全部指标记 failed(`trace_failed`)，下次重试会重新执行 RAG。
@@ -582,7 +593,7 @@ API 文档与前端都不得只显示其中一个。
 | 3A 单测 | 表驱动：完全命中/完全未命中/部分命中/Top-K 边界/空检索/空 Gold/文档级/chunk 级/重复检索/重复 Gold/文本规范化/混合粒度 + 公式断言 |
 | 3B 单测 | Judge 输出解析、claim 聚合、跳过规则、异常/超时/结构化失败（Mock LLM） |
 | 3C 集成 | 建任务 → 执行（Mock 适配器）→ trace → 4 指标 → 结果 → 聚合 → 失败样本 → 重试 → 重复提交 |
-| 回归 | 全量 `pytest -m "not prompt"`（Phase 3B 基线 851，3C 后 **881** 不得减少）、mypy、black、flake8、lint-imports、前端覆盖率 |
+| 回归 | 全量 `pytest -m "not prompt"`（Phase 3B 基线 851，3C 后 **884** 不得减少）、mypy、black、flake8、lint-imports、前端覆盖率 |
 
 ---
 
@@ -606,4 +617,4 @@ API 文档与前端都不得只显示其中一个。
 |---|---|
 | 3A 确定性指标 | ✅ 已实现（`app/application/metrics.py` + **40 条**单测；含 Precision 分母与去重粒度补充） |
 | 3B LLM Judge | ✅ 已实现（Agent + 3 Prompt + 编排服务 + 24 条测试） |
-| 3C 持久化与批量 | ✅ 已实现（迁移 021 + 2 表 + 8 API + Celery 执行/恢复/重试 + 聚合 + 25 条新增测试）；真实 WeKnora 联调未完成 |
+| 3C 持久化与批量 | ✅ 已实现（迁移 021 + 2 表 + 8 API + Celery 执行/恢复/重试 + 聚合 + 28 条新增测试）；真实 WeKnora 联调未完成 |

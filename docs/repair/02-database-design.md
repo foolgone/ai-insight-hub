@@ -241,6 +241,9 @@ revision=`d4e8b1c6f902`，down_revision=`c9d2a4f7b1e6`。
 索引：**唯一** `(run_id, dataset_item_id, metric_name, metric_version)`（幂等/重投递安全）、
 `(run_id, metric_name, status)`、`(run_id, status)`、`(trace_id)`。
 
+Trace 复用指纹写在 `rag_traces.retrieval_config._request_config`（仅评测 Run 执行时写入，
+内容是 Run 的 `retrieval_config` 快照），复用只逐字比较该字段；不改变 Phase 2 字段语义。
+
 ### 7.3 `tasks.task_type` CHECK
 
 由 6 种扩到 7 种，加入 `rag_eval`；**不动** `tasks.status` 枚举（`partial_failed` 只存在于 run）。

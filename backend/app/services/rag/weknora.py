@@ -78,7 +78,10 @@ class WeKnoraAdapter:
     # ------------------------------------------------------------------ 对外能力
 
     async def retrieve(self, query: str, *, config: Mapping[str, Any] | None = None) -> RAGResult:
-        if not self.kb_id:
+        # 评测 Run 会显式传入 knowledge_base_id（配置快照，保证重试可复现）；
+        # 普通调用不传时回退环境配置。
+        kb_id = str((config or {}).get("knowledge_base_id") or self.kb_id or "")
+        if not kb_id:
             raise WeKnoraError("缺少 WEKNORA_KB_ID，无法执行纯检索")
         payload = {
             "query_text": query,
@@ -89,7 +92,7 @@ class WeKnoraAdapter:
         started = time.perf_counter()
         raw = await self._request(
             "POST",
-            f"/api/v1/knowledge-bases/{self.kb_id}/hybrid-search",
+            f"/api/v1/knowledge-bases/{kb_id}/hybrid-search",
             payload=payload,
             extra_headers={"X-Tenant-ID": self.tenant_id} if self.tenant_id else None,
         )
@@ -114,7 +117,8 @@ class WeKnoraAdapter:
         )
 
     async def query(self, query: str, *, config: Mapping[str, Any] | None = None) -> RAGResult:
-        if not self.agent_id:
+        agent_id = str((config or {}).get("agent_id") or self.agent_id or "")
+        if not agent_id:
             raise WeKnoraError("缺少 WEKNORA_AGENT_ID，无法执行端到端问答")
         started = time.perf_counter()
         session = await self._request(
@@ -126,7 +130,7 @@ class WeKnoraAdapter:
         if not session_id:
             raise WeKnoraError(f"建会话响应缺少 data.id: {str(session)[:200]}")
 
-        payload = {"query": query, "agent_enabled": True, "agent_id": self.agent_id}
+        payload = {"query": query, "agent_enabled": True, "agent_id": agent_id}
         raw_text = await self._request_text(
             "POST", f"/api/v1/agent-chat/{session_id}", payload=payload
         )
@@ -155,7 +159,7 @@ class WeKnoraAdapter:
             context_source="agent_chat" if contexts else "none",
             answer=answer,
             external_session_id=str(session_id),
-            model_config={"agent_id": self.agent_id},
+            model_config={"agent_id": agent_id},
             retrieval_config={"agent_enabled": True},
             token_usage=self._extract_token_usage(parsed),
             raw=self._truncate_raw(raw_text),

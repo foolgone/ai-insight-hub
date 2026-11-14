@@ -15,6 +15,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.agents.base import load_prompt_version
 from app.agents.rag_judge_agent import PROMPT_DIR as RAG_JUDGE_PROMPT_DIR
+from app.agents.rag_judge_agent import RagJudgeAgent
+from app.core.advisory_lock import AdvisoryLock
 from app.core.config import settings
 from app.core.exceptions import (
     RagEvaluationConflictError,
@@ -61,6 +63,57 @@ def metric_version_for(metric_name: str) -> str:
     if metric_name in RAG_JUDGE_METRIC_VERSION:
         return RAG_JUDGE_METRIC_VERSION[metric_name]
     return RETRIEVAL_METRIC_VERSION
+
+
+def build_retrieval_config(
+    *, adapter: str, top_k: int, precision_mode: str, split: str
+) -> dict[str, Any]:
+    """Run 的检索配置指纹：Trace 复用要求与当前配置**完全相等**。
+
+    WeKnora 的 KB/Agent/Tenant 不在请求体里，必须显式快照，否则换 KB 后无法识别。
+    """
+    config: dict[str, Any] = {
+        "top_k": top_k,
+        "precision_mode": precision_mode,
+        "split": split,
+    }
+    if adapter == "weknora":
+        config.update(
+            {
+                "knowledge_base_id": settings.WEKNORA_KB_ID or None,
+                "agent_id": settings.WEKNORA_AGENT_ID or None,
+                "tenant_id": settings.WEKNORA_TENANT_ID or None,
+            }
+        )
+    return config
+
+
+def build_judge_config(judge_metrics: Sequence[str]) -> dict[str, Any]:
+    """当前 Judge 指纹（模型/温度/max_tokens/Prompt SHA/指标版本）。
+
+    重试 Run 必须用**当前**指纹，不能照抄父 Run；否则 Prompt/模型变更后仍会复用旧结果。
+    """
+    if not judge_metrics:
+        return {}
+    fingerprints: dict[str, Any] = {}
+    for metric in judge_metrics:
+        agent = RagJudgeAgent(metric)  # type: ignore[arg-type]
+        fingerprints[metric] = {
+            "agent": agent.config.name,
+            "model": settings.DEFAULT_LLM_MODEL,
+            "temperature": agent.config.temperature,
+            "max_tokens": agent.config.max_tokens,
+            "prompt_version": agent.config.version,
+            "prompt_sha256": agent.prompt_sha256,
+            "metric_version": agent.metric_version,
+        }
+    return {
+        "model": settings.DEFAULT_LLM_MODEL,
+        "temperature": settings.DEFAULT_TEMPERATURE,
+        "prompt_version": load_prompt_version(RAG_JUDGE_PROMPT_DIR),
+        "metric_versions": {metric: RAG_JUDGE_METRIC_VERSION[metric] for metric in judge_metrics},
+        "metric_fingerprints": fingerprints,
+    }
 
 
 def expected_metrics(run: RagEvaluationRun) -> list[str]:
@@ -136,21 +189,13 @@ async def create_run(
     metrics = list(payload.metrics or []) if payload.execution_mode == "retrieve" else []
     judge_metrics = list(payload.judge_metrics or []) if payload.execution_mode == "query" else []
 
-    retrieval_config = {
-        "top_k": payload.top_k,
-        "precision_mode": payload.precision_mode,
-        "split": payload.split,
-    }
-    judge_config: dict[str, Any] = {}
-    if judge_metrics:
-        judge_config = {
-            "model": settings.DEFAULT_LLM_MODEL,
-            "temperature": settings.DEFAULT_TEMPERATURE,
-            "prompt_version": load_prompt_version(RAG_JUDGE_PROMPT_DIR),
-            "metric_versions": {
-                metric: RAG_JUDGE_METRIC_VERSION[metric] for metric in judge_metrics
-            },
-        }
+    retrieval_config = build_retrieval_config(
+        adapter=payload.adapter,
+        top_k=payload.top_k,
+        precision_mode=payload.precision_mode,
+        split=payload.split,
+    )
+    judge_config = build_judge_config(judge_metrics)
 
     config_snapshot = {
         "dataset_id": str(dataset.id),
@@ -338,6 +383,23 @@ async def retry_run(
     session.add(task)
     await session.flush()
 
+    retry_retrieval = dict(parent.retrieval_config or {})
+    if parent.adapter == "weknora":
+        # 用当前环境重新指纹；KB/Agent 变了 → 与父 Trace 不一致 → 不复用（安全方向）
+        retry_retrieval.update(
+            {
+                "knowledge_base_id": settings.WEKNORA_KB_ID or None,
+                "agent_id": settings.WEKNORA_AGENT_ID or None,
+                "tenant_id": settings.WEKNORA_TENANT_ID or None,
+            }
+        )
+    retry_judge = build_judge_config(
+        list((parent.config_snapshot or {}).get("judge_metrics") or [])
+    )
+    retry_snapshot = dict(parent.config_snapshot or {})
+    retry_snapshot["retrieval_config"] = retry_retrieval
+    retry_snapshot["judge_config"] = retry_judge
+
     run = RagEvaluationRun(
         id=new_run_id,
         user_id=user.id,
@@ -351,9 +413,9 @@ async def retry_run(
         dataset_checksum=parent.dataset_checksum,
         execution_mode=parent.execution_mode,
         adapter=parent.adapter,
-        retrieval_config=dict(parent.retrieval_config or {}),
-        judge_config=dict(parent.judge_config or {}),
-        config_snapshot=dict(parent.config_snapshot or {}),
+        retrieval_config=retry_retrieval,
+        judge_config=retry_judge,
+        config_snapshot=retry_snapshot,
         item_selection={
             "mode": "failed_only",
             "parent_run_id": str(parent.id),
@@ -616,23 +678,49 @@ async def summary(
 
 
 async def recover_stale_runs(session: AsyncSession, *, now: datetime | None = None) -> int:
+    """回收心跳超时的 Run。
+
+    先用 **Run 级 advisory lock** 确认 Worker 真的不在了：锁被占用说明 Worker 仍存活
+    （只是心跳落后），不得标记 failed，否则会和正在执行的 Worker 互相覆盖。
+    抢到锁后再次确认状态/心跳（防止 worker 在查询与抢锁之间正常结束）。
+    """
     cutoff = (now or _now_naive()) - timedelta(seconds=settings.RAG_EVAL_STALE_SECONDS)
     stale = await repo.list_stale_runs(session, heartbeat_before=cutoff)
+    recovered = 0
     for run in stale:
-        run.status = RUN_FAILED
-        run.error_message = "stale_worker"
-        run.completed_at = _now_naive()
-        if run.task_id is not None:
-            task = await session.get(Task, run.task_id)
-            if task is not None and task.status in ("pending", "running"):
-                task.status = "failed"
-                task.error_message = "worker heartbeat timeout"
-                task.completed_at = _now_naive()
-        logger.warning(
-            "rag evaluation stale run={} last_heartbeat={}", run.id, run.last_heartbeat_at
-        )
+        lock = AdvisoryLock.for_run(run.id)
+        if not await lock.acquire():
+            logger.info(
+                "rag evaluation stale but still locked, skip run={} last_heartbeat={}",
+                run.id,
+                run.last_heartbeat_at,
+            )
+            continue
+        try:
+            await session.refresh(run)
+            if run.status != RUN_RUNNING:
+                continue
+            if run.last_heartbeat_at is None or run.last_heartbeat_at >= cutoff:
+                continue
+            run.status = RUN_FAILED
+            run.error_message = "stale_worker"
+            run.completed_at = _now_naive()
+            if run.task_id is not None:
+                task = await session.get(Task, run.task_id)
+                if task is not None and task.status in ("pending", "running"):
+                    task.status = "failed"
+                    task.error_message = "worker heartbeat timeout"
+                    task.completed_at = _now_naive()
+            recovered += 1
+            logger.warning(
+                "rag evaluation stale run={} last_heartbeat={}",
+                run.id,
+                run.last_heartbeat_at,
+            )
+        finally:
+            await lock.release()
     await session.flush()
-    return len(stale)
+    return recovered
 
 
 __all__ = [
@@ -646,6 +734,8 @@ __all__ = [
     "STOP_CANCELLED",
     "STOP_TIME_BUDGET",
     "TERMINAL_RUN_STATUSES",
+    "build_judge_config",
+    "build_retrieval_config",
     "build_aggregate",
     "cancel_run",
     "create_run",

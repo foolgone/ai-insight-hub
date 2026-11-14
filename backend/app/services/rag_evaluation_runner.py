@@ -73,13 +73,30 @@ def _gold_evidence(item: QaDatasetItem) -> list[EvidenceRef]:
 
 
 def _trace_reusable(trace: RagTrace, run: RagEvaluationRun, item: QaDatasetItem) -> bool:
+    """复用父 Run 的成功 Trace：配置指纹必须完全相等。
+
+    ``run.retrieval_config`` 在创建时快照 top_k/precision_mode/split（WeKnora 另含
+    knowledge_base_id/agent_id/tenant_id）；执行时把它写到 trace 的 ``_request_config``。
+    这里逐字比较，避免拿适配器回显（match_count 等）误判。
+    """
     if trace.status != "success":
         return False
     if trace.adapter != run.adapter or trace.mode != run.execution_mode:
         return False
     if trace.dataset_item_id != item.id:
         return False
-    return dict(trace.retrieval_config or {}) == dict(run.retrieval_config or {})
+    recorded = dict(trace.retrieval_config or {}).get("_request_config")
+    if not isinstance(recorded, dict):
+        return False
+    return dict(recorded) == dict(run.retrieval_config or {})
+
+
+def _stamp_request_config(trace: RagTrace, run: RagEvaluationRun) -> None:
+    config = dict(trace.retrieval_config or {})
+    if "_request_config" in config:
+        return
+    config["_request_config"] = dict(run.retrieval_config or {})
+    trace.retrieval_config = config
 
 
 async def _resolve_trace(
@@ -99,6 +116,8 @@ async def _resolve_trace(
     key = f"rag_eval:{run.id}:{item.id}"
     existing = await trace_repo.get_by_idempotency_key(session, key)
     if existing is not None:
+        _stamp_request_config(existing, run)
+        await session.flush()
         return existing, False
 
     trace = await rag_execute.execute_query(
@@ -112,6 +131,8 @@ async def _resolve_trace(
         task_id=run.task_id,
         idempotency_key=key,
     )
+    _stamp_request_config(trace, run)
+    await session.flush()
     return trace, False
 
 
@@ -299,6 +320,31 @@ async def _evaluate_trace(
     return rows
 
 
+def _parent_result_reusable(
+    parent: RagEvaluationResult, run: RagEvaluationRun, metric: str
+) -> bool:
+    """父 Run 结果是否可复制：版本一致；Judge 指标还要模型/参数/Prompt SHA 一致。
+
+    skipped 结果不依赖模型，按 metric_version 复用；evaluated 结果必须与当前 Judge
+    指纹逐项相等（模型换成 BYOK 或 Prompt 改了都会失配 → 重新执行，安全方向）。
+    """
+    if parent.status not in ("evaluated", "skipped"):
+        return False
+    if parent.metric_version != service.metric_version_for(metric):
+        return False
+    if parent.status == "skipped":
+        return True
+    fingerprints = (run.judge_config or {}).get("metric_fingerprints") or {}
+    expected = fingerprints.get(metric)
+    if not expected:
+        return True  # 检索指标没有 Judge 指纹
+    actual = dict(parent.judge_config or {})
+    return all(
+        actual.get(key) == expected.get(key)
+        for key in ("model", "temperature", "max_tokens", "prompt_sha256")
+    )
+
+
 async def _process_item(
     session: AsyncSession,
     *,
@@ -323,11 +369,7 @@ async def _process_item(
     ready: list[RagEvaluationResult] = []
     for metric in expected:
         parent = parent_results.get(metric)
-        if (
-            parent is not None
-            and parent.status in ("evaluated", "skipped")
-            and parent.metric_version == service.metric_version_for(metric)
-        ):
+        if parent is not None and _parent_result_reusable(parent, run, metric):
             ready.append(_copy_parent_result(run=run, item=item, parent=parent))
         else:
             to_execute.append(metric)
@@ -457,6 +499,21 @@ async def execute_run(session: AsyncSession, run_id: uuid.UUID) -> dict[str, Any
 
     try:
         for index, item in enumerate(items, start=1):
+            # 外部可能已取消或已被 stale 回收；先对齐 DB 状态，避免继续写入
+            await session.refresh(run)
+            if run.status != service.RUN_RUNNING:
+                stopped_reason = (
+                    "stale_worker"
+                    if run.status == service.RUN_FAILED and run.error_message == "stale_worker"
+                    else service.STOP_CANCELLED
+                )
+                logger.warning(
+                    "rag evaluation fenced before item run={} status={} reason={}",
+                    run.id,
+                    run.status,
+                    stopped_reason,
+                )
+                break
             if task is not None and await task_control.is_cancelled(session, task.id):
                 run.status = service.RUN_CANCELLED
                 stopped_reason = service.STOP_CANCELLED
@@ -483,6 +540,22 @@ async def execute_run(session: AsyncSession, run_id: uuid.UUID) -> dict[str, Any
                 metrics=metrics,
                 judge_metrics=judge_metrics,
             )
+            # 单条执行期间可能被 stale 回收/取消：未提交的结果直接回滚，禁止落库
+            await session.refresh(run)
+            if run.status != service.RUN_RUNNING:
+                await session.rollback()
+                stopped_reason = (
+                    "stale_worker"
+                    if run.status == service.RUN_FAILED and run.error_message == "stale_worker"
+                    else service.STOP_CANCELLED
+                )
+                logger.warning(
+                    "rag evaluation fenced after item run={} status={} reason={}",
+                    run.id,
+                    run.status,
+                    stopped_reason,
+                )
+                break
             processed += 1
             run.last_heartbeat_at = service._now_naive()
             if task is not None:
@@ -491,6 +564,24 @@ async def execute_run(session: AsyncSession, run_id: uuid.UUID) -> dict[str, Any
             await session.commit()
     finally:
         await adapter.aclose()
+
+    if stopped_reason != service.STOP_CANCELLED:
+        # 收尾前再对齐一次：被 stale 回收/其它执行者结束后不得覆盖状态
+        await session.refresh(run)
+        if run.status not in (service.RUN_RUNNING, service.RUN_CANCELLED):
+            logger.warning(
+                "rag evaluation skip finalize run={} status={} reason={}",
+                run.id,
+                run.status,
+                run.error_message,
+            )
+            return {
+                "status": run.status,
+                "run_id": str(run.id),
+                "processed": processed,
+                "total": total,
+                "stopped_reason": stopped_reason or run.error_message,
+            }
 
     await service.finalize_run(session, run, stopped_reason=stopped_reason)
 
