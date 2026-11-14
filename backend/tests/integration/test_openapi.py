@@ -1,4 +1,4 @@
-﻿"""B-212 路由聚合与 OpenAPI 契约测试。"""
+"""B-212 路由聚合与 OpenAPI 契约测试。"""
 from __future__ import annotations
 
 import pytest
@@ -50,6 +50,14 @@ EXPECTED_PATHS = {
     "/api/v1/rag/traces",
     "/api/v1/rag/traces/{trace_id}",
     "/api/v1/rag/health",
+    # RAG 批量评测（Phase 3C，迁移 021）
+    "/api/v1/rag/evaluations",
+    "/api/v1/rag/evaluations/summary",
+    "/api/v1/rag/evaluations/{run_id}",
+    "/api/v1/rag/evaluations/{run_id}/results",
+    "/api/v1/rag/evaluations/{run_id}/failures",
+    "/api/v1/rag/evaluations/{run_id}/retry",
+    "/api/v1/rag/evaluations/{run_id}/cancel",
     "/health",
 }
 

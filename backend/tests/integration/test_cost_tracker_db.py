@@ -1,4 +1,4 @@
-﻿"""B-306 成本追踪数据库测试（llm_calls 幂等 / 失败回写 / 日成本 / 用量统计）。"""
+"""B-306 成本追踪数据库测试（llm_calls 幂等 / 失败回写 / 日成本 / 用量统计）。"""
 from __future__ import annotations
 
 import uuid

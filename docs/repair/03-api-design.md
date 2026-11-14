@@ -254,3 +254,53 @@ POST /rag/queries
 1. `hybrid-search` 是否返回 `score`（实现按「有则取、无则 null + missing」处理）；
 2. `agent-chat` 的 SSE 是否稳定包含 `tool_result`（若不含，则 `context_source=none`）；
 3. 分页/多 KB 参数是否支持（当前只支持单 `kb_id`）。
+
+---
+
+## 7. Phase 3 增量：批量评测（`/api/v1/rag/evaluations`，8 个端点）
+
+| # | 方法 | 路径 | 说明 |
+|---|---|---|---|
+| 1 | POST | `/rag/evaluations` | 创建 Run（202），`{run_id, task_id, status}` |
+| 2 | GET | `/rag/evaluations` | 列表（dataset / version / status / mode / adapter） |
+| 3 | GET | `/rag/evaluations/summary` | 跨 Run 分组汇总 |
+| 4 | GET | `/rag/evaluations/{run_id}` | 详情（含 `task_status`/`task_progress` 与 aggregate） |
+| 5 | GET | `/rag/evaluations/{run_id}/results` | 结果列表（metric / status / item） |
+| 6 | GET | `/rag/evaluations/{run_id}/failures` | 失败结果（等价 `results?status=failed`） |
+| 7 | POST | `/rag/evaluations/{run_id}/retry` | 重试失败样本 → 新 Run（202） |
+| 8 | POST | `/rag/evaluations/{run_id}/cancel` | 取消（任务同步 cancel） |
+
+### 7.1 创建请求
+
+```json
+{
+  "dataset_version_id": "uuid",
+  "execution_mode": "retrieve",
+  "adapter": "mock",
+  "split": "test",
+  "limit": 200,
+  "top_k": 5,
+  "precision_mode": "at_k",
+  "metrics": ["hit_rate", "mrr", "context_recall"],
+  "item_ids": null
+}
+```
+
+- `retrieve`：不接受 `judge_metrics`；`context_precision_at_k` 与 `context_precision_ap_at_k` 互斥，
+  由 `precision_mode` 决定补哪一个；默认 4 个检索指标。
+- `query`：不接受 `metrics`；默认 3 个 Judge 指标（faithfulness / answer_correctness / answer_relevancy）。
+- `limit` 上限 200（`RAG_EVAL_MAX_ITEMS`）。
+- 版本未发布 → **409**；空数据集 / `item_ids` 不属于该版本 → **400**。
+
+### 7.2 状态约定
+
+- `run.status`：`pending/running/completed/partial_failed/failed/cancelled`；
+- `task.status`：现有 5 态；**run=partial_failed 时 task=completed**（执行完毕≠全部成功），
+  两者在详情里分别返回，前端不得只显示其中一个；
+- 失败重试：父 Run 结果不变，新 Run 带 `parent_run_id` / `attempt+1` / `retry_scope=failed_only`；
+  同一父 Run 已有子 Run → **409**。
+
+### 7.3 错误码
+
+`RAG_EVALUATION_NOT_FOUND`(404) / `RAG_EVALUATION_INVALID`(400) / `RAG_EVALUATION_CONFLICT`(409)，
+错误码总数 39 → 42。

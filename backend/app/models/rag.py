@@ -1,4 +1,4 @@
-﻿"""RAG 执行链路 ORM（Phase 2）。
+"""RAG 执行链路 ORM（Phase 2）。
 
 - ``rag_traces``：一次 RAG 调用的完整快照（问题、上下文、答案、配置、耗时、错误）。
 

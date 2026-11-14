@@ -1,4 +1,4 @@
-﻿"""B-204 ORM 模型契约测试（与数据库设计 §3 对齐）。"""
+"""B-204 ORM 模型契约测试（与数据库设计 §3 对齐）。"""
 from __future__ import annotations
 
 import pytest
@@ -32,6 +32,9 @@ EXPECTED_TABLES = {
     "qa_dataset_items",
     # RAG Trace（迁移 020，Phase 2）
     "rag_traces",
+    # RAG 批量评测（迁移 021，Phase 3C）
+    "rag_evaluation_runs",
+    "rag_evaluation_results",
 }
 
 
@@ -41,7 +44,7 @@ def _table(name: str):
 
 def test_all_tables_registered() -> None:
     assert set(Base.metadata.tables) == EXPECTED_TABLES
-    assert len(Base.metadata.tables) == 22
+    assert len(Base.metadata.tables) == 24
 
 
 @pytest.mark.parametrize(
@@ -97,6 +100,53 @@ def test_all_tables_registered() -> None:
                 "retrieved_contexts",
                 "status",
                 "missing",
+            },
+        ),
+        # RAG 批量评测（迁移 021）
+        (
+            "rag_evaluation_runs",
+            {
+                "id",
+                "user_id",
+                "task_id",
+                "parent_run_id",
+                "attempt",
+                "retry_scope",
+                "dataset_version_id",
+                "dataset_checksum",
+                "execution_mode",
+                "adapter",
+                "retrieval_config",
+                "judge_config",
+                "config_snapshot",
+                "item_selection",
+                "total_items",
+                "completed_items",
+                "skipped_items",
+                "failed_items",
+                "status",
+                "aggregate",
+                "last_heartbeat_at",
+            },
+        ),
+        (
+            "rag_evaluation_results",
+            {
+                "id",
+                "run_id",
+                "dataset_item_id",
+                "trace_id",
+                "metric_name",
+                "metric_version",
+                "status",
+                "score",
+                "skipped_reason",
+                "details",
+                "judge_config",
+                "raw_output",
+                "raw_truncated",
+                "latency_ms",
+                "error_message",
             },
         ),
     ],

@@ -1,4 +1,4 @@
-﻿"""``qa_datasets`` 仓储：数据集 / 版本 / 条目的读写。
+"""``qa_datasets`` 仓储：数据集 / 版本 / 条目的读写。
 
 只负责 SQL；「发布后不可变」「导入校验」「checksum」等规则在
 ``app.services.qa_dataset_service``。

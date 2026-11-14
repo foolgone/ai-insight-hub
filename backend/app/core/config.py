@@ -209,6 +209,10 @@ class Settings(BaseSettings):
     RAG_MAX_RETRIES: int = 3
     # Judge 输出含 claim 级细节，推理模型还会消耗 reasoning token；4096 容易截断
     RAG_JUDGE_MAX_TOKENS: int = 8192
+    # 批量评测：单 Run 条目上限 / 时间预算（秒） / stale 判定（秒）
+    RAG_EVAL_MAX_ITEMS: int = 200
+    RAG_EVAL_SOFT_BUDGET_SECONDS: int = 1500
+    RAG_EVAL_STALE_SECONDS: int = 900
     # WeKnora 连接信息：只从环境变量注入，**禁止**写入代码或提交仓库
     WEKNORA_BASE_URL: str = ""
     WEKNORA_API_KEY: str = ""

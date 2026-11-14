@@ -1,4 +1,4 @@
-﻿"""B-608 成本监控任务集成测试。"""
+"""B-608 成本监控任务集成测试。"""
 from __future__ import annotations
 
 import uuid

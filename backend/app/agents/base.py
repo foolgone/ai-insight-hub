@@ -1,4 +1,4 @@
-﻿"""Agent 基座（B-310；Agent 详细设计 §1.2 —— 框架无关版，ADR-001）。
+"""Agent 基座（B-310；Agent 详细设计 §1.2 —— 框架无关版，ADR-001）。
 
 对外契约（保持不变）：
 - ``AgentConfig`` / ``AgentResult`` / ``AgentError`` 异常树；

@@ -1,4 +1,4 @@
-﻿# 修复进度（按 Phase 记录）
+# 修复进度（按 Phase 记录）
 
 > 每阶段完成后追加：改动文件、迁移、测试结果、遗留问题。
 > 上一阶段：`docs/repair/01-implementation-plan.md`
@@ -401,7 +401,7 @@ alembic check   : No new upgrade operations detected
 
 ---
 
-## Phase 3C · 持久化与批量执行 — 设计完成（待审核，未编码）
+## Phase 3C · 持久化与批量执行 — 设计完成（已审核通过，实施见下节）
 
 **日期**：2026-11-14
 **范围**：仅审计 + 设计（`docs/repair/04-evaluation-design.md` 第 4 节）。**未改业务代码、未建迁移、未操作数据库。**
@@ -445,4 +445,103 @@ alembic check   : No new upgrade operations detected
 
 ### 4. 状态
 
-设计待审核；审核通过后按 Phase 3C 实施（迁移 021 → 服务/任务 → API → 测试）。
+设计已审核通过；实施记录见下节（迁移 021 → 服务/任务 → API → 测试）。
+
+---
+
+## Phase 3C · 持久化与批量执行 — 已实现（真实 WeKnora 联调未完成）
+
+**日期**：2026-11-14
+**范围**：迁移 021 + 两张表 + 评测服务/执行器/Celery/API + 测试 + 文档。
+未改动 Phase 1/2 的对外契约，未改动对话清洗/质量评估/知识库链路。
+
+### 1. 改动文件
+
+| 类型 | 文件 | 说明 |
+|---|---|---|
+| 新增 | `backend/migrations/versions/20261114_1800_d4e8b1c6f902_021_rag_evaluation.py` | 迁移 021（2 表 + `tasks.task_type`） |
+| 新增 | `backend/app/models/rag_evaluation.py` | `RagEvaluationRun` / `RagEvaluationResult` |
+| 新增 | `backend/app/repositories/rag_evaluation.py` | Run/Result SQL、批量幂等写入、stale/汇总查询 |
+| 新增 | `backend/app/schemas/rag_evaluation.py` | 创建/详情/结果/汇总 + 指标模式校验 |
+| 新增 | `backend/app/services/rag_evaluation_service.py` | 创建/重试/取消/finalize/aggregate/summary/stale |
+| 新增 | `backend/app/services/rag_evaluation_runner.py` | 执行循环、Trace 复用、逐条 savepoint、时间预算 |
+| 新增 | `backend/app/core/advisory_lock.py` | 专用连接的会话级 advisory lock |
+| 新增 | `backend/app/tasks/rag_evaluation.py` | `tasks.rag_evaluation` + `tasks.recover_stale_rag_runs` |
+| 新增 | `backend/app/api/v1/rag_evaluations.py` | 8 个端点 |
+| 新增 | `backend/tests/integration/test_rag_evaluations.py` | 16 条集成测试 |
+| 新增 | `backend/tests/unit/test_rag_evaluation_rules.py` | 9 条规则/聚合/Schema 单测 |
+| 修改 | `backend/app/models/__init__.py` | 登记 2 个模型（24 张表） |
+| 修改 | `backend/app/core/config.py` | `RAG_EVAL_MAX_ITEMS` / `SOFT_BUDGET_SECONDS` / `STALE_SECONDS` |
+| 修改 | `backend/app/core/errors.py` / `exceptions.py` | 3 个错误码 + 状态映射（39 → 42） |
+| 修改 | `backend/app/tasks/__init__.py` / `core/celery.py` | 任务注册 + 每 10 分钟 stale 回收 |
+| 修改 | `backend/app/composition/enqueue.py` / `executors.py` | `rag_eval` 入队与执行器 |
+| 修改 | `backend/app/schemas/task.py` | `TaskType` 加入 `rag_eval` |
+| 修改 | `backend/app/api/v1/__init__.py` | 挂载 `/rag/evaluations` |
+| 修改 | `backend/tests/unit/test_errors.py` / `test_models_schema.py` / `test_celery.py` | 契约同步 |
+| 修改 | `backend/tests/integration/test_openapi.py` | 7 条新路径 |
+| 修改 | `frontend/src/lib/errorMessages.js` | 3 个错误码中文文案 |
+| 修改 | `docs/repair/02-database-design.md` / `03-api-design.md` / `04-evaluation-design.md` | Phase 3 增量 + §4.10 约束 |
+
+### 2. 数据库迁移
+
+```
+021_rag_evaluation  revision=d4e8b1c6f902  down_revision=c9d2a4f7b1e6
+新增：rag_evaluation_runs / rag_evaluation_results
+调整：tasks.task_type CHECK += 'rag_eval'（不改 status 枚举）
+```
+
+执行记录（开发库）：
+
+```
+alembic current : c9d2a4f7b1e6 -> d4e8b1c6f902 (head)
+alembic check   : No new upgrade operations detected
+```
+
+回滚：先删两张新表，再删除 `task_type='rag_eval'` 的任务记录并恢复旧 CHECK。
+生产库仍为 `9a4d2f8c6e15`（018），上线按 019 → 020 → 021 顺序执行。
+
+### 3. 五条审核约束的落地
+
+| 约束 | 实现 | 测试 |
+|---|---|---|
+| 锁生命周期 | `AdvisoryLock` 用 `engine.connect()` 专用连接；Run 全程持有；业务事务用独立 Session 逐条 commit；同连接 `pg_advisory_unlock`；崩溃由连接关闭自动释放 | `test_advisory_lock_lifecycle`、`test_different_runs_can_hold_locks_concurrently`、`test_lock_released_when_connection_drops` |
+| 时间预算 | `RAG_EVAL_SOFT_BUDGET_SECONDS=1500`；每轮检查，超预算停止领取新样本；已提交结果保留；未处理数进 aggregate；run=`partial_failed`+`time_budget_exhausted`；单条耗时写 `details.item_latency_ms` | `test_time_budget_stops_claiming_items` |
+| Trace 复用 | 仅重试 Run；校验 `status=success`、adapter、mode、retrieval_config 完全相等、dataset_item_id；父 Run 失败 Trace 不复用；结果写 `trace_reused/source_trace_id` | `test_retry_reuses_evaluated_results_and_reruns_failed_metric` |
+| 重试粒度 | evaluated/skipped 复制（`reused_from_run_id`），failed/无结果才执行；只有需要执行时才调用 RAG；父 Run 结果不变 | 同上 |
+| 状态边界 | 按结果粒度：全部 failed 才 `failed`，任一非 failed 为 `partial_failed`；空数据集创建 400；取消 `cancelled`；预算耗尽 `partial_failed` | `test_full_run_retrieve_mode`、`test_single_failure_is_isolated`、`test_all_failures_marks_run_failed`、`test_create_rejects_unpublished_and_empty`、`test_cancel_before_start` |
+
+### 4. 测试
+
+| 套件 | 数量 | 结果 |
+|---|---|---|
+| `tests/unit/test_rag_evaluation_rules.py` | 9 | 通过 |
+| `tests/integration/test_rag_evaluations.py` | 16 | 通过 |
+| 全量 `pytest -m "not prompt"` | 881 | 通过（0 failed / 0 error；较 Phase 3B 基线 851 增加 30） |
+
+新增测试覆盖：全链路（retrieve / query）、单条失败隔离、全部失败、时间预算、取消、
+失败重试与指标级复用、父 Run 不变、已有子 Run 409、锁生命周期（互斥/释放/断连/不同 Run 并行）、
+数据集篡改、未发布版本 409、空数据集 400、汇总分组、viewer 403 与越权 403。
+
+### 5. 设计偏差
+
+| 项 | 设计 | 实现 | 原因 |
+|---|---|---|---|
+| Run 状态判定 | 「所有条目都 failed 或全部指标 failed」 | `failed_results >= len(expected_metrics) × total_items` 才 failed | 与重试的指标粒度一致；单条 2/3 指标成功时不应判 failed |
+| 批量写入 | 逐条 ORM 写入 | `pg_insert ... on_conflict_do_nothing` | 幂等 + 重投递安全；需显式补 NOT NULL 默认值 |
+| `limit` 上限 | 200 | Schema 常量 + 运行时 `RAG_EVAL_MAX_ITEMS` 双重校验 | 配置可收紧但不能放宽 Schema 契约 |
+| `summary` coverage | 未细化 | `evaluated / group.total_items` | 与单 Run 口径一致（分母含 skipped/failed/未处理） |
+| 失败 Trace | 可复用 | 不复用（`status=success` 才复用） | 审核约束 §3 |
+
+### 6. 遗留问题
+
+1. **真实 WeKnora 联调未完成**（无凭据）：`retrieve`/`query` 的最小联调仍是上线前阻塞项；
+   现有测试全部为 Mock 适配器 / Fake Judge，不构成真实联调证据。
+2. **Judge 真实模型全链路未跑**：3C 集成测试注入 Fake Judge；真实 Prompt + 模型输出解析仅由 3B 单测覆盖。
+3. **Advisory lock 多进程验证**：集成测试覆盖同进程两个锁实例、断连释放、不同 Run 并行；
+   真正的多 worker 并发需在联调/预发环境复测。
+4. **单条强制中断**：时间预算只在样本间检查，单条超长（如 Judge 卡住）由 Celery 硬超时 1800s 兜底；
+   该场景由 stale 回收标记 `failed(stale_worker)`，已提交结果保留。
+   若崩溃发生在全部结果写入之后、`finalize` 之前，Run 会停在 `failed(stale_worker)` 且没有可重试样本（重试返回 409），
+   需要为新 Run 重新提交。
+5. **重试次数**：同一父 Run 只允许一次重试（409）；多次重试需以子 Run 为父新建，产品上可接受但未做 UI 引导。
+6. **前端未接入**：仅补错误码文案，无评测页面。

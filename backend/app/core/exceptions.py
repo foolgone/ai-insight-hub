@@ -1,4 +1,4 @@
-﻿"""领域异常体系（开发规范 §2.3 + API 设计 §12.2）。
+"""领域异常体系（开发规范 §2.3 + API 设计 §12.2）。
 
 约定：
 - 所有领域异常继承 ``AIInsightHubException``；
@@ -241,6 +241,27 @@ class RagTraceNotFoundError(AIInsightHubException):
     default_message = "RAG Trace 不存在"
 
 
+class RagEvaluationNotFoundError(AIInsightHubException):
+    """评测 Run / 结果不存在（404）。"""
+
+    code = ErrorCode.RAG_EVALUATION_NOT_FOUND
+    default_message = "评测任务不存在"
+
+
+class RagEvaluationInvalidError(AIInsightHubException):
+    """评测请求不合法（400）：版本未发布/空数据集/指标不匹配等。"""
+
+    code = ErrorCode.RAG_EVALUATION_INVALID
+    default_message = "评测请求不合法"
+
+
+class RagEvaluationConflictError(AIInsightHubException):
+    """评测冲突（409）：已有子 Run、重复提交等。"""
+
+    code = ErrorCode.RAG_EVALUATION_CONFLICT
+    default_message = "评测冲突"
+
+
 class QaDatasetImmutableError(AIInsightHubException):
     """已发布版本不可修改（409）。"""
 
@@ -296,6 +317,9 @@ __all__ = [
     "QaDatasetImportInvalidError",
     "QaDatasetNameExistsError",
     "QaDatasetNotFoundError",
+    "RagEvaluationConflictError",
+    "RagEvaluationInvalidError",
+    "RagEvaluationNotFoundError",
     "RagTraceNotFoundError",
     "RateLimitExceededError",
     "RefreshTokenInvalidError",

@@ -183,3 +183,77 @@ alembic check   : No new upgrade operations detected
 
 > 开发库（VM `aiinsight-postgres:5433`）中，本阶段曾提前创建的 `rag_eval_results`（0 行）
 > 已手工 DROP；生产库（`aiinsight-prod-postgres`）未做任何变更。
+
+---
+
+## 7. Phase 3 增量（迁移 021：`rag_evaluation_runs` / `rag_evaluation_results`）
+
+revision=`d4e8b1c6f902`，down_revision=`c9d2a4f7b1e6`。
+
+### 7.1 `rag_evaluation_runs`
+
+| 列 | 类型 | 说明 |
+|---|---|---|
+| id | uuid | PK（对外 `run_id`） |
+| user_id | uuid | FK users CASCADE |
+| task_id | uuid | FK tasks SET NULL，**唯一**（1 task : 1 run） |
+| parent_run_id | uuid | FK 自关联 SET NULL（重试链） |
+| attempt / retry_scope | int / varchar(20) | `1..`；CHECK `all` / `failed_only` |
+| dataset_id | uuid | FK qa_datasets SET NULL（快照名仍在） |
+| dataset_name | varchar(200) | 创建时快照，数据集改名不影响历史 |
+| dataset_version_id | uuid | FK qa_dataset_versions **RESTRICT** |
+| dataset_checksum | varchar(64) | 执行前比对，篡改 → `failed(dataset_modified)` |
+| execution_mode | varchar(20) | CHECK `retrieve` / `query` |
+| adapter | varchar(50) | `mock` / `weknora` |
+| retrieval_config | jsonb | `{top_k, precision_mode, split}`（连 trace 复用比对） |
+| judge_config | jsonb | `{model, temperature, prompt_version, metric_versions}` |
+| config_snapshot | jsonb | 完整配置快照（含指标清单与版本） |
+| item_selection | jsonb | `{mode, split?, parent_run_id?, item_ids}` |
+| total/completed/skipped/failed_items | int | 计数（completed 含全 skipped 条目） |
+| status | varchar(20) | CHECK `pending/running/completed/partial_failed/failed/cancelled` |
+| aggregate | jsonb | 收尾生成的聚合（指标 mean/coverage/skip_reasons） |
+| error_message | text | `dataset_modified` / `time_budget_exhausted` / `stale_worker` 等 |
+| started_at / completed_at / last_heartbeat_at | datetime | 心跳供 stale 回收 |
+| created_at | datetime | 默认 now() |
+
+索引：`uk_rag_evaluation_runs_task_id`（唯一）、`(user_id, created_at)`、
+`(dataset_version_id)`、`(status)`、`(parent_run_id)`。
+
+### 7.2 `rag_evaluation_results`
+
+| 列 | 类型 | 说明 |
+|---|---|---|
+| id | uuid | PK |
+| run_id | uuid | FK runs CASCADE |
+| dataset_item_id | uuid | FK qa_dataset_items **RESTRICT** |
+| trace_id | uuid | FK rag_traces SET NULL（重试复用父 Trace 时指向父 Trace） |
+| metric_name | varchar(40) | 指标名 |
+| metric_version | varchar(20) | 指标版本（不覆盖历史） |
+| status | varchar(20) | CHECK `evaluated` / `skipped` / `failed` |
+| score | float | `skipped` / `failed` 为 NULL（**不补 0**） |
+| skipped_reason | varchar(60) | `gold_evidence_missing` / `answer_missing` 等 |
+| details / judge_config | jsonb | 指标细节 / Judge 配置快照 |
+| raw_output / raw_truncated | text / bool | Judge 原文（20k 截断） |
+| latency_ms | int | Judge 或单条耗时 |
+| error_message | text | 失败原文（截断 2000） |
+| created_at | datetime | 默认 now() |
+
+索引：**唯一** `(run_id, dataset_item_id, metric_name, metric_version)`（幂等/重投递安全）、
+`(run_id, metric_name, status)`、`(run_id, status)`、`(trace_id)`。
+
+### 7.3 `tasks.task_type` CHECK
+
+由 6 种扩到 7 种，加入 `rag_eval`；**不动** `tasks.status` 枚举（`partial_failed` 只存在于 run）。
+回滚会先删两张新表，再 `DELETE FROM tasks WHERE task_type='rag_eval'` 后恢复旧 CHECK。
+
+命名规范提醒：约束实际名带前缀（`ck_tasks_task_type_valid`），
+`op.drop_constraint` 传**未加前缀**的 `task_type_valid`。
+
+### 7.4 迁移执行记录（2026-11-14，开发库）
+
+```
+alembic current : c9d2a4f7b1e6 -> d4e8b1c6f902 (head)
+alembic check   : No new upgrade operations detected
+```
+
+生产库仍为 `9a4d2f8c6e15`（018）；上线需按 019 → 020 → 021 顺序执行。

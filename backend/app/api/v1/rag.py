@@ -1,4 +1,4 @@
-﻿"""RAG 执行与 Trace API（Phase 2）。
+"""RAG 执行与 Trace API（Phase 2）。
 
 - ``POST /rag/queries``：执行一次检索/问答并落 trace（写权限）；
 - ``GET /rag/traces``：Trace 列表（按任务/状态/适配器过滤）；

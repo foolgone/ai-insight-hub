@@ -1,4 +1,4 @@
-﻿"""RAG Judge 集成测试（Phase 3B）：真实 DB 中的 Trace + Mock LLM。
+"""RAG Judge 集成测试（Phase 3B）：真实 DB 中的 Trace + Mock LLM。
 
 验证：
 - 三个指标可对一条已落库 Trace 执行；

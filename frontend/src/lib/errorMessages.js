@@ -1,4 +1,4 @@
-﻿import { MAX_UPLOAD_LABEL } from './mediaFile'
+import { MAX_UPLOAD_LABEL } from './mediaFile'
 
 /** 21 个 MVP 可达业务错误码 → 中文文案（F-105）。 */
 const MESSAGES = {
@@ -35,6 +35,9 @@ const MESSAGES = {
   QA_DATASET_IMPORT_INVALID: '导入数据校验失败，请检查错误明细',
   QA_DATASET_NAME_EXISTS: '同名数据集已存在，请换一个名称',
   RAG_TRACE_NOT_FOUND: 'RAG Trace 不存在或无权访问',
+  RAG_EVALUATION_NOT_FOUND: '评测任务或结果不存在或无权访问',
+  RAG_EVALUATION_INVALID: '评测请求不合法（版本为空、指标与模式不匹配等）',
+  RAG_EVALUATION_CONFLICT: '评测状态冲突（版本未发布、已有重试或已结束）',
   INTERNAL_ERROR: '服务器异常，请稍后重试',
 }
 

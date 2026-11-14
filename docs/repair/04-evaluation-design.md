@@ -1,6 +1,6 @@
-﻿# 评测引擎设计（Phase 3）
+# 评测引擎设计（Phase 3）
 
-> 范围：Phase 3A 确定性检索指标（已实现）、3B LLM Judge（已实现）、3C 持久化与批量任务（待实施）。
+> 范围：Phase 3A 确定性检索指标（已实现）、3B LLM Judge（已实现）、3C 持久化与批量任务（已实现；真实 WeKnora 联调待完成）。
 > 前置：Phase 1 数据集（`qa_dataset_items.gold_evidence`）、Phase 2 Trace（`rag_traces.context_source/retrieved_contexts`）。
 
 ---
@@ -345,9 +345,12 @@ pending ──启动──> running ──全部条目处理完──> completed
 |---|---|
 | 无 failed 结果（skipped 不算失败） | completed |
 | 至少一条 failed 结果，且存在非 failed | partial_failed |
-| 所有条目都 failed（或全部指标 failed） | failed |
+| 所有预期结果都 failed（条目 × 指标全失败） | failed |
 | 取消 | cancelled |
 | 心跳超时 | failed（error=`stale_worker`） |
+
+> 判定按**结果粒度**：`failed_results >= len(expected_metrics) × total_items` 才是 `failed`；
+> 只要存在任一 `evaluated`/`skipped` 结果即为 `partial_failed`（与重试的指标粒度一致）。
 
 `Task.status` 映射：`running` → run 运行中；run 结束（completed/partial_failed）→ task `completed`；
 run failed → task `failed`；取消 → task `cancelled`。**不改 tasks 表状态枚举**。
@@ -496,6 +499,82 @@ Run 结束时写入 `aggregate`：
 
 ---
 
+### 4.10 审核补充约束（实施前锁定）
+
+#### 1. Advisory Lock 生命周期
+
+- 用**专用连接**（`engine.connect()`）执行 `pg_try_advisory_lock(key)`（会话级）；
+- 该连接在 Run 全程保持打开，**不归还连接池**；
+- 每条样本使用独立 `SessionLocal()` 事务提交，**不影响锁连接**；
+- 释放必须使用**同一连接** `pg_advisory_unlock(key)`，随后关闭连接；
+- Worker 崩溃 → 进程退出 → 连接关闭 → PG 自动释放会话锁；
+- key 由 `run_id` 稳定派生（UUID 前 8 字节 mod 2^63），保证同一 Run 唯一、不同 Run 不冲突。
+
+集成测试：同一 Run 第二次获取失败；正常结束/异常退出后锁可再次获取；不同 Run 可同时持锁。
+
+#### 2. 执行时间预算
+
+| 项 | 值 |
+|---|---|
+| Celery 软超时 | 1700s（全局） |
+| Celery 硬超时 | 1800s（全局） |
+| Run 预算 | `RAG_EVAL_SOFT_BUDGET_SECONDS=1500`（可在 .env 覆盖） |
+| 单 Run 上限 | 200 条 |
+
+- 每条处理前检查 `elapsed > budget`：**停止领取新样本**，已提交结果保留；
+- 未处理样本不写结果（保持「无结果」），Run 结束为 `partial_failed`，`error_message=time_budget_exhausted`；
+- 重试 Run 的选中集包含「无结果」条目，可续跑；
+- 每条样本耗时写入该条每个结果的 `details.item_latency_ms`（无需新表）。
+
+#### 3. Trace 复用规则（仅重试 Run）
+
+复用父 Run 的成功 Trace 前，逐项比较：
+
+| 条件 | 要求 |
+|---|---|
+| `trace.status` | 必须 `success`（失败 Trace 不复用） |
+| `trace.adapter` | 与当前 Run 相同 |
+| `trace.mode` | 与当前 Run 的 `execution_mode` 相同 |
+| `trace.retrieval_config` | 与当前 Run 的 retrieval_config **完全相等** |
+| `trace.dataset_item_id` | 等于当前条目 |
+| 数据集 | 版本 id 相同且 checksum 一致 |
+
+不一致 → 重新执行 RAG。复用时在结果 `details` 写
+`{"trace_reused": true, "trace_reused_from_run_id": "...", "source_trace_id": "..."}`。
+
+#### 4. 失败重试粒度（按指标，不整条重跑）
+
+对父 Run 的每个条目、每个预期指标：
+
+| 父结果状态 | 子 Run 行为 |
+|---|---|
+| `evaluated` | **复制**结果（新 run_id，`details.reused_from_run_id`） |
+| `skipped` | **复制**结果（保留 skipped_reason） |
+| `failed` | 重新执行 |
+| 无结果 | 执行该指标 |
+
+只有当存在「failed / 无结果」指标时才执行 RAG；若全部可复用，则不调用适配器。
+RAG 执行失败且无有效 Trace → 该条全部指标记 failed(`trace_failed`)，下次重试会重新执行 RAG。
+父 Run 结果永远不改动。
+
+#### 5. Run 状态边界
+
+| 场景 | run.status |
+|---|---|
+| 全部 evaluated | `completed` |
+| evaluated + skipped，无 failed | `completed` |
+| 部分 failed | `partial_failed` |
+| 全部 failed | `failed` |
+| 全部 skipped | `completed` |
+| 空数据集 | **创建时 400**（不创建 Run） |
+| 用户取消 | `cancelled` |
+| 时间预算耗尽（有未处理条目） | `partial_failed` + `time_budget_exhausted` |
+
+`task.status` 与 `run.status` **分别返回**：run=partial_failed 时 task=completed（任务执行完毕），
+API 文档与前端都不得只显示其中一个。
+
+---
+
 ## 5. 测试计划
 
 | 层级 | 用例 |
@@ -503,7 +582,7 @@ Run 结束时写入 `aggregate`：
 | 3A 单测 | 表驱动：完全命中/完全未命中/部分命中/Top-K 边界/空检索/空 Gold/文档级/chunk 级/重复检索/重复 Gold/文本规范化/混合粒度 + 公式断言 |
 | 3B 单测 | Judge 输出解析、claim 聚合、跳过规则、异常/超时/结构化失败（Mock LLM） |
 | 3C 集成 | 建任务 → 执行（Mock 适配器）→ trace → 4 指标 → 结果 → 聚合 → 失败样本 → 重试 → 重复提交 |
-| 回归 | 全量 `pytest -m "not prompt"`（当前基线 **851** 不得减少）、mypy、black、flake8、lint-imports、前端覆盖率 |
+| 回归 | 全量 `pytest -m "not prompt"`（Phase 3B 基线 851，3C 后 **881** 不得减少）、mypy、black、flake8、lint-imports、前端覆盖率 |
 
 ---
 
@@ -527,4 +606,4 @@ Run 结束时写入 `aggregate`：
 |---|---|
 | 3A 确定性指标 | ✅ 已实现（`app/application/metrics.py` + **40 条**单测；含 Precision 分母与去重粒度补充） |
 | 3B LLM Judge | ✅ 已实现（Agent + 3 Prompt + 编排服务 + 24 条测试） |
-| 3C 持久化与批量 | 📄 设计完成（本文第 4 节），**待审核后实施** |
+| 3C 持久化与批量 | ✅ 已实现（迁移 021 + 2 表 + 8 API + Celery 执行/恢复/重试 + 聚合 + 25 条新增测试）；真实 WeKnora 联调未完成 |

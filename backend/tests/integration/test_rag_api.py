@@ -1,4 +1,4 @@
-﻿"""RAG 执行与 Trace API 集成测试（Phase 2）。
+"""RAG 执行与 Trace API 集成测试（Phase 2）。
 
 全部使用 ``mock`` 适配器（``RAG_ADAPTER`` 默认值），不访问外部服务。
 覆盖：检索/问答两种模式、数据集条目联动、失败 trace、幂等、权限、404、健康检查。

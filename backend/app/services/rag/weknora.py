@@ -1,4 +1,4 @@
-﻿"""WeKnora 适配器（Phase 2）。
+"""WeKnora 适配器（Phase 2）。
 
 只做「协议翻译」：把外部返回的 JSON / SSE 映射为 ``RAGResult``，并如实记录缺失字段。
 不在这里算指标、不落库。
