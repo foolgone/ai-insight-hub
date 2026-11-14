@@ -398,3 +398,51 @@ alembic check   : No new upgrade operations detected
 3. 上下文截断策略（20×6000）需在真实长文档场景复核；
 4. `AgentResult.raw_text` 让所有 Agent 多存一份原文（内存态），未写入 `llm_calls`；
    如需全链路原文留存，3C/后续可考虑按需落对象存储。
+
+---
+
+## Phase 3C · 持久化与批量执行 — 设计完成（待审核，未编码）
+
+**日期**：2026-11-14
+**范围**：仅审计 + 设计（`docs/repair/04-evaluation-design.md` 第 4 节）。**未改业务代码、未建迁移、未操作数据库。**
+
+### 1. 审计事实（代码核对）
+
+| 项 | 事实 |
+|---|---|
+| 迁移 head | 生产 `9a4d2f8c6e15`（018，**无 rag 表**）；开发 `c9d2a4f7b1e6`（020） |
+| `tasks.task_type` | CHECK 仅 6 种，**不含 `rag_eval`** → 021 需调整约束 |
+| `tasks.status` | 仅 `pending/running/completed/failed/cancelled`，**无 partial_failed** → 由 run 承载 |
+| Celery | `acks_late=False`（仅 clean 开启）；`prefetch=1`；visibility 3600s；`time_limit=1800s`；concurrency=2 |
+| 连接池 | `pool_size=20 / max_overflow=40`，API 与 worker 共享 |
+| Phase 1 | 发布后版本不可变（409）+ checksum |
+| Phase 2 | `rag_traces.idempotency_key` 唯一；含 `dataset_item_id` / `task_id` |
+| Phase 3B | `judge_trace` 返回 `JudgeOutcome`（含 judge_config/raw_output），不落库 |
+
+### 2. 8 个核查问题结论
+
+| # | 结论 |
+|---|---|
+| 1 | Faithfulness 的 evidence **未**与输入上下文校验；3C 落库时加 `evidence_verified` 统计，不改分数 |
+| 2 | Judge 原始输出 20k 截断 + `raw_truncated`，足够复盘（超长除外） |
+| 3 | Run 配置可重现（版本+checksum+judge_config+prompt_sha）；缺代码版本/随机种子，已知限制 |
+| 4 | 重复投递/崩溃：任务级 `acks_late` + run 级 advisory lock + 唯一键 + 心跳/stale 回收 |
+| 5 | 事务：每条样本 savepoint + 逐条 commit，单条失败不回滚整批 |
+| 6 | 数据集发布后不可变；Run 固定版本 + checksum，执行前比对 |
+| 7 | 每 Run 每样本独立 Trace；重试按 idempotency key 复用父 Run 成功 Trace |
+| 8 | WeKnora 最小验收：1 条 retrieve + 1 条 query，核对 contexts/context_source/耗时与外部基线 |
+
+### 3. 设计交付（第 4 节）
+
+- **ER**：`tasks 1─1 runs 1─n results`；runs 自关联 `parent_run_id`；results FK items（RESTRICT）/ traces（SET NULL）。
+- **唯一键**：`unique(run_id, dataset_item_id, metric_name, metric_version)`；前提是 Run 内 Judge 配置固定，换配置必须新建 Run。
+- **状态机**：run `pending/running/completed/partial_failed/failed/cancelled`；task 仅用现有 5 态映射。
+- **Celery**：`tasks.rag_evaluation`（acks_late + advisory lock + 逐条 savepoint + 心跳），复用现有 tasks/enqueue/executors。
+- **重试**：新建 Run（`parent_run_id`、`failed_only`），复用成功 Trace；同一父 Run 已有子 Run → 409。
+- **聚合**：mean/coverage/skip_reasons，skipped/failed 不计 0；按 doc/conv、mode、adapter、metric_version 分组。
+- **API**：8 个（创建/列表/详情/结果/失败/重试/取消/汇总）。
+- **迁移 021**：新增 2 表 + 调整 tasks CHECK；给出了锁、顺序、回滚方案。
+
+### 4. 状态
+
+设计待审核；审核通过后按 Phase 3C 实施（迁移 021 → 服务/任务 → API → 测试）。
