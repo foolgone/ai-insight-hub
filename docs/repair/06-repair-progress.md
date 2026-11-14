@@ -325,3 +325,76 @@ alembic check   : No new upgrade operations detected
 6. 测试全部 Mock LLM（含非法 JSON/超时/缺字段/无上下文等 20+ 场景规划）。
 
 > 等待人工确认后再编码。
+
+---
+
+## Phase 3B · LLM Judge（Faithfulness / Correctness / Relevancy）— 已完成（待审核）
+
+**日期**：2026-11-14
+**范围**：Judge Agent + Prompt + Schema + 编排服务 + 测试；**不建表、不落库、不调度**（3C 负责）。
+
+### 1. 改动文件
+
+| 类型 | 文件 | 说明 |
+|---|---|---|
+| 新增 | `backend/app/schemas/agents/rag_judge.py` | 输入 + 三个输出 Schema + metric_version |
+| 新增 | `backend/app/agents/rag_judge_agent.py` | 单 Agent 按 metric 切 Prompt/Schema |
+| 新增 | `backend/app/services/rag_judge_service.py` | 跳过规则、指标编排、原始输出截断 |
+| 新增 | `backend/app/prompts/rag_judge/` | `faithfulness.txt` / `answer_correctness.txt` / `answer_relevancy.txt` / `version.txt` |
+| 新增 | `backend/tests/unit/test_rag_judge_agent.py` | 10 条 |
+| 新增 | `backend/tests/unit/test_rag_judge_service.py` | 12 条 |
+| 新增 | `backend/tests/integration/test_rag_judge_integration.py` | 2 条（真实 DB + Fake LLM） |
+| 修改 | `backend/app/agents/base.py` | `AgentResult.raw_text`（默认 None）+ 记录最终解析文本 |
+| 修改 | `backend/app/agents/structured_output.py` | `parse_with_repair(raw_sink=...)` 返回最终用于解析的原文 |
+| 修改 | `backend/app/core/config.py` | `RAG_JUDGE_MAX_TOKENS=8192` |
+| 修改 | `docs/repair/04-evaluation-design.md` | 3B 设计与实现落点 |
+
+### 2. 关键实现
+
+| 约束 | 实现 |
+|---|---|
+| Faithfulness 总分由代码算 | `supported / total`；模型只输出 claims |
+| 无 claim | `skipped(no_claims)`，score=None（不是 1.0） |
+| 无真实上下文 | `context_source != agent_chat` 或 contexts 为空 → `skipped(context_unavailable)`，**不创建也不调用 Judge** |
+| 上下文不混用 | 只用 `trace.retrieved_contexts`（agent_chat）；`hybrid_search` 的 Trace 一律 skip |
+| 分数范围 | Schema `ge=0, le=1` + `_validate_parsed` 有限性校验；非法 → 修复轮 → 仍非法则 failed |
+| 原始输出 | `AgentResult.raw_text` = **最终实际用于解析**的文本（含修复轮）；服务层截断 20000 字符并标 `raw_truncated` |
+| 版本追溯 | `judge_config` 含 agent/model/temperature/max_tokens/prompt_version/prompt_sha256/metric_version |
+| 指标隔离 | 三个指标输入字段互不串用（有测试断言 payload） |
+| 失败隔离 | 单指标失败只标记该指标 failed，不影响其它指标与 Trace |
+
+### 3. Prompt 与版本
+
+- 目录 `app/prompts/rag_judge/`，`version.txt = 2026-11-14.1`；
+- `prompt_sha256` 运行时按实际 Prompt 文本计算；
+- `metric_version`：三个指标当前均为 `v1`，与 Prompt 版本独立；
+- 同一 Trace 可用不同版本重复评测：3B 每次调用返回独立 `judge_config`，**不覆盖**；
+  3C 以 `(run_id, dataset_item_id, metric_name, metric_version)` 唯一键落库。
+
+### 4. 测试结果（本阶段新增 24 条）
+
+| 项 | 结果 |
+|---|---|
+| Agent 单测 | 10（解析、修复轮 raw_text、非法输出、输入校验、超时、Prompt 版本/SHA） |
+| 服务单测 | 12（无上下文不调用、retrieval 上下文不冒充、无 claims、部分支持、缺 gold、空答案、失败隔离、截断、版本元信息、输入隔离） |
+| 集成 | 2（真实 DB Trace + Fake LLM；Judge 不改 Trace；不同 Prompt 版本产生不同 config） |
+| 全量回归 | **851 passed**（3A 827 + 24，无删除） |
+| mypy / black / flake8 | 0 issue / 通过 / 通过 |
+| lint-imports | 5 kept, 0 broken |
+
+### 5. 与设计的差异
+
+| 项 | 设计 | 实现 | 原因 |
+|---|---|---|---|
+| 原始输出 | `raw_text` | 同，且 `parse_with_repair` 返回「最终解析文本」 | 修复轮存在时不能存首次输出 |
+| 截断 | 合理长度保护 | 20,000 字符 + `raw_truncated` | 避免大对象入库/日志 |
+| 上下文条数 | 未定 | 最多 20 条、每条 6,000 字符 | 控制 Prompt 体积 |
+| 指标版本 | 常量 | `v1`（三个指标） | 与 Prompt 版本解耦 |
+
+### 6. 遗留问题
+
+1. Judge 结果尚未落库（3C）；
+2. 真实 WeKnora 未联调，所有测试为 Mock/Fake；
+3. 上下文截断策略（20×6000）需在真实长文档场景复核；
+4. `AgentResult.raw_text` 让所有 Agent 多存一份原文（内存态），未写入 `llm_calls`；
+   如需全链路原文留存，3C/后续可考虑按需落对象存储。

@@ -1,6 +1,6 @@
 ﻿# 评测引擎设计（Phase 3）
 
-> 范围：Phase 3A 确定性检索指标（本阶段实现）、3B LLM Judge（待审）、3C 持久化与批量任务（待审）。
+> 范围：Phase 3A 确定性检索指标（已实现）、3B LLM Judge（已实现）、3C 持久化与批量任务（待实施）。
 > 前置：Phase 1 数据集（`qa_dataset_items.gold_evidence`）、Phase 2 Trace（`rag_traces.context_source/retrieved_contexts`）。
 
 ---
@@ -108,7 +108,7 @@ Gold 证据的粒度由字段决定，**优先级不可混用**：
 
 ---
 
-## 3. Phase 3B：LLM Judge（设计，待审核）
+## 3. Phase 3B：LLM Judge（已实现）
 
 ### 3.1 复用与边界
 
@@ -215,6 +215,18 @@ async def judge_trace(session, *, trace: RagTrace, item: QaDatasetItem | None,
 - `session` 透传给 `BaseAgent` 以写 `llm_calls`（成本可查）；
 - 不做数据库写入（3C 负责）。
 
+### 3.8 实现落点（已完成）
+
+| 组件 | 文件 |
+|---|---|
+| Schema | `app/schemas/agents/rag_judge.py` |
+| Agent | `app/agents/rag_judge_agent.py` |
+| Prompt | `app/prompts/rag_judge/{faithfulness,answer_correctness,answer_relevancy}.txt` + `version.txt` |
+| 编排 | `app/services/rag_judge_service.py` |
+| 基座改动 | `AgentResult.raw_text`（默认 None）+ `parse_with_repair(raw_sink=...)` |
+| 测试 | `tests/unit/test_rag_judge_agent.py`（10）、`tests/unit/test_rag_judge_service.py`（12）、`tests/integration/test_rag_judge_integration.py`（2） |
+
+保护阈值：上下文最多 20 条 / 每条 6,000 字符；原始输出 20,000 字符截断并标 `raw_truncated`。
 ### 3.7 测试计划（全部 Mock LLM，无真实 API）
 
 | 指标 | 用例 |
@@ -318,5 +330,5 @@ qa_dataset_items 1─n rag_evaluation_results
 | 子阶段 | 状态 |
 |---|---|
 | 3A 确定性指标 | ✅ 已实现（`app/application/metrics.py` + **40 条**单测；含 Precision 分母与去重粒度补充） |
-| 3B LLM Judge | 📄 设计完成，**待审核**（本文第 3 节） |
+| 3B LLM Judge | ✅ 已实现（Agent + 3 Prompt + 编排服务 + 24 条测试） |
 | 3C 持久化与批量 | 待 3B 审核后实施 |

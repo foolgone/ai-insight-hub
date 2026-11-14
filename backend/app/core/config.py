@@ -207,6 +207,8 @@ class Settings(BaseSettings):
     RAG_ADAPTER: str = "mock"
     RAG_TIMEOUT_SECONDS: float = 60.0
     RAG_MAX_RETRIES: int = 3
+    # Judge 输出含 claim 级细节，推理模型还会消耗 reasoning token；4096 容易截断
+    RAG_JUDGE_MAX_TOKENS: int = 8192
     # WeKnora 连接信息：只从环境变量注入，**禁止**写入代码或提交仓库
     WEKNORA_BASE_URL: str = ""
     WEKNORA_API_KEY: str = ""
