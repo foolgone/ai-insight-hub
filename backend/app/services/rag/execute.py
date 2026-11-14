@@ -135,6 +135,13 @@ async def execute_query(
             error_message=error,
         )
 
+    # 请求配置指纹：Trace 复用的唯一比较基准（含 KB / Agent / Tenant / top_k）。
+    # 适配器回显（match_count 等）与请求配置形状不同，不能直接比较。
+    trace.retrieval_config = {
+        **dict(trace.retrieval_config or {}),
+        "_request_config": dict(config or {}),
+    }
+
     await trace_repo.add_trace(session, trace)
     logger.info(
         "rag trace recorded id={} adapter={} mode={} status={} contexts={} latency_ms={}",

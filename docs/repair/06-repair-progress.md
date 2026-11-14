@@ -601,3 +601,46 @@ alembic check   : No new upgrade operations detected
 - 三个问题均已覆盖并有测试；代码冻结，不再增加 API/Agent/表结构。
 - 仍不宣布上线验收：**真实 WeKnora + 真实 Judge 联调未完成**。
 - 下一步优先级：真实数据可验证（1 条 retrieve + 1 条 query 最小联调），而非继续扩展功能。
+
+---
+
+## Phase 3D · 真实 WeKnora 联调 — 已完成（本地 VM）
+
+**日期**：2026-11-14
+**环境**：`192.168.150.100:8080`（本地 Docker 部署，非公司实例）
+**报告**：`docs/repair/07-phase3d-weknora.md`
+
+### 1. 验收结果
+
+| 验收项 | 结果 |
+|---|---|
+| 真实 retrieve | ✅ 2 条上下文，`hybrid_search`，371ms |
+| 真实 query | ✅ 378 字答案，2 条上下文，`agent_chat`，4724ms |
+| 原始响应核对 | ✅ 条数/ID/内容/答案长度逐项一致 |
+| context_source / context_available | ✅ `hybrid_search` / `agent_chat`，均 true |
+| KB/Agent/Tenant/Top-K 进入 Trace | ✅ `retrieval_config._request_config` + `model_config.agent_id` |
+| Trace 持久化与读取 | ✅ 按幂等键读回，ID 一致 |
+| 延迟/异常 | ✅ 已记录；仅 `token_usage` 缺失，无 5xx/超时 |
+| 真实批量 Run | ✅ 1 条，4 个检索指标均 1.0，`completed` |
+
+### 2. 代码修复
+
+| 文件 | 修改 |
+|---|---|
+| `backend/app/services/rag/weknora.py` | 支持 0.9 `references.knowledge_references`；chunk_id 取 `id`；metadata 增加 chunk 信息 |
+| `backend/app/services/rag/execute.py` | 所有 Trace 写入 `retrieval_config._request_config`（KB/Agent/Tenant/Top-K 可追溯） |
+| `backend/tests/unit/test_rag_adapters.py` | 新增 references 事件解析用例 |
+| `backend/tests/integration/test_rag_api.py` | 断言 `_request_config`；幂等计数按 key 隔离 |
+
+### 3. 测试
+
+- 全量 `pytest -m "not prompt"`：**885 passed**（Phase 3C 884 + 1）
+- mypy 0 / black / flake8 / lint-imports 5 kept
+- 联调数据已从开发库清理，避免污染全局计数测试
+
+### 4. 遗留
+
+1. API Key 仍在本地临时文件，未纳入 `user_llm_credentials`；
+2. `hybrid-search` 无 chunk id，检索指标暂按 `document_id`；
+3. 镜像使用 `latest`，上线前锁定 digest；
+4. 真实 Judge 未开始（Phase 3E）。

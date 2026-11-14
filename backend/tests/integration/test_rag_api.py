@@ -48,8 +48,8 @@ async def _run(client, headers, *, mode: str = "query", **payload: Any) -> dict[
     return response
 
 
-async def test_retrieve_mode_records_trace(client, auth_headers) -> None:
-    response = await _run(client, auth_headers, mode="retrieve")
+async def test_retrieve_mode_records_trace(client, auth_headers, db_session) -> None:
+    response = await _run(client, auth_headers, mode="retrieve", config={"top_k": 7})
 
     assert response.status_code == 201, response.text
     body = response.json()
@@ -68,6 +68,11 @@ async def test_retrieve_mode_records_trace(client, auth_headers) -> None:
     assert detail.status_code == 200
     assert detail.json()["query"] == "怎么退款？"
     assert detail.json()["retrieved_contexts"][0]["document_id"] == "mock-doc-approval"
+
+    # Trace 持久化请求配置指纹（Phase 3D：KB/Agent/Tenant/Top-K 可追溯）
+    trace = await db_session.get(RagTrace, uuid.UUID(trace_id))
+    assert trace is not None
+    assert trace.retrieval_config["_request_config"]["top_k"] == 7
 
     listed = await client.get(f"{BASE}/traces", headers=auth_headers)
     assert listed.status_code == 200
@@ -168,7 +173,11 @@ async def test_idempotent_execution_reuses_trace(db_session: AsyncSession, test_
     )
 
     assert first.id == second.id
-    total = await db_session.scalar(select(func.count()).select_from(RagTrace))
+    total = await db_session.scalar(
+        select(func.count())
+        .select_from(RagTrace)
+        .where(RagTrace.idempotency_key == "task:t1:item:i1")
+    )
     assert total == 1
 
 

@@ -1,6 +1,6 @@
 # 评测引擎设计（Phase 3）
 
-> 范围：Phase 3A 确定性检索指标（已实现）、3B LLM Judge（已实现）、3C 持久化与批量任务（已实现；真实 WeKnora 联调待完成）。
+> 范围：Phase 3A 确定性检索指标（已实现）、3B LLM Judge（已实现）、3C 持久化与批量任务（已实现）、3D 真实 WeKnora 联调（本地 VM 已完成）。
 > 前置：Phase 1 数据集（`qa_dataset_items.gold_evidence`）、Phase 2 Trace（`rag_traces.context_source/retrieved_contexts`）。
 
 ---
@@ -618,3 +618,4 @@ API 文档与前端都不得只显示其中一个。
 | 3A 确定性指标 | ✅ 已实现（`app/application/metrics.py` + **40 条**单测；含 Precision 分母与去重粒度补充） |
 | 3B LLM Judge | ✅ 已实现（Agent + 3 Prompt + 编排服务 + 24 条测试） |
 | 3C 持久化与批量 | ✅ 已实现（迁移 021 + 2 表 + 8 API + Celery 执行/恢复/重试 + 聚合 + 28 条新增测试）；真实 WeKnora 联调未完成 |
+| 3D 真实 WeKnora 联调 | ✅ 本地 VM 完成（retrieve/query/Trace/批量 Run，详见 `07-phase3d-weknora.md`） |

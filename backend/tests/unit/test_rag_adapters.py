@@ -207,6 +207,36 @@ async def test_sse_parses_answer_and_contexts() -> None:
     assert result.context_source == "agent_chat"
 
 
+SSE_REFERENCES = "\n".join(
+    [
+        'data: {"response_type":"references","knowledge_references":'
+        '[{"id":"chunk-ref-1","knowledge_id":"doc-ref-1","content":"退款 1-3 天",'
+        '"knowledge_title":"售后政策","score":0.88,"seq":0,"chunk_type":"text"}]}',
+        "",
+        'data: {"response_type":"answer","content":"退款 1-3 天"}',
+        "",
+        "data: [DONE]",
+        "",
+    ]
+)
+
+
+async def test_sse_parses_knowledge_references_event() -> None:
+    """WeKnora >= 0.9 的检索片段在 references 事件，不在 tool_result.data.results。"""
+    adapter = _adapter(_sse_handler(SSE_REFERENCES))
+    result = await adapter.query("退款")
+    await adapter.aclose()
+
+    assert result.context_source == "agent_chat"
+    assert len(result.contexts) == 1
+    context = result.contexts[0]
+    assert context.document_id == "doc-ref-1"
+    assert context.chunk_id == "chunk-ref-1"
+    assert context.title == "售后政策"
+    assert context.score == 0.88
+    assert context.metadata["chunk_type"] == "text"
+
+
 async def test_sse_truncated_midstream_keeps_received_content() -> None:
     """中途断开：保留已收到的答案，不抛异常（残缺事件被忽略）。"""
     adapter = _adapter(_sse_handler(SSE_TRUNCATED))

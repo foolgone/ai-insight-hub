@@ -333,7 +333,14 @@ class WeKnoraAdapter:
         items: list[Mapping[str, Any]] = []
         missing: list[str] = []
         for event in events:
-            if event.get("response_type") != "tool_result":
+            response_type = event.get("response_type")
+            # WeKnora >= 0.9：检索片段在 references 事件的 knowledge_references
+            if response_type == "references":
+                refs = event.get("knowledge_references")
+                if isinstance(refs, list):
+                    items.extend(item for item in refs if isinstance(item, Mapping))
+                continue
+            if response_type != "tool_result":
                 continue
             data = event.get("data") or {}
             results = data.get("results") if isinstance(data, Mapping) else None
@@ -341,6 +348,7 @@ class WeKnoraAdapter:
                 items.extend(item for item in results if isinstance(item, Mapping))
         if not items and payload:
             for key in (
+                "knowledge_references",
                 "results",
                 "citations",
                 "references",
@@ -351,7 +359,7 @@ class WeKnoraAdapter:
                 value = payload.get(key)
                 if value is None and isinstance(payload.get("data"), Mapping):
                     data_obj = payload["data"]
-                value = data_obj.get(key)
+                    value = data_obj.get(key)
                 if isinstance(value, list):
                     items.extend(item for item in value if isinstance(item, Mapping))
                     break
@@ -383,12 +391,14 @@ class WeKnoraAdapter:
                 RetrievedContext(
                     content=content or "",
                     document_id=self._first_text(item, ("knowledge_id", "document_id", "doc_id")),
-                    chunk_id=self._first_text(item, ("chunk_id", "chunkId")),
+                    chunk_id=self._first_text(item, ("chunk_id", "chunkId", "id")),
                     title=self._first_text(item, ("knowledge_title", "title", "doc_name")),
                     score=score,
                     rank=rank,
                     metadata={
                         "knowledge_base_id": item.get("knowledge_base_id"),
+                        "chunk_index": item.get("chunk_index"),
+                        "chunk_type": item.get("chunk_type"),
                         "truncated": truncated,
                     },
                 )
