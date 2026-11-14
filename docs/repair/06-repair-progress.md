@@ -279,3 +279,49 @@ alembic check   : No new upgrade operations detected
 - 全量计数从 820 恢复到 **824**（基线 787 + 新增 37），证明无测试丢失。
 
 教训：新增测试文件前先检查同名；`git diff` 中出现的 `-def test_` 必须逐条确认为「重命名」而非「删除」。
+
+---
+
+## Phase 3A 审核核查（2026-11-14）
+
+### 1. Precision@K 语义
+
+| 项 | 结论 |
+|---|---|
+| 实现与设计一致性 | ✅ 一致：`value = 相关数 / len(去重后实际返回)`，实现 `metrics.py: context_precision_at_k` |
+| 返回数 < K | 分母取**实际返回数**（例：返回 2 条、K=5、1 条相关 → 0.5，而非 0.2） |
+| 测试覆盖 | 原有 k 截断/重复用例之外，新增 `test_context_precision_denominator_is_actual_returned_count` 锁定语义 |
+| 是否改公式 | **否**；已在设计文档明确它是「返回结果中的相关比例」，不同返回条数的查询间不宜直接横向比较（需要时用 AP@K） |
+
+### 2. 检索去重粒度
+
+| 项 | 结论 |
+|---|---|
+| 有 `chunk_id` | 只按 `chunk_id` 去重 ✅（`RetrievedItem.identity`） |
+| 无 chunk、有 `document_id` | 按 `document_id` 去重 ✅ |
+| 两者都无 | 按规范化文本去重 ✅ |
+| 同文档不同 chunk | **保留为两条** ✅（新增 `test_same_document_different_chunks_are_not_merged`） |
+| 首次排名 | 保留 ✅（`test_duplicate_retrieved_keeps_first_rank`） |
+| 去重与 K 的顺序 | 先去重再截断（重复项不占 K 名额）；新增 `test_dedupe_happens_before_k_truncation` 锁定 |
+| 是否改代码 | **否**，实现已符合要求；补充 3 条测试与文档说明 |
+
+### 3. 变更与测试
+
+- 代码：**无改动**（仅测试与文档）；
+- 新增测试 3 条（`test_rag_metrics.py` 40 条）；
+- `04-evaluation-design.md` 更新：Precision 语义、去重与截断顺序、Phase 3B 完整设计。
+
+---
+
+## Phase 3B 设计已提交（待审核，未编码）
+
+设计见 `docs/repair/04-evaluation-design.md` 第 3 节，要点：
+
+1. 一个 `RagJudgeAgent` 按 metric 切换 Prompt 与输出 Schema，复用 `BaseAgent`；
+2. Faithfulness **仅**使用 Trace 的真实上下文（`context_source=agent_chat`），否则 skipped 且不调用模型；
+3. score 由代码计算（claims 支持比例），不信任模型自报；
+4. Prompt 版本 + SHA256 + metric_version + 模型参数全部随结果返回；
+5. 3B 不建表、不调度，结果结构完整，3C 落库与聚合；
+6. 测试全部 Mock LLM（含非法 JSON/超时/缺字段/无上下文等 20+ 场景规划）。
+
+> 等待人工确认后再编码。

@@ -186,6 +186,47 @@ def test_context_precision_at_k_table(retrieved, gold, k, expected_value, releva
     assert result.details["relevant_count"] == relevant_count
 
 
+def test_context_precision_denominator_is_actual_returned_count() -> None:
+    """Precision@K 的分母是「实际返回且去重后」的条数，不是固定 K。
+
+    returned=2（< K=5），1 条相关 → 0.5；
+    若按固定 K 计算会得到 0.2 —— 本测试锁定「返回相对」语义。
+    """
+    result = context_precision_at_k([doc("d1"), doc("d2")], [EvidenceRef(document_id="d1")], k=5)
+
+    assert result.value == pytest.approx(0.5)
+    assert result.details["returned_count"] == 2
+    assert result.details["k"] == 5
+
+
+def test_same_document_different_chunks_are_not_merged() -> None:
+    """同一 document_id 下的不同 chunk 必须保留为两条（按 chunk_id 去重）。"""
+    retrieved = [
+        RetrievedItem(document_id="d1", chunk_id="c1", content="片段一"),
+        RetrievedItem(document_id="d1", chunk_id="c2", content="片段二"),
+    ]
+
+    precision = context_precision_at_k(
+        retrieved, [EvidenceRef(document_id="d1", chunk_id="c1")], k=5
+    )
+    recall = context_recall(retrieved, [EvidenceRef(document_id="d1", chunk_id="c1")])
+
+    assert precision.details["returned_count"] == 2
+    assert precision.value == pytest.approx(0.5)
+    assert recall.value == pytest.approx(1.0)
+
+
+def test_dedupe_happens_before_k_truncation() -> None:
+    """先去重再截断：重复项不占用 K 名额（[d1,d1,d2] + k=2 → d1,d2）。"""
+    retrieved = [doc("d1"), doc("d1"), doc("d2")]
+    gold = [EvidenceRef(document_id="d1"), EvidenceRef(document_id="d2")]
+
+    result = context_precision_at_k(retrieved, gold, k=2)
+
+    assert result.details["returned_count"] == 2
+    assert result.value == pytest.approx(1.0)
+
+
 def test_context_precision_skips_without_retrieved_or_gold() -> None:
     no_retrieved = context_precision_at_k([], [EvidenceRef(document_id="d1")])
     assert no_retrieved.status == "skipped"
