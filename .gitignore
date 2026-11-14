@@ -123,6 +123,7 @@ data/
 !backend/app/data/**
 backend/app/data/__pycache__/
 *.csv
+!docs/repair/phase3e/*.csv
 *.json.gz
 *.parquet
 

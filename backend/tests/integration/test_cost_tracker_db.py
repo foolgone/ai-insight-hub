@@ -113,7 +113,9 @@ async def test_daily_cost_and_usage_stats(db_session, monkeypatch) -> None:
         user_id=user.id,
     )
 
-    daily = await tracker.get_daily_cost(user_id=user.id)
+    # 用数据库时间：宿主与 DB 时钟可能不一致（本地联调环境）
+    db_now = await db_session.scalar(select(func.now()))
+    daily = await tracker.get_daily_cost(user_id=user.id, now=db_now)
     assert daily == Decimal("2.00000000")
 
     stats = await tracker.get_usage_stats(days=7, user_id=user.id)

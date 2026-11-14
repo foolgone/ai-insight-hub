@@ -63,6 +63,17 @@ async def _enqueue_report(session: AsyncSession, task: Task) -> str:
     return enqueue.enqueue_report(str(report.id))
 
 
+async def _enqueue_rag_evaluation(_session: AsyncSession, task: Task) -> str:
+    run_id = (task.params or {}).get("run_id")
+    if not run_id:
+        raise TaskNotRetryableError(
+            details={"task_type": task.task_type, "reason": "missing_run_id"}
+        )
+    from app.composition import enqueue
+
+    return enqueue.enqueue_rag_evaluation(str(run_id))
+
+
 async def _enqueue_structure(_session: AsyncSession, task: Task) -> str:
     from app.composition import enqueue
 
@@ -77,6 +88,7 @@ def _build_registry() -> dict[str, Executor]:
         "extract": _enqueue_extract,
         "analyze": _enqueue_insight,
         "report": _enqueue_report,
+        "rag_eval": _enqueue_rag_evaluation,
     }
 
 

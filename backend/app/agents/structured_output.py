@@ -74,12 +74,16 @@ async def parse_with_repair(
     max_attempts: int = 2,
     usage_collector: list[LLMUsage] | None = None,
     validator: Callable[[TModel], None] | None = None,
+    raw_sink: list[str] | None = None,
 ) -> TModel:
     """解析结构化输出；失败时调用模型修复一次。
 
     ``validator`` 用于**业务校验**（schema 合法但内容不可用，例如
     ``structure=summary`` 却 ``summary`` 为空）。这类错误同样会进入修复轮，
     否则模型返回一个「最小合法但空」的对象就能让整条链路静默降级。
+
+    ``raw_sink`` 用于记录**最终实际用于解析**的原文（可能是修复轮的输出），
+    供评测链路保存 Judge 原始响应；不传则行为不变。
     """
     raw_output = text
     last_error: Exception | None = None
@@ -89,6 +93,8 @@ async def parse_with_repair(
             model = schema.model_validate_json(extract_json_text(raw_output))
             if validator is not None:
                 validator(model)
+            if raw_sink is not None:
+                raw_sink.append(raw_output)
             return model
         except (ValidationError, ValueError) as exc:
             last_error = exc
