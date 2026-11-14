@@ -1,0 +1,13 @@
+{
+  "version": "v1.0.0",
+  "status": "archived_baseline",
+  "active": true,
+  "date": "2026-11-14",
+  "note": "Pilot 运行版本；根目录同名文件为当前生效副本。不得覆盖。",
+  "prompts": {
+    "faithfulness.txt": "287053e9e67ad29fd2de597d1052b8d418040097910462e4a0f176b14295bfed",
+    "answer_correctness.txt": "106e11f2bc39806da5ecf090c6dbcd94d81ca5f53b968e5055d5a33833b30f94",
+    "answer_relevancy.txt": "27203126964ae0ca8f0bb8641cb3c2b145605cec706ef47c5432a0bbd6fad141"
+  },
+  "pilot_results": "docs/repair/phase3e/pilot-judge-results.json"
+}

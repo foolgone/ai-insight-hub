@@ -686,3 +686,40 @@ alembic check   : No new upgrade operations detected
 - Judge 输出结构：✅ 通过
 - Judge 评分质量：❌ 暂不通过（E1–E5）
 - Phase 3E：**暂不宣布验收通过**；不进入 Phase 4。
+
+---
+
+## Phase 3E 补充 · Prompt v1.1.0 设计与人工基准准备（未激活）
+
+**日期**：2026-11-14
+**报告**：`docs/repair/09-phase3e-prompt-v1.1-design.md`
+
+### 1. 交付
+
+| 项 | 位置 |
+|---|---|
+| v1.0.0 归档 + MANIFEST | `backend/app/prompts/rag_judge/v1.0.0/` |
+| v1.1.0 设计稿（pending_review） | `backend/app/prompts/rag_judge/v1.1.0/` |
+| 逐行 diff | `docs/repair/phase3e/prompt-v1.1.0.diff` |
+| 人工标注规范 | `docs/repair/phase3e/annotation-spec.md` |
+| 10 条 Pilot 审核表 | `human-review-pilot.csv` |
+| 30 条剩余审核表 | `human-review-remaining.csv` |
+| 35 条 Claim 审核表 | `pilot-claims-review.csv` |
+| Human Gold 模板（全空） | `human-gold.template.json` |
+| 40 条待审清单 | `pending-review.md` |
+
+### 2. Prompt 修改
+
+- **Faithfulness**：结论句必须为第一条 claim；`factual_claim/non_factual/contradictory` 分类；`non_factual` 不进分母；含事实承诺的建议仍判断；矛盾作为诊断标签。
+- **Correctness**：模糊问题条件式回答 0.8~1.0；无依据确定性结论 ≤0.3；无答案正确拒答 1.0；首句/后文矛盾 ≤0.3。
+- **Relevancy**：只评是否围绕问题；合理拒答可高分但不自动 1.0；正确/错误拒答交给 Correctness。
+
+### 3. 状态
+
+- 根目录 `version.txt` 未改，**线上仍为 v1.0.0**；
+- v1.1.0 **未运行、未激活**；
+- 未改 Phase 3C 数据库/API，未新增 Agent；
+- 待人工审核 40 条基础字段 + 10 条 Pilot Claim 标签；
+- 通过后先用相同 10 条跑 v1.1.0 对比，再决定是否跑完整 40 条。
+
+**Phase 3E：暂停，等待人工审核。不进入 Phase 4。**
