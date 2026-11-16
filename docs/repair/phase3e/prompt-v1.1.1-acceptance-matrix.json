@@ -747,7 +747,7 @@
         "faithfulness<0.5"
       ],
       "tolerance": "target_range exact; labels exact; constraints override",
-      "regression": "v1.0.0 F=0.8 -> 0.6-0.9; not below 0.5",
+      "regression": "v1.0.0 F=0.8 -> 0.6-0.8; not below 0.5",
       "why": "Q11 的关键是“需提供凭证”属于规范性事实，不是纯建议；纯建议才排除。Q11 基础题为 AI draft，验收 provisional。"
     },
     {

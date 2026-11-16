@@ -427,6 +427,8 @@ Correctness/Relevancy 输出不变；`RagJudgeInput` 不变（不新增 answerab
 
 本次设计自检已通过上述静态规则；负向测试（Q35 cl6/cl7 指 C2、supported 无 evidence）能被脚本抓出；未运行 Judge。
 
+六案例 dry-run（2026-11-16，签字通过后执行）已通过：6/6 案例 Schema/标签/证据/计分符合矩阵；负向/边界测试 12/12 符合预期（含 Q21 1.0 超出 0.6–0.7 FAIL、Q21 2/3=0.667 PASS、Q36 base 7/7 PASS）。dry-run 用矩阵 expected_claims 构造合成输出，只验证 Schema/计分/证据规则，不调用 Judge，不代表 Prompt 真实模型表现。
+
 通用：
 
 - 容差：Faithfulness 的六个期望值使用 `target_range=...; tolerance=none`，区间为目标范围，不再额外加 ±0.10；其它精确目标值允许 ±0.10；forbidden/约束优先于分数容差；

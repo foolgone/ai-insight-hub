@@ -958,3 +958,13 @@ alembic check   : No new upgrade operations detected
   meta 明确区间不再叠加 ±0.10；静态脚本按 target_range 校验实际 supported/scorable。
 - 容差字段（2026-11-16）：六个 case 的 per-case tolerance 改为 `target_range exact`，与 meta 的 `tolerance=none` 一致；Q11 F 收窄 0.6–0.8。
 - 静态脚本删除 range 目标的 exact 断言，只保留 target_range 包含检查；0.667 within 0.6–0.7 PASS，1.0 超出 FAIL。
+
+### v1.1.1 六案例 dry-run（2026-11-16，签字通过后执行）
+- 新增 `dry_run_prompt_v1.1.1.py`：只读加载矩阵 + fixtures，用设计稿 §5.1 的 v2 字段构造合成输出，不调用 LLM/Judge、不联网、不写库。
+- 输入只使用 `answer_contexts`（C1–C2）；`retrieval_contexts`（R1–R4）未混入；`RagJudgeInput` v1 解析通过。
+- F 由 claim `support_status` 计算：Q23 3/6=0.5；Q35 6/6=1.0；Q36 8/8=1.0（base 无 cl8 为 7/7=1.0）；Q21#3 3/5=0.6；Q11 3/5=0.6；Q29 skipped(no_scorable_claims)。
+- C/R 为矩阵区间内的模拟候选，非模型输出；所有候选落在 target_range 与 rubric band 内，区间外 probe 被拒绝。
+- 证据逐字校验 24 条（3+6+9+3+3+0）全部命中；Q35 cl6 指 C2、supported 无 evidence 等负向测试均被抓出。
+- 负向/边界测试 12/12 符合预期：包含 Q21 1.0 超出 0.6–0.7 FAIL、Q21 2/3=0.667 PASS、Q36 base 7/7 PASS。
+- 结果文件：`dry-run-v1.1.1-report.md`、`dry-run-v1.1.1-results.json`；未生成 Judge 结果，未激活 v1.1.1。
+- Q11 矩阵 regression 同步收窄为 0.6–0.8，避免与 expected_scores 冲突。

@@ -1,0 +1,2040 @@
+{
+  "meta": {
+    "name": "phase3e-prompt-v1.1.1-dry-run",
+    "kind": "dry_run",
+    "judge_invoked": false,
+    "llm_invoked": false,
+    "network_used": false,
+    "db_written": false,
+    "prompt_version": "v1.1.1",
+    "prompt_status": "design_draft",
+    "active": false,
+    "generated_on": "2026-11-16",
+    "matrix": "docs/repair/phase3e/prompt-v1.1.1-acceptance-matrix.json",
+    "fixtures": "docs/repair/phase3e/prompt-v1.1.1-fixtures.json",
+    "context_source": "fixture.answer_contexts",
+    "claim_source": "matrix.expected_claims (synthetic, not Judge output)",
+    "schema_source": "inline v2 models mirroring design §5.1; backend v2 not implemented",
+    "note": "dry-run only; F computed from matrix claims; C/R simulated; NOT Judge scores"
+  },
+  "summary": {
+    "passed": true,
+    "cases": 6,
+    "passed_cases": 6,
+    "negative_tests": 12,
+    "negative_caught": 12,
+    "judge_invoked": false,
+    "llm_invoked": false,
+    "network_used": false,
+    "db_written": false
+  },
+  "cases": [
+    {
+      "case_id": "Q23",
+      "schema_ok": true,
+      "claims": [
+        {
+          "claim_id": "cl1",
+          "claim": "可以按政策反馈",
+          "claim_type": "factual_claim",
+          "claim_subtype": "policy",
+          "support_status": "unsupported",
+          "is_contradictory": true,
+          "contradiction_with": [
+            "cl2"
+          ],
+          "evidence_count": 0,
+          "required": true,
+          "variant_only": false
+        },
+        {
+          "claim_id": "cl2",
+          "claim": "超过 24 小时反馈不符合受理条件",
+          "claim_type": "factual_claim",
+          "claim_subtype": "policy",
+          "support_status": "supported",
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_count": 1,
+          "required": true,
+          "variant_only": false
+        },
+        {
+          "claim_id": "cl3",
+          "claim": "生鲜食品质量问题需在签收后 24 小时内拍照反馈",
+          "claim_type": "factual_claim",
+          "claim_subtype": "policy",
+          "support_status": "supported",
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_count": 1,
+          "required": true,
+          "variant_only": false
+        },
+        {
+          "claim_id": "cl4",
+          "claim": "24 小时起算点为签收完成时间（非签收日零点）",
+          "claim_type": "factual_claim",
+          "claim_subtype": "policy",
+          "support_status": "insufficient_evidence",
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_count": 0,
+          "required": true,
+          "variant_only": false
+        },
+        {
+          "claim_id": "cl5",
+          "claim": "该时限是硬性要求",
+          "claim_type": "factual_claim",
+          "claim_subtype": "policy",
+          "support_status": "supported",
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_count": 1,
+          "required": true,
+          "variant_only": false
+        },
+        {
+          "claim_id": "cl6",
+          "claim": "需保留问题实物及包装证据",
+          "claim_type": "factual_claim",
+          "claim_subtype": "policy",
+          "support_status": "insufficient_evidence",
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_count": 0,
+          "required": true,
+          "variant_only": false
+        },
+        {
+          "claim_id": "cl7",
+          "claim": "文档未提及例外/宽限期",
+          "claim_type": "non_factual",
+          "claim_subtype": "absence",
+          "support_status": null,
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_count": 0,
+          "required": false,
+          "variant_only": false
+        },
+        {
+          "claim_id": "cl8",
+          "claim": "建议联系客服/提交带时间水印照片",
+          "claim_type": "non_factual",
+          "claim_subtype": "advice",
+          "support_status": null,
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_count": 0,
+          "required": false,
+          "variant_only": false
+        }
+      ],
+      "faithfulness": {
+        "status": "evaluated",
+        "score": 0.5,
+        "skip_reason": null,
+        "scorable_claim_count": 6,
+        "supported_claim_count": 3,
+        "unsupported_claim_count": 1,
+        "insufficient_evidence_count": 2,
+        "non_factual_count": 2,
+        "absence_count": 1,
+        "document_conflict_count": 0,
+        "contradiction_count": 1,
+        "insufficient_evidence_rate": 0.3333333333333333,
+        "all_insufficient": false
+      },
+      "target": {
+        "status": "evaluated",
+        "target_range": [
+          0.4,
+          0.5
+        ],
+        "in_range": true,
+        "errors": []
+      },
+      "correctness_relevancy": {
+        "answer_correctness": {
+          "status": "simulated",
+          "ranges": [
+            [
+              0.0,
+              0.2
+            ]
+          ],
+          "candidates": [
+            {
+              "label": "base",
+              "value": 0.1,
+              "target_range": [
+                0.0,
+                0.2
+              ],
+              "in_range": true,
+              "rubric_band": "0.0-0.2"
+            }
+          ],
+          "negative_probe": {
+            "value": 1.0,
+            "in_range": false,
+            "rejected": true
+          },
+          "errors": []
+        },
+        "answer_relevancy": {
+          "status": "simulated",
+          "ranges": [
+            [
+              0.7,
+              1.0
+            ]
+          ],
+          "candidates": [
+            {
+              "label": "base",
+              "value": 0.75,
+              "target_range": [
+                0.7,
+                1.0
+              ],
+              "in_range": true,
+              "rubric_band": "0.7-0.8"
+            }
+          ],
+          "negative_probe": {
+            "value": 0.0,
+            "in_range": false,
+            "rejected": true
+          },
+          "errors": []
+        }
+      },
+      "evidence_checks": [
+        {
+          "claim_id": "cl2",
+          "context_id": "C1",
+          "quote": "质量问题需在签收后 24 小时内拍照反馈",
+          "ok": true,
+          "error": null
+        },
+        {
+          "claim_id": "cl3",
+          "context_id": "C1",
+          "quote": "质量问题需在签收后 24 小时内拍照反馈",
+          "ok": true,
+          "error": null
+        },
+        {
+          "claim_id": "cl5",
+          "context_id": "C1",
+          "quote": "质量问题需在签收后 24 小时内拍照反馈。",
+          "ok": true,
+          "error": null
+        }
+      ],
+      "labels": {
+        "cl1": {
+          "claim_type": "factual_claim",
+          "claim_subtype": "policy",
+          "support_status": "unsupported",
+          "is_contradictory": true,
+          "contradiction_with": [
+            "cl2"
+          ]
+        },
+        "cl7": {
+          "claim_type": "non_factual",
+          "claim_subtype": "absence"
+        },
+        "cl8": {
+          "claim_type": "non_factual",
+          "claim_subtype": "advice"
+        }
+      },
+      "label_errors": [],
+      "constraints": [
+        {
+          "name": "cl1 remains factual",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "cl1 contradictory_with=['cl2']",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "F != 1.0",
+          "ok": true,
+          "detail": "F=0.5"
+        },
+        {
+          "name": "C <= 0.3 (v1.0.0 regression)",
+          "ok": true,
+          "detail": "C=0.1"
+        },
+        {
+          "name": "C not in 0.3-0.6",
+          "ok": true,
+          "detail": "C=0.1"
+        },
+        {
+          "name": "wrong_facts non-empty",
+          "ok": null,
+          "detail": "requires Judge output; not produced in dry-run"
+        }
+      ],
+      "errors": [],
+      "passed": true,
+      "input": {
+        "checks": [
+          {
+            "name": "judge_context_source=answer_contexts",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "answer_contexts count=2",
+            "ok": true,
+            "detail": "count=2"
+          },
+          {
+            "name": "retrieval_contexts not mixed",
+            "ok": true,
+            "detail": "retrieval=4"
+          },
+          {
+            "name": "RagJudgeInput v1 parse",
+            "ok": true,
+            "detail": "contexts=2"
+          }
+        ],
+        "errors": []
+      }
+    },
+    {
+      "case_id": "Q35",
+      "schema_ok": true,
+      "claims": [
+        {
+          "claim_id": "cl1",
+          "claim": "现货商品付款后 48 小时内发出",
+          "claim_type": "factual_claim",
+          "claim_subtype": "policy",
+          "support_status": "supported",
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_count": 1,
+          "required": true,
+          "variant_only": false
+        },
+        {
+          "claim_id": "cl2",
+          "claim": "预售商品以商品页标注时间为准",
+          "claim_type": "factual_claim",
+          "claim_subtype": "policy",
+          "support_status": "supported",
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_count": 1,
+          "required": true,
+          "variant_only": false
+        },
+        {
+          "claim_id": "cl3",
+          "claim": "大件商品发货时间为 5 个工作日内",
+          "claim_type": "factual_claim",
+          "claim_subtype": "policy",
+          "support_status": "supported",
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_count": 1,
+          "required": true,
+          "variant_only": false
+        },
+        {
+          "claim_id": "cl4",
+          "claim": "大件商品配送前电话预约",
+          "claim_type": "factual_claim",
+          "claim_subtype": "policy",
+          "support_status": "supported",
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_count": 1,
+          "required": true,
+          "variant_only": false
+        },
+        {
+          "claim_id": "cl5",
+          "claim": "文档未说明快递运输/送达需要多久",
+          "claim_type": "non_factual",
+          "claim_subtype": "absence",
+          "support_status": null,
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_count": 0,
+          "required": true,
+          "variant_only": false
+        },
+        {
+          "claim_id": "cl6",
+          "claim": "发货后可在「我的订单」查看物流轨迹",
+          "claim_type": "factual_claim",
+          "claim_subtype": "policy",
+          "support_status": "supported",
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_count": 1,
+          "required": true,
+          "variant_only": false
+        },
+        {
+          "claim_id": "cl7",
+          "claim": "物流信息超过 24 小时未更新可联系客服",
+          "claim_type": "factual_claim",
+          "claim_subtype": "policy",
+          "support_status": "supported",
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_count": 1,
+          "required": true,
+          "variant_only": false
+        },
+        {
+          "claim_id": "cl8",
+          "claim": "建议查看物流/联系客服",
+          "claim_type": "non_factual",
+          "claim_subtype": "advice",
+          "support_status": null,
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_count": 0,
+          "required": false,
+          "variant_only": false
+        }
+      ],
+      "faithfulness": {
+        "status": "evaluated",
+        "score": 1.0,
+        "skip_reason": null,
+        "scorable_claim_count": 6,
+        "supported_claim_count": 6,
+        "unsupported_claim_count": 0,
+        "insufficient_evidence_count": 0,
+        "non_factual_count": 2,
+        "absence_count": 1,
+        "document_conflict_count": 0,
+        "contradiction_count": 0,
+        "insufficient_evidence_rate": 0.0,
+        "all_insufficient": false
+      },
+      "target": {
+        "status": "evaluated",
+        "target_range": [
+          0.8,
+          1.0
+        ],
+        "in_range": true,
+        "errors": []
+      },
+      "correctness_relevancy": {
+        "answer_correctness": {
+          "status": "simulated",
+          "ranges": [
+            [
+              0.7,
+              1.0
+            ],
+            [
+              0.9,
+              1.0
+            ]
+          ],
+          "candidates": [
+            {
+              "label": "target",
+              "value": 0.95,
+              "target_range": [
+                0.7,
+                1.0
+              ],
+              "in_range": true,
+              "rubric_band": "0.9-1.0"
+            }
+          ],
+          "negative_probe": {
+            "value": 0.0,
+            "in_range": false,
+            "rejected": true
+          },
+          "errors": []
+        },
+        "answer_relevancy": {
+          "status": "simulated",
+          "ranges": [
+            [
+              0.8,
+              1.0
+            ]
+          ],
+          "candidates": [
+            {
+              "label": "base",
+              "value": 0.95,
+              "target_range": [
+                0.8,
+                1.0
+              ],
+              "in_range": true,
+              "rubric_band": "0.9-1.0"
+            }
+          ],
+          "negative_probe": {
+            "value": 0.0,
+            "in_range": false,
+            "rejected": true
+          },
+          "errors": []
+        }
+      },
+      "evidence_checks": [
+        {
+          "claim_id": "cl1",
+          "context_id": "C1",
+          "quote": "现货商品在付款后 48 小时内发出",
+          "ok": true,
+          "error": null
+        },
+        {
+          "claim_id": "cl2",
+          "context_id": "C1",
+          "quote": "预售商品以商品页标注的发货时间为准",
+          "ok": true,
+          "error": null
+        },
+        {
+          "claim_id": "cl3",
+          "context_id": "C1",
+          "quote": "大件商品（家具、家电）发货时间为 5 个工作日内",
+          "ok": true,
+          "error": null
+        },
+        {
+          "claim_id": "cl4",
+          "context_id": "C1",
+          "quote": "配送前会电话预约",
+          "ok": true,
+          "error": null
+        },
+        {
+          "claim_id": "cl6",
+          "context_id": "C1",
+          "quote": "订单发货后可在「我的订单」查看物流单号与实时轨迹",
+          "ok": true,
+          "error": null
+        },
+        {
+          "claim_id": "cl7",
+          "context_id": "C1",
+          "quote": "物流信息超过 24 小时未更新时，可联系客服协助核查",
+          "ok": true,
+          "error": null
+        }
+      ],
+      "labels": {
+        "cl5": {
+          "claim_type": "non_factual",
+          "claim_subtype": "absence",
+          "support_status": null
+        },
+        "cl8": {
+          "claim_type": "non_factual",
+          "claim_subtype": "advice"
+        }
+      },
+      "label_errors": [],
+      "constraints": [
+        {
+          "name": "cl5 non_factual/absence",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "cl5 support_status is null",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "C >= 0.7",
+          "ok": true,
+          "detail": "C=0.95"
+        },
+        {
+          "name": "F >= 0.8",
+          "ok": true,
+          "detail": "F=1.0"
+        },
+        {
+          "name": "no region penalty",
+          "ok": null,
+          "detail": "requires Judge semantics; not machine-checkable"
+        },
+        {
+          "name": "no transit-time requirement",
+          "ok": null,
+          "detail": "requires answer semantics; not machine-checkable"
+        }
+      ],
+      "errors": [],
+      "passed": true,
+      "input": {
+        "checks": [
+          {
+            "name": "judge_context_source=answer_contexts",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "answer_contexts count=2",
+            "ok": true,
+            "detail": "count=2"
+          },
+          {
+            "name": "retrieval_contexts not mixed",
+            "ok": true,
+            "detail": "retrieval=4"
+          },
+          {
+            "name": "RagJudgeInput v1 parse",
+            "ok": true,
+            "detail": "contexts=2"
+          }
+        ],
+        "errors": []
+      }
+    },
+    {
+      "case_id": "Q36",
+      "schema_ok": true,
+      "claims": [
+        {
+          "claim_id": "cl1",
+          "claim": "普通商品签收后 7 天内可申请无理由退款",
+          "claim_type": "factual_claim",
+          "claim_subtype": "policy",
+          "support_status": "supported",
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_count": 1,
+          "required": true,
+          "variant_only": false
+        },
+        {
+          "claim_id": "cl2",
+          "claim": "定制类商品不支持无理由退款",
+          "claim_type": "factual_claim",
+          "claim_subtype": "policy",
+          "support_status": "supported",
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_count": 1,
+          "required": true,
+          "variant_only": false
+        },
+        {
+          "claim_id": "cl3",
+          "claim": "生鲜食品不支持无理由退款",
+          "claim_type": "factual_claim",
+          "claim_subtype": "policy",
+          "support_status": "supported",
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_count": 1,
+          "required": true,
+          "variant_only": false
+        },
+        {
+          "claim_id": "cl4",
+          "claim": "生鲜食品质量问题需在签收后 24 小时内拍照反馈",
+          "claim_type": "factual_claim",
+          "claim_subtype": "policy",
+          "support_status": "supported",
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_count": 1,
+          "required": true,
+          "variant_only": false
+        },
+        {
+          "claim_id": "cl5",
+          "claim": "已激活的虚拟商品不支持无理由退款",
+          "claim_type": "factual_claim",
+          "claim_subtype": "policy",
+          "support_status": "supported",
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_count": 1,
+          "required": true,
+          "variant_only": false
+        },
+        {
+          "claim_id": "cl6",
+          "claim": "虚拟商品（充值、会员、课程）一经售出不支持退款",
+          "claim_type": "factual_claim",
+          "claim_subtype": "policy",
+          "support_status": "supported",
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_count": 1,
+          "required": true,
+          "variant_only": false
+        },
+        {
+          "claim_id": "cl7",
+          "claim": "定制商品支持质量问题退换，不支持无理由退换",
+          "claim_type": "factual_claim",
+          "claim_subtype": "policy",
+          "support_status": "supported",
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_count": 1,
+          "required": true,
+          "variant_only": false
+        },
+        {
+          "claim_id": "cl8",
+          "claim": "§1 与 §12 对虚拟商品范围表述不一致",
+          "claim_type": "factual_claim",
+          "claim_subtype": "conflict",
+          "support_status": "supported",
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_count": 2,
+          "required": false,
+          "variant_only": true
+        }
+      ],
+      "faithfulness": {
+        "status": "evaluated",
+        "score": 1.0,
+        "skip_reason": null,
+        "scorable_claim_count": 8,
+        "supported_claim_count": 8,
+        "unsupported_claim_count": 0,
+        "insufficient_evidence_count": 0,
+        "non_factual_count": 0,
+        "absence_count": 0,
+        "document_conflict_count": 1,
+        "contradiction_count": 0,
+        "insufficient_evidence_rate": 0.0,
+        "all_insufficient": false
+      },
+      "target": {
+        "status": "evaluated",
+        "target_range": [
+          0.8,
+          1.0
+        ],
+        "in_range": true,
+        "errors": []
+      },
+      "correctness_relevancy": {
+        "answer_correctness": {
+          "status": "simulated",
+          "ranges": [
+            [
+              0.5,
+              0.6
+            ],
+            [
+              0.9,
+              1.0
+            ]
+          ],
+          "candidates": [
+            {
+              "label": "v1.0.0-no-disclosure",
+              "value": 0.55,
+              "target_range": [
+                0.5,
+                0.6
+              ],
+              "in_range": true,
+              "rubric_band": "0.5-0.6"
+            },
+            {
+              "label": "disclosure-variant",
+              "value": 0.95,
+              "target_range": [
+                0.9,
+                1.0
+              ],
+              "in_range": true,
+              "rubric_band": "0.9-1.0"
+            }
+          ],
+          "negative_probe": {
+            "value": 0.0,
+            "in_range": false,
+            "rejected": true
+          },
+          "errors": []
+        },
+        "answer_relevancy": {
+          "status": "simulated",
+          "ranges": [
+            [
+              0.8,
+              1.0
+            ]
+          ],
+          "candidates": [
+            {
+              "label": "base",
+              "value": 0.95,
+              "target_range": [
+                0.8,
+                1.0
+              ],
+              "in_range": true,
+              "rubric_band": "0.9-1.0"
+            }
+          ],
+          "negative_probe": {
+            "value": 0.0,
+            "in_range": false,
+            "rejected": true
+          },
+          "errors": []
+        }
+      },
+      "evidence_checks": [
+        {
+          "claim_id": "cl1",
+          "context_id": "C1",
+          "quote": "订单签收后 7 天内可申请无理由退款",
+          "ok": true,
+          "error": null
+        },
+        {
+          "claim_id": "cl2",
+          "context_id": "C1",
+          "quote": "定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款",
+          "ok": true,
+          "error": null
+        },
+        {
+          "claim_id": "cl3",
+          "context_id": "C1",
+          "quote": "定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款",
+          "ok": true,
+          "error": null
+        },
+        {
+          "claim_id": "cl4",
+          "context_id": "C1",
+          "quote": "质量问题需在签收后 24 小时内拍照反馈",
+          "ok": true,
+          "error": null
+        },
+        {
+          "claim_id": "cl5",
+          "context_id": "C1",
+          "quote": "已激活的虚拟商品不支持无理由退款",
+          "ok": true,
+          "error": null
+        },
+        {
+          "claim_id": "cl6",
+          "context_id": "C1",
+          "quote": "虚拟商品（充值、会员、课程）一经售出不支持退款",
+          "ok": true,
+          "error": null
+        },
+        {
+          "claim_id": "cl7",
+          "context_id": "C1",
+          "quote": "定制商品支持质量问题退换，不支持无理由退换",
+          "ok": true,
+          "error": null
+        },
+        {
+          "claim_id": "cl8",
+          "context_id": "C1",
+          "quote": "定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款",
+          "ok": true,
+          "error": null
+        },
+        {
+          "claim_id": "cl8",
+          "context_id": "C1",
+          "quote": "虚拟商品（充值、会员、课程）一经售出不支持退款",
+          "ok": true,
+          "error": null
+        }
+      ],
+      "labels": {
+        "cl8": {
+          "claim_type": "factual_claim",
+          "claim_subtype": "conflict",
+          "support_status": "supported",
+          "is_contradictory": false,
+          "evidence_count_min": 2
+        }
+      },
+      "label_errors": [],
+      "constraints": [
+        {
+          "name": "cl8 factual/conflict/supported",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "cl8 not contradictory",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "cl8 two-sided evidence",
+          "ok": true,
+          "detail": "evidence=2"
+        },
+        {
+          "name": "base C 0.5-0.6",
+          "ok": true,
+          "detail": "C=0.55"
+        },
+        {
+          "name": "base C not 0.0-0.2",
+          "ok": true,
+          "detail": "C=0.55"
+        },
+        {
+          "name": "variant C 0.9-1.0",
+          "ok": true,
+          "detail": "C=0.95"
+        },
+        {
+          "name": "wrong_facts empty for real quote",
+          "ok": null,
+          "detail": "requires Judge output"
+        },
+        {
+          "name": "no forced canonical rule",
+          "ok": null,
+          "detail": "requires answer semantics"
+        }
+      ],
+      "errors": [],
+      "passed": true,
+      "input": {
+        "checks": [
+          {
+            "name": "judge_context_source=answer_contexts",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "answer_contexts count=2",
+            "ok": true,
+            "detail": "count=2"
+          },
+          {
+            "name": "retrieval_contexts not mixed",
+            "ok": true,
+            "detail": "retrieval=4"
+          },
+          {
+            "name": "RagJudgeInput v1 parse",
+            "ok": true,
+            "detail": "contexts=2"
+          }
+        ],
+        "errors": []
+      }
+    },
+    {
+      "case_id": "Q21#3",
+      "schema_ok": true,
+      "claims": [
+        {
+          "claim_id": "cl1",
+          "claim": "无理由退款仅限签收后 7 天内",
+          "claim_type": "factual_claim",
+          "claim_subtype": "policy",
+          "support_status": "supported",
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_count": 1,
+          "required": true,
+          "variant_only": false
+        },
+        {
+          "claim_id": "cl2",
+          "claim": "第 10 天已超出 7 天，不支持无理由退款",
+          "claim_type": "factual_claim",
+          "claim_subtype": "policy",
+          "support_status": "supported",
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_count": 1,
+          "required": true,
+          "variant_only": false
+        },
+        {
+          "claim_id": "cl3",
+          "claim": "该限制适用于普通商品（非定制/生鲜/虚拟）",
+          "claim_type": "factual_claim",
+          "claim_subtype": "policy",
+          "support_status": "supported",
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_count": 1,
+          "required": true,
+          "variant_only": false
+        },
+        {
+          "claim_id": "cl4",
+          "claim": "质量问题不受 7 天无理由限制",
+          "claim_type": "factual_claim",
+          "claim_subtype": "policy",
+          "support_status": "insufficient_evidence",
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_count": 0,
+          "required": true,
+          "variant_only": false
+        },
+        {
+          "claim_id": "cl5",
+          "claim": "可依据保修条款申请保修",
+          "claim_type": "factual_claim",
+          "claim_subtype": "policy",
+          "support_status": "insufficient_evidence",
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_count": 0,
+          "required": true,
+          "variant_only": false
+        },
+        {
+          "claim_id": "cl6",
+          "claim": "建议联系客服",
+          "claim_type": "non_factual",
+          "claim_subtype": "advice",
+          "support_status": null,
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_count": 0,
+          "required": false,
+          "variant_only": false
+        }
+      ],
+      "faithfulness": {
+        "status": "evaluated",
+        "score": 0.6,
+        "skip_reason": null,
+        "scorable_claim_count": 5,
+        "supported_claim_count": 3,
+        "unsupported_claim_count": 0,
+        "insufficient_evidence_count": 2,
+        "non_factual_count": 1,
+        "absence_count": 0,
+        "document_conflict_count": 0,
+        "contradiction_count": 0,
+        "insufficient_evidence_rate": 0.4,
+        "all_insufficient": false
+      },
+      "target": {
+        "status": "evaluated",
+        "target_range": [
+          0.6,
+          0.7
+        ],
+        "in_range": true,
+        "errors": []
+      },
+      "correctness_relevancy": {
+        "answer_correctness": {
+          "status": "not_applicable",
+          "reason": "matrix has no target for this case",
+          "errors": []
+        },
+        "answer_relevancy": {
+          "status": "not_applicable",
+          "reason": "matrix has no target for this case",
+          "errors": []
+        }
+      },
+      "evidence_checks": [
+        {
+          "claim_id": "cl1",
+          "context_id": "C1",
+          "quote": "订单签收后 7 天内可申请无理由退款。",
+          "ok": true,
+          "error": null
+        },
+        {
+          "claim_id": "cl2",
+          "context_id": "C1",
+          "quote": "订单签收后 7 天内可申请无理由退款。",
+          "ok": true,
+          "error": null
+        },
+        {
+          "claim_id": "cl3",
+          "context_id": "C1",
+          "quote": "定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。",
+          "ok": true,
+          "error": null
+        }
+      ],
+      "labels": {
+        "cl4": {
+          "support_status": "insufficient_evidence",
+          "is_contradictory": false
+        },
+        "cl5": {
+          "support_status": "insufficient_evidence"
+        },
+        "cl6": {
+          "claim_type": "non_factual",
+          "claim_subtype": "advice"
+        }
+      },
+      "label_errors": [],
+      "constraints": [
+        {
+          "name": "cl4 insufficient",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "cl4 not unsupported",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "cl5 insufficient",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "F != 1.0",
+          "ok": true,
+          "detail": "F=0.6"
+        },
+        {
+          "name": "single Q21#3 claim score=0.0",
+          "ok": true,
+          "detail": "score=0.0"
+        }
+      ],
+      "errors": [],
+      "passed": true,
+      "input": {
+        "checks": [
+          {
+            "name": "judge_context_source=answer_contexts",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "answer_contexts count=2",
+            "ok": true,
+            "detail": "count=2"
+          },
+          {
+            "name": "retrieval_contexts not mixed",
+            "ok": true,
+            "detail": "retrieval=4"
+          },
+          {
+            "name": "RagJudgeInput v1 parse",
+            "ok": true,
+            "detail": "contexts=2"
+          }
+        ],
+        "errors": []
+      }
+    },
+    {
+      "case_id": "Q11",
+      "schema_ok": true,
+      "claims": [
+        {
+          "claim_id": "cl1",
+          "claim": "第 5 天在 7 天时限内",
+          "claim_type": "factual_claim",
+          "claim_subtype": "policy",
+          "support_status": "supported",
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_count": 1,
+          "required": true,
+          "variant_only": false
+        },
+        {
+          "claim_id": "cl2",
+          "claim": "定制类商品不支持无理由退款",
+          "claim_type": "factual_claim",
+          "claim_subtype": "policy",
+          "support_status": "supported",
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_count": 1,
+          "required": true,
+          "variant_only": false
+        },
+        {
+          "claim_id": "cl3",
+          "claim": "定制商品支持质量问题退换",
+          "claim_type": "factual_claim",
+          "claim_subtype": "policy",
+          "support_status": "supported",
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_count": 1,
+          "required": true,
+          "variant_only": false
+        },
+        {
+          "claim_id": "cl4",
+          "claim": "需提供照片/视频等凭证",
+          "claim_type": "factual_claim",
+          "claim_subtype": "policy",
+          "support_status": "insufficient_evidence",
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_count": 0,
+          "required": true,
+          "variant_only": false
+        },
+        {
+          "claim_id": "cl5",
+          "claim": "由商家审核认定",
+          "claim_type": "factual_claim",
+          "claim_subtype": "policy",
+          "support_status": "insufficient_evidence",
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_count": 0,
+          "required": true,
+          "variant_only": false
+        },
+        {
+          "claim_id": "cl6",
+          "claim": "建议联系/补充材料",
+          "claim_type": "non_factual",
+          "claim_subtype": "advice",
+          "support_status": null,
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_count": 0,
+          "required": false,
+          "variant_only": false
+        }
+      ],
+      "faithfulness": {
+        "status": "evaluated",
+        "score": 0.6,
+        "skip_reason": null,
+        "scorable_claim_count": 5,
+        "supported_claim_count": 3,
+        "unsupported_claim_count": 0,
+        "insufficient_evidence_count": 2,
+        "non_factual_count": 1,
+        "absence_count": 0,
+        "document_conflict_count": 0,
+        "contradiction_count": 0,
+        "insufficient_evidence_rate": 0.4,
+        "all_insufficient": false
+      },
+      "target": {
+        "status": "evaluated",
+        "target_range": [
+          0.6,
+          0.8
+        ],
+        "in_range": true,
+        "errors": []
+      },
+      "correctness_relevancy": {
+        "answer_correctness": {
+          "status": "simulated",
+          "ranges": [
+            [
+              0.8,
+              1.0
+            ]
+          ],
+          "candidates": [
+            {
+              "label": "base",
+              "value": 0.95,
+              "target_range": [
+                0.8,
+                1.0
+              ],
+              "in_range": true,
+              "rubric_band": "0.9-1.0"
+            }
+          ],
+          "negative_probe": {
+            "value": 0.0,
+            "in_range": false,
+            "rejected": true
+          },
+          "errors": []
+        },
+        "answer_relevancy": {
+          "status": "simulated",
+          "ranges": [
+            [
+              0.9,
+              1.0
+            ]
+          ],
+          "candidates": [
+            {
+              "label": "base",
+              "value": 0.95,
+              "target_range": [
+                0.9,
+                1.0
+              ],
+              "in_range": true,
+              "rubric_band": "0.9-1.0"
+            }
+          ],
+          "negative_probe": {
+            "value": 0.0,
+            "in_range": false,
+            "rejected": true
+          },
+          "errors": []
+        }
+      },
+      "evidence_checks": [
+        {
+          "claim_id": "cl1",
+          "context_id": "C1",
+          "quote": "订单签收后 7 天内可申请无理由退款。",
+          "ok": true,
+          "error": null
+        },
+        {
+          "claim_id": "cl2",
+          "context_id": "C1",
+          "quote": "定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。",
+          "ok": true,
+          "error": null
+        },
+        {
+          "claim_id": "cl3",
+          "context_id": "C1",
+          "quote": "定制商品支持质量问题退换，不支持无理由退换。",
+          "ok": true,
+          "error": null
+        }
+      ],
+      "labels": {
+        "cl4": {
+          "claim_type": "factual_claim",
+          "claim_subtype": "policy",
+          "support_status": "insufficient_evidence"
+        },
+        "cl5": {
+          "claim_type": "factual_claim",
+          "claim_subtype": "policy",
+          "support_status": "insufficient_evidence"
+        },
+        "cl6": {
+          "claim_type": "non_factual",
+          "claim_subtype": "advice"
+        }
+      },
+      "label_errors": [],
+      "constraints": [
+        {
+          "name": "cl4 factual/policy",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "cl4 insufficient",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "cl4 not excluded as non_factual",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "F != 1.0",
+          "ok": true,
+          "detail": "F=0.6"
+        },
+        {
+          "name": "F >= 0.5",
+          "ok": true,
+          "detail": "F=0.6"
+        }
+      ],
+      "errors": [],
+      "passed": true,
+      "input": {
+        "checks": [
+          {
+            "name": "judge_context_source=answer_contexts",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "answer_contexts count=2",
+            "ok": true,
+            "detail": "count=2"
+          },
+          {
+            "name": "retrieval_contexts not mixed",
+            "ok": true,
+            "detail": "retrieval=4"
+          },
+          {
+            "name": "RagJudgeInput v1 parse",
+            "ok": true,
+            "detail": "contexts=2"
+          }
+        ],
+        "errors": []
+      }
+    },
+    {
+      "case_id": "Q29",
+      "schema_ok": true,
+      "claims": [
+        {
+          "claim_id": "cl1",
+          "claim": "文档未提及货到付款",
+          "claim_type": "non_factual",
+          "claim_subtype": "absence",
+          "support_status": null,
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_count": 0,
+          "required": true,
+          "variant_only": false
+        },
+        {
+          "claim_id": "cl2",
+          "claim": "无法确认是否支持货到付款",
+          "claim_type": "non_factual",
+          "claim_subtype": "meta",
+          "support_status": null,
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_count": 0,
+          "required": true,
+          "variant_only": false
+        },
+        {
+          "claim_id": "cl3",
+          "claim": "建议查看结算页/联系客服",
+          "claim_type": "non_factual",
+          "claim_subtype": "advice",
+          "support_status": null,
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_count": 0,
+          "required": false,
+          "variant_only": false
+        }
+      ],
+      "faithfulness": {
+        "status": "skipped",
+        "score": null,
+        "skip_reason": "no_scorable_claims",
+        "scorable_claim_count": 0,
+        "supported_claim_count": 0,
+        "unsupported_claim_count": 0,
+        "insufficient_evidence_count": 0,
+        "non_factual_count": 3,
+        "absence_count": 1,
+        "document_conflict_count": 0,
+        "contradiction_count": 0,
+        "insufficient_evidence_rate": null,
+        "all_insufficient": false
+      },
+      "target": {
+        "status": "skipped",
+        "target_range": null,
+        "in_range": true,
+        "errors": []
+      },
+      "correctness_relevancy": {
+        "answer_correctness": {
+          "status": "simulated",
+          "ranges": [
+            [
+              0.9,
+              1.0
+            ]
+          ],
+          "candidates": [
+            {
+              "label": "base",
+              "value": 0.95,
+              "target_range": [
+                0.9,
+                1.0
+              ],
+              "in_range": true,
+              "rubric_band": "0.9-1.0"
+            }
+          ],
+          "negative_probe": {
+            "value": 0.0,
+            "in_range": false,
+            "rejected": true
+          },
+          "errors": []
+        },
+        "answer_relevancy": {
+          "status": "simulated",
+          "ranges": [
+            [
+              0.9,
+              1.0
+            ]
+          ],
+          "candidates": [
+            {
+              "label": "base",
+              "value": 0.95,
+              "target_range": [
+                0.9,
+                1.0
+              ],
+              "in_range": true,
+              "rubric_band": "0.9-1.0"
+            }
+          ],
+          "negative_probe": {
+            "value": 0.0,
+            "in_range": false,
+            "rejected": true
+          },
+          "errors": []
+        }
+      },
+      "evidence_checks": [],
+      "labels": {
+        "cl1": {
+          "claim_type": "non_factual",
+          "claim_subtype": "absence"
+        },
+        "cl2": {
+          "claim_type": "non_factual",
+          "claim_subtype": "meta"
+        },
+        "cl3": {
+          "claim_type": "non_factual",
+          "claim_subtype": "advice"
+        }
+      },
+      "label_errors": [],
+      "constraints": [
+        {
+          "name": "F skipped",
+          "ok": true,
+          "detail": "status=skipped"
+        },
+        {
+          "name": "skip reason no_scorable_claims",
+          "ok": true,
+          "detail": "reason=no_scorable_claims"
+        },
+        {
+          "name": "R >= 0.8",
+          "ok": true,
+          "detail": "R=0.95"
+        },
+        {
+          "name": "wrong refusal absent",
+          "ok": null,
+          "detail": "requires Judge output"
+        }
+      ],
+      "errors": [],
+      "passed": true,
+      "input": {
+        "checks": [
+          {
+            "name": "judge_context_source=answer_contexts",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "answer_contexts count=2",
+            "ok": true,
+            "detail": "count=2"
+          },
+          {
+            "name": "retrieval_contexts not mixed",
+            "ok": true,
+            "detail": "retrieval=4"
+          },
+          {
+            "name": "RagJudgeInput v1 parse",
+            "ok": true,
+            "detail": "contexts=2"
+          }
+        ],
+        "errors": []
+      }
+    }
+  ],
+  "negative_tests": [
+    {
+      "name": "Q35 cl6 evidence points to C2",
+      "case_id": "Q35",
+      "expected": "FAIL containing 'quote not verbatim in C2'",
+      "observed": "cl6: quote not verbatim in C2",
+      "faithfulness": {
+        "status": "evaluated",
+        "score": 1.0,
+        "skip_reason": null,
+        "scorable_claim_count": 6,
+        "supported_claim_count": 6,
+        "unsupported_claim_count": 0,
+        "insufficient_evidence_count": 0,
+        "non_factual_count": 2,
+        "absence_count": 1,
+        "document_conflict_count": 0,
+        "contradiction_count": 0,
+        "insufficient_evidence_rate": 0.0,
+        "all_insufficient": false
+      },
+      "target": {
+        "status": "evaluated",
+        "target_range": [
+          0.8,
+          1.0
+        ],
+        "in_range": true,
+        "errors": []
+      },
+      "errors": [
+        "cl6: quote not verbatim in C2"
+      ],
+      "as_expected": true
+    },
+    {
+      "name": "Q23 cl1 demoted to non_factual",
+      "case_id": "Q23",
+      "expected": "FAIL containing 'Q23/cl1'",
+      "observed": "Q23/cl1: claim_type expected 'factual_claim', got 'non_factual'",
+      "faithfulness": {
+        "status": "evaluated",
+        "score": 0.6,
+        "skip_reason": null,
+        "scorable_claim_count": 5,
+        "supported_claim_count": 3,
+        "unsupported_claim_count": 0,
+        "insufficient_evidence_count": 2,
+        "non_factual_count": 3,
+        "absence_count": 1,
+        "document_conflict_count": 0,
+        "contradiction_count": 0,
+        "insufficient_evidence_rate": 0.4,
+        "all_insufficient": false
+      },
+      "target": {
+        "status": "evaluated",
+        "target_range": [
+          0.4,
+          0.5
+        ],
+        "in_range": false,
+        "errors": [
+          "supported/scorable=0.6, target_range=0.4-0.5"
+        ]
+      },
+      "errors": [
+        "Q23/cl1: claim_type expected 'factual_claim', got 'non_factual'",
+        "Q23/cl1: claim_subtype expected 'policy', got 'meta'",
+        "Q23/cl1: support_status expected 'unsupported', got None",
+        "Q23/cl1: is_contradictory expected True, got False",
+        "Q23/cl1: contradiction_with expected ['cl2'], got []",
+        "supported/scorable=0.6, target_range=0.4-0.5",
+        "constraint: cl1 remains factual ()",
+        "constraint: cl1 contradictory_with=['cl2'] ()"
+      ],
+      "as_expected": true
+    },
+    {
+      "name": "Q21 cl4 supported without evidence",
+      "case_id": "Q21#3",
+      "expected": "FAIL containing 'supported without evidence_refs'",
+      "observed": "cl4: supported without evidence_refs",
+      "faithfulness": {
+        "status": "evaluated",
+        "score": 0.8,
+        "skip_reason": null,
+        "scorable_claim_count": 5,
+        "supported_claim_count": 4,
+        "unsupported_claim_count": 0,
+        "insufficient_evidence_count": 1,
+        "non_factual_count": 1,
+        "absence_count": 0,
+        "document_conflict_count": 0,
+        "contradiction_count": 0,
+        "insufficient_evidence_rate": 0.2,
+        "all_insufficient": false
+      },
+      "target": {
+        "status": "evaluated",
+        "target_range": [
+          0.6,
+          0.7
+        ],
+        "in_range": false,
+        "errors": [
+          "supported/scorable=0.8, target_range=0.6-0.7"
+        ]
+      },
+      "errors": [
+        "cl4: supported without evidence_refs",
+        "Q21#3/cl4: support_status expected 'insufficient_evidence', got 'supported'",
+        "supported/scorable=0.8, target_range=0.6-0.7",
+        "constraint: cl4 insufficient ()",
+        "constraint: single Q21#3 claim score=0.0 (score=1.0)"
+      ],
+      "as_expected": true
+    },
+    {
+      "name": "Q21 all claims supported -> F=1.0",
+      "case_id": "Q21#3",
+      "expected": "FAIL containing 'target_range'",
+      "observed": "supported/scorable=1.0, target_range=0.6-0.7",
+      "faithfulness": {
+        "status": "evaluated",
+        "score": 1.0,
+        "skip_reason": null,
+        "scorable_claim_count": 5,
+        "supported_claim_count": 5,
+        "unsupported_claim_count": 0,
+        "insufficient_evidence_count": 0,
+        "non_factual_count": 1,
+        "absence_count": 0,
+        "document_conflict_count": 0,
+        "contradiction_count": 0,
+        "insufficient_evidence_rate": 0.0,
+        "all_insufficient": false
+      },
+      "target": {
+        "status": "evaluated",
+        "target_range": [
+          0.6,
+          0.7
+        ],
+        "in_range": false,
+        "errors": [
+          "supported/scorable=1.0, target_range=0.6-0.7"
+        ]
+      },
+      "errors": [
+        "supported/scorable=1.0, target_range=0.6-0.7"
+      ],
+      "as_expected": true
+    },
+    {
+      "name": "Q29 fabricated supported policy claim",
+      "case_id": "Q29",
+      "expected": "FAIL containing 'expected skipped'",
+      "observed": "expected skipped but faithfulness was evaluated",
+      "faithfulness": {
+        "status": "evaluated",
+        "score": 1.0,
+        "skip_reason": null,
+        "scorable_claim_count": 1,
+        "supported_claim_count": 1,
+        "unsupported_claim_count": 0,
+        "insufficient_evidence_count": 0,
+        "non_factual_count": 3,
+        "absence_count": 1,
+        "document_conflict_count": 0,
+        "contradiction_count": 0,
+        "insufficient_evidence_rate": 0.0,
+        "all_insufficient": false
+      },
+      "target": {
+        "status": "skipped",
+        "target_range": null,
+        "in_range": false,
+        "errors": [
+          "expected skipped but faithfulness was evaluated",
+          "expected skip_reason=no_scorable_claims, got None"
+        ]
+      },
+      "errors": [
+        "expected skipped but faithfulness was evaluated",
+        "expected skip_reason=no_scorable_claims, got None",
+        "constraint: F skipped (status=evaluated)",
+        "constraint: skip reason no_scorable_claims (reason=None)"
+      ],
+      "as_expected": true
+    },
+    {
+      "name": "Q36 cl8 marked contradictory",
+      "case_id": "Q36",
+      "expected": "FAIL containing 'conflict claim must not be contradictory'",
+      "observed": "cl8: conflict claim must not be contradictory",
+      "faithfulness": {
+        "status": "evaluated",
+        "score": 1.0,
+        "skip_reason": null,
+        "scorable_claim_count": 8,
+        "supported_claim_count": 8,
+        "unsupported_claim_count": 0,
+        "insufficient_evidence_count": 0,
+        "non_factual_count": 0,
+        "absence_count": 0,
+        "document_conflict_count": 1,
+        "contradiction_count": 1,
+        "insufficient_evidence_rate": 0.0,
+        "all_insufficient": false
+      },
+      "target": {
+        "status": "evaluated",
+        "target_range": [
+          0.8,
+          1.0
+        ],
+        "in_range": true,
+        "errors": []
+      },
+      "errors": [
+        "cl8: conflict claim must not be contradictory",
+        "Q36/cl8: is_contradictory expected False, got True",
+        "constraint: cl8 not contradictory ()"
+      ],
+      "as_expected": true
+    },
+    {
+      "name": "Q23 cl1 contradictory without pair",
+      "case_id": "Q23",
+      "expected": "FAIL containing 'is_contradictory requires contradiction_with'",
+      "observed": "cl1: is_contradictory requires contradiction_with",
+      "faithfulness": {
+        "status": "evaluated",
+        "score": 0.5,
+        "skip_reason": null,
+        "scorable_claim_count": 6,
+        "supported_claim_count": 3,
+        "unsupported_claim_count": 1,
+        "insufficient_evidence_count": 2,
+        "non_factual_count": 2,
+        "absence_count": 1,
+        "document_conflict_count": 0,
+        "contradiction_count": 1,
+        "insufficient_evidence_rate": 0.3333333333333333,
+        "all_insufficient": false
+      },
+      "target": {
+        "status": "evaluated",
+        "target_range": [
+          0.4,
+          0.5
+        ],
+        "in_range": true,
+        "errors": []
+      },
+      "errors": [
+        "cl1: is_contradictory requires contradiction_with",
+        "Q23/cl1: contradiction_with expected ['cl2'], got []",
+        "constraint: cl1 contradictory_with=['cl2'] ()"
+      ],
+      "as_expected": true
+    },
+    {
+      "name": "Q36 cl8 single-sided evidence",
+      "case_id": "Q36",
+      "expected": "FAIL containing 'conflict supported needs two-sided evidence'",
+      "observed": "cl8: conflict supported needs two-sided evidence",
+      "faithfulness": {
+        "status": "evaluated",
+        "score": 1.0,
+        "skip_reason": null,
+        "scorable_claim_count": 8,
+        "supported_claim_count": 8,
+        "unsupported_claim_count": 0,
+        "insufficient_evidence_count": 0,
+        "non_factual_count": 0,
+        "absence_count": 0,
+        "document_conflict_count": 1,
+        "contradiction_count": 0,
+        "insufficient_evidence_rate": 0.0,
+        "all_insufficient": false
+      },
+      "target": {
+        "status": "evaluated",
+        "target_range": [
+          0.8,
+          1.0
+        ],
+        "in_range": true,
+        "errors": []
+      },
+      "errors": [
+        "cl8: conflict supported needs two-sided evidence",
+        "Q36/cl8: evidence count 1 < 2",
+        "constraint: cl8 two-sided evidence (evidence=1)"
+      ],
+      "as_expected": true
+    },
+    {
+      "name": "Q11 cl4 excluded as non_factual",
+      "case_id": "Q11",
+      "expected": "FAIL containing 'Q11/cl4'",
+      "observed": "Q11/cl4: claim_type expected 'factual_claim', got 'non_factual'",
+      "faithfulness": {
+        "status": "evaluated",
+        "score": 0.75,
+        "skip_reason": null,
+        "scorable_claim_count": 4,
+        "supported_claim_count": 3,
+        "unsupported_claim_count": 0,
+        "insufficient_evidence_count": 1,
+        "non_factual_count": 2,
+        "absence_count": 1,
+        "document_conflict_count": 0,
+        "contradiction_count": 0,
+        "insufficient_evidence_rate": 0.25,
+        "all_insufficient": false
+      },
+      "target": {
+        "status": "evaluated",
+        "target_range": [
+          0.6,
+          0.8
+        ],
+        "in_range": true,
+        "errors": []
+      },
+      "errors": [
+        "Q11/cl4: claim_type expected 'factual_claim', got 'non_factual'",
+        "Q11/cl4: claim_subtype expected 'policy', got 'absence'",
+        "Q11/cl4: support_status expected 'insufficient_evidence', got None",
+        "constraint: cl4 factual/policy ()",
+        "constraint: cl4 insufficient ()",
+        "constraint: cl4 not excluded as non_factual ()"
+      ],
+      "as_expected": true
+    },
+    {
+      "name": "Q35 cl5 marked supported",
+      "case_id": "Q35",
+      "expected": "FAIL containing 'non_factual must not have support_status'",
+      "observed": "cl5: non_factual must not have support_status",
+      "faithfulness": {
+        "status": "evaluated",
+        "score": 1.0,
+        "skip_reason": null,
+        "scorable_claim_count": 6,
+        "supported_claim_count": 6,
+        "unsupported_claim_count": 0,
+        "insufficient_evidence_count": 0,
+        "non_factual_count": 2,
+        "absence_count": 1,
+        "document_conflict_count": 0,
+        "contradiction_count": 0,
+        "insufficient_evidence_rate": 0.0,
+        "all_insufficient": false
+      },
+      "target": {
+        "status": "evaluated",
+        "target_range": [
+          0.8,
+          1.0
+        ],
+        "in_range": true,
+        "errors": []
+      },
+      "errors": [
+        "cl5: non_factual must not have support_status",
+        "Q35/cl5: support_status expected None, got 'supported'",
+        "constraint: cl5 support_status is null ()"
+      ],
+      "as_expected": true
+    },
+    {
+      "name": "Q21 alternative split 2/3=0.667",
+      "case_id": "Q21#3",
+      "expected": "PASS (range-only)",
+      "observed": "F=0.667, target=0.6-0.7 PASS",
+      "faithfulness": {
+        "status": "evaluated",
+        "score": 0.6666666666666666,
+        "skip_reason": null,
+        "scorable_claim_count": 3,
+        "supported_claim_count": 2,
+        "unsupported_claim_count": 0,
+        "insufficient_evidence_count": 1,
+        "non_factual_count": 1,
+        "absence_count": 0,
+        "document_conflict_count": 0,
+        "contradiction_count": 0,
+        "insufficient_evidence_rate": 0.3333333333333333,
+        "all_insufficient": false
+      },
+      "target": {
+        "status": "evaluated",
+        "target_range": [
+          0.6,
+          0.7
+        ],
+        "in_range": true,
+        "errors": []
+      },
+      "errors": [],
+      "as_expected": true
+    },
+    {
+      "name": "Q36 base answer without cl8 (7/7=1.0)",
+      "case_id": "Q36",
+      "expected": "PASS (range-only)",
+      "observed": "F=1.000, target=0.8-1.0 PASS",
+      "faithfulness": {
+        "status": "evaluated",
+        "score": 1.0,
+        "skip_reason": null,
+        "scorable_claim_count": 7,
+        "supported_claim_count": 7,
+        "unsupported_claim_count": 0,
+        "insufficient_evidence_count": 0,
+        "non_factual_count": 0,
+        "absence_count": 0,
+        "document_conflict_count": 0,
+        "contradiction_count": 0,
+        "insufficient_evidence_rate": 0.0,
+        "all_insufficient": false
+      },
+      "target": {
+        "status": "evaluated",
+        "target_range": [
+          0.8,
+          1.0
+        ],
+        "in_range": true,
+        "errors": []
+      },
+      "errors": [],
+      "as_expected": true
+    }
+  ]
+}
