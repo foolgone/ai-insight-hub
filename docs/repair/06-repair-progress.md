@@ -910,3 +910,16 @@ alembic check   : No new upgrade operations detected
 - absence：Q30-F1、Q35-F5；conflict：Q36-F8；
 - Human Gold 一致性审计复跑 **424/424 通过**；
 - 未改 Prompt/Agent/Schema/API/DB，未运行 Judge、10 条对照或 40 条评测。
+
+
+---
+
+## Phase 3E · Prompt v1.1.1 设计完成（2026-11-16，未激活）
+
+- 基于 Subagent 复核 + Human Gold v1（含 key_facts）设计 v1.1.1；
+- Faithfulness：claim_type/support_status 分离、evidence_refs 必填、non_factual 不进分母、全 non_factual → skipped、矛盾关系标签、结论句优先；
+- Correctness：不重叠区间/严重度优先级、模糊题全分支、文档冲突披露、拒答区分、首句矛盾 ≤0.2；
+- Relevancy：不重叠区间、合理拒答 0.9–1.0 不自动满分、多部分优先级、正确性交给 Correctness；
+- 版本：schema_version v2 / rubric_version v1.1.1 / Judge metric_version v2；v1.0.0 默认 active；
+- 交付：三份 Prompt、MANIFEST、逐行 diff、六案例验收矩阵、设计文档；
+- 未改 v1.0.0/v1.1.0，未改 Agent/Service/Schema/API/DB，未运行 Judge/10 条/40 条。

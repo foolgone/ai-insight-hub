@@ -1,0 +1,105 @@
+{
+  "meta": {
+    "name": "phase3e-prompt-v1.1.1-acceptance",
+    "status": "design_not_run",
+    "baseline": "v1.0.0 Pilot 10",
+    "reference": "Human Gold v1",
+    "tolerance": "score ranges ±0.10; labels/skip reasons exact; no metric drop >0.10 unless targeted",
+    "note": "All ranges are design hypotheses, not validated objective thresholds."
+  },
+  "cases": [
+    {
+      "id": "Q23",
+      "focus": "首句与后文矛盾",
+      "input": "v1.0.0 Pilot answer; Human Gold Q23 final question/answer",
+      "expected": {
+        "answer_correctness": "0.0-0.2",
+        "faithfulness": "<=0.5",
+        "answer_relevancy": "0.7-1.0"
+      },
+      "must": [
+        "Correctness wrong_facts contains the positive conclusion",
+        "Faithfulness conclusion is factual_claim, not non_factual; is_contradictory=true; contradiction_with non-empty",
+        "no supported claim without evidence_refs"
+      ],
+      "no_regression": "v1.0.0 correctness 0.8 must drop to <=0.3; relevancy not below 0.7"
+    },
+    {
+      "id": "Q35",
+      "focus": "发货时效 vs 到货时间",
+      "input": "v1.0.0 Pilot answer; Human Gold Q35 answer",
+      "expected": {
+        "answer_correctness": "0.7-1.0 (target 0.9-1.0)",
+        "faithfulness": "0.8-1.0",
+        "answer_relevancy": "0.8-1.0"
+      },
+      "must": [
+        "correctness does not require transit time or region info not in gold",
+        "absence of transit time is not counted as supported factual claim"
+      ],
+      "no_regression": "v1.0.0 correctness 0.3 must rise to >=0.7; no new wrong_facts"
+    },
+    {
+      "id": "Q36",
+      "focus": "文档内部冲突",
+      "input": "v1.0.0 Pilot answer; Human Gold Q36 answer",
+      "expected": {
+        "answer_correctness": "0.5-0.6 (v1.0.0 answer lacks conflict disclosure); 0.9-1.0 if disclosure added",
+        "faithfulness": "0.8-1.0",
+        "answer_relevancy": "0.8-1.0"
+      },
+      "must": [
+        "no forced canonical choice; disclosure of §1/§12 conflict is not a wrong fact",
+        "missing conflict disclosure goes to missing_points, not wrong_facts",
+        "conflict disclosure meta claim is not marked contradictory"
+      ],
+      "no_regression": "v1.0.0 correctness 0.2 must rise to >=0.5"
+    },
+    {
+      "id": "Q21#3",
+      "focus": "证据不足的推断",
+      "input": "Q21 Pilot answer; claim '质量问题不受 7 天无理由限制'",
+      "expected": {
+        "faithfulness": "0.7-0.9 (one insufficient claim among scorable claims)"
+      },
+      "must": [
+        "claim support_status=insufficient_evidence",
+        "score <1.0",
+        "not unsupported unless context contradicts"
+      ],
+      "no_regression": "v1.0.0 faithfulness 1.0 must not remain 1.0"
+    },
+    {
+      "id": "Q11",
+      "focus": "合理操作建议 vs 规范性要求",
+      "input": "Q11 Pilot answer; Human Gold Q11 answer",
+      "expected": {
+        "faithfulness": "0.6-0.9",
+        "answer_correctness": "0.8-1.0",
+        "answer_relevancy": "0.9-1.0"
+      },
+      "must": [
+        "'需提供照片/视频凭证' is factual_claim; if context lacks it -> insufficient_evidence",
+        "pure advice '建议联系客服' is non_factual and excluded from denominator",
+        "no over-penalty below 0.5"
+      ],
+      "no_regression": "v1.0.0 faithfulness 0.8 should stay within 0.6-0.9, not drop below 0.5"
+    },
+    {
+      "id": "Q29",
+      "focus": "无答案但合理拒答",
+      "input": "Q29 Pilot answer; Human Gold Q29 answer",
+      "expected": {
+        "faithfulness": "skipped(no_scorable_claims)",
+        "answer_correctness": "0.9-1.0",
+        "answer_relevancy": "0.9-1.0"
+      },
+      "must": [
+        "Faithfulness does not return 1.0 for all-non_factual answers; exact skip reason no_scorable_claims",
+        "Correctness distinguishes correct refusal from wrong refusal",
+        "Relevancy does not require a yes/no conclusion"
+      ],
+      "no_regression": "v1.0.0 relevancy 0.6 must rise to >=0.9; correctness 1.0 preserved"
+    }
+  ]
+}
