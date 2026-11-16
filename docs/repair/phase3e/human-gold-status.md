@@ -57,6 +57,8 @@ Q23 保持 `constraint`，Q14/Q19 保持 `multi`，Q36/Q37/Q35 保持 `ambiguous
 ### 4.1 key_facts
 
 13 条基础数据的 `key_facts` **尚未单独人工复核**，统一为 `[]` + `key_facts_status=pending_human`。
+
+已准备审核表：`human-gold-key-facts-review.md` / `.json` / `.csv`（13 行）/ `-long.csv`（45 条事实）；所有 `human_*` 字段为空，仍待人工确认。
 - 不得用 AI 草稿填充；
 - 当前 Judge 的 Correctness 使用 `gold_answer`，不依赖 key_facts，因此 10 条 Pilot 对比可先跑；
 - 完整 40 条 Gold 前建议补齐。
@@ -104,3 +106,16 @@ Q23 保持 `constraint`，Q14/Q19 保持 `multi`，Q36/Q37/Q35 保持 `ambiguous
 - 覆盖：40 条候选、13 条 Gold、27 条 pending、1 条 Gold Claim、34 条 pending Claim、
   来源 SHA、Evidence 逐字性、状态、分类/answerability、题目改写、Prompt 版本关系
 - 未修改任何 Prompt/Agent/Schema/API/DB，未运行 Judge
+
+---
+
+## 7. key_facts 审核准备（2026-11-16）
+
+- 覆盖 13 条 human_reviewed 基础数据；
+- 候选 45 条原子事实；
+- 证据状态：`supported` 42 / `evidence_insufficient` 2 / `ambiguous` 1；
+- 证据缺失：Q30-F1（海外配送未提及）、Q35-F5（运输/送达时长未说明）；
+- 歧义：Q36-F8（§1/§12 虚拟商品口径冲突）；
+- 所有 `human_decision` / `human_corrected_key_facts` / `human_reason` 为空，`review_status=pending_human`；
+- 当前 Correctness Prompt 只读取 `gold_answer`，不读取 key_facts，因此本表不会改变 Judge 分数；
+- 未修改 `human-gold.json`、pending 数据、Prompt、Agent、Schema、API、DB，未运行 Judge。

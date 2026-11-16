@@ -1,0 +1,46 @@
+item_id,fact_id,proposed_key_fact,evidence_excerpt,evidence_location,evidence_status,ai_reason,human_decision,human_corrected_key_fact,human_reason,review_status
+Q23,Q23-F1,生鲜食品的质量问题需在签收后 24 小时内反馈,生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。,phase3d_doc.md §12 特殊商品,supported,原文直接规定 24 小时时限,,,,pending_human
+Q23,Q23-F2,反馈方式为拍照反馈,生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。,phase3d_doc.md §12 特殊商品,supported,原文明确“拍照反馈”,,,,pending_human
+Q23,Q23-F3,超过 24 小时反馈不符合该条款,生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。,phase3d_doc.md §12 特殊商品,supported,由“需在 24 小时内”直接推出；属条件否定,,,,pending_human
+Q23,Q23-F4,该 24 小时时限适用于生鲜食品的质量问题,生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。,phase3d_doc.md §12 特殊商品,supported,原文把时限限定在生鲜食品质量问题,,,,pending_human
+Q36,Q36-F1,普通商品签收后 7 天内可申请无理由退款,订单签收后 7 天内可申请无理由退款。审核通过后，款项将在 1-3 个工作日内原路退回。,phase3d_doc.md §1 退款时效,supported,原文直接支持,,,,pending_human
+Q36,Q36-F2,定制类商品不支持无理由退款,定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。,phase3d_doc.md §1 退款时效,supported,原文直接支持,,,,pending_human
+Q36,Q36-F3,生鲜食品不支持无理由退款,定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。,phase3d_doc.md §1 退款时效,supported,原文直接支持,,,,pending_human
+Q36,Q36-F4,已激活的虚拟商品不支持无理由退款,定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。,phase3d_doc.md §1 退款时效,supported,原文直接支持，限定词是“已激活”,,,,pending_human
+Q36,Q36-F5,生鲜食品质量问题需在签收后 24 小时内拍照反馈,生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。,phase3d_doc.md §12 特殊商品,supported,原文直接支持,,,,pending_human
+Q36,Q36-F6,虚拟商品（充值、会员、课程）一经售出不支持退款,虚拟商品（充值、会员、课程）一经售出不支持退款。,phase3d_doc.md §12 特殊商品,supported,原文直接支持，未限定“已激活”,,,,pending_human
+Q36,Q36-F7,定制商品支持质量问题退换，不支持无理由退换,定制商品支持质量问题退换，不支持无理由退换。,phase3d_doc.md §12 特殊商品,supported,原文直接支持,,,,pending_human
+Q36,Q36-F8,§1 与 §12 对虚拟商品范围的表述不一致：§1 限定“已激活”，§12 称“一经售出”,定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。,phase3d_doc.md §1；§12 原文见 ai_reason,ambiguous,§1 原文为“定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。”；§12 原文为“虚拟商品（充值、会员、课程）一经售出不支持退款。”；两处范围不一致，需业务确认 canonical 口径,,,,pending_human
+Q14,Q14-F1,发票抬头可在开具前修改,发票抬头可在开具前修改；已开具的发票需先申请红冲，再重新开具。,phase3d_doc.md §4 发票说明,supported,原文直接支持,,,,pending_human
+Q14,Q14-F2,已开具的发票需先申请红冲，再重新开具,发票抬头可在开具前修改；已开具的发票需先申请红冲，再重新开具。,phase3d_doc.md §4 发票说明,supported,原文直接支持,,,,pending_human
+Q15,Q15-F1,大件商品包括家具、家电,大件商品（家具、家电）发货时间为 5 个工作日内，配送前会电话预约。,phase3d_doc.md §5 发货时效,supported,原文括号内列出家具、家电,,,,pending_human
+Q15,Q15-F2,大件商品配送前会电话预约,大件商品（家具、家电）发货时间为 5 个工作日内，配送前会电话预约。,phase3d_doc.md §5 发货时效,supported,原文直接支持,,,,pending_human
+Q16,Q16-F1,物流信息超过 24 小时未更新是联系客服核查的触发条件,物流信息超过 24 小时未更新时，可联系客服协助核查。,phase3d_doc.md §6 物流查询,supported,原文直接规定条件,,,,pending_human
+Q16,Q16-F2,触发后可联系客服协助核查,物流信息超过 24 小时未更新时，可联系客服协助核查。,phase3d_doc.md §6 物流查询,supported,原文直接支持,,,,pending_human
+Q19,Q19-F1,退款时优惠券仍在有效期内会退回账户,退款时优惠券若仍在有效期内会退回账户，已过期则不退回。,phase3d_doc.md §9 优惠券规则,supported,原文直接支持,,,,pending_human
+Q19,Q19-F2,退款时优惠券已过期则不退回,退款时优惠券若仍在有效期内会退回账户，已过期则不退回。,phase3d_doc.md §9 优惠券规则,supported,原文直接支持,,,,pending_human
+Q37,Q37-F1,仅支持电子发票,仅支持电子发票，提交申请后 24 小时内发送至下单邮箱。,phase3d_doc.md §4 发票说明,supported,原文直接支持,,,,pending_human
+Q37,Q37-F2,提交申请后 24 小时内发送至下单邮箱,仅支持电子发票，提交申请后 24 小时内发送至下单邮箱。,phase3d_doc.md §4 发票说明,supported,原文直接支持,,,,pending_human
+Q37,Q37-F3,发票抬头可在开具前修改,发票抬头可在开具前修改；已开具的发票需先申请红冲，再重新开具。,phase3d_doc.md §4 发票说明,supported,原文直接支持,,,,pending_human
+Q37,Q37-F4,已开具的发票需先申请红冲，再重新开具,发票抬头可在开具前修改；已开具的发票需先申请红冲，再重新开具。,phase3d_doc.md §4 发票说明,supported,原文直接支持,,,,pending_human
+Q37,Q37-F5,不支持纸质发票和增值税专用发票,暂不支持纸质发票和增值税专用发票。,phase3d_doc.md §4 发票说明,supported,原文直接支持,,,,pending_human
+Q40,Q40-F1,积分不可转让,积分不可转让、不可提现，仅限本账户使用。,phase3d_doc.md §10 会员积分,supported,原文直接支持,,,,pending_human
+Q40,Q40-F2,积分不可提现,积分不可转让、不可提现，仅限本账户使用。,phase3d_doc.md §10 会员积分,supported,原文直接支持,,,,pending_human
+Q40,Q40-F3,积分仅限本账户使用,积分不可转让、不可提现，仅限本账户使用。,phase3d_doc.md §10 会员积分,supported,原文直接支持,,,,pending_human
+Q05,Q05-F1,发票提交申请后 24 小时内发送,仅支持电子发票，提交申请后 24 小时内发送至下单邮箱。,phase3d_doc.md §4 发票说明,supported,原文直接支持,,,,pending_human
+Q05,Q05-F2,发票发送至下单邮箱,仅支持电子发票，提交申请后 24 小时内发送至下单邮箱。,phase3d_doc.md §4 发票说明,supported,原文直接支持,,,,pending_human
+Q13,Q13-F1,换货需先寄回原商品,换货需先寄回原商品，商家收到并验收后 48 小时内寄出新品；运费由责任方承担。,phase3d_doc.md §3 换货政策,supported,原文直接支持,,,,pending_human
+Q13,Q13-F2,商家需收到并验收原商品,换货需先寄回原商品，商家收到并验收后 48 小时内寄出新品；运费由责任方承担。,phase3d_doc.md §3 换货政策,supported,原文直接支持；是新品寄出的前提,,,,pending_human
+Q13,Q13-F3,验收后 48 小时内寄出新品,换货需先寄回原商品，商家收到并验收后 48 小时内寄出新品；运费由责任方承担。,phase3d_doc.md §3 换货政策,supported,原文直接支持,,,,pending_human
+Q22,Q22-F1,新疆属于偏远地区,新疆、西藏、内蒙古等偏远地区运费为 20 元，不参与包邮活动。,phase3d_doc.md §7 运费规则,supported,原文将新疆列入偏远地区,,,,pending_human
+Q22,Q22-F2,偏远地区运费为 20 元,新疆、西藏、内蒙古等偏远地区运费为 20 元，不参与包邮活动。,phase3d_doc.md §7 运费规则,supported,原文直接支持,,,,pending_human
+Q22,Q22-F3,偏远地区不参与包邮活动,新疆、西藏、内蒙古等偏远地区运费为 20 元，不参与包邮活动。,phase3d_doc.md §7 运费规则,supported,原文直接支持,,,,pending_human
+Q22,Q22-F4,订单实付 89 元未满 99 元包邮门槛,单笔订单实付满 99 元包邮；未满 99 元收取 10 元运费。,phase3d_doc.md §7 运费规则,supported,89 < 99，由包邮门槛直接推出；不是外部知识,,,,pending_human
+Q30,Q30-F1,文档未说明是否支持海外配送,,phase3d_doc.md 全文 §1–§13,evidence_insufficient,全文没有海外/跨境配送表述；这是 absence 事实，无法提供肯定证据；按 unanswerable 处理,,,,pending_human
+Q35,Q35-F1,现货商品付款后 48 小时内发出,现货商品在付款后 48 小时内发出；预售商品以商品页标注的发货时间为准。,phase3d_doc.md §5 发货时效,supported,原文直接支持,,,,pending_human
+Q35,Q35-F2,预售商品以商品页标注的发货时间为准,现货商品在付款后 48 小时内发出；预售商品以商品页标注的发货时间为准。,phase3d_doc.md §5 发货时效,supported,原文直接支持,,,,pending_human
+Q35,Q35-F3,大件商品发货时间为 5 个工作日内,大件商品（家具、家电）发货时间为 5 个工作日内，配送前会电话预约。,phase3d_doc.md §5 发货时效,supported,原文直接支持,,,,pending_human
+Q35,Q35-F4,大件商品配送前电话预约,大件商品（家具、家电）发货时间为 5 个工作日内，配送前会电话预约。,phase3d_doc.md §5 发货时效,supported,原文直接支持,,,,pending_human
+Q35,Q35-F5,文档未说明快递运输/送达需要多久,,phase3d_doc.md 全文（§5 只有发货时效，§6 只有查询方式）,evidence_insufficient,absence 事实；不能把“发货时效”当成“到货时效”,,,,pending_human
+Q35,Q35-F6,发货后可在「我的订单」查看物流单号与实时轨迹,订单发货后可在「我的订单」查看物流单号与实时轨迹。,phase3d_doc.md §6 物流查询,supported,原文直接支持,,,,pending_human
+Q35,Q35-F7,物流信息超过 24 小时未更新可联系客服核查,物流信息超过 24 小时未更新时，可联系客服协助核查。,phase3d_doc.md §6 物流查询,supported,原文直接支持,,,,pending_human

@@ -865,3 +865,15 @@ alembic check   : No new upgrade operations detected
 - Q23/Q40 题干改写、分类覆盖 12/8/9/6/5、Q36 冲突披露、Q37 文档外流程移除均一致
 - 未改 Prompt/Agent/Schema/API/DB，未运行 Judge
 - 报告：`docs/repair/phase3e/human-gold-audit.md` / `.json`
+
+---
+
+## Phase 3E-H · Human Gold key_facts 人工审核准备（2026-11-16）
+
+- 覆盖 13 条 human_reviewed 基础数据；
+- 候选 45 条原子事实：supported 42 / evidence_insufficient 2 / ambiguous 1；
+- 证据缺失：Q30-F1（海外配送未提及）、Q35-F5（运输/送达时长未说明）；
+- 歧义：Q36-F8（§1/§12 虚拟商品口径冲突）；
+- 输出：`human-gold-key-facts-review.md`、`.json`、`.csv`（13 行）、`-long.csv`（45 条）；
+- 所有 human 字段为空，`pending_human`；未修改 human-gold/pending/Prompt/Agent/Schema/API/DB，未运行 Judge；
+- 当前 Correctness 只读 gold_answer，不读 key_facts，因此不会影响 Judge 分数。
