@@ -130,3 +130,26 @@
 - `pending-review.md`（40 条待审清单）
 
 **状态：暂停，等待人工审核。**
+
+---
+
+## 7. Subagent 独立复核（2026-11-16）
+
+5 个独立 subagent 并行复核（Prompt / 10 条 Pilot / 35 条 Claim / 剩余 30 条）。
+结果：`verdict=approve_with_changes`，`ready_for_implementation=false`。
+
+主要阻断项：
+
+1. Faithfulness `claim_type` 不是互斥分类，`contradictory` 可能被排除出分母；
+2. 缺少 `insufficient_evidence` 与 zero-denominator 规则；Q21 推断仍可能被判 supported；
+3. `supported=true` 仍允许空 evidence；“按出现顺序”与“结论第一条”冲突；
+4. Correctness 模糊题 rubric 假定金标有分支，但 Q35/Q36 金标是“信息不足”；
+5. 三个指标的评分区间重叠、无优先级；
+6. 无逐案例期望分数/容差/通过标准；版本加载器未接入；
+7. `metric_version` 仍为 v1，v1.0/v1.1 结果会混入同一聚合；
+8. 人工 `insufficient_evidence` 与 Judge `supported: bool` 分类不一致。
+
+详细报告：`docs/repair/phase3e/subagent-review.md`
+机器可读：`docs/repair/phase3e/subagent-review.json`
+
+**结论：当前 v1.1.0 保持 pending_review，不实施、不运行；先修订为 v1.1.1 并再次复核。**

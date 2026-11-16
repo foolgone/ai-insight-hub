@@ -723,3 +723,46 @@ alembic check   : No new upgrade operations detected
 - 通过后先用相同 10 条跑 v1.1.0 对比，再决定是否跑完整 40 条。
 
 **Phase 3E：暂停，等待人工审核。不进入 Phase 4。**
+
+---
+
+## Phase 3E 补充 · Subagent 独立复核（2026-11-16）
+
+**方式**：5 个独立 subagent 并行（Prompt / 10 条 Pilot / 35 条 Claim / 剩余 30 条分两组）
+**性质**：`reviewer_type=ai_subagent`，**不是 Human Gold**
+**报告**：`docs/repair/phase3e/subagent-review.md` / `subagent-review.json`
+
+### 1. 结果
+
+| 对象 | 数量 | 结果 |
+|---|---|---|
+| Prompt v1.1.0 | 3 指标 | `approve_with_changes`，`ready=false` |
+| 10 条 Pilot 基础字段 | 10 | 8 ai_reviewed / 2 needs_recheck（Q23、Q36） |
+| 剩余 30 条基础字段 | 30 | 24 ai_reviewed / 6 needs_recheck（Q14/Q15/Q16/Q19/Q37/Q40） |
+| 35 条 Claim | 35 | 32 supported / 1 unsupported（Q23#3）/ 2 insufficient（Q21#3、Q29#2） |
+
+### 2. Prompt 阻断项（摘要）
+
+- Faithfulness taxonomy 非互斥、`contradictory` 可能不进分母；缺 `insufficient_evidence`、零分母、evidence 必填、Q21 反例；
+- “出现顺序”与“结论第一条”冲突；删除原子性规则；
+- Correctness 模糊题 rubric 假定金标有分支，但 Q35/Q36 金标是“信息不足”；
+- 三指标评分区间重叠、无优先级；无逐案例期望分数/容差；
+- 版本加载器未接入；`metric_version` 仍为 v1，v1.0/v1.1 会混入同一聚合；
+- 人工 `insufficient_evidence` 与 Judge `supported: bool` 分类不一致。
+
+### 3. 标注发现
+
+- Q35：原答案把“收货地区”误作到货因素，已修正为“发货 vs 到货”；
+- Q36：原答案缺条件分支；文档对虚拟商品口径不一致（已激活 vs 一经售出）；
+- Q23：题干“第 2 天”存在 24 小时边界歧义；
+- Q14/Q19：应标 `ambiguous`（缺是否已开具/是否过期）；
+- Q15/Q16：分类 `multi` 不合适；
+- Q37：参考答案含文档外流程；
+- Q40：与 Q20 近似重复。
+
+### 4. 处置
+
+- v1.1.0 保持 `pending_review`，**不实施、不运行**；
+- 不跑完整 40 条；
+- 下一步：按复核意见产出 v1.1.1 → 再次 subagent 复核 → 人工定稿 9 条 `needs_recheck` → 10 条真实对比 → 40 条；
+- 仍不宣布 Judge 验收通过，不进入 Phase 4。
