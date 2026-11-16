@@ -6,6 +6,7 @@ consistency. Does NOT call an LLM, Judge, or the network.
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
@@ -93,11 +94,20 @@ def main() -> int:
         supported = [c for c in scorable if c.get("support_status") == "supported"]
         expected = EXPECTED_F.get(cid)
         actual = (len(supported) / len(scorable)) if scorable else None
+        f_text = case["expected_scores"].get("faithfulness", "")
         if expected is None:
-            if scorable or "skipped" not in case["expected_scores"].get("faithfulness", ""):
+            if scorable or "status=skipped" not in f_text:
                 errors.append(f"{cid}: expected skipped/no_scorable")
-        elif actual is None or abs(actual - expected) > 1e-9:
-            errors.append(f"{cid}: supported/scorable={actual}, expected {expected}")
+        else:
+            match = re.search(r"target_range=(\d+(?:\.\d+)?)-(\d+(?:\.\d+)?)", f_text)
+            if not match:
+                errors.append(f"{cid}: missing target_range in faithfulness expected")
+            else:
+                low, high = float(match.group(1)), float(match.group(2))
+                if actual is None or not (low <= actual <= high):
+                    errors.append(f"{cid}: supported/scorable={actual}, target_range={low}-{high}")
+                if abs(actual - expected) > 1e-9:
+                    errors.append(f"{cid}: supported/scorable={actual}, expected {expected}")
 
         if cid == "Q23":
             if case["expected_claims"][0].get("contradiction_with") != ["cl2"]:

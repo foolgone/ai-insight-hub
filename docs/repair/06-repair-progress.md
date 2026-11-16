@@ -954,3 +954,5 @@ alembic check   : No new upgrade operations detected
   负向测试（Q35 C2 + supported 无 evidence）能抓出错误；修复后矩阵 PASS。
 - 矩阵 tolerance 语义统一：expected 是目标区间/目标值，区间不再叠加 ±0.10；forbidden 优先。
 - v1.0.0 MANIFEST status 统一 active_baseline；v1.1.1 仍 design_draft/inactive。
+- 容差语义（2026-11-16）：六个 Faithfulness 期望值改为 `target_range=...; tolerance=none`；
+  meta 明确区间不再叠加 ±0.10；静态脚本按 target_range 校验实际 supported/scorable。

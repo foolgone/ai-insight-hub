@@ -429,7 +429,7 @@ Correctness/Relevancy 输出不变；`RagJudgeInput` 不变（不新增 answerab
 
 通用：
 
-- 容差：矩阵中的 expected 是目标区间/目标值，区间不再额外加 ±0.10；精确目标值允许 ±0.10；forbidden/约束优先于分数容差；
+- 容差：Faithfulness 的六个期望值使用 `target_range=...; tolerance=none`，区间为目标范围，不再额外加 ±0.10；其它精确目标值允许 ±0.10；forbidden/约束优先于分数容差；
 - 10 条整体：Schema 合法率 100%，无 supported 无 evidence，无新增 failed；
 - 不得修改 Human Gold；不得用 v1.0.0 分数反推 Gold；
 - Q11/Q21 基础/Q29 的期望为 provisional，只有 Q21#3 Claim 是 Human Gold。

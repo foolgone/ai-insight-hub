@@ -5,7 +5,7 @@
     "baseline": "v1.0.0 Pilot 10",
     "reference": "Human Gold v1 where available; AI draft fixtures explicitly marked",
     "fixture_file": "docs/repair/phase3e/prompt-v1.1.1-fixtures.json",
-    "tolerance": "expected ranges are target ranges without additional ±0.10; exact point targets may use ±0.10; forbidden/constraints take precedence",
+    "tolerance": "target_range entries are inclusive target ranges; tolerance=none means do not add ±0.10. Exact point targets may use ±0.10. forbidden/constraints take precedence.",
     "note": "All ranges are design hypotheses, not validated objective thresholds. Q11/Q21 base/Q29 base are NOT Human Gold; only Q21#3 claim is Human Gold.",
     "static_validation_required": [
       "required and variant_only are booleans",
@@ -16,7 +16,8 @@
       "all evidence_refs context_id exist in fixture.answer_contexts",
       "claim_subtype is one of policy/absence/conflict/advice/meta",
       "every evidence_ref.quote must be a verbatim substring of its referenced answer_context",
-      "every factual_claim with support_status=supported must have at least one evidence_ref"
+      "every factual_claim with support_status=supported must have at least one evidence_ref",
+      "for each target_range, the computed supported/scorable score must fall inside the inclusive range"
     ]
   },
   "cases": [
@@ -149,7 +150,7 @@
         }
       ],
       "expected_scores": {
-        "faithfulness": "0.4-0.5 (6 scorable: 3 supported / 1 unsupported / 2 insufficient = 0.5)",
+        "faithfulness": "target_range=0.4-0.5; tolerance=none; 6 scorable: 3 supported / 1 unsupported / 2 insufficient = 0.5",
         "answer_correctness": "0.0-0.2",
         "answer_relevancy": "0.7-1.0"
       },
@@ -311,7 +312,7 @@
         }
       ],
       "expected_scores": {
-        "faithfulness": "0.8-1.0 (6 scorable, all supported = 1.0)",
+        "faithfulness": "target_range=0.8-1.0; tolerance=none; 6 scorable all supported = 1.0",
         "answer_correctness": "0.7-1.0 (target 0.9-1.0)",
         "answer_relevancy": "0.8-1.0"
       },
@@ -486,7 +487,7 @@
         }
       ],
       "expected_scores": {
-        "faithfulness": "0.8-1.0 (7 policy claims all supported; cl8 optional disclosure)",
+        "faithfulness": "target_range=0.8-1.0; tolerance=none; 7 policy claims supported; cl8 conflict optional",
         "answer_correctness": "0.5-0.6 for v1.0.0 answer (no disclosure); 0.9-1.0 for disclosure variant",
         "answer_relevancy": "0.8-1.0"
       },
@@ -612,7 +613,7 @@
         }
       ],
       "expected_scores": {
-        "faithfulness": "0.6-0.7 (5 scorable: 3 supported + 2 insufficient = 0.6)"
+        "faithfulness": "target_range=0.6-0.7; tolerance=none; 5 scorable: 3 supported + 2 insufficient = 0.6"
       },
       "diagnostics": [
         "cl4 support_status=insufficient_evidence (Human Gold Q21#3)",
@@ -731,7 +732,7 @@
         }
       ],
       "expected_scores": {
-        "faithfulness": "0.6-0.9 (5 scorable: 3 supported + 2 insufficient = 0.6)",
+        "faithfulness": "target_range=0.6-0.9; tolerance=none; 5 scorable: 3 supported + 2 insufficient = 0.6",
         "answer_correctness": "0.8-1.0",
         "answer_relevancy": "0.9-1.0"
       },
@@ -797,7 +798,7 @@
         }
       ],
       "expected_scores": {
-        "faithfulness": "skipped(no_scorable_claims)",
+        "faithfulness": "status=skipped; reason=no_scorable_claims; tolerance=n/a",
         "answer_correctness": "0.9-1.0",
         "answer_relevancy": "0.9-1.0"
       },
