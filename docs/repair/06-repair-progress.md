@@ -945,3 +945,12 @@ alembic check   : No new upgrade operations detected
 - Correctness 增加 answerability 推断/unknown 兜底；Q36 真实单边 vs 编造区分。
 - 矩阵校验类型/ID/subtype/evidence/分数自洽；新增 `validate_prompt_v1.1.1_matrix.py`（PASS）。
 - v1.0.0 MANIFEST status 统一为 active_baseline；v1.1.1 仍 design_draft/inactive。
+
+### v1.1.1 P0 证据缺陷修复
+- Q35 cl6/cl7 evidence context 从 C2（摘要）改为 C1（整篇 §6 原文）。
+- 8 条 supported claim 补齐 evidence_refs（Q23 cl5、Q21 cl1/2/3/5、Q11 cl1/2/3）；
+  Q21 cl5 因 §8 只覆盖电子产品/配件，改标 insufficient_evidence，Q21 F 调整 0.6–0.7。
+- 静态脚本新增两项校验：supported 必须有 evidence；quote 必须是 context 逐字子串。
+  负向测试（Q35 C2 + supported 无 evidence）能抓出错误；修复后矩阵 PASS。
+- 矩阵 tolerance 语义统一：expected 是目标区间/目标值，区间不再叠加 ±0.10；forbidden 优先。
+- v1.0.0 MANIFEST status 统一 active_baseline；v1.1.1 仍 design_draft/inactive。

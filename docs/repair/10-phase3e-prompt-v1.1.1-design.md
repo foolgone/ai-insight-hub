@@ -103,9 +103,9 @@ else:
 #### Q21#3 的单 Claim 与整条回答
 
 - **单 Claim 视角**：Q21#3 若单独评测，`support_status=insufficient_evidence`，score=0.0（1 个 scorable，0 supported）。
-- **整条回答视角**：Q21 回答若拆成 5 个 factual claim，其中 Q21#3 为 insufficient、其余 4 个 supported，则 score=4/5=0.8。
-- 两者不冲突：0.0 是“该 claim 的贡献”，0.8 是“整条回答汇总分”；报告必须同时给出 `Q21#3` 标签与整条 `score`，不能用一个数覆盖另一个。
-- v1.1.1 验收以**整条回答 0.7–0.9 + Q21#3 为 insufficient_evidence** 为准；若单独 claim 测试，则期望 0.0。
+- **整条回答视角**：Q21 回答若拆成 5 个 factual claim，其中 Q21#3 与“可依据保修条款申请保修”均为 insufficient、其余 3 个 supported，则 score=3/5=0.6（保修 §8 只覆盖电子产品/配件，不能推广到所有普通商品）。
+- 两者不冲突：0.0 是“该 claim 的贡献”，0.6 是“整条回答汇总分”；报告必须同时给出 `Q21#3` 标签与整条 `score`，不能用一个数覆盖另一个。
+- v1.1.1 验收以**整条回答 0.6–0.7 + Q21#3 为 insufficient_evidence** 为准；若单独 claim 测试，则期望 0.0。
 
 ### 2.5 矛盾标签定义（二次修订）
 
@@ -286,7 +286,7 @@ Correctness/Relevancy 输出不变；`RagJudgeInput` 不变（不新增 answerab
 
 | 版本 | prompt_version | schema_version | rubric_version | Judge metric_version | 状态 |
 |---|---|---|---|---|---|
-| v1.0.0 | v1.0.0 | rag_judge_schema_v1 | v1.0.0 | v1 | active |
+| v1.0.0 | v1.0.0 | rag_judge_schema_v1 | v1.0.0 | v1 | active_baseline |
 | v1.1.0 | v1.1.0 | rag_judge_schema_v2（拟） | v1.1.0 | v2（拟） | pending_review |
 | v1.1.1 | v1.1.1 | rag_judge_schema_v2 | v1.1.1 | v2 | design_draft |
 
@@ -407,7 +407,7 @@ Correctness/Relevancy 输出不变；`RagJudgeInput` 不变（不新增 answerab
 | Q23 | 回答内部矛盾 | C 0.0–0.2；F 0.4–0.5（6 scorable: 3 supported / 1 unsupported / 2 insufficient = 0.5）；R 0.7–1.0；`is_contradictory=true`、`contradiction_with=["cl2"]`、`wrong_facts` 含肯定结论 |
 | Q35 | 发货 vs 到货 | C 0.7–1.0（目标 0.9–1.0）；F 0.8–1.0；R 0.8–1.0；absence 为 non_factual、无 wrong_facts |
 | Q36 | Context 自身冲突 | v1.0.0 无披露：C 0.5–0.6，`missing_points` 含冲突；披露 variant：C 0.9–1.0；F 0.8–1.0（7 policy supported；cl8 conflict optional）；不得 `wrong_facts` 真实单边引用 |
-| Q21#3 | 证据不足 | 整条 F 0.7–0.9（5 scorable: 4 supported + 1 insufficient = 0.8）；Q21#3 `insufficient_evidence`；单 Claim 0.0；不得 1.0 |
+| Q21#3 | 证据不足 | 整条 F 0.6–0.7（5 scorable: 3 supported + 2 insufficient = 0.6）；Q21#3 `insufficient_evidence`；单 Claim 0.0；不得 1.0 |
 | Q11 | 规范性要求 vs 建议 | F 0.6–0.9；“需提供…” factual/insufficient；“建议…” non_factual；不得 <0.5 |
 | Q29 | 合理无答案 | F `skipped(no_scorable_claims)`；C 0.9–1.0；R 0.9–1.0；`scorable_claim_count=0` |
 
@@ -421,14 +421,15 @@ Correctness/Relevancy 输出不变；`RagJudgeInput` 不变（不新增 answerab
 - 每个 case 的 `claim_id` 唯一；`contradiction_with` 都能解析到同 case 的 claim；
 - `claim_subtype ∈ {policy, absence, conflict, advice, meta}`，且 policy/conflict 为 factual、absence/advice/meta 为 non_factual；
 - 每个 F 期望区间都能由 claim 的 supported/scorable 算出；
-- 所有 `evidence_refs.context_id` 都在 fixture `answer_contexts` 中存在；
+- 所有 `evidence_refs.context_id` 都在 fixture `answer_contexts` 中存在，且 `quote.strip()` 是对应 context 的逐字子串；
+- 每个 `supported` factual claim 至少有一条 evidence_refs；
 - Q29 的 scorable=0，skip reason 精确为 `no_scorable_claims`。
 
-本次设计自检已通过上述静态规则；未运行 Judge。
+本次设计自检已通过上述静态规则；负向测试（Q35 cl6/cl7 指 C2、supported 无 evidence）能被脚本抓出；未运行 Judge。
 
 通用：
 
-- 容差：分数 ±0.10；标签/skip reason 精确；回归下降 >0.10 必须有明确目标，否则视为回归；
+- 容差：矩阵中的 expected 是目标区间/目标值，区间不再额外加 ±0.10；精确目标值允许 ±0.10；forbidden/约束优先于分数容差；
 - 10 条整体：Schema 合法率 100%，无 supported 无 evidence，无新增 failed；
 - 不得修改 Human Gold；不得用 v1.0.0 分数反推 Gold；
 - Q11/Q21 基础/Q29 的期望为 provisional，只有 Q21#3 Claim 是 Human Gold。
@@ -444,8 +445,8 @@ Correctness/Relevancy 输出不变；`RagJudgeInput` 不变（不新增 answerab
 5. **metric_version v2**：需在激活时同步修改 `metric_version_for`/聚合；不迁移 DB，但历史 v1 结果不能与 v2 混算。
 6. **key_facts 尚未进入 Correctness 输入**：当前只读 gold_answer；未来启用需 Schema 增 `fact_type/required/evidence_status`，并定义 absence/conflict 不进 supported 分母。
 7. **Prompt 长度/成本**：Faithfulness few-shot 增加输入 token；10 条实验需记录 token/成本。
-8. **Q11/Q21 基础/Q29 基础不是 Human Gold**：只有 Q21#3 Claim 是人工确认；这三条 Acceptance 为 provisional，需后续人工复核。
-9. **Q21 整条 0.8 依赖 5 个 claim 的拆分**：若模型拆分不同，目标改为 0.7–0.9 + Q21#3 insufficient，不固定 0.8。
+8. **Q11/Q21 基础/Q29 基础不是 Human Gold**：只有 Q21#3 Claim 是人工确认；这三条 Acceptance 为 provisional，需后续人工复核。Q21 cl5 已收窄为 insufficient，F 改为 0.6–0.7。
+9. **Q21 整条 0.6 依赖 5 个 claim 的拆分**：若模型拆分不同，目标改为 0.6–0.7 + Q21#3 insufficient，不固定 0.6。
 10. **v1.1.1 未运行**：所有期望均未验证；本阶段不产生任何 Judge 分数。
 11. **metric_version_for 签名**：需改为接收 prompt_version/config；未传时默认 v1，v1.1.1 显式传 v2；调用方测试必须覆盖默认行为。
 12. **fixture 基线上下文**：v1.0.0 分数绑定 answer_contexts（2 条 query trace）；4 条 retrieval_contexts 已冻结但不用于旧分数。若改用 4 条作为 Faithfulness 输入，必须重跑 v1.0.0 建立同输入基线。
@@ -457,7 +458,7 @@ Correctness/Relevancy 输出不变；`RagJudgeInput` 不变（不新增 answerab
 
 | 检查 | 结果 |
 |---|---|
-| v1.0.0 Prompt | 未修改；根目录 SHA 仍 `287053e9…`（F） |
+| v1.0.0 Prompt | 未修改；status=active_baseline；根目录 SHA 仍 `287053e9…`（F） |
 | v1.1.0 Prompt | 未修改；仍 pending_review |
 | v1.1.1 Prompt 正文 | 按 P0-3/P0-4/P1-4/P1-7/P2-3 修订：claim_id cl、claim_subtype、absence/conflict、answerability 推断；已记录原因 |
 | Agent/Service/Schema/API/DB | 未修改 |

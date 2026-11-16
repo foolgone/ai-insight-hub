@@ -16,7 +16,7 @@ EXPECTED_F = {
     "Q23": 0.5,
     "Q35": 1.0,
     "Q36": 1.0,
-    "Q21#3": 0.8,
+    "Q21#3": 0.6,
     "Q11": 0.6,
     "Q29": None,
 }
@@ -45,7 +45,11 @@ def main() -> int:
         if "required" in case:
             errors.append(f"{cid}: 'required' must be per-claim, not per-case")
 
-        contexts = {c["context_id"] for c in fixtures[ref]["answer_contexts"]}
+        context_contents = {
+            c["context_id"]: (c.get("content") or "")
+            for c in fixtures[ref]["answer_contexts"]
+        }
+        contexts = set(context_contents)
         claim_ids = [c["claim_id"] for c in case["expected_claims"]]
         if len(claim_ids) != len(set(claim_ids)):
             errors.append(f"{cid}: duplicate claim_id")
@@ -65,10 +69,24 @@ def main() -> int:
             for other in claim.get("contradiction_with") or []:
                 if other not in claim_ids:
                     errors.append(f"{cid}/{claim.get('claim_id')}: contradiction_with {other}")
-            for evidence in claim.get("evidence_refs") or []:
-                if evidence.get("context_id") not in contexts:
+            evidence_refs = claim.get("evidence_refs") or []
+            if (
+                claim.get("claim_type") == "factual_claim"
+                and claim.get("support_status") == "supported"
+                and not evidence_refs
+            ):
+                errors.append(f"{cid}/{claim.get('claim_id')}: supported without evidence_refs")
+            for evidence in evidence_refs:
+                context_id = evidence.get("context_id")
+                if context_id not in contexts:
+                    errors.append(f"{cid}/{claim.get('claim_id')}: evidence context {context_id}")
+                    continue
+                quote = (evidence.get("quote") or "").strip()
+                if not quote:
+                    errors.append(f"{cid}/{claim.get('claim_id')}: empty evidence quote")
+                elif quote not in context_contents[context_id].strip():
                     errors.append(
-                        f"{cid}/{claim.get('claim_id')}: evidence context {evidence.get('context_id')}"
+                        f"{cid}/{claim.get('claim_id')}: quote not verbatim in {context_id}"
                     )
 
         scorable = [c for c in case["expected_claims"] if c["claim_type"] == "factual_claim"]
