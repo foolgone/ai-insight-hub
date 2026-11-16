@@ -977,6 +977,7 @@ alembic check   : No new upgrade operations detected
 - Evidence：context_id 必须存在、quote 逐字、supported 至少一条；失败降级 insufficient 并记 `evidence_validation_failed` / `validation_errors`。
 - document_conflict：conflict + supported 统计；冲突 claim 不得标 `is_contradictory`；单边 evidence 降级。
 - `metric_version_for(metric, prompt_version=None)`：默认 v1，v1.1.1 → v2；创建/重试/聚合/复用按 Run 的 prompt version 解析，v1/v2 不混算。
-- 新增 60 条单测：v2 Schema/loader、计分/证据/矛盾/zero-denominator、六案例 canonical + 12 个负向/边界回归；现有 24 条 Judge 测试保持。
+- 新增 64 条单测：v2 Schema/loader、计分/证据/矛盾/zero-denominator、六案例 canonical + 12 个负向/边界回归；现有 24 条 Judge 测试保持。
+- P1 边界修复：conflict 双侧证据按 `(context_id, quote.strip())` 去重且拒绝互为子串；重复 `claim_id` 保留首条、跳过后续，不重复进分母。
 - 生产 Schema/Service 重跑同一 6 案例 dry-run：6/6、12/12，结果与设计稿 dry-run 一致。
 - 未激活 v1.1.1；未运行真实 Judge/10/40；未改 Human Gold；未做 DB Migration。

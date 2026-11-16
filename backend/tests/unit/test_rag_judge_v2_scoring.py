@@ -171,6 +171,38 @@ def test_contradictory_claim_stays_in_denominator() -> None:
     assert details["contradiction_count"] == 1
 
 
+def test_duplicate_supported_claim_counts_once() -> None:
+    score, details, _ = _score(
+        [
+            _claim(),
+            _claim(claim="重复的同一 claim", claim_id="cl1"),
+        ]
+    )
+
+    assert score == 1.0
+    assert details["scorable_claim_count"] == 1
+    assert details["supported_claim_count"] == 1
+    assert len(details["claims"]) == 1
+    assert any(error["code"] == "duplicate_claim_id" for error in details["validation_errors"])
+
+
+def test_duplicate_unsupported_claim_counts_once() -> None:
+    score, details, _ = _score(
+        [
+            _claim(claim_id="cl1"),
+            _claim(claim_id="cl2", support_status="unsupported", evidence_refs=[]),
+            _claim(claim_id="cl2", support_status="unsupported", evidence_refs=[]),
+        ]
+    )
+
+    assert score == 0.5
+    assert details["scorable_claim_count"] == 2
+    assert details["supported_claim_count"] == 1
+    assert details["unsupported_claim_count"] == 1
+    assert len(details["claims"]) == 2
+    assert any(error["code"] == "duplicate_claim_id" for error in details["validation_errors"])
+
+
 # --------------------------------------------------------------------------- 证据
 
 
@@ -253,6 +285,40 @@ def test_conflict_claim_needs_two_sided_evidence() -> None:
             _claim(
                 claim_subtype="conflict",
                 evidence_refs=[{"context_id": "C1", "quote": "订单签收后 7 天内可申请无理由退款。"}],
+            )
+        ]
+    )
+
+    assert score == 0.0
+    assert details["claims"][0]["support_status"] == "insufficient_evidence"
+    assert details["document_conflict"] is False
+    assert any(
+        error["code"] == "conflict_single_sided_evidence" for error in details["validation_errors"]
+    )
+
+
+def test_conflict_duplicate_quote_is_downgraded() -> None:
+    ref = {"context_id": "C1", "quote": "订单签收后 7 天内可申请无理由退款。"}
+
+    score, details, _ = _score([_claim(claim_subtype="conflict", evidence_refs=[ref, dict(ref)])])
+
+    assert score == 0.0
+    assert details["claims"][0]["support_status"] == "insufficient_evidence"
+    assert details["document_conflict"] is False
+    assert any(
+        error["code"] == "conflict_single_sided_evidence" for error in details["validation_errors"]
+    )
+
+
+def test_conflict_nested_quote_is_downgraded() -> None:
+    score, details, _ = _score(
+        [
+            _claim(
+                claim_subtype="conflict",
+                evidence_refs=[
+                    {"context_id": "C1", "quote": "订单签收后 7 天内可申请无理由退款。"},
+                    {"context_id": "C1", "quote": "订单签收后 7 天内"},
+                ],
             )
         ]
     )

@@ -790,7 +790,7 @@ NEGATIVE_TESTS: list[
         "Q36 cl8 single-sided evidence",
         "Q36",
         neg_q36_single_evidence,
-        "conflict claim needs two-sided evidence",
+        "conflict claim needs two distinct",
         False,
         False,
     ),

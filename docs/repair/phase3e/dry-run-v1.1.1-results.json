@@ -1862,8 +1862,8 @@
     {
       "name": "Q36 cl8 single-sided evidence",
       "case_id": "Q36",
-      "expected": "FAIL containing 'conflict claim needs two-sided evidence'",
-      "observed": "cl8: conflict claim needs two-sided evidence; downgraded",
+      "expected": "FAIL containing 'conflict claim needs two distinct'",
+      "observed": "cl8: conflict claim needs two distinct, non-nested quotes; downgraded",
       "faithfulness": {
         "status": "evaluated",
         "score": 0.875,
@@ -1889,7 +1889,7 @@
         "errors": []
       },
       "errors": [
-        "cl8: conflict claim needs two-sided evidence; downgraded",
+        "cl8: conflict claim needs two distinct, non-nested quotes; downgraded",
         "Q36/cl8: evidence count 1 < 2",
         "constraint: cl8 two-sided evidence (evidence=1)"
       ],

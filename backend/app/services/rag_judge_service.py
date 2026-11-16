@@ -391,20 +391,24 @@ def _validate_v2_evidence(
                 )
             )
             return True
-    if (
-        claim["claim_subtype"] == "conflict"
-        and claim["support_status"] == "supported"
-        and len(normalized_refs) < 2
-    ):
-        claim["support_status"] = "insufficient_evidence"
-        errors.append(
-            _validation_error(
-                claim_id,
-                "conflict_single_sided_evidence",
-                "conflict claim needs two-sided evidence; downgraded",
-            )
+    if claim["claim_subtype"] == "conflict" and claim["support_status"] == "supported":
+        distinct_keys = {(ref["context_id"], ref["quote"].strip()) for ref in normalized_refs}
+        distinct_quotes = {key[1] for key in distinct_keys}
+        has_substring_pair = any(
+            left != right and (left in right or right in left)
+            for left in distinct_quotes
+            for right in distinct_quotes
         )
-        return True
+        if len(distinct_keys) < 2 or len(distinct_quotes) < 2 or has_substring_pair:
+            claim["support_status"] = "insufficient_evidence"
+            errors.append(
+                _validation_error(
+                    claim_id,
+                    "conflict_single_sided_evidence",
+                    "conflict claim needs two distinct, non-nested quotes; downgraded",
+                )
+            )
+            return True
     return False
 
 
@@ -546,9 +550,10 @@ def _faithfulness_score(
                 _validation_error(
                     claim["claim_id"],
                     "duplicate_claim_id",
-                    "claim_id must be unique within one answer",
+                    "claim_id must be unique within one answer; duplicate skipped",
                 )
             )
+            continue
         seen_claim_ids.add(claim["claim_id"])
         downgraded = _validate_v2_evidence(claim, context_map, validation_errors, evidence_checks)
         evidence_failed = evidence_failed or downgraded

@@ -517,13 +517,15 @@ Correctness/Relevancy 输出不变；`RagJudgeInput` 不变（不新增 answerab
 - v1.0.0 输出 `supported/evidence` 继续可解析，v1 计分路径不变；
 - v2 factual 缺 `support_status`/非法 `claim_subtype` → `validation_errors`，按 `insufficient_evidence` 计数，不静默默认 supported；
 - supported 无 evidence、quote 非逐字、context 不存在 → 降级 `insufficient_evidence`，记 `evidence_validation_failed`；
-- `claim_subtype=conflict` + supported → `document_conflict=true`；冲突 claim 不得标 `is_contradictory=true`；
+- `claim_subtype=conflict` + supported → `document_conflict=true`；两条证据必须 `(context_id, quote.strip())` 去重且互不为子串；冲突 claim 不得标 `is_contradictory=true`；
+- 重复 `claim_id` 保留首条、跳过后续（只计一次），仍记录 `duplicate_claim_id`；
 - 新增单测全部通过；生产 Schema/Service 重跑同一 6 案例 dry-run，结果与设计稿 dry-run 一致（6/6、12/12）。
 
 ### 11.3 激活闸门（仍未满足）
 
 - 未设置 `RAG_JUDGE_PROMPT_VERSION=v1.1.1`；
 - 回滚：删除该环境变量或设为 `v1.0.0`；v1.1.1 目录保留不会生效；
+- `MANIFEST.active` 仅记录状态，不作为硬门禁；显式选择才加载，默认不选；
 - 未运行真实 Judge / 10 条对比 / 40 条；
 - 10 条对比需另开批准；不得把 dry-run PASS 当作 Prompt 质量证据；
 - v1.1.1 仍 `design_draft` / `active=false`。

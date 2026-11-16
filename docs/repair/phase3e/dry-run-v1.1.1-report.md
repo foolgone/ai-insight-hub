@@ -207,7 +207,7 @@
 | Q29 fabricated supported policy claim | FAIL containing 'expected skipped' | expected skipped but faithfulness was evaluated | PASS |
 | Q36 cl8 marked contradictory | FAIL containing 'document conflict must not be answer-internal contradiction' | cl8: document conflict must not be answer-internal contradiction | PASS |
 | Q23 cl1 contradictory without pair | FAIL containing 'is_contradictory requires contradiction_with' | cl1: is_contradictory requires contradiction_with | PASS |
-| Q36 cl8 single-sided evidence | FAIL containing 'conflict claim needs two-sided evidence' | cl8: conflict claim needs two-sided evidence; downgraded | PASS |
+| Q36 cl8 single-sided evidence | FAIL containing 'conflict claim needs two distinct' | cl8: conflict claim needs two distinct, non-nested quotes; downgraded | PASS |
 | Q11 cl4 excluded as non_factual | FAIL containing 'Q11/cl4' | Q11/cl4: claim_type expected 'factual_claim', got 'non_factual' | PASS |
 | Q35 cl5 marked supported | FAIL containing 'non_factual claim must not have support_status' | cl5: non_factual claim must not have support_status | PASS |
 | Q21 alternative split 2/3=0.667 | PASS (range-only) | F=0.667, target=0.6-0.7 PASS | PASS |
