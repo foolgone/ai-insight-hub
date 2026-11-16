@@ -94,3 +94,13 @@ Q23 保持 `constraint`，Q14/Q19 保持 `multi`，Q36/Q37/Q35 保持 `ambiguous
 5. 通过后再跑完整 40 条。
 
 **当前未改 Prompt/Agent/Schema/API/DB，未运行 Judge；v1.1.0 仍 pending_review。**
+
+---
+
+## 6. 一致性审计（2026-11-16）
+
+- 报告：`human-gold-audit.md`；机器结果：`human-gold-audit.json`
+- **345 项检查全部通过**（0 失败、0 警告）
+- 覆盖：40 条候选、13 条 Gold、27 条 pending、1 条 Gold Claim、34 条 pending Claim、
+  来源 SHA、Evidence 逐字性、状态、分类/answerability、题目改写、Prompt 版本关系
+- 未修改任何 Prompt/Agent/Schema/API/DB，未运行 Judge
