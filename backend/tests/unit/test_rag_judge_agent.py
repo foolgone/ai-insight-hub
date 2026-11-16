@@ -168,6 +168,7 @@ async def test_prompt_version_and_sha_are_exposed() -> None:
     agent, _ = _agent("faithfulness", [FAITHFULNESS_JSON])
 
     assert agent.config.version == "2026-11-14.1"
+    assert agent.prompt_version == "v1.0.0"
     assert len(agent.prompt_sha256) == 64
     assert agent.prompt_sha256 == agent.prompt_sha256
     assert agent.metric_version == "v1"

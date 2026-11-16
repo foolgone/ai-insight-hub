@@ -1,13 +1,13 @@
 """Phase 3E Prompt v1.1.1 six-case dry-run.
 
-Read-only and offline:
+Inputs read-only; writes only the two dry-run artifacts; no DB/network:
 - loads the frozen acceptance matrix + fixtures;
-- parses a synthetic v1.1.1 Faithfulness output with the *designed* v2 fields
-  (inline Pydantic models, mirroring docs/repair/10-phase3e-prompt-v1.1.1-design.md §5.1);
-- computes F = supported / scorable from claim labels;
-- checks evidence refs are verbatim substrings of answer_contexts;
+- builds a synthetic v1.1.1 Faithfulness output from matrix claims and parses it
+  with the **production** Schema (``FaithfulnessOutput``);
+- computes F with the **production** Service (``_faithfulness_score``):
+  supported / scorable, non_factual excluded, evidence + contradiction checks;
 - simulates C/R candidates against the matrix ranges;
-- runs negative tests to prove the checks reject known-bad mutations.
+- runs negative/boundary tests to prove production checks reject known-bad mutations.
 
 It does NOT call an LLM/Judge, access the network, write the database, or
 produce real Judge scores. C/R values are simulated candidates, not model output.
@@ -19,9 +19,9 @@ import re
 import sys
 from datetime import date
 from pathlib import Path
-from typing import Any, Callable, Literal
+from typing import Any, Callable
 
-from pydantic import BaseModel, Field, ValidationError
+from pydantic import ValidationError
 
 ROOT = Path(__file__).resolve().parent
 REPO_ROOT = ROOT.parents[2]
@@ -29,7 +29,12 @@ BACKEND = REPO_ROOT / "backend"
 if str(BACKEND) not in sys.path:
     sys.path.insert(0, str(BACKEND))
 
-from app.schemas.agents.rag_judge import RagJudgeInput  # noqa: E402
+from app.schemas.agents.rag_judge import (  # noqa: E402
+    JUDGE_SCHEMA_V2,
+    FaithfulnessOutput,
+    RagJudgeInput,
+)
+from app.services.rag_judge_service import _faithfulness_score  # noqa: E402
 
 MATRIX = ROOT / "prompt-v1.1.1-acceptance-matrix.json"
 FIXTURES = ROOT / "prompt-v1.1.1-fixtures.json"
@@ -121,32 +126,6 @@ LABEL_ASSERTIONS: dict[str, dict[str, dict[str, Any]]] = {
 }
 
 
-class EvidenceRef(BaseModel):
-    context_id: str = Field(min_length=1, max_length=64)
-    quote: str = Field(min_length=1, max_length=2000)
-
-
-class ClaimV2(BaseModel):
-    """Designed v1.1.1 claim fields; v1 fields kept for compatibility."""
-
-    claim: str = Field(min_length=1, max_length=2000)
-    claim_id: str | None = Field(default=None, max_length=32)
-    claim_type: Literal["factual_claim", "non_factual"] = FACTUAL
-    claim_subtype: Literal["policy", "absence", "conflict", "advice", "meta"] | None = None
-    support_status: Literal["supported", "unsupported", "insufficient_evidence"] | None = None
-    supported: bool | None = None
-    evidence: list[str] = Field(default_factory=list, max_length=20)
-    evidence_refs: list[EvidenceRef] = Field(default_factory=list, max_length=20)
-    is_contradictory: bool = False
-    contradiction_with: list[str] = Field(default_factory=list, max_length=20)
-    reason: str = Field(default="", max_length=1000)
-
-
-class FaithfulnessOutputV2(BaseModel):
-    claims: list[ClaimV2] = Field(default_factory=list, max_length=80)
-    reason: str = Field(default="", max_length=1000)
-
-
 def load_inputs() -> tuple[dict[str, Any], dict[str, Any]]:
     matrix = json.loads(MATRIX.read_text(encoding="utf-8"))
     fixtures = {
@@ -180,148 +159,42 @@ def build_payload(
     return {"claims": claims, "reason": "dry-run synthetic output"}
 
 
-def parse_output(payload: dict[str, Any]) -> tuple[FaithfulnessOutputV2 | None, list[str]]:
+def parse_output(payload: dict[str, Any]) -> tuple[FaithfulnessOutput | None, list[str]]:
     try:
-        return FaithfulnessOutputV2.model_validate(payload), []
+        return FaithfulnessOutput.model_validate(payload), []
     except ValidationError as exc:
         return None, [f"schema: {error['loc']}: {error['msg']}" for error in exc.errors()]
 
 
-def validate_semantics(
-    output: FaithfulnessOutputV2, fixture: dict[str, Any]
-) -> tuple[list[str], list[dict[str, Any]]]:
-    errors: list[str] = []
-    contexts = {
-        item["context_id"]: (item.get("content") or "")
-        for item in fixture["answer_contexts"]
-    }
-    ids = [claim.claim_id for claim in output.claims]
-    if any(not claim_id for claim_id in ids):
-        errors.append("claim_id missing")
-    if len(ids) != len(set(ids)):
-        errors.append("duplicate claim_id")
-
-    by_id = {claim.claim_id: claim for claim in output.claims if claim.claim_id}
-    factual_ids = {
-        claim.claim_id
-        for claim in output.claims
-        if claim.claim_type == FACTUAL and claim.claim_id
-    }
-
-    evidence_checks: list[dict[str, Any]] = []
-    for claim in output.claims:
-        label = claim.claim_id or "<missing>"
-        if claim.claim_type == FACTUAL:
-            if claim.support_status is None:
-                errors.append(f"{label}: factual claim requires support_status")
-            if claim.claim_subtype not in {"policy", "conflict"}:
-                errors.append(f"{label}: factual claim subtype must be policy/conflict")
-        else:
-            if claim.support_status is not None:
-                errors.append(f"{label}: non_factual must not have support_status")
-            if claim.claim_subtype not in {"absence", "advice", "meta"}:
-                errors.append(f"{label}: non_factual subtype must be absence/advice/meta")
-
-        if (
-            claim.claim_type == FACTUAL
-            and claim.support_status == "supported"
-            and not claim.evidence_refs
-        ):
-            errors.append(f"{label}: supported without evidence_refs")
-
-        for evidence in claim.evidence_refs:
-            detail = {
-                "claim_id": label,
-                "context_id": evidence.context_id,
-                "quote": evidence.quote,
-                "ok": True,
-                "error": None,
-            }
-            content = contexts.get(evidence.context_id)
-            if content is None:
-                detail.update(ok=False, error="unknown_context_id")
-                errors.append(f"{label}: unknown context {evidence.context_id}")
-            elif evidence.quote.strip() not in content.strip():
-                detail.update(ok=False, error="quote_not_found")
-                errors.append(
-                    f"{label}: quote not verbatim in {evidence.context_id}"
-                )
-            evidence_checks.append(detail)
-
-        if claim.is_contradictory:
-            if claim.claim_type != FACTUAL:
-                errors.append(f"{label}: only factual claims can be contradictory")
-            if not claim.contradiction_with:
-                errors.append(f"{label}: is_contradictory requires contradiction_with")
-            if claim.claim_id and claim.claim_id in claim.contradiction_with:
-                errors.append(f"{label}: contradiction_with must not self-reference")
-            for other in claim.contradiction_with:
-                target = by_id.get(other)
-                if target is None:
-                    errors.append(f"{label}: contradiction_with unknown claim {other}")
-                elif target.claim_type != FACTUAL:
-                    errors.append(
-                        f"{label}: contradiction_with points to non_factual {other}"
-                    )
-            if len(factual_ids) < 2:
-                errors.append(f"{label}: answer-internal contradiction needs >=2 factual claims")
-        elif claim.contradiction_with:
-            errors.append(f"{label}: contradiction_with requires is_contradictory=true")
-
-        if claim.claim_subtype == "conflict":
-            if claim.is_contradictory:
-                errors.append(f"{label}: conflict claim must not be contradictory")
-            if claim.support_status == "supported" and len(claim.evidence_refs) < 2:
-                errors.append(f"{label}: conflict supported needs two-sided evidence")
-
-    return errors, evidence_checks
-
-
-def compute_f(output: FaithfulnessOutputV2) -> dict[str, Any]:
-    scorable = [claim for claim in output.claims if claim.claim_type == FACTUAL]
-    supported = [claim for claim in scorable if claim.support_status == "supported"]
-    unsupported = [claim for claim in scorable if claim.support_status == "unsupported"]
-    insufficient = [
-        claim for claim in scorable if claim.support_status == "insufficient_evidence"
-    ]
-    non_factual = [claim for claim in output.claims if claim.claim_type == NON_FACTUAL]
-    absence = [claim for claim in output.claims if claim.claim_subtype == "absence"]
-    conflicts = [
-        claim
-        for claim in output.claims
-        if claim.claim_subtype == "conflict" and claim.support_status == "supported"
-    ]
-    contradictions = [
-        claim
-        for claim in output.claims
-        if claim.claim_type == FACTUAL and claim.is_contradictory
-    ]
-    if not scorable:
-        status = "skipped"
-        score = None
-        skip_reason = "no_scorable_claims"
-        rate = None
-    else:
-        status = "evaluated"
-        score = len(supported) / len(scorable)
-        skip_reason = None
-        rate = len(insufficient) / len(scorable)
-    return {
-        "status": status,
+def score_with_service(
+    payload: dict[str, Any], fixture: dict[str, Any]
+) -> tuple[dict[str, Any], list[dict[str, Any]], list[str]]:
+    """Production Service scoring: F + evidence checks + validation errors."""
+    contexts = [item["content"] for item in fixture["answer_contexts"]]
+    score, details, skip_reason = _faithfulness_score(
+        payload, contexts=contexts, schema_version=JUDGE_SCHEMA_V2
+    )
+    f = {
+        "status": "skipped" if skip_reason else "evaluated",
         "score": score,
         "skip_reason": skip_reason,
-        "scorable_claim_count": len(scorable),
-        "supported_claim_count": len(supported),
-        "unsupported_claim_count": len(unsupported),
-        "insufficient_evidence_count": len(insufficient),
-        "non_factual_count": len(non_factual),
-        "absence_count": len(absence),
-        "document_conflict_count": len(conflicts),
-        "contradiction_count": len(contradictions),
-        "insufficient_evidence_rate": rate,
-        "all_insufficient": bool(scorable)
-        and len(insufficient) == len(scorable),
+        "scorable_claim_count": details.get("scorable_claim_count", 0),
+        "supported_claim_count": details.get("supported_claim_count", 0),
+        "unsupported_claim_count": details.get("unsupported_claim_count", 0),
+        "insufficient_evidence_count": details.get("insufficient_evidence_count", 0),
+        "non_factual_count": details.get("non_factual_count", 0),
+        "absence_count": details.get("absence_count", 0),
+        "document_conflict_count": details.get("document_conflict_count", 0),
+        "contradiction_count": details.get("contradiction_count", 0),
+        "insufficient_evidence_rate": details.get("insufficient_evidence_rate"),
+        "all_insufficient": details.get("all_insufficient", False),
     }
+    evidence_checks = list(details.get("evidence_validation") or [])
+    semantic_errors = [
+        f"{item.get('claim_id')}: {item.get('message')}"
+        for item in details.get("validation_errors") or []
+    ]
+    return f, evidence_checks, semantic_errors
 
 
 def parse_ranges(text: str) -> list[tuple[float, float]]:
@@ -448,7 +321,7 @@ def _check(name: str, ok: bool | None, detail: str = "") -> dict[str, Any]:
 
 
 def check_constraints(
-    case_id: str, output: FaithfulnessOutputV2, f: dict[str, Any], cr: dict[str, Any]
+    case_id: str, output: FaithfulnessOutput, f: dict[str, Any], cr: dict[str, Any]
 ) -> list[dict[str, Any]]:
     claims = {claim.claim_id: claim for claim in output.claims if claim.claim_id}
     checks: list[dict[str, Any]] = []
@@ -607,7 +480,7 @@ def check_constraints(
     return checks
 
 
-def check_labels(output: FaithfulnessOutputV2, case_id: str) -> list[str]:
+def check_labels(output: FaithfulnessOutput, case_id: str) -> list[str]:
     claims = {claim.claim_id: claim for claim in output.claims if claim.claim_id}
     errors: list[str] = []
     for claim_id, expected in LABEL_ASSERTIONS.get(case_id, {}).items():
@@ -681,8 +554,7 @@ def evaluate_case(
             "checks": [],
             "passed": False,
         }
-    semantic_errors, evidence_checks = validate_semantics(parsed, fixture)
-    f = compute_f(parsed)
+    f, evidence_checks, semantic_errors = score_with_service(payload, fixture)
     target = check_f_target(f, case)
     cr = simulate_cr(case)
     label_errors = check_labels(parsed, cid) if check_extra else []
@@ -862,7 +734,7 @@ NEGATIVE_TESTS: list[
         "Q35 cl6 evidence points to C2",
         "Q35",
         neg_q35_wrong_context,
-        "quote not verbatim in C2",
+        "not a verbatim substring",
         False,
         False,
     ),
@@ -878,7 +750,7 @@ NEGATIVE_TESTS: list[
         "Q21 cl4 supported without evidence",
         "Q21#3",
         neg_q21_cl4_supported_no_evidence,
-        "supported without evidence_refs",
+        "supported claim requires at least one evidence_ref",
         False,
         False,
     ),
@@ -902,7 +774,7 @@ NEGATIVE_TESTS: list[
         "Q36 cl8 marked contradictory",
         "Q36",
         neg_q36_cl8_contradictory,
-        "conflict claim must not be contradictory",
+        "document conflict must not be answer-internal contradiction",
         False,
         False,
     ),
@@ -918,7 +790,7 @@ NEGATIVE_TESTS: list[
         "Q36 cl8 single-sided evidence",
         "Q36",
         neg_q36_single_evidence,
-        "conflict supported needs two-sided evidence",
+        "conflict claim needs two-sided evidence",
         False,
         False,
     ),
@@ -934,7 +806,7 @@ NEGATIVE_TESTS: list[
         "Q35 cl5 marked supported",
         "Q35",
         neg_q35_cl5_supported,
-        "non_factual must not have support_status",
+        "non_factual claim must not have support_status",
         False,
         False,
     ),
@@ -1034,7 +906,8 @@ def render_report(result: dict[str, Any]) -> str:
     )
     lines.append(
         "> 合成输出：用矩阵 `expected_claims` 构造 v1.1.1 输出（不是 Judge 生成），"
-        "只验证 Schema/计分/证据规则能否接受矩阵预期，不代表 Prompt 的真实模型表现。"
+        "用生产 Schema/Service 解析与计分；只验证 Schema/计分/证据规则能否接受矩阵预期，"
+        "不代表 Prompt 的真实模型表现。"
     )
     lines.append(
         f"> 生成：{result['meta']['generated_on']}；脚本：`docs/repair/phase3e/dry_run_prompt_v1.1.1.py`。"
@@ -1230,8 +1103,8 @@ def main() -> int:
             "fixtures": str(FIXTURES.relative_to(REPO_ROOT)).replace("\\", "/"),
             "context_source": "fixture.answer_contexts",
             "claim_source": "matrix.expected_claims (synthetic, not Judge output)",
-            "schema_source": "inline v2 models mirroring design §5.1; backend v2 not implemented",
-            "note": "dry-run only; F computed from matrix claims; C/R simulated; NOT Judge scores",
+            "schema_source": "production app.schemas.agents.rag_judge + app.services.rag_judge_service",
+            "note": "dry-run only; F computed by production Service; C/R simulated; NOT Judge scores",
         },
         "summary": summary,
         "cases": results,

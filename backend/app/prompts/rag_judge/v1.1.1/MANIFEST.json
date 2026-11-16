@@ -80,5 +80,7 @@
     "Q21#3": "human_gold_claim_only",
     "Q11": "ai_draft_pending_human",
     "Q29": "ai_draft_pending_human"
-  }
+  },
+  "implementation_status": "implemented_default_off",
+  "default_prompt_version": "v1.0.0"
 }

@@ -13,9 +13,7 @@ from loguru import logger
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.agents.base import load_prompt_version
-from app.agents.rag_judge_agent import PROMPT_DIR as RAG_JUDGE_PROMPT_DIR
-from app.agents.rag_judge_agent import RagJudgeAgent
+from app.agents.rag_judge_agent import RagJudgeAgent, resolve_prompt_version
 from app.core.advisory_lock import AdvisoryLock
 from app.core.config import settings
 from app.core.exceptions import (
@@ -34,7 +32,10 @@ from app.models import (
 )
 from app.repositories import qa_dataset as qa_repo
 from app.repositories import rag_evaluation as repo
-from app.schemas.agents.rag_judge import RAG_JUDGE_METRIC_VERSION
+from app.schemas.agents.rag_judge import (
+    RAG_JUDGE_METRICS,
+    metric_version_for_prompt,
+)
 from app.schemas.rag_evaluation import RagEvaluationCreate
 
 RUN_PENDING = "pending"
@@ -59,10 +60,18 @@ def _now_naive() -> datetime:
 now_naive = _now_naive
 
 
-def metric_version_for(metric_name: str) -> str:
-    if metric_name in RAG_JUDGE_METRIC_VERSION:
-        return RAG_JUDGE_METRIC_VERSION[metric_name]
+def metric_version_for(metric_name: str, prompt_version: str | None = None) -> str:
+    """指标版本：Judge v1.1.1 → v2；检索指标始终 v1。"""
+    if metric_name in RAG_JUDGE_METRICS:
+        return metric_version_for_prompt(metric_name, prompt_version)
     return RETRIEVAL_METRIC_VERSION
+
+
+def judge_prompt_version_of(run: RagEvaluationRun) -> str:
+    """Run 的 Judge Prompt 版本；优先 run.judge_config，其次快照；缺失按 v1.0.0。"""
+    config = run.judge_config or {}
+    snapshot = (run.config_snapshot or {}).get("judge_config") or {}
+    return str(config.get("prompt_version") or snapshot.get("prompt_version") or "v1.0.0")
 
 
 def build_retrieval_config(
@@ -89,12 +98,13 @@ def build_retrieval_config(
 
 
 def build_judge_config(judge_metrics: Sequence[str]) -> dict[str, Any]:
-    """当前 Judge 指纹（模型/温度/max_tokens/Prompt SHA/指标版本）。
+    """当前 Judge 指纹（模型/温度/max_tokens/Prompt SHA/Schema/指标版本）。
 
     重试 Run 必须用**当前**指纹，不能照抄父 Run；否则 Prompt/模型变更后仍会复用旧结果。
     """
     if not judge_metrics:
         return {}
+    prompt_version = resolve_prompt_version()
     fingerprints: dict[str, Any] = {}
     for metric in judge_metrics:
         agent = RagJudgeAgent(metric)  # type: ignore[arg-type]
@@ -103,15 +113,22 @@ def build_judge_config(judge_metrics: Sequence[str]) -> dict[str, Any]:
             "model": settings.DEFAULT_LLM_MODEL,
             "temperature": agent.config.temperature,
             "max_tokens": agent.config.max_tokens,
-            "prompt_version": agent.config.version,
+            "prompt_version": agent.prompt_version,
+            "resolved_prompt_version": agent.prompt_version,
             "prompt_sha256": agent.prompt_sha256,
+            "schema_version": agent.schema_version,
+            "rubric_version": agent.rubric_version,
             "metric_version": agent.metric_version,
         }
     return {
         "model": settings.DEFAULT_LLM_MODEL,
         "temperature": settings.DEFAULT_TEMPERATURE,
-        "prompt_version": load_prompt_version(RAG_JUDGE_PROMPT_DIR),
-        "metric_versions": {metric: RAG_JUDGE_METRIC_VERSION[metric] for metric in judge_metrics},
+        "prompt_version": prompt_version,
+        "schema_version": next((item["schema_version"] for item in fingerprints.values()), None),
+        "rubric_version": next((item["rubric_version"] for item in fingerprints.values()), None),
+        "metric_versions": {
+            metric: fingerprint["metric_version"] for metric, fingerprint in fingerprints.items()
+        },
         "metric_fingerprints": fingerprints,
     }
 
@@ -196,6 +213,7 @@ async def create_run(
         split=payload.split,
     )
     judge_config = build_judge_config(judge_metrics)
+    judge_prompt_version = judge_config.get("prompt_version")
 
     config_snapshot = {
         "dataset_id": str(dataset.id),
@@ -211,7 +229,8 @@ async def create_run(
         "metrics": metrics,
         "judge_metrics": judge_metrics,
         "metric_versions": {
-            metric: metric_version_for(metric) for metric in [*metrics, *judge_metrics]
+            metric: metric_version_for(metric, judge_prompt_version)
+            for metric in [*metrics, *judge_metrics]
         },
         "retrieval_config": retrieval_config,
         "judge_config": judge_config,
@@ -349,6 +368,9 @@ async def retry_run(
         )
 
     all_ids = {uuid.UUID(str(item)) for item in (parent.item_selection or {}).get("item_ids", [])}
+    judge_metrics = list((parent.config_snapshot or {}).get("judge_metrics") or [])
+    retry_judge = build_judge_config(judge_metrics)
+    retry_prompt_version = retry_judge.get("prompt_version")
     # 选中集 = 有 failed 指标 / 缺指标 / 指标版本过期（无结果也属于缺指标）
     expected = expected_metrics(parent)
     parent_results = await repo.results_for_run(session, parent.id)
@@ -362,7 +384,7 @@ async def retry_run(
         needs_retry = any(
             metric not in rows
             or rows[metric].status == "failed"
-            or rows[metric].metric_version != metric_version_for(metric)
+            or rows[metric].metric_version != metric_version_for(metric, retry_prompt_version)
             for metric in expected
         )
         if needs_retry:
@@ -393,12 +415,12 @@ async def retry_run(
                 "tenant_id": settings.WEKNORA_TENANT_ID or None,
             }
         )
-    retry_judge = build_judge_config(
-        list((parent.config_snapshot or {}).get("judge_metrics") or [])
-    )
     retry_snapshot = dict(parent.config_snapshot or {})
     retry_snapshot["retrieval_config"] = retry_retrieval
     retry_snapshot["judge_config"] = retry_judge
+    retry_snapshot["metric_versions"] = {
+        metric: metric_version_for(metric, retry_prompt_version) for metric in expected
+    }
 
     run = RagEvaluationRun(
         id=new_run_id,
@@ -472,6 +494,7 @@ def build_aggregate(
 ) -> dict[str, Any]:
     total = run.total_items
     metrics = expected_metrics(run)
+    prompt_version = judge_prompt_version_of(run)
     grouped: dict[str, list[RagEvaluationResult]] = defaultdict(list)
     for row in results:
         grouped[row.metric_name].append(row)
@@ -493,7 +516,7 @@ def build_aggregate(
         )
         skip_reasons = Counter(row.skipped_reason or "unknown" for row in skipped)
         metrics_payload[metric] = {
-            "metric_version": metric_version_for(metric),
+            "metric_version": metric_version_for(metric, prompt_version),
             "mean": mean,
             "evaluated": len(evaluated),
             "skipped": len(skipped),
@@ -742,6 +765,7 @@ __all__ = [
     "expected_metrics",
     "finalize_run",
     "get_run",
+    "judge_prompt_version_of",
     "list_results",
     "list_runs",
     "metric_version_for",

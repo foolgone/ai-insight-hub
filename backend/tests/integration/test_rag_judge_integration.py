@@ -64,6 +64,7 @@ def _factory(prompt_version: str):
                 max_tokens=512,
             ),
             llm=FakeLLM(RESPONSES[metric]),
+            prompt_version=prompt_version,
         )
 
     return build
@@ -111,7 +112,7 @@ async def test_judge_trace_end_to_end_with_mock_llm(db_session: AsyncSession) ->
     }
 
     outcomes = await judge_trace(
-        db_session, trace=trace, item=item, agent_factory=_factory("2026-11-14.1")
+        db_session, trace=trace, item=item, agent_factory=_factory("v1.0.0")
     )
 
     by_metric = {row.metric_name: row for row in outcomes}
@@ -120,7 +121,7 @@ async def test_judge_trace_end_to_end_with_mock_llm(db_session: AsyncSession) ->
     assert by_metric["faithfulness"].score == pytest.approx(1.0)
     assert by_metric["answer_correctness"].score == pytest.approx(0.9)
     assert by_metric["answer_relevancy"].score == pytest.approx(0.8)
-    assert all(row.judge_config["prompt_version"] == "2026-11-14.1" for row in outcomes)
+    assert all(row.judge_config["prompt_version"] == "v1.0.0" for row in outcomes)
     assert all(row.raw_output for row in outcomes)
 
     await db_session.refresh(trace)
@@ -137,17 +138,19 @@ async def test_different_prompt_versions_produce_different_config(db_session: As
         trace=trace,
         item=item,
         metrics=["answer_relevancy"],
-        agent_factory=_factory("v1.0"),
+        agent_factory=_factory("v1.0.0"),
     )
     second = await judge_trace(
         db_session,
         trace=trace,
         item=item,
         metrics=["answer_relevancy"],
-        agent_factory=_factory("v2.0"),
+        agent_factory=_factory("v1.1.1"),
     )
 
-    assert first[0].judge_config["prompt_version"] == "v1.0"
-    assert second[0].judge_config["prompt_version"] == "v2.0"
+    assert first[0].judge_config["prompt_version"] == "v1.0.0"
+    assert second[0].judge_config["prompt_version"] == "v1.1.1"
+    assert first[0].metric_version == "v1"
+    assert second[0].metric_version == "v2"
     # 3B 不落库：两条结果互不覆盖，由 3C 按版本分别保存
     assert first[0].score == second[0].score

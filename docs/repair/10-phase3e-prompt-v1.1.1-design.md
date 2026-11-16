@@ -1,7 +1,7 @@
-# Phase 3E · Prompt v1.1.1 设计（未激活）
+# Phase 3E · Prompt v1.1.1 设计与实现（默认关闭）
 
 **日期**：2026-11-16
-**状态**：**设计稿**；v1.0.0 仍为 active_baseline，v1.1.0 保持 `pending_review`，v1.1.1 未接入运行时。
+**状态**：**设计已实现，默认关闭**；v1.0.0 仍为 active_baseline，v1.1.0 保持 `pending_review`，v1.1.1 仍为 `design_draft` / `active=false`，只有显式设置 `RAG_JUDGE_PROMPT_VERSION=v1.1.1` 才加载。
 **依据**：`subagent-review.md/json`、`09-phase3e-prompt-v1.1-design.md`、Human Gold v1（含 key_facts）、当前 v1.0.0 Prompt / Judge Schema / Agent / Service / 版本实现。
 **本阶段未运行 Judge、未跑 10 条对照、未跑 40 条评测。**
 
@@ -21,7 +21,7 @@
 | `build_judge_config` | model/temperature/max_tokens/prompt_version/prompt_sha256/metric_version | 缺 schema_version/rubric_version；需扩展 JSONB，无需迁移 |
 | `metric_version_for` | Judge 指标返回 v1 | 激活 v1.1.1 时映射 v2；默认 v1.0.0 仍 v1 |
 
-> 结论：v1.1.1 必须同时设计 **Prompt + Schema + 版本加载 + 评分服务**，但本阶段只交设计，不改代码。
+> 结论：v1.1.1 必须同时设计 **Prompt + Schema + 版本加载 + 评分服务**；设计已完成，代码已在默认关闭的开关后落地，见 §11。
 
 ---
 
@@ -225,7 +225,7 @@ Few-shot：Q29 合理拒答 0.9–1.0；Q35 条件式 0.9–1.0 / 只答发货 0
 
 ---
 
-## 5. Schema 兼容设计（未实施）
+## 5. Schema 兼容设计（已实现，默认关闭）
 
 ### 5.1 FaithfulnessClaim 增量
 
@@ -256,14 +256,14 @@ evidence_refs: list[EvidenceRef] = []
 
 Correctness/Relevancy 输出不变；`RagJudgeInput` 不变（不新增 answerability）。
 
-### 5.3 测试要求（激活前）
+### 5.3 测试要求（已补充单测）
 
 - v1.0.0 24 条 Judge 测试全部保持；
 - v1.1.1 schema 解析、缺省字段回退、evidence 校验；
 - non_factual 过滤、zero-denominator skipped；
 - claim_type 非法值归一化（默认 factual_claim）并记录计数，避免单条坏 claim 导致整个 metric failed。
 
-### 5.4 Evidence 校验（Service 设计，未实施）
+### 5.4 Evidence 校验（Service 已实现）
 
 | 检查 | 规则 | 失败处理 |
 |---|---|---|
@@ -276,7 +276,7 @@ Correctness/Relevancy 输出不变；`RagJudgeInput` 不变（不新增 answerab
 - 校验失败**不静默接受**：Service 在 `details.evidence_validation` 记录 `claim_id`、错误码、原始 context_id/quote；
 - 一个 claim 校验失败不影响其它 claim；
 - 若全部 factual claim 因 evidence 校验降级为 insufficient，按 2.4 处理（score=0.0, `all_insufficient=true`），不是 1.0；
-- 这部分是 Service 设计，本轮不修改代码。
+- 这部分已在 `rag_judge_service._faithfulness_score` 落地；v1.0.0 走兼容分支，不改变旧行为。
 
 ---
 
@@ -318,12 +318,12 @@ Correctness/Relevancy 输出不变；`RagJudgeInput` 不变（不新增 answerab
 
 ### 6.3 加载器
 
-- 新增 `RAG_JUDGE_PROMPT_VERSION`，默认 `v1.0.0`；
-- 显式解析 `rag_judge/<version>/<metric>.txt`；
+- 已新增 `RAG_JUDGE_PROMPT_VERSION`，默认 `v1.0.0`；
+- 已实现显式解析 `rag_judge/<version>/<metric>.txt`；
 - v1.1.1 目录存在**不会自动加载**；
-- 缺文件/缺 MANIFEST → 明确报错，不静默回退；
-- `AgentConfig.version`、`prompt_sha256`、`judge_config.prompt_version` 必须来自同一解析结果；
-- 根目录 `version.txt` 不再作为唯一事实源（避免 `2026-11-14.1` 与 `v1.0.0` 不一致）。
+- 缺文件/缺 MANIFEST/SHA 不匹配 → 明确报错，不静默回退；
+- `judge_config.prompt_version` 使用 resolved prompt version，并同时记录 `resolved_prompt_version`；
+- 根目录 `version.txt` 不再作为 Judge 唯一事实源（避免 `2026-11-14.1` 与 `v1.0.0` 不一致）。
 
 ### 6.4 v1/v2 兼容与历史行为
 
@@ -463,7 +463,7 @@ Correctness/Relevancy 输出不变；`RagJudgeInput` 不变（不新增 answerab
 | v1.0.0 Prompt | 未修改；status=active_baseline；根目录 SHA 仍 `287053e9…`（F） |
 | v1.1.0 Prompt | 未修改；仍 pending_review |
 | v1.1.1 Prompt 正文 | 按 P0-3/P0-4/P1-4/P1-7/P2-3 修订：claim_id cl、claim_subtype、absence/conflict、answerability 推断；已记录原因 |
-| Agent/Service/Schema/API/DB | 未修改 |
+| Agent/Service/Schema/API/DB | 设计阶段未修改；实现阶段已按 §11 在默认关闭开关后落地 |
 | Migration | 未执行 |
 | Judge / 10 条 / 40 条 | 未运行 |
 | 固定 fixture | 6 个案例；每个含 4 条 retrieval_contexts + 2 条 answer_contexts；v1.0.0 分数绑定 answer_contexts |
@@ -486,3 +486,44 @@ Correctness/Relevancy 输出不变；`RagJudgeInput` 不变（不新增 answerab
 | 本文件 | 设计决策、Schema 兼容、版本映射、风险 |
 
 **状态：设计完成，等待审核；未激活、未运行 Judge、未跑 10/40 条、不进入 Phase 4。**
+
+---
+
+## 11. 实现记录（默认关闭，未激活）
+
+**日期**：2026-11-16
+**边界**：只实现 v1.1.1 Schema / Service / loader + 单测；v1.0.0 仍默认；未激活、未跑 Judge/10/40、未改 Human Gold、未做 Migration。
+
+### 11.1 代码变更
+
+| 文件 | 变更 |
+|---|---|
+| `backend/app/core/config.py` | 新增 `RAG_JUDGE_PROMPT_VERSION`，默认 `v1.0.0` |
+| `backend/.env.example` | 同步默认值 |
+| `backend/app/schemas/agents/rag_judge.py` | `FaithfulnessClaim` 扩展 `claim_id/claim_type/claim_subtype/support_status/is_contradictory/contradiction_with/evidence_refs`；`supported` 改为可选；新增 `EvidenceRef`、schema/metric 版本映射 |
+| `backend/app/agents/rag_judge_agent.py` | 显式版本化 loader：`<version>/MANIFEST.json` + `<version>/<metric>.txt`，校验 MANIFEST/SHA；缺文件/缺 MANIFEST/SHA 不匹配 → `RagJudgePromptError` |
+| `backend/app/services/rag_judge_service.py` | v2 计分：factual 进分母、non_factual 排除、0 scorable → `skipped(no_scorable_claims)`、全 insufficient → 0.0 + `all_insufficient`；evidence 校验/降级；矛盾/冲突校验 |
+| `backend/app/services/rag_evaluation_service.py` | `metric_version_for(metric, prompt_version=None)`；`build_judge_config` 增加 schema/rubric/resolved prompt；Run 创建/重试/聚合按同一 prompt version 解析 |
+| `backend/app/services/rag_evaluation_runner.py` | 结果行/失败行/复用检查按 Run 的 Judge prompt version 计算 metric_version；v2 evidence 统计 |
+| `backend/tests/unit/test_rag_judge_v2_schema_loader.py` | v2 Schema、默认关闭、显式 v1.1.1、MANIFEST/SHA/缺文件负向测试 |
+| `backend/tests/unit/test_rag_judge_v2_scoring.py` | v2 计分/证据/矛盾/zero-denominator；六案例 canonical + 12 个负向/边界回归 |
+| `backend/tests/integration/test_rag_judge_integration.py` | 测试夹具改用有效 Prompt 版本；24 条 Judge 测试保持 |
+| `backend/tests/integration/test_rag_evaluations.py` | fake judge 签名接受新增可选参数 |
+
+### 11.2 行为结果
+
+- 默认 `RAG_JUDGE_PROMPT_VERSION=v1.0.0`；v1.1.1 目录存在不会自动加载；
+- v1.1.1 显式加载后：`schema_version=rag_judge_schema_v2`、`rubric_version=v1.1.1`、Judge `metric_version=v2`；
+- v1.0.0 输出 `supported/evidence` 继续可解析，v1 计分路径不变；
+- v2 factual 缺 `support_status`/非法 `claim_subtype` → `validation_errors`，按 `insufficient_evidence` 计数，不静默默认 supported；
+- supported 无 evidence、quote 非逐字、context 不存在 → 降级 `insufficient_evidence`，记 `evidence_validation_failed`；
+- `claim_subtype=conflict` + supported → `document_conflict=true`；冲突 claim 不得标 `is_contradictory=true`；
+- 新增单测全部通过；生产 Schema/Service 重跑同一 6 案例 dry-run，结果与设计稿 dry-run 一致（6/6、12/12）。
+
+### 11.3 激活闸门（仍未满足）
+
+- 未设置 `RAG_JUDGE_PROMPT_VERSION=v1.1.1`；
+- 回滚：删除该环境变量或设为 `v1.0.0`；v1.1.1 目录保留不会生效；
+- 未运行真实 Judge / 10 条对比 / 40 条；
+- 10 条对比需另开批准；不得把 dry-run PASS 当作 Prompt 质量证据；
+- v1.1.1 仍 `design_draft` / `active=false`。

@@ -3,7 +3,7 @@
 > **这是 dry-run，不是 Judge 分数。** 未调用 LLM/Judge、未访问网络、未写数据库、未激活 v1.1.1。
 >
 > 输入：fixture `answer_contexts`（C1–C2）；`retrieval_contexts`（R1–R4）未混入。
-> 合成输出：用矩阵 `expected_claims` 构造 v1.1.1 输出（不是 Judge 生成），只验证 Schema/计分/证据规则能否接受矩阵预期，不代表 Prompt 的真实模型表现。
+> 合成输出：用矩阵 `expected_claims` 构造 v1.1.1 输出（不是 Judge 生成），用生产 Schema/Service 解析与计分；只验证 Schema/计分/证据规则能否接受矩阵预期，不代表 Prompt 的真实模型表现。
 > 生成：2026-11-16；脚本：`docs/repair/phase3e/dry_run_prompt_v1.1.1.py`。
 
 ## 结论
@@ -200,16 +200,16 @@
 
 | 测试 | 预期 | 实际 | 结果 |
 |---|---|---|---|
-| Q35 cl6 evidence points to C2 | FAIL containing 'quote not verbatim in C2' | cl6: quote not verbatim in C2 | PASS |
+| Q35 cl6 evidence points to C2 | FAIL containing 'not a verbatim substring' | cl6: evidence quote is not a verbatim substring | PASS |
 | Q23 cl1 demoted to non_factual | FAIL containing 'Q23/cl1' | Q23/cl1: claim_type expected 'factual_claim', got 'non_factual' | PASS |
-| Q21 cl4 supported without evidence | FAIL containing 'supported without evidence_refs' | cl4: supported without evidence_refs | PASS |
+| Q21 cl4 supported without evidence | FAIL containing 'supported claim requires at least one evidence_ref' | cl4: supported claim requires at least one evidence_ref | PASS |
 | Q21 all claims supported -> F=1.0 | FAIL containing 'target_range' | supported/scorable=1.0, target_range=0.6-0.7 | PASS |
 | Q29 fabricated supported policy claim | FAIL containing 'expected skipped' | expected skipped but faithfulness was evaluated | PASS |
-| Q36 cl8 marked contradictory | FAIL containing 'conflict claim must not be contradictory' | cl8: conflict claim must not be contradictory | PASS |
+| Q36 cl8 marked contradictory | FAIL containing 'document conflict must not be answer-internal contradiction' | cl8: document conflict must not be answer-internal contradiction | PASS |
 | Q23 cl1 contradictory without pair | FAIL containing 'is_contradictory requires contradiction_with' | cl1: is_contradictory requires contradiction_with | PASS |
-| Q36 cl8 single-sided evidence | FAIL containing 'conflict supported needs two-sided evidence' | cl8: conflict supported needs two-sided evidence | PASS |
+| Q36 cl8 single-sided evidence | FAIL containing 'conflict claim needs two-sided evidence' | cl8: conflict claim needs two-sided evidence; downgraded | PASS |
 | Q11 cl4 excluded as non_factual | FAIL containing 'Q11/cl4' | Q11/cl4: claim_type expected 'factual_claim', got 'non_factual' | PASS |
-| Q35 cl5 marked supported | FAIL containing 'non_factual must not have support_status' | cl5: non_factual must not have support_status | PASS |
+| Q35 cl5 marked supported | FAIL containing 'non_factual claim must not have support_status' | cl5: non_factual claim must not have support_status | PASS |
 | Q21 alternative split 2/3=0.667 | PASS (range-only) | F=0.667, target=0.6-0.7 PASS | PASS |
 | Q36 base answer without cl8 (7/7=1.0) | PASS (range-only) | F=1.000, target=0.8-1.0 PASS | PASS |
 

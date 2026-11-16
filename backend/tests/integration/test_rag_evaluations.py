@@ -180,7 +180,16 @@ async def test_query_mode_copies_judge_outcomes(
 ) -> None:
     monkeypatch.setattr(enqueue, "enqueue_rag_evaluation", _fake_enqueue())
 
-    async def fake_judge_trace(session, *, trace, item=None, metrics=None, agent_factory=None):
+    async def fake_judge_trace(
+        session,
+        *,
+        trace,
+        item=None,
+        metrics=None,
+        agent_factory=None,
+        prompt_version=None,
+        schema_version=None,
+    ):
         return [
             JudgeOutcome(
                 metric_name=metric,
@@ -327,7 +336,16 @@ async def test_retry_reuses_evaluated_results_and_reruns_failed_metric(
     monkeypatch.setattr(enqueue, "enqueue_rag_evaluation", _fake_enqueue())
     state = {"fail_relevancy": True}
 
-    async def fake_judge_trace(session, *, trace, item=None, metrics=None, agent_factory=None):
+    async def fake_judge_trace(
+        session,
+        *,
+        trace,
+        item=None,
+        metrics=None,
+        agent_factory=None,
+        prompt_version=None,
+        schema_version=None,
+    ):
         requested = list(metrics or [])
         fingerprints = build_judge_config(requested)["metric_fingerprints"]
         rows = []
@@ -632,7 +650,16 @@ async def test_retry_does_not_reuse_when_judge_fingerprint_changes(
     monkeypatch.setattr(enqueue, "enqueue_rag_evaluation", _fake_enqueue())
     state = {"fail_relevancy": True}
 
-    async def fake_judge_trace(session, *, trace, item=None, metrics=None, agent_factory=None):
+    async def fake_judge_trace(
+        session,
+        *,
+        trace,
+        item=None,
+        metrics=None,
+        agent_factory=None,
+        prompt_version=None,
+        schema_version=None,
+    ):
         requested = list(metrics or [])
         fingerprints = build_judge_config(requested)["metric_fingerprints"]
         rows = []

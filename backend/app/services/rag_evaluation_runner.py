@@ -168,7 +168,7 @@ def _row_from_metric(
         dataset_item_id=item.id,
         trace_id=trace.id,
         metric_name=metric,
-        metric_version=service.metric_version_for(metric),
+        metric_version=service.metric_version_for(metric, service.judge_prompt_version_of(run)),
         status=result.status,
         score=result.value,
         skipped_reason=result.skipped_reason,
@@ -192,7 +192,7 @@ def _failed_row(
         dataset_item_id=item.id,
         trace_id=trace_id,
         metric_name=metric,
-        metric_version=service.metric_version_for(metric),
+        metric_version=service.metric_version_for(metric, service.judge_prompt_version_of(run)),
         status="failed",
         score=None,
         details={"error": error[:1000], "trace_reused": trace_reused},
@@ -273,7 +273,11 @@ async def _evaluate_trace(
 
     if judge_metrics:
         outcomes = await judge_trace(
-            session, trace=trace, item=item, metrics=list(judge_metrics)  # type: ignore[arg-type]
+            session,
+            trace=trace,
+            item=item,
+            metrics=list(judge_metrics),  # type: ignore[arg-type]
+            prompt_version=service.judge_prompt_version_of(run),
         )
         by_metric = {row.metric_name: row for row in outcomes}
         contexts = _trace_contexts(trace)
@@ -296,9 +300,17 @@ async def _evaluate_trace(
             if trace_reused:
                 details["source_trace_id"] = str(trace.id)
             if metric == "faithfulness" and judge.status == "evaluated":
-                details["evidence_verified"] = _evidence_verified(
-                    details.get("claims") or [], contexts
-                )
+                if "evidence_validation" in details:
+                    checks = details.get("evidence_validation") or []
+                    details["evidence_verified"] = {
+                        "claims": len(details.get("claims") or []),
+                        "verified": sum(1 for item in checks if item.get("ok")),
+                        "failed": sum(1 for item in checks if not item.get("ok")),
+                    }
+                else:
+                    details["evidence_verified"] = _evidence_verified(
+                        details.get("claims") or [], contexts
+                    )
             rows.append(
                 RagEvaluationResult(
                     run_id=run.id,
@@ -330,7 +342,8 @@ def _parent_result_reusable(
     """
     if parent.status not in ("evaluated", "skipped"):
         return False
-    if parent.metric_version != service.metric_version_for(metric):
+    prompt_version = service.judge_prompt_version_of(run)
+    if parent.metric_version != service.metric_version_for(metric, prompt_version):
         return False
     if parent.status == "skipped":
         return True
@@ -341,7 +354,17 @@ def _parent_result_reusable(
     actual = dict(parent.judge_config or {})
     return all(
         actual.get(key) == expected.get(key)
-        for key in ("model", "temperature", "max_tokens", "prompt_sha256")
+        for key in (
+            "model",
+            "temperature",
+            "max_tokens",
+            "prompt_version",
+            "resolved_prompt_version",
+            "prompt_sha256",
+            "schema_version",
+            "rubric_version",
+            "metric_version",
+        )
     )
 
 

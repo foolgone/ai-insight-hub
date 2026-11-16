@@ -13,6 +13,7 @@ from __future__ import annotations
 import hashlib
 import json
 import math
+import re
 import uuid
 from pathlib import Path
 from typing import Any
@@ -25,17 +26,73 @@ from app.agents.base import (
     AgentOutputError,
     AgentResult,
     BaseAgent,
-    load_prompt_version,
 )
 from app.core.config import settings
 from app.schemas.agents.rag_judge import (
     METRIC_OUTPUT_SCHEMAS,
-    RAG_JUDGE_METRIC_VERSION,
     RagJudgeInput,
     RagJudgeMetric,
+    judge_schema_version,
+    metric_version_for_prompt,
 )
 
 PROMPT_DIR = Path(__file__).resolve().parents[1] / "prompts" / "rag_judge"
+PROMPT_VERSION_PATTERN = re.compile(r"^v\d+\.\d+\.\d+$")
+
+
+class RagJudgePromptError(RuntimeError):
+    """Judge Prompt 制品缺失/损坏；不静默回退。"""
+
+
+def resolve_prompt_version(explicit: str | None = None) -> str:
+    """解析 Judge Prompt 版本；默认 v1.0.0，目录存在不会自动切换。"""
+    value = (explicit or settings.RAG_JUDGE_PROMPT_VERSION or "v1.0.0").strip()
+    return value or "v1.0.0"
+
+
+def load_prompt_manifest(version: str, *, prompt_dir: Path = PROMPT_DIR) -> dict[str, Any]:
+    """读取并校验 ``rag_judge/<version>/MANIFEST.json``。"""
+    if not PROMPT_VERSION_PATTERN.match(version):
+        raise RagJudgePromptError(f"invalid rag judge prompt version: {version!r}")
+    manifest_path = prompt_dir / version / "MANIFEST.json"
+    if not manifest_path.is_file():
+        raise RagJudgePromptError(f"rag judge manifest missing: {manifest_path}")
+    try:
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise RagJudgePromptError(f"rag judge manifest unreadable: {manifest_path}") from exc
+    if not isinstance(manifest, dict):
+        raise RagJudgePromptError(f"rag judge manifest must be an object: {manifest_path}")
+    if manifest.get("version") != version:
+        raise RagJudgePromptError(
+            f"rag judge manifest version mismatch: {manifest.get('version')!r} != {version!r}"
+        )
+    prompts = manifest.get("prompts")
+    if not isinstance(prompts, dict) or not prompts:
+        raise RagJudgePromptError(f"rag judge manifest has no prompts: {manifest_path}")
+    return manifest
+
+
+def load_judge_prompt(version: str, metric: str, *, prompt_dir: Path = PROMPT_DIR) -> str:
+    """显式加载 ``<version>/<metric>.txt``，并按 MANIFEST 校验 SHA256。"""
+    if metric not in METRIC_OUTPUT_SCHEMAS:
+        raise RagJudgePromptError(f"unsupported rag judge metric: {metric!r}")
+    manifest = load_prompt_manifest(version, prompt_dir=prompt_dir)
+    filename = f"{metric}.txt"
+    expected_sha = manifest["prompts"].get(filename)
+    if not expected_sha:
+        raise RagJudgePromptError(f"rag judge prompt not registered: {version}/{filename}")
+    prompt_path = prompt_dir / version / filename
+    if not prompt_path.is_file():
+        raise RagJudgePromptError(f"rag judge prompt missing: {prompt_path}")
+    try:
+        text = prompt_path.read_text(encoding="utf-8")
+    except OSError as exc:
+        raise RagJudgePromptError(f"rag judge prompt unreadable: {prompt_path}") from exc
+    actual_sha = hashlib.sha256(text.encode("utf-8")).hexdigest()
+    if actual_sha != expected_sha:
+        raise RagJudgePromptError(f"rag judge prompt sha256 mismatch: {version}/{filename}")
+    return text
 
 
 class RagJudgeAgent(BaseAgent):
@@ -48,16 +105,25 @@ class RagJudgeAgent(BaseAgent):
         config: AgentConfig | None = None,
         llm: Any = None,
         credentials: Any = None,
+        prompt_version: str | None = None,
     ) -> None:
         if metric not in METRIC_OUTPUT_SCHEMAS:
             raise ValueError(f"unsupported rag judge metric: {metric}")
         self.metric: RagJudgeMetric = metric
+        self.prompt_version = resolve_prompt_version(prompt_version)
+        manifest = load_prompt_manifest(self.prompt_version)
+        self.schema_version = str(
+            manifest.get("schema_version") or judge_schema_version(self.prompt_version)
+        )
+        self.rubric_version = str(manifest.get("rubric_version") or self.prompt_version)
+        self.prompt_status = str(manifest.get("status") or "unknown")
+        self.prompt_active = bool(manifest.get("active", False))
         self._active_input: RagJudgeInput | None = None
         super().__init__(
             config
             or AgentConfig(
                 name=f"rag_judge_{metric}",
-                version=load_prompt_version(PROMPT_DIR),
+                version=self.prompt_version,
                 # Judge 输出含 claim 明细，推理模型还会占 reasoning token
                 max_tokens=settings.RAG_JUDGE_MAX_TOKENS,
             ),
@@ -70,7 +136,7 @@ class RagJudgeAgent(BaseAgent):
 
     @property
     def metric_version(self) -> str:
-        return RAG_JUDGE_METRIC_VERSION[self.metric]
+        return metric_version_for_prompt(self.metric, self.prompt_version)
 
     @property
     def prompt_sha256(self) -> str:
@@ -83,7 +149,7 @@ class RagJudgeAgent(BaseAgent):
 
     def _load_prompt(self) -> str:
         if self._prompt is None:
-            self._prompt = (PROMPT_DIR / f"{self.metric}.txt").read_text(encoding="utf-8")
+            self._prompt = load_judge_prompt(self.prompt_version, self.metric)
         return self._prompt
 
     def _create_agent(self, input_data: Any) -> list[dict[str, str]]:
@@ -169,4 +235,11 @@ class RagJudgeAgent(BaseAgent):
         )
 
 
-__all__ = ["PROMPT_DIR", "RagJudgeAgent"]
+__all__ = [
+    "PROMPT_DIR",
+    "RagJudgeAgent",
+    "RagJudgePromptError",
+    "load_judge_prompt",
+    "load_prompt_manifest",
+    "resolve_prompt_version",
+]

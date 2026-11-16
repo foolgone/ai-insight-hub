@@ -209,6 +209,8 @@ class Settings(BaseSettings):
     RAG_MAX_RETRIES: int = 3
     # Judge 输出含 claim 级细节，推理模型还会消耗 reasoning token；4096 容易截断
     RAG_JUDGE_MAX_TOKENS: int = 8192
+    # Judge Prompt 版本：默认 v1.0.0；v1.1.1 必须显式设置才加载（目录存在不等于激活）
+    RAG_JUDGE_PROMPT_VERSION: str = "v1.0.0"
     # 批量评测：单 Run 条目上限 / 时间预算（秒） / stale 判定（秒）
     RAG_EVAL_MAX_ITEMS: int = 200
     RAG_EVAL_SOFT_BUDGET_SECONDS: int = 1500

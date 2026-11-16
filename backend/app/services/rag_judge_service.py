@@ -20,12 +20,15 @@ from typing import Any, Literal
 from loguru import logger
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.agents.rag_judge_agent import RagJudgeAgent
+from app.agents.rag_judge_agent import RagJudgeAgent, resolve_prompt_version
 from app.models import QaDatasetItem, RagTrace
 from app.schemas.agents.rag_judge import (
+    JUDGE_SCHEMA_V1,
+    JUDGE_SCHEMA_V2,
     RAG_JUDGE_METRICS,
-    RAG_JUDGE_METRIC_VERSION,
     RagJudgeMetric,
+    judge_schema_version,
+    metric_version_for_prompt,
 )
 
 JudgeStatus = Literal["evaluated", "skipped", "failed"]
@@ -34,6 +37,11 @@ JudgeStatus = Literal["evaluated", "skipped", "failed"]
 MAX_CONTEXTS = 20
 MAX_CONTEXT_CHARS = 6000
 MAX_RAW_CHARS = 20000
+
+SUPPORT_STATUSES = {"supported", "unsupported", "insufficient_evidence"}
+CLAIM_TYPES = {"factual_claim", "non_factual"}
+FACTUAL_SUBTYPES = {"policy", "conflict"}
+NON_FACTUAL_SUBTYPES = {"absence", "advice", "meta"}
 
 AgentFactory = Callable[[RagJudgeMetric], RagJudgeAgent]
 
@@ -118,8 +126,11 @@ def _judge_config(agent: RagJudgeAgent, *, model: str | None) -> dict[str, Any]:
         "model": model,
         "temperature": agent.config.temperature,
         "max_tokens": agent.config.max_tokens,
-        "prompt_version": agent.config.version,
+        "prompt_version": getattr(agent, "prompt_version", agent.config.version),
+        "resolved_prompt_version": getattr(agent, "prompt_version", agent.config.version),
         "prompt_sha256": agent.prompt_sha256,
+        "schema_version": getattr(agent, "schema_version", JUDGE_SCHEMA_V1),
+        "rubric_version": getattr(agent, "rubric_version", agent.config.version),
         "metric_version": agent.metric_version,
     }
 
@@ -147,37 +158,442 @@ def _payload(
     return base
 
 
-def _skipped(metric: RagJudgeMetric, reason: str, *, model: str | None = None) -> JudgeOutcome:
+def _skipped(
+    metric: RagJudgeMetric,
+    reason: str,
+    *,
+    model: str | None = None,
+    prompt_version: str | None = None,
+) -> JudgeOutcome:
+    version = resolve_prompt_version(prompt_version)
+    schema_version = judge_schema_version(version)
+    metric_version = metric_version_for_prompt(metric, version)
     return JudgeOutcome(
         metric_name=metric,
-        metric_version=RAG_JUDGE_METRIC_VERSION[metric],
+        metric_version=metric_version,
         status="skipped",
         skipped_reason=reason,
         judge_config={
             "agent": f"rag_judge_{metric}",
             "model": model,
-            "metric_version": RAG_JUDGE_METRIC_VERSION[metric],
+            "prompt_version": version,
+            "resolved_prompt_version": version,
+            "schema_version": schema_version,
+            "rubric_version": version,
+            "metric_version": metric_version,
         },
     )
 
 
-def _faithfulness_score(data: dict[str, Any]) -> tuple[float | None, dict[str, Any], str | None]:
-    """返回 ``(score, details, skipped_reason)``；无 claims 时 score=None。"""
+def _validation_error(claim_id: str, code: str, message: str, **extra: Any) -> dict[str, Any]:
+    return {"claim_id": claim_id, "code": code, "message": message, **extra}
+
+
+def _normalize_v2_claim(
+    raw: dict[str, Any], index: int, errors: list[dict[str, Any]]
+) -> dict[str, Any]:
+    """v1.1.1 claim 归一化：非法字段记 validation_error，不静默当 supported。"""
+    claim = dict(raw)
+    claim_id = str(claim.get("claim_id") or f"cl{index}")
+    if not claim.get("claim_id"):
+        errors.append(_validation_error(claim_id, "missing_claim_id", "claim_id is required"))
+    claim["claim_id"] = claim_id
+
+    raw_type = claim.get("claim_type")
+    if raw_type not in CLAIM_TYPES:
+        errors.append(
+            _validation_error(
+                claim_id,
+                "claim_type_invalid",
+                "claim_type must be factual_claim/non_factual",
+                value=raw_type,
+            )
+        )
+        claim_type = "factual_claim"
+    else:
+        claim_type = raw_type
+    claim["claim_type"] = claim_type
+
+    raw_subtype = claim.get("claim_subtype")
+    allowed_subtypes = FACTUAL_SUBTYPES if claim_type == "factual_claim" else NON_FACTUAL_SUBTYPES
+    if raw_subtype not in allowed_subtypes:
+        known_subtype = raw_subtype in (FACTUAL_SUBTYPES | NON_FACTUAL_SUBTYPES)
+        errors.append(
+            _validation_error(
+                claim_id,
+                "claim_subtype_type_mismatch" if known_subtype else "claim_subtype_invalid",
+                f"claim_subtype {raw_subtype!r} is not valid for {claim_type}",
+                value=raw_subtype,
+            )
+        )
+        subtype = "policy" if claim_type == "factual_claim" else "meta"
+    else:
+        subtype = raw_subtype
+    claim["claim_subtype"] = subtype
+
+    raw_status = claim.get("support_status")
+    legacy_supported = claim.get("supported")
+    if claim_type == "non_factual":
+        if raw_status is not None:
+            errors.append(
+                _validation_error(
+                    claim_id,
+                    "non_factual_support_status",
+                    "non_factual claim must not have support_status",
+                    value=raw_status,
+                )
+            )
+        claim["support_status"] = None
+    else:
+        if raw_status not in SUPPORT_STATUSES:
+            errors.append(
+                _validation_error(
+                    claim_id,
+                    "support_status_invalid",
+                    "factual claim requires support_status",
+                    value=raw_status,
+                )
+            )
+            status = "insufficient_evidence"
+        else:
+            status = raw_status
+        if (
+            raw_status in SUPPORT_STATUSES
+            and isinstance(legacy_supported, bool)
+            and legacy_supported != (raw_status == "supported")
+        ):
+            errors.append(
+                _validation_error(
+                    claim_id,
+                    "legacy_supported_conflict",
+                    "supported bool conflicts with support_status",
+                    supported=legacy_supported,
+                    support_status=raw_status,
+                )
+            )
+        claim["support_status"] = status
+
+    if not isinstance(claim.get("is_contradictory"), bool):
+        errors.append(
+            _validation_error(
+                claim_id,
+                "is_contradictory_invalid",
+                "is_contradictory must be boolean",
+                value=claim.get("is_contradictory"),
+            )
+        )
+        claim["is_contradictory"] = False
+
+    raw_pair = claim.get("contradiction_with")
+    if raw_pair is None:
+        claim["contradiction_with"] = []
+    elif not isinstance(raw_pair, list):
+        errors.append(
+            _validation_error(
+                claim_id,
+                "contradiction_with_invalid",
+                "contradiction_with must be a list",
+            )
+        )
+        claim["contradiction_with"] = []
+    else:
+        claim["contradiction_with"] = [str(item) for item in raw_pair]
+    return claim
+
+
+def _validate_v2_evidence(
+    claim: dict[str, Any],
+    context_map: dict[str, str],
+    errors: list[dict[str, Any]],
+    evidence_checks: list[dict[str, Any]],
+) -> bool:
+    """校验逐字证据；supported 失败时降级为 insufficient_evidence。"""
+    claim_id = claim["claim_id"]
+    raw_refs = claim.get("evidence_refs")
+    if raw_refs is None:
+        refs: list[Any] = []
+    elif not isinstance(raw_refs, list):
+        errors.append(
+            _validation_error(claim_id, "evidence_refs_invalid", "evidence_refs must be a list")
+        )
+        refs = []
+    else:
+        refs = raw_refs
+
+    normalized_refs: list[dict[str, str]] = []
+    refs_ok = True
+    for raw_ref in refs:
+        if not isinstance(raw_ref, dict):
+            errors.append(
+                _validation_error(
+                    claim_id, "evidence_ref_invalid", "evidence_ref must be an object"
+                )
+            )
+            refs_ok = False
+            continue
+        context_id = str(raw_ref.get("context_id") or "")
+        quote = str(raw_ref.get("quote") or "")
+        normalized_refs.append({"context_id": context_id, "quote": quote})
+        check = {
+            "claim_id": claim_id,
+            "context_id": context_id,
+            "quote": quote,
+            "ok": True,
+            "error": None,
+        }
+        if not context_id or context_id not in context_map:
+            check.update(ok=False, error="unknown_context_id")
+            errors.append(
+                _validation_error(
+                    claim_id,
+                    "unknown_context_id",
+                    "evidence context_id is not in C1..Cn",
+                    context_id=context_id,
+                )
+            )
+            refs_ok = False
+        elif not quote.strip():
+            check.update(ok=False, error="empty_quote")
+            errors.append(_validation_error(claim_id, "empty_quote", "evidence quote is empty"))
+            refs_ok = False
+        elif quote.strip() not in context_map[context_id].strip():
+            check.update(ok=False, error="quote_not_found")
+            errors.append(
+                _validation_error(
+                    claim_id,
+                    "quote_not_found",
+                    "evidence quote is not a verbatim substring",
+                    context_id=context_id,
+                )
+            )
+            refs_ok = False
+        evidence_checks.append(check)
+    claim["evidence_refs"] = normalized_refs
+
+    if claim["claim_type"] == "factual_claim" and claim["support_status"] == "supported":
+        if not refs:
+            claim["support_status"] = "insufficient_evidence"
+            errors.append(
+                _validation_error(
+                    claim_id,
+                    "supported_without_evidence",
+                    "supported claim requires at least one evidence_ref",
+                )
+            )
+            return True
+        if not refs_ok:
+            claim["support_status"] = "insufficient_evidence"
+            errors.append(
+                _validation_error(
+                    claim_id,
+                    "evidence_validation_failed",
+                    "supported claim has invalid evidence; downgraded",
+                )
+            )
+            return True
+    if (
+        claim["claim_subtype"] == "conflict"
+        and claim["support_status"] == "supported"
+        and len(normalized_refs) < 2
+    ):
+        claim["support_status"] = "insufficient_evidence"
+        errors.append(
+            _validation_error(
+                claim_id,
+                "conflict_single_sided_evidence",
+                "conflict claim needs two-sided evidence; downgraded",
+            )
+        )
+        return True
+    return False
+
+
+def _validate_v2_contradictions(claims: list[dict[str, Any]], errors: list[dict[str, Any]]) -> None:
+    by_id = {claim["claim_id"]: claim for claim in claims}
+    factual_ids = {claim["claim_id"] for claim in claims if claim["claim_type"] == "factual_claim"}
+    for claim in claims:
+        claim_id = claim["claim_id"]
+        if claim["claim_subtype"] == "conflict" and claim["is_contradictory"]:
+            errors.append(
+                _validation_error(
+                    claim_id,
+                    "conflict_marked_contradictory",
+                    "document conflict must not be answer-internal contradiction",
+                )
+            )
+            claim["is_contradictory"] = False
+            claim["contradiction_with"] = []
+            continue
+        if not claim["is_contradictory"]:
+            if claim["contradiction_with"]:
+                errors.append(
+                    _validation_error(
+                        claim_id,
+                        "contradiction_with_without_flag",
+                        "contradiction_with requires is_contradictory=true",
+                    )
+                )
+                claim["contradiction_with"] = []
+            continue
+
+        valid = True
+        if claim["claim_type"] != "factual_claim":
+            errors.append(
+                _validation_error(
+                    claim_id,
+                    "non_factual_contradictory",
+                    "only factual claims can be contradictory",
+                )
+            )
+            valid = False
+        if not claim["contradiction_with"]:
+            errors.append(
+                _validation_error(
+                    claim_id,
+                    "missing_contradiction_pair",
+                    "is_contradictory requires contradiction_with",
+                )
+            )
+            valid = False
+        if claim_id in claim["contradiction_with"]:
+            errors.append(
+                _validation_error(
+                    claim_id,
+                    "self_contradiction",
+                    "contradiction_with must not self-reference",
+                )
+            )
+            valid = False
+        for other in claim["contradiction_with"]:
+            target = by_id.get(other)
+            if target is None:
+                errors.append(
+                    _validation_error(
+                        claim_id,
+                        "unknown_contradiction_pair",
+                        "contradiction_with references an unknown claim",
+                        other=other,
+                    )
+                )
+                valid = False
+            elif target["claim_type"] != "factual_claim":
+                errors.append(
+                    _validation_error(
+                        claim_id,
+                        "non_factual_contradiction_pair",
+                        "contradiction_with must reference factual claims",
+                        other=other,
+                    )
+                )
+                valid = False
+        if len(factual_ids) < 2:
+            errors.append(
+                _validation_error(
+                    claim_id,
+                    "insufficient_contradiction_claims",
+                    "answer-internal contradiction needs >=2 factual claims",
+                )
+            )
+            valid = False
+        if not valid:
+            claim["is_contradictory"] = False
+            claim["contradiction_with"] = []
+
+
+def _faithfulness_score(
+    data: dict[str, Any],
+    *,
+    contexts: Sequence[str] = (),
+    schema_version: str = JUDGE_SCHEMA_V1,
+) -> tuple[float | None, dict[str, Any], str | None]:
+    """返回 ``(score, details, skipped_reason)``。
+
+    v1.0.0：全部 claims 进分母，``supported`` 为事实源（行为不变）；
+    v1.1.1：``factual_claim`` 进分母，non_factual 不进；0 scorable → skipped。
+    """
     claims = list(data.get("claims") or [])
-    total = len(claims)
-    if total == 0:
-        return None, {"claims": [], "reason": data.get("reason") or ""}, "no_claims"
-    supported = sum(1 for claim in claims if claim.get("supported"))
-    return (
-        round(supported / total, 6),
-        {
-            "claims": claims,
-            "supported_count": supported,
-            "claim_count": total,
-            "reason": data.get("reason") or "",
-        },
-        None,
-    )
+    if schema_version != JUDGE_SCHEMA_V2:
+        total = len(claims)
+        if total == 0:
+            return None, {"claims": [], "reason": data.get("reason") or ""}, "no_claims"
+        supported_count = sum(1 for claim in claims if claim.get("supported"))
+        return (
+            round(supported_count / total, 6),
+            {
+                "claims": claims,
+                "supported_count": supported_count,
+                "claim_count": total,
+                "reason": data.get("reason") or "",
+            },
+            None,
+        )
+
+    context_map = {f"C{index}": str(content) for index, content in enumerate(contexts, 1)}
+    validation_errors: list[dict[str, Any]] = []
+    evidence_checks: list[dict[str, Any]] = []
+    normalized: list[dict[str, Any]] = []
+    evidence_failed = False
+    seen_claim_ids: set[str] = set()
+    for index, raw in enumerate(claims, 1):
+        if not isinstance(raw, dict):
+            validation_errors.append(
+                _validation_error(f"cl{index}", "claim_invalid", "claim must be an object")
+            )
+            continue
+        claim = _normalize_v2_claim(raw, index, validation_errors)
+        if claim["claim_id"] in seen_claim_ids:
+            validation_errors.append(
+                _validation_error(
+                    claim["claim_id"],
+                    "duplicate_claim_id",
+                    "claim_id must be unique within one answer",
+                )
+            )
+        seen_claim_ids.add(claim["claim_id"])
+        downgraded = _validate_v2_evidence(claim, context_map, validation_errors, evidence_checks)
+        evidence_failed = evidence_failed or downgraded
+        normalized.append(claim)
+    _validate_v2_contradictions(normalized, validation_errors)
+
+    scorable = [claim for claim in normalized if claim["claim_type"] == "factual_claim"]
+    supported = [claim for claim in scorable if claim["support_status"] == "supported"]
+    unsupported = [claim for claim in scorable if claim["support_status"] == "unsupported"]
+    insufficient = [
+        claim for claim in scorable if claim["support_status"] == "insufficient_evidence"
+    ]
+    non_factual = [claim for claim in normalized if claim["claim_type"] == "non_factual"]
+    absence = [claim for claim in normalized if claim["claim_subtype"] == "absence"]
+    document_conflicts = [
+        claim
+        for claim in normalized
+        if claim["claim_subtype"] == "conflict" and claim["support_status"] == "supported"
+    ]
+    contradictions = [claim for claim in scorable if claim["is_contradictory"]]
+    details: dict[str, Any] = {
+        "claims": normalized,
+        "reason": data.get("reason") or "",
+        "claim_count": len(normalized),
+        "scorable_claim_count": len(scorable),
+        "supported_count": len(supported),
+        "supported_claim_count": len(supported),
+        "unsupported_claim_count": len(unsupported),
+        "insufficient_evidence_count": len(insufficient),
+        "non_factual_count": len(non_factual),
+        "absence_count": len(absence),
+        "document_conflict": bool(document_conflicts),
+        "document_conflict_count": len(document_conflicts),
+        "contradiction_count": len(contradictions),
+        "insufficient_evidence_rate": (
+            round(len(insufficient) / len(scorable), 6) if scorable else None
+        ),
+        "all_insufficient": bool(scorable) and len(insufficient) == len(scorable),
+        "evidence_validation": evidence_checks,
+        "evidence_validation_failed": evidence_failed,
+        "validation_errors": validation_errors,
+    }
+    if not scorable:
+        return None, details, "no_scorable_claims"
+    return round(len(supported) / len(scorable), 6), details, None
 
 
 async def judge_trace(
@@ -187,6 +603,8 @@ async def judge_trace(
     item: QaDatasetItem | None = None,
     metrics: Sequence[RagJudgeMetric] | None = None,
     agent_factory: AgentFactory | None = None,
+    prompt_version: str | None = None,
+    schema_version: str | None = None,
 ) -> list[JudgeOutcome]:
     """对一条 Trace 执行指定指标；返回按 ``RAG_JUDGE_METRICS`` 顺序排列的结果。"""
     requested = list(metrics or RAG_JUDGE_METRICS)
@@ -194,9 +612,13 @@ async def judge_trace(
     if unknown:
         raise ValueError(f"unknown rag judge metrics: {unknown}")
 
+    resolved_prompt_version = resolve_prompt_version(prompt_version)
+    resolved_schema_version = schema_version or judge_schema_version(resolved_prompt_version)
     contexts = _contexts_from_trace(trace)
     gold_answer = _gold_answer_of(item)
-    factory: AgentFactory = agent_factory or (lambda metric: RagJudgeAgent(metric))
+    factory: AgentFactory = agent_factory or (
+        lambda metric: RagJudgeAgent(metric, prompt_version=resolved_prompt_version)
+    )
 
     outcomes: list[JudgeOutcome] = []
     for metric in RAG_JUDGE_METRICS:
@@ -205,10 +627,17 @@ async def judge_trace(
 
         reason = _skip_reason(metric, trace=trace, contexts=contexts, gold_answer=gold_answer)
         if reason is not None:
-            outcomes.append(_skipped(metric, reason))
+            outcomes.append(
+                _skipped(
+                    metric,
+                    reason,
+                    prompt_version=resolved_prompt_version,
+                )
+            )
             continue
 
         agent = factory(metric)
+        agent_schema_version = getattr(agent, "schema_version", resolved_schema_version)
         started = time.perf_counter()
         result = await agent.judge(
             _payload(metric, trace=trace, contexts=contexts, gold_answer=gold_answer),
@@ -245,7 +674,11 @@ async def judge_trace(
 
         data = dict(result.data)
         if metric == "faithfulness":
-            score, details, skipped_reason = _faithfulness_score(data)
+            score, details, skipped_reason = _faithfulness_score(
+                data,
+                contexts=contexts,
+                schema_version=agent_schema_version,
+            )
             if skipped_reason is not None:
                 outcomes.append(
                     JudgeOutcome(

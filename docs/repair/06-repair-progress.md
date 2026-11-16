@@ -968,3 +968,15 @@ alembic check   : No new upgrade operations detected
 - 负向/边界测试 12/12 符合预期：包含 Q21 1.0 超出 0.6–0.7 FAIL、Q21 2/3=0.667 PASS、Q36 base 7/7 PASS。
 - 结果文件：`dry-run-v1.1.1-report.md`、`dry-run-v1.1.1-results.json`；未生成 Judge 结果，未激活 v1.1.1。
 - Q11 矩阵 regression 同步收窄为 0.6–0.8，避免与 expected_scores 冲突。
+
+### v1.1.1 Schema / Service / loader 实现（2026-11-16，默认关闭）
+- 新增 `RAG_JUDGE_PROMPT_VERSION`，默认 `v1.0.0`；v1.1.1 只有显式设置才加载，目录存在不自动激活。
+- Judge loader 改为显式 `<version>/MANIFEST.json` + `<version>/<metric>.txt`，校验 MANIFEST/SHA；缺文件/缺 MANIFEST/SHA 不匹配 → `RagJudgePromptError`，不静默回退。
+- Schema 扩展 v2 字段（claim_id/claim_type/claim_subtype/support_status/is_contradictory/contradiction_with/evidence_refs），保留 v1 `supported/evidence` 解析。
+- Service 新增 v2 计分：factual 进分母、non_factual 排除、0 scorable → skipped(no_scorable_claims)、全 insufficient → 0.0 + all_insufficient；矛盾 claim 仍进分母。
+- Evidence：context_id 必须存在、quote 逐字、supported 至少一条；失败降级 insufficient 并记 `evidence_validation_failed` / `validation_errors`。
+- document_conflict：conflict + supported 统计；冲突 claim 不得标 `is_contradictory`；单边 evidence 降级。
+- `metric_version_for(metric, prompt_version=None)`：默认 v1，v1.1.1 → v2；创建/重试/聚合/复用按 Run 的 prompt version 解析，v1/v2 不混算。
+- 新增 60 条单测：v2 Schema/loader、计分/证据/矛盾/zero-denominator、六案例 canonical + 12 个负向/边界回归；现有 24 条 Judge 测试保持。
+- 生产 Schema/Service 重跑同一 6 案例 dry-run：6/6、12/12，结果与设计稿 dry-run 一致。
+- 未激活 v1.1.1；未运行真实 Judge/10/40；未改 Human Gold；未做 DB Migration。

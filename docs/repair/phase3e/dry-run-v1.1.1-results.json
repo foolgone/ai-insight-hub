@@ -14,8 +14,8 @@
     "fixtures": "docs/repair/phase3e/prompt-v1.1.1-fixtures.json",
     "context_source": "fixture.answer_contexts",
     "claim_source": "matrix.expected_claims (synthetic, not Judge output)",
-    "schema_source": "inline v2 models mirroring design §5.1; backend v2 not implemented",
-    "note": "dry-run only; F computed from matrix claims; C/R simulated; NOT Judge scores"
+    "schema_source": "production app.schemas.agents.rag_judge + app.services.rag_judge_service",
+    "note": "dry-run only; F computed by production Service; C/R simulated; NOT Judge scores"
   },
   "summary": {
     "passed": true,
@@ -144,7 +144,7 @@
         "absence_count": 1,
         "document_conflict_count": 0,
         "contradiction_count": 1,
-        "insufficient_evidence_rate": 0.3333333333333333,
+        "insufficient_evidence_rate": 0.333333,
         "all_insufficient": false
       },
       "target": {
@@ -1602,21 +1602,21 @@
     {
       "name": "Q35 cl6 evidence points to C2",
       "case_id": "Q35",
-      "expected": "FAIL containing 'quote not verbatim in C2'",
-      "observed": "cl6: quote not verbatim in C2",
+      "expected": "FAIL containing 'not a verbatim substring'",
+      "observed": "cl6: evidence quote is not a verbatim substring",
       "faithfulness": {
         "status": "evaluated",
-        "score": 1.0,
+        "score": 0.833333,
         "skip_reason": null,
         "scorable_claim_count": 6,
-        "supported_claim_count": 6,
+        "supported_claim_count": 5,
         "unsupported_claim_count": 0,
-        "insufficient_evidence_count": 0,
+        "insufficient_evidence_count": 1,
         "non_factual_count": 2,
         "absence_count": 1,
         "document_conflict_count": 0,
         "contradiction_count": 0,
-        "insufficient_evidence_rate": 0.0,
+        "insufficient_evidence_rate": 0.166667,
         "all_insufficient": false
       },
       "target": {
@@ -1629,7 +1629,8 @@
         "errors": []
       },
       "errors": [
-        "cl6: quote not verbatim in C2"
+        "cl6: evidence quote is not a verbatim substring",
+        "cl6: supported claim has invalid evidence; downgraded"
       ],
       "as_expected": true
     },
@@ -1679,21 +1680,21 @@
     {
       "name": "Q21 cl4 supported without evidence",
       "case_id": "Q21#3",
-      "expected": "FAIL containing 'supported without evidence_refs'",
-      "observed": "cl4: supported without evidence_refs",
+      "expected": "FAIL containing 'supported claim requires at least one evidence_ref'",
+      "observed": "cl4: supported claim requires at least one evidence_ref",
       "faithfulness": {
         "status": "evaluated",
-        "score": 0.8,
+        "score": 0.6,
         "skip_reason": null,
         "scorable_claim_count": 5,
-        "supported_claim_count": 4,
+        "supported_claim_count": 3,
         "unsupported_claim_count": 0,
-        "insufficient_evidence_count": 1,
+        "insufficient_evidence_count": 2,
         "non_factual_count": 1,
         "absence_count": 0,
         "document_conflict_count": 0,
         "contradiction_count": 0,
-        "insufficient_evidence_rate": 0.2,
+        "insufficient_evidence_rate": 0.4,
         "all_insufficient": false
       },
       "target": {
@@ -1702,15 +1703,12 @@
           0.6,
           0.7
         ],
-        "in_range": false,
-        "errors": [
-          "supported/scorable=0.8, target_range=0.6-0.7"
-        ]
+        "in_range": true,
+        "errors": []
       },
       "errors": [
-        "cl4: supported without evidence_refs",
+        "cl4: supported claim requires at least one evidence_ref",
         "Q21#3/cl4: support_status expected 'insufficient_evidence', got 'supported'",
-        "supported/scorable=0.8, target_range=0.6-0.7",
         "constraint: cl4 insufficient ()",
         "constraint: single Q21#3 claim score=0.0 (score=1.0)"
       ],
@@ -1792,80 +1790,8 @@
     {
       "name": "Q36 cl8 marked contradictory",
       "case_id": "Q36",
-      "expected": "FAIL containing 'conflict claim must not be contradictory'",
-      "observed": "cl8: conflict claim must not be contradictory",
-      "faithfulness": {
-        "status": "evaluated",
-        "score": 1.0,
-        "skip_reason": null,
-        "scorable_claim_count": 8,
-        "supported_claim_count": 8,
-        "unsupported_claim_count": 0,
-        "insufficient_evidence_count": 0,
-        "non_factual_count": 0,
-        "absence_count": 0,
-        "document_conflict_count": 1,
-        "contradiction_count": 1,
-        "insufficient_evidence_rate": 0.0,
-        "all_insufficient": false
-      },
-      "target": {
-        "status": "evaluated",
-        "target_range": [
-          0.8,
-          1.0
-        ],
-        "in_range": true,
-        "errors": []
-      },
-      "errors": [
-        "cl8: conflict claim must not be contradictory",
-        "Q36/cl8: is_contradictory expected False, got True",
-        "constraint: cl8 not contradictory ()"
-      ],
-      "as_expected": true
-    },
-    {
-      "name": "Q23 cl1 contradictory without pair",
-      "case_id": "Q23",
-      "expected": "FAIL containing 'is_contradictory requires contradiction_with'",
-      "observed": "cl1: is_contradictory requires contradiction_with",
-      "faithfulness": {
-        "status": "evaluated",
-        "score": 0.5,
-        "skip_reason": null,
-        "scorable_claim_count": 6,
-        "supported_claim_count": 3,
-        "unsupported_claim_count": 1,
-        "insufficient_evidence_count": 2,
-        "non_factual_count": 2,
-        "absence_count": 1,
-        "document_conflict_count": 0,
-        "contradiction_count": 1,
-        "insufficient_evidence_rate": 0.3333333333333333,
-        "all_insufficient": false
-      },
-      "target": {
-        "status": "evaluated",
-        "target_range": [
-          0.4,
-          0.5
-        ],
-        "in_range": true,
-        "errors": []
-      },
-      "errors": [
-        "cl1: is_contradictory requires contradiction_with",
-        "Q23/cl1: contradiction_with expected ['cl2'], got []",
-        "constraint: cl1 contradictory_with=['cl2'] ()"
-      ],
-      "as_expected": true
-    },
-    {
-      "name": "Q36 cl8 single-sided evidence",
-      "case_id": "Q36",
-      "expected": "FAIL containing 'conflict supported needs two-sided evidence'",
-      "observed": "cl8: conflict supported needs two-sided evidence",
+      "expected": "FAIL containing 'document conflict must not be answer-internal contradiction'",
+      "observed": "cl8: document conflict must not be answer-internal contradiction",
       "faithfulness": {
         "status": "evaluated",
         "score": 1.0,
@@ -1891,7 +1817,79 @@
         "errors": []
       },
       "errors": [
-        "cl8: conflict supported needs two-sided evidence",
+        "cl8: document conflict must not be answer-internal contradiction",
+        "Q36/cl8: is_contradictory expected False, got True",
+        "constraint: cl8 not contradictory ()"
+      ],
+      "as_expected": true
+    },
+    {
+      "name": "Q23 cl1 contradictory without pair",
+      "case_id": "Q23",
+      "expected": "FAIL containing 'is_contradictory requires contradiction_with'",
+      "observed": "cl1: is_contradictory requires contradiction_with",
+      "faithfulness": {
+        "status": "evaluated",
+        "score": 0.5,
+        "skip_reason": null,
+        "scorable_claim_count": 6,
+        "supported_claim_count": 3,
+        "unsupported_claim_count": 1,
+        "insufficient_evidence_count": 2,
+        "non_factual_count": 2,
+        "absence_count": 1,
+        "document_conflict_count": 0,
+        "contradiction_count": 0,
+        "insufficient_evidence_rate": 0.333333,
+        "all_insufficient": false
+      },
+      "target": {
+        "status": "evaluated",
+        "target_range": [
+          0.4,
+          0.5
+        ],
+        "in_range": true,
+        "errors": []
+      },
+      "errors": [
+        "cl1: is_contradictory requires contradiction_with",
+        "Q23/cl1: contradiction_with expected ['cl2'], got []",
+        "constraint: cl1 contradictory_with=['cl2'] ()"
+      ],
+      "as_expected": true
+    },
+    {
+      "name": "Q36 cl8 single-sided evidence",
+      "case_id": "Q36",
+      "expected": "FAIL containing 'conflict claim needs two-sided evidence'",
+      "observed": "cl8: conflict claim needs two-sided evidence; downgraded",
+      "faithfulness": {
+        "status": "evaluated",
+        "score": 0.875,
+        "skip_reason": null,
+        "scorable_claim_count": 8,
+        "supported_claim_count": 7,
+        "unsupported_claim_count": 0,
+        "insufficient_evidence_count": 1,
+        "non_factual_count": 0,
+        "absence_count": 0,
+        "document_conflict_count": 0,
+        "contradiction_count": 0,
+        "insufficient_evidence_rate": 0.125,
+        "all_insufficient": false
+      },
+      "target": {
+        "status": "evaluated",
+        "target_range": [
+          0.8,
+          1.0
+        ],
+        "in_range": true,
+        "errors": []
+      },
+      "errors": [
+        "cl8: conflict claim needs two-sided evidence; downgraded",
         "Q36/cl8: evidence count 1 < 2",
         "constraint: cl8 two-sided evidence (evidence=1)"
       ],
@@ -1939,8 +1937,8 @@
     {
       "name": "Q35 cl5 marked supported",
       "case_id": "Q35",
-      "expected": "FAIL containing 'non_factual must not have support_status'",
-      "observed": "cl5: non_factual must not have support_status",
+      "expected": "FAIL containing 'non_factual claim must not have support_status'",
+      "observed": "cl5: non_factual claim must not have support_status",
       "faithfulness": {
         "status": "evaluated",
         "score": 1.0,
@@ -1966,7 +1964,7 @@
         "errors": []
       },
       "errors": [
-        "cl5: non_factual must not have support_status",
+        "cl5: non_factual claim must not have support_status",
         "Q35/cl5: support_status expected None, got 'supported'",
         "constraint: cl5 support_status is null ()"
       ],
@@ -1979,7 +1977,7 @@
       "observed": "F=0.667, target=0.6-0.7 PASS",
       "faithfulness": {
         "status": "evaluated",
-        "score": 0.6666666666666666,
+        "score": 0.666667,
         "skip_reason": null,
         "scorable_claim_count": 3,
         "supported_claim_count": 2,
@@ -1989,7 +1987,7 @@
         "absence_count": 0,
         "document_conflict_count": 0,
         "contradiction_count": 0,
-        "insufficient_evidence_rate": 0.3333333333333333,
+        "insufficient_evidence_rate": 0.333333,
         "all_insufficient": false
       },
       "target": {
