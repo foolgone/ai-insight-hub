@@ -29,6 +29,7 @@ from app.agents.base import (
 )
 from app.core.config import settings
 from app.schemas.agents.rag_judge import (
+    JUDGE_SCHEMA_V2,
     METRIC_OUTPUT_SCHEMAS,
     RagJudgeInput,
     RagJudgeMetric,
@@ -159,7 +160,14 @@ class RagJudgeAgent(BaseAgent):
         user_payload: dict[str, Any] = {"query": payload.query}
         if self.metric == "faithfulness":
             user_payload["answer"] = payload.answer
-            user_payload["contexts"] = payload.contexts
+            if self.schema_version == JUDGE_SCHEMA_V2:
+                # 显式给 context_id，避免模型把文档章节号（如 ## 7）当成 C7。
+                user_payload["contexts"] = payload.contexts
+                user_payload["context_ids"] = [
+                    f"C{index}" for index in range(1, len(payload.contexts) + 1)
+                ]
+            else:
+                user_payload["contexts"] = payload.contexts
         elif self.metric == "answer_correctness":
             user_payload["answer"] = payload.answer
             user_payload["gold_answer"] = payload.gold_answer
@@ -211,6 +219,63 @@ class RagJudgeAgent(BaseAgent):
         value = float(score)
         if not math.isfinite(value) or value < 0 or value > 1:
             raise ValueError("score must be a finite number within [0, 1]")
+
+    def _repair_example(self) -> str | None:
+        """给修复轮一条完整合法 JSON，避免长 schema 导致半截输出。"""
+        if self.metric == "faithfulness":
+            if self.schema_version == JUDGE_SCHEMA_V2:
+                return json.dumps(
+                    {
+                        "claims": [
+                            {
+                                "claim_id": "cl1",
+                                "claim": "订单签收后 7 天内可申请无理由退款",
+                                "claim_type": "factual_claim",
+                                "claim_subtype": "policy",
+                                "support_status": "supported",
+                                "is_contradictory": False,
+                                "contradiction_with": [],
+                                "evidence_refs": [
+                                    {
+                                        "context_id": "C1",
+                                        "quote": "订单签收后 7 天内可申请无理由退款。",
+                                    }
+                                ],
+                                "reason": "C1 原文",
+                            }
+                        ],
+                        "reason": "",
+                    },
+                    ensure_ascii=False,
+                )
+            return json.dumps(
+                {
+                    "claims": [
+                        {
+                            "claim": "订单签收后 7 天内可申请无理由退款",
+                            "supported": True,
+                            "evidence": ["订单签收后 7 天内可申请无理由退款。"],
+                            "reason": "C1 原文",
+                        }
+                    ],
+                    "reason": "",
+                },
+                ensure_ascii=False,
+            )
+        if self.metric == "answer_correctness":
+            return json.dumps(
+                {
+                    "score": 0.8,
+                    "missing_points": [],
+                    "wrong_facts": [],
+                    "reason": "关键事实正确",
+                },
+                ensure_ascii=False,
+            )
+        return json.dumps(
+            {"score": 0.9, "reason": "直接回答了问题"},
+            ensure_ascii=False,
+        )
 
     # ------------------------------------------------------------------ 便捷入口
 

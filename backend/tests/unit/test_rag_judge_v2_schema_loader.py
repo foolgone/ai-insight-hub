@@ -15,6 +15,7 @@ from app.agents.rag_judge_agent import (
     load_prompt_manifest,
     resolve_prompt_version,
 )
+from app.agents.structured_output import parse_with_repair
 from app.core.config import settings
 from app.schemas.agents.rag_judge import (
     JUDGE_SCHEMA_V1,
@@ -263,3 +264,111 @@ def test_v2_claim_schema_allows_missing_legacy_supported() -> None:
 
     assert output.claims[0].supported is None
     assert output.claims[0].support_status == "insufficient_evidence"
+
+
+class _NoCallLLM:
+    def __init__(self) -> None:
+        self.calls = 0
+
+    async def chat(self, messages, **kwargs):  # noqa: ANN001, ANN002
+        self.calls += 1
+        raise AssertionError("null fields must not trigger a repair call")
+
+
+async def test_v2_null_collections_parse_without_repair() -> None:
+    llm = _NoCallLLM()
+    payload = json.dumps(
+        {
+            "claims": [
+                {
+                    "claim_id": "cl1",
+                    "claim": "订单签收后 7 天内可申请无理由退款",
+                    "claim_type": "factual_claim",
+                    "claim_subtype": "policy",
+                    "support_status": "supported",
+                    "is_contradictory": None,
+                    "contradiction_with": None,
+                    "evidence_refs": [
+                        {
+                            "context_id": "C1",
+                            "quote": "订单签收后 7 天内可申请无理由退款。",
+                        }
+                    ],
+                    "reason": None,
+                }
+            ],
+            "reason": None,
+        },
+        ensure_ascii=False,
+    )
+
+    output = await parse_with_repair(text=payload, schema=FaithfulnessOutput, llm=llm)
+
+    claim = output.claims[0]
+    assert llm.calls == 0
+    assert claim.is_contradictory is False
+    assert claim.contradiction_with == []
+    assert claim.reason == ""
+    assert output.reason == ""
+    assert claim.evidence_refs[0].context_id == "C1"
+
+
+async def test_v2_null_evidence_and_contradiction_lists_parse() -> None:
+    llm = _NoCallLLM()
+    payload = json.dumps(
+        {
+            "claims": [
+                {
+                    "claim_id": "cl1",
+                    "claim": "文档未提及货到付款",
+                    "claim_type": "non_factual",
+                    "claim_subtype": "absence",
+                    "support_status": None,
+                    "evidence_refs": None,
+                    "evidence": None,
+                    "contradiction_with": None,
+                }
+            ]
+        }
+    )
+
+    output = await parse_with_repair(text=payload, schema=FaithfulnessOutput, llm=llm)
+
+    claim = output.claims[0]
+    assert llm.calls == 0
+    assert claim.evidence_refs == []
+    assert claim.evidence == []
+    assert claim.contradiction_with == []
+
+
+def test_v111_faithfulness_payload_has_explicit_context_ids() -> None:
+    agent = _agent(prompt_version="v1.1.1")
+
+    messages = agent._create_agent(
+        {"query": "q", "answer": "a", "contexts": ["context one", "context two"]}
+    )
+
+    payload = json.loads(messages[1]["content"])
+    assert payload["context_ids"] == ["C1", "C2"]
+    assert payload["contexts"] == ["context one", "context two"]
+
+
+def test_v100_faithfulness_payload_has_no_context_ids() -> None:
+    agent = _agent(prompt_version="v1.0.0")
+
+    messages = agent._create_agent(
+        {"query": "q", "answer": "a", "contexts": ["context one", "context two"]}
+    )
+
+    payload = json.loads(messages[1]["content"])
+    assert "context_ids" not in payload
+
+
+def test_v111_repair_example_is_complete_json() -> None:
+    agent = _agent(prompt_version="v1.1.1")
+
+    example = json.loads(agent._repair_example() or "{}")
+
+    claim = example["claims"][0]
+    assert claim["claim_type"] == "factual_claim"
+    assert claim["evidence_refs"][0]["context_id"] == "C1"

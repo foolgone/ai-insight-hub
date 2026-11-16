@@ -143,6 +143,8 @@ class AgentResult:
     cost: Decimal = Decimal("0")
     # 最后一次实际用于解析的模型输出原文（含修复轮）；默认 None，不影响既有 Agent。
     raw_text: str | None = None
+    # 首次（未修复）模型输出；仅结构化失败时保留，便于定位原始非法点。
+    original_raw_text: str | None = None
 
 
 # --------------------------------------------------------------------------- 基类
@@ -213,6 +215,10 @@ class BaseAgent(ABC):
         （``parse_with_repair`` 的 validator），而不是直接判失败。
         典型场景：模型选了 ``structure=summary`` 却返回空 summary。
         """
+        return None
+
+    def _repair_example(self) -> str | None:
+        """结构化修复轮使用的完整合法 JSON 示例；默认不提供。"""
         return None
 
     # -- 对外唯一入口 -----------------------------------------------------
@@ -316,6 +322,7 @@ class BaseAgent(ABC):
                     usage_collector=repair_usage,
                     validator=self._validate_parsed,
                     raw_sink=raw_text_sink,
+                    repair_example=self._repair_example(),
                 )
             data = self._validate_output(payload)
 
@@ -419,6 +426,7 @@ class BaseAgent(ABC):
                 duration=duration,
                 token_usage=token_usage,
                 raw_text=getattr(exc, "raw_output", None) or last_raw_text,
+                original_raw_text=getattr(exc, "original_output", None),
             )
 
         finally:
@@ -513,6 +521,7 @@ async def _parse_structured(
     usage_collector: list[LLMUsage],
     validator: Callable[[Any], None] | None = None,
     raw_sink: list[str] | None = None,
+    repair_example: str | None = None,
 ) -> BaseModel:
     """延迟导入避免模块循环（structured_output 依赖 llm，不依赖 base）。"""
     from app.agents.structured_output import parse_with_repair
@@ -524,6 +533,7 @@ async def _parse_structured(
         usage_collector=usage_collector,
         validator=validator,
         raw_sink=raw_sink,
+        repair_example=repair_example,
     )
 
 

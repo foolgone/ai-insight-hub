@@ -656,12 +656,20 @@ async def judge_trace(
         config = _judge_config(agent, model=str(result.metadata.get("model") or "") or None)
 
         if not result.success or result.data is None:
+            original_raw, original_truncated = _truncate_raw(
+                getattr(result, "original_raw_text", None)
+            )
             outcomes.append(
                 JudgeOutcome(
                     metric_name=metric,
                     metric_version=agent.metric_version,
                     status="failed",
-                    details={"errors": list(result.errors), **_usage_details(result)},
+                    details={
+                        "errors": list(result.errors),
+                        "original_raw_output": original_raw,
+                        "original_raw_truncated": original_truncated,
+                        **_usage_details(result),
+                    },
                     judge_config=config,
                     raw_output=raw_output,
                     raw_truncated=raw_truncated,

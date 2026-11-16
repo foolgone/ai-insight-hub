@@ -977,7 +977,7 @@ alembic check   : No new upgrade operations detected
 - Evidence：context_id 必须存在、quote 逐字、supported 至少一条；失败降级 insufficient 并记 `evidence_validation_failed` / `validation_errors`。
 - document_conflict：conflict + supported 统计；冲突 claim 不得标 `is_contradictory`；单边 evidence 降级。
 - `metric_version_for(metric, prompt_version=None)`：默认 v1，v1.1.1 → v2；创建/重试/聚合/复用按 Run 的 prompt version 解析，v1/v2 不混算。
-- 新增 64 条单测：v2 Schema/loader、计分/证据/矛盾/zero-denominator、六案例 canonical + 12 个负向/边界回归；现有 24 条 Judge 测试保持。
+- 新增 71 条 v2 相关单测：v2 Schema/loader、计分/证据/矛盾/zero-denominator、六案例 canonical + 12 个负向/边界回归；另补结构化失败双输出与紧凑修复 Prompt 测试；现有 24 条 Judge 测试保持。
 - P1 边界修复：conflict 双侧证据按 `(context_id, quote.strip())` 去重且拒绝互为子串；重复 `claim_id` 保留首条、跳过后续，不重复进分母。
 - 生产 Schema/Service 重跑同一 6 案例 dry-run：6/6、12/12，结果与设计稿 dry-run 一致。
 - 未激活 v1.1.1；未运行真实 Judge/10/40；未改 Human Gold；未做 DB Migration。
@@ -990,3 +990,14 @@ alembic check   : No new upgrade operations detected
 - 已完成案例未出现 duplicate claim_id 或 duplicate/nested conflict evidence；Q36 未运行，disclosure 未验证。
 - 结果：`docs/repair/phase3e/pilot-10-v1.0.0-vs-v1.1.1.json` / `.md`。
 - 未跑 40 条、未激活；脚本退出前恢复 `RAG_JUDGE_PROMPT_VERSION=v1.0.0`。
+
+### Q17 修复与单案例验证（2026-11-16）
+- StructuredOutputError 同时保留 `original_output` 与最终 `raw_output`；Judge failed details 增加 `original_raw_output`。
+- Schema 对 `contradiction_with=null`、`evidence_refs=null`、`is_contradictory=null`、`reason=null` 宽容化，不因 null 触发修复轮。
+- 修复 Prompt 不再 dump 完整 JSON Schema，改为紧凑模板 + RagJudge 完整 JSON 示例。
+- v1.1.1 Faithfulness 增加 Q17 式多 claim + evidence_refs 完整 JSON few-shot；输入显式提供 `context_ids`。
+- Q17 单案例：attempt1/2 schema PASS 但 context_id 写成 C7（章节号）/quote 不命中，F=0.0；attempt3 显式 `context_ids` 后 **schema PASS，F=1.0，5/5 evidence 逐字命中，validation_errors=[]**。
+- 新 F Prompt SHA：`4ee65afb3e7ea8b4b5e361e41ea75b74173142a8c26c97dedc7139ba37c86317`。
+- Q17 三次 smoke token：input 10,616 / output 1,941，估算约 ¥0.044。
+- Q11 目标从 0.6–0.8 调整为 0.6–0.9，明确允许 5/6=0.833。
+- 仍 design_draft/inactive；未重跑 10 条、未跑 40 条。

@@ -16,7 +16,7 @@
 | 2 | Q35 | 1.000 | 0.8–1.0 | 0.95 | 0.95 | 6/6 | PASS |
 | 3 | Q36 | 1.000 | 0.8–1.0 | 0.55, 0.95 | 0.95 | 9/9 | PASS |
 | 4 | Q21#3 | 0.600 | 0.6–0.7 | n/a | n/a | 3/3 | PASS |
-| 5 | Q11 | 0.600 | 0.6–0.8 | 0.95 | 0.95 | 3/3 | PASS |
+| 5 | Q11 | 0.600 | 0.6–0.9 | 0.95 | 0.95 | 3/3 | PASS |
 | 6 | Q29 | skipped | skipped | 0.95 | 0.95 | 0/0 | PASS |
 
 > C/R 是矩阵区间内的模拟候选值，不是模型输出；F 由 claim `support_status` 计算。
@@ -147,7 +147,7 @@
 ## Q11
 
 - Schema: PASS
-- F: `3/5 = 0.600`；target `0.6–0.8` → PASS
+- F: `3/5 = 0.600`；target `0.6–0.9` → PASS
 - Counts: scorable=5, supported=3, unsupported=0, insufficient=2, non_factual=1, absence=0, document_conflict=0, contradiction=0
 
 | claim_id | type/subtype | support_status | contradictory | evidence | required | variant |

@@ -13,7 +13,7 @@
     "retrieval_metrics": "v1"
   },
   "prompts": {
-    "faithfulness.txt": "913dc28f6e28973462cee8052a0f8ee7aeb95704b6c9ae151ab5937ad46d59d0",
+    "faithfulness.txt": "4ee65afb3e7ea8b4b5e361e41ea75b74173142a8c26c97dedc7139ba37c86317",
     "answer_correctness.txt": "35631c071418fcaf3d6b49a75a92ce2d6d70c7d3da9f381e164e4785f769f7c8",
     "answer_relevancy.txt": "0f8576b7dbf2e7ea1a02752680b0afe8c66677fe2eda823f4bcd28371ae4da84"
   },
@@ -70,7 +70,7 @@
     "Q21 整条 0.8 依赖 5 个 claim 拆分；若不同则 0.7-0.9 + Q21#3 insufficient",
     "v1.0.0 Pilot Judge 使用 answer_contexts（2 条）；retrieval 4 条不用于旧分数，改用需重跑基线"
   ],
-  "design_revision": "2026-11-16-fourth",
+  "design_revision": "2026-11-16-fifth",
   "acceptance_matrix": "docs/repair/phase3e/prompt-v1.1.1-acceptance-matrix.json",
   "fixtures": "docs/repair/phase3e/prompt-v1.1.1-fixtures.json",
   "human_gold_coverage": {

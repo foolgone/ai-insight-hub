@@ -1,13 +1,15 @@
 --- v1.0.0/faithfulness.txt
 +++ v1.1.1/faithfulness.txt
-@@ -1,23 +1,106 @@
+@@ -1,23 +1,163 @@
  你是 RAG 评测的 Faithfulness 裁判。
  
 +## 输入
 +- 用户问题（query）
 +- 模型回答（answer）
 +- 检索上下文（contexts），按输入顺序编号为 C1、C2、……
++- 合法上下文编号列表（context_ids），例如 `["C1", "C2"]`；`evidence_refs.context_id` **只能从该列表选择**。
 +
++> `context_id` 不是文档章节号。即使原文在“## 7. 运费规则”下，输入只有 C1/C2 时也只能写 C1/C2，禁止写 C7。
  ## 任务
 -把【模型回答】拆成若干条**独立、可判定真假**的事实性陈述（claim），
 -逐条判断它是否能被【检索上下文】支持。
@@ -50,6 +52,7 @@
 +- `evidence_refs` 使用 `{ "context_id": "C1", "quote": "上下文原文" }`。
 +- `quote` 必须是所引用上下文的**逐字片段**；不能改写、拼接或引用外部知识。
 +- `context_id` 必须是输入中真实存在的编号；无法匹配真实上下文/片段时，support_status 不得为 supported。
++- `context_id` 只看输入顺序（C1、C2、……），**不是文档章节号**。即使原文位于“## 7. 运费规则”，引用时仍写 `C1` 或 `C2`，不得写成 `C7`。
 +- `unsupported` 可提供指向矛盾原文的 evidence_refs；`insufficient_evidence` 的 evidence_refs 为空数组。
 +
 +## 3. 矛盾与文档冲突
@@ -71,6 +74,9 @@
 +- 若全部 factual 都是 insufficient_evidence：仍然输出这些 factual claim；由代码计为 0.0（不是 skipped）。
  
  ## 输出结构
++- 所有数组字段（`contradiction_with` / `evidence_refs` / `evidence`）无内容时输出 `[]`，不要输出 `null`。
++- `is_contradictory` 输出 `true` / `false`，不要输出 `null`。
++- 必须输出完整闭合的 JSON；不要因为 claim 多而省略字段或截断数组。
  {
    "claims": [
 -    {"claim": "事实性陈述", "supported": true, "evidence": ["上下文原文"], "reason": "依据"}
@@ -119,7 +125,57 @@
 +- “无法确认到货时间” → non_factual / meta
 +- “建议查看物流轨迹/联系客服” → non_factual / advice
 +- 全部 non_factual → reason=no_scorable_claims，由代码 skipped。
-
++
++## Few-shot D（Q17：多 claim + evidence_refs 完整 JSON）
++上下文 C1：
++“单笔订单实付满 99 元包邮；未满 99 元收取 10 元运费。……因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。”
++回答：
++“满 99 元包邮；退货时按原因区分：质量问题由商家承担运费，非质量问题由买家承担。”
++完整输出（只示范结构，不要求逐字复制；原文在 §7，但 `context_id` 仍是 `C1`，不是 `C7`）：
++{
++  "claims": [
++    {
++      "claim_id": "cl1",
++      "claim": "单笔订单实付满 99 元包邮",
++      "claim_type": "factual_claim",
++      "claim_subtype": "policy",
++      "support_status": "supported",
++      "is_contradictory": false,
++      "contradiction_with": [],
++      "evidence_refs": [
++        {"context_id": "C1", "quote": "单笔订单实付满 99 元包邮"}
++      ],
++      "reason": "C1 原文"
++    },
++    {
++      "claim_id": "cl2",
++      "claim": "质量问题产生的退换货运费由商家承担",
++      "claim_type": "factual_claim",
++      "claim_subtype": "policy",
++      "support_status": "supported",
++      "is_contradictory": false,
++      "contradiction_with": [],
++      "evidence_refs": [
++        {"context_id": "C1", "quote": "因质量问题产生的退换货运费由商家承担"}
++      ],
++      "reason": "C1 原文"
++    },
++    {
++      "claim_id": "cl3",
++      "claim": "非质量问题的退货运费由买家承担",
++      "claim_type": "factual_claim",
++      "claim_subtype": "policy",
++      "support_status": "supported",
++      "is_contradictory": false,
++      "contradiction_with": [],
++      "evidence_refs": [
++        {"context_id": "C1", "quote": "非质量问题的退货运费由买家承担"}
++      ],
++      "reason": "C1 原文"
++    }
++  ],
++  "reason": ""
++}
 --- v1.0.0/answer_correctness.txt
 +++ v1.1.1/answer_correctness.txt
 @@ -1,25 +1,82 @@
@@ -220,7 +276,6 @@
 +回答：
 +“普通商品 7 天内可退；定制/生鲜/已激活虚拟不支持；生鲜质量问题 24 小时内；虚拟商品按 §12 一律不退。”
 +判定：`score=0.5–0.6`；`missing_points=["§1/§12 虚拟商品范围冲突需披露"]`；`wrong_facts=[]`。
-
 --- v1.0.0/answer_relevancy.txt
 +++ v1.1.1/answer_relevancy.txt
 @@ -1,20 +1,61 @@

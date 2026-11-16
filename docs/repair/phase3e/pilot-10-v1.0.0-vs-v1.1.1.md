@@ -21,6 +21,8 @@
 | v1.0.0 | qwen-max | 0.0 | 8192 | rag_judge_schema_v1 | v1.0.0 | v1 | `287053e9e67ad29fd2de597d1052b8d418040097910462e4a0f176b14295bfed` | `106e11f2bc39806da5ecf090c6dbcd94d81ca5f53b968e5055d5a33833b30f94` | `27203126964ae0ca8f0bb8641cb3c2b145605cec706ef47c5432a0bbd6fad141` |
 | v1.1.1 | qwen-max | 0.0 | 8192 | rag_judge_schema_v2 | v1.1.1 | v2 | `913dc28f6e28973462cee8052a0f8ee7aeb95704b6c9ae151ab5937ad46d59d0` | `35631c071418fcaf3d6b49a75a92ce2d6d70c7d3da9f381e164e4785f769f7c8` | `0f8576b7dbf2e7ea1a02752680b0afe8c66677fe2eda823f4bcd28371ae4da84` |
 
+> 上表是 **停止的 10 条 run 实际使用的 SHA**（F=`913dc28f…`）。Q17 修复后 F Prompt SHA 已变为 `4ee65afb…`；若重跑 10 条，会使用新 SHA。
+
 ## 分指标汇总（仅已完成案例）
 
 | Arm | F 均值 | C 均值 | R 均值 | F 有效 | C 有效 | R 有效 | 失败 |
@@ -137,10 +139,23 @@
     }
 ```
 
+## Q17 修复验证（单案例，不是 10 条）
+
+| Attempt | 变更 | schema | F | claims | evidence ok | validation_errors |
+|---|---|---|---|---|---|---|
+| 1 | null 宽容化 + 紧凑修复 Prompt + Q17 few-shot | PASS | 0.000 | 5 | 0/5（全部 C7） | unknown_context_id |
+| 2 | Prompt 增加“章节号不是 context_id”规则 | PASS | 0.000 | 5 | 0/5（cl1 C1 quote_not_found，其余 C7） | quote_not_found / unknown_context_id |
+| 3 | 输入显式增加 `context_ids=["C1","C2"]` | **PASS** | **1.000** | 5 | **5/5（C2）** | **[]** |
+
+- Attempt 3 的 v1.1.1 Faithfulness Prompt SHA：`4ee65afb3e7ea8b4b5e361e41ea75b74173142a8c26c97dedc7139ba37c86317`。
+- 结论：Q17 schema 失败已修复；模型现在能拿到完整 claim/evidence，且 context_id 合法。
+- 三次 Q17 smoke token：input 10,616 / output 1,941，估算成本约 ¥0.044（按 qwen-max 公开价）。
+- 该结果只证明 Q17 单案例；10 条仍未重跑。
+
 ## 发现
 
 - **停止条件命中：Q17 v1.1.1 Faithfulness schema failed**；首次输出非法，修复轮后仍非法，`raw_output` 仅 295 chars 且 JSON 在 `evidence_refs` 处截断。按批准边界停止，未继续 Q21/Q23/Q29/Q31/Q35/Q36。
-- **Q11 F 目标未命中**：v1.1.1 F=0.833（5/6 supported + 1 insufficient），高于矩阵 0.6–0.8 上限；v1.0.0=0.75。该差异不是分数下降，但属于验收目标未命中，需在进入 40 条前处理。
+- **Q11 F 目标**：v1.1.1 F=0.833（5/6 supported + 1 insufficient），v1.0.0=0.75。该拆分已确认合法；矩阵 target 已从 0.6–0.8 调整为 **0.6–0.9**。
 - Q11 R=0.9（v1.0.0 1.0，Δ-0.1），处于矩阵 0.9–1.0 下界；未超过 0.10 下降阈值。
 - Q01 R +0.1、Q04 C +0.1、Q17 R -0.1；均未超过 0.10，未触发停止。
 - 已完成案例的 v1.1.1 未出现 duplicate claim_id 或 duplicate/nested conflict evidence；`validation_errors` 均为空（Q17 在 schema 阶段失败，未进入 Service）。

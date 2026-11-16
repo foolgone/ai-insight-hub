@@ -93,12 +93,56 @@ class FaithfulnessClaim(BaseModel):
     contradiction_with: list[str] = Field(default_factory=list, max_length=20)
     evidence_refs: list[EvidenceRef] = Field(default_factory=list, max_length=20)
 
+    @field_validator("evidence", "contradiction_with", mode="before")
+    @classmethod
+    def _none_or_null_items_to_list(cls, value: object) -> object:
+        """模型常把空数组写成 null；宽容化，避免仅因 null 触发修复轮。"""
+        if value is None:
+            return []
+        if isinstance(value, list):
+            return [item for item in value if item is not None]
+        return value
+
+    @field_validator("evidence_refs", mode="before")
+    @classmethod
+    def _none_or_null_refs_to_list(cls, value: object) -> object:
+        if value is None:
+            return []
+        if isinstance(value, list):
+            return [item for item in value if item is not None]
+        return value
+
+    @field_validator("is_contradictory", mode="before")
+    @classmethod
+    def _none_to_false(cls, value: object) -> object:
+        return False if value is None else value
+
+    @field_validator("claim_type", mode="before")
+    @classmethod
+    def _none_to_factual(cls, value: object) -> object:
+        return "factual_claim" if value is None else value
+
+    @field_validator("reason", mode="before")
+    @classmethod
+    def _none_to_empty_reason(cls, value: object) -> object:
+        return "" if value is None else value
+
 
 class FaithfulnessOutput(BaseModel):
     """Faithfulness 只输出 claims 与说明；总分由代码计算。"""
 
     claims: list[FaithfulnessClaim] = Field(default_factory=list, max_length=80)
     reason: str = Field(default="", max_length=1000)
+
+    @field_validator("claims", mode="before")
+    @classmethod
+    def _none_claims_to_list(cls, value: object) -> object:
+        return [] if value is None else value
+
+    @field_validator("reason", mode="before")
+    @classmethod
+    def _none_reason_to_empty(cls, value: object) -> object:
+        return "" if value is None else value
 
 
 class AnswerCorrectnessOutput(BaseModel):

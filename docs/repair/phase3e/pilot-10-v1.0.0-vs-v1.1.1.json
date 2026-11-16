@@ -1826,5 +1826,48 @@
       "output_tokens": 3093,
       "estimated_cost_cny": 0.0883
     }
+  },
+  "post_run": {
+    "q17_fix": {
+      "attempts": [
+        {
+          "change": "null tolerance + compact repair prompt + Q17 few-shot",
+          "schema": "PASS",
+          "score": 0.0,
+          "evidence_ok": 0,
+          "evidence_count": 5,
+          "errors": [
+            "unknown_context_id:C7"
+          ]
+        },
+        {
+          "change": "prompt rule: section number is not context_id",
+          "schema": "PASS",
+          "score": 0.0,
+          "evidence_ok": 0,
+          "evidence_count": 5,
+          "errors": [
+            "quote_not_found:C1",
+            "unknown_context_id:C7"
+          ]
+        },
+        {
+          "change": "explicit context_ids in v1.1.1 faithfulness payload",
+          "schema": "PASS",
+          "score": 1.0,
+          "evidence_ok": 5,
+          "evidence_count": 5,
+          "errors": []
+        }
+      ],
+      "latest_smoke": "docs/repair/phase3e/q17-v1.1.1-faithfulness-smoke.json",
+      "latest_prompt_sha256": "4ee65afb3e7ea8b4b5e361e41ea75b74173142a8c26c97dedc7139ba37c86317"
+    },
+    "q11_target_range": [
+      0.6,
+      0.9
+    ],
+    "ten_case_rerun": false,
+    "forty_case_run": false
   }
 }

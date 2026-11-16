@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import re
 import uuid
 from pathlib import Path
 from types import SimpleNamespace
@@ -689,6 +690,16 @@ def test_acceptance_q11_cl4_excluded_as_non_factual() -> None:
     assert details["scorable_claim_count"] == 4
 
 
+def test_q11_target_range_accepts_five_of_six() -> None:
+    cases, _ = _load_acceptance()
+    text = cases["Q11"]["expected_scores"]["faithfulness"]
+    match = re.search(r"target_range=(\d+(?:\.\d+)?)-(\d+(?:\.\d+)?)", text)
+
+    assert match is not None
+    low, high = float(match.group(1)), float(match.group(2))
+    assert low <= 5 / 6 <= high
+
+
 def test_acceptance_q35_cl5_marked_supported() -> None:
     def mutate(claims: list[dict[str, Any]]) -> None:
         _by_id(claims)["cl5"]["support_status"] = "supported"
@@ -729,7 +740,16 @@ def test_acceptance_q36_base_without_cl8() -> None:
 
 
 class _StubAgentV2:
-    def __init__(self, metric: str, data: dict[str, Any]) -> None:
+    def __init__(
+        self,
+        metric: str,
+        data: dict[str, Any] | None,
+        *,
+        success: bool = True,
+        errors: list[str] | None = None,
+        raw_text: str | None = "{}",
+        original_raw_text: str | None = None,
+    ) -> None:
         self.config = SimpleNamespace(
             name=f"rag_judge_{metric}",
             version="v1.1.1",
@@ -742,10 +762,12 @@ class _StubAgentV2:
         self.metric_version = "v2"
         self.prompt_sha256 = "a" * 64
         self._result = AgentResult(
-            success=True,
+            success=success,
             data=data,
+            errors=list(errors or []),
             metadata={"model": "stub-judge-model"},
-            raw_text="{}",
+            raw_text=raw_text,
+            original_raw_text=original_raw_text,
         )
 
     async def judge(self, payload: dict[str, Any], **kwargs: Any) -> AgentResult:
@@ -827,6 +849,30 @@ async def test_judge_trace_v2_skip_uses_v2_metric_version() -> None:
     assert outcome.skipped_reason == "context_unavailable"
     assert outcome.metric_version == "v2"
     assert outcome.judge_config["schema_version"] == JUDGE_SCHEMA_V2
+
+
+async def test_failed_outcome_keeps_original_and_final_raw_output() -> None:
+    stub = _StubAgentV2(
+        "faithfulness",
+        None,
+        success=False,
+        errors=["StructuredOutputError: still invalid"],
+        raw_text="final-repair-output",
+        original_raw_text="first-invalid-output",
+    )
+
+    outcomes = await judge_trace(
+        None,
+        trace=_trace(),
+        metrics=["faithfulness"],
+        agent_factory=lambda metric: stub,
+        prompt_version="v1.1.1",
+    )
+
+    outcome = outcomes[0]
+    assert outcome.status == "failed"
+    assert outcome.raw_output == "final-repair-output"
+    assert outcome.details["original_raw_output"] == "first-invalid-output"
 
 
 def test_metric_version_for_prompt_version() -> None:
