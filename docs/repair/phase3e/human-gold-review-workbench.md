@@ -1,6 +1,7 @@
 # Phase 3E 人工 Gold 复核工作台
 
-> **性质**：材料整理，不是人工审核结论。所有 `human_*` 字段为空，等待用户本人判断。
+> **2026-11-16 复核完成**：8 条基础 + 1 条 Claim + 5 条抽查已完成判断，结论以 `human-gold-review-base.csv` / `human-gold-review-claim.csv` 为准，逐条说明见 `human-gold-decisions.md`。以下“请填写/保持空白”为材料原貌，不再代表当前状态。
+> **性质（原始）**：材料整理，不是人工审核结论。所有 `human_*` 字段为空，等待用户本人判断。
 > **来源文档**：`docs/repair/phase3e/source/phase3d_doc.md`（SHA-256 `737f6bd3…`，与本地 WeKnora KB 中 `phase3d_doc.md` 对应）。
 > **机器可编辑表**：`human-gold-review-base.csv`（8 条）、`human-gold-review-claim.csv`（1 条）。
 

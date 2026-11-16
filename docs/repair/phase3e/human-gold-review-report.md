@@ -179,3 +179,28 @@ Claim 表：
 - Q36 文档冲突、Q23 时间边界、Q37 文档外内容、Q40 重复、Q21#3 推断是必须由用户决定的事项。
 
 **完成后停止，等待用户确认；不进入下一阶段。**
+
+---
+
+## 7. 复核结论回填（2026-11-16）
+
+人工判断已完成并写入两张复核表，逐条说明见 `human-gold-decisions.md`。
+
+| 对象 | 决定 | 最终标签 |
+|---|---|---|
+| Q23 | rewrite（题干改“超过 24 小时”） | constraint / answerable |
+| Q36 | use_subagent_correction | ambiguous |
+| Q14 | accept_current | multi / ambiguous |
+| Q15 | accept_current | direct |
+| Q16 | accept_current | constraint |
+| Q19 | accept_current | multi / ambiguous |
+| Q37 | use_subagent_correction | ambiguous |
+| Q40 | rewrite（题干改“转让或提现”） | direct / answerable |
+| Q21#3 | accept_current | insufficient_evidence |
+| Q05/Q13/Q22/Q30 | accept_current | 原标签不变 |
+| Q35 | use_subagent_correction | ambiguous |
+
+- 复核表：`human-gold-review-base.csv` 13 行（8 基础 + 5 抽查）、`human-gold-review-claim.csv` 1 行；所有 `human_*` 已填，`review_status=human_reviewed`。
+- 分类覆盖：direct 10→12、multi 10→8、constraint 8→9、unanswerable 6→6、ambiguous 6→5。
+- 复核人署名：江晚（结论由 AI 起草，用户确认署名）；如需更严格的逐条签核，可补充签核时间。
+- 仍未生成 `human-gold.json`，`human-gold.template.json` 未改；未运行 Judge、10 条对照或 40 条评测，Phase 3E 仍未进入 Phase 4。

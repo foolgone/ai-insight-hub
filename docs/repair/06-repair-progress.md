@@ -796,3 +796,61 @@ alembic check   : No new upgrade operations detected
 - Q36 虚拟商品口径冲突、Q23 时间边界、Q37 文档外流程、Q40 重复、Q21#3 推断是需用户决定的事项；
 - 所有人工字段为空，仍为 `pending_human`；
 - 未产生新的 Human Gold；Phase 3E 暂停，不进入 Phase 4。
+
+### 人工 Gold 复核结论（2026-11-16 回填）
+
+**性质**：完成人工判断并回填复核表；仍未生成 `human-gold.json`，未改 Prompt/代码/DB，未运行 Judge。
+
+| 对象 | 决定 | 最终标签 |
+|---|---|---|
+| Q23 | rewrite（题干改“超过 24 小时”） | constraint / answerable |
+| Q36 | use_subagent_correction | ambiguous |
+| Q14 | accept_current | multi / ambiguous |
+| Q15 | accept_current | direct |
+| Q16 | accept_current | constraint |
+| Q19 | accept_current | multi / ambiguous |
+| Q37 | use_subagent_correction | ambiguous |
+| Q40 | rewrite（题干改“转让或提现”） | direct / answerable |
+| Q21#3 | accept_current | insufficient_evidence |
+| Q05/Q13/Q22/Q30 | accept_current | 原标签不变 |
+| Q35 | use_subagent_correction | ambiguous |
+
+- 已填：`human-gold-review-base.csv`（13 行 = 8 基础 + 5 抽查）、`human-gold-review-claim.csv`（1 行）；`review_status=human_reviewed`。
+- 覆盖变化：direct 10→12、multi 10→8、constraint 8→9、unanswerable 6→6、ambiguous 6→5。
+- 复核人署名：江晚（结论由 AI 起草，用户确认署名）。
+- 未关闭：Q36 的 §1/§12 虚拟商品口径需业务确认；Q23/Q40 题干变更需在候选集落地。
+- 详细结论：`docs/repair/phase3e/human-gold-decisions.md`。
+- Phase 3E 仍停在 Judge 之前，不进入 Phase 4。
+
+---
+
+## Phase 3E 补充 · Human Gold v1 固化（2026-11-16）
+
+**复核人**：江晚
+**范围**：13 条基础 + 1 条 Claim（Q21#3）；未复核 27 条基础 + 34 条 Claim 保持 pending。
+
+### 交付
+
+| 文件 | 内容 |
+|---|---|
+| `human-gold.json` | 13 条基础 + Q21#3，`provenance=human_gold` |
+| `human-gold.pending.json` | 27 条未复核基础，`human=null` |
+| `human-gold-status.md` | 覆盖变化、题干改写、key_facts 缺口、下一步 |
+| `human-gold-decisions.md` | 用户签署结论 + 已固化记录 |
+
+### 关键决定
+
+- Q23 题干改为“超过 24 小时（如第 2 天）”；
+- Q40 改为“积分可以转让或提现吗？”，Q40 与 Q15 分类调整；
+- Q14/Q19 标 `ambiguous`；
+- Q36 保留 `ambiguous`，§1/§12 虚拟商品冲突不选边；
+- Q37 删除文档外流程；
+- Q21#3 判 `insufficient_evidence`；
+- 分类覆盖变为 direct 12 / multi 8 / constraint 9 / unanswerable 6 / ambiguous 5。
+
+### 未完成
+
+- 13 条 `key_facts` 未单独人工复核，保持 `pending_human`；
+- 27 条基础 + 34 条 Claim 未复核；
+- v1.1.0 仍未达实施门槛，未运行 Judge；
+- 未改 Prompt/Agent/Schema/API/DB。
