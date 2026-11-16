@@ -936,3 +936,12 @@ alembic check   : No new upgrade operations detected
 - 验收矩阵补齐预期 Claim/标签/分数/诊断/禁止/容差/回归；Q11/Q21 基础/Q29 明确为 AI draft，不冒充 Human Gold。
 - 版本兼容：v1/v2 Schema 字段关系、JudgeOutcome 变化、历史快照、复用校验、聚合隔离、metric_version_for 同步。
 - 未改 v1.0.0/v1.1.0；未改 Agent/Service/Schema/API/DB；未运行 Judge/10 条/40 条。
+
+### v1.1.1 第三次修订（审核 P0/P1/P2）
+- fixture 冻结 4 条 retrieval_contexts + 2 条 answer_contexts；v1.0.0 分数绑定 answer_contexts，不混用。
+- Q23 补全 6 条 scorable claims，3 supported + 1 unsupported + 2 insufficient = 0.5，与 F 区间自洽。
+- claim_id 改为 cl1..cln，context_id 保持 C1..Cn；contradiction_with 引用 cl。
+- Faithfulness 增加 claim_subtype（policy/absence/conflict/advice/meta）；absence/advice/meta 为 non_factual，conflict 为 factual；Q29/Q35 absence、Q36 conflict 有明确分类。
+- Correctness 增加 answerability 推断/unknown 兜底；Q36 真实单边 vs 编造区分。
+- 矩阵校验类型/ID/subtype/evidence/分数自洽；新增 `validate_prompt_v1.1.1_matrix.py`（PASS）。
+- v1.0.0 MANIFEST status 统一为 active_baseline；v1.1.1 仍 design_draft/inactive。

@@ -14,44 +14,56 @@
 - `factual_claim`：政策、规则、事实、数字、条件、时间、流程、材料/凭证要求。
   - “需/必须/应当/应/须提供/流程/材料/凭证”等**规范性要求**属于 factual_claim，即使它是用户需要执行的动作。
 - `non_factual`：问候、共情、纯建议（如“建议联系客服”）、下一步操作建议、纯元信息。
-  - 若建议中包含事实承诺（如“我们会退款”“系统会自动处理”），改标 `factual_claim`。
-- `contradictory` **不是** claim_type。矛盾是 claim 之间的关系，用 `is_contradictory` / `contradiction_with` 表达。
+
+`claim_subtype`（诊断标签，必须填写）：
+- `policy`：政策/规则断言（factual_claim）
+- `absence`：文档未说明/未提及某事实，无法提供肯定证据（non_factual）
+- `conflict`：文档两处规则不一致的 meta 陈述（factual_claim；两处原文都可给出时 supported）
+- `advice`：纯建议/下一步操作（non_factual）
+- `meta`：其它元信息（non_factual）
+
+`contradictory` **不是** claim_type。矛盾是 claim 之间的关系，用 `is_contradictory` / `contradiction_with` 表达。
 
 ## 2. 支持状态（与 claim_type 分离）
 每条 factual_claim 标记 `support_status`：
 - `supported`：上下文有明确依据。
 - `unsupported`：上下文与 claim 矛盾，或 claim 与回答内其它 claim 冲突且无法同时成立。
 - `insufficient_evidence`：上下文未提及、只沾边，或需要外部知识才能判断；**不得**把“未提及”判成 supported。
+- non_factual（absence/advice/meta）不需要 support_status；输出 null。
 
 ### Evidence 规则
 - `supported` 必须至少有一个 `evidence_refs` 元素；没有 evidence 不得 supported。
 - `evidence_refs` 使用 `{ "context_id": "C1", "quote": "上下文原文" }`。
 - `quote` 必须是所引用上下文的**逐字片段**；不能改写、拼接或引用外部知识。
 - `context_id` 必须是输入中真实存在的编号；无法匹配真实上下文/片段时，support_status 不得为 supported。
-- `unsupported` / `insufficient_evidence` 的 `evidence_refs` 为空数组。
+- `unsupported` 可提供指向矛盾原文的 evidence_refs；`insufficient_evidence` 的 evidence_refs 为空数组。
 
 ## 3. 矛盾与文档冲突
-- `is_contradictory`：该 claim 与回答内其它 claim 或自身表述冲突时为 true。
-- `contradiction_with`：填写冲突 claim 的 `claim_id`（可多个）。
+- `is_contradictory`：该 claim 与**同一回答内**其它 claim 或自身表述冲突时为 true。
+- `contradiction_with`：填写冲突 claim 的 `claim_id`（`cl1..cln`，不是 context_id）。
 - 矛盾 claim 仍要判断 support_status，**不得**用 non_factual 排除。
-- 文档本身存在冲突时（如“§1 与 §12 表述不一致”）：这是关于文档的事实性 meta claim，标 `factual_claim`；两处原文都能给出时标 `supported`；`is_contradictory=false`（矛盾在文档，不在回答）。
+- 回答 vs Context 矛盾：`support_status=unsupported`，不要用 `is_contradictory` 冒充。
+- 文档自身冲突（如“§1 与 §12 表述不一致”）：`claim_type=factual_claim`、`claim_subtype=conflict`；两处原文都能给出时 `support_status=supported`；`is_contradictory=false`（矛盾在文档，不在回答）。
 
 ## 4. 原子性与顺序
 - 一条 claim 只表达一个可判定事实；不要合并多条事实。
 - 先输出结论 claim（回答用户问题的那一句/几句），再按出现顺序输出其余 claim。
+- `claim_id` 使用 `cl1..cln`；context_id 使用 `C1..Cn`，两者不得混用。
 - 不评价语气、格式、长度；不输出总分。
 
 ## 5. 无有效 claim
-- 全部都是 non_factual，或没有任何 claim：返回 `claims`（可为空）和 `reason: "no_scorable_claims"`。
+- 全部都是 non_factual（含 absence/advice/meta），或没有任何 claim：返回 `claims`（可为空）和 `reason: "no_scorable_claims"`。
 - 由代码决定 `skipped(no_scorable_claims)`，模型不要返回 1.0。
+- 若全部 factual 都是 insufficient_evidence：仍然输出这些 factual claim；由代码计为 0.0（不是 skipped）。
 
 ## 输出结构
 {
   "claims": [
     {
-      "claim_id": "C1",
+      "claim_id": "cl1",
       "claim": "事实性陈述",
       "claim_type": "factual_claim",
+      "claim_subtype": "policy",
       "support_status": "supported",
       "is_contradictory": false,
       "contradiction_with": [],
@@ -68,9 +80,9 @@
 回答：
 “是的，可以按政策反馈。但您是在签收后第 2 天反馈，已超过 24 小时，原则上不符合受理条件。”
 输出要点：
-- C1：“可以按政策反馈” → factual_claim / unsupported / is_contradictory=true / contradiction_with=["C2"]
-- C2：“超过 24 小时不符合受理条件” → factual_claim / supported / evidence_refs=[C1]
-- C3：“生鲜质量问题需在 24 小时内拍照反馈” → factual_claim / supported / evidence_refs=[C1]
+- cl1：“可以按政策反馈” → factual_claim / policy / unsupported / is_contradictory=true / contradiction_with=["cl2"]
+- cl2：“超过 24 小时不符合受理条件” → factual_claim / policy / supported / evidence_refs=[C1]
+- cl3：“生鲜质量问题需在 24 小时内拍照反馈” → factual_claim / policy / supported / evidence_refs=[C1]
 
 ## Few-shot B（Q21/Q11：证据不足与建议）
 上下文 C1：
@@ -78,6 +90,17 @@
 回答：
 “质量问题不受 7 天限制。需要提供照片/视频凭证并由商家审核。建议联系客服确认。”
 输出要点：
-- “质量问题不受 7 天限制” → factual_claim / insufficient_evidence（上下文只把 7 天限定在无理由退款，未规定普通商品质量问题期限）
-- “需要提供照片/视频凭证” → factual_claim / insufficient_evidence（规范性要求，但上下文未写）
-- “建议联系客服确认” → non_factual（纯建议，不进分母）
+- “质量问题不受 7 天限制” → factual_claim / policy / insufficient_evidence（上下文只把 7 天限定在无理由退款，未规定普通商品质量问题期限）
+- “需要提供照片/视频凭证” → factual_claim / policy / insufficient_evidence（规范性要求，但上下文未写）
+- “建议联系客服确认” → non_factual / advice（不进分母）
+
+## Few-shot C（Q29/Q35：absence meta）
+上下文 C1：
+“现货商品在付款后 48 小时内发出；……物流信息超过 24 小时未更新时，可联系客服协助核查。”
+回答：
+“文档未说明运输/送达需要多久，无法确认到货时间。建议查看物流轨迹或联系客服。”
+输出要点：
+- “文档未说明运输/送达需要多久” → non_factual / absence（absence 不是 policy claim；无肯定 evidence；不进分母）
+- “无法确认到货时间” → non_factual / meta
+- “建议查看物流轨迹/联系客服” → non_factual / advice
+- 全部 non_factual → reason=no_scorable_claims，由代码 skipped。

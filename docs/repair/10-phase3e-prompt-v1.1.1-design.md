@@ -32,7 +32,8 @@
 | 字段 | 取值 | 说明 |
 |---|---|---|
 | `claim_type` | `factual_claim` / `non_factual` | **互斥**；contradictory 不是类型 |
-| `support_status` | `supported` / `unsupported` / `insufficient_evidence` | 只对 factual_claim 有意义 |
+| `claim_subtype` | `policy` / `absence` / `conflict` / `advice` / `meta` | 诊断子类型；absence/advice/meta 为 non_factual，conflict 为 factual_claim |
+| `support_status` | `supported` / `unsupported` / `insufficient_evidence` | 只对 factual_claim 有意义；v1.1.1 factual 必填 |
 | `is_contradictory` | bool | Claim 之间的关系/诊断标签 |
 | `contradiction_with` | list[claim_id] | 与哪些 claim 冲突 |
 | `evidence_refs` | list[{context_id, quote}] | supported 必须非空且逐字匹配 |
@@ -47,7 +48,9 @@
 6. **insufficient ≠ unsupported**：上下文未提及/只沾边 → insufficient；与上下文矛盾 → unsupported。
 7. **矛盾仍进分母**：`is_contradictory=true` 的 claim 继续判断支持性；不得标 non_factual 排除（解决 Q23）。
 8. **全 non_factual / 无 claim**：返回 `reason=no_scorable_claims`；Service 输出 `skipped(no_scorable_claims)`，**不是 1.0**（解决 Q29/Q30 类）。
-9. **文档冲突披露**：关于文档不一致的 meta 陈述标 factual_claim；两处原文都可给出时 supported；`is_contradictory=false`（矛盾在文档，不在回答）。
+9. **文档冲突披露**：关于文档不一致的 meta 陈述标 `factual_claim` / `claim_subtype=conflict`；两处原文都可给出时 supported；`is_contradictory=false`（矛盾在文档，不在回答）。
+10. **absence meta**：“文档未提及/未说明 X，无法确认”标 `non_factual` / `claim_subtype=absence` 或 `meta`；无肯定 evidence，不进分母。Q29/Q30/Q35 的 absence 不得被当成 factual supported，也不得因此给 1.0。
+11. **advice**：纯建议/下一步操作标 `non_factual` / `claim_subtype=advice`；若建议包含事实承诺，按 factual policy 判断。
 
 ### 2.3 反例/few-shot
 
@@ -66,6 +69,8 @@
 | `unsupported_claim_count` | factual_claim 中 `support_status == unsupported` 的数量 |
 | `insufficient_evidence_count` | factual_claim 中 `support_status == insufficient_evidence` 的数量 |
 | `non_factual_count` | `claim_type == non_factual` 的数量；不进分母 |
+| `absence_count` | `claim_subtype == absence` 的数量；应同时是 non_factual |
+| `document_conflict_count` | `claim_subtype == conflict` 且 supported 的数量；Service 据此置 `document_conflict=true` |
 | `contradiction_count` | `is_contradictory == true` 的 factual_claim 数量；仅诊断，不排除 |
 
 #### 公式
@@ -106,9 +111,9 @@ else:
 
 | 类型 | 触发 | 字段 | 是否进分母 | 案例 |
 |---|---|---|---|---|
-| 回答内部 Claim 矛盾 | 同一回答的两个 claim 不可同时成立 | `is_contradictory=true`；`contradiction_with=[claim_id...]`；`scope=answer_internal` | 是（两个 claim 都算） | Q23 |
+| 回答内部 Claim 矛盾 | 同一回答的两个 claim 不可同时成立 | `is_contradictory=true`；`contradiction_with=[cl...]`；`scope=answer_internal` | 是（两个 claim 都算） | Q23 |
 | 回答 vs Context 矛盾 | claim 与所引 context 原文冲突 | `support_status=unsupported`；`scope=context`；可选 `evidence_refs` 指向冲突原文 | 是 | 如声称“7 天可退”但 context 写“不支持” |
-| Context 自身冲突 | 文档两条规则范围/口径不一致；不是回答自相矛盾 | 关于文档的 meta claim 标 `factual_claim`；两处原文都可给出时 `support_status=supported`；`is_contradictory=false`；Service 记 `document_conflict=true` | 是（meta claim 计 1 条） | Q36 |
+| Context 自身冲突 | 文档两条规则范围/口径不一致；不是回答自相矛盾 | 关于文档的 meta claim 标 `factual_claim` / `claim_subtype=conflict`；两处原文都可给出时 `support_status=supported`；`is_contradictory=false`；Service 记 `document_conflict=true` | 是（meta claim 计 1 条） | Q36 |
 
 校验规则：
 
@@ -233,6 +238,7 @@ evidence: list[str] = []               # v1.0.0 兼容；v1.1.1 用 evidence_ref
 reason: str = ""
 claim_id: str | None = None
 claim_type: Literal["factual_claim", "non_factual"] = "factual_claim"
+claim_subtype: Literal["policy", "absence", "conflict", "advice", "meta"] | None = None
 support_status: Literal["supported", "unsupported", "insufficient_evidence"] | None = None
 is_contradictory: bool = False
 contradiction_with: list[str] = []
@@ -240,7 +246,9 @@ evidence_refs: list[EvidenceRef] = []
 ```
 
 - v1.0.0 输出缺新字段 → 默认 `factual_claim` / support_status 由 `supported` 派生；行为不变。
-- v1.1.1 输出 `support_status`；`supported` 仅作为兼容派生值。
+- v1.1.1 factual claim 必须有合法 `support_status`；缺失/非法 → `validation_error`，按 `insufficient_evidence` 处理并计数（不得默认 supported）。
+- `support_status` 优先；`supported` 仅作为 v1 兼容派生值；两者冲突时以 `support_status` 为准并记 `legacy_supported_conflict=true`。
+- `claim_subtype` 校验：policy/conflict 必须 factual；absence/advice/meta 必须 non_factual；冲突/缺失 → `validation_error`。
 - `EvidenceRef`: `{context_id: str, quote: str}`；Service 校验 quote 在对应 context 中逐字存在。
 - `FaithfulnessOutput` 可增加 `scorable_claim_count`（可选），但分母以 Service 计算为准。
 
@@ -354,8 +362,11 @@ Correctness/Relevancy 输出不变；`RagJudgeInput` 不变（不新增 answerab
 
 - `rag_evaluation_results.metric_version` 是聚合隔离键；v1 与 v2 不得合并均值；
 - `build_aggregate` / `summary` 继续按 `metric_version` 分组；
-- 激活 v1.1.1 时，`metric_version_for(judge_metric)` 必须返回 `v2`；检索指标保持 `v1`；
-- `build_judge_config.metric_versions` 与 `expected_metrics` 快照必须同步为 v2，避免 Run 配置与结果字段不一致；
+- 当前 `metric_version_for(metric_name: str)` 只接收指标名并读静态映射，无法同时支持两版；设计改为 `metric_version_for(metric_name, prompt_version: str | None = None)`（或传入 resolved config）：
+  - 未传 `prompt_version` → 默认 `v1.0.0` 映射，返回 v1；
+  - `prompt_version=v1.1.1` → Judge 三指标 v2；检索指标始终 v1；
+- `build_judge_config.metric_versions`、`expected_metrics`、`_parent_result_reusable` 必须使用**同一解析结果**，避免配置/结果/聚合不一致；
+- 激活前必须补该签名与调用方测试，默认行为保持 v1。
 - 不需要 DB Migration；历史 v1 行不更新。
 
 ---
@@ -364,6 +375,17 @@ Correctness/Relevancy 输出不变；`RagJudgeInput` 不变（不新增 answerab
 
 完整机器可读：`docs/repair/phase3e/prompt-v1.1.1-acceptance-matrix.json`
 固定输入：`docs/repair/phase3e/prompt-v1.1.1-fixtures.json`
+
+### 7.0 Fixture 上下文来源（P0-1 修正）
+
+`prompt-v1.1.1-fixtures.json` 对每个案例冻结两组上下文：
+
+| 字段 | 内容 | 用途 |
+|---|---|---|
+| `retrieval_contexts` | v1.0.0 retrieval trace 的 **4 个原始片段**（R1–R4） | 检索配置/证据来源参考 |
+| `answer_contexts` | v1.0.0 query trace 的 **2 个原始生成上下文**（C1–C2） | v1.0.0 Pilot Judge 实际输入 |
+
+经核对，v1.0.0 Pilot Judge 的 Faithfulness 使用的是 `answer_contexts`（query/agent_chat 上下文），不是 retrieval 的 4 条；历史分数必须与 `answer_contexts` 绑定，不能改用 4 条 retrieval 片段后仍引用旧分数。若未来要用 4 条 retrieval 上下文做 Faithfulness，必须重跑 v1.0.0 建立同输入基线，旧分数降级为历史参考。本设计不混用两组上下文。
 
 ### 7.1 Human Gold 覆盖与限制
 
@@ -382,14 +404,27 @@ Correctness/Relevancy 输出不变；`RagJudgeInput` 不变（不新增 answerab
 
 | Case | 重点 | 期望（分数区间 + 必现诊断） |
 |---|---|---|
-| Q23 | 回答内部矛盾 | C 0.0–0.2；F ≤0.5；R 0.7–1.0；`is_contradictory=true`、`contradiction_with` 非空、`wrong_facts` 含肯定结论 |
+| Q23 | 回答内部矛盾 | C 0.0–0.2；F 0.4–0.5（6 scorable: 3 supported / 1 unsupported / 2 insufficient = 0.5）；R 0.7–1.0；`is_contradictory=true`、`contradiction_with=["cl2"]`、`wrong_facts` 含肯定结论 |
 | Q35 | 发货 vs 到货 | C 0.7–1.0（目标 0.9–1.0）；F 0.8–1.0；R 0.8–1.0；absence 为 non_factual、无 wrong_facts |
-| Q36 | Context 自身冲突 | v1.0.0 无披露：C 0.5–0.6，`missing_points` 含冲突；披露 variant：C 0.9–1.0；F 0.8–1.0；不得 `wrong_facts` 真实单边引用 |
-| Q21#3 | 证据不足 | 整条 F 0.7–0.9；Q21#3 `insufficient_evidence`；单 Claim 0.0；不得 1.0 |
+| Q36 | Context 自身冲突 | v1.0.0 无披露：C 0.5–0.6，`missing_points` 含冲突；披露 variant：C 0.9–1.0；F 0.8–1.0（7 policy supported；cl8 conflict optional）；不得 `wrong_facts` 真实单边引用 |
+| Q21#3 | 证据不足 | 整条 F 0.7–0.9（5 scorable: 4 supported + 1 insufficient = 0.8）；Q21#3 `insufficient_evidence`；单 Claim 0.0；不得 1.0 |
 | Q11 | 规范性要求 vs 建议 | F 0.6–0.9；“需提供…” factual/insufficient；“建议…” non_factual；不得 <0.5 |
 | Q29 | 合理无答案 | F `skipped(no_scorable_claims)`；C 0.9–1.0；R 0.9–1.0；`scorable_claim_count=0` |
 
 每个案例的完整 fixture、预期 Claim 拆分、标签、诊断、禁止行为、容差、回归规则见 JSON；本表只做摘要。
+
+### 7.3 矩阵静态校验（不跑 Judge）
+
+激活前必须通过脚本校验：
+
+- `required` / `variant_only` 是 boolean；`human_gold` 是 boolean；`human_gold_claim` 是 null 或结构化对象；
+- 每个 case 的 `claim_id` 唯一；`contradiction_with` 都能解析到同 case 的 claim；
+- `claim_subtype ∈ {policy, absence, conflict, advice, meta}`，且 policy/conflict 为 factual、absence/advice/meta 为 non_factual；
+- 每个 F 期望区间都能由 claim 的 supported/scorable 算出；
+- 所有 `evidence_refs.context_id` 都在 fixture `answer_contexts` 中存在；
+- Q29 的 scorable=0，skip reason 精确为 `no_scorable_claims`。
+
+本次设计自检已通过上述静态规则；未运行 Judge。
 
 通用：
 
@@ -412,6 +447,9 @@ Correctness/Relevancy 输出不变；`RagJudgeInput` 不变（不新增 answerab
 8. **Q11/Q21 基础/Q29 基础不是 Human Gold**：只有 Q21#3 Claim 是人工确认；这三条 Acceptance 为 provisional，需后续人工复核。
 9. **Q21 整条 0.8 依赖 5 个 claim 的拆分**：若模型拆分不同，目标改为 0.7–0.9 + Q21#3 insufficient，不固定 0.8。
 10. **v1.1.1 未运行**：所有期望均未验证；本阶段不产生任何 Judge 分数。
+11. **metric_version_for 签名**：需改为接收 prompt_version/config；未传时默认 v1，v1.1.1 显式传 v2；调用方测试必须覆盖默认行为。
+12. **fixture 基线上下文**：v1.0.0 分数绑定 answer_contexts（2 条 query trace）；4 条 retrieval_contexts 已冻结但不用于旧分数。若改用 4 条作为 Faithfulness 输入，必须重跑 v1.0.0 建立同输入基线。
+13. **v1.0.0 MANIFEST**：status 已统一为 `active_baseline`；`archived` 仅表示不再迭代，不是 inactive。
 
 ---
 
@@ -421,12 +459,12 @@ Correctness/Relevancy 输出不变；`RagJudgeInput` 不变（不新增 answerab
 |---|---|
 | v1.0.0 Prompt | 未修改；根目录 SHA 仍 `287053e9…`（F） |
 | v1.1.0 Prompt | 未修改；仍 pending_review |
-| v1.1.1 Prompt 正文 | 未修改（本轮仅设计/矩阵/fixtures） |
+| v1.1.1 Prompt 正文 | 按 P0-3/P0-4/P1-4/P1-7/P2-3 修订：claim_id cl、claim_subtype、absence/conflict、answerability 推断；已记录原因 |
 | Agent/Service/Schema/API/DB | 未修改 |
 | Migration | 未执行 |
 | Judge / 10 条 / 40 条 | 未运行 |
-| 固定 fixture | 6 个案例已保存 `prompt-v1.1.1-fixtures.json` |
-| 验收矩阵 | 6 案例，含预期 Claim/标签/分数/诊断/禁止/容差/回归 |
+| 固定 fixture | 6 个案例；每个含 4 条 retrieval_contexts + 2 条 answer_contexts；v1.0.0 分数绑定 answer_contexts |
+| 验收矩阵 | 6 案例，含 claim_id/subtype/预期标签/分数/诊断/禁止/容差/回归；静态校验脚本 `validate_prompt_v1.1.1_matrix.py` 通过 |
 | Human Gold 混用 | Q23/Q35/Q36 Human Gold；Q21#3 仅 Claim；Q11/Q21 基础/Q29 明确 AI draft |
 | 版本关系 | v1.0.0 active；v1.1.1 design_draft/inactive；metric v2 映射已设计 |
 
@@ -439,7 +477,9 @@ Correctness/Relevancy 输出不变；`RagJudgeInput` 不变（不新增 answerab
 | `backend/app/prompts/rag_judge/v1.1.1/*.txt` | 三份 Prompt 模板 |
 | `.../v1.1.1/MANIFEST.json` | SHA、schema/rubric/metric 映射、激活条件、风险 |
 | `docs/repair/phase3e/prompt-v1.1.1.diff` | 与 v1.0.0 逐行 diff |
-| `docs/repair/phase3e/prompt-v1.1.1-acceptance-matrix.json` | 六案例验收矩阵 |
+| `docs/repair/phase3e/prompt-v1.1.1-acceptance-matrix.json` | 六案例验收矩阵（含 claim_id/subtype/静态校验要求） |
+| `docs/repair/phase3e/prompt-v1.1.1-fixtures.json` | 六案例固定输入：4 retrieval + 2 answer contexts、Human Gold/AI draft 标记 |
+| `docs/repair/phase3e/validate_prompt_v1.1.1_matrix.py` | 矩阵静态校验（不跑 Judge）：类型/claim_id/subtype/evidence/分数自洽/4R2C |
 | 本文件 | 设计决策、Schema 兼容、版本映射、风险 |
 
 **状态：设计完成，等待审核；未激活、未运行 Judge、未跑 10/40 条、不进入 Phase 4。**

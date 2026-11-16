@@ -1,6 +1,6 @@
 --- v1.0.0/faithfulness.txt
 +++ v1.1.1/faithfulness.txt
-@@ -1,23 +1,83 @@
+@@ -1,23 +1,106 @@
  你是 RAG 评测的 Faithfulness 裁判。
  
 +## 输入
@@ -28,45 +28,57 @@
 +- `factual_claim`：政策、规则、事实、数字、条件、时间、流程、材料/凭证要求。
 +  - “需/必须/应当/应/须提供/流程/材料/凭证”等**规范性要求**属于 factual_claim，即使它是用户需要执行的动作。
 +- `non_factual`：问候、共情、纯建议（如“建议联系客服”）、下一步操作建议、纯元信息。
-+  - 若建议中包含事实承诺（如“我们会退款”“系统会自动处理”），改标 `factual_claim`。
-+- `contradictory` **不是** claim_type。矛盾是 claim 之间的关系，用 `is_contradictory` / `contradiction_with` 表达。
++
++`claim_subtype`（诊断标签，必须填写）：
++- `policy`：政策/规则断言（factual_claim）
++- `absence`：文档未说明/未提及某事实，无法提供肯定证据（non_factual）
++- `conflict`：文档两处规则不一致的 meta 陈述（factual_claim；两处原文都可给出时 supported）
++- `advice`：纯建议/下一步操作（non_factual）
++- `meta`：其它元信息（non_factual）
++
++`contradictory` **不是** claim_type。矛盾是 claim 之间的关系，用 `is_contradictory` / `contradiction_with` 表达。
 +
 +## 2. 支持状态（与 claim_type 分离）
 +每条 factual_claim 标记 `support_status`：
 +- `supported`：上下文有明确依据。
 +- `unsupported`：上下文与 claim 矛盾，或 claim 与回答内其它 claim 冲突且无法同时成立。
 +- `insufficient_evidence`：上下文未提及、只沾边，或需要外部知识才能判断；**不得**把“未提及”判成 supported。
++- non_factual（absence/advice/meta）不需要 support_status；输出 null。
 +
 +### Evidence 规则
 +- `supported` 必须至少有一个 `evidence_refs` 元素；没有 evidence 不得 supported。
 +- `evidence_refs` 使用 `{ "context_id": "C1", "quote": "上下文原文" }`。
 +- `quote` 必须是所引用上下文的**逐字片段**；不能改写、拼接或引用外部知识。
 +- `context_id` 必须是输入中真实存在的编号；无法匹配真实上下文/片段时，support_status 不得为 supported。
-+- `unsupported` / `insufficient_evidence` 的 `evidence_refs` 为空数组。
++- `unsupported` 可提供指向矛盾原文的 evidence_refs；`insufficient_evidence` 的 evidence_refs 为空数组。
 +
 +## 3. 矛盾与文档冲突
-+- `is_contradictory`：该 claim 与回答内其它 claim 或自身表述冲突时为 true。
-+- `contradiction_with`：填写冲突 claim 的 `claim_id`（可多个）。
++- `is_contradictory`：该 claim 与**同一回答内**其它 claim 或自身表述冲突时为 true。
++- `contradiction_with`：填写冲突 claim 的 `claim_id`（`cl1..cln`，不是 context_id）。
 +- 矛盾 claim 仍要判断 support_status，**不得**用 non_factual 排除。
-+- 文档本身存在冲突时（如“§1 与 §12 表述不一致”）：这是关于文档的事实性 meta claim，标 `factual_claim`；两处原文都能给出时标 `supported`；`is_contradictory=false`（矛盾在文档，不在回答）。
++- 回答 vs Context 矛盾：`support_status=unsupported`，不要用 `is_contradictory` 冒充。
++- 文档自身冲突（如“§1 与 §12 表述不一致”）：`claim_type=factual_claim`、`claim_subtype=conflict`；两处原文都能给出时 `support_status=supported`；`is_contradictory=false`（矛盾在文档，不在回答）。
 +
 +## 4. 原子性与顺序
 +- 一条 claim 只表达一个可判定事实；不要合并多条事实。
 +- 先输出结论 claim（回答用户问题的那一句/几句），再按出现顺序输出其余 claim。
++- `claim_id` 使用 `cl1..cln`；context_id 使用 `C1..Cn`，两者不得混用。
 +- 不评价语气、格式、长度；不输出总分。
 +
 +## 5. 无有效 claim
-+- 全部都是 non_factual，或没有任何 claim：返回 `claims`（可为空）和 `reason: "no_scorable_claims"`。
++- 全部都是 non_factual（含 absence/advice/meta），或没有任何 claim：返回 `claims`（可为空）和 `reason: "no_scorable_claims"`。
 +- 由代码决定 `skipped(no_scorable_claims)`，模型不要返回 1.0。
++- 若全部 factual 都是 insufficient_evidence：仍然输出这些 factual claim；由代码计为 0.0（不是 skipped）。
  
  ## 输出结构
  {
    "claims": [
 -    {"claim": "事实性陈述", "supported": true, "evidence": ["上下文原文"], "reason": "依据"}
 +    {
-+      "claim_id": "C1",
++      "claim_id": "cl1",
 +      "claim": "事实性陈述",
 +      "claim_type": "factual_claim",
++      "claim_subtype": "policy",
 +      "support_status": "supported",
 +      "is_contradictory": false,
 +      "contradiction_with": [],
@@ -83,9 +95,9 @@
 +回答：
 +“是的，可以按政策反馈。但您是在签收后第 2 天反馈，已超过 24 小时，原则上不符合受理条件。”
 +输出要点：
-+- C1：“可以按政策反馈” → factual_claim / unsupported / is_contradictory=true / contradiction_with=["C2"]
-+- C2：“超过 24 小时不符合受理条件” → factual_claim / supported / evidence_refs=[C1]
-+- C3：“生鲜质量问题需在 24 小时内拍照反馈” → factual_claim / supported / evidence_refs=[C1]
++- cl1：“可以按政策反馈” → factual_claim / policy / unsupported / is_contradictory=true / contradiction_with=["cl2"]
++- cl2：“超过 24 小时不符合受理条件” → factual_claim / policy / supported / evidence_refs=[C1]
++- cl3：“生鲜质量问题需在 24 小时内拍照反馈” → factual_claim / policy / supported / evidence_refs=[C1]
 +
 +## Few-shot B（Q21/Q11：证据不足与建议）
 +上下文 C1：
@@ -93,24 +105,32 @@
 +回答：
 +“质量问题不受 7 天限制。需要提供照片/视频凭证并由商家审核。建议联系客服确认。”
 +输出要点：
-+- “质量问题不受 7 天限制” → factual_claim / insufficient_evidence（上下文只把 7 天限定在无理由退款，未规定普通商品质量问题期限）
-+- “需要提供照片/视频凭证” → factual_claim / insufficient_evidence（规范性要求，但上下文未写）
-+- “建议联系客服确认” → non_factual（纯建议，不进分母）
++- “质量问题不受 7 天限制” → factual_claim / policy / insufficient_evidence（上下文只把 7 天限定在无理由退款，未规定普通商品质量问题期限）
++- “需要提供照片/视频凭证” → factual_claim / policy / insufficient_evidence（规范性要求，但上下文未写）
++- “建议联系客服确认” → non_factual / advice（不进分母）
++
++## Few-shot C（Q29/Q35：absence meta）
++上下文 C1：
++“现货商品在付款后 48 小时内发出；……物流信息超过 24 小时未更新时，可联系客服协助核查。”
++回答：
++“文档未说明运输/送达需要多久，无法确认到货时间。建议查看物流轨迹或联系客服。”
++输出要点：
++- “文档未说明运输/送达需要多久” → non_factual / absence（absence 不是 policy claim；无肯定 evidence；不进分母）
++- “无法确认到货时间” → non_factual / meta
++- “建议查看物流轨迹/联系客服” → non_factual / advice
++- 全部 non_factual → reason=no_scorable_claims，由代码 skipped。
 
 --- v1.0.0/answer_correctness.txt
 +++ v1.1.1/answer_correctness.txt
-@@ -1,25 +1,83 @@
+@@ -1,25 +1,82 @@
  你是 RAG 评测的 Answer Correctness 裁判。
  
+-## 任务
+-比较【模型回答】与【金标答案】，判断模型回答在**事实层面**是否正确、完整。
 +## 输入
 +- 用户问题（query）
 +- 模型回答（answer）
 +- 金标答案（gold_answer）
-+- 当前输入契约不包含 `answerability` 字段；如需判断“无答案/模糊”，以 gold_answer 的内容为准。
-+
- ## 任务
--比较【模型回答】与【金标答案】，判断模型回答在**事实层面**是否正确、完整。
-+比较模型回答与金标答案，判断事实层面的正确性、完整性和内部一致性。
  
 -## 规则
 -1. 只输出 JSON，不要 Markdown 代码块、不要解释文字。
@@ -124,49 +144,52 @@
 -5. `reason` 用一句话说明扣分点；不得只写「部分正确」。
 -6. 不要因为措辞不同扣分；只看事实是否一致、关键点是否覆盖。
 -7. 不要评价语气、格式、长度。
-+## 1. 评分区间（不重叠）
-+- `0.0–0.2`：关键事实与金标矛盾、编造事实、答非所问，或首句/结论与后文关键事实矛盾。
-+- `0.3–0.4`：给出了无依据的确定性结论，或核心事实错误。
-+- `0.5–0.6`：部分正确，但缺少金标中的主要分支/关键条件。
-+- `0.7–0.8`：核心正确，缺少次要信息或表述不精确。
-+- `0.9–1.0`：关键事实、条件、分支完整且与金标一致。
++当前输入契约**没有** `answerability` 字段；按以下规则从 gold_answer 推断：
  
 -## 输出结构
++| gold_answer 特征 | 推断 |
++|---|---|
++| 含“文档未提及/未说明/无法确认/信息不足/无法判断/未规定”等，且无实质政策答案 | unanswerable |
++| 含明确条件分支（“如果/取决于/分两种/需确认/视…而定”）或要求补充信息 | ambiguous |
++| 同时含 no-answer 标记和条件分支 | ambiguous（如 Q36） |
++| 有实质政策答案、无条件分支 | answerable |
++| 无法可靠判断 | unknown：**只按一般事实覆盖评分，不给模糊/无答案特殊加分，也不自动扣分** |
++
++## 1. 评分区间（不重叠）
++- `0.0–0.2`：关键事实与金标矛盾、编造事实、答非所问，或首句/结论与后文关键事实矛盾。
++- `0.3–0.4`：无依据的确定性结论，或核心事实错误。
++- `0.5–0.6`：部分正确，缺主要分支/关键条件。
++- `0.7–0.8`：核心正确，缺次要信息/表述不精确。
++- `0.9–1.0`：关键事实、条件、分支完整且与金标一致。
++
 +**优先级**：矛盾 > 编造/无依据确定性结论 > 部分正确 > 次要缺失 > 完整。
-+同一回答命中多条规则时，取最严重区间；若不确定，选择更严重（更低）的区间，不要输出区间外的间隙值（如 0.25）。
-+同一回答命中多条规则时，取**最严重**的区间，不得取平均或向上取整。
++命中多条时取最严重区间；若不确定，选择更严重（更低）的区间，不要输出区间外的间隙值（如 0.25）。不取平均、不向上取整。
 +
 +## 2. 模糊/条件式问题
-+- 金标包含条件分支时，回答必须覆盖**问题真正需要的分支**，不能只因为使用了“如果/取决于”就高分。
-+- 覆盖全部分支，并明确说明还需补充的信息 → `0.9–1.0`。
-+- 只覆盖部分分支 → `0.5–0.6`。
-+- 只给泛泛政策、不结合问题条件 → `0.3–0.4`。
-+- 在信息不足时给出无依据的确定性结论 → `0.0–0.2`，并写入 `wrong_facts`。
++- 金标有分支：回答必须覆盖**问题真正需要的全部分支**，不因使用“如果/取决于”自动高分。
++- 全部分支 + 明确缺信息 → `0.9–1.0`；部分分支 → `0.5–0.6`；泛泛政策 → `0.3–0.4`；无依据确定性结论 → `0.0–0.2` + `wrong_facts`。
 +
-+## 3. 文档冲突
-+- 金标明确披露文档内部冲突（如“§1 与 §12 口径不一致”）时：
-+  - 回答同时披露冲突并给出条件分支 → `0.9–1.0`；
-+  - 只选一边、不披露冲突 → `0.5–0.6`；
-+  - 编造第三条规则 → `0.0–0.2`。
-+- 冲突披露不是错误；不得因为回答“没有给出唯一结论”而扣分。
++## 3. 文档冲突（Q36）
++- 金标披露文档冲突（如 §1/§12 不一致）时：
++  - 回答同时披露冲突 + 条件分支 → `0.9–1.0`；
++  - 引用真实但单边口径、未披露冲突 → `0.5–0.6`；`missing_points` 写冲突披露，`wrong_facts` 为空；
++  - 真实单边口径但声称“文档明确统一规定” → `0.3–0.4`；
++  - 编造文档不存在的规则 → `0.0–0.2` + `wrong_facts`。
++- 冲突披露不是错误；不得因“没有唯一结论”扣分。
 +
 +## 4. 拒答
-+- 金标是“文档未提及/无法确认/信息不足”时：
-+  - 正确说明无法确认并给出可行下一步 → `0.9–1.0`；
-+  - 编造答案或给无依据的肯定结论 → `0.0–0.2`。
-+- 金标有实质答案时：
-+  - 拒答 → `0.0–0.2`（错误拒答）；
-+  - 不要因为“拒答语气礼貌”给高分。
++- 金标是“文档未提及/无法确认/信息不足”时：正确说明无法确认 + 可行下一步 → `0.9–1.0`；编造答案或肯定结论 → `0.0–0.2`。
++- 金标有实质答案时：拒答 → `0.0–0.2`（错误拒答）；不要因语气礼貌给高分。
 +
 +## 5. 矛盾处理
-+- 回答首句/结论与后文关键事实冲突，或同时给出“可以/不可以”两种结论 → `0.0–0.2`。
++- 首句/结论与后文关键事实冲突，或同时给出“可以/不可以”两种结论 → `0.0–0.2`。
 +- 冲突项必须写入 `wrong_facts`；`missing_points` 记录因矛盾而缺失的正确结论。
 +- 仅措辞、顺序、详细程度不同，不视为矛盾。
 +
 +## 6. 缺失点与措辞
 +- `missing_points` 只列金标中有、回答未覆盖的**事实/条件**（最多 5 条）。
 +- 建议/下一步操作不属于 missing point，除非金标明确把它列为必须内容。
-+- 不要因为措辞不同扣分；只比较事实、条件、分支和覆盖度。
++- 不因措辞不同扣分；只比较事实、条件、分支和覆盖度。
 +- 不评价语气、格式、长度。
 +
 +## 输出结构（不变）
@@ -182,21 +205,21 @@
 +“不能按该条款反馈。生鲜食品质量问题需在签收后 24 小时内拍照反馈，超过 24 小时反馈不符合该条款。”
 +回答：
 +“是的，可以按政策反馈。但第 2 天已超过 24 小时，原则上不符合受理条件。”
-+判定：首句“可以按政策反馈”与后文/金标冲突 → `score=0.0–0.2`，`wrong_facts=["可以按政策反馈"]`，`missing_points=["不能按该条款反馈"]`。
++判定：`score=0.0–0.2`；`wrong_facts=["可以按政策反馈"]`；`missing_points=["不能按该条款反馈"]`。
 +
 +## Few-shot B（Q35：发货 vs 到货）
 +金标：
 +“文档只规定发货时效（现货 48 小时内发出、预售以页面为准、大件 5 个工作日内）；文档未说明快递运输/送达需要多久。”
 +回答：
 +“现货 48 小时内发出，预售以页面为准，大件 5 个工作日内；文档没有说明运输时长。若问到货时间，无法给出具体时间。”
-+判定：正确区分发货与到货、明确缺失信息 → `score=0.9–1.0`，`missing_points=[]`。
++判定：`score=0.9–1.0`；`missing_points=[]`。
 +
 +## Few-shot C（Q36：文档冲突）
 +金标：
-+“普通商品 7 天内可无理由退款；定制/生鲜/已激活虚拟商品不支持；生鲜质量问题 24 小时内拍照；虚拟商品一经售出不支持退款；§1 与 §12 对虚拟商品范围表述不一致，需以条款/客服确认。”
++“普通商品 7 天内可无理由退款；定制/生鲜/已激活虚拟不支持；生鲜质量问题 24 小时内拍照；虚拟商品一经售出不支持退款；§1 与 §12 对虚拟商品范围表述不一致，需以条款/客服确认。”
 +回答：
 +“普通商品 7 天内可退；定制/生鲜/已激活虚拟不支持；生鲜质量问题 24 小时内；虚拟商品按 §12 一律不退。”
-+判定：覆盖多数分支，但未披露 §1/§12 冲突 → `score=0.5–0.6`，`missing_points=["§1/§12 虚拟商品范围冲突需披露"]`，不得判 0.0。
++判定：`score=0.5–0.6`；`missing_points=["§1/§12 虚拟商品范围冲突需披露"]`；`wrong_facts=[]`。
 
 --- v1.0.0/answer_relevancy.txt
 +++ v1.1.1/answer_relevancy.txt
