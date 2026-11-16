@@ -766,3 +766,33 @@ alembic check   : No new upgrade operations detected
 - 不跑完整 40 条；
 - 下一步：按复核意见产出 v1.1.1 → 再次 subagent 复核 → 人工定稿 9 条 `needs_recheck` → 10 条真实对比 → 40 条；
 - 仍不宣布 Judge 验收通过，不进入 Phase 4。
+
+---
+
+## Phase 3E 补充 · 人工 Gold 复核准备（2026-11-16）
+
+**性质**：只整理材料，未产生 Human Gold，未改 Prompt/Agent/Schema/API/DB，未运行 Judge。
+
+### 交付
+
+| 文件 | 内容 |
+|---|---|
+| `docs/repair/phase3e/human-gold-review-workbench.md` | 9 个对象的完整上下文、原文、冲突、AI 建议、空白人工字段 |
+| `human-gold-review-base.csv` | 8 条基础数据，`human_*` 全空，`pending_human` |
+| `human-gold-review-claim.csv` | Q21#3，`human_*` 全空，`pending_human` |
+| `human-gold-review-workbench.json` | 机器可读复核材料 |
+| `human-gold-review-report.md` | 文件检查、风险、操作说明、修改范围 |
+| `source/phase3d_doc.md` + `SOURCE.md` | 原始文档只读副本，SHA `737f6bd3…` |
+
+### 重点对象
+
+- 基础：Q23、Q36、Q14、Q15、Q16、Q19、Q37、Q40
+- Claim：Q21#3
+- 抽查候选：Q05、Q13、Q22、Q30、Q35（待用户确认）
+
+### 结论
+
+- 8 条基础 + 1 条 Claim 材料齐全；
+- Q36 虚拟商品口径冲突、Q23 时间边界、Q37 文档外流程、Q40 重复、Q21#3 推断是需用户决定的事项；
+- 所有人工字段为空，仍为 `pending_human`；
+- 未产生新的 Human Gold；Phase 3E 暂停，不进入 Phase 4。
