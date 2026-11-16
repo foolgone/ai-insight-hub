@@ -1,7 +1,7 @@
 # Phase 3E · Prompt v1.1.1 设计（未激活）
 
 **日期**：2026-11-16
-**状态**：**设计稿**；v1.0.0 仍为 active，v1.1.0 保持 `pending_review`，v1.1.1 未接入运行时。
+**状态**：**设计稿**；v1.0.0 仍为 active_baseline，v1.1.0 保持 `pending_review`，v1.1.1 未接入运行时。
 **依据**：`subagent-review.md/json`、`09-phase3e-prompt-v1.1-design.md`、Human Gold v1（含 key_facts）、当前 v1.0.0 Prompt / Judge Schema / Agent / Service / 版本实现。
 **本阶段未运行 Judge、未跑 10 条对照、未跑 40 条评测。**
 
@@ -408,7 +408,7 @@ Correctness/Relevancy 输出不变；`RagJudgeInput` 不变（不新增 answerab
 | Q35 | 发货 vs 到货 | C 0.7–1.0（目标 0.9–1.0）；F 0.8–1.0；R 0.8–1.0；absence 为 non_factual、无 wrong_facts |
 | Q36 | Context 自身冲突 | v1.0.0 无披露：C 0.5–0.6，`missing_points` 含冲突；披露 variant：C 0.9–1.0；F 0.8–1.0（7 policy supported；cl8 conflict optional）；不得 `wrong_facts` 真实单边引用 |
 | Q21#3 | 证据不足 | 整条 F 0.6–0.7（5 scorable: 3 supported + 2 insufficient = 0.6）；Q21#3 `insufficient_evidence`；单 Claim 0.0；不得 1.0 |
-| Q11 | 规范性要求 vs 建议 | F 0.6–0.9；“需提供…” factual/insufficient；“建议…” non_factual；不得 <0.5 |
+| Q11 | 规范性要求 vs 建议 | F 0.6–0.8（3/5=0.6；若 cl4/cl5 被错标 supported 则 0.8，仍允许）；“需提供…” factual/insufficient；“建议…” non_factual；不得 <0.5 |
 | Q29 | 合理无答案 | F `skipped(no_scorable_claims)`；C 0.9–1.0；R 0.9–1.0；`scorable_claim_count=0` |
 
 每个案例的完整 fixture、预期 Claim 拆分、标签、诊断、禁止行为、容差、回归规则见 JSON；本表只做摘要。
@@ -454,7 +454,7 @@ Correctness/Relevancy 输出不变；`RagJudgeInput` 不变（不新增 answerab
 
 ---
 
-## 9. 二次修订自检（2026-11-16）
+## 9. 最终自检（2026-11-16）
 
 | 检查 | 结果 |
 |---|---|

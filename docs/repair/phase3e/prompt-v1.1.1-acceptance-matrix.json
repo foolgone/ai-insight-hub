@@ -155,7 +155,7 @@
         "answer_relevancy": "0.7-1.0"
       },
       "diagnostics": [
-        "cl1 is is_contradictory=true and contradiction_with=['cl2']",
+        "cl1: is_contradictory=true and contradiction_with=['cl2']",
         "wrong_facts contains positive conclusion",
         "scorable_claim_count=6 if split as listed",
         "supported=3, unsupported=1, insufficient=2"
@@ -166,7 +166,7 @@
         "no wrong_facts",
         "score 0.3-0.6 for correctness"
       ],
-      "tolerance": "±0.10; labels exact; if model splits differently, F must still be <=0.5",
+      "tolerance": "target_range exact; labels exact; constraints override; F must stay in target_range",
       "regression": "v1.0.0 C=0.8 -> <=0.3; F=0.714 -> <=0.5; R=0.9 -> >=0.7",
       "why": "v1.0.0 漏掉首句结论；2/3=0.667 与 <=0.5 不自洽，因此补全 6 条 scorable claims，使 3/6=0.5 自洽。"
     },
@@ -327,7 +327,7 @@
         "correctness <0.7",
         "require transit time"
       ],
-      "tolerance": "±0.10; labels exact",
+      "tolerance": "target_range exact; labels exact; constraints override",
       "regression": "v1.0.0 C=0.3 -> >=0.7; F=0.75 -> >=0.8; R=0.9 -> >=0.8",
       "why": "v1.0.0 没有把“文档未说明运输时长”当作合理回答；旧 Judge 以缺少地区信息扣分，不是 v1.0.0 回答写了地区。"
     },
@@ -502,7 +502,7 @@
         "score 0.0-0.2 for one real side",
         "mark cl8 contradictory"
       ],
-      "tolerance": "±0.10; labels exact",
+      "tolerance": "target_range exact; labels exact; constraints override",
       "regression": "v1.0.0 C=0.2 -> >=0.5; F=1.0 -> >=0.8; R=0.9 -> >=0.8",
       "why": "Q36 的核心是文档冲突，不是回答自相矛盾；单边真实口径应 partial，编造才应 critical。"
     },
@@ -626,7 +626,7 @@
         "faithfulness=1.0",
         "cl4 unsupported (no direct contradiction)"
       ],
-      "tolerance": "±0.10; claim label exact",
+      "tolerance": "target_range exact; claim label exact; constraints override",
       "regression": "v1.0.0 F=1.0 -> 0.6-0.7; no support for Q21#3 or broad warranty claim",
       "why": "Q21#3 单 Claim=0.0；整条 3/5=0.6；Q21 基础题为 AI draft，只有 Claim 是 Human Gold。"
     },
@@ -732,7 +732,7 @@
         }
       ],
       "expected_scores": {
-        "faithfulness": "target_range=0.6-0.9; tolerance=none; 5 scorable: 3 supported + 2 insufficient = 0.6",
+        "faithfulness": "target_range=0.6-0.8; tolerance=none; 5 scorable: 3 supported + 2 insufficient = 0.6",
         "answer_correctness": "0.8-1.0",
         "answer_relevancy": "0.9-1.0"
       },
@@ -746,7 +746,7 @@
         "faithfulness=1.0",
         "faithfulness<0.5"
       ],
-      "tolerance": "±0.10; labels exact",
+      "tolerance": "target_range exact; labels exact; constraints override",
       "regression": "v1.0.0 F=0.8 -> 0.6-0.9; not below 0.5",
       "why": "Q11 的关键是“需提供凭证”属于规范性事实，不是纯建议；纯建议才排除。Q11 基础题为 AI draft，验收 provisional。"
     },
@@ -813,7 +813,7 @@
         "relevancy<0.8",
         "wrong refusal"
       ],
-      "tolerance": "skip reason exact; scores ±0.10",
+      "tolerance": "target_range exact; skip reason exact",
       "regression": "v1.0.0 F=1.0 -> skipped; C=1.0 -> 0.9-1.0; R=0.6 -> >=0.9",
       "why": "无答案回答的核心是 absence/meta，不是 policy claim；不能用 1.0 伪装支持。Q29 基础题为 AI draft，验收 provisional。"
     }

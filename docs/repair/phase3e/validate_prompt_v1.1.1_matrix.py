@@ -13,14 +13,6 @@ ROOT = Path(__file__).resolve().parent
 MATRIX = ROOT / "prompt-v1.1.1-acceptance-matrix.json"
 FIXTURES = ROOT / "prompt-v1.1.1-fixtures.json"
 
-EXPECTED_F = {
-    "Q23": 0.5,
-    "Q35": 1.0,
-    "Q36": 1.0,
-    "Q21#3": 0.6,
-    "Q11": 0.6,
-    "Q29": None,
-}
 SUBTYPES = {"policy", "absence", "conflict", "advice", "meta"}
 
 
@@ -92,12 +84,11 @@ def main() -> int:
 
         scorable = [c for c in case["expected_claims"] if c["claim_type"] == "factual_claim"]
         supported = [c for c in scorable if c.get("support_status") == "supported"]
-        expected = EXPECTED_F.get(cid)
         actual = (len(supported) / len(scorable)) if scorable else None
         f_text = case["expected_scores"].get("faithfulness", "")
-        if expected is None:
-            if scorable or "status=skipped" not in f_text:
-                errors.append(f"{cid}: expected skipped/no_scorable")
+        if "status=skipped" in f_text:
+            if scorable:
+                errors.append(f"{cid}: expected skipped but has scorable claims")
         else:
             match = re.search(r"target_range=(\d+(?:\.\d+)?)-(\d+(?:\.\d+)?)", f_text)
             if not match:
@@ -106,8 +97,6 @@ def main() -> int:
                 low, high = float(match.group(1)), float(match.group(2))
                 if actual is None or not (low <= actual <= high):
                     errors.append(f"{cid}: supported/scorable={actual}, target_range={low}-{high}")
-                if abs(actual - expected) > 1e-9:
-                    errors.append(f"{cid}: supported/scorable={actual}, expected {expected}")
 
         if cid == "Q23":
             if case["expected_claims"][0].get("contradiction_with") != ["cl2"]:

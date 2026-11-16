@@ -956,3 +956,5 @@ alembic check   : No new upgrade operations detected
 - v1.0.0 MANIFEST status 统一 active_baseline；v1.1.1 仍 design_draft/inactive。
 - 容差语义（2026-11-16）：六个 Faithfulness 期望值改为 `target_range=...; tolerance=none`；
   meta 明确区间不再叠加 ±0.10；静态脚本按 target_range 校验实际 supported/scorable。
+- 容差字段（2026-11-16）：六个 case 的 per-case tolerance 改为 `target_range exact`，与 meta 的 `tolerance=none` 一致；Q11 F 收窄 0.6–0.8。
+- 静态脚本删除 range 目标的 exact 断言，只保留 target_range 包含检查；0.667 within 0.6–0.7 PASS，1.0 超出 FAIL。

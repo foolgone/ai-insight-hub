@@ -70,7 +70,7 @@
     "Q21 整条 0.8 依赖 5 个 claim 拆分；若不同则 0.7-0.9 + Q21#3 insufficient",
     "v1.0.0 Pilot Judge 使用 answer_contexts（2 条）；retrieval 4 条不用于旧分数，改用需重跑基线"
   ],
-  "design_revision": "2026-11-16-third",
+  "design_revision": "2026-11-16-fourth",
   "acceptance_matrix": "docs/repair/phase3e/prompt-v1.1.1-acceptance-matrix.json",
   "fixtures": "docs/repair/phase3e/prompt-v1.1.1-fixtures.json",
   "human_gold_coverage": {
