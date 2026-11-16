@@ -923,3 +923,16 @@ alembic check   : No new upgrade operations detected
 - 版本：schema_version v2 / rubric_version v1.1.1 / Judge metric_version v2；v1.0.0 默认 active；
 - 交付：三份 Prompt、MANIFEST、逐行 diff、六案例验收矩阵、设计文档；
 - 未改 v1.0.0/v1.1.0，未改 Agent/Service/Schema/API/DB，未运行 Judge/10 条/40 条。
+
+---
+
+## Phase 3E · Prompt v1.1.1 二次修订（2026-11-16，未激活）
+
+- 补齐 Faithfulness 计分语义：supported/unsupported/insufficient 均进分母；全 non_factual → skipped；全 insufficient → evaluated 0.0；Q21#3 单 Claim=0.0、整条回答 4/5=0.8。
+- 明确矛盾三类：回答内部（is_contradictory）、回答 vs Context（unsupported）、Context 自身冲突（meta claim + document_conflict）；Q23/Q36 分别覆盖。
+- 补齐 Correctness answerability 推断、unknown 处理、Q36 真实单边 vs 编造、Q23/Q35/Q36 判定树。
+- 补齐 Evidence 校验：context ID、逐字 quote、supported 必填、失败降级 insufficient、诊断记录。
+- 新增固定 fixtures：`prompt-v1.1.1-fixtures.json`（6 案例）。
+- 验收矩阵补齐预期 Claim/标签/分数/诊断/禁止/容差/回归；Q11/Q21 基础/Q29 明确为 AI draft，不冒充 Human Gold。
+- 版本兼容：v1/v2 Schema 字段关系、JudgeOutcome 变化、历史快照、复用校验、聚合隔离、metric_version_for 同步。
+- 未改 v1.0.0/v1.1.0；未改 Agent/Service/Schema/API/DB；未运行 Judge/10 条/40 条。

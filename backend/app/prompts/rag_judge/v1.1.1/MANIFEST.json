@@ -58,6 +58,20 @@
     "当前 contexts 为 list[str]；evidence_refs 使用 C1..Cn 序号，需要 Service 映射到真实 context",
     "Q36 §1/§12 canonical 口径未确认；设计只要求披露冲突",
     "评分区间是设计假设，未经过人工验证；区间不连续，需禁止间隙值（如 0.25）并在 10 条实验检验",
-    "key_facts 尚未进入 Correctness 输入契约"
-  ]
+    "key_facts 尚未进入 Correctness 输入契约",
+    "Q11/Q21 base/Q29 base 不是 Human Gold；只有 Q21#3 Claim 已人工确认",
+    "Q21 整条 0.8 依赖 5 个 claim 拆分；若拆分不同，目标改为 0.7-0.9 + Q21#3 insufficient",
+    "Q36 fixture 的 v1.0.0 回答不含冲突披露；披露 variant 需单独输入 Human Gold answer"
+  ],
+  "design_revision": "2026-11-16-second",
+  "acceptance_matrix": "docs/repair/phase3e/prompt-v1.1.1-acceptance-matrix.json",
+  "fixtures": "docs/repair/phase3e/prompt-v1.1.1-fixtures.json",
+  "human_gold_coverage": {
+    "Q23": "human_gold",
+    "Q35": "human_gold",
+    "Q36": "human_gold",
+    "Q21#3": "human_gold_claim_only",
+    "Q11": "ai_draft_pending_human",
+    "Q29": "ai_draft_pending_human"
+  }
 }

@@ -3,103 +3,392 @@
     "name": "phase3e-prompt-v1.1.1-acceptance",
     "status": "design_not_run",
     "baseline": "v1.0.0 Pilot 10",
-    "reference": "Human Gold v1",
+    "reference": "Human Gold v1 where available; AI draft fixtures explicitly marked",
+    "fixture_file": "docs/repair/phase3e/prompt-v1.1.1-fixtures.json",
     "tolerance": "score ranges ±0.10; labels/skip reasons exact; no metric drop >0.10 unless targeted",
-    "note": "All ranges are design hypotheses, not validated objective thresholds."
+    "note": "All ranges are design hypotheses, not validated objective thresholds. Q11/Q21 base/Q29 base are NOT Human Gold; only Q21#3 claim is Human Gold."
   },
   "cases": [
     {
       "id": "Q23",
-      "focus": "首句与后文矛盾",
-      "input": "v1.0.0 Pilot answer; Human Gold Q23 final question/answer",
-      "expected": {
-        "answer_correctness": "0.0-0.2",
+      "focus": "回答内部矛盾：首句结论 vs 后文/金标",
+      "fixture": {
+        "query": "Human Gold Q23 final question",
+        "answer": "v1.0.0 Pilot answer",
+        "contexts": "C1..Cn from v1.0.0 Trace",
+        "gold_answer": "Human Gold v1",
+        "human_gold": true
+      },
+      "expected_claims": [
+        {
+          "claim": "可以按政策反馈",
+          "claim_type": "factual_claim",
+          "support_status": "unsupported",
+          "is_contradictory": true,
+          "contradiction_with": [
+            "C2"
+          ],
+          "required": true,
+          "why": "结论与 24 小时限制/后文冲突；不得标 non_factual 排除"
+        },
+        {
+          "claim": "超过 24 小时反馈不符合受理条件",
+          "claim_type": "factual_claim",
+          "support_status": "supported",
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "required": true,
+          "why": "由 §12 时限直接推出"
+        },
+        {
+          "claim": "生鲜食品质量问题需在签收后 24 小时内拍照反馈",
+          "claim_type": "factual_claim",
+          "support_status": "supported",
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "required": true,
+          "why": "§12 原文"
+        }
+      ],
+      "expected_scores": {
         "faithfulness": "<=0.5",
+        "answer_correctness": "0.0-0.2",
         "answer_relevancy": "0.7-1.0"
       },
-      "must": [
-        "Correctness wrong_facts contains the positive conclusion",
-        "Faithfulness conclusion is factual_claim, not non_factual; is_contradictory=true; contradiction_with non-empty",
-        "no supported claim without evidence_refs"
+      "diagnostics": [
+        "is_contradictory=true for conclusion",
+        "contradiction_with non-empty",
+        "wrong_facts contains positive conclusion",
+        "scorable_claim_count >= 3"
       ],
-      "no_regression": "v1.0.0 correctness 0.8 must drop to <=0.3; relevancy not below 0.7"
+      "forbidden": [
+        "conclusion marked non_factual",
+        "faithfulness=1.0",
+        "no wrong_facts",
+        "score 0.3-0.6 for correctness"
+      ],
+      "tolerance": "±0.10; labels exact",
+      "regression": "v1.0.0 C=0.8 -> <=0.3; F=0.714 -> <=0.5; R=0.9 -> >=0.7",
+      "why": "Q23 是已知首句矛盾案例；v1.0.0 把首句漏成非事实/未提取，导致 Correctness 0.8。"
     },
     {
       "id": "Q35",
-      "focus": "发货时效 vs 到货时间",
-      "input": "v1.0.0 Pilot answer; Human Gold Q35 answer",
-      "expected": {
-        "answer_correctness": "0.7-1.0 (target 0.9-1.0)",
+      "focus": "发货时效 vs 到货时间；absence 事实",
+      "fixture": {
+        "query": "Human Gold Q35 question",
+        "answer": "v1.0.0 Pilot answer",
+        "contexts": "C1..Cn from v1.0.0 Trace",
+        "gold_answer": "Human Gold v1",
+        "human_gold": true
+      },
+      "expected_claims": [
+        {
+          "claim": "现货商品付款后 48 小时内发出",
+          "claim_type": "factual_claim",
+          "support_status": "supported",
+          "required": true
+        },
+        {
+          "claim": "预售商品以商品页标注时间为准",
+          "claim_type": "factual_claim",
+          "support_status": "supported",
+          "required": true
+        },
+        {
+          "claim": "大件商品发货时间为 5 个工作日内",
+          "claim_type": "factual_claim",
+          "support_status": "supported",
+          "required": true
+        },
+        {
+          "claim": "大件商品配送前电话预约",
+          "claim_type": "factual_claim",
+          "support_status": "supported",
+          "required": true
+        },
+        {
+          "claim": "文档未说明快递运输/送达需要多久",
+          "claim_type": "non_factual",
+          "support_status": null,
+          "required": true,
+          "why": "absence/meta；不得要求 evidence，不得算 supported"
+        }
+      ],
+      "expected_scores": {
         "faithfulness": "0.8-1.0",
+        "answer_correctness": "0.7-1.0 (target 0.9-1.0)",
         "answer_relevancy": "0.8-1.0"
       },
-      "must": [
-        "correctness does not require transit time or region info not in gold",
-        "absence of transit time is not counted as supported factual claim"
+      "diagnostics": [
+        "absence/meta claim is non_factual",
+        "no wrong_facts",
+        "correctness does not require region/transit time absent from gold"
       ],
-      "no_regression": "v1.0.0 correctness 0.3 must rise to >=0.7; no new wrong_facts"
+      "forbidden": [
+        "penalize missing region",
+        "mark absence supported",
+        "correctness <0.7",
+        "require transit time"
+      ],
+      "tolerance": "±0.10; labels exact",
+      "regression": "v1.0.0 C=0.3 -> >=0.7; F=0.75 -> >=0.8; R=0.9 -> >=0.8",
+      "why": "v1.0.0 把“收货地区”当成到货因素；Human Gold 明确只有发货时效、没有运输时长。"
     },
     {
       "id": "Q36",
-      "focus": "文档内部冲突",
-      "input": "v1.0.0 Pilot answer; Human Gold Q36 answer",
-      "expected": {
-        "answer_correctness": "0.5-0.6 (v1.0.0 answer lacks conflict disclosure); 0.9-1.0 if disclosure added",
+      "focus": "Context 自身冲突：§1 已激活 vs §12 一经售出",
+      "fixture": {
+        "query": "Human Gold Q36 question",
+        "answer": "v1.0.0 Pilot answer (no conflict disclosure)",
+        "contexts": "C1..Cn from v1.0.0 Trace",
+        "gold_answer": "Human Gold v1 (discloses conflict)",
+        "human_gold": true,
+        "variant": "disclosure_variant = Human Gold answer; expected correctness 0.9-1.0"
+      },
+      "expected_claims": [
+        {
+          "claim": "普通商品签收后 7 天内可申请无理由退款",
+          "claim_type": "factual_claim",
+          "support_status": "supported",
+          "required": true
+        },
+        {
+          "claim": "定制类商品不支持无理由退款",
+          "claim_type": "factual_claim",
+          "support_status": "supported",
+          "required": true
+        },
+        {
+          "claim": "生鲜食品不支持无理由退款",
+          "claim_type": "factual_claim",
+          "support_status": "supported",
+          "required": true
+        },
+        {
+          "claim": "生鲜食品质量问题需在签收后 24 小时内拍照反馈",
+          "claim_type": "factual_claim",
+          "support_status": "supported",
+          "required": true
+        },
+        {
+          "claim": "已激活的虚拟商品不支持无理由退款",
+          "claim_type": "factual_claim",
+          "support_status": "supported",
+          "required": true
+        },
+        {
+          "claim": "虚拟商品（充值、会员、课程）一经售出不支持退款",
+          "claim_type": "factual_claim",
+          "support_status": "supported",
+          "required": true
+        },
+        {
+          "claim": "定制商品支持质量问题退换，不支持无理由退换",
+          "claim_type": "factual_claim",
+          "support_status": "supported",
+          "required": true
+        },
+        {
+          "claim": "§1 与 §12 对虚拟商品范围表述不一致",
+          "claim_type": "factual_claim",
+          "support_status": "supported",
+          "is_contradictory": false,
+          "required": "disclosure_variant",
+          "why": "文档内部冲突 meta claim；两处原文都在时 supported；不得标 contradictory"
+        }
+      ],
+      "expected_scores": {
         "faithfulness": "0.8-1.0",
+        "answer_correctness": "0.5-0.6 for v1.0.0 answer (no disclosure); 0.9-1.0 for disclosure variant",
         "answer_relevancy": "0.8-1.0"
       },
-      "must": [
-        "no forced canonical choice; disclosure of §1/§12 conflict is not a wrong fact",
-        "missing conflict disclosure goes to missing_points, not wrong_facts",
-        "conflict disclosure meta claim is not marked contradictory"
+      "diagnostics": [
+        "missing_points contains conflict disclosure for v1.0.0 answer",
+        "no wrong_facts for real single-side quote",
+        "document conflict meta claim is not contradictory"
       ],
-      "no_regression": "v1.0.0 correctness 0.2 must rise to >=0.5"
+      "forbidden": [
+        "force canonical single rule",
+        "wrong_facts for real quote",
+        "score 0.0-0.2 for one real side",
+        "mark conflict disclosure as contradictory"
+      ],
+      "tolerance": "±0.10; labels exact",
+      "regression": "v1.0.0 C=0.2 -> >=0.5; F=1.0 -> >=0.8; R=0.9 -> >=0.8",
+      "why": "Q36 的核心是文档冲突，不是回答自相矛盾；单边真实口径应 partial，编造才应 critical。"
     },
     {
       "id": "Q21#3",
-      "focus": "证据不足的推断",
-      "input": "Q21 Pilot answer; claim '质量问题不受 7 天无理由限制'",
-      "expected": {
-        "faithfulness": "0.7-0.9 (one insufficient claim among scorable claims)"
+      "focus": "证据不足的推断 claim",
+      "fixture": {
+        "query": "Q21 question (AI draft base, not Human Gold)",
+        "answer": "v1.0.0 Pilot answer",
+        "contexts": "C1..Cn from v1.0.0 Trace",
+        "gold_claim": "Human Gold Q21#3 = insufficient_evidence",
+        "human_gold": "claim only"
       },
-      "must": [
-        "claim support_status=insufficient_evidence",
-        "score <1.0",
-        "not unsupported unless context contradicts"
+      "expected_claims": [
+        {
+          "claim": "无理由退款仅限签收后 7 天内",
+          "claim_type": "factual_claim",
+          "support_status": "supported",
+          "required": true
+        },
+        {
+          "claim": "第 10 天已超出 7 天，不支持无理由退款",
+          "claim_type": "factual_claim",
+          "support_status": "supported",
+          "required": true
+        },
+        {
+          "claim": "质量问题不受 7 天无理由限制",
+          "claim_type": "factual_claim",
+          "support_status": "insufficient_evidence",
+          "required": true,
+          "why": "Human Gold Q21#3；上下文只限定无理由退款，未规定质量问题期限"
+        },
+        {
+          "claim": "可依据保修/退换货政策主张权益",
+          "claim_type": "factual_claim",
+          "support_status": "supported",
+          "required": false
+        }
       ],
-      "no_regression": "v1.0.0 faithfulness 1.0 must not remain 1.0"
+      "expected_scores": {
+        "faithfulness": "0.7-0.9 (full answer 4/5=0.8 if exactly 5 scorable)"
+      },
+      "diagnostics": [
+        "Q21#3 support_status=insufficient_evidence",
+        "insufficient_evidence_count>=1",
+        "score<1.0"
+      ],
+      "forbidden": [
+        "Q21#3 supported",
+        "faithfulness=1.0",
+        "Q21#3 unsupported (no direct contradiction)"
+      ],
+      "tolerance": "±0.10; claim label exact",
+      "regression": "v1.0.0 F=1.0 -> 0.7-0.9; no claim-level support for Q21#3",
+      "why": "区分整条回答汇总分与单 Claim：Q21#3 单测=0；整条回答若 4 supported + 1 insufficient = 0.8。"
     },
     {
       "id": "Q11",
-      "focus": "合理操作建议 vs 规范性要求",
-      "input": "Q11 Pilot answer; Human Gold Q11 answer",
-      "expected": {
+      "focus": "规范性要求 vs 纯建议",
+      "fixture": {
+        "query": "Q11 question (AI draft base, not Human Gold)",
+        "answer": "v1.0.0 Pilot answer",
+        "contexts": "C1..Cn from v1.0.0 Trace",
+        "gold_answer": "AI draft (pending human)",
+        "human_gold": false
+      },
+      "expected_claims": [
+        {
+          "claim": "第 5 天在 7 天时限内",
+          "claim_type": "factual_claim",
+          "support_status": "supported",
+          "required": true
+        },
+        {
+          "claim": "定制类商品不支持无理由退款",
+          "claim_type": "factual_claim",
+          "support_status": "supported",
+          "required": true
+        },
+        {
+          "claim": "定制商品支持质量问题退换",
+          "claim_type": "factual_claim",
+          "support_status": "supported",
+          "required": true
+        },
+        {
+          "claim": "需提供照片/视频等凭证",
+          "claim_type": "factual_claim",
+          "support_status": "insufficient_evidence",
+          "required": true,
+          "why": "规范性要求，但上下文未写具体凭证要求"
+        },
+        {
+          "claim": "由商家审核认定",
+          "claim_type": "factual_claim",
+          "support_status": "insufficient_evidence",
+          "required": false
+        },
+        {
+          "claim": "建议联系/补充材料",
+          "claim_type": "non_factual",
+          "support_status": null,
+          "required": false
+        }
+      ],
+      "expected_scores": {
         "faithfulness": "0.6-0.9",
         "answer_correctness": "0.8-1.0",
         "answer_relevancy": "0.9-1.0"
       },
-      "must": [
-        "'需提供照片/视频凭证' is factual_claim; if context lacks it -> insufficient_evidence",
-        "pure advice '建议联系客服' is non_factual and excluded from denominator",
-        "no over-penalty below 0.5"
+      "diagnostics": [
+        "non_factual_count>=1 if advice exists",
+        "insufficient_evidence_count>=1",
+        "no supported claim for unverified deontic requirement"
       ],
-      "no_regression": "v1.0.0 faithfulness 0.8 should stay within 0.6-0.9, not drop below 0.5"
+      "forbidden": [
+        "mark deontic requirement non_factual and exclude",
+        "faithfulness=1.0",
+        "faithfulness<0.5"
+      ],
+      "tolerance": "±0.10; labels exact",
+      "regression": "v1.0.0 F=0.8 -> 0.6-0.9; not below 0.5",
+      "why": "Q11 的关键是“需提供凭证”属于规范性事实，不是纯建议；纯建议才排除。"
     },
     {
       "id": "Q29",
       "focus": "无答案但合理拒答",
-      "input": "Q29 Pilot answer; Human Gold Q29 answer",
-      "expected": {
+      "fixture": {
+        "query": "Q29 question (AI draft base, not Human Gold)",
+        "answer": "v1.0.0 Pilot answer",
+        "contexts": "C1..Cn from v1.0.0 Trace",
+        "gold_answer": "AI draft (pending human)",
+        "human_gold": false
+      },
+      "expected_claims": [
+        {
+          "claim": "文档未提及货到付款",
+          "claim_type": "non_factual",
+          "support_status": null,
+          "required": true,
+          "why": "absence/meta，不是可支持的政策事实"
+        },
+        {
+          "claim": "无法确认是否支持货到付款",
+          "claim_type": "non_factual",
+          "support_status": null,
+          "required": true
+        },
+        {
+          "claim": "建议查看结算页/联系客服",
+          "claim_type": "non_factual",
+          "support_status": null,
+          "required": false
+        }
+      ],
+      "expected_scores": {
         "faithfulness": "skipped(no_scorable_claims)",
         "answer_correctness": "0.9-1.0",
         "answer_relevancy": "0.9-1.0"
       },
-      "must": [
-        "Faithfulness does not return 1.0 for all-non_factual answers; exact skip reason no_scorable_claims",
-        "Correctness distinguishes correct refusal from wrong refusal",
-        "Relevancy does not require a yes/no conclusion"
+      "diagnostics": [
+        "scorable_claim_count=0",
+        "skip_reason=no_scorable_claims",
+        "non_factual_count>=1"
       ],
-      "no_regression": "v1.0.0 relevancy 0.6 must rise to >=0.9; correctness 1.0 preserved"
+      "forbidden": [
+        "faithfulness=1.0",
+        "faithfulness=evaluated",
+        "relevancy<0.8",
+        "wrong refusal"
+      ],
+      "tolerance": "skip reason exact; scores ±0.10",
+      "regression": "v1.0.0 F=1.0 -> skipped; C=1.0 -> 0.9-1.0; R=0.6 -> >=0.9",
+      "why": "无答案回答的核心是 absence/meta，不是 policy claim；不能用 1.0 伪装支持。"
     }
   ]
 }

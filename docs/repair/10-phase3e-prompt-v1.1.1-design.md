@@ -55,26 +55,105 @@
 - **Q21#3**：“质量问题不受 7 天限制” → factual_claim / `insufficient_evidence`；原文只把 7 天限定在无理由退款，未规定普通商品质量问题期限。
 - **Q11**：“需提供照片/视频凭证” → factual_claim / insufficient_evidence；“建议联系客服” → non_factual，不进分母。
 
-### 2.4 评分（代码计算）
+### 2.4 评分语义（二次修订）
+
+#### 定义
+
+| 字段 | 定义 |
+|---|---|
+| `scorable_claim_count` | `claim_type == factual_claim` 的数量（含 unsupported/insufficient） |
+| `supported_claim_count` | factual_claim 中 `support_status == supported` 的数量 |
+| `unsupported_claim_count` | factual_claim 中 `support_status == unsupported` 的数量 |
+| `insufficient_evidence_count` | factual_claim 中 `support_status == insufficient_evidence` 的数量 |
+| `non_factual_count` | `claim_type == non_factual` 的数量；不进分母 |
+| `contradiction_count` | `is_contradictory == true` 的 factual_claim 数量；仅诊断，不排除 |
+
+#### 公式
 
 ```
-scorable = [c for c in claims if c.claim_type == "factual_claim"]
-if not scorable: skipped(no_scorable_claims)
-score = supported_count / len(scorable)
-details: supported_count, scorable_claim_count, non_factual_count,
-         contradiction_count, insufficient_count
+scorable = factual_claim 列表
+if len(scorable) == 0:
+    status = skipped(no_scorable_claims)      # 不是 1.0
+else:
+    score = supported_claim_count / scorable_claim_count
+    status = evaluated
 ```
 
-不支持 claim 不补 0 分，而是进入分母但计为未支持；non_factual 完全排除。
+- `unsupported` 和 `insufficient_evidence` **都进入分母**，但都不进入分子；
+- `insufficient_evidence` 不得自动视为 supported，也不得从分母删除；
+- 额外输出 `insufficient_evidence_rate = insufficient_count / scorable_count`，但不改变主分；
+- `non_factual` 完全不进分母；
+- `contradiction_count` 只做诊断，不额外扣分/加分；矛盾 claim 仍以其 support_status 进入分子/分母。
+
+#### 边界案例
+
+| 场景 | 结果 |
+|---|---|
+| 全部 non_factual / 0 claim | `skipped(no_scorable_claims)`，score=None |
+| 全部 factual 为 insufficient_evidence | `evaluated`，score=0.0；`all_insufficient=true`；不 skipped |
+| 全部 factual 为 unsupported | `evaluated`，score=0.0 |
+| 混合 supported/unsupported/insufficient | `supported / scorable` |
+| 全部 factual supported | `evaluated`，score=1.0 |
+
+#### Q21#3 的单 Claim 与整条回答
+
+- **单 Claim 视角**：Q21#3 若单独评测，`support_status=insufficient_evidence`，score=0.0（1 个 scorable，0 supported）。
+- **整条回答视角**：Q21 回答若拆成 5 个 factual claim，其中 Q21#3 为 insufficient、其余 4 个 supported，则 score=4/5=0.8。
+- 两者不冲突：0.0 是“该 claim 的贡献”，0.8 是“整条回答汇总分”；报告必须同时给出 `Q21#3` 标签与整条 `score`，不能用一个数覆盖另一个。
+- v1.1.1 验收以**整条回答 0.7–0.9 + Q21#3 为 insufficient_evidence** 为准；若单独 claim 测试，则期望 0.0。
+
+### 2.5 矛盾标签定义（二次修订）
+
+| 类型 | 触发 | 字段 | 是否进分母 | 案例 |
+|---|---|---|---|---|
+| 回答内部 Claim 矛盾 | 同一回答的两个 claim 不可同时成立 | `is_contradictory=true`；`contradiction_with=[claim_id...]`；`scope=answer_internal` | 是（两个 claim 都算） | Q23 |
+| 回答 vs Context 矛盾 | claim 与所引 context 原文冲突 | `support_status=unsupported`；`scope=context`；可选 `evidence_refs` 指向冲突原文 | 是 | 如声称“7 天可退”但 context 写“不支持” |
+| Context 自身冲突 | 文档两条规则范围/口径不一致；不是回答自相矛盾 | 关于文档的 meta claim 标 `factual_claim`；两处原文都可给出时 `support_status=supported`；`is_contradictory=false`；Service 记 `document_conflict=true` | 是（meta claim 计 1 条） | Q36 |
+
+校验规则：
+
+- `is_contradictory=true` 只能用于**回答内部**；至少需要 2 个 factual claim，`contradiction_with` 非空、引用存在的 `claim_id`、不能自指；
+- `contradiction_with` 不得引用 non_factual claim；
+- 回答 vs Context 冲突用 `support_status=unsupported`，不得用 `is_contradictory` 冒充；
+- Context 自身冲突用 meta claim + `document_conflict` 诊断，不得把披露冲突的回答标成 contradictory；
+- 所有矛盾 claim 仍参与 supported 分子/分母计算，不得排除。
 
 ---
 
 ## 3. Correctness v1.1.1
 
-### 3.1 输入契约
+### 3.1 输入契约与 answerability 推断
 
 保持 `query` / `answer` / `gold_answer`；**不接入 key_facts**。
-当前没有 `answerability` 字段：v1.1.1 从 `gold_answer` 是否包含“文档未提及/无法确认/信息不足”或条件分支来推断；未来可加可选字段，但不属于本次运行时改动。
+当前 `RagJudgeInput` **没有 answerability/category**；v1.1.1 只能从 `gold_answer` 推断，规则如下：
+
+| 条件 | 推断 |
+|---|---|
+| gold_answer 含“文档未提及/未说明/无法确认/信息不足/无法判断/未规定”等，且没有实质政策答案 | `unanswerable` |
+| gold_answer 含明确条件分支（“如果/取决于/分两种/需确认/视…而定”）或要求补充信息 | `ambiguous` |
+| 同时含 no-answer 标记与条件分支 | `ambiguous`（如 Q36） |
+| 有实质政策答案、无条件分支 | `answerable` |
+| 无法可靠判断 | `unknown`：不启用无答案/模糊特殊加分，只按一般事实覆盖评分 |
+
+`unknown` 不是 `ambiguous`，不得给条件式回答额外奖励；也不得因“可能模糊”自动扣分。
+
+### 3.1.1 Q36：真实单边口径 vs 编造口径
+
+| 回答 | 判定 |
+|---|---|
+| 引用 §12“虚拟商品一经售出不支持退款”，但不披露 §1“已激活”限定 | 真实但单边 → `0.5–0.6`；`missing_points` 含“§1/§12 冲突披露”；`wrong_facts` 为空 |
+| 同时披露 §1/§12 并给条件分支 | `0.9–1.0`；不因“没有唯一结论”扣分 |
+| 编造“虚拟商品 7 天内可退”或文档不存在的规则 | `0.0–0.2`；写入 `wrong_facts` |
+| 引用真实单边口径但声称“文档明确统一规定” | `0.3–0.4`；真实引用 + 错误确定性 |
+
+### 3.1.2 Q23/Q35/Q36 判定树（按优先级）
+
+1. **首句/结论与后文或金标矛盾** → Q23：`0.0–0.2`，`wrong_facts` 必填，停止。
+2. **编造文档不存在的规则** → `0.0–0.2`，`wrong_facts` 必填。
+3. **Q36 单边真实口径、未披露冲突** → `0.5–0.6`，`missing_points` 含冲突披露，`wrong_facts` 为空。
+4. **Q35 混淆发货与到货** → `0.3–0.4`；区分二者、说明无运输时长 → `0.9–1.0`；只答发货且未说明到货 → `0.5–0.6`。
+5. **分支覆盖**：全分支 `0.9–1.0`；部分 `0.5–0.6`；泛泛政策 `0.3–0.4`。
+6. **次要缺失** `0.7–0.8`；完整 `0.9–1.0`。
 
 ### 3.2 不重叠区间与优先级
 
@@ -176,6 +255,21 @@ Correctness/Relevancy 输出不变；`RagJudgeInput` 不变（不新增 answerab
 - non_factual 过滤、zero-denominator skipped；
 - claim_type 非法值归一化（默认 factual_claim）并记录计数，避免单条坏 claim 导致整个 metric failed。
 
+### 5.4 Evidence 校验（Service 设计，未实施）
+
+| 检查 | 规则 | 失败处理 |
+|---|---|---|
+| Context ID 有效 | `context_id` 必须在本次输入的 C1..Cn 中 | 标记 `unknown_context_id`；该 claim 不得 supported |
+| Quote 原文子串 | `quote.strip()` 必须是 `context.content.strip()` 的子串；不做内部空白/同义词归一化 | 标记 `quote_not_found`；不得 supported |
+| supported 必须有 evidence | supported claim 的 `evidence_refs` 非空且每条通过上述校验 | 降级为 `insufficient_evidence`，记 `evidence_validation_failed=true` |
+| insufficient/unsupported | 允许空 evidence；若提供则仍校验 | 失败只记诊断，不改变 support_status（unsupported 仍 unsupported） |
+| 重复/空 quote | 空 quote、只有省略号、跨 context 拼接 | 标记 `empty_quote` / `quote_not_in_context`；不得 supported |
+
+- 校验失败**不静默接受**：Service 在 `details.evidence_validation` 记录 `claim_id`、错误码、原始 context_id/quote；
+- 一个 claim 校验失败不影响其它 claim；
+- 若全部 factual claim 因 evidence 校验降级为 insufficient，按 2.4 处理（score=0.0, `all_insufficient=true`），不是 1.0；
+- 这部分是 Service 设计，本轮不修改代码。
+
 ---
 
 ## 6. 版本管理与 fingerprint
@@ -223,43 +317,122 @@ Correctness/Relevancy 输出不变；`RagJudgeInput` 不变（不新增 answerab
 - `AgentConfig.version`、`prompt_sha256`、`judge_config.prompt_version` 必须来自同一解析结果；
 - 根目录 `version.txt` 不再作为唯一事实源（避免 `2026-11-14.1` 与 `v1.0.0` 不一致）。
 
+### 6.4 v1/v2 兼容与历史行为
+
+#### Schema 字段关系
+
+| v1.0.0 字段 | v1.1.1 字段 | 兼容规则 |
+|---|---|---|
+| `claim` | `claim` | 必填，不变 |
+| `supported: bool` | `support_status: enum` | v1 输出无 `support_status` → 由 supported 派生：true=supported，false=unsupported；v1.1.1 以 support_status 为准 |
+| `evidence: list[str]` | `evidence_refs: list[{context_id, quote}]` | v1 evidence 仅作兼容；v1.1.1 校验 quote 是否为对应 context 子串 |
+| 无 | `claim_id` | v1 自动生成 `C1..Cn`；v1.1.1 要求模型提供 |
+| 无 | `claim_type: factual_claim|non_factual` | v1 默认 factual_claim；v1.1.1 必须显式 |
+| 无 | `is_contradictory` / `contradiction_with` | v1 默认 false/[]；v1.1.1 按 2.5 校验 |
+| `reason` | `reason` | 不变 |
+
+**解析策略**：v1.0.0 输出用 v1 兼容路径；v1.1.1 输出用 v2 路径。不得让 v1.1.1 输出缺 `supported` 时被 v1 Schema 拒绝，也不得让 v1.0.0 输出因缺新字段而 failed。
+
+#### JudgeOutcome 预期变化
+
+| 字段 | v1.0.0 | v1.1.1 |
+|---|---|---|
+| `metric_version` | v1 | v2（Judge 三指标） |
+| `score` | supported/全部 claims | supported/scorable factual claims |
+| `skipped_reason` | `no_claims` | `no_scorable_claims`（全部 non_factual） |
+| `details` | claims, supported_count, claim_count | 增加 scorable/supported/unsupported/insufficient/non_factual/contradiction counts、evidence_validation、all_insufficient |
+| `judge_config` | model/temp/max_tokens/prompt_version/SHA/metric_version | 增加 schema_version/rubric_version |
+
+#### 历史 Run 与复用
+
+- 历史 Run 的 `judge_config` 快照与结果不改写；v1.0.0 结果继续 `metric_version=v1`；
+- v1.1.1 新建 Run 使用 v2；不得把 v2 结果写回 v1 Run；
+- 重试复用 Judge 结果必须逐项比较 fingerprint：model/temperature/max_tokens/prompt_version/prompt_sha256/schema_version/rubric_version/metric_version；任一不等不得复用；
+- **Trace 复用与 Judge 结果复用是两件事**：Trace 复用只看检索配置/checksum；Judge 结果复用必须看上述完整 fingerprint。
+
+#### 聚合隔离与 metric_version_for
+
+- `rag_evaluation_results.metric_version` 是聚合隔离键；v1 与 v2 不得合并均值；
+- `build_aggregate` / `summary` 继续按 `metric_version` 分组；
+- 激活 v1.1.1 时，`metric_version_for(judge_metric)` 必须返回 `v2`；检索指标保持 `v1`；
+- `build_judge_config.metric_versions` 与 `expected_metrics` 快照必须同步为 v2，避免 Run 配置与结果字段不一致；
+- 不需要 DB Migration；历史 v1 行不更新。
+
 ---
 
 ## 7. 验收矩阵（设计，未运行）
 
 完整机器可读：`docs/repair/phase3e/prompt-v1.1.1-acceptance-matrix.json`
+固定输入：`docs/repair/phase3e/prompt-v1.1.1-fixtures.json`
 
-| Case | 重点 | 期望 |
+### 7.1 Human Gold 覆盖与限制
+
+| Case | 基础 Gold 来源 | 是否 Human Gold | 说明 |
+|---|---|---|---|
+| Q23 | Human Gold v1 | ✅ | 题干已改写；答案/证据人工确认 |
+| Q35 | Human Gold v1 | ✅ | 区分发货/到货 |
+| Q36 | Human Gold v1 | ✅ | 含 §1/§12 冲突披露 |
+| Q21#3 | Human Gold Claim | ✅（仅 Claim） | Q21 基础题为 AI draft；Q21#3 已人工确认 insufficient_evidence |
+| Q11 | AI draft | ❌ | 基础题未人工复核；验收为 provisional |
+| Q29 | AI draft | ❌ | 基础题未人工复核；验收为 provisional |
+
+> Q11/Q21 基础/Q29 基础不是 Human Gold，不得把其期望说成人工验证；只有 Q21#3 Claim 是人工确认。Q23/Q35/Q36 的 Gold 与 v1.0.0 输入 fixture 分开保存。
+
+### 7.2 六案例矩阵
+
+| Case | 重点 | 期望（分数区间 + 必现诊断） |
 |---|---|---|
-| Q23 | 首句/后文矛盾 | Correctness 0.0–0.2；Faithfulness ≤0.5；Relevancy 0.7–1.0；wrong_facts 必填 |
-| Q35 | 发货 vs 到货 | Correctness 0.7–1.0（目标 0.9–1.0）；Faithfulness 0.8–1.0；Relevancy 0.8–1.0 |
-| Q36 | 文档冲突 | Correctness 0.5–0.6（缺披露）/0.9–1.0（披露）；Faithfulness 0.8–1.0；Relevancy 0.8–1.0 |
-| Q21#3 | 证据不足 | Faithfulness 0.7–0.9；claim `insufficient_evidence`；不得 1.0 |
-| Q11 | 建议 vs 规范性要求 | Faithfulness 0.6–0.9；“需提供…” factual/insufficient；“建议…” non_factual |
-| Q29 | 合理无答案 | Faithfulness `skipped(no_scorable_claims)`；Correctness 0.9–1.0；Relevancy 0.9–1.0 |
+| Q23 | 回答内部矛盾 | C 0.0–0.2；F ≤0.5；R 0.7–1.0；`is_contradictory=true`、`contradiction_with` 非空、`wrong_facts` 含肯定结论 |
+| Q35 | 发货 vs 到货 | C 0.7–1.0（目标 0.9–1.0）；F 0.8–1.0；R 0.8–1.0；absence 为 non_factual、无 wrong_facts |
+| Q36 | Context 自身冲突 | v1.0.0 无披露：C 0.5–0.6，`missing_points` 含冲突；披露 variant：C 0.9–1.0；F 0.8–1.0；不得 `wrong_facts` 真实单边引用 |
+| Q21#3 | 证据不足 | 整条 F 0.7–0.9；Q21#3 `insufficient_evidence`；单 Claim 0.0；不得 1.0 |
+| Q11 | 规范性要求 vs 建议 | F 0.6–0.9；“需提供…” factual/insufficient；“建议…” non_factual；不得 <0.5 |
+| Q29 | 合理无答案 | F `skipped(no_scorable_claims)`；C 0.9–1.0；R 0.9–1.0；`scorable_claim_count=0` |
+
+每个案例的完整 fixture、预期 Claim 拆分、标签、诊断、禁止行为、容差、回归规则见 JSON；本表只做摘要。
 
 通用：
 
-- 容差：分数区间 ±0.10；标签/skip reason 精确；无回归下降 >0.10（除明确目标）；
-- 10 条整体：schema 合法率 100%，无 supported 无 evidence，无新增 failed；
-- 不得修改 Human Gold；不得用 v1.0.0 分数反推 Gold。
+- 容差：分数 ±0.10；标签/skip reason 精确；回归下降 >0.10 必须有明确目标，否则视为回归；
+- 10 条整体：Schema 合法率 100%，无 supported 无 evidence，无新增 failed；
+- 不得修改 Human Gold；不得用 v1.0.0 分数反推 Gold；
+- Q11/Q21 基础/Q29 的期望为 provisional，只有 Q21#3 Claim 是 Human Gold。
 
 ---
 
 ## 8. 风险与未解决问题
 
-1. **answerability 不在当前输入契约**：v1.1.1 只能从 `gold_answer` 推断；未来加字段需另开 Schema/Service 设计。
+1. **answerability 不在当前输入契约**：v1.1.1 只能从 `gold_answer` 推断；`unknown` 时只按一般事实覆盖评分；未来加字段需另开 Schema/Service 设计。
 2. **contexts 无 ID**：C1..Cn 依赖 Service 顺序；需在实现时映射真实 Trace context，并验证 quote 逐字匹配。
 3. **Q36 canonical 口径未确认**：设计只要求披露 §1/§12 冲突，不选边；业务确认仍待办。
-4. **评分区间未人工验证**：0.0–0.2 等是设计假设，10 条实验只验证相对改善，不把它们包装成客观阈值。
+4. **评分区间未人工验证**：0.0–0.2 等是设计假设；10 条实验只验证相对改善，不把它们包装成客观阈值。
 5. **metric_version v2**：需在激活时同步修改 `metric_version_for`/聚合；不迁移 DB，但历史 v1 结果不能与 v2 混算。
 6. **key_facts 尚未进入 Correctness 输入**：当前只读 gold_answer；未来启用需 Schema 增 `fact_type/required/evidence_status`，并定义 absence/conflict 不进 supported 分母。
 7. **Prompt 长度/成本**：Faithfulness few-shot 增加输入 token；10 条实验需记录 token/成本。
-8. **v1.1.1 未运行**：所有期望均未验证；本阶段不产生任何 Judge 分数。
+8. **Q11/Q21 基础/Q29 基础不是 Human Gold**：只有 Q21#3 Claim 是人工确认；这三条 Acceptance 为 provisional，需后续人工复核。
+9. **Q21 整条 0.8 依赖 5 个 claim 的拆分**：若模型拆分不同，目标改为 0.7–0.9 + Q21#3 insufficient，不固定 0.8。
+10. **v1.1.1 未运行**：所有期望均未验证；本阶段不产生任何 Judge 分数。
 
 ---
 
-## 9. 交付物
+## 9. 二次修订自检（2026-11-16）
+
+| 检查 | 结果 |
+|---|---|
+| v1.0.0 Prompt | 未修改；根目录 SHA 仍 `287053e9…`（F） |
+| v1.1.0 Prompt | 未修改；仍 pending_review |
+| v1.1.1 Prompt 正文 | 未修改（本轮仅设计/矩阵/fixtures） |
+| Agent/Service/Schema/API/DB | 未修改 |
+| Migration | 未执行 |
+| Judge / 10 条 / 40 条 | 未运行 |
+| 固定 fixture | 6 个案例已保存 `prompt-v1.1.1-fixtures.json` |
+| 验收矩阵 | 6 案例，含预期 Claim/标签/分数/诊断/禁止/容差/回归 |
+| Human Gold 混用 | Q23/Q35/Q36 Human Gold；Q21#3 仅 Claim；Q11/Q21 基础/Q29 明确 AI draft |
+| 版本关系 | v1.0.0 active；v1.1.1 design_draft/inactive；metric v2 映射已设计 |
+
+---
+
+## 10. 交付物
 
 | 文件 | 内容 |
 |---|---|
