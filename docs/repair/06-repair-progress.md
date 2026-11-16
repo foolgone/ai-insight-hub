@@ -981,3 +981,12 @@ alembic check   : No new upgrade operations detected
 - P1 边界修复：conflict 双侧证据按 `(context_id, quote.strip())` 去重且拒绝互为子串；重复 `claim_id` 保留首条、跳过后续，不重复进分母。
 - 生产 Schema/Service 重跑同一 6 案例 dry-run：6/6、12/12，结果与设计稿 dry-run 一致。
 - 未激活 v1.1.1；未运行真实 Judge/10/40；未改 Human Gold；未做 DB Migration。
+
+### 10 条真实对比（2026-11-16，stopped）
+- 按批准边界执行：固定同一批 Pilot answer/contexts，只切换 Judge Prompt 版本；qwen-max、temp 0、max_tokens 8192；未重新生成答案。
+- 完成 Q01/Q04/Q11/Q17；**Q17 v1.1.1 Faithfulness schema failed**（修复轮后仍非法，raw output 295 chars 截断），按停止条件立即停止，未跑 Q21/Q23/Q29/Q31/Q35/Q36。
+- Q11 v1.1.1 F=0.833（5/6 supported + 1 insufficient），高于矩阵 0.6–0.8 上限；Q11 R=0.9（Δ-0.1，仍在下界）。
+- Q01/Q04/Q17 的 F/C/R delta 均未超过 0.10；Q17 F 因 schema failed 无分数。
+- 已完成案例未出现 duplicate claim_id 或 duplicate/nested conflict evidence；Q36 未运行，disclosure 未验证。
+- 结果：`docs/repair/phase3e/pilot-10-v1.0.0-vs-v1.1.1.json` / `.md`。
+- 未跑 40 条、未激活；脚本退出前恢复 `RAG_JUDGE_PROMPT_VERSION=v1.0.0`。
