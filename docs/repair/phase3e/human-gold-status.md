@@ -54,14 +54,14 @@ Q23 保持 `constraint`，Q14/Q19 保持 `multi`，Q36/Q37/Q35 保持 `ambiguous
 
 ## 4. 仍待处理
 
-### 4.1 key_facts
+### 4.1 key_facts（已完成）
 
-13 条基础数据的 `key_facts` **尚未单独人工复核**，统一为 `[]` + `key_facts_status=pending_human`。
-
-已准备审核表：`human-gold-key-facts-review.md` / `.json` / `.csv`（13 行）/ `-long.csv`（45 条事实）；所有 `human_*` 字段为空，仍待人工确认。
-- 不得用 AI 草稿填充；
-- 当前 Judge 的 Correctness 使用 `gold_answer`，不依赖 key_facts，因此 10 条 Pilot 对比可先跑；
-- 完整 40 条 Gold 前建议补齐。
+13 条基础数据的 `key_facts` 已人工确认并写入 `human-gold.json`：
+- **41 条**最终事实：`supported` 38 / `evidence_insufficient` 2（Q30-F1、Q35-F5）/ `ambiguous` 1（Q36-F8）；
+- 45 条候选 → 38 accept / 3 modify / 4 delete；
+- `key_facts_status=human_reviewed`，reviewer=江晚，reviewed_at=2026-11-16；
+- 逐条证据保留在 `key_fact_details`；审核记录见 `human-gold-key-facts-review-long.csv`（45 行）与 `human-gold-key-facts-decisions.md`；
+- 当前 Judge 的 Correctness 使用 `gold_answer`，不依赖 key_facts；未来启用需另开 Schema。
 
 ### 4.2 未复核数据
 
@@ -89,11 +89,10 @@ Q23 保持 `constraint`，Q14/Q19 保持 `multi`，Q36/Q37/Q35 保持 `ambiguous
 
 ## 5. 下一步（未执行）
 
-1. （可选）补齐 13 条 key_facts；
-2. 复核剩余 27 条基础 + 34 条 Claim；
-3. 按 subagent 复核意见修订 Prompt v1.1.1；
-4. 用相同 10 条跑 v1.1.1 对比（需另行批准）；
-5. 通过后再跑完整 40 条。
+1. 复核剩余 27 条基础 + 34 条 Claim；
+2. 按 subagent 复核意见修订 Prompt v1.1.1；
+3. 用相同 10 条跑 v1.1.1 对比（需另行批准）；
+4. 通过后再跑完整 40 条。
 
 **当前未改 Prompt/Agent/Schema/API/DB，未运行 Judge；v1.1.0 仍 pending_review。**
 
@@ -102,20 +101,21 @@ Q23 保持 `constraint`，Q14/Q19 保持 `multi`，Q36/Q37/Q35 保持 `ambiguous
 ## 6. 一致性审计（2026-11-16）
 
 - 报告：`human-gold-audit.md`；机器结果：`human-gold-audit.json`
-- **345 项检查全部通过**（0 失败、0 警告）
+- **424 项检查全部通过**（0 失败、0 警告）
 - 覆盖：40 条候选、13 条 Gold、27 条 pending、1 条 Gold Claim、34 条 pending Claim、
   来源 SHA、Evidence 逐字性、状态、分类/answerability、题目改写、Prompt 版本关系
 - 未修改任何 Prompt/Agent/Schema/API/DB，未运行 Judge
 
 ---
 
-## 7. key_facts 审核准备（2026-11-16）
+## 7. key_facts 复核结论（2026-11-16）
 
-- 覆盖 13 条 human_reviewed 基础数据；
-- 候选 45 条原子事实；
-- 证据状态：`supported` 42 / `evidence_insufficient` 2 / `ambiguous` 1；
-- 证据缺失：Q30-F1（海外配送未提及）、Q35-F5（运输/送达时长未说明）；
-- 歧义：Q36-F8（§1/§12 虚拟商品口径冲突）；
-- 所有 `human_decision` / `human_corrected_key_facts` / `human_reason` 为空，`review_status=pending_human`；
-- 当前 Correctness Prompt 只读取 `gold_answer`，不读取 key_facts，因此本表不会改变 Judge 分数；
-- 未修改 `human-gold.json`、pending 数据、Prompt、Agent、Schema、API、DB，未运行 Judge。
+- 覆盖 13 条 human_reviewed 基础数据，候选 45 条 → **最终 41 条**；
+- 决定：`accept` 38 / `modify` 3 / `delete` 4；
+- 证据状态：`supported` 38 / `evidence_insufficient` 2 / `ambiguous` 1；
+- 删除：Q23-F4（重复）、Q15-F1（定义性上下文）、Q16-F1（条件重复）、Q22-F4（非必答推导）；
+- 改写：Q23-F2、Q36-F3、Q16-F2；
+- 保留 absence：Q30-F1、Q35-F5；保留 conflict：Q36-F8（均不进入 supported 分母）；
+- 逐条结果：`human-gold-key-facts-review-long.csv`（45 行）、`human-gold-key-facts-review.csv`（13 行）、`human-gold-key-facts-review.json`；
+- 结论与 8 个问题的决定：`human-gold-key-facts-decisions.md`；
+- **已写入** `human-gold.json`：13 条 key_facts 全部 `human_reviewed`（41 条）；未改 Prompt/Agent/Schema/API/DB，未运行 Judge。

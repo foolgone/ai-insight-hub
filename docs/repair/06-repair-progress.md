@@ -877,3 +877,36 @@ alembic check   : No new upgrade operations detected
 - 输出：`human-gold-key-facts-review.md`、`.json`、`.csv`（13 行）、`-long.csv`（45 条）；
 - 所有 human 字段为空，`pending_human`；未修改 human-gold/pending/Prompt/Agent/Schema/API/DB，未运行 Judge；
 - 当前 Correctness 只读 gold_answer，不读 key_facts，因此不会影响 Judge 分数。
+
+---
+
+## Phase 3E-H · key_facts 人工复核结论（2026-11-16 回填）
+
+**复核人**：江晚（结论由 AI 起草，用户确认署名）
+
+| 项 | 结果 |
+|---|---|
+| 候选 | 45 条 |
+| 最终 | **41 条**（supported 38 / evidence_insufficient 2 / ambiguous 1） |
+| 决定 | accept 38 / modify 3 / delete 4 |
+| 删除 | Q23-F4（重复）、Q15-F1（定义性上下文）、Q16-F1（条件重复）、Q22-F4（非必答推导） |
+| 改写 | Q23-F2、Q36-F3、Q16-F2 |
+| 保留 absence | Q30-F1、Q35-F5（不进入 supported 分母） |
+| 保留 conflict | Q36-F8（不进入 supported 分母） |
+
+- 8 个问题的决定：Q30-F1 保留；Q35-F5 保留；Q36-F8 保留为 meta/conflict；Q23-F3 接受；Q22-F4 算术成立但不作 key_fact；Q37 不补 absence；粒度不再拆（45→41）；key_facts 本阶段不进入 Judge。
+- 已填：`human-gold-key-facts-review-long.csv`、`human-gold-key-facts-review.csv`、`human-gold-key-facts-review.json`；`review_status=human_reviewed`。
+- **未修改** `human-gold.json`（key_facts 仍为 `[]`），未改 Prompt/Agent/Schema/API/DB，未运行 Judge。
+- 结论：`docs/repair/phase3e/human-gold-key-facts-decisions.md`。
+
+
+---
+
+## Phase 3E-H 完成 · key_facts 写入 Human Gold（2026-11-16）
+
+- 45 条候选 → 最终 **41 条**：supported 38 / evidence_insufficient 2 / ambiguous 1；
+- 13 条基础数据 key_facts 全部 `human_reviewed`，已写入 `human-gold.json`；
+- 删除 4：Q23-F4、Q15-F1、Q16-F1、Q22-F4；改写 3：Q23-F2、Q36-F3、Q16-F2；
+- absence：Q30-F1、Q35-F5；conflict：Q36-F8；
+- Human Gold 一致性审计复跑 **424/424 通过**；
+- 未改 Prompt/Agent/Schema/API/DB，未运行 Judge、10 条对照或 40 条评测。

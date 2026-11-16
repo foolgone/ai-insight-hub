@@ -7,8 +7,8 @@
     "source_sha256": "737f6bd3ef412d41d14ada4d2000bd01e851355f0d95cd0d321ac84416f9002d"
   },
   "summary": {
-    "checks": 345,
-    "passed": 345,
+    "checks": 424,
+    "passed": 424,
     "failed": 0,
     "warnings": 0
   },
@@ -109,9 +109,34 @@
       "detail": "empty"
     },
     {
-      "name": "Q23 key_facts pending",
+      "name": "Q23 key_facts count",
       "ok": true,
-      "detail": "[] / pending_human"
+      "detail": "3 != 3"
+    },
+    {
+      "name": "Q23 key_facts match reviewed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q23 key_facts human_reviewed",
+      "ok": true,
+      "detail": "human_reviewed"
+    },
+    {
+      "name": "Q23 key_fact_details count",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q23 key_facts reviewer",
+      "ok": true,
+      "detail": "江晚"
+    },
+    {
+      "name": "Q23 key_facts reviewed_at",
+      "ok": true,
+      "detail": "2026-11-16"
     },
     {
       "name": "Q23 original_question",
@@ -164,9 +189,34 @@
       "detail": "empty"
     },
     {
-      "name": "Q36 key_facts pending",
+      "name": "Q36 key_facts count",
       "ok": true,
-      "detail": "[] / pending_human"
+      "detail": "8 != 8"
+    },
+    {
+      "name": "Q36 key_facts match reviewed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q36 key_facts human_reviewed",
+      "ok": true,
+      "detail": "human_reviewed"
+    },
+    {
+      "name": "Q36 key_fact_details count",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q36 key_facts reviewer",
+      "ok": true,
+      "detail": "江晚"
+    },
+    {
+      "name": "Q36 key_facts reviewed_at",
+      "ok": true,
+      "detail": "2026-11-16"
     },
     {
       "name": "Q36 original_question",
@@ -224,9 +274,34 @@
       "detail": "empty"
     },
     {
-      "name": "Q14 key_facts pending",
+      "name": "Q14 key_facts count",
       "ok": true,
-      "detail": "[] / pending_human"
+      "detail": "2 != 2"
+    },
+    {
+      "name": "Q14 key_facts match reviewed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q14 key_facts human_reviewed",
+      "ok": true,
+      "detail": "human_reviewed"
+    },
+    {
+      "name": "Q14 key_fact_details count",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q14 key_facts reviewer",
+      "ok": true,
+      "detail": "江晚"
+    },
+    {
+      "name": "Q14 key_facts reviewed_at",
+      "ok": true,
+      "detail": "2026-11-16"
     },
     {
       "name": "Q14 original_question",
@@ -279,9 +354,34 @@
       "detail": "empty"
     },
     {
-      "name": "Q15 key_facts pending",
+      "name": "Q15 key_facts count",
       "ok": true,
-      "detail": "[] / pending_human"
+      "detail": "1 != 1"
+    },
+    {
+      "name": "Q15 key_facts match reviewed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q15 key_facts human_reviewed",
+      "ok": true,
+      "detail": "human_reviewed"
+    },
+    {
+      "name": "Q15 key_fact_details count",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q15 key_facts reviewer",
+      "ok": true,
+      "detail": "江晚"
+    },
+    {
+      "name": "Q15 key_facts reviewed_at",
+      "ok": true,
+      "detail": "2026-11-16"
     },
     {
       "name": "Q15 original_question",
@@ -334,9 +434,34 @@
       "detail": "empty"
     },
     {
-      "name": "Q16 key_facts pending",
+      "name": "Q16 key_facts count",
       "ok": true,
-      "detail": "[] / pending_human"
+      "detail": "1 != 1"
+    },
+    {
+      "name": "Q16 key_facts match reviewed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q16 key_facts human_reviewed",
+      "ok": true,
+      "detail": "human_reviewed"
+    },
+    {
+      "name": "Q16 key_fact_details count",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q16 key_facts reviewer",
+      "ok": true,
+      "detail": "江晚"
+    },
+    {
+      "name": "Q16 key_facts reviewed_at",
+      "ok": true,
+      "detail": "2026-11-16"
     },
     {
       "name": "Q16 original_question",
@@ -389,9 +514,34 @@
       "detail": "empty"
     },
     {
-      "name": "Q19 key_facts pending",
+      "name": "Q19 key_facts count",
       "ok": true,
-      "detail": "[] / pending_human"
+      "detail": "2 != 2"
+    },
+    {
+      "name": "Q19 key_facts match reviewed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q19 key_facts human_reviewed",
+      "ok": true,
+      "detail": "human_reviewed"
+    },
+    {
+      "name": "Q19 key_fact_details count",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q19 key_facts reviewer",
+      "ok": true,
+      "detail": "江晚"
+    },
+    {
+      "name": "Q19 key_facts reviewed_at",
+      "ok": true,
+      "detail": "2026-11-16"
     },
     {
       "name": "Q19 original_question",
@@ -444,9 +594,34 @@
       "detail": "empty"
     },
     {
-      "name": "Q37 key_facts pending",
+      "name": "Q37 key_facts count",
       "ok": true,
-      "detail": "[] / pending_human"
+      "detail": "5 != 5"
+    },
+    {
+      "name": "Q37 key_facts match reviewed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q37 key_facts human_reviewed",
+      "ok": true,
+      "detail": "human_reviewed"
+    },
+    {
+      "name": "Q37 key_fact_details count",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q37 key_facts reviewer",
+      "ok": true,
+      "detail": "江晚"
+    },
+    {
+      "name": "Q37 key_facts reviewed_at",
+      "ok": true,
+      "detail": "2026-11-16"
     },
     {
       "name": "Q37 original_question",
@@ -499,9 +674,34 @@
       "detail": "empty"
     },
     {
-      "name": "Q40 key_facts pending",
+      "name": "Q40 key_facts count",
       "ok": true,
-      "detail": "[] / pending_human"
+      "detail": "3 != 3"
+    },
+    {
+      "name": "Q40 key_facts match reviewed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q40 key_facts human_reviewed",
+      "ok": true,
+      "detail": "human_reviewed"
+    },
+    {
+      "name": "Q40 key_fact_details count",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q40 key_facts reviewer",
+      "ok": true,
+      "detail": "江晚"
+    },
+    {
+      "name": "Q40 key_facts reviewed_at",
+      "ok": true,
+      "detail": "2026-11-16"
     },
     {
       "name": "Q40 original_question",
@@ -554,9 +754,34 @@
       "detail": "empty"
     },
     {
-      "name": "Q05 key_facts pending",
+      "name": "Q05 key_facts count",
       "ok": true,
-      "detail": "[] / pending_human"
+      "detail": "2 != 2"
+    },
+    {
+      "name": "Q05 key_facts match reviewed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q05 key_facts human_reviewed",
+      "ok": true,
+      "detail": "human_reviewed"
+    },
+    {
+      "name": "Q05 key_fact_details count",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q05 key_facts reviewer",
+      "ok": true,
+      "detail": "江晚"
+    },
+    {
+      "name": "Q05 key_facts reviewed_at",
+      "ok": true,
+      "detail": "2026-11-16"
     },
     {
       "name": "Q05 original_question",
@@ -609,9 +834,34 @@
       "detail": "empty"
     },
     {
-      "name": "Q13 key_facts pending",
+      "name": "Q13 key_facts count",
       "ok": true,
-      "detail": "[] / pending_human"
+      "detail": "3 != 3"
+    },
+    {
+      "name": "Q13 key_facts match reviewed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q13 key_facts human_reviewed",
+      "ok": true,
+      "detail": "human_reviewed"
+    },
+    {
+      "name": "Q13 key_fact_details count",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q13 key_facts reviewer",
+      "ok": true,
+      "detail": "江晚"
+    },
+    {
+      "name": "Q13 key_facts reviewed_at",
+      "ok": true,
+      "detail": "2026-11-16"
     },
     {
       "name": "Q13 original_question",
@@ -664,9 +914,34 @@
       "detail": "empty"
     },
     {
-      "name": "Q22 key_facts pending",
+      "name": "Q22 key_facts count",
       "ok": true,
-      "detail": "[] / pending_human"
+      "detail": "3 != 3"
+    },
+    {
+      "name": "Q22 key_facts match reviewed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q22 key_facts human_reviewed",
+      "ok": true,
+      "detail": "human_reviewed"
+    },
+    {
+      "name": "Q22 key_fact_details count",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q22 key_facts reviewer",
+      "ok": true,
+      "detail": "江晚"
+    },
+    {
+      "name": "Q22 key_facts reviewed_at",
+      "ok": true,
+      "detail": "2026-11-16"
     },
     {
       "name": "Q22 original_question",
@@ -719,9 +994,34 @@
       "detail": "empty"
     },
     {
-      "name": "Q30 key_facts pending",
+      "name": "Q30 key_facts count",
       "ok": true,
-      "detail": "[] / pending_human"
+      "detail": "1 != 1"
+    },
+    {
+      "name": "Q30 key_facts match reviewed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q30 key_facts human_reviewed",
+      "ok": true,
+      "detail": "human_reviewed"
+    },
+    {
+      "name": "Q30 key_fact_details count",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q30 key_facts reviewer",
+      "ok": true,
+      "detail": "江晚"
+    },
+    {
+      "name": "Q30 key_facts reviewed_at",
+      "ok": true,
+      "detail": "2026-11-16"
     },
     {
       "name": "Q30 original_question",
@@ -769,9 +1069,34 @@
       "detail": "empty"
     },
     {
-      "name": "Q35 key_facts pending",
+      "name": "Q35 key_facts count",
       "ok": true,
-      "detail": "[] / pending_human"
+      "detail": "7 != 7"
+    },
+    {
+      "name": "Q35 key_facts match reviewed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q35 key_facts human_reviewed",
+      "ok": true,
+      "detail": "human_reviewed"
+    },
+    {
+      "name": "Q35 key_fact_details count",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q35 key_facts reviewer",
+      "ok": true,
+      "detail": "江晚"
+    },
+    {
+      "name": "Q35 key_facts reviewed_at",
+      "ok": true,
+      "detail": "2026-11-16"
     },
     {
       "name": "Q35 original_question",
@@ -1329,22 +1654,17 @@
       "detail": "got 40"
     },
     {
+      "name": "pending-review Q15 human_reviewed",
+      "ok": true,
+      "detail": "human_reviewed"
+    },
+    {
       "name": "pending-review Q23 human_reviewed",
       "ok": true,
       "detail": "human_reviewed（题干改写）"
     },
     {
-      "name": "pending-review Q22 human_reviewed",
-      "ok": true,
-      "detail": "human_reviewed"
-    },
-    {
-      "name": "pending-review Q30 human_reviewed",
-      "ok": true,
-      "detail": "human_reviewed"
-    },
-    {
-      "name": "pending-review Q37 human_reviewed",
+      "name": "pending-review Q35 human_reviewed",
       "ok": true,
       "detail": "human_reviewed"
     },
@@ -1354,32 +1674,17 @@
       "detail": "human_reviewed"
     },
     {
+      "name": "pending-review Q22 human_reviewed",
+      "ok": true,
+      "detail": "human_reviewed"
+    },
+    {
       "name": "pending-review Q40 human_reviewed",
       "ok": true,
       "detail": "human_reviewed（题干改写）"
     },
     {
-      "name": "pending-review Q16 human_reviewed",
-      "ok": true,
-      "detail": "human_reviewed"
-    },
-    {
-      "name": "pending-review Q15 human_reviewed",
-      "ok": true,
-      "detail": "human_reviewed"
-    },
-    {
-      "name": "pending-review Q19 human_reviewed",
-      "ok": true,
-      "detail": "human_reviewed"
-    },
-    {
-      "name": "pending-review Q14 human_reviewed",
-      "ok": true,
-      "detail": "human_reviewed"
-    },
-    {
-      "name": "pending-review Q05 human_reviewed",
+      "name": "pending-review Q30 human_reviewed",
       "ok": true,
       "detail": "human_reviewed"
     },
@@ -1389,7 +1694,27 @@
       "detail": "human_reviewed"
     },
     {
-      "name": "pending-review Q35 human_reviewed",
+      "name": "pending-review Q19 human_reviewed",
+      "ok": true,
+      "detail": "human_reviewed"
+    },
+    {
+      "name": "pending-review Q37 human_reviewed",
+      "ok": true,
+      "detail": "human_reviewed"
+    },
+    {
+      "name": "pending-review Q05 human_reviewed",
+      "ok": true,
+      "detail": "human_reviewed"
+    },
+    {
+      "name": "pending-review Q14 human_reviewed",
+      "ok": true,
+      "detail": "human_reviewed"
+    },
+    {
+      "name": "pending-review Q16 human_reviewed",
       "ok": true,
       "detail": "human_reviewed"
     },
@@ -1409,7 +1734,7 @@
       "detail": ""
     },
     {
-      "name": "status doc key_facts pending",
+      "name": "status doc key_facts human_reviewed",
       "ok": true,
       "detail": ""
     },
@@ -1735,6 +2060,76 @@
     },
     {
       "name": "human-gold-status.md 存在",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "key_facts 总数 41",
+      "ok": true,
+      "detail": "got 41"
+    },
+    {
+      "name": "key_facts 状态 38/2/1",
+      "ok": true,
+      "detail": "{'supported': 38, 'ambiguous': 1, 'evidence_insufficient': 2}"
+    },
+    {
+      "name": "已删除 Q23-F4 不在 Gold",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "已删除 Q15-F1 不在 Gold",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "已删除 Q16-F1 不在 Gold",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "已删除 Q22-F4 不在 Gold",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q23-F2 改写",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q36-F3 改写",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q16-F2 改写",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q30-F1 evidence_insufficient",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q35-F5 evidence_insufficient",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q36-F8 ambiguous",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Gold meta key_facts 41/38/2/1",
+      "ok": true,
+      "detail": "{'version': 'phase3e-key-facts-v1', 'status': 'human_reviewed', 'reviewer': '江晚', 'reviewed_at': '2026-11-16', 'total': 41, 'supported': 38, 'evidence_insufficient': 2, 'ambiguous': 1, 'decisions_file': 'docs/repair/phase3e/human-gold-key-facts-decisions.md', 'review_file': 'docs/repair/phase3e/human-gold-key-facts-review.json', 'note': '41 条人工确认；Q30/Q35 absence 与 Q36 conflict 保留为 evidence_insufficient/ambiguous，不进入 supported 分母（未来启用时）。'}"
+    },
+    {
+      "name": "key_facts review 全部 human_reviewed",
       "ok": true,
       "detail": ""
     }

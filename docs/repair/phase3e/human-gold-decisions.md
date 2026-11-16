@@ -90,3 +90,18 @@
 - 旧 `human-review-*.csv` / `pilot-claims-review.csv` 保留为 AI 草稿/模板，下游以 `human-gold.json` 为准。
 
 未改 Prompt/Agent/Schema/API/DB，未运行 Judge；v1.1.0 仍 `pending_review`。
+
+---
+
+## 7. key_facts 已写入 Human Gold（2026-11-16）
+
+- `human-gold.json` 的 13 条基础数据已写入 key_facts：
+  - 最终 **41 条**；`supported` 38 / `evidence_insufficient` 2 / `ambiguous` 1；
+  - 45 条候选 → accept 38 / modify 3 / delete 4；
+  - `key_facts_status=human_reviewed`，reviewer=江晚，reviewed_at=2026-11-16；
+  - 逐条证据保留在 `key_fact_details`。
+- 删除：Q23-F4、Q15-F1、Q16-F1、Q22-F4；改写：Q23-F2、Q36-F3、Q16-F2。
+- absence：Q30-F1、Q35-F5；conflict：Q36-F8。
+- 决策记录：`human-gold-key-facts-decisions.md`；审核表：`human-gold-key-facts-review*.csv/json`。
+- Human Gold 一致性审计复跑：**424/424 通过**。
+- 未改 Prompt/Agent/Schema/API/DB，未运行 Judge。

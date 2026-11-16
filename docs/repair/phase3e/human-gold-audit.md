@@ -1,9 +1,9 @@
 # Phase 3E Human Gold v1 一致性审计报告
 
 **日期**：2026-11-16
-**审计范围**：Human Gold v1、27 条 pending 基础、34 条 pending Claim、来源文档、版本关系
+**审计范围**：Human Gold v1（含 41 条 key_facts）、27 条 pending 基础、34 条 pending Claim、来源文档、版本关系
 **审计性质**：只读审计；未改 Prompt/Agent/Schema/API/DB，未运行 Judge
-**结果**：**345 项检查全部通过（0 失败，0 警告）**
+**结果**：**424 项检查全部通过（0 失败，0 警告）**
 
 ---
 
@@ -18,6 +18,7 @@
 | Human Gold Claim | 1 | Q21#3 |
 | Pending Claim | 34 | 全部 `pending_human`、`human_label=null` |
 | Claim 合计 | 35 | 1 + 34，无交集、无重复 |
+| key_facts | 41 | 13 条基础；supported 38 / evidence_insufficient 2 / ambiguous 1 |
 
 已复核基础 ID：
 `Q23, Q36, Q14, Q15, Q16, Q19, Q37, Q40, Q05, Q13, Q22, Q30, Q35`
@@ -61,6 +62,21 @@ Claim：仅 `Q21#3` 已复核；其余 34 条见 `human-gold.claims-pending.json
 
 ---
 
+## 3.1 key_facts
+
+| 检查 | 结果 |
+|---|---|
+| 13 条 Human Gold 基础 key_facts | 全部 `human_reviewed` |
+| 最终事实数 | 41（候选 45；accept 38 / modify 3 / delete 4） |
+| 证据状态 | supported 38 / evidence_insufficient 2 / ambiguous 1 |
+| 证据缺失 | Q30-F1（海外配送未提及）、Q35-F5（运输/送达时长未说明） |
+| 歧义 | Q36-F8（§1/§12 虚拟商品口径冲突） |
+| 删除项 | Q23-F4、Q15-F1、Q16-F1、Q22-F4 不在 Gold |
+| 改写项 | Q23-F2、Q36-F3、Q16-F2 已按人工文本落地 |
+| 当前 Judge 关系 | Correctness 只读 `gold_answer`，不读 key_facts |
+
+---
+
 ## 4. 分类与答案性
 
 复核后分类覆盖：
@@ -94,7 +110,7 @@ Q14/Q19 `answerability=ambiguous`；Q23/Q40 题干改写。
 
 ## 6. 仍然存在的差距（不是一致性错误）
 
-1. **key_facts 未人工复核**：13 条全部 `[]` + `key_facts_status=pending_human`；未用 AI 草稿填充。
+1. **key_facts 已人工确认**：41 条（supported 38 / evidence_insufficient 2 / ambiguous 1）；Q30/Q35 absence、Q36 conflict 保留，不进入 supported 分母（未来启用时）。
 2. **27 条基础 + 34 条 Claim 未复核**：属于范围缺口，不是本次 13+1 的冲突。
 3. **Q21 基础题未复核**：仅有其 Claim Q21#3 已复核；`human-gold.pending.json` 中 Q21 基础仍为 pending。
 4. **Q36 文档口径冲突**：§1“已激活虚拟商品”vs §12“虚拟商品一经售出”；Human Gold 保留 ambiguous 并披露，需业务确认 canonical 口径。
@@ -107,8 +123,8 @@ Q14/Q19 `answerability=ambiguous`；Q23/Q40 题干改写。
 
 - Human Gold v1 的 **数量、ID、状态、来源、证据、版本关系**均一致；
 - 13 条基础 + Q21#3 可作为已确认的人工参照；
-- **不是完整 40 条 Human Gold**，且 key_facts 仍未人工确认；
+- **不是完整 40 条 Human Gold**；13 条 key_facts 已人工确认；
 - 在这些差距关闭前，不应把结果称为“完整 40 条验收”；
 - 未修改任何 Prompt、Agent、Schema、API、DB，未运行 Judge。
 
-**建议下一步**：先补 key_facts / 继续复核 27+34；同时按 Subagent 复核意见设计 v1.1.1；在 v1.1.1 通过二次审核前，不跑 10 条对照。
+**建议下一步**：继续复核 27 条基础 + 34 条 Claim；同时按 Subagent 复核意见设计 v1.1.1；在 v1.1.1 通过二次审核前，不跑 10 条对照。

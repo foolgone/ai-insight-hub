@@ -1,6 +1,7 @@
 # Phase 3E-H · Human Gold key_facts 人工审核工作表
 
-> **性质**：AI 候选，不是 Human Gold。`human_*` 字段全部为空，`review_status=pending_human`。
+> **2026-11-16 复核完成**：45 条候选已逐条判断（38 accept / 3 modify / 4 delete），最终 41 条；结论见 `human-gold-key-facts-decisions.md`，逐条结果见三份表。以下“留空”为材料原貌。
+> **性质（原始）**：AI 候选，不是 Human Gold。`human_*` 字段全部为空，`review_status=pending_human`。
 > **未改** `human-gold.json`、pending 数据、Prompt、Agent、Schema、API、DB；**未运行 Judge**。
 > **来源**：`source/phase3d_doc.md`（SHA-256 `737f6bd3…`）。
 
