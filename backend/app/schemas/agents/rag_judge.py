@@ -32,7 +32,7 @@ RAG_JUDGE_METRIC_VERSION: dict[str, str] = {
 # v1.1.1 起 Faithfulness 分母/字段语义变化，指标版本升 v2；v1/v2 不混算。
 JUDGE_SCHEMA_V1 = "rag_judge_schema_v1"
 JUDGE_SCHEMA_V2 = "rag_judge_schema_v2"
-JUDGE_V2_PROMPT_VERSIONS: frozenset[str] = frozenset({"v1.1.1", "v1.1.2", "v1.1.3"})
+JUDGE_V2_PROMPT_VERSIONS: frozenset[str] = frozenset({"v1.1.1", "v1.1.2", "v1.1.3", "v1.1.4"})
 
 RAG_JUDGE_METRIC_VERSION_V2: dict[str, str] = {
     "faithfulness": "v2",

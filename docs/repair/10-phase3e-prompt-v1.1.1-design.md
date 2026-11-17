@@ -631,3 +631,11 @@ Correctness/Relevancy 输出不变；`RagJudgeInput` 不变（不新增 answerab
 - 40 条规模/回归：Q01–Q27 通过（Q14 F=unavailable，C=0.9 本次 pass、历史 C 0.7/0.7/0.9 方差；Q16 R 已修复；Q23 F=0.5；Q25 C 0.8→0.7 恰好 0.10）；Q28 注册 provisional F 0.8–1.0，F=0.857/重跑 0.875，PASS。
 - **Q30 F=0.25 停止**（Human Gold，v1.0.0 F=1.0；重跑 0.25/0.5/0.5）。Q30 不是 quote 失败：absence 已归 non_factual，但“国内履约前提/默认中国大陆”等范围推断被标 factual/insufficient。完成 30/40。
 - 40 条未完成、未通过；不能称为 40 条 Human Gold 验收。未激活、未进入 Phase 4、未改 Human Gold/DB。
+
+## 14. v1.1.4（design_draft，未激活）
+
+- F = v1.1.3 + Q30 范围/地域推断归 meta/absence、混合句拆分、Q30 few-shot；R/C 继承 v1.1.3。
+- F SHA `576f5719…`；R SHA `394cd30c…`、C SHA `2ab6eac…` 不变；v1.1.4 仍 design_draft/active=false，默认 v1.0.0。
+- Q30 F 3/3：1.0/1.0/1.0，2 scorable（偏远运费、签收起算）+ 5 non_factual；C=0.9、R=0.9；范围/地域推断不再被标 factual。
+- 10 条闸门 v1.1.4：Q01/Q04/Q11 通过；**Q17 F=0.8 停止**（目标 0.9–1.0）。cl5“该规则与是否满 99 元无关”被标 factual/insufficient；v1.0.0/v1.1.3 标 supported，属于规则关系/独立性推断。
+- v1.1.4 未跑 40；v1.1.3 的 10/30 结果全部作废。未激活、未改 Human Gold/DB。

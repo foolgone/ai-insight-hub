@@ -1,0 +1,119 @@
+--- v1.1.3/faithfulness.txt
++++ v1.1.4/faithfulness.txt
+@@ -19,6 +19,7 @@
+ - `non_factual`：问候、共情、纯建议（如“建议联系客服”）、下一步操作建议、纯元信息。
+   - 回答开头的总起/分类引导句（如“能否退款，取决于具体商品类型和签收时间”）属于 meta，不建 `factual_claim`，不进分母；只对具体商品、时限、运费、流程建 claim。
+   - 对文档覆盖范围/章节内容的描述（如“文档详细说明了退款时效、换货、发票……”）属于 meta；对“文档未提及/未涉及/未说明某事项”的陈述属于 absence；两者都不建 `factual_claim`，不进分母，不得标 factual/policy/insufficient。
++  - 文档未明确写的适用范围/地域推断（如“默认适用于中国大陆境内订单”“以国内履约场景为前提”“未定义签收是否包含境外地址”）→ `non_factual/meta` 或 `absence`，不建 factual claim；只有文档明确写出的适用范围才建 factual claim。
+ 
+ `claim_subtype`（诊断标签，必须填写）：
+ - `policy`：政策/规则断言（factual_claim）
+@@ -62,6 +63,7 @@
+ 
+ ## 4. 原子性与顺序
+ - 一条 claim 只表达一个可判定事实；不要合并多条事实。
++- 混合句必须拆分：事实部分建 factual_claim，未定义/范围推断部分建 `non_factual/meta` 或 `absence`；不得整句标 factual/insufficient。
+ - 回答中的引用/转述原文（包括 `>` 引用块、`<kb ...>` 标注前的原文）同样是回答内容；引用中的每个独立事实（时间、条件、动作、主体）都要单独建 claim，不得因为前文已概括而省略。
+   例：引用“大件商品（家具、家电）发货时间为 5 个工作日内，配送前会电话预约。”应拆成“发货时间为 5 个工作日内”和“配送前会电话预约”两条。
+ - 虚拟商品必须拆 §1/§12：即使回答把“已激活的虚拟商品（如充值、会员、课程等，一经售出不支持退款）”写在同一句/同一 bullet，也要拆成两条 claim：
+@@ -570,3 +572,100 @@
+   ],
+   "reason": ""
+ }
++## Few-shot H（Q30：范围/地域推断与混合句拆分）
++上下文 C1（节选）：
++“订单签收后 7 天内可申请无理由退款。……新疆、西藏、内蒙古等偏远地区运费为 20 元，不参与包邮活动。……签收后 7 天内，商品未使用且包装完整可申请换货。……电子产品自签收之日起保修 12 个月。”
++
++回答：
++“文档未说明支持海外配送。运费规则只提到新疆、西藏、内蒙古等偏远地区。发货与物流条款均以国内履约场景为前提。现有条款默认适用于中国大陆境内订单。退款、换货、保修以签收为起算基准。未定义签收是否包含境外地址，亦未说明清关、国际运输、跨境售后。建议查阅官网或联系客服。”
++
++说明：范围/地域推断不建 factual claim；混合句拆成事实部分与 absence/meta；所有 quote 只引 contexts 的最短连续子串，结尾不带标点。
++完整输出：
++{
++  "claims": [
++    {
++      "claim_id": "cl1",
++      "claim": "文档未说明支持海外配送",
++      "claim_type": "non_factual",
++      "claim_subtype": "absence",
++      "support_status": null,
++      "is_contradictory": false,
++      "contradiction_with": [],
++      "evidence_refs": [],
++      "reason": "absence"
++    },
++    {
++      "claim_id": "cl2",
++      "claim": "新疆、西藏、内蒙古等偏远地区运费为 20 元，不参与包邮活动",
++      "claim_type": "factual_claim",
++      "claim_subtype": "policy",
++      "support_status": "supported",
++      "is_contradictory": false,
++      "contradiction_with": [],
++      "evidence_refs": [
++        {"context_id": "C1", "quote": "新疆、西藏、内蒙古等偏远地区运费为 20 元，不参与包邮活动"}
++      ],
++      "reason": "C1 最短连续子串"
++    },
++    {
++      "claim_id": "cl3",
++      "claim": "发货与物流条款均以国内履约场景为前提",
++      "claim_type": "non_factual",
++      "claim_subtype": "meta",
++      "support_status": null,
++      "is_contradictory": false,
++      "contradiction_with": [],
++      "evidence_refs": [],
++      "reason": "文档未明确写出的范围推断"
++    },
++    {
++      "claim_id": "cl4",
++      "claim": "现有条款默认适用于中国大陆境内订单",
++      "claim_type": "non_factual",
++      "claim_subtype": "meta",
++      "support_status": null,
++      "is_contradictory": false,
++      "contradiction_with": [],
++      "evidence_refs": [],
++      "reason": "文档未明确写出的地域推断"
++    },
++    {
++      "claim_id": "cl5",
++      "claim": "退款、换货、保修以签收为起算基准",
++      "claim_type": "factual_claim",
++      "claim_subtype": "policy",
++      "support_status": "supported",
++      "is_contradictory": false,
++      "contradiction_with": [],
++      "evidence_refs": [
++        {"context_id": "C1", "quote": "订单签收后 7 天内可申请无理由退款"},
++        {"context_id": "C1", "quote": "签收后 7 天内，商品未使用且包装完整可申请换货"},
++        {"context_id": "C1", "quote": "电子产品自签收之日起保修 12 个月"}
++      ],
++      "reason": "三条最短连续子串共同支持"
++    },
++    {
++      "claim_id": "cl6",
++      "claim": "未定义签收是否包含境外地址，亦未说明清关、国际运输、跨境售后",
++      "claim_type": "non_factual",
++      "claim_subtype": "absence",
++      "support_status": null,
++      "is_contradictory": false,
++      "contradiction_with": [],
++      "evidence_refs": [],
++      "reason": "absence"
++    },
++    {
++      "claim_id": "cl7",
++      "claim": "建议查阅官网或联系客服",
++      "claim_type": "non_factual",
++      "claim_subtype": "advice",
++      "support_status": null,
++      "is_contradictory": false,
++      "contradiction_with": [],
++      "evidence_refs": [],
++      "reason": "纯建议"
++    }
++  ],
++  "reason": ""
++}
