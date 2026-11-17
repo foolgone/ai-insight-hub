@@ -104,3 +104,15 @@ async def test_repair_prompt_uses_compact_example_without_full_schema() -> None:
     assert '{"answer": "ok"}' in system
     assert '"$defs"' not in system
     assert '"properties"' not in system
+
+
+async def test_default_repair_prompt_includes_schema() -> None:
+    llm = _StubLLM(['{"answer": "fixed"}'])
+
+    result = await parse_with_repair(text="not json", schema=_Answer, llm=llm)
+
+    assert result.answer == "fixed"
+    system = llm.calls[0][0]["content"]
+    assert "JSON Schema" in system
+    assert '"properties"' in system
+    assert '"answer"' in system

@@ -521,6 +521,7 @@ Correctness/Relevancy 输出不变；`RagJudgeInput` 不变（不新增 answerab
 - 重复 `claim_id` 保留首条、跳过后续（只计一次），仍记录 `duplicate_claim_id`；
 - 结构化失败保留首次/修复两次 raw output；null 集合字段宽容化；修复 Prompt 使用紧凑模板 + 完整 JSON 示例；
 - v1.1.1 Faithfulness 输入显式附带 `context_ids=["C1", ...]`（不改变 `RagJudgeInput`），避免模型把文档章节号当 context_id；
+- 共享 `parse_with_repair` 在无 `repair_example` 时回退到 `schema.model_json_schema()`，其它 Agent 修复能力不降级；
 - Q17 单案例修复验证：attempt1/2 schema PASS 但 context_id 写成 C7（章节号）/quote 不命中；显式 `context_ids` 后 schema PASS、F=1.0、5/5 evidence、validation_errors=[]；新 F SHA `4ee65afb…`；
 - 新增单测全部通过；生产 Schema/Service 重跑同一 6 案例 dry-run，结果与设计稿 dry-run 一致（6/6、12/12）。
 
@@ -529,7 +530,7 @@ Correctness/Relevancy 输出不变；`RagJudgeInput` 不变（不新增 answerab
 - 未设置 `RAG_JUDGE_PROMPT_VERSION=v1.1.1`；
 - 回滚：删除该环境变量或设为 `v1.0.0`；v1.1.1 目录保留不会生效；
 - `MANIFEST.active` 仅记录状态，不作为硬门禁；显式选择才加载，默认不选；
-- 10 条真实对比已启动，因 **Q17 v1.1.1 Faithfulness schema failed** 停止（完成 4/10）；未跑 40 条；
-- Q17 单案例修复后已 **schema PASS、F=1.0、5/5 evidence、validation_errors=[]**；10 条尚未重跑；
+- 10 条真实对比第一次因 **Q17 v1.1.1 Faithfulness schema failed** 停止（4/10）；Q17 单案例修复后已 **schema PASS、F=1.0、5/5 evidence、validation_errors=[]**；
+- 10 条重跑（2026-11-17）因 **Q01 Correctness 0.900→0.700（-0.200，无目标解释）** 停止（1/10）；未跑 40 条；
 - Q11 v1.1.1 F=0.833 属于合法 5/6 拆分；Q11 target 已调整为 0.6–0.9；Q36 未运行，disclosure 未验证；
 - 不得把 dry-run PASS 当作 Prompt 质量证据；v1.1.1 仍 `design_draft` / `active=false`。

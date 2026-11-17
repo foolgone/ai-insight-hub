@@ -1001,3 +1001,12 @@ alembic check   : No new upgrade operations detected
 - Q17 三次 smoke token：input 10,616 / output 1,941，估算约 ¥0.044。
 - Q11 目标从 0.6–0.8 调整为 0.6–0.9，明确允许 5/6=0.833。
 - 仍 design_draft/inactive；未重跑 10 条、未跑 40 条。
+
+### 10 条重跑（2026-11-17，stopped）
+- 使用新 F Prompt SHA `4ee65afb…`；同一批 Pilot answer/contexts；v1.0.0 仅复用指纹一致的 Q01/Q04/Q11/Q17，其余重跑。
+- **Q01 v1.1.1 Correctness 0.900→0.700（-0.200）**，Q01 无矩阵目标解释，按“未解释单指标下降 >0.10”立即停止；完成 1/10。
+- Q01 C `missing_points=[]`、`wrong_facts=[]`，reason 为“回答基本正确，但包含了一些不必要的额外信息”；F 1.0→1.0，R 0.8→0.9。
+- 未运行 Q04/Q11/Q17/Q21/Q23/Q29/Q31/Q35/Q36；Q36 disclosure 未验证。
+- 结果：`docs/repair/phase3e/pilot-10-v1.0.0-vs-v1.1.1-rerun.json` / `.md`。
+- 共享 `parse_with_repair` fallback 已补回 `schema.model_json_schema()`，并新增“默认修复 Prompt 含 Schema”测试；不影响 RagJudge 的完整示例路径。
+- 未跑 40 条、未激活；脚本退出前恢复 `RAG_JUDGE_PROMPT_VERSION=v1.0.0`。

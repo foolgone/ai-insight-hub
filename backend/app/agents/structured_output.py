@@ -9,6 +9,7 @@
 """
 from __future__ import annotations
 
+import json
 from collections.abc import Callable
 from typing import TypeVar
 
@@ -21,7 +22,7 @@ TModel = TypeVar("TModel", bound=BaseModel)
 
 _REPAIR_SYSTEM_PROMPT = """你是结构化输出修复器。
 只输出合法 JSON，不要输出解释、Markdown 代码块或多余文本。
-必须保留原输出表达的含义；字段名、层级和类型必须与示例一致。
+必须保留原输出表达的含义；字段名、层级和类型必须与示例/JSON Schema 一致。
 {example}
 """
 
@@ -86,8 +87,9 @@ async def parse_with_repair(
     ``raw_sink`` 用于记录**最终实际用于解析**的原文（可能是修复轮的输出），
     供评测链路保存 Judge 原始响应；不传则行为不变。
 
-    ``repair_example`` 是一条完整合法 JSON 示例；修复 Prompt 不再 dump 完整
-    JSON Schema，避免长 schema + 长原文导致模型输出半截 JSON。
+    ``repair_example`` 是一条完整合法 JSON 示例；提供时修复 Prompt 不再 dump
+    完整 JSON Schema，避免长 schema + 长原文导致模型输出半截 JSON。未提供时
+    fallback 到 ``json.dumps(schema.model_json_schema())``，保持其它 Agent 的修复能力。
     """
     original_output = text
     raw_output = text
@@ -109,7 +111,9 @@ async def parse_with_repair(
             example_block = (
                 f"合法 JSON 示例：\n{repair_example}\n"
                 if repair_example
-                else "参考原始输出中的字段结构，不要新增或遗漏字段。\n"
+                else "参考以下 JSON Schema：\n"
+                + json.dumps(schema.model_json_schema(), ensure_ascii=False)
+                + "\n"
             )
             repair_messages = [
                 {
