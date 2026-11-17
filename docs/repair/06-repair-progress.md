@@ -1017,3 +1017,13 @@ alembic check   : No new upgrade operations detected
 - 新 C Prompt SHA：`2ab6eac2abe57dcfd647df328244ac3e5681fc93222938d6614e71037d49ae77`。
 - Q01 C 单案例：**score=0.9，missing_points=[]，wrong_facts=[]**；reason 为“补充了相关且正确的例外情况”。
 - 未重跑 10 条、未跑 40 条；v1.1.1 仍 design_draft/inactive。
+
+### 10 条重跑第二次（2026-11-17，stopped Q23）
+- 补 Q04/Q17/Q31 目标；Q01 F 放宽 0.9–1.0；使用 F SHA `4ee65afb…`、C SHA `2ab6eac…`。
+- v1.0.0 复用 Q01/Q04/Q11/Q17；完成 Q01/Q04/Q11/Q17/Q21/Q23（6/10）。
+- **Q23 v1.1.1 F=0.0**：唯一尝试 supported 的 cl2 quote 非 C1 逐字子串，Service 记 `quote_not_found` 并降级，0 supported / 4 scorable；低于目标 0.4–0.5，且相对 v1.0.0 0.75 下降 >0.10，按停止条件立即停止。
+- Q23 C=0.0（目标命中）、R=0.9；Q21 F=0.6、C=0.9、R=0.9；Q11 F=0.6、C=0.9、R=0.9；Q01/Q04/Q17 目标命中。
+- 未运行 Q29/Q31/Q35/Q36；Q36 disclosure 未验证。
+- Token（6 条×2 臂）：v1.0.0 input 17,985/output 2,922；v1.1.1 input 43,731/output 4,682；估算 ¥0.2211。
+- 结果：`pilot-10-v1.0.0-vs-v1.1.1-rerun.json` / `.md`。
+- 未跑 40 条、未激活；脚本退出前恢复 v1.0.0。

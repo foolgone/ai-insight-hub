@@ -420,8 +420,17 @@ Correctness/Relevancy 输出不变；`RagJudgeInput` 不变（不新增 answerab
 | Case | 指标 | 目标 | 说明 |
 |---|---|---|---|
 | Q01 | C | 0.9–1.0 | AI draft / provisional；正确且相关的额外例外不扣分 |
-| Q01 | F | 1.0 | 不退化为不必要扣分；5/5 supported 为期望 |
+| Q01 | F | 0.9–1.0 | 允许 claim 拆分差异，不要求 exact 1.0 |
 | Q01 | R | 0.8–1.0 | 不退化 |
+| Q04 | F | 1.0 | AI draft / provisional |
+| Q04 | C | 0.8–1.0 | AI draft / provisional |
+| Q04 | R | 0.9–1.0 | AI draft / provisional |
+| Q17 | F | 0.9–1.0 | AI draft / provisional；已单案例 1.0 |
+| Q17 | C | 0.8–1.0 | AI draft / provisional |
+| Q17 | R | 0.8–1.0 | AI draft / provisional |
+| Q31 | F | 0.6–1.0 | AI draft / provisional；absence 移出分母后允许 0.6–0.75；只有全 non_factual 才 skipped |
+| Q31 | C | 0.8–1.0 | AI draft / provisional |
+| Q31 | R | 0.8–1.0 | AI draft / provisional |
 
 **额外内容扣分边界（Correctness）**：
 
@@ -552,7 +561,8 @@ Correctness/Relevancy 输出不变；`RagJudgeInput` 不变（不新增 answerab
 - 回滚：删除该环境变量或设为 `v1.0.0`；v1.1.1 目录保留不会生效；
 - `MANIFEST.active` 仅记录状态，不作为硬门禁；显式选择才加载，默认不选；
 - 10 条真实对比第一次因 **Q17 v1.1.1 Faithfulness schema failed** 停止（4/10）；Q17 单案例修复后已 **schema PASS、F=1.0、5/5 evidence、validation_errors=[]**；
-- 10 条重跑（2026-11-17）因 **Q01 Correctness 0.900→0.700（-0.200，无目标解释）** 停止（1/10）；Q01 C Prompt 修复后单案例 **C=0.9、missing=[]、wrong_facts=[]**，Q01 target 0.9–1.0；10 条尚未再次重跑；
+- 10 条重跑（2026-11-17）因 **Q01 Correctness 0.900→0.700（-0.200，无目标解释）** 停止（1/10）；Q01 C Prompt 修复后单案例 **C=0.9、missing=[]、wrong_facts=[]**；
+- 补 Q04/Q17/Q31 目标后再次重跑，完成 6/10，因 **Q23 F=0.0（目标 0.4–0.5；cl2 quote 非逐字，降级）** 停止；未跑 Q29/Q31/Q35/Q36；
 - 未跑 40 条；
 - Q11 v1.1.1 F=0.833 属于合法 5/6 拆分；Q11 target 已调整为 0.6–0.9；Q36 未运行，disclosure 未验证；
 - 不得把 dry-run PASS 当作 Prompt 质量证据；v1.1.1 仍 `design_draft` / `active=false`。
