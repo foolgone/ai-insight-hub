@@ -567,6 +567,7 @@ Correctness/Relevancy 输出不变；`RagJudgeInput` 不变（不新增 answerab
 - Q23 F 修复：8 条完整 JSON few-shot + quote 连续复制 + 规范性要求分类；新 F SHA `3519fd3b…`；Q23 F 单案例 **0.5、6/3/1/2/2、3/3 evidence**；
 - 最终 10 条重跑 **10/10 完成**：Q23 接受 7 scorable（3 supported / 1 unsupported / 3 insufficient / 3 non_factual），F=0.428571 在 0.4–0.5；Q29 F skipped(no_scorable_claims)；Q31 F=1.0；Q35 F=0.833333（absence 被归 factual/policy 但为 insufficient，不是 supported）；Q36 F=0.857143、C=0.5、R=0.9，answer 未披露冲突，document_conflict=0，C missing 含冲突披露，wrong_facts=[]；
 - 全部注册目标命中；无 schema failed、无全 invalid；未跑 40 条；
-- 40 条规模运行在 Q10 停止（10/40）：Q10 provisional F 1.0→0.5，cl1 quote 把“30 天内”写成“30 夅内”，`quote_not_found` 降级；未跑 Q11 之后；40 条未完成；
+- 40 条规模运行在 Q10 停止后继续；最终在 Q15 停止（22/40）：Q10 记录为 provisional evidence_typo（“30 夅” vs “30 天”），不停止；Q15 Human Gold F 1.0→0.667，多拆出“电话联系目的”无依据 claim，按未解释 F 下降 >0.10 停止；未跑 Q16 之后；
+- Q36 披露 variant smoke：C=0.9、missing=[]、wrong_facts=[]，目标 0.9–1.0 通过；40 条只含 base answer；
 - Q11 target 已调整为 0.6–0.9；Q36 只验证“披露冲突”，未选 canonical 口径；
 - 不得把 dry-run PASS 当作 Prompt 质量证据；v1.1.1 仍 `design_draft` / `active=false`。

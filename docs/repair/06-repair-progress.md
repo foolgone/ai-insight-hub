@@ -1062,3 +1062,12 @@ alembic check   : No new upgrade operations detected
 - 未运行 Q11 之后案例；未跑 40 条整体验收。
 - Token（10 条×2 臂）：v1.0.0 23,678/2,532；v1.1.1 76,438/3,645；估算 ¥0.2995。
 - 结果：`pilot-40-v1.0.0-vs-v1.1.1.json` / `.md`；未激活、未改 Human Gold/DB。
+
+### 40 条继续（2026-11-17，stopped Q15）
+- Q10 记录为 provisional `evidence_typo`（“30 夅内” vs “30 天内”），保持 F/C SHA；继续运行。
+- 完成 22/40（HG 7/13，provisional 15/27）；Q11/Q17/Q21/Q23/Q29/Q31/Q35/Q36 为 10 条指纹复用。
+- **Q15 Human Gold F 1.0→0.667（-0.333）**：v1.1.1 多拆出 cl3“电话联系的目的是确认收货时间及安排上门事宜”，上下文无依据，标 insufficient；Q15 无显式目标，按未解释 F 下降 >0.10 停止。
+- Q15 C=0.9、R=0.9；wrong_facts=[]；不是 quote typo，是 claim 粒度/推断差异。
+- 未跑 Q16/Q18/Q19/Q20/Q22/Q24–Q28/Q30/Q32–Q34/Q37–Q40。
+- Token（22 条×2 臂）：v1.0.0 59,962/9,087；v1.1.1 172,935/13,207；估算 ¥0.7729。
+- Q36 披露 variant smoke C=0.9 已通过；40 条只含 base answer。
