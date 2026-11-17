@@ -17,6 +17,8 @@
   - “需/必须/应当/应/须提供/流程/材料/凭证”等**规范性要求**属于 factual_claim，即使它是用户需要执行的动作。
   - “需/必须/应当/须保留/材料/凭证”等规范性要求同样属于 factual_claim；无上下文依据时标 `insufficient_evidence`，不得标 advice/non_factual。例：“该时限是硬性要求” → factual/policy；“需保留问题实物及包装证据” → factual/policy/insufficient。
 - `non_factual`：问候、共情、纯建议（如“建议联系客服”）、下一步操作建议、纯元信息。
+  - 回答开头的总起/分类引导句（如“能否退款，取决于具体商品类型和签收时间”）属于 meta，不建 `factual_claim`，不进分母；只对具体商品、时限、运费、流程建 claim。
+  - 对文档覆盖范围/章节内容的描述（如“文档详细说明了退款时效、换货、发票……”）属于 meta；对“文档未提及/未涉及/未说明某事项”的陈述属于 absence；两者都不建 `factual_claim`，不进分母，不得标 factual/policy/insufficient。
 
 `claim_subtype`（诊断标签，必须填写）：
 - `policy`：政策/规则断言（factual_claim）
@@ -54,6 +56,12 @@
 
 ## 4. 原子性与顺序
 - 一条 claim 只表达一个可判定事实；不要合并多条事实。
+- 回答中的引用/转述原文（包括 `>` 引用块、`<kb ...>` 标注前的原文）同样是回答内容；引用中的每个独立事实（时间、条件、动作、主体）都要单独建 claim，不得因为前文已概括而省略。
+  例：引用“大件商品（家具、家电）发货时间为 5 个工作日内，配送前会电话预约。”应拆成“发货时间为 5 个工作日内”和“配送前会电话预约”两条。
+- 虚拟商品必须拆 §1/§12：即使回答把“已激活的虚拟商品（如充值、会员、课程等，一经售出不支持退款）”写在同一句/同一 bullet，也要拆成两条 claim：
+  - §1：已激活的虚拟商品不支持无理由退款；
+  - §12：虚拟商品（充值、会员、课程）一经售出不支持退款；
+  两条 claim 各引对应单句，不得合并 quote。
 - 先输出结论 claim（回答用户问题的那一句/几句），再按出现顺序输出其余 claim。
 - `claim_id` 使用 `cl1..cln`；context_id 使用 `C1..Cn`，两者不得混用。
 - 不评价语气、格式、长度；不输出总分。
@@ -207,6 +215,8 @@
 “文档未说明运输/送达需要多久，无法确认到货时间。建议查看物流轨迹或联系客服。”
 输出要点：
 - “文档未说明运输/送达需要多久” → non_factual / absence（absence 不是 policy claim；无肯定 evidence；不进分母）
+- “文档详细说明了退款时效、换货、发票……” → non_factual / meta（文档覆盖范围描述，不是政策事实）
+- “在所有章节中均未涉及支付方式” → non_factual / absence（未提及本身是 absence，不得标 factual/policy/insufficient）
 - “无法确认到货时间” → non_factual / meta
 - “建议查看物流轨迹/联系客服” → non_factual / advice
 - 全部 non_factual → reason=no_scorable_claims，由代码 skipped。
@@ -347,8 +357,8 @@
 虚拟商品（充值、会员、课程）一经售出不支持退款。
 定制商品支持质量问题退换，不支持无理由退换。”
 回答（base，无披露）：
-“普通商品 7 天内可退；定制/生鲜/已激活虚拟不支持；生鲜质量问题 24 小时内；虚拟商品按 §12 退不了；定制商品支持质量问题退换。”
-说明：base 只输出 cl1–cl7（7/7 supported），不要输出 cl8；只有回答明确披露 §1/§12 冲突时才输出 cl8（variant，8/8）。所有 quote 只引单句连续原文；cl5/cl6 必须拆开，不能把 §1 与 §12 合并。
+“能否退款，取决于具体商品类型和签收时间：普通商品 7 天内可退；定制/生鲜/已激活虚拟不支持；生鲜质量问题 24 小时内；虚拟商品按 §12 退不了；定制商品支持质量问题退换。”
+说明：开头的“能否退款，取决于具体商品类型和签收时间”是 meta 总起句，**不建 claim**；base 只输出 cl1–cl7（7/7 supported），不要输出 cl8；只有回答明确披露 §1/§12 冲突时才输出 cl8（variant，8/8）。所有 quote 只引单句连续原文；cl5/cl6 必须拆开，不能把 §1 与 §12 合并。即使回答把“已激活的虚拟商品（如充值、会员、课程等，一经售出不支持退款）”写在同一 bullet，也要拆成 §1 已激活 与 §12 一经售出 两条 claim。
 完整输出（base 去掉 cl8；cl8 仅 variant）：
 {
   "claims": [
@@ -456,6 +466,99 @@
         {"context_id": "C1", "quote": "虚拟商品（充值、会员、课程）一经售出不支持退款。"}
       ],
       "reason": "仅回答披露冲突时输出；两条单句 refs，不拼接"
+    }
+  ],
+  "reason": ""
+}
+## Few-shot G（Q21：结论 + 时效 + 范围/质量推断，5 scorable）
+上下文 C1（节选）：
+“订单签收后 7 天内可申请无理由退款。……定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。……电子产品自签收之日起保修 12 个月……”
+
+回答：
+“不可以。无理由退款仅限订单签收后 7 天内申请。签收第 10 天已超出该时效窗口（7 天），因此不支持无理由退款。该限制适用于普通商品（即非定制、非生鲜、非已激活虚拟商品）。若商品存在质量问题，则不受 7 天无理由限制，仍可依据保修或退换货政策主张权益。建议联系客服核实。”
+
+输出要点：
+- cl1“不可以无理由退款” → factual/policy/supported（7 天规则 + 第 10 天）
+- cl2“无理由退款仅限订单签收后 7 天内申请” → factual/policy/supported
+- cl3“签收第 10 天已超出 7 天” → factual/policy/supported
+- cl4“该限制适用于普通商品（即非定制、非生鲜、非已激活虚拟商品）” → factual/policy/**insufficient_evidence**（上下文只列排除项，未明确写“普通商品”）
+- cl5“质量问题不受 7 天无理由限制，仍可依据保修或退换货政策主张权益” → factual/policy/**insufficient_evidence**（上下文未规定普通商品质量问题期限；保修仅电子产品）
+- cl6“建议联系客服核实” → non_factual/advice
+
+完整输出：
+{
+  "claims": [
+    {
+      "claim_id": "cl1",
+      "claim": "不可以无理由退款",
+      "claim_type": "factual_claim",
+      "claim_subtype": "policy",
+      "support_status": "supported",
+      "is_contradictory": false,
+      "contradiction_with": [],
+      "evidence_refs": [
+        {"context_id": "C1", "quote": "订单签收后 7 天内可申请无理由退款。"}
+      ],
+      "reason": "7 天规则 + 第 10 天"
+    },
+    {
+      "claim_id": "cl2",
+      "claim": "无理由退款仅限订单签收后 7 天内申请",
+      "claim_type": "factual_claim",
+      "claim_subtype": "policy",
+      "support_status": "supported",
+      "is_contradictory": false,
+      "contradiction_with": [],
+      "evidence_refs": [
+        {"context_id": "C1", "quote": "订单签收后 7 天内可申请无理由退款。"}
+      ],
+      "reason": "C1 单句原文"
+    },
+    {
+      "claim_id": "cl3",
+      "claim": "签收第 10 天已超出该时效窗口（7 天）",
+      "claim_type": "factual_claim",
+      "claim_subtype": "policy",
+      "support_status": "supported",
+      "is_contradictory": false,
+      "contradiction_with": [],
+      "evidence_refs": [
+        {"context_id": "C1", "quote": "订单签收后 7 天内可申请无理由退款。"}
+      ],
+      "reason": "10 > 7"
+    },
+    {
+      "claim_id": "cl4",
+      "claim": "该限制适用于普通商品（即非定制、非生鲜、非已激活虚拟商品）",
+      "claim_type": "factual_claim",
+      "claim_subtype": "policy",
+      "support_status": "insufficient_evidence",
+      "is_contradictory": false,
+      "contradiction_with": [],
+      "evidence_refs": [],
+      "reason": "上下文只列排除项，未明确写普通商品"
+    },
+    {
+      "claim_id": "cl5",
+      "claim": "若商品存在质量问题，则不受 7 天无理由限制，仍可依据保修或退换货政策主张权益",
+      "claim_type": "factual_claim",
+      "claim_subtype": "policy",
+      "support_status": "insufficient_evidence",
+      "is_contradictory": false,
+      "contradiction_with": [],
+      "evidence_refs": [],
+      "reason": "上下文未规定普通商品质量问题期限；保修仅电子产品"
+    },
+    {
+      "claim_id": "cl6",
+      "claim": "建议联系客服核实",
+      "claim_type": "non_factual",
+      "claim_subtype": "advice",
+      "support_status": null,
+      "is_contradictory": false,
+      "contradiction_with": [],
+      "evidence_refs": [],
+      "reason": "纯建议"
     }
   ],
   "reason": ""

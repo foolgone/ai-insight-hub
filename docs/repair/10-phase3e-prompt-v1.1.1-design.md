@@ -606,3 +606,14 @@ Correctness/Relevancy 输出不变；`RagJudgeInput` 不变（不新增 answerab
 - Q36 未通过严格门；未重跑 10 条闸门，旧 10 条结果不可复用；Q10/Q15/Q20 未跑，40 条未启动。
 - Token：input 7,384 / output 1,146；估算 ¥0.0287。
 - v1.1.2 仍 design_draft/inactive；未激活、未改 Human Gold/DB。
+
+### 12.3 v1.1.2 精修后 10 条闸门与 40 条启动（2026-11-17）
+
+- 追加规则：总起/分类引导句归 non_factual/meta；文档范围描述归 meta；文档未提及/未涉及归 absence；引用原文逐事实拆分；Q21 5 scorable few-shot；虚拟商品 §1/§12 拆分。
+- 最终 F SHA：`e95f04b556dd1a86e7abfbdd5dad75d3b834628490cdf460adb608dd02713b30`；C/R SHA 不变。
+- Q36：F=1.0，7 scorable 全 supported，evidence 7/7，`validation_errors=[]`，`document_conflict=0`。
+- Q29：F=`skipped(no_scorable_claims)`；Q15 F=0.667；Q10 F=1.0；Q20 F=0.8；Q21 F=0.6（Q21#3 insufficient）；Q22 F=1.0。
+- **10 条闸门：10/10 通过**（Q01/Q04/Q11/Q17/Q21/Q23/Q29/Q31/Q35/Q36）；Q31 仍有 5 条 quote_not_found，provisional 目标命中，记录为已知诊断。
+- 10 条 Token：v1.0.0 32,612/6,252；v1.1.2 124,502/9,279；估算 ¥0.5262。
+- 40 条规模/回归：14/40 停在 **Q14 C=0.7（目标 0.8–1.0）**；Q14 F=`skipped(context_unavailable)`，F 未评估；C 重跑 3 次为 0.7/0.7/0.9，C Prompt 未变，属于 C Judge 方差。
+- 40 条未完成、未通过；不能称为 40 条 Human Gold 验收。v1.1.2 仍 design_draft/inactive；未激活、未改 Human Gold/DB。

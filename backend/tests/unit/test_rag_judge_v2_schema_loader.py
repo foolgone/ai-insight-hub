@@ -418,3 +418,11 @@ def test_v112_faithfulness_prompt_has_single_line_quote_and_q22() -> None:
     assert "Few-shot F（Q36" in text
     assert "§1 与 §12" in text
     assert "虚拟商品（充值、会员、课程）一经售出不支持退款。" in text
+    assert "总起/分类引导句" in text
+    assert "虚拟商品必须拆 §1/§12" in text
+    assert "文档覆盖范围/章节内容的描述" in text
+    assert "未涉及/未说明" in text
+    assert "回答中的引用/转述原文" in text
+    assert "发货时间为 5 个工作日内" in text
+    assert "Few-shot G（Q21" in text
+    assert "该限制适用于普通商品" in text

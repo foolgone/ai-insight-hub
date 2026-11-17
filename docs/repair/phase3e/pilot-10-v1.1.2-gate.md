@@ -2,7 +2,7 @@
 
 > v1.1.2 F SHA 3db91171…；Q22 单案例已通过；本闸门 Q36 未通过，未启动 40 条。
 >
-> **历史结果，已失效**：Q36 canonical few-shot 后 F SHA 已变为 `81456bc5…`；本报告的 9/10 不可复用。新 Q36 F 单案例见 `q36-v1.1.2-faithfulness-smoke.md`（F=0.875，但 evidence 严格门未通过）。
+> **历史结果，已失效**：Q36 canonical few-shot 后 F SHA 已变为 `81456bc5…`，后续又精修到 `e95f04b5…`；本报告的 9/10 不可复用。最终 10 条闸门见 `pilot-10-v1.1.2-gate-final2.md`（10/10 通过）。
 
 ## 执行状态
 

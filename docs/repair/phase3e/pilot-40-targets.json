@@ -5,7 +5,7 @@
     "note": "40 条规模/回归运行，不是 40 条 Human Gold 验收；Q22 目标为 v1.1.2 注册。",
     "human_gold_count": 13,
     "provisional_count": 27,
-    "f_sha": "81456bc56b6829e5029698a16054bde3dc2e55af4379194f85fd3974ef167fe8",
+    "f_sha": "e95f04b556dd1a86e7abfbdd5dad75d3b834628490cdf460adb608dd02713b30",
     "c_sha": "2ab6eac2abe57dcfd647df328244ac3e5681fc93222938d6614e71037d49ae77",
     "r_sha": "0f8576b7dbf2e7ea1a02752680b0afe8c66677fe2eda823f4bcd28371ae4da84",
     "q36_disclosure_variant": "docs/repair/phase3e/q36-disclosure-variant-smoke.json",
