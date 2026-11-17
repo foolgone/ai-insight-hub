@@ -615,5 +615,6 @@ Correctness/Relevancy 输出不变；`RagJudgeInput` 不变（不新增 answerab
 - Q29：F=`skipped(no_scorable_claims)`；Q15 F=0.667；Q10 F=1.0；Q20 F=0.8；Q21 F=0.6（Q21#3 insufficient）；Q22 F=1.0。
 - **10 条闸门：10/10 通过**（Q01/Q04/Q11/Q17/Q21/Q23/Q29/Q31/Q35/Q36）；Q31 仍有 5 条 quote_not_found，provisional 目标命中，记录为已知诊断。
 - 10 条 Token：v1.0.0 32,612/6,252；v1.1.2 124,502/9,279；估算 ¥0.5262。
-- 40 条规模/回归：14/40 停在 **Q14 C=0.7（目标 0.8–1.0）**；Q14 F=`skipped(context_unavailable)`，F 未评估；C 重跑 3 次为 0.7/0.7/0.9，C Prompt 未变，属于 C Judge 方差。
+- 40 条规模/回归：Q01–Q13 通过；Q14 记为 **known Human Gold C miss**：F=`skipped(context_unavailable)`（unavailable，不是 PASS），C=0.7（目标 0.8–1.0），missing `未开具前可以修改`，C 重跑 3 次 0.7/0.7/0.9，多数 0.7；不移动目标、不改 C Prompt。
+- 40 条继续：Q15 通过；**Q16 R=0.7 停止**（v1.0.0 R=1.0，下降 0.30 >0.10）；R 重跑 3 次均 0.7，R Prompt SHA 未变；回答与金标一致，R 裁判额外要求“具体核查步骤”，金标未要求。完成 16/40。
 - 40 条未完成、未通过；不能称为 40 条 Human Gold 验收。v1.1.2 仍 design_draft/inactive；未激活、未改 Human Gold/DB。
