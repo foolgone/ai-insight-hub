@@ -38,10 +38,13 @@
       "Q10"
     ],
     "stop_rule": "Q10 evidence_typo allowed; second provisional typo or HG evidence downgrade stops",
-    "continued_from_cases": 22,
+    "continued_from_cases": 26,
     "q15_target_registered": true,
     "q14_f_unavailable": true,
-    "q20_stop": "provisional F 1.0->0.8; extra claim cl5 no context"
+    "q20_stop": "provisional F 1.0->0.8; extra claim cl5 no context",
+    "q20_target_registered": true,
+    "q20_generalization_insufficient": true,
+    "q22_stop": "HG supported claims cl1/cl4 quote_not_found; F 1.0->0.4"
   },
   "cases": [
     {
@@ -10646,7 +10649,20 @@
       "human_gold": false,
       "provisional": true,
       "group": "provisional",
-      "target": {},
+      "target": {
+        "F": [
+          0.6,
+          1.0
+        ],
+        "C": [
+          0.8,
+          1.0
+        ],
+        "R": [
+          0.8,
+          1.0
+        ]
+      },
       "answer": "根据《售后服务政策（Phase 3E 验证文档 v2）》：\n\n- **获得方式**：消费 1 元积 1 分   \n- **抵扣规则**：100 积分可抵扣 1 元   \n- **有效期**：积分自获得之日起 12 个月内有效，逾期自动清零   \n- **其他限制**：积分不可转让、不可提现，仅限本账户使用 \n\n注：该政策适用于所有符合积分累积条件的订单，不区分商品类型（生鲜、虚拟、定制等特殊商品未在积分条款中被排除）。",
       "contexts": [
         {
@@ -11079,23 +11095,435 @@
           ]
         }
       },
-      "result_note": "provisional F 1.0->0.8; cl5 'policy applies to all eligible orders' has no context; stop unexplained >0.10"
+      "result_note": "generalization_insufficient; cl5 broad policy claim; F=0.8 in 0.6-1.0; wrong_facts=[]",
+      "generalization_insufficient": true
+    },
+    {
+      "id": "Q22",
+      "category": "constraint",
+      "question": "订单实付 89 元寄往新疆，运费多少？",
+      "gold_answer": "20 元。新疆属于偏远地区，运费 20 元且不参与包邮。",
+      "gold_source": "docs/repair/phase3e/human-gold.json",
+      "gold_status": "human_reviewed",
+      "human_gold": true,
+      "provisional": false,
+      "group": "human_gold",
+      "target": {},
+      "answer": "订单实付 89 元寄往新疆，运费为 **20 元**。\n\n依据：  \n- 运费规则明确指出：“单笔订单实付满 99 元包邮；未满 99 元收取 10 元运费。**新疆、西藏、内蒙古等偏远地区运费为 20 元，不参与包邮活动**”<kb doc=\"phase3d_doc.md\" chunk_id=\"cdf680b6-0280-44fd-8003-73901ac3e13e\" kb_id=\"4ae8e147-6f76-4330-93f1-d2b3fef3d9ba\" />。  \n- 本订单实付 89 元 < 99 元，且收货地为新疆（属明确列出的偏远地区），因此不享受包邮，直接适用偏远地区运费标准：**20 元**。\n\n注：该运费规则无例外说明，且未提及促销或会员等级可豁免此标准，故按条款严格执行。",
+      "contexts": [
+        {
+          "document_id": "4ee02c53-d4d1-4364-8a24-30a614ead1f8",
+          "chunk_id": "cdf680b6-0280-44fd-8003-73901ac3e13e",
+          "title": "phase3d_doc.md",
+          "content": "## 6. 物流查询\n\n订单发货后可在「我的订单」查看物流单号与实时轨迹。\n物流信息超过 24 小时未更新时，可联系客服协助核查。\n\n## 7. 运费规则\n\n单笔订单实付满 99 元包邮；未满 99 元收取 10 元运费。\n新疆、西藏、内蒙古等偏远地区运费为 20 元，不参与包邮活动。\n因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。\n\n## 8. 保修政策\n\n电子产品自签收之日起保修 12 个月，配件保修 3 个月。\n人为损坏、进水、私自拆修不在保修范围内。\n保修期内维修免费；保修期外维修需收取材料费和人工费。\n\n## 9. 优惠券规则\n\n优惠券自领取之日起 30 天内有效，逾期自动失效。\n同一订单只能使用一张优惠券，不能与会员折扣叠加。\n退款时优惠券若仍在有效期内会退回账户，已过期则不退回。\n\n## 10. 会员积分\n\n消费 1 元积 1 分，100 积分可抵扣 1 元。\n积分自获得之日起 12 个月内有效，逾期清零。\n积分不可转让、不可提现，仅限本账户使用。\n\n## 11. 客服时间",
+          "score": 0.5829356364436784,
+          "rank": 1,
+          "metadata": {
+            "knowledge_base_id": "4ae8e147-6f76-4330-93f1-d2b3fef3d9ba",
+            "chunk_index": 1,
+            "chunk_type": "text",
+            "truncated": false
+          }
+        }
+      ],
+      "context_source": "agent_chat",
+      "model_config": {
+        "agent_id": "2c74bf39-bc41-4bf0-a64a-4a1f24721a46"
+      },
+      "answer_context_count": 1,
+      "arms": {
+        "v1.0.0": {
+          "arm": "v1.0.0",
+          "reused": false,
+          "wall_latency_ms": 5938,
+          "outcomes": [
+            {
+              "metric": "faithfulness",
+              "status": "evaluated",
+              "score": 1.0,
+              "skipped_reason": null,
+              "latency_ms": 3489,
+              "error": null,
+              "judge_config": {
+                "agent": "rag_judge_faithfulness",
+                "model": "qwen-max",
+                "temperature": 0.0,
+                "max_tokens": 8192,
+                "prompt_version": "v1.0.0",
+                "resolved_prompt_version": "v1.0.0",
+                "prompt_sha256": "287053e9e67ad29fd2de597d1052b8d418040097910462e4a0f176b14295bfed",
+                "schema_version": "rag_judge_schema_v1",
+                "rubric_version": "v1.0.0",
+                "metric_version": "v1"
+              },
+              "token_usage": {
+                "input": 952,
+                "output": 139
+              },
+              "cost": "0",
+              "details": {
+                "claims": [
+                  {
+                    "claim": "订单实付 89 元寄往新疆，运费为 20 元。",
+                    "supported": true,
+                    "evidence": [
+                      "单笔订单实付满 99 元包邮；未满 99 元收取 10 元运费。",
+                      "新疆、西藏、内蒙古等偏远地区运费为 20 元，不参与包邮活动。"
+                    ],
+                    "reason": "上下文明确指出新疆属于偏远地区，且订单实付金额未满 99 元时运费为 20 元。",
+                    "claim_id": null,
+                    "claim_type": "factual_claim",
+                    "claim_subtype": null,
+                    "support_status": null,
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": []
+                  }
+                ],
+                "supported_count": 1,
+                "claim_count": 1,
+                "reason": ""
+              },
+              "raw_output": "{\n  \"claims\": [\n    {\"claim\": \"订单实付 89 元寄往新疆，运费为 20 元。\", \"supported\": true, \"evidence\": [\"单笔订单实付满 99 元包邮；未满 99 元收取 10 元运费。\", \"新疆、西藏、内蒙古等偏远地区运费为 20 元，不参与包邮活动。\"], \"reason\": \"上下文明确指出新疆属于偏远地区，且订单实付金额未满 99 元时运费为 20 元。\"}\n  ],\n  \"reason\": \"\"\n}",
+              "raw_truncated": false
+            },
+            {
+              "metric": "answer_correctness",
+              "status": "evaluated",
+              "score": 1.0,
+              "skipped_reason": null,
+              "latency_ms": 1336,
+              "error": null,
+              "judge_config": {
+                "agent": "rag_judge_answer_correctness",
+                "model": "qwen-max",
+                "temperature": 0.0,
+                "max_tokens": 8192,
+                "prompt_version": "v1.0.0",
+                "resolved_prompt_version": "v1.0.0",
+                "prompt_sha256": "106e11f2bc39806da5ecf090c6dbcd94d81ca5f53b968e5055d5a33833b30f94",
+                "schema_version": "rag_judge_schema_v1",
+                "rubric_version": "v1.0.0",
+                "metric_version": "v1"
+              },
+              "token_usage": {
+                "input": 628,
+                "output": 40
+              },
+              "cost": "0",
+              "details": {
+                "missing_points": [],
+                "wrong_facts": [],
+                "reason": "回答完全正确且完整，涵盖了关键事实。"
+              },
+              "raw_output": "{\n  \"score\": 1.0,\n  \"missing_points\": [],\n  \"wrong_facts\": [],\n  \"reason\": \"回答完全正确且完整，涵盖了关键事实。\"\n}",
+              "raw_truncated": false
+            },
+            {
+              "metric": "answer_relevancy",
+              "status": "evaluated",
+              "score": 1.0,
+              "skipped_reason": null,
+              "latency_ms": 1101,
+              "error": null,
+              "judge_config": {
+                "agent": "rag_judge_answer_relevancy",
+                "model": "qwen-max",
+                "temperature": 0.0,
+                "max_tokens": 8192,
+                "prompt_version": "v1.0.0",
+                "resolved_prompt_version": "v1.0.0",
+                "prompt_sha256": "27203126964ae0ca8f0bb8641cb3c2b145605cec706ef47c5432a0bbd6fad141",
+                "schema_version": "rag_judge_schema_v1",
+                "rubric_version": "v1.0.0",
+                "metric_version": "v1"
+              },
+              "token_usage": {
+                "input": 510,
+                "output": 29
+              },
+              "cost": "0",
+              "details": {
+                "reason": "直接、完整地回答了运费问题，并提供了详细的依据"
+              },
+              "raw_output": "{\n  \"score\": 1.0,\n  \"reason\": \"直接、完整地回答了运费问题，并提供了详细的依据\"\n}",
+              "raw_truncated": false
+            }
+          ]
+        },
+        "v1.1.1": {
+          "arm": "v1.1.1",
+          "reused": false,
+          "wall_latency_ms": 21289,
+          "outcomes": [
+            {
+              "metric": "faithfulness",
+              "status": "evaluated",
+              "score": 0.4,
+              "skipped_reason": null,
+              "latency_ms": 17237,
+              "error": null,
+              "judge_config": {
+                "agent": "rag_judge_faithfulness",
+                "model": "qwen-max",
+                "temperature": 0.0,
+                "max_tokens": 8192,
+                "prompt_version": "v1.1.1",
+                "resolved_prompt_version": "v1.1.1",
+                "prompt_sha256": "3519fd3b1bbbab9b117abd04f69304609146c2d2a05c39699483dea1740eda19",
+                "schema_version": "rag_judge_schema_v2",
+                "rubric_version": "v1.1.1",
+                "metric_version": "v2"
+              },
+              "token_usage": {
+                "input": 4047,
+                "output": 778
+              },
+              "cost": "0",
+              "details": {
+                "claims": [
+                  {
+                    "claim": "订单实付 89 元寄往新疆，运费为 20 元。",
+                    "supported": null,
+                    "evidence": [],
+                    "reason": "C1 原文",
+                    "claim_id": "cl1",
+                    "claim_type": "factual_claim",
+                    "claim_subtype": "policy",
+                    "support_status": "insufficient_evidence",
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": [
+                      {
+                        "context_id": "C1",
+                        "quote": "单笔订单实付满 99 元包邮；未满 99 元收取 10 元运费。新疆、西藏、内蒙古等偏远地区运费为 20 元，不参与包邮活动。"
+                      }
+                    ]
+                  },
+                  {
+                    "claim": "单笔订单实付满 99 元包邮；未满 99 元收取 10 元运费。",
+                    "supported": null,
+                    "evidence": [],
+                    "reason": "C1 原文",
+                    "claim_id": "cl2",
+                    "claim_type": "factual_claim",
+                    "claim_subtype": "policy",
+                    "support_status": "supported",
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": [
+                      {
+                        "context_id": "C1",
+                        "quote": "单笔订单实付满 99 元包邮；未满 99 元收取 10 元运费。"
+                      }
+                    ]
+                  },
+                  {
+                    "claim": "新疆、西藏、内蒙古等偏远地区运费为 20 元，不参与包邮活动。",
+                    "supported": null,
+                    "evidence": [],
+                    "reason": "C1 原文",
+                    "claim_id": "cl3",
+                    "claim_type": "factual_claim",
+                    "claim_subtype": "policy",
+                    "support_status": "supported",
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": [
+                      {
+                        "context_id": "C1",
+                        "quote": "新疆、西藏、内蒙古等偏远地区运费为 20 元，不参与包邮活动。"
+                      }
+                    ]
+                  },
+                  {
+                    "claim": "本订单实付 89 元 < 99 元，且收货地为新疆（属明确列出的偏远地区），因此不享受包邮，直接适用偏远地区运费标准：20 元。",
+                    "supported": null,
+                    "evidence": [],
+                    "reason": "C1 原文",
+                    "claim_id": "cl4",
+                    "claim_type": "factual_claim",
+                    "claim_subtype": "policy",
+                    "support_status": "insufficient_evidence",
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": [
+                      {
+                        "context_id": "C1",
+                        "quote": "单笔订单实付满 99 元包邮；未满 99 元收取 10 元运费。新疆、西藏、内蒙古等偏远地区运费为 20 元，不参与包邮活动。"
+                      }
+                    ]
+                  },
+                  {
+                    "claim": "该运费规则无例外说明，且未提及促销或会员等级可豁免此标准，故按条款严格执行。",
+                    "supported": null,
+                    "evidence": [],
+                    "reason": "上下文未提及例外情况",
+                    "claim_id": "cl5",
+                    "claim_type": "factual_claim",
+                    "claim_subtype": "policy",
+                    "support_status": "insufficient_evidence",
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": []
+                  }
+                ],
+                "reason": "",
+                "claim_count": 5,
+                "scorable_claim_count": 5,
+                "supported_count": 2,
+                "supported_claim_count": 2,
+                "unsupported_claim_count": 0,
+                "insufficient_evidence_count": 3,
+                "non_factual_count": 0,
+                "absence_count": 0,
+                "document_conflict": false,
+                "document_conflict_count": 0,
+                "contradiction_count": 0,
+                "insufficient_evidence_rate": 0.6,
+                "all_insufficient": false,
+                "evidence_validation": [
+                  {
+                    "claim_id": "cl1",
+                    "context_id": "C1",
+                    "quote": "单笔订单实付满 99 元包邮；未满 99 元收取 10 元运费。新疆、西藏、内蒙古等偏远地区运费为 20 元，不参与包邮活动。",
+                    "ok": false,
+                    "error": "quote_not_found"
+                  },
+                  {
+                    "claim_id": "cl2",
+                    "context_id": "C1",
+                    "quote": "单笔订单实付满 99 元包邮；未满 99 元收取 10 元运费。",
+                    "ok": true,
+                    "error": null
+                  },
+                  {
+                    "claim_id": "cl3",
+                    "context_id": "C1",
+                    "quote": "新疆、西藏、内蒙古等偏远地区运费为 20 元，不参与包邮活动。",
+                    "ok": true,
+                    "error": null
+                  },
+                  {
+                    "claim_id": "cl4",
+                    "context_id": "C1",
+                    "quote": "单笔订单实付满 99 元包邮；未满 99 元收取 10 元运费。新疆、西藏、内蒙古等偏远地区运费为 20 元，不参与包邮活动。",
+                    "ok": false,
+                    "error": "quote_not_found"
+                  }
+                ],
+                "evidence_validation_failed": true,
+                "validation_errors": [
+                  {
+                    "claim_id": "cl1",
+                    "code": "quote_not_found",
+                    "message": "evidence quote is not a verbatim substring",
+                    "context_id": "C1"
+                  },
+                  {
+                    "claim_id": "cl1",
+                    "code": "evidence_validation_failed",
+                    "message": "supported claim has invalid evidence; downgraded"
+                  },
+                  {
+                    "claim_id": "cl4",
+                    "code": "quote_not_found",
+                    "message": "evidence quote is not a verbatim substring",
+                    "context_id": "C1"
+                  },
+                  {
+                    "claim_id": "cl4",
+                    "code": "evidence_validation_failed",
+                    "message": "supported claim has invalid evidence; downgraded"
+                  }
+                ]
+              },
+              "raw_output": "{\n  \"claims\": [\n    {\n      \"claim_id\": \"cl1\",\n      \"claim\": \"订单实付 89 元寄往新疆，运费为 20 元。\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"单笔订单实付满 99 元包邮；未满 99 元收取 10 元运费。新疆、西藏、内蒙古等偏远地区运费为 20 元，不参与包邮活动。\"}\n      ],\n      \"reason\": \"C1 原文\"\n    },\n    {\n      \"claim_id\": \"cl2\",\n      \"claim\": \"单笔订单实付满 99 元包邮；未满 99 元收取 10 元运费。\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"单笔订单实付满 99 元包邮；未满 99 元收取 10 元运费。\"}\n      ],\n      \"reason\": \"C1 原文\"\n    },\n    {\n      \"claim_id\": \"cl3\",\n      \"claim\": \"新疆、西藏、内蒙古等偏远地区运费为 20 元，不参与包邮活动。\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"新疆、西藏、内蒙古等偏远地区运费为 20 元，不参与包邮活动。\"}\n      ],\n      \"reason\": \"C1 原文\"\n    },\n    {\n      \"claim_id\": \"cl4\",\n      \"claim\": \"本订单实付 89 元 < 99 元，且收货地为新疆（属明确列出的偏远地区），因此不享受包邮，直接适用偏远地区运费标准：20 元。\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"单笔订单实付满 99 元包邮；未满 99 元收取 10 元运费。新疆、西藏、内蒙古等偏远地区运费为 20 元，不参与包邮活动。\"}\n      ],\n      \"reason\": \"C1 原文\"\n    },\n    {\n      \"claim_id\": \"cl5\",\n      \"claim\": \"该运费规则无例外说明，且未提及促销或会员等级可豁免此标准，故按条款严格执行。\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"insufficient_evidence\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [],\n      \"reason\": \"上下文未提及例外情况\"\n    }\n  ],\n  \"reason\": \"\"\n}",
+              "raw_truncated": false
+            },
+            {
+              "metric": "answer_correctness",
+              "status": "evaluated",
+              "score": 0.9,
+              "skipped_reason": null,
+              "latency_ms": 2119,
+              "error": null,
+              "judge_config": {
+                "agent": "rag_judge_answer_correctness",
+                "model": "qwen-max",
+                "temperature": 0.0,
+                "max_tokens": 8192,
+                "prompt_version": "v1.1.1",
+                "resolved_prompt_version": "v1.1.1",
+                "prompt_sha256": "2ab6eac2abe57dcfd647df328244ac3e5681fc93222938d6614e71037d49ae77",
+                "schema_version": "rag_judge_schema_v2",
+                "rubric_version": "v1.1.1",
+                "metric_version": "v2"
+              },
+              "token_usage": {
+                "input": 2028,
+                "output": 50
+              },
+              "cost": "0",
+              "details": {
+                "missing_points": [],
+                "wrong_facts": [],
+                "reason": "回答关键事实、条件与金标一致，且补充了相关运费规则的详细说明。"
+              },
+              "raw_output": "{\n  \"score\": 0.9,\n  \"missing_points\": [],\n  \"wrong_facts\": [],\n  \"reason\": \"回答关键事实、条件与金标一致，且补充了相关运费规则的详细说明。\"\n}",
+              "raw_truncated": false
+            },
+            {
+              "metric": "answer_relevancy",
+              "status": "evaluated",
+              "score": 1.0,
+              "skipped_reason": null,
+              "latency_ms": 1931,
+              "error": null,
+              "judge_config": {
+                "agent": "rag_judge_answer_relevancy",
+                "model": "qwen-max",
+                "temperature": 0.0,
+                "max_tokens": 8192,
+                "prompt_version": "v1.1.1",
+                "resolved_prompt_version": "v1.1.1",
+                "prompt_sha256": "0f8576b7dbf2e7ea1a02752680b0afe8c66677fe2eda823f4bcd28371ae4da84",
+                "schema_version": "rag_judge_schema_v2",
+                "rubric_version": "v1.1.1",
+                "metric_version": "v2"
+              },
+              "token_usage": {
+                "input": 1287,
+                "output": 42
+              },
+              "cost": "0",
+              "details": {
+                "reason": "完整回应了问题，明确说明了运费金额，并结合了订单实付金额和收货地条件进行解释。"
+              },
+              "raw_output": "{\n  \"score\": 1.0,\n  \"reason\": \"完整回应了问题，明确说明了运费金额，并结合了订单实付金额和收货地条件进行解释。\"\n}",
+              "raw_truncated": false
+            }
+          ]
+        }
+      },
+      "result_note": "Human Gold F 1.0->0.4; cl1/cl4 supported quotes not verbatim; evidence downgrade; stop"
     }
   ],
   "status": "stopped",
   "stop_reasons": [
-    "Q20/faithfulness: dropped 1.000->0.800 >0.10"
+    "Q22/faithfulness: dropped 1.000->0.400 >0.10",
+    "Q22: Human Gold supported claim downgraded by evidence"
   ],
   "totals": {
     "v1.0.0": {
-      "input_tokens": 69497,
-      "output_tokens": 10627,
-      "estimated_cost_cny": 0.2688
+      "input_tokens": 71587,
+      "output_tokens": 10835,
+      "estimated_cost_cny": 0.2758
     },
     "v1.1.1": {
-      "input_tokens": 203574,
-      "output_tokens": 15838,
-      "estimated_cost_cny": 0.6406
+      "input_tokens": 210936,
+      "output_tokens": 16708,
+      "estimated_cost_cny": 0.6666
     }
   }
 }

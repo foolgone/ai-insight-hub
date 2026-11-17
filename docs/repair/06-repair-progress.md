@@ -1080,3 +1080,12 @@ alembic check   : No new upgrade operations detected
 - 未跑 Q22/Q24–Q28/Q30/Q32–Q34/Q37–Q40。
 - Token（26 条×2 臂）：v1.0.0 69,497/10,627；v1.1.1 203,574/15,838；估算 ¥0.9094。
 - 40 条未完成、未激活；v1.1.1 仍 design_draft/inactive。
+
+### 40 条继续第三次（2026-11-17，stopped Q22）
+- Q20 注册 F 0.6–1.0（期望 0.8），F=0.8、C=0.9、R=1.0，PASS；标 generalization_insufficient。
+- 完成 27/40（HG 10/13，provisional 17/27）；Q22 前案例按目标通过。
+- **Q22 Human Gold F 1.0→0.4（-0.6）**：cl1/cl4 原 supported，但 quote 非 C1 逐字子串，`quote_not_found` 降级；按 HG supported evidence downgrade + 未解释下降 >0.10 停止。
+- Q22 C=0.9、R=1.0；wrong_facts=[]。
+- 未跑 Q24–Q28/Q30/Q32–Q34/Q37–Q40。
+- Token（27 条×2 臂）：v1.0.0 71,587/10,835；v1.1.1 210,936/16,708；估算 ¥0.9424。
+- 40 条未完成、未激活；v1.1.1 仍 design_draft/inactive。

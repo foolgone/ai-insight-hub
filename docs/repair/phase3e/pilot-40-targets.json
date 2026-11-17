@@ -371,11 +371,26 @@
       "gold_source": "docs/repair/phase3e/candidates.json (AI draft, pending human)",
       "group": "provisional",
       "target_group": "provisional",
-      "target_source": "provisional_general",
+      "target_source": "provisional_explicit",
       "answer_context_count": 2,
-      "targets": {},
+      "targets": {
+        "F": [
+          0.6,
+          1.0
+        ],
+        "C": [
+          0.8,
+          1.0
+        ],
+        "R": [
+          0.8,
+          1.0
+        ]
+      },
       "rule": "no_schema_failed; no_all_invalid; no_supported_without_evidence; no_unexplained_drop_gt_0.10",
-      "notes": []
+      "notes": [
+        "5 scorable: 4 supported + 1 generalization insufficient; F=0.8 expected; wrong_facts=[]"
+      ]
     },
     {
       "id": "Q21",
