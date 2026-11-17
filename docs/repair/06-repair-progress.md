@@ -1054,3 +1054,11 @@ alembic check   : No new upgrade operations detected
 - **10/10 完成，全部注册目标命中；无 schema failed、无全 invalid。**
 - Token（10 条×2 臂）：v1.0.0 32,612/6,252；v1.1.1 85,372/9,008；估算 ¥0.1383/¥0.2914，合计 ¥0.4297。
 - 未跑 40 条、未激活；v1.1.1 仍 design_draft/inactive。
+
+### 40 条规模运行（2026-11-17，stopped Q10）
+- 已注册 `pilot-40-targets.json`：13 Human Gold + 27 provisional；40 条规模运行，不是 40 条 Human Gold 验收。
+- Q36 披露 variant smoke：C=0.9、missing=[]、wrong_facts=[]，目标 0.9–1.0 通过。
+- 40 条运行完成 10/40（HG 1/13，provisional 9/27）：Q10 v1.1.1 F 1.0→0.5，cl1 quote 把“30 天内”写成“30 夅内”，`quote_not_found` 降级；Q10 无显式目标，按未解释下降 >0.10 停止。
+- 未运行 Q11 之后案例；未跑 40 条整体验收。
+- Token（10 条×2 臂）：v1.0.0 23,678/2,532；v1.1.1 76,438/3,645；估算 ¥0.2995。
+- 结果：`pilot-40-v1.0.0-vs-v1.1.1.json` / `.md`；未激活、未改 Human Gold/DB。
