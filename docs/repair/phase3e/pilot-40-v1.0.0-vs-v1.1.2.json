@@ -25,7 +25,14 @@
       "Q12",
       "Q13",
       "Q15",
-      "Q16"
+      "Q16",
+      "Q17",
+      "Q18",
+      "Q19",
+      "Q20",
+      "Q21",
+      "Q22",
+      "Q23"
     ],
     "baseline_new_cases": [
       "Q14"
@@ -33,15 +40,17 @@
     "v112_fresh_count": 40,
     "typo_cases": [],
     "note": "40 条规模/回归运行，不是 40 条 Human Gold 验收；v1.0.0 基线复用 27 条，补跑 13 条；v1.1.2 全部新跑。",
-    "baseline_reused_count": 15,
+    "baseline_reused_count": 22,
     "baseline_new_count": 1,
     "q14_known_miss": true,
     "q14_f_unavailable": true,
-    "target_pass_count": 14,
+    "target_pass_count": 20,
     "target_total": 40,
-    "known_miss_count": 1,
-    "result_note": "14/16 run cases target pass + Q14 known Human Gold C miss; 40 incomplete, stopped at Q16 R; not Human Gold acceptance",
-    "cases_run": 16
+    "known_miss_count": 2,
+    "result_note": "20/23 run cases target pass + Q14 C known miss + Q16 R known miss; 40 incomplete, stopped at Q23 F (HG quote downgrade); not Human Gold acceptance",
+    "cases_run": 23,
+    "q16_known_r_miss": true,
+    "q23_stop": "Human Gold F=0.0, target 0.4-0.5; supported cl2/cl3/cl4 quote synthesized; 6 quote_not_found; repeats 0.0/0.0/0.428571"
   },
   "cases": [
     {
@@ -5974,23 +5983,3394 @@
           ]
         }
       },
+      "target_pass": false,
+      "known_miss": true,
+      "result_note": "known Human Gold R miss: R=0.7 vs v1.0.0 1.0; repeats 0.7/0.7/0.7; F=1.0, C=0.9; answer matches gold; R judge over-strict, target/R prompt unchanged"
+    },
+    {
+      "id": "Q17",
+      "category": "multi",
+      "question": "订单满 99 元包邮，退货时运费谁承担？",
+      "gold_answer": "因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。",
+      "gold_source": "docs/repair/phase3e/candidates.json (AI draft, pending human)",
+      "gold_status": "ai_draft_pending_human",
+      "human_gold": false,
+      "provisional": true,
+      "group": "provisional",
+      "target_group": "pilot10",
+      "target": {
+        "F": [
+          0.9,
+          1.0
+        ],
+        "C": [
+          0.8,
+          1.0
+        ],
+        "R": [
+          0.8,
+          1.0
+        ]
+      },
+      "answer": "根据售后服务政策，订单满 99 元包邮适用于**正向发货环节**；而**退货时的运费承担方取决于退换货原因**：\n\n- 若因**质量问题**退换货，运费由**商家承担**；  \n- 若为**非质量问题**（如无理由退货），运费由**买家承担**。\n\n该规则与是否满 99 元无关，不因包邮资格而改变退货运费责任归属。",
+      "contexts": [
+        {
+          "document_id": "4ee02c53-d4d1-4364-8a24-30a614ead1f8",
+          "chunk_id": "70aed937-0495-4ef4-8cc0-de7f58b9dc4b",
+          "title": "phase3d_doc.md",
+          "content": "# Summary\n一份详述退款、换货、发票、发货、物流、运费、保修、优惠券、积分、客服及特殊商品售后规则的客户服务政策文件。\n\n该文档是Phase 3E验证版本的售后服务政策，系统规定了消费者在订单履约各环节享有的权益与限制。内容涵盖退款（时效、范围、流程）、换货、电子发票开具与修改、发货与物流管理、运费承担规则、电子产品及配件保修期限与免责情形、优惠券使用与退还逻辑、会员积分累积与有效期、客服响应机制，以及生鲜、虚拟、定制等特殊商品的差异化售后条款。所有条款均以消费者签收时间为关键节点，并明确责任归属（如质量问题由商家承担运费，非质量问题由买家承担），强调操作路径（如通过「我的订单」发起申请）和时效承诺（如审核48小时内、退款1–3个工作日）。",
+          "score": 0.6068964567942029,
+          "rank": 1,
+          "metadata": {
+            "knowledge_base_id": "4ae8e147-6f76-4330-93f1-d2b3fef3d9ba",
+            "chunk_index": 3,
+            "chunk_type": "summary",
+            "truncated": false
+          }
+        },
+        {
+          "document_id": "4ee02c53-d4d1-4364-8a24-30a614ead1f8",
+          "chunk_id": "c65abc80-f589-49de-9a1f-77ad2689bdb9",
+          "title": "phase3d_doc.md",
+          "content": "# 售后服务政策（Phase 3E 验证文档 v2）\n\n## 1. 退款时效\n\n订单签收后 7 天内可申请无理由退款。审核通过后，款项将在 1-3 个工作日内原路退回。\n定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。\n\n## 2. 退款流程\n\n在「我的订单」中选择退款，填写原因并上传凭证，商家会在 48 小时内审核。\n审核通过后按原支付渠道退回；审核驳回会显示原因，可补充材料后重新提交。\n\n## 3. 换货政策\n\n签收后 7 天内，商品未使用且包装完整可申请换货，同一订单仅支持一次换货。\n换货需先寄回原商品，商家收到并验收后 48 小时内寄出新品；运费由责任方承担。\n\n## 4. 发票说明\n\n仅支持电子发票，提交申请后 24 小时内发送至下单邮箱。\n发票抬头可在开具前修改；已开具的发票需先申请红冲，再重新开具。\n暂不支持纸质发票和增值税专用发票。\n\n## 5. 发货时效\n\n现货商品在付款后 48 小时内发出；预售商品以商品页标注的发货时间为准。\n大件商品（家具、家电）发货时间为 5 个工作日内，配送前会电话预约。\n\n## 6. 物流查询\n\n订单发货后可在「我的订单」查看物流单号与实时轨迹。\n物流信息超过 24 小时未更新时，可联系客服协助核查。\n\n## 7. 运费规则\n\n单笔订单实付满 99 元包邮；未满 99 元收取 10 元运费。\n新疆、西藏、内蒙古等偏远地区运费为 20 元，不参与包邮活动。\n因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。\n\n## 8. 保修政策\n\n电子产品自签收之日起保修 12 个月，配件保修 3 个月。\n人为损坏、进水、私自拆修不在保修范围内。\n保修期内维修免费；保修期外维修需收取材料费和人工费。\n\n## 9. 优惠券规则\n\n优惠券自领取之日起 30 天内有效，逾期自动失效。\n同一订单只能使用一张优惠券，不能与会员折扣叠加。\n退款时优惠券若仍在有效期内会退回账户，已过期则不退回。\n\n## 10. 会员积分\n\n消费 1 元积 1 分，100 积分可抵扣 1 元。\n积分自获得之日起 12 个月内有效，逾期清零。\n积分不可转让、不可提现，仅限本账户使用。\n\n## 11. 客服时间\n\n在线客服服务时间为每天 9:00-21:00。\n客服热线 400-800-1234，服务时间同上。\n非服务时间可留言，客服会在次日 12:00 前回复。\n\n## 12. 特殊商品\n\n生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。\n虚拟商品（充值、会员、课程）一经售出不支持退款。\n定制商品支持质量问题退换，不支持无理由退换。\n\n## 13. 收货信息修改\n\n订单发货前可在「我的订单」修改收货地址和联系电话。\n已发货订单无法修改地址，可联系快递拦截或申请改派。",
+          "score": 0.5998693486851883,
+          "rank": 2,
+          "metadata": {
+            "knowledge_base_id": "4ae8e147-6f76-4330-93f1-d2b3fef3d9ba",
+            "chunk_index": 0,
+            "chunk_type": "text",
+            "truncated": false
+          }
+        }
+      ],
+      "context_source": "agent_chat",
+      "model_config": {
+        "agent_id": "2c74bf39-bc41-4bf0-a64a-4a1f24721a46"
+      },
+      "answer_context_count": 2,
+      "arms": {
+        "v1.0.0": {
+          "arm": "v1.0.0",
+          "wall_latency_ms": 21071,
+          "outcomes": [
+            {
+              "metric": "faithfulness",
+              "status": "evaluated",
+              "score": 1.0,
+              "skipped_reason": null,
+              "latency_ms": 18486,
+              "error": null,
+              "judge_config": {
+                "agent": "rag_judge_faithfulness",
+                "model": "qwen-max",
+                "temperature": 0.0,
+                "max_tokens": 8192,
+                "prompt_version": "v1.0.0",
+                "resolved_prompt_version": "v1.0.0",
+                "prompt_sha256": "287053e9e67ad29fd2de597d1052b8d418040097910462e4a0f176b14295bfed",
+                "schema_version": "rag_judge_schema_v1",
+                "rubric_version": "v1.0.0",
+                "metric_version": "v1"
+              },
+              "token_usage": {
+                "input": 1518,
+                "output": 452
+              },
+              "cost": "0",
+              "details": {
+                "claims": [
+                  {
+                    "claim": "订单满 99 元包邮适用于正向发货环节",
+                    "supported": true,
+                    "evidence": [
+                      "单笔订单实付满 99 元包邮；未满 99 元收取 10 元运费。"
+                    ],
+                    "reason": "上下文明确说明了订单满 99 元包邮的规则。",
+                    "claim_id": null,
+                    "claim_type": "factual_claim",
+                    "claim_subtype": null,
+                    "support_status": null,
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": []
+                  },
+                  {
+                    "claim": "退货时的运费承担方取决于退换货原因",
+                    "supported": true,
+                    "evidence": [
+                      "因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。"
+                    ],
+                    "reason": "上下文明确指出了退货时运费的承担方取决于退换货的原因。",
+                    "claim_id": null,
+                    "claim_type": "factual_claim",
+                    "claim_subtype": null,
+                    "support_status": null,
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": []
+                  },
+                  {
+                    "claim": "若因质量问题退换货，运费由商家承担",
+                    "supported": true,
+                    "evidence": [
+                      "因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。"
+                    ],
+                    "reason": "上下文明确说明了因质量问题退换货时，运费由商家承担。",
+                    "claim_id": null,
+                    "claim_type": "factual_claim",
+                    "claim_subtype": null,
+                    "support_status": null,
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": []
+                  },
+                  {
+                    "claim": "若为非质量问题（如无理由退货），运费由买家承担",
+                    "supported": true,
+                    "evidence": [
+                      "因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。"
+                    ],
+                    "reason": "上下文明确说明了非质量问题退换货时，运费由买家承担。",
+                    "claim_id": null,
+                    "claim_type": "factual_claim",
+                    "claim_subtype": null,
+                    "support_status": null,
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": []
+                  },
+                  {
+                    "claim": "该规则与是否满 99 元无关，不因包邮资格而改变退货运费责任归属",
+                    "supported": true,
+                    "evidence": [
+                      "因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。"
+                    ],
+                    "reason": "上下文明确了退货运费的责任归属与是否满 99 元无关。",
+                    "claim_id": null,
+                    "claim_type": "factual_claim",
+                    "claim_subtype": null,
+                    "support_status": null,
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": []
+                  }
+                ],
+                "supported_count": 5,
+                "claim_count": 5,
+                "reason": ""
+              },
+              "raw_output": "{\n  \"claims\": [\n    {\n      \"claim\": \"订单满 99 元包邮适用于正向发货环节\",\n      \"supported\": true,\n      \"evidence\": [\n        \"单笔订单实付满 99 元包邮；未满 99 元收取 10 元运费。\"\n      ],\n      \"reason\": \"上下文明确说明了订单满 99 元包邮的规则。\"\n    },\n    {\n      \"claim\": \"退货时的运费承担方取决于退换货原因\",\n      \"supported\": true,\n      \"evidence\": [\n        \"因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。\"\n      ],\n      \"reason\": \"上下文明确指出了退货时运费的承担方取决于退换货的原因。\"\n    },\n    {\n      \"claim\": \"若因质量问题退换货，运费由商家承担\",\n      \"supported\": true,\n      \"evidence\": [\n        \"因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。\"\n      ],\n      \"reason\": \"上下文明确说明了因质量问题退换货时，运费由商家承担。\"\n    },\n    {\n      \"claim\": \"若为非质量问题（如无理由退货），运费由买家承担\",\n      \"supported\": true,\n      \"evidence\": [\n        \"因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。\"\n      ],\n      \"reason\": \"上下文明确说明了非质量问题退换货时，运费由买家承担。\"\n    },\n    {\n      \"claim\": \"该规则与是否满 99 元无关，不因包邮资格而改变退货运费责任归属\",\n      \"supported\": true,\n      \"evidence\": [\n        \"因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。\"\n      ],\n      \"reason\": \"上下文明确了退货运费的责任归属与是否满 99 元无关。\"\n    }\n  ],\n  \"reason\": \"\"\n}",
+              "raw_truncated": false
+            },
+            {
+              "metric": "answer_correctness",
+              "status": "evaluated",
+              "score": 0.9,
+              "skipped_reason": null,
+              "latency_ms": 1423,
+              "error": null,
+              "judge_config": {
+                "agent": "rag_judge_answer_correctness",
+                "model": "qwen-max",
+                "temperature": 0.0,
+                "max_tokens": 8192,
+                "prompt_version": "v1.0.0",
+                "resolved_prompt_version": "v1.0.0",
+                "prompt_sha256": "106e11f2bc39806da5ecf090c6dbcd94d81ca5f53b968e5055d5a33833b30f94",
+                "schema_version": "rag_judge_schema_v1",
+                "rubric_version": "v1.0.0",
+                "metric_version": "v1"
+              },
+              "token_usage": {
+                "input": 478,
+                "output": 45
+              },
+              "cost": "0",
+              "details": {
+                "missing_points": [],
+                "wrong_facts": [],
+                "reason": "回答内容正确，但稍微冗长，包含了一些额外的解释。"
+              },
+              "raw_output": "{\n  \"score\": 0.9,\n  \"missing_points\": [],\n  \"wrong_facts\": [],\n  \"reason\": \"回答内容正确，但稍微冗长，包含了一些额外的解释。\"\n}",
+              "raw_truncated": false
+            },
+            {
+              "metric": "answer_relevancy",
+              "status": "evaluated",
+              "score": 1.0,
+              "skipped_reason": null,
+              "latency_ms": 1159,
+              "error": null,
+              "judge_config": {
+                "agent": "rag_judge_answer_relevancy",
+                "model": "qwen-max",
+                "temperature": 0.0,
+                "max_tokens": 8192,
+                "prompt_version": "v1.0.0",
+                "resolved_prompt_version": "v1.0.0",
+                "prompt_sha256": "27203126964ae0ca8f0bb8641cb3c2b145605cec706ef47c5432a0bbd6fad141",
+                "schema_version": "rag_judge_schema_v1",
+                "rubric_version": "v1.0.0",
+                "metric_version": "v1"
+              },
+              "token_usage": {
+                "input": 361,
+                "output": 37
+              },
+              "cost": "0",
+              "details": {
+                "reason": "直接且完整地回答了退货时运费的承担方，并解释了不同情况下的具体规则"
+              },
+              "raw_output": "{\n  \"score\": 1.0,\n  \"reason\": \"直接且完整地回答了退货时运费的承担方，并解释了不同情况下的具体规则\"\n}",
+              "raw_truncated": false
+            }
+          ],
+          "reused": true
+        },
+        "v1.1.2": {
+          "arm": "v1.1.2",
+          "reused": false,
+          "wall_latency_ms": 26210,
+          "outcomes": [
+            {
+              "metric": "faithfulness",
+              "status": "evaluated",
+              "score": 1.0,
+              "skipped_reason": null,
+              "latency_ms": 22861,
+              "error": null,
+              "judge_config": {
+                "agent": "rag_judge_faithfulness",
+                "model": "qwen-max",
+                "temperature": 0.0,
+                "max_tokens": 8192,
+                "prompt_version": "v1.1.2",
+                "resolved_prompt_version": "v1.1.2",
+                "prompt_sha256": "e95f04b556dd1a86e7abfbdd5dad75d3b834628490cdf460adb608dd02713b30",
+                "schema_version": "rag_judge_schema_v2",
+                "rubric_version": "v1.1.2",
+                "metric_version": "v2"
+              },
+              "token_usage": {
+                "input": 8530,
+                "output": 663
+              },
+              "cost": "0",
+              "details": {
+                "claims": [
+                  {
+                    "claim": "订单满 99 元包邮适用于正向发货环节",
+                    "supported": null,
+                    "evidence": [],
+                    "reason": "C2 单句原文",
+                    "claim_id": "cl1",
+                    "claim_type": "factual_claim",
+                    "claim_subtype": "policy",
+                    "support_status": "supported",
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": [
+                      {
+                        "context_id": "C2",
+                        "quote": "单笔订单实付满 99 元包邮；未满 99 元收取 10 元运费。"
+                      }
+                    ]
+                  },
+                  {
+                    "claim": "退货时的运费承担方取决于退换货原因",
+                    "supported": null,
+                    "evidence": [],
+                    "reason": "C2 单句原文",
+                    "claim_id": "cl2",
+                    "claim_type": "factual_claim",
+                    "claim_subtype": "policy",
+                    "support_status": "supported",
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": [
+                      {
+                        "context_id": "C2",
+                        "quote": "因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。"
+                      }
+                    ]
+                  },
+                  {
+                    "claim": "若因质量问题退换货，运费由商家承担",
+                    "supported": null,
+                    "evidence": [],
+                    "reason": "C2 单句原文",
+                    "claim_id": "cl3",
+                    "claim_type": "factual_claim",
+                    "claim_subtype": "policy",
+                    "support_status": "supported",
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": [
+                      {
+                        "context_id": "C2",
+                        "quote": "因质量问题产生的退换货运费由商家承担"
+                      }
+                    ]
+                  },
+                  {
+                    "claim": "若为非质量问题（如无理由退货），运费由买家承担",
+                    "supported": null,
+                    "evidence": [],
+                    "reason": "C2 单句原文",
+                    "claim_id": "cl4",
+                    "claim_type": "factual_claim",
+                    "claim_subtype": "policy",
+                    "support_status": "supported",
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": [
+                      {
+                        "context_id": "C2",
+                        "quote": "非质量问题的退货运费由买家承担"
+                      }
+                    ]
+                  },
+                  {
+                    "claim": "该规则与是否满 99 元无关，不因包邮资格而改变退货运费责任归属",
+                    "supported": null,
+                    "evidence": [],
+                    "reason": "C2 单句原文",
+                    "claim_id": "cl5",
+                    "claim_type": "factual_claim",
+                    "claim_subtype": "policy",
+                    "support_status": "supported",
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": [
+                      {
+                        "context_id": "C2",
+                        "quote": "因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。"
+                      }
+                    ]
+                  }
+                ],
+                "reason": "",
+                "claim_count": 5,
+                "scorable_claim_count": 5,
+                "supported_count": 5,
+                "supported_claim_count": 5,
+                "unsupported_claim_count": 0,
+                "insufficient_evidence_count": 0,
+                "non_factual_count": 0,
+                "absence_count": 0,
+                "document_conflict": false,
+                "document_conflict_count": 0,
+                "contradiction_count": 0,
+                "insufficient_evidence_rate": 0.0,
+                "all_insufficient": false,
+                "evidence_validation": [
+                  {
+                    "claim_id": "cl1",
+                    "context_id": "C2",
+                    "quote": "单笔订单实付满 99 元包邮；未满 99 元收取 10 元运费。",
+                    "ok": true,
+                    "error": null
+                  },
+                  {
+                    "claim_id": "cl2",
+                    "context_id": "C2",
+                    "quote": "因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。",
+                    "ok": true,
+                    "error": null
+                  },
+                  {
+                    "claim_id": "cl3",
+                    "context_id": "C2",
+                    "quote": "因质量问题产生的退换货运费由商家承担",
+                    "ok": true,
+                    "error": null
+                  },
+                  {
+                    "claim_id": "cl4",
+                    "context_id": "C2",
+                    "quote": "非质量问题的退货运费由买家承担",
+                    "ok": true,
+                    "error": null
+                  },
+                  {
+                    "claim_id": "cl5",
+                    "context_id": "C2",
+                    "quote": "因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。",
+                    "ok": true,
+                    "error": null
+                  }
+                ],
+                "evidence_validation_failed": false,
+                "validation_errors": []
+              },
+              "raw_output": "{\n  \"claims\": [\n    {\n      \"claim_id\": \"cl1\",\n      \"claim\": \"订单满 99 元包邮适用于正向发货环节\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C2\", \"quote\": \"单笔订单实付满 99 元包邮；未满 99 元收取 10 元运费。\"}\n      ],\n      \"reason\": \"C2 单句原文\"\n    },\n    {\n      \"claim_id\": \"cl2\",\n      \"claim\": \"退货时的运费承担方取决于退换货原因\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C2\", \"quote\": \"因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。\"}\n      ],\n      \"reason\": \"C2 单句原文\"\n    },\n    {\n      \"claim_id\": \"cl3\",\n      \"claim\": \"若因质量问题退换货，运费由商家承担\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C2\", \"quote\": \"因质量问题产生的退换货运费由商家承担\"}\n      ],\n      \"reason\": \"C2 单句原文\"\n    },\n    {\n      \"claim_id\": \"cl4\",\n      \"claim\": \"若为非质量问题（如无理由退货），运费由买家承担\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C2\", \"quote\": \"非质量问题的退货运费由买家承担\"}\n      ],\n      \"reason\": \"C2 单句原文\"\n    },\n    {\n      \"claim_id\": \"cl5\",\n      \"claim\": \"该规则与是否满 99 元无关，不因包邮资格而改变退货运费责任归属\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C2\", \"quote\": \"因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。\"}\n      ],\n      \"reason\": \"C2 单句原文\"\n    }\n  ],\n  \"reason\": \"\"\n}",
+              "raw_truncated": false
+            },
+            {
+              "metric": "answer_correctness",
+              "status": "evaluated",
+              "score": 0.9,
+              "skipped_reason": null,
+              "latency_ms": 1752,
+              "error": null,
+              "judge_config": {
+                "agent": "rag_judge_answer_correctness",
+                "model": "qwen-max",
+                "temperature": 0.0,
+                "max_tokens": 8192,
+                "prompt_version": "v1.1.2",
+                "resolved_prompt_version": "v1.1.2",
+                "prompt_sha256": "2ab6eac2abe57dcfd647df328244ac3e5681fc93222938d6614e71037d49ae77",
+                "schema_version": "rag_judge_schema_v2",
+                "rubric_version": "v1.1.2",
+                "metric_version": "v2"
+              },
+              "token_usage": {
+                "input": 1878,
+                "output": 51
+              },
+              "cost": "0",
+              "details": {
+                "missing_points": [],
+                "wrong_facts": [],
+                "reason": "回答涵盖了金标中的所有关键事实和条件，且补充了与问题相关的正确政策信息。"
+              },
+              "raw_output": "{\n  \"score\": 0.9,\n  \"missing_points\": [],\n  \"wrong_facts\": [],\n  \"reason\": \"回答涵盖了金标中的所有关键事实和条件，且补充了与问题相关的正确政策信息。\"\n}",
+              "raw_truncated": false
+            },
+            {
+              "metric": "answer_relevancy",
+              "status": "evaluated",
+              "score": 0.9,
+              "skipped_reason": null,
+              "latency_ms": 1585,
+              "error": null,
+              "judge_config": {
+                "agent": "rag_judge_answer_relevancy",
+                "model": "qwen-max",
+                "temperature": 0.0,
+                "max_tokens": 8192,
+                "prompt_version": "v1.1.2",
+                "resolved_prompt_version": "v1.1.2",
+                "prompt_sha256": "0f8576b7dbf2e7ea1a02752680b0afe8c66677fe2eda823f4bcd28371ae4da84",
+                "schema_version": "rag_judge_schema_v2",
+                "rubric_version": "v1.1.2",
+                "metric_version": "v2"
+              },
+              "token_usage": {
+                "input": 1138,
+                "output": 39
+              },
+              "cost": "0",
+              "details": {
+                "reason": "回答详细说明了不同退换货原因下的运费承担方，并明确指出与包邮资格无关。"
+              },
+              "raw_output": "{\n  \"score\": 0.9,\n  \"reason\": \"回答详细说明了不同退换货原因下的运费承担方，并明确指出与包邮资格无关。\"\n}",
+              "raw_truncated": false
+            }
+          ]
+        }
+      },
+      "target_pass": true
+    },
+    {
+      "id": "Q18",
+      "category": "multi",
+      "question": "保修期内和保修期外维修分别怎么收费？",
+      "gold_answer": "保修期内维修免费；保修期外维修需收取材料费和人工费。",
+      "gold_source": "docs/repair/phase3e/candidates.json (AI draft, pending human)",
+      "gold_status": "ai_draft_pending_human",
+      "human_gold": false,
+      "provisional": true,
+      "group": "provisional",
+      "target_group": "provisional",
+      "target": {},
+      "answer": "根据《售后服务政策（Phase 3E 验证文档 v2）》第8条“保修政策”：\n\n- **保修期内维修**：免费，不收取费用 。  \n- **保修期外维修**：需收取**材料费和人工费** 。\n\n补充说明：  \n- 电子产品整机保修期为**签收之日起12个月**；  \n- 配件保修期为**3个月**；  \n- 人为损坏、进水、私自拆修等情况**不属于保修范围**，无论是否在保修期内均不享受免费维修服务 。",
+      "contexts": [
+        {
+          "document_id": "4ee02c53-d4d1-4364-8a24-30a614ead1f8",
+          "chunk_id": "c65abc80-f589-49de-9a1f-77ad2689bdb9",
+          "title": "phase3d_doc.md",
+          "content": "# 售后服务政策（Phase 3E 验证文档 v2）\n\n## 1. 退款时效\n\n订单签收后 7 天内可申请无理由退款。审核通过后，款项将在 1-3 个工作日内原路退回。\n定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。\n\n## 2. 退款流程\n\n在「我的订单」中选择退款，填写原因并上传凭证，商家会在 48 小时内审核。\n审核通过后按原支付渠道退回；审核驳回会显示原因，可补充材料后重新提交。\n\n## 3. 换货政策\n\n签收后 7 天内，商品未使用且包装完整可申请换货，同一订单仅支持一次换货。\n换货需先寄回原商品，商家收到并验收后 48 小时内寄出新品；运费由责任方承担。\n\n## 4. 发票说明\n\n仅支持电子发票，提交申请后 24 小时内发送至下单邮箱。\n发票抬头可在开具前修改；已开具的发票需先申请红冲，再重新开具。\n暂不支持纸质发票和增值税专用发票。\n\n## 5. 发货时效\n\n现货商品在付款后 48 小时内发出；预售商品以商品页标注的发货时间为准。\n大件商品（家具、家电）发货时间为 5 个工作日内，配送前会电话预约。\n\n## 6. 物流查询\n\n订单发货后可在「我的订单」查看物流单号与实时轨迹。\n物流信息超过 24 小时未更新时，可联系客服协助核查。\n\n## 7. 运费规则\n\n单笔订单实付满 99 元包邮；未满 99 元收取 10 元运费。\n新疆、西藏、内蒙古等偏远地区运费为 20 元，不参与包邮活动。\n因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。\n\n## 8. 保修政策\n\n电子产品自签收之日起保修 12 个月，配件保修 3 个月。\n人为损坏、进水、私自拆修不在保修范围内。\n保修期内维修免费；保修期外维修需收取材料费和人工费。\n\n## 9. 优惠券规则\n\n优惠券自领取之日起 30 天内有效，逾期自动失效。\n同一订单只能使用一张优惠券，不能与会员折扣叠加。\n退款时优惠券若仍在有效期内会退回账户，已过期则不退回。\n\n## 10. 会员积分\n\n消费 1 元积 1 分，100 积分可抵扣 1 元。\n积分自获得之日起 12 个月内有效，逾期清零。\n积分不可转让、不可提现，仅限本账户使用。\n\n## 11. 客服时间\n\n在线客服服务时间为每天 9:00-21:00。\n客服热线 400-800-1234，服务时间同上。\n非服务时间可留言，客服会在次日 12:00 前回复。\n\n## 12. 特殊商品\n\n生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。\n虚拟商品（充值、会员、课程）一经售出不支持退款。\n定制商品支持质量问题退换，不支持无理由退换。\n\n## 13. 收货信息修改\n\n订单发货前可在「我的订单」修改收货地址和联系电话。\n已发货订单无法修改地址，可联系快递拦截或申请改派。",
+          "score": 0.604943242945232,
+          "rank": 1,
+          "metadata": {
+            "knowledge_base_id": "4ae8e147-6f76-4330-93f1-d2b3fef3d9ba",
+            "chunk_index": 0,
+            "chunk_type": "text",
+            "truncated": false
+          }
+        },
+        {
+          "document_id": "4ee02c53-d4d1-4364-8a24-30a614ead1f8",
+          "chunk_id": "70aed937-0495-4ef4-8cc0-de7f58b9dc4b",
+          "title": "phase3d_doc.md",
+          "content": "# Summary\n一份详述退款、换货、发票、发货、物流、运费、保修、优惠券、积分、客服及特殊商品售后规则的客户服务政策文件。\n\n该文档是Phase 3E验证版本的售后服务政策，系统规定了消费者在订单履约各环节享有的权益与限制。内容涵盖退款（时效、范围、流程）、换货、电子发票开具与修改、发货与物流管理、运费承担规则、电子产品及配件保修期限与免责情形、优惠券使用与退还逻辑、会员积分累积与有效期、客服响应机制，以及生鲜、虚拟、定制等特殊商品的差异化售后条款。所有条款均以消费者签收时间为关键节点，并明确责任归属（如质量问题由商家承担运费，非质量问题由买家承担），强调操作路径（如通过「我的订单」发起申请）和时效承诺（如审核48小时内、退款1–3个工作日）。",
+          "score": 0.5748591429235737,
+          "rank": 2,
+          "metadata": {
+            "knowledge_base_id": "4ae8e147-6f76-4330-93f1-d2b3fef3d9ba",
+            "chunk_index": 3,
+            "chunk_type": "summary",
+            "truncated": false
+          }
+        }
+      ],
+      "context_source": "agent_chat",
+      "model_config": {
+        "agent_id": "2c74bf39-bc41-4bf0-a64a-4a1f24721a46"
+      },
+      "answer_context_count": 2,
+      "arms": {
+        "v1.0.0": {
+          "arm": "v1.0.0",
+          "reused": false,
+          "wall_latency_ms": 13783,
+          "outcomes": [
+            {
+              "metric": "faithfulness",
+              "status": "evaluated",
+              "score": 1.0,
+              "skipped_reason": null,
+              "latency_ms": 10034,
+              "error": null,
+              "judge_config": {
+                "agent": "rag_judge_faithfulness",
+                "model": "qwen-max",
+                "temperature": 0.0,
+                "max_tokens": 8192,
+                "prompt_version": "v1.0.0",
+                "resolved_prompt_version": "v1.0.0",
+                "prompt_sha256": "287053e9e67ad29fd2de597d1052b8d418040097910462e4a0f176b14295bfed",
+                "schema_version": "rag_judge_schema_v1",
+                "rubric_version": "v1.0.0",
+                "metric_version": "v1"
+              },
+              "token_usage": {
+                "input": 1543,
+                "output": 398
+              },
+              "cost": "0",
+              "details": {
+                "claims": [
+                  {
+                    "claim": "保修期内维修：免费，不收取费用。",
+                    "supported": true,
+                    "evidence": [
+                      "保修期内维修免费；保修期外维修需收取材料费和人工费。"
+                    ],
+                    "reason": "上下文明确说明了保修期内维修是免费的。",
+                    "claim_id": null,
+                    "claim_type": "factual_claim",
+                    "claim_subtype": null,
+                    "support_status": null,
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": []
+                  },
+                  {
+                    "claim": "保修期外维修：需收取材料费和人工费。",
+                    "supported": true,
+                    "evidence": [
+                      "保修期内维修免费；保修期外维修需收取材料费和人工费。"
+                    ],
+                    "reason": "上下文明确说明了保修期外维修需要收取材料费和人工费。",
+                    "claim_id": null,
+                    "claim_type": "factual_claim",
+                    "claim_subtype": null,
+                    "support_status": null,
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": []
+                  },
+                  {
+                    "claim": "电子产品整机保修期为签收之日起12个月。",
+                    "supported": true,
+                    "evidence": [
+                      "电子产品自签收之日起保修 12 个月，配件保修 3 个月。"
+                    ],
+                    "reason": "上下文明确说明了电子产品的保修期是从签收之日起12个月。",
+                    "claim_id": null,
+                    "claim_type": "factual_claim",
+                    "claim_subtype": null,
+                    "support_status": null,
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": []
+                  },
+                  {
+                    "claim": "配件保修期为3个月。",
+                    "supported": true,
+                    "evidence": [
+                      "电子产品自签收之日起保修 12 个月，配件保修 3 个月。"
+                    ],
+                    "reason": "上下文明确说明了配件的保修期是3个月。",
+                    "claim_id": null,
+                    "claim_type": "factual_claim",
+                    "claim_subtype": null,
+                    "support_status": null,
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": []
+                  },
+                  {
+                    "claim": "人为损坏、进水、私自拆修等情况不属于保修范围，无论是否在保修期内均不享受免费维修服务。",
+                    "supported": true,
+                    "evidence": [
+                      "人为损坏、进水、私自拆修不在保修范围内。"
+                    ],
+                    "reason": "上下文明确说明了这些情况不在保修范围内。",
+                    "claim_id": null,
+                    "claim_type": "factual_claim",
+                    "claim_subtype": null,
+                    "support_status": null,
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": []
+                  }
+                ],
+                "supported_count": 5,
+                "claim_count": 5,
+                "reason": ""
+              },
+              "raw_output": "{\n  \"claims\": [\n    {\n      \"claim\": \"保修期内维修：免费，不收取费用。\",\n      \"supported\": true,\n      \"evidence\": [\n        \"保修期内维修免费；保修期外维修需收取材料费和人工费。\"\n      ],\n      \"reason\": \"上下文明确说明了保修期内维修是免费的。\"\n    },\n    {\n      \"claim\": \"保修期外维修：需收取材料费和人工费。\",\n      \"supported\": true,\n      \"evidence\": [\n        \"保修期内维修免费；保修期外维修需收取材料费和人工费。\"\n      ],\n      \"reason\": \"上下文明确说明了保修期外维修需要收取材料费和人工费。\"\n    },\n    {\n      \"claim\": \"电子产品整机保修期为签收之日起12个月。\",\n      \"supported\": true,\n      \"evidence\": [\n        \"电子产品自签收之日起保修 12 个月，配件保修 3 个月。\"\n      ],\n      \"reason\": \"上下文明确说明了电子产品的保修期是从签收之日起12个月。\"\n    },\n    {\n      \"claim\": \"配件保修期为3个月。\",\n      \"supported\": true,\n      \"evidence\": [\n        \"电子产品自签收之日起保修 12 个月，配件保修 3 个月。\"\n      ],\n      \"reason\": \"上下文明确说明了配件的保修期是3个月。\"\n    },\n    {\n      \"claim\": \"人为损坏、进水、私自拆修等情况不属于保修范围，无论是否在保修期内均不享受免费维修服务。\",\n      \"supported\": true,\n      \"evidence\": [\n        \"人为损坏、进水、私自拆修不在保修范围内。\"\n      ],\n      \"reason\": \"上下文明确说明了这些情况不在保修范围内。\"\n    }\n  ],\n  \"reason\": \"\"\n}",
+              "raw_truncated": false
+            },
+            {
+              "metric": "answer_correctness",
+              "status": "evaluated",
+              "score": 0.8,
+              "skipped_reason": null,
+              "latency_ms": 2052,
+              "error": null,
+              "judge_config": {
+                "agent": "rag_judge_answer_correctness",
+                "model": "qwen-max",
+                "temperature": 0.0,
+                "max_tokens": 8192,
+                "prompt_version": "v1.0.0",
+                "resolved_prompt_version": "v1.0.0",
+                "prompt_sha256": "106e11f2bc39806da5ecf090c6dbcd94d81ca5f53b968e5055d5a33833b30f94",
+                "schema_version": "rag_judge_schema_v1",
+                "rubric_version": "v1.0.0",
+                "metric_version": "v1"
+              },
+              "token_usage": {
+                "input": 499,
+                "output": 44
+              },
+              "cost": "0",
+              "details": {
+                "missing_points": [],
+                "wrong_facts": [],
+                "reason": "回答包含了额外的补充说明，但核心事实正确且完整。"
+              },
+              "raw_output": "{\n  \"score\": 0.8,\n  \"missing_points\": [],\n  \"wrong_facts\": [],\n  \"reason\": \"回答包含了额外的补充说明，但核心事实正确且完整。\"\n}",
+              "raw_truncated": false
+            },
+            {
+              "metric": "answer_relevancy",
+              "status": "evaluated",
+              "score": 1.0,
+              "skipped_reason": null,
+              "latency_ms": 1693,
+              "error": null,
+              "judge_config": {
+                "agent": "rag_judge_answer_relevancy",
+                "model": "qwen-max",
+                "temperature": 0.0,
+                "max_tokens": 8192,
+                "prompt_version": "v1.0.0",
+                "resolved_prompt_version": "v1.0.0",
+                "prompt_sha256": "27203126964ae0ca8f0bb8641cb3c2b145605cec706ef47c5432a0bbd6fad141",
+                "schema_version": "rag_judge_schema_v1",
+                "rubric_version": "v1.0.0",
+                "metric_version": "v1"
+              },
+              "token_usage": {
+                "input": 386,
+                "output": 39
+              },
+              "cost": "0",
+              "details": {
+                "reason": "直接、完整地回答了保修期内和保修期外的维修收费情况，并提供了额外的相关信息。"
+              },
+              "raw_output": "{\n  \"score\": 1.0,\n  \"reason\": \"直接、完整地回答了保修期内和保修期外的维修收费情况，并提供了额外的相关信息。\"\n}",
+              "raw_truncated": false
+            }
+          ]
+        },
+        "v1.1.2": {
+          "arm": "v1.1.2",
+          "reused": false,
+          "wall_latency_ms": 16791,
+          "outcomes": [
+            {
+              "metric": "faithfulness",
+              "status": "evaluated",
+              "score": 1.0,
+              "skipped_reason": null,
+              "latency_ms": 13864,
+              "error": null,
+              "judge_config": {
+                "agent": "rag_judge_faithfulness",
+                "model": "qwen-max",
+                "temperature": 0.0,
+                "max_tokens": 8192,
+                "prompt_version": "v1.1.2",
+                "resolved_prompt_version": "v1.1.2",
+                "prompt_sha256": "e95f04b556dd1a86e7abfbdd5dad75d3b834628490cdf460adb608dd02713b30",
+                "schema_version": "rag_judge_schema_v2",
+                "rubric_version": "v1.1.2",
+                "metric_version": "v2"
+              },
+              "token_usage": {
+                "input": 8555,
+                "output": 646
+              },
+              "cost": "0",
+              "details": {
+                "claims": [
+                  {
+                    "claim": "保修期内维修免费，不收取费用",
+                    "supported": null,
+                    "evidence": [],
+                    "reason": "C1 原文",
+                    "claim_id": "cl1",
+                    "claim_type": "factual_claim",
+                    "claim_subtype": "policy",
+                    "support_status": "supported",
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": [
+                      {
+                        "context_id": "C1",
+                        "quote": "保修期内维修免费；保修期外维修需收取材料费和人工费。"
+                      }
+                    ]
+                  },
+                  {
+                    "claim": "保修期外维修需收取材料费和人工费",
+                    "supported": null,
+                    "evidence": [],
+                    "reason": "C1 原文",
+                    "claim_id": "cl2",
+                    "claim_type": "factual_claim",
+                    "claim_subtype": "policy",
+                    "support_status": "supported",
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": [
+                      {
+                        "context_id": "C1",
+                        "quote": "保修期内维修免费；保修期外维修需收取材料费和人工费。"
+                      }
+                    ]
+                  },
+                  {
+                    "claim": "电子产品整机保修期为签收之日起12个月",
+                    "supported": null,
+                    "evidence": [],
+                    "reason": "C1 原文",
+                    "claim_id": "cl3",
+                    "claim_type": "factual_claim",
+                    "claim_subtype": "policy",
+                    "support_status": "supported",
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": [
+                      {
+                        "context_id": "C1",
+                        "quote": "电子产品自签收之日起保修 12 个月，配件保修 3 个月。"
+                      }
+                    ]
+                  },
+                  {
+                    "claim": "配件保修期为3个月",
+                    "supported": null,
+                    "evidence": [],
+                    "reason": "C1 原文",
+                    "claim_id": "cl4",
+                    "claim_type": "factual_claim",
+                    "claim_subtype": "policy",
+                    "support_status": "supported",
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": [
+                      {
+                        "context_id": "C1",
+                        "quote": "电子产品自签收之日起保修 12 个月，配件保修 3 个月。"
+                      }
+                    ]
+                  },
+                  {
+                    "claim": "人为损坏、进水、私自拆修等情况不属于保修范围，无论是否在保修期内均不享受免费维修服务",
+                    "supported": null,
+                    "evidence": [],
+                    "reason": "C1 原文",
+                    "claim_id": "cl5",
+                    "claim_type": "factual_claim",
+                    "claim_subtype": "policy",
+                    "support_status": "supported",
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": [
+                      {
+                        "context_id": "C1",
+                        "quote": "人为损坏、进水、私自拆修不在保修范围内。"
+                      }
+                    ]
+                  }
+                ],
+                "reason": "",
+                "claim_count": 5,
+                "scorable_claim_count": 5,
+                "supported_count": 5,
+                "supported_claim_count": 5,
+                "unsupported_claim_count": 0,
+                "insufficient_evidence_count": 0,
+                "non_factual_count": 0,
+                "absence_count": 0,
+                "document_conflict": false,
+                "document_conflict_count": 0,
+                "contradiction_count": 0,
+                "insufficient_evidence_rate": 0.0,
+                "all_insufficient": false,
+                "evidence_validation": [
+                  {
+                    "claim_id": "cl1",
+                    "context_id": "C1",
+                    "quote": "保修期内维修免费；保修期外维修需收取材料费和人工费。",
+                    "ok": true,
+                    "error": null
+                  },
+                  {
+                    "claim_id": "cl2",
+                    "context_id": "C1",
+                    "quote": "保修期内维修免费；保修期外维修需收取材料费和人工费。",
+                    "ok": true,
+                    "error": null
+                  },
+                  {
+                    "claim_id": "cl3",
+                    "context_id": "C1",
+                    "quote": "电子产品自签收之日起保修 12 个月，配件保修 3 个月。",
+                    "ok": true,
+                    "error": null
+                  },
+                  {
+                    "claim_id": "cl4",
+                    "context_id": "C1",
+                    "quote": "电子产品自签收之日起保修 12 个月，配件保修 3 个月。",
+                    "ok": true,
+                    "error": null
+                  },
+                  {
+                    "claim_id": "cl5",
+                    "context_id": "C1",
+                    "quote": "人为损坏、进水、私自拆修不在保修范围内。",
+                    "ok": true,
+                    "error": null
+                  }
+                ],
+                "evidence_validation_failed": false,
+                "validation_errors": []
+              },
+              "raw_output": "{\n  \"claims\": [\n    {\n      \"claim_id\": \"cl1\",\n      \"claim\": \"保修期内维修免费，不收取费用\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"保修期内维修免费；保修期外维修需收取材料费和人工费。\"}\n      ],\n      \"reason\": \"C1 原文\"\n    },\n    {\n      \"claim_id\": \"cl2\",\n      \"claim\": \"保修期外维修需收取材料费和人工费\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"保修期内维修免费；保修期外维修需收取材料费和人工费。\"}\n      ],\n      \"reason\": \"C1 原文\"\n    },\n    {\n      \"claim_id\": \"cl3\",\n      \"claim\": \"电子产品整机保修期为签收之日起12个月\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"电子产品自签收之日起保修 12 个月，配件保修 3 个月。\"}\n      ],\n      \"reason\": \"C1 原文\"\n    },\n    {\n      \"claim_id\": \"cl4\",\n      \"claim\": \"配件保修期为3个月\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"电子产品自签收之日起保修 12 个月，配件保修 3 个月。\"}\n      ],\n      \"reason\": \"C1 原文\"\n    },\n    {\n      \"claim_id\": \"cl5\",\n      \"claim\": \"人为损坏、进水、私自拆修等情况不属于保修范围，无论是否在保修期内均不享受免费维修服务\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"人为损坏、进水、私自拆修不在保修范围内。\"}\n      ],\n      \"reason\": \"C1 原文\"\n    }\n  ],\n  \"reason\": \"\"\n}",
+              "raw_truncated": false
+            },
+            {
+              "metric": "answer_correctness",
+              "status": "evaluated",
+              "score": 0.9,
+              "skipped_reason": null,
+              "latency_ms": 1435,
+              "error": null,
+              "judge_config": {
+                "agent": "rag_judge_answer_correctness",
+                "model": "qwen-max",
+                "temperature": 0.0,
+                "max_tokens": 8192,
+                "prompt_version": "v1.1.2",
+                "resolved_prompt_version": "v1.1.2",
+                "prompt_sha256": "2ab6eac2abe57dcfd647df328244ac3e5681fc93222938d6614e71037d49ae77",
+                "schema_version": "rag_judge_schema_v2",
+                "rubric_version": "v1.1.2",
+                "metric_version": "v2"
+              },
+              "token_usage": {
+                "input": 1899,
+                "output": 48
+              },
+              "cost": "0",
+              "details": {
+                "missing_points": [],
+                "wrong_facts": [],
+                "reason": "回答关键事实、条件与金标一致，且补充了正确的额外政策信息。"
+              },
+              "raw_output": "{\n  \"score\": 0.9,\n  \"missing_points\": [],\n  \"wrong_facts\": [],\n  \"reason\": \"回答关键事实、条件与金标一致，且补充了正确的额外政策信息。\"\n}",
+              "raw_truncated": false
+            },
+            {
+              "metric": "answer_relevancy",
+              "status": "evaluated",
+              "score": 0.9,
+              "skipped_reason": null,
+              "latency_ms": 1488,
+              "error": null,
+              "judge_config": {
+                "agent": "rag_judge_answer_relevancy",
+                "model": "qwen-max",
+                "temperature": 0.0,
+                "max_tokens": 8192,
+                "prompt_version": "v1.1.2",
+                "resolved_prompt_version": "v1.1.2",
+                "prompt_sha256": "0f8576b7dbf2e7ea1a02752680b0afe8c66677fe2eda823f4bcd28371ae4da84",
+                "schema_version": "rag_judge_schema_v2",
+                "rubric_version": "v1.1.2",
+                "metric_version": "v2"
+              },
+              "token_usage": {
+                "input": 1163,
+                "output": 41
+              },
+              "cost": "0",
+              "details": {
+                "reason": "回答完整回应了保修期内和保修期外的维修收费情况，并补充了相关的保修期限和例外情况。"
+              },
+              "raw_output": "{\n  \"score\": 0.9,\n  \"reason\": \"回答完整回应了保修期内和保修期外的维修收费情况，并补充了相关的保修期限和例外情况。\"\n}",
+              "raw_truncated": false
+            }
+          ]
+        }
+      },
+      "target_pass": true
+    },
+    {
+      "id": "Q19",
+      "category": "multi",
+      "question": "退款后优惠券会退回吗？",
+      "gold_answer": "优惠券若仍在有效期内会退回账户，已过期则不退回。",
+      "gold_source": "docs/repair/phase3e/human-gold.json",
+      "gold_status": "human_reviewed",
+      "human_gold": true,
+      "provisional": false,
+      "group": "human_gold",
+      "target_group": "human_gold",
+      "target": {},
+      "answer": "根据《售后服务政策（Phase 3E 验证文档 v2）》第9条“优惠券规则”：\n\n- **退款时，若优惠券仍在有效期内，会退回账户**；  \n- **若优惠券已过期，则不退回**。\n\n该规则未区分退款原因（如无理由退款或质量问题退款），仅以优惠券是否处于**领取后30天有效期内**为判断标准。例如：某优惠券于2026年11月1日领取，有效期至11月30日；若在11月15日完成退款，且该券尚未过期，则自动返还至原账户。\n\n注意：优惠券不可叠加使用，且不与会员折扣共享。",
+      "contexts": [
+        {
+          "document_id": "4ee02c53-d4d1-4364-8a24-30a614ead1f8",
+          "chunk_id": "c65abc80-f589-49de-9a1f-77ad2689bdb9",
+          "title": "phase3d_doc.md",
+          "content": "# 售后服务政策（Phase 3E 验证文档 v2）\n\n## 1. 退款时效\n\n订单签收后 7 天内可申请无理由退款。审核通过后，款项将在 1-3 个工作日内原路退回。\n定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。\n\n## 2. 退款流程\n\n在「我的订单」中选择退款，填写原因并上传凭证，商家会在 48 小时内审核。\n审核通过后按原支付渠道退回；审核驳回会显示原因，可补充材料后重新提交。\n\n## 3. 换货政策\n\n签收后 7 天内，商品未使用且包装完整可申请换货，同一订单仅支持一次换货。\n换货需先寄回原商品，商家收到并验收后 48 小时内寄出新品；运费由责任方承担。\n\n## 4. 发票说明\n\n仅支持电子发票，提交申请后 24 小时内发送至下单邮箱。\n发票抬头可在开具前修改；已开具的发票需先申请红冲，再重新开具。\n暂不支持纸质发票和增值税专用发票。\n\n## 5. 发货时效\n\n现货商品在付款后 48 小时内发出；预售商品以商品页标注的发货时间为准。\n大件商品（家具、家电）发货时间为 5 个工作日内，配送前会电话预约。\n\n## 6. 物流查询\n\n订单发货后可在「我的订单」查看物流单号与实时轨迹。\n物流信息超过 24 小时未更新时，可联系客服协助核查。\n\n## 7. 运费规则\n\n单笔订单实付满 99 元包邮；未满 99 元收取 10 元运费。\n新疆、西藏、内蒙古等偏远地区运费为 20 元，不参与包邮活动。\n因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。\n\n## 8. 保修政策\n\n电子产品自签收之日起保修 12 个月，配件保修 3 个月。\n人为损坏、进水、私自拆修不在保修范围内。\n保修期内维修免费；保修期外维修需收取材料费和人工费。\n\n## 9. 优惠券规则\n\n优惠券自领取之日起 30 天内有效，逾期自动失效。\n同一订单只能使用一张优惠券，不能与会员折扣叠加。\n退款时优惠券若仍在有效期内会退回账户，已过期则不退回。\n\n## 10. 会员积分\n\n消费 1 元积 1 分，100 积分可抵扣 1 元。\n积分自获得之日起 12 个月内有效，逾期清零。\n积分不可转让、不可提现，仅限本账户使用。\n\n## 11. 客服时间\n\n在线客服服务时间为每天 9:00-21:00。\n客服热线 400-800-1234，服务时间同上。\n非服务时间可留言，客服会在次日 12:00 前回复。\n\n## 12. 特殊商品\n\n生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。\n虚拟商品（充值、会员、课程）一经售出不支持退款。\n定制商品支持质量问题退换，不支持无理由退换。\n\n## 13. 收货信息修改\n\n订单发货前可在「我的订单」修改收货地址和联系电话。\n已发货订单无法修改地址，可联系快递拦截或申请改派。",
+          "score": 0.6609563128090855,
+          "rank": 1,
+          "metadata": {
+            "knowledge_base_id": "4ae8e147-6f76-4330-93f1-d2b3fef3d9ba",
+            "chunk_index": 0,
+            "chunk_type": "text",
+            "truncated": false
+          }
+        },
+        {
+          "document_id": "4ee02c53-d4d1-4364-8a24-30a614ead1f8",
+          "chunk_id": "70aed937-0495-4ef4-8cc0-de7f58b9dc4b",
+          "title": "phase3d_doc.md",
+          "content": "# Summary\n一份详述退款、换货、发票、发货、物流、运费、保修、优惠券、积分、客服及特殊商品售后规则的客户服务政策文件。\n\n该文档是Phase 3E验证版本的售后服务政策，系统规定了消费者在订单履约各环节享有的权益与限制。内容涵盖退款（时效、范围、流程）、换货、电子发票开具与修改、发货与物流管理、运费承担规则、电子产品及配件保修期限与免责情形、优惠券使用与退还逻辑、会员积分累积与有效期、客服响应机制，以及生鲜、虚拟、定制等特殊商品的差异化售后条款。所有条款均以消费者签收时间为关键节点，并明确责任归属（如质量问题由商家承担运费，非质量问题由买家承担），强调操作路径（如通过「我的订单」发起申请）和时效承诺（如审核48小时内、退款1–3个工作日）。",
+          "score": 0.6297857737320456,
+          "rank": 2,
+          "metadata": {
+            "knowledge_base_id": "4ae8e147-6f76-4330-93f1-d2b3fef3d9ba",
+            "chunk_index": 3,
+            "chunk_type": "summary",
+            "truncated": false
+          }
+        }
+      ],
+      "context_source": "agent_chat",
+      "model_config": {
+        "agent_id": "2c74bf39-bc41-4bf0-a64a-4a1f24721a46"
+      },
+      "answer_context_count": 2,
+      "arms": {
+        "v1.0.0": {
+          "arm": "v1.0.0",
+          "reused": false,
+          "wall_latency_ms": 12863,
+          "outcomes": [
+            {
+              "metric": "faithfulness",
+              "status": "evaluated",
+              "score": 0.6,
+              "skipped_reason": null,
+              "latency_ms": 9091,
+              "error": null,
+              "judge_config": {
+                "agent": "rag_judge_faithfulness",
+                "model": "qwen-max",
+                "temperature": 0.0,
+                "max_tokens": 8192,
+                "prompt_version": "v1.0.0",
+                "resolved_prompt_version": "v1.0.0",
+                "prompt_sha256": "287053e9e67ad29fd2de597d1052b8d418040097910462e4a0f176b14295bfed",
+                "schema_version": "rag_judge_schema_v1",
+                "rubric_version": "v1.0.0",
+                "metric_version": "v1"
+              },
+              "token_usage": {
+                "input": 1570,
+                "output": 408
+              },
+              "cost": "0",
+              "details": {
+                "claims": [
+                  {
+                    "claim": "根据《售后服务政策（Phase 3E 验证文档 v2）》第9条“优惠券规则”：退款时，若优惠券仍在有效期内，会退回账户。",
+                    "supported": true,
+                    "evidence": [
+                      "退款时优惠券若仍在有效期内会退回账户，已过期则不退回。"
+                    ],
+                    "reason": "上下文明确说明了该规则。",
+                    "claim_id": null,
+                    "claim_type": "factual_claim",
+                    "claim_subtype": null,
+                    "support_status": null,
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": []
+                  },
+                  {
+                    "claim": "若优惠券已过期，则不退回。",
+                    "supported": true,
+                    "evidence": [
+                      "退款时优惠券若仍在有效期内会退回账户，已过期则不退回。"
+                    ],
+                    "reason": "上下文明确说明了该规则。",
+                    "claim_id": null,
+                    "claim_type": "factual_claim",
+                    "claim_subtype": null,
+                    "support_status": null,
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": []
+                  },
+                  {
+                    "claim": "该规则未区分退款原因（如无理由退款或质量问题退款），仅以优惠券是否处于领取后30天有效期内为判断标准。",
+                    "supported": false,
+                    "evidence": [],
+                    "reason": "上下文没有提到关于退款原因的具体区分情况。",
+                    "claim_id": null,
+                    "claim_type": "factual_claim",
+                    "claim_subtype": null,
+                    "support_status": null,
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": []
+                  },
+                  {
+                    "claim": "例如：某优惠券于2026年11月1日领取，有效期至11月30日；若在11月15日完成退款，且该券尚未过期，则自动返还至原账户。",
+                    "supported": false,
+                    "evidence": [],
+                    "reason": "上下文没有提供具体的例子来支持这个陈述。",
+                    "claim_id": null,
+                    "claim_type": "factual_claim",
+                    "claim_subtype": null,
+                    "support_status": null,
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": []
+                  },
+                  {
+                    "claim": "优惠券不可叠加使用，且不与会员折扣共享。",
+                    "supported": true,
+                    "evidence": [
+                      "同一订单只能使用一张优惠券，不能与会员折扣叠加。"
+                    ],
+                    "reason": "上下文明确说明了该规则。",
+                    "claim_id": null,
+                    "claim_type": "factual_claim",
+                    "claim_subtype": null,
+                    "support_status": null,
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": []
+                  }
+                ],
+                "supported_count": 3,
+                "claim_count": 5,
+                "reason": ""
+              },
+              "raw_output": "{\n  \"claims\": [\n    {\n      \"claim\": \"根据《售后服务政策（Phase 3E 验证文档 v2）》第9条“优惠券规则”：退款时，若优惠券仍在有效期内，会退回账户。\",\n      \"supported\": true,\n      \"evidence\": [\n        \"退款时优惠券若仍在有效期内会退回账户，已过期则不退回。\"\n      ],\n      \"reason\": \"上下文明确说明了该规则。\"\n    },\n    {\n      \"claim\": \"若优惠券已过期，则不退回。\",\n      \"supported\": true,\n      \"evidence\": [\n        \"退款时优惠券若仍在有效期内会退回账户，已过期则不退回。\"\n      ],\n      \"reason\": \"上下文明确说明了该规则。\"\n    },\n    {\n      \"claim\": \"该规则未区分退款原因（如无理由退款或质量问题退款），仅以优惠券是否处于领取后30天有效期内为判断标准。\",\n      \"supported\": false,\n      \"evidence\": [],\n      \"reason\": \"上下文没有提到关于退款原因的具体区分情况。\"\n    },\n    {\n      \"claim\": \"例如：某优惠券于2026年11月1日领取，有效期至11月30日；若在11月15日完成退款，且该券尚未过期，则自动返还至原账户。\",\n      \"supported\": false,\n      \"evidence\": [],\n      \"reason\": \"上下文没有提供具体的例子来支持这个陈述。\"\n    },\n    {\n      \"claim\": \"优惠券不可叠加使用，且不与会员折扣共享。\",\n      \"supported\": true,\n      \"evidence\": [\n        \"同一订单只能使用一张优惠券，不能与会员折扣叠加。\"\n      ],\n      \"reason\": \"上下文明确说明了该规则。\"\n    }\n  ],\n  \"reason\": \"\"\n}",
+              "raw_truncated": false
+            },
+            {
+              "metric": "answer_correctness",
+              "status": "evaluated",
+              "score": 0.9,
+              "skipped_reason": null,
+              "latency_ms": 2436,
+              "error": null,
+              "judge_config": {
+                "agent": "rag_judge_answer_correctness",
+                "model": "qwen-max",
+                "temperature": 0.0,
+                "max_tokens": 8192,
+                "prompt_version": "v1.0.0",
+                "resolved_prompt_version": "v1.0.0",
+                "prompt_sha256": "106e11f2bc39806da5ecf090c6dbcd94d81ca5f53b968e5055d5a33833b30f94",
+                "schema_version": "rag_judge_schema_v1",
+                "rubric_version": "v1.0.0",
+                "metric_version": "v1"
+              },
+              "token_usage": {
+                "input": 526,
+                "output": 62
+              },
+              "cost": "0",
+              "details": {
+                "missing_points": [],
+                "wrong_facts": [],
+                "reason": "回答基本正确，但包含了一些额外的信息，如具体的优惠券有效期和使用规则，这些信息虽然没有错误，但不在金标答案中。"
+              },
+              "raw_output": "{\n  \"score\": 0.9,\n  \"missing_points\": [],\n  \"wrong_facts\": [],\n  \"reason\": \"回答基本正确，但包含了一些额外的信息，如具体的优惠券有效期和使用规则，这些信息虽然没有错误，但不在金标答案中。\"\n}",
+              "raw_truncated": false
+            },
+            {
+              "metric": "answer_relevancy",
+              "status": "evaluated",
+              "score": 1.0,
+              "skipped_reason": null,
+              "latency_ms": 1333,
+              "error": null,
+              "judge_config": {
+                "agent": "rag_judge_answer_relevancy",
+                "model": "qwen-max",
+                "temperature": 0.0,
+                "max_tokens": 8192,
+                "prompt_version": "v1.0.0",
+                "resolved_prompt_version": "v1.0.0",
+                "prompt_sha256": "27203126964ae0ca8f0bb8641cb3c2b145605cec706ef47c5432a0bbd6fad141",
+                "schema_version": "rag_judge_schema_v1",
+                "rubric_version": "v1.0.0",
+                "metric_version": "v1"
+              },
+              "token_usage": {
+                "input": 413,
+                "output": 38
+              },
+              "cost": "0",
+              "details": {
+                "reason": "直接、完整地回答了退款后优惠券是否会退回的问题，并提供了详细规则和示例。"
+              },
+              "raw_output": "{\n  \"score\": 1.0,\n  \"reason\": \"直接、完整地回答了退款后优惠券是否会退回的问题，并提供了详细规则和示例。\"\n}",
+              "raw_truncated": false
+            }
+          ]
+        },
+        "v1.1.2": {
+          "arm": "v1.1.2",
+          "reused": false,
+          "wall_latency_ms": 28749,
+          "outcomes": [
+            {
+              "metric": "faithfulness",
+              "status": "evaluated",
+              "score": 1.0,
+              "skipped_reason": null,
+              "latency_ms": 25115,
+              "error": null,
+              "judge_config": {
+                "agent": "rag_judge_faithfulness",
+                "model": "qwen-max",
+                "temperature": 0.0,
+                "max_tokens": 8192,
+                "prompt_version": "v1.1.2",
+                "resolved_prompt_version": "v1.1.2",
+                "prompt_sha256": "e95f04b556dd1a86e7abfbdd5dad75d3b834628490cdf460adb608dd02713b30",
+                "schema_version": "rag_judge_schema_v2",
+                "rubric_version": "v1.1.2",
+                "metric_version": "v2"
+              },
+              "token_usage": {
+                "input": 8582,
+                "output": 848
+              },
+              "cost": "0",
+              "details": {
+                "claims": [
+                  {
+                    "claim": "退款时，若优惠券仍在有效期内，会退回账户",
+                    "supported": null,
+                    "evidence": [],
+                    "reason": "C1 单句原文",
+                    "claim_id": "cl1",
+                    "claim_type": "factual_claim",
+                    "claim_subtype": "policy",
+                    "support_status": "supported",
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": [
+                      {
+                        "context_id": "C1",
+                        "quote": "退款时优惠券若仍在有效期内会退回账户，已过期则不退回。"
+                      }
+                    ]
+                  },
+                  {
+                    "claim": "若优惠券已过期，则不退回",
+                    "supported": null,
+                    "evidence": [],
+                    "reason": "C1 单句原文",
+                    "claim_id": "cl2",
+                    "claim_type": "factual_claim",
+                    "claim_subtype": "policy",
+                    "support_status": "supported",
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": [
+                      {
+                        "context_id": "C1",
+                        "quote": "退款时优惠券若仍在有效期内会退回账户，已过期则不退回。"
+                      }
+                    ]
+                  },
+                  {
+                    "claim": "该规则未区分退款原因（如无理由退款或质量问题退款）",
+                    "supported": null,
+                    "evidence": [],
+                    "reason": "C1 未提及退款原因",
+                    "claim_id": "cl3",
+                    "claim_type": "factual_claim",
+                    "claim_subtype": "policy",
+                    "support_status": "supported",
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": [
+                      {
+                        "context_id": "C1",
+                        "quote": "退款时优惠券若仍在有效期内会退回账户，已过期则不退回。"
+                      }
+                    ]
+                  },
+                  {
+                    "claim": "仅以优惠券是否处于领取后30天有效期内为判断标准",
+                    "supported": null,
+                    "evidence": [],
+                    "reason": "C1 单句原文",
+                    "claim_id": "cl4",
+                    "claim_type": "factual_claim",
+                    "claim_subtype": "policy",
+                    "support_status": "supported",
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": [
+                      {
+                        "context_id": "C1",
+                        "quote": "优惠券自领取之日起 30 天内有效，逾期自动失效。"
+                      }
+                    ]
+                  },
+                  {
+                    "claim": "某优惠券于2026年11月1日领取，有效期至11月30日；若在11月15日完成退款，且该券尚未过期，则自动返还至原账户",
+                    "supported": null,
+                    "evidence": [],
+                    "reason": "两条单句原文共同推出",
+                    "claim_id": "cl5",
+                    "claim_type": "factual_claim",
+                    "claim_subtype": "policy",
+                    "support_status": "supported",
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": [
+                      {
+                        "context_id": "C1",
+                        "quote": "退款时优惠券若仍在有效期内会退回账户，已过期则不退回。"
+                      },
+                      {
+                        "context_id": "C1",
+                        "quote": "优惠券自领取之日起 30 天内有效，逾期自动失效。"
+                      }
+                    ]
+                  },
+                  {
+                    "claim": "优惠券不可叠加使用，且不与会员折扣共享",
+                    "supported": null,
+                    "evidence": [],
+                    "reason": "C1 单句原文",
+                    "claim_id": "cl6",
+                    "claim_type": "factual_claim",
+                    "claim_subtype": "policy",
+                    "support_status": "supported",
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": [
+                      {
+                        "context_id": "C1",
+                        "quote": "同一订单只能使用一张优惠券，不能与会员折扣叠加。"
+                      }
+                    ]
+                  }
+                ],
+                "reason": "",
+                "claim_count": 6,
+                "scorable_claim_count": 6,
+                "supported_count": 6,
+                "supported_claim_count": 6,
+                "unsupported_claim_count": 0,
+                "insufficient_evidence_count": 0,
+                "non_factual_count": 0,
+                "absence_count": 0,
+                "document_conflict": false,
+                "document_conflict_count": 0,
+                "contradiction_count": 0,
+                "insufficient_evidence_rate": 0.0,
+                "all_insufficient": false,
+                "evidence_validation": [
+                  {
+                    "claim_id": "cl1",
+                    "context_id": "C1",
+                    "quote": "退款时优惠券若仍在有效期内会退回账户，已过期则不退回。",
+                    "ok": true,
+                    "error": null
+                  },
+                  {
+                    "claim_id": "cl2",
+                    "context_id": "C1",
+                    "quote": "退款时优惠券若仍在有效期内会退回账户，已过期则不退回。",
+                    "ok": true,
+                    "error": null
+                  },
+                  {
+                    "claim_id": "cl3",
+                    "context_id": "C1",
+                    "quote": "退款时优惠券若仍在有效期内会退回账户，已过期则不退回。",
+                    "ok": true,
+                    "error": null
+                  },
+                  {
+                    "claim_id": "cl4",
+                    "context_id": "C1",
+                    "quote": "优惠券自领取之日起 30 天内有效，逾期自动失效。",
+                    "ok": true,
+                    "error": null
+                  },
+                  {
+                    "claim_id": "cl5",
+                    "context_id": "C1",
+                    "quote": "退款时优惠券若仍在有效期内会退回账户，已过期则不退回。",
+                    "ok": true,
+                    "error": null
+                  },
+                  {
+                    "claim_id": "cl5",
+                    "context_id": "C1",
+                    "quote": "优惠券自领取之日起 30 天内有效，逾期自动失效。",
+                    "ok": true,
+                    "error": null
+                  },
+                  {
+                    "claim_id": "cl6",
+                    "context_id": "C1",
+                    "quote": "同一订单只能使用一张优惠券，不能与会员折扣叠加。",
+                    "ok": true,
+                    "error": null
+                  }
+                ],
+                "evidence_validation_failed": false,
+                "validation_errors": []
+              },
+              "raw_output": "{\n  \"claims\": [\n    {\n      \"claim_id\": \"cl1\",\n      \"claim\": \"退款时，若优惠券仍在有效期内，会退回账户\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"退款时优惠券若仍在有效期内会退回账户，已过期则不退回。\"}\n      ],\n      \"reason\": \"C1 单句原文\"\n    },\n    {\n      \"claim_id\": \"cl2\",\n      \"claim\": \"若优惠券已过期，则不退回\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"退款时优惠券若仍在有效期内会退回账户，已过期则不退回。\"}\n      ],\n      \"reason\": \"C1 单句原文\"\n    },\n    {\n      \"claim_id\": \"cl3\",\n      \"claim\": \"该规则未区分退款原因（如无理由退款或质量问题退款）\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"退款时优惠券若仍在有效期内会退回账户，已过期则不退回。\"}\n      ],\n      \"reason\": \"C1 未提及退款原因\"\n    },\n    {\n      \"claim_id\": \"cl4\",\n      \"claim\": \"仅以优惠券是否处于领取后30天有效期内为判断标准\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"优惠券自领取之日起 30 天内有效，逾期自动失效。\"}\n      ],\n      \"reason\": \"C1 单句原文\"\n    },\n    {\n      \"claim_id\": \"cl5\",\n      \"claim\": \"某优惠券于2026年11月1日领取，有效期至11月30日；若在11月15日完成退款，且该券尚未过期，则自动返还至原账户\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"退款时优惠券若仍在有效期内会退回账户，已过期则不退回。\"},\n        {\"context_id\": \"C1\", \"quote\": \"优惠券自领取之日起 30 天内有效，逾期自动失效。\"}\n      ],\n      \"reason\": \"两条单句原文共同推出\"\n    },\n    {\n      \"claim_id\": \"cl6\",\n      \"claim\": \"优惠券不可叠加使用，且不与会员折扣共享\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"同一订单只能使用一张优惠券，不能与会员折扣叠加。\"}\n      ],\n      \"reason\": \"C1 单句原文\"\n    }\n  ],\n  \"reason\": \"\"\n}",
+              "raw_truncated": false
+            },
+            {
+              "metric": "answer_correctness",
+              "status": "evaluated",
+              "score": 0.9,
+              "skipped_reason": null,
+              "latency_ms": 2238,
+              "error": null,
+              "judge_config": {
+                "agent": "rag_judge_answer_correctness",
+                "model": "qwen-max",
+                "temperature": 0.0,
+                "max_tokens": 8192,
+                "prompt_version": "v1.1.2",
+                "resolved_prompt_version": "v1.1.2",
+                "prompt_sha256": "2ab6eac2abe57dcfd647df328244ac3e5681fc93222938d6614e71037d49ae77",
+                "schema_version": "rag_judge_schema_v2",
+                "rubric_version": "v1.1.2",
+                "metric_version": "v2"
+              },
+              "token_usage": {
+                "input": 1926,
+                "output": 60
+              },
+              "cost": "0",
+              "details": {
+                "missing_points": [],
+                "wrong_facts": [],
+                "reason": "回答关键事实与金标一致，且补充了有效期内的具体例子和额外的优惠券使用规则，这些补充内容正确且相关。"
+              },
+              "raw_output": "{\n  \"score\": 0.9,\n  \"missing_points\": [],\n  \"wrong_facts\": [],\n  \"reason\": \"回答关键事实与金标一致，且补充了有效期内的具体例子和额外的优惠券使用规则，这些补充内容正确且相关。\"\n}",
+              "raw_truncated": false
+            },
+            {
+              "metric": "answer_relevancy",
+              "status": "evaluated",
+              "score": 0.9,
+              "skipped_reason": null,
+              "latency_ms": 1393,
+              "error": null,
+              "judge_config": {
+                "agent": "rag_judge_answer_relevancy",
+                "model": "qwen-max",
+                "temperature": 0.0,
+                "max_tokens": 8192,
+                "prompt_version": "v1.1.2",
+                "resolved_prompt_version": "v1.1.2",
+                "prompt_sha256": "0f8576b7dbf2e7ea1a02752680b0afe8c66677fe2eda823f4bcd28371ae4da84",
+                "schema_version": "rag_judge_schema_v2",
+                "rubric_version": "v1.1.2",
+                "metric_version": "v2"
+              },
+              "token_usage": {
+                "input": 1190,
+                "output": 40
+              },
+              "cost": "0",
+              "details": {
+                "reason": "回答详细解释了退款后优惠券是否会退回的条件，并提供了具体示例，完整回应了问题。"
+              },
+              "raw_output": "{\n  \"score\": 0.9,\n  \"reason\": \"回答详细解释了退款后优惠券是否会退回的条件，并提供了具体示例，完整回应了问题。\"\n}",
+              "raw_truncated": false
+            }
+          ]
+        }
+      },
+      "target_pass": true
+    },
+    {
+      "id": "Q20",
+      "category": "multi",
+      "question": "会员积分怎么获得、怎么抵扣、有效期多久？",
+      "gold_answer": "消费 1 元积 1 分，100 积分可抵扣 1 元；积分自获得之日起 12 个月内有效。",
+      "gold_source": "docs/repair/phase3e/candidates.json (AI draft, pending human)",
+      "gold_status": "ai_draft_pending_human",
+      "human_gold": false,
+      "provisional": true,
+      "group": "provisional",
+      "target_group": "provisional",
+      "target": {
+        "F": [
+          0.6,
+          1.0
+        ],
+        "C": [
+          0.8,
+          1.0
+        ],
+        "R": [
+          0.8,
+          1.0
+        ]
+      },
+      "answer": "根据《售后服务政策（Phase 3E 验证文档 v2）》：\n\n- **获得方式**：消费 1 元积 1 分   \n- **抵扣规则**：100 积分可抵扣 1 元   \n- **有效期**：积分自获得之日起 12 个月内有效，逾期自动清零   \n- **其他限制**：积分不可转让、不可提现，仅限本账户使用 \n\n注：该政策适用于所有符合积分累积条件的订单，不区分商品类型（生鲜、虚拟、定制等特殊商品未在积分条款中被排除）。",
+      "contexts": [
+        {
+          "document_id": "4ee02c53-d4d1-4364-8a24-30a614ead1f8",
+          "chunk_id": "c65abc80-f589-49de-9a1f-77ad2689bdb9",
+          "title": "phase3d_doc.md",
+          "content": "# 售后服务政策（Phase 3E 验证文档 v2）\n\n## 1. 退款时效\n\n订单签收后 7 天内可申请无理由退款。审核通过后，款项将在 1-3 个工作日内原路退回。\n定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。\n\n## 2. 退款流程\n\n在「我的订单」中选择退款，填写原因并上传凭证，商家会在 48 小时内审核。\n审核通过后按原支付渠道退回；审核驳回会显示原因，可补充材料后重新提交。\n\n## 3. 换货政策\n\n签收后 7 天内，商品未使用且包装完整可申请换货，同一订单仅支持一次换货。\n换货需先寄回原商品，商家收到并验收后 48 小时内寄出新品；运费由责任方承担。\n\n## 4. 发票说明\n\n仅支持电子发票，提交申请后 24 小时内发送至下单邮箱。\n发票抬头可在开具前修改；已开具的发票需先申请红冲，再重新开具。\n暂不支持纸质发票和增值税专用发票。\n\n## 5. 发货时效\n\n现货商品在付款后 48 小时内发出；预售商品以商品页标注的发货时间为准。\n大件商品（家具、家电）发货时间为 5 个工作日内，配送前会电话预约。\n\n## 6. 物流查询\n\n订单发货后可在「我的订单」查看物流单号与实时轨迹。\n物流信息超过 24 小时未更新时，可联系客服协助核查。\n\n## 7. 运费规则\n\n单笔订单实付满 99 元包邮；未满 99 元收取 10 元运费。\n新疆、西藏、内蒙古等偏远地区运费为 20 元，不参与包邮活动。\n因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。\n\n## 8. 保修政策\n\n电子产品自签收之日起保修 12 个月，配件保修 3 个月。\n人为损坏、进水、私自拆修不在保修范围内。\n保修期内维修免费；保修期外维修需收取材料费和人工费。\n\n## 9. 优惠券规则\n\n优惠券自领取之日起 30 天内有效，逾期自动失效。\n同一订单只能使用一张优惠券，不能与会员折扣叠加。\n退款时优惠券若仍在有效期内会退回账户，已过期则不退回。\n\n## 10. 会员积分\n\n消费 1 元积 1 分，100 积分可抵扣 1 元。\n积分自获得之日起 12 个月内有效，逾期清零。\n积分不可转让、不可提现，仅限本账户使用。\n\n## 11. 客服时间",
+          "score": 0.6114763781429449,
+          "rank": 1,
+          "metadata": {
+            "knowledge_base_id": "4ae8e147-6f76-4330-93f1-d2b3fef3d9ba",
+            "chunk_index": 0,
+            "chunk_type": "text",
+            "truncated": false
+          }
+        },
+        {
+          "document_id": "4ee02c53-d4d1-4364-8a24-30a614ead1f8",
+          "chunk_id": "70aed937-0495-4ef4-8cc0-de7f58b9dc4b",
+          "title": "phase3d_doc.md",
+          "content": "# Summary\n一份详述退款、换货、发票、发货、物流、运费、保修、优惠券、积分、客服及特殊商品售后规则的客户服务政策文件。\n\n该文档是Phase 3E验证版本的售后服务政策，系统规定了消费者在订单履约各环节享有的权益与限制。内容涵盖退款（时效、范围、流程）、换货、电子发票开具与修改、发货与物流管理、运费承担规则、电子产品及配件保修期限与免责情形、优惠券使用与退还逻辑、会员积分累积与有效期、客服响应机制，以及生鲜、虚拟、定制等特殊商品的差异化售后条款。所有条款均以消费者签收时间为关键节点，并明确责任归属（如质量问题由商家承担运费，非质量问题由买家承担），强调操作路径（如通过「我的订单」发起申请）和时效承诺（如审核48小时内、退款1–3个工作日）。",
+          "score": 0.5214271449758048,
+          "rank": 2,
+          "metadata": {
+            "knowledge_base_id": "4ae8e147-6f76-4330-93f1-d2b3fef3d9ba",
+            "chunk_index": 3,
+            "chunk_type": "summary",
+            "truncated": false
+          }
+        }
+      ],
+      "context_source": "agent_chat",
+      "model_config": {
+        "agent_id": "2c74bf39-bc41-4bf0-a64a-4a1f24721a46"
+      },
+      "answer_context_count": 2,
+      "arms": {
+        "v1.0.0": {
+          "arm": "v1.0.0",
+          "reused": false,
+          "wall_latency_ms": 9667,
+          "outcomes": [
+            {
+              "metric": "faithfulness",
+              "status": "evaluated",
+              "score": 1.0,
+              "skipped_reason": null,
+              "latency_ms": 6809,
+              "error": null,
+              "judge_config": {
+                "agent": "rag_judge_faithfulness",
+                "model": "qwen-max",
+                "temperature": 0.0,
+                "max_tokens": 8192,
+                "prompt_version": "v1.0.0",
+                "resolved_prompt_version": "v1.0.0",
+                "prompt_sha256": "287053e9e67ad29fd2de597d1052b8d418040097910462e4a0f176b14295bfed",
+                "schema_version": "rag_judge_schema_v1",
+                "rubric_version": "v1.0.0",
+                "metric_version": "v1"
+              },
+              "token_usage": {
+                "input": 1367,
+                "output": 309
+              },
+              "cost": "0",
+              "details": {
+                "claims": [
+                  {
+                    "claim": "消费 1 元积 1 分",
+                    "supported": true,
+                    "evidence": [
+                      "消费 1 元积 1 分，100 积分可抵扣 1 元。"
+                    ],
+                    "reason": "上下文明确说明了消费 1 元积 1 分",
+                    "claim_id": null,
+                    "claim_type": "factual_claim",
+                    "claim_subtype": null,
+                    "support_status": null,
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": []
+                  },
+                  {
+                    "claim": "100 积分可抵扣 1 元",
+                    "supported": true,
+                    "evidence": [
+                      "消费 1 元积 1 分，100 积分可抵扣 1 元。"
+                    ],
+                    "reason": "上下文明确说明了 100 积分可抵扣 1 元",
+                    "claim_id": null,
+                    "claim_type": "factual_claim",
+                    "claim_subtype": null,
+                    "support_status": null,
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": []
+                  },
+                  {
+                    "claim": "积分自获得之日起 12 个月内有效，逾期自动清零",
+                    "supported": true,
+                    "evidence": [
+                      "积分自获得之日起 12 个月内有效，逾期清零。"
+                    ],
+                    "reason": "上下文明确说明了积分的有效期和清零规则",
+                    "claim_id": null,
+                    "claim_type": "factual_claim",
+                    "claim_subtype": null,
+                    "support_status": null,
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": []
+                  },
+                  {
+                    "claim": "积分不可转让、不可提现，仅限本账户使用",
+                    "supported": true,
+                    "evidence": [
+                      "积分不可转让、不可提现，仅限本账户使用。"
+                    ],
+                    "reason": "上下文明确说明了积分的使用限制",
+                    "claim_id": null,
+                    "claim_type": "factual_claim",
+                    "claim_subtype": null,
+                    "support_status": null,
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": []
+                  }
+                ],
+                "supported_count": 4,
+                "claim_count": 4,
+                "reason": ""
+              },
+              "raw_output": "{\n  \"claims\": [\n    {\n      \"claim\": \"消费 1 元积 1 分\",\n      \"supported\": true,\n      \"evidence\": [\"消费 1 元积 1 分，100 积分可抵扣 1 元。\"],\n      \"reason\": \"上下文明确说明了消费 1 元积 1 分\"\n    },\n    {\n      \"claim\": \"100 积分可抵扣 1 元\",\n      \"supported\": true,\n      \"evidence\": [\"消费 1 元积 1 分，100 积分可抵扣 1 元。\"],\n      \"reason\": \"上下文明确说明了 100 积分可抵扣 1 元\"\n    },\n    {\n      \"claim\": \"积分自获得之日起 12 个月内有效，逾期自动清零\",\n      \"supported\": true,\n      \"evidence\": [\"积分自获得之日起 12 个月内有效，逾期清零。\"],\n      \"reason\": \"上下文明确说明了积分的有效期和清零规则\"\n    },\n    {\n      \"claim\": \"积分不可转让、不可提现，仅限本账户使用\",\n      \"supported\": true,\n      \"evidence\": [\"积分不可转让、不可提现，仅限本账户使用。\"],\n      \"reason\": \"上下文明确说明了积分的使用限制\"\n    }\n  ],\n  \"reason\": \"\"\n}",
+              "raw_truncated": false
+            },
+            {
+              "metric": "answer_correctness",
+              "status": "evaluated",
+              "score": 0.9,
+              "skipped_reason": null,
+              "latency_ms": 1709,
+              "error": null,
+              "judge_config": {
+                "agent": "rag_judge_answer_correctness",
+                "model": "qwen-max",
+                "temperature": 0.0,
+                "max_tokens": 8192,
+                "prompt_version": "v1.0.0",
+                "resolved_prompt_version": "v1.0.0",
+                "prompt_sha256": "106e11f2bc39806da5ecf090c6dbcd94d81ca5f53b968e5055d5a33833b30f94",
+                "schema_version": "rag_judge_schema_v1",
+                "rubric_version": "v1.0.0",
+                "metric_version": "v1"
+              },
+              "token_usage": {
+                "input": 522,
+                "output": 49
+              },
+              "cost": "0",
+              "details": {
+                "missing_points": [],
+                "wrong_facts": [],
+                "reason": "回答包含了一些额外的限制条件，但这些信息并未在金标答案中提到。"
+              },
+              "raw_output": "{\n  \"score\": 0.9,\n  \"missing_points\": [],\n  \"wrong_facts\": [],\n  \"reason\": \"回答包含了一些额外的限制条件，但这些信息并未在金标答案中提到。\"\n}",
+              "raw_truncated": false
+            },
+            {
+              "metric": "answer_relevancy",
+              "status": "evaluated",
+              "score": 1.0,
+              "skipped_reason": null,
+              "latency_ms": 1146,
+              "error": null,
+              "judge_config": {
+                "agent": "rag_judge_answer_relevancy",
+                "model": "qwen-max",
+                "temperature": 0.0,
+                "max_tokens": 8192,
+                "prompt_version": "v1.0.0",
+                "resolved_prompt_version": "v1.0.0",
+                "prompt_sha256": "27203126964ae0ca8f0bb8641cb3c2b145605cec706ef47c5432a0bbd6fad141",
+                "schema_version": "rag_judge_schema_v1",
+                "rubric_version": "v1.0.0",
+                "metric_version": "v1"
+              },
+              "token_usage": {
+                "input": 391,
+                "output": 31
+              },
+              "cost": "0",
+              "details": {
+                "reason": "回答直接且完整地涵盖了获得方式、抵扣规则和有效期"
+              },
+              "raw_output": "{\n  \"score\": 1.0,\n  \"reason\": \"回答直接且完整地涵盖了获得方式、抵扣规则和有效期\"\n}",
+              "raw_truncated": false
+            }
+          ]
+        },
+        "v1.1.2": {
+          "arm": "v1.1.2",
+          "reused": false,
+          "wall_latency_ms": 21771,
+          "outcomes": [
+            {
+              "metric": "faithfulness",
+              "status": "evaluated",
+              "score": 0.8,
+              "skipped_reason": null,
+              "latency_ms": 18389,
+              "error": null,
+              "judge_config": {
+                "agent": "rag_judge_faithfulness",
+                "model": "qwen-max",
+                "temperature": 0.0,
+                "max_tokens": 8192,
+                "prompt_version": "v1.1.2",
+                "resolved_prompt_version": "v1.1.2",
+                "prompt_sha256": "e95f04b556dd1a86e7abfbdd5dad75d3b834628490cdf460adb608dd02713b30",
+                "schema_version": "rag_judge_schema_v2",
+                "rubric_version": "v1.1.2",
+                "metric_version": "v2"
+              },
+              "token_usage": {
+                "input": 8379,
+                "output": 646
+              },
+              "cost": "0",
+              "details": {
+                "claims": [
+                  {
+                    "claim": "消费 1 元积 1 分",
+                    "supported": null,
+                    "evidence": [],
+                    "reason": "C1 单句原文",
+                    "claim_id": "cl1",
+                    "claim_type": "factual_claim",
+                    "claim_subtype": "policy",
+                    "support_status": "supported",
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": [
+                      {
+                        "context_id": "C1",
+                        "quote": "消费 1 元积 1 分，100 积分可抵扣 1 元。"
+                      }
+                    ]
+                  },
+                  {
+                    "claim": "100 积分可抵扣 1 元",
+                    "supported": null,
+                    "evidence": [],
+                    "reason": "C1 单句原文",
+                    "claim_id": "cl2",
+                    "claim_type": "factual_claim",
+                    "claim_subtype": "policy",
+                    "support_status": "supported",
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": [
+                      {
+                        "context_id": "C1",
+                        "quote": "消费 1 元积 1 分，100 积分可抵扣 1 元。"
+                      }
+                    ]
+                  },
+                  {
+                    "claim": "积分自获得之日起 12 个月内有效，逾期自动清零",
+                    "supported": null,
+                    "evidence": [],
+                    "reason": "C1 单句原文",
+                    "claim_id": "cl3",
+                    "claim_type": "factual_claim",
+                    "claim_subtype": "policy",
+                    "support_status": "supported",
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": [
+                      {
+                        "context_id": "C1",
+                        "quote": "积分自获得之日起 12 个月内有效，逾期清零。"
+                      }
+                    ]
+                  },
+                  {
+                    "claim": "积分不可转让、不可提现，仅限本账户使用",
+                    "supported": null,
+                    "evidence": [],
+                    "reason": "C1 单句原文",
+                    "claim_id": "cl4",
+                    "claim_type": "factual_claim",
+                    "claim_subtype": "policy",
+                    "support_status": "supported",
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": [
+                      {
+                        "context_id": "C1",
+                        "quote": "积分不可转让、不可提现，仅限本账户使用。"
+                      }
+                    ]
+                  },
+                  {
+                    "claim": "该政策适用于所有符合积分累积条件的订单，不区分商品类型（生鲜、虚拟、定制等特殊商品未在积分条款中被排除）",
+                    "supported": null,
+                    "evidence": [],
+                    "reason": "上下文未明确提及特殊商品是否排除",
+                    "claim_id": "cl5",
+                    "claim_type": "factual_claim",
+                    "claim_subtype": "policy",
+                    "support_status": "insufficient_evidence",
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": []
+                  }
+                ],
+                "reason": "",
+                "claim_count": 5,
+                "scorable_claim_count": 5,
+                "supported_count": 4,
+                "supported_claim_count": 4,
+                "unsupported_claim_count": 0,
+                "insufficient_evidence_count": 1,
+                "non_factual_count": 0,
+                "absence_count": 0,
+                "document_conflict": false,
+                "document_conflict_count": 0,
+                "contradiction_count": 0,
+                "insufficient_evidence_rate": 0.2,
+                "all_insufficient": false,
+                "evidence_validation": [
+                  {
+                    "claim_id": "cl1",
+                    "context_id": "C1",
+                    "quote": "消费 1 元积 1 分，100 积分可抵扣 1 元。",
+                    "ok": true,
+                    "error": null
+                  },
+                  {
+                    "claim_id": "cl2",
+                    "context_id": "C1",
+                    "quote": "消费 1 元积 1 分，100 积分可抵扣 1 元。",
+                    "ok": true,
+                    "error": null
+                  },
+                  {
+                    "claim_id": "cl3",
+                    "context_id": "C1",
+                    "quote": "积分自获得之日起 12 个月内有效，逾期清零。",
+                    "ok": true,
+                    "error": null
+                  },
+                  {
+                    "claim_id": "cl4",
+                    "context_id": "C1",
+                    "quote": "积分不可转让、不可提现，仅限本账户使用。",
+                    "ok": true,
+                    "error": null
+                  }
+                ],
+                "evidence_validation_failed": false,
+                "validation_errors": []
+              },
+              "raw_output": "{\n  \"claims\": [\n    {\n      \"claim_id\": \"cl1\",\n      \"claim\": \"消费 1 元积 1 分\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"消费 1 元积 1 分，100 积分可抵扣 1 元。\"}\n      ],\n      \"reason\": \"C1 单句原文\"\n    },\n    {\n      \"claim_id\": \"cl2\",\n      \"claim\": \"100 积分可抵扣 1 元\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"消费 1 元积 1 分，100 积分可抵扣 1 元。\"}\n      ],\n      \"reason\": \"C1 单句原文\"\n    },\n    {\n      \"claim_id\": \"cl3\",\n      \"claim\": \"积分自获得之日起 12 个月内有效，逾期自动清零\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"积分自获得之日起 12 个月内有效，逾期清零。\"}\n      ],\n      \"reason\": \"C1 单句原文\"\n    },\n    {\n      \"claim_id\": \"cl4\",\n      \"claim\": \"积分不可转让、不可提现，仅限本账户使用\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"积分不可转让、不可提现，仅限本账户使用。\"}\n      ],\n      \"reason\": \"C1 单句原文\"\n    },\n    {\n      \"claim_id\": \"cl5\",\n      \"claim\": \"该政策适用于所有符合积分累积条件的订单，不区分商品类型（生鲜、虚拟、定制等特殊商品未在积分条款中被排除）\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"insufficient_evidence\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [],\n      \"reason\": \"上下文未明确提及特殊商品是否排除\"\n    }\n  ],\n  \"reason\": \"\"\n}",
+              "raw_truncated": false
+            },
+            {
+              "metric": "answer_correctness",
+              "status": "evaluated",
+              "score": 0.9,
+              "skipped_reason": null,
+              "latency_ms": 1771,
+              "error": null,
+              "judge_config": {
+                "agent": "rag_judge_answer_correctness",
+                "model": "qwen-max",
+                "temperature": 0.0,
+                "max_tokens": 8192,
+                "prompt_version": "v1.1.2",
+                "resolved_prompt_version": "v1.1.2",
+                "prompt_sha256": "2ab6eac2abe57dcfd647df328244ac3e5681fc93222938d6614e71037d49ae77",
+                "schema_version": "rag_judge_schema_v2",
+                "rubric_version": "v1.1.2",
+                "metric_version": "v2"
+              },
+              "token_usage": {
+                "input": 1922,
+                "output": 48
+              },
+              "cost": "0",
+              "details": {
+                "missing_points": [],
+                "wrong_facts": [],
+                "reason": "回答涵盖了金标中的所有关键事实，且补充了正确且相关的额外信息。"
+              },
+              "raw_output": "{\n  \"score\": 0.9,\n  \"missing_points\": [],\n  \"wrong_facts\": [],\n  \"reason\": \"回答涵盖了金标中的所有关键事实，且补充了正确且相关的额外信息。\"\n}",
+              "raw_truncated": false
+            },
+            {
+              "metric": "answer_relevancy",
+              "status": "evaluated",
+              "score": 0.9,
+              "skipped_reason": null,
+              "latency_ms": 1608,
+              "error": null,
+              "judge_config": {
+                "agent": "rag_judge_answer_relevancy",
+                "model": "qwen-max",
+                "temperature": 0.0,
+                "max_tokens": 8192,
+                "prompt_version": "v1.1.2",
+                "resolved_prompt_version": "v1.1.2",
+                "prompt_sha256": "0f8576b7dbf2e7ea1a02752680b0afe8c66677fe2eda823f4bcd28371ae4da84",
+                "schema_version": "rag_judge_schema_v2",
+                "rubric_version": "v1.1.2",
+                "metric_version": "v2"
+              },
+              "token_usage": {
+                "input": 1168,
+                "output": 38
+              },
+              "cost": "0",
+              "details": {
+                "reason": "回答完整覆盖了获得方式、抵扣规则和有效期三个子问题，且没有无关内容。"
+              },
+              "raw_output": "{\n  \"score\": 0.9,\n  \"reason\": \"回答完整覆盖了获得方式、抵扣规则和有效期三个子问题，且没有无关内容。\"\n}",
+              "raw_truncated": false
+            }
+          ]
+        }
+      },
+      "target_pass": true
+    },
+    {
+      "id": "Q21",
+      "category": "constraint",
+      "question": "签收后第 10 天，普通商品还能无理由退款吗？",
+      "gold_answer": "不能。无理由退款期限是签收后 7 天内。",
+      "gold_source": "docs/repair/phase3e/candidates.json (AI draft, pending human)",
+      "gold_status": "ai_draft_pending_human",
+      "human_gold": false,
+      "provisional": true,
+      "group": "provisional",
+      "target_group": "pilot10",
+      "target": {
+        "F": [
+          0.6,
+          0.7
+        ]
+      },
+      "answer": "不可以。\n\n根据《售后服务政策（Phase 3E 验证文档 v2）》，**无理由退款仅限订单签收后 7 天内申请**<kb doc=\"phase3d_doc.md\" chunk_id=\"c65abc80-f589-49de-9a1f-77ad2689bdb9\" kb_id=\"4ae8e147-6f76-4330-93f1-d2b3fef3d9ba\" />。  \n签收第 10 天已超出该时效窗口（7 天），因此不支持无理由退款。\n\n⚠️ 注意：  \n- 该限制适用于“普通商品”（即非定制、非生鲜、非已激活虚拟商品）；  \n- 若商品存在**质量问题**，则不受 7 天无理由限制，仍可依据保修或退换货政策主张权益（如申请换货或质量退换，需提供凭证并符合相应条款）<kb doc=\"phase3d_doc.md\" chunk_id=\"c65abc80-f589-49de-9a1f-77ad2689bdb9\" kb_id=\"4ae8e147-6f76-4330-93f1-d2b3fef3d9ba\" /><kb doc=\"phase3d_doc.md\" chunk_id=\"b978479f-6440-4514-b220-6e48a9dbf1be\" kb_id=\"4ae8e147-6f76-4330-93f1-d2b3fef3d9ba\" />。\n\n如需进一步协助，建议联系客服（9:00–21:00）核实具体订单情况<kb doc=\"phase3d_doc.md\" chunk_id=\"b978479f-6440-4514-b220-6e48a9dbf1be\" kb_id=\"4ae8e147-6f76-4330-93f1-d2b3fef3d9ba\" />。",
+      "contexts": [
+        {
+          "document_id": "4ee02c53-d4d1-4364-8a24-30a614ead1f8",
+          "chunk_id": "c65abc80-f589-49de-9a1f-77ad2689bdb9",
+          "title": "phase3d_doc.md",
+          "content": "# 售后服务政策（Phase 3E 验证文档 v2）\n\n## 1. 退款时效\n\n订单签收后 7 天内可申请无理由退款。审核通过后，款项将在 1-3 个工作日内原路退回。\n定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。\n\n## 2. 退款流程\n\n在「我的订单」中选择退款，填写原因并上传凭证，商家会在 48 小时内审核。\n审核通过后按原支付渠道退回；审核驳回会显示原因，可补充材料后重新提交。\n\n## 3. 换货政策\n\n签收后 7 天内，商品未使用且包装完整可申请换货，同一订单仅支持一次换货。\n换货需先寄回原商品，商家收到并验收后 48 小时内寄出新品；运费由责任方承担。\n\n## 4. 发票说明\n\n仅支持电子发票，提交申请后 24 小时内发送至下单邮箱。\n发票抬头可在开具前修改；已开具的发票需先申请红冲，再重新开具。\n暂不支持纸质发票和增值税专用发票。\n\n## 5. 发货时效\n\n现货商品在付款后 48 小时内发出；预售商品以商品页标注的发货时间为准。\n大件商品（家具、家电）发货时间为 5 个工作日内，配送前会电话预约。\n\n## 6. 物流查询\n\n订单发货后可在「我的订单」查看物流单号与实时轨迹。\n物流信息超过 24 小时未更新时，可联系客服协助核查。\n\n## 7. 运费规则\n\n单笔订单实付满 99 元包邮；未满 99 元收取 10 元运费。\n新疆、西藏、内蒙古等偏远地区运费为 20 元，不参与包邮活动。\n因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。\n\n## 8. 保修政策\n\n电子产品自签收之日起保修 12 个月，配件保修 3 个月。\n人为损坏、进水、私自拆修不在保修范围内。\n保修期内维修免费；保修期外维修需收取材料费和人工费。\n\n## 9. 优惠券规则\n\n优惠券自领取之日起 30 天内有效，逾期自动失效。\n同一订单只能使用一张优惠券，不能与会员折扣叠加。\n退款时优惠券若仍在有效期内会退回账户，已过期则不退回。\n\n## 10. 会员积分\n\n消费 1 元积 1 分，100 积分可抵扣 1 元。\n积分自获得之日起 12 个月内有效，逾期清零。\n积分不可转让、不可提现，仅限本账户使用。\n\n## 11. 客服时间\n\n在线客服服务时间为每天 9:00-21:00。\n客服热线 400-800-1234，服务时间同上。\n非服务时间可留言，客服会在次日 12:00 前回复。\n\n## 12. 特殊商品\n\n生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。\n虚拟商品（充值、会员、课程）一经售出不支持退款。\n定制商品支持质量问题退换，不支持无理由退换。\n\n## 13. 收货信息修改\n\n订单发货前可在「我的订单」修改收货地址和联系电话。\n已发货订单无法修改地址，可联系快递拦截或申请改派。",
+          "score": 0.7034471227191674,
+          "rank": 1,
+          "metadata": {
+            "knowledge_base_id": "4ae8e147-6f76-4330-93f1-d2b3fef3d9ba",
+            "chunk_index": 0,
+            "chunk_type": "text",
+            "truncated": false
+          }
+        },
+        {
+          "document_id": "4ee02c53-d4d1-4364-8a24-30a614ead1f8",
+          "chunk_id": "70aed937-0495-4ef4-8cc0-de7f58b9dc4b",
+          "title": "phase3d_doc.md",
+          "content": "# Summary\n一份详述退款、换货、发票、发货、物流、运费、保修、优惠券、积分、客服及特殊商品售后规则的客户服务政策文件。\n\n该文档是Phase 3E验证版本的售后服务政策，系统规定了消费者在订单履约各环节享有的权益与限制。内容涵盖退款（时效、范围、流程）、换货、电子发票开具与修改、发货与物流管理、运费承担规则、电子产品及配件保修期限与免责情形、优惠券使用与退还逻辑、会员积分累积与有效期、客服响应机制，以及生鲜、虚拟、定制等特殊商品的差异化售后条款。所有条款均以消费者签收时间为关键节点，并明确责任归属（如质量问题由商家承担运费，非质量问题由买家承担），强调操作路径（如通过「我的订单」发起申请）和时效承诺（如审核48小时内、退款1–3个工作日）。",
+          "score": 0.6311440615975099,
+          "rank": 2,
+          "metadata": {
+            "knowledge_base_id": "4ae8e147-6f76-4330-93f1-d2b3fef3d9ba",
+            "chunk_index": 3,
+            "chunk_type": "summary",
+            "truncated": false
+          }
+        }
+      ],
+      "context_source": "agent_chat",
+      "model_config": {
+        "agent_id": "2c74bf39-bc41-4bf0-a64a-4a1f24721a46"
+      },
+      "answer_context_count": 2,
+      "arms": {
+        "v1.0.0": {
+          "arm": "v1.0.0",
+          "reused": false,
+          "wall_latency_ms": 14578,
+          "outcomes": [
+            {
+              "metric": "faithfulness",
+              "status": "evaluated",
+              "score": 0.8,
+              "skipped_reason": null,
+              "latency_ms": 11534,
+              "error": null,
+              "judge_config": {
+                "agent": "rag_judge_faithfulness",
+                "model": "qwen-max",
+                "temperature": 0.0,
+                "max_tokens": 8192,
+                "prompt_version": "v1.0.0",
+                "resolved_prompt_version": "v1.0.0",
+                "prompt_sha256": "287053e9e67ad29fd2de597d1052b8d418040097910462e4a0f176b14295bfed",
+                "schema_version": "rag_judge_schema_v1",
+                "rubric_version": "v1.0.0",
+                "metric_version": "v1"
+              },
+              "token_usage": {
+                "input": 1915,
+                "output": 491
+              },
+              "cost": "0",
+              "details": {
+                "claims": [
+                  {
+                    "claim": "无理由退款仅限订单签收后 7 天内申请",
+                    "supported": true,
+                    "evidence": [
+                      "订单签收后 7 天内可申请无理由退款。"
+                    ],
+                    "reason": "上下文明确指出无理由退款的时效为签收后 7 天内。",
+                    "claim_id": null,
+                    "claim_type": "factual_claim",
+                    "claim_subtype": null,
+                    "support_status": null,
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": []
+                  },
+                  {
+                    "claim": "签收第 10 天已超出该时效窗口（7 天）",
+                    "supported": true,
+                    "evidence": [
+                      "订单签收后 7 天内可申请无理由退款。"
+                    ],
+                    "reason": "上下文明确指出无理由退款的时效为签收后 7 天内，因此第 10 天确实超出了这个时效窗口。",
+                    "claim_id": null,
+                    "claim_type": "factual_claim",
+                    "claim_subtype": null,
+                    "support_status": null,
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": []
+                  },
+                  {
+                    "claim": "该限制适用于“普通商品”（即非定制、非生鲜、非已激活虚拟商品）",
+                    "supported": true,
+                    "evidence": [
+                      "订单签收后 7 天内可申请无理由退款。",
+                      "定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。"
+                    ],
+                    "reason": "上下文明确指出无理由退款的时效为签收后 7 天内，并且特别说明了定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。",
+                    "claim_id": null,
+                    "claim_type": "factual_claim",
+                    "claim_subtype": null,
+                    "support_status": null,
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": []
+                  },
+                  {
+                    "claim": "若商品存在质量问题，则不受 7 天无理由限制，仍可依据保修或退换货政策主张权益",
+                    "supported": false,
+                    "evidence": [],
+                    "reason": "上下文没有明确提到质量问题的商品可以不受 7 天无理由限制进行退款。",
+                    "claim_id": null,
+                    "claim_type": "factual_claim",
+                    "claim_subtype": null,
+                    "support_status": null,
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": []
+                  },
+                  {
+                    "claim": "如需进一步协助，建议联系客服（9:00–21:00）核实具体订单情况",
+                    "supported": true,
+                    "evidence": [
+                      "在线客服服务时间为每天 9:00-21:00。"
+                    ],
+                    "reason": "上下文明确指出了客服的服务时间为 9:00-21:00。",
+                    "claim_id": null,
+                    "claim_type": "factual_claim",
+                    "claim_subtype": null,
+                    "support_status": null,
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": []
+                  }
+                ],
+                "supported_count": 4,
+                "claim_count": 5,
+                "reason": ""
+              },
+              "raw_output": "{\n  \"claims\": [\n    {\n      \"claim\": \"无理由退款仅限订单签收后 7 天内申请\",\n      \"supported\": true,\n      \"evidence\": [\n        \"订单签收后 7 天内可申请无理由退款。\"\n      ],\n      \"reason\": \"上下文明确指出无理由退款的时效为签收后 7 天内。\"\n    },\n    {\n      \"claim\": \"签收第 10 天已超出该时效窗口（7 天）\",\n      \"supported\": true,\n      \"evidence\": [\n        \"订单签收后 7 天内可申请无理由退款。\"\n      ],\n      \"reason\": \"上下文明确指出无理由退款的时效为签收后 7 天内，因此第 10 天确实超出了这个时效窗口。\"\n    },\n    {\n      \"claim\": \"该限制适用于“普通商品”（即非定制、非生鲜、非已激活虚拟商品）\",\n      \"supported\": true,\n      \"evidence\": [\n        \"订单签收后 7 天内可申请无理由退款。\",\n        \"定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。\"\n      ],\n      \"reason\": \"上下文明确指出无理由退款的时效为签收后 7 天内，并且特别说明了定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。\"\n    },\n    {\n      \"claim\": \"若商品存在质量问题，则不受 7 天无理由限制，仍可依据保修或退换货政策主张权益\",\n      \"supported\": false,\n      \"evidence\": [],\n      \"reason\": \"上下文没有明确提到质量问题的商品可以不受 7 天无理由限制进行退款。\"\n    },\n    {\n      \"claim\": \"如需进一步协助，建议联系客服（9:00–21:00）核实具体订单情况\",\n      \"supported\": true,\n      \"evidence\": [\n        \"在线客服服务时间为每天 9:00-21:00。\"\n      ],\n      \"reason\": \"上下文明确指出了客服的服务时间为 9:00-21:00。\"\n    }\n  ],\n  \"reason\": \"\"\n}",
+              "raw_truncated": false
+            },
+            {
+              "metric": "answer_correctness",
+              "status": "evaluated",
+              "score": 0.9,
+              "skipped_reason": null,
+              "latency_ms": 1466,
+              "error": null,
+              "judge_config": {
+                "agent": "rag_judge_answer_correctness",
+                "model": "qwen-max",
+                "temperature": 0.0,
+                "max_tokens": 8192,
+                "prompt_version": "v1.0.0",
+                "resolved_prompt_version": "v1.0.0",
+                "prompt_sha256": "106e11f2bc39806da5ecf090c6dbcd94d81ca5f53b968e5055d5a33833b30f94",
+                "schema_version": "rag_judge_schema_v1",
+                "rubric_version": "v1.0.0",
+                "metric_version": "v1"
+              },
+              "token_usage": {
+                "input": 870,
+                "output": 42
+              },
+              "cost": "0",
+              "details": {
+                "missing_points": [],
+                "wrong_facts": [],
+                "reason": "回答正确且完整，但包含了额外的详细信息。"
+              },
+              "raw_output": "{\n  \"score\": 0.9,\n  \"missing_points\": [],\n  \"wrong_facts\": [],\n  \"reason\": \"回答正确且完整，但包含了额外的详细信息。\"\n}",
+              "raw_truncated": false
+            },
+            {
+              "metric": "answer_relevancy",
+              "status": "evaluated",
+              "score": 1.0,
+              "skipped_reason": null,
+              "latency_ms": 1574,
+              "error": null,
+              "judge_config": {
+                "agent": "rag_judge_answer_relevancy",
+                "model": "qwen-max",
+                "temperature": 0.0,
+                "max_tokens": 8192,
+                "prompt_version": "v1.0.0",
+                "resolved_prompt_version": "v1.0.0",
+                "prompt_sha256": "27203126964ae0ca8f0bb8641cb3c2b145605cec706ef47c5432a0bbd6fad141",
+                "schema_version": "rag_judge_schema_v1",
+                "rubric_version": "v1.0.0",
+                "metric_version": "v1"
+              },
+              "token_usage": {
+                "input": 758,
+                "output": 43
+              },
+              "cost": "0",
+              "details": {
+                "reason": "直接、完整地回答了问题，明确指出签收后第10天不能无理由退款，并提供了相关政策依据。"
+              },
+              "raw_output": "{\n  \"score\": 1.0,\n  \"reason\": \"直接、完整地回答了问题，明确指出签收后第10天不能无理由退款，并提供了相关政策依据。\"\n}",
+              "raw_truncated": false
+            }
+          ]
+        },
+        "v1.1.2": {
+          "arm": "v1.1.2",
+          "reused": false,
+          "wall_latency_ms": 22106,
+          "outcomes": [
+            {
+              "metric": "faithfulness",
+              "status": "evaluated",
+              "score": 0.6,
+              "skipped_reason": null,
+              "latency_ms": 18071,
+              "error": null,
+              "judge_config": {
+                "agent": "rag_judge_faithfulness",
+                "model": "qwen-max",
+                "temperature": 0.0,
+                "max_tokens": 8192,
+                "prompt_version": "v1.1.2",
+                "resolved_prompt_version": "v1.1.2",
+                "prompt_sha256": "e95f04b556dd1a86e7abfbdd5dad75d3b834628490cdf460adb608dd02713b30",
+                "schema_version": "rag_judge_schema_v2",
+                "rubric_version": "v1.1.2",
+                "metric_version": "v2"
+              },
+              "token_usage": {
+                "input": 8927,
+                "output": 716
+              },
+              "cost": "0",
+              "details": {
+                "claims": [
+                  {
+                    "claim": "不可以无理由退款",
+                    "supported": null,
+                    "evidence": [],
+                    "reason": "7 天规则 + 第 10 天",
+                    "claim_id": "cl1",
+                    "claim_type": "factual_claim",
+                    "claim_subtype": "policy",
+                    "support_status": "supported",
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": [
+                      {
+                        "context_id": "C1",
+                        "quote": "订单签收后 7 天内可申请无理由退款。"
+                      }
+                    ]
+                  },
+                  {
+                    "claim": "无理由退款仅限订单签收后 7 天内申请",
+                    "supported": null,
+                    "evidence": [],
+                    "reason": "C1 单句原文",
+                    "claim_id": "cl2",
+                    "claim_type": "factual_claim",
+                    "claim_subtype": "policy",
+                    "support_status": "supported",
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": [
+                      {
+                        "context_id": "C1",
+                        "quote": "订单签收后 7 天内可申请无理由退款。"
+                      }
+                    ]
+                  },
+                  {
+                    "claim": "签收第 10 天已超出该时效窗口（7 天）",
+                    "supported": null,
+                    "evidence": [],
+                    "reason": "10 > 7",
+                    "claim_id": "cl3",
+                    "claim_type": "factual_claim",
+                    "claim_subtype": "policy",
+                    "support_status": "supported",
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": [
+                      {
+                        "context_id": "C1",
+                        "quote": "订单签收后 7 天内可申请无理由退款。"
+                      }
+                    ]
+                  },
+                  {
+                    "claim": "该限制适用于普通商品（即非定制、非生鲜、非已激活虚拟商品）",
+                    "supported": null,
+                    "evidence": [],
+                    "reason": "上下文只列排除项，未明确写普通商品",
+                    "claim_id": "cl4",
+                    "claim_type": "factual_claim",
+                    "claim_subtype": "policy",
+                    "support_status": "insufficient_evidence",
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": []
+                  },
+                  {
+                    "claim": "若商品存在质量问题，则不受 7 天无理由限制，仍可依据保修或退换货政策主张权益",
+                    "supported": null,
+                    "evidence": [],
+                    "reason": "上下文未规定普通商品质量问题期限；保修仅电子产品",
+                    "claim_id": "cl5",
+                    "claim_type": "factual_claim",
+                    "claim_subtype": "policy",
+                    "support_status": "insufficient_evidence",
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": []
+                  },
+                  {
+                    "claim": "如需进一步协助，建议联系客服（9:00–21:00）核实具体订单情况",
+                    "supported": null,
+                    "evidence": [],
+                    "reason": "纯建议",
+                    "claim_id": "cl6",
+                    "claim_type": "non_factual",
+                    "claim_subtype": "advice",
+                    "support_status": null,
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": []
+                  }
+                ],
+                "reason": "",
+                "claim_count": 6,
+                "scorable_claim_count": 5,
+                "supported_count": 3,
+                "supported_claim_count": 3,
+                "unsupported_claim_count": 0,
+                "insufficient_evidence_count": 2,
+                "non_factual_count": 1,
+                "absence_count": 0,
+                "document_conflict": false,
+                "document_conflict_count": 0,
+                "contradiction_count": 0,
+                "insufficient_evidence_rate": 0.4,
+                "all_insufficient": false,
+                "evidence_validation": [
+                  {
+                    "claim_id": "cl1",
+                    "context_id": "C1",
+                    "quote": "订单签收后 7 天内可申请无理由退款。",
+                    "ok": true,
+                    "error": null
+                  },
+                  {
+                    "claim_id": "cl2",
+                    "context_id": "C1",
+                    "quote": "订单签收后 7 天内可申请无理由退款。",
+                    "ok": true,
+                    "error": null
+                  },
+                  {
+                    "claim_id": "cl3",
+                    "context_id": "C1",
+                    "quote": "订单签收后 7 天内可申请无理由退款。",
+                    "ok": true,
+                    "error": null
+                  }
+                ],
+                "evidence_validation_failed": false,
+                "validation_errors": []
+              },
+              "raw_output": "{\n  \"claims\": [\n    {\n      \"claim_id\": \"cl1\",\n      \"claim\": \"不可以无理由退款\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"订单签收后 7 天内可申请无理由退款。\"}\n      ],\n      \"reason\": \"7 天规则 + 第 10 天\"\n    },\n    {\n      \"claim_id\": \"cl2\",\n      \"claim\": \"无理由退款仅限订单签收后 7 天内申请\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"订单签收后 7 天内可申请无理由退款。\"}\n      ],\n      \"reason\": \"C1 单句原文\"\n    },\n    {\n      \"claim_id\": \"cl3\",\n      \"claim\": \"签收第 10 天已超出该时效窗口（7 天）\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"订单签收后 7 天内可申请无理由退款。\"}\n      ],\n      \"reason\": \"10 > 7\"\n    },\n    {\n      \"claim_id\": \"cl4\",\n      \"claim\": \"该限制适用于普通商品（即非定制、非生鲜、非已激活虚拟商品）\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"insufficient_evidence\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [],\n      \"reason\": \"上下文只列排除项，未明确写普通商品\"\n    },\n    {\n      \"claim_id\": \"cl5\",\n      \"claim\": \"若商品存在质量问题，则不受 7 天无理由限制，仍可依据保修或退换货政策主张权益\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"insufficient_evidence\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [],\n      \"reason\": \"上下文未规定普通商品质量问题期限；保修仅电子产品\"\n    },\n    {\n      \"claim_id\": \"cl6\",\n      \"claim\": \"如需进一步协助，建议联系客服（9:00–21:00）核实具体订单情况\",\n      \"claim_type\": \"non_factual\",\n      \"claim_subtype\": \"advice\",\n      \"support_status\": null,\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [],\n      \"reason\": \"纯建议\"\n    }\n  ],\n  \"reason\": \"\"\n}",
+              "raw_truncated": false
+            },
+            {
+              "metric": "answer_correctness",
+              "status": "evaluated",
+              "score": 0.9,
+              "skipped_reason": null,
+              "latency_ms": 2377,
+              "error": null,
+              "judge_config": {
+                "agent": "rag_judge_answer_correctness",
+                "model": "qwen-max",
+                "temperature": 0.0,
+                "max_tokens": 8192,
+                "prompt_version": "v1.1.2",
+                "resolved_prompt_version": "v1.1.2",
+                "prompt_sha256": "2ab6eac2abe57dcfd647df328244ac3e5681fc93222938d6614e71037d49ae77",
+                "schema_version": "rag_judge_schema_v2",
+                "rubric_version": "v1.1.2",
+                "metric_version": "v2"
+              },
+              "token_usage": {
+                "input": 2270,
+                "output": 64
+              },
+              "cost": "0",
+              "details": {
+                "missing_points": [],
+                "wrong_facts": [],
+                "reason": "回答准确地指出了无理由退款的期限是签收后7天内，并且额外提供了关于质量问题退货的相关信息，这些信息是正确且相关的。"
+              },
+              "raw_output": "{\n  \"score\": 0.9,\n  \"missing_points\": [],\n  \"wrong_facts\": [],\n  \"reason\": \"回答准确地指出了无理由退款的期限是签收后7天内，并且额外提供了关于质量问题退货的相关信息，这些信息是正确且相关的。\"\n}",
+              "raw_truncated": false
+            },
+            {
+              "metric": "answer_relevancy",
+              "status": "evaluated",
+              "score": 0.9,
+              "skipped_reason": null,
+              "latency_ms": 1656,
+              "error": null,
+              "judge_config": {
+                "agent": "rag_judge_answer_relevancy",
+                "model": "qwen-max",
+                "temperature": 0.0,
+                "max_tokens": 8192,
+                "prompt_version": "v1.1.2",
+                "resolved_prompt_version": "v1.1.2",
+                "prompt_sha256": "0f8576b7dbf2e7ea1a02752680b0afe8c66677fe2eda823f4bcd28371ae4da84",
+                "schema_version": "rag_judge_schema_v2",
+                "rubric_version": "v1.1.2",
+                "metric_version": "v2"
+              },
+              "token_usage": {
+                "input": 1535,
+                "output": 47
+              },
+              "cost": "0",
+              "details": {
+                "reason": "完整回应了问题，明确说明了签收第10天不能无理由退款，并补充了质量问题的处理方式和建议联系客服。"
+              },
+              "raw_output": "{\n  \"score\": 0.9,\n  \"reason\": \"完整回应了问题，明确说明了签收第10天不能无理由退款，并补充了质量问题的处理方式和建议联系客服。\"\n}",
+              "raw_truncated": false
+            }
+          ]
+        }
+      },
+      "target_pass": true
+    },
+    {
+      "id": "Q22",
+      "category": "constraint",
+      "question": "订单实付 89 元寄往新疆，运费多少？",
+      "gold_answer": "20 元。新疆属于偏远地区，运费 20 元且不参与包邮。",
+      "gold_source": "docs/repair/phase3e/human-gold.json",
+      "gold_status": "human_reviewed",
+      "human_gold": true,
+      "provisional": false,
+      "group": "human_gold",
+      "target_group": "human_gold",
+      "target": {
+        "F": [
+          0.8,
+          1.0
+        ],
+        "C": [
+          0.9,
+          1.0
+        ],
+        "R": [
+          0.9,
+          1.0
+        ]
+      },
+      "answer": "订单实付 89 元寄往新疆，运费为 **20 元**。\n\n依据：  \n- 运费规则明确指出：“单笔订单实付满 99 元包邮；未满 99 元收取 10 元运费。**新疆、西藏、内蒙古等偏远地区运费为 20 元，不参与包邮活动**”<kb doc=\"phase3d_doc.md\" chunk_id=\"cdf680b6-0280-44fd-8003-73901ac3e13e\" kb_id=\"4ae8e147-6f76-4330-93f1-d2b3fef3d9ba\" />。  \n- 本订单实付 89 元 < 99 元，且收货地为新疆（属明确列出的偏远地区），因此不享受包邮，直接适用偏远地区运费标准：**20 元**。\n\n注：该运费规则无例外说明，且未提及促销或会员等级可豁免此标准，故按条款严格执行。",
+      "contexts": [
+        {
+          "document_id": "4ee02c53-d4d1-4364-8a24-30a614ead1f8",
+          "chunk_id": "cdf680b6-0280-44fd-8003-73901ac3e13e",
+          "title": "phase3d_doc.md",
+          "content": "## 6. 物流查询\n\n订单发货后可在「我的订单」查看物流单号与实时轨迹。\n物流信息超过 24 小时未更新时，可联系客服协助核查。\n\n## 7. 运费规则\n\n单笔订单实付满 99 元包邮；未满 99 元收取 10 元运费。\n新疆、西藏、内蒙古等偏远地区运费为 20 元，不参与包邮活动。\n因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。\n\n## 8. 保修政策\n\n电子产品自签收之日起保修 12 个月，配件保修 3 个月。\n人为损坏、进水、私自拆修不在保修范围内。\n保修期内维修免费；保修期外维修需收取材料费和人工费。\n\n## 9. 优惠券规则\n\n优惠券自领取之日起 30 天内有效，逾期自动失效。\n同一订单只能使用一张优惠券，不能与会员折扣叠加。\n退款时优惠券若仍在有效期内会退回账户，已过期则不退回。\n\n## 10. 会员积分\n\n消费 1 元积 1 分，100 积分可抵扣 1 元。\n积分自获得之日起 12 个月内有效，逾期清零。\n积分不可转让、不可提现，仅限本账户使用。\n\n## 11. 客服时间",
+          "score": 0.5829356364436784,
+          "rank": 1,
+          "metadata": {
+            "knowledge_base_id": "4ae8e147-6f76-4330-93f1-d2b3fef3d9ba",
+            "chunk_index": 1,
+            "chunk_type": "text",
+            "truncated": false
+          }
+        }
+      ],
+      "context_source": "agent_chat",
+      "model_config": {
+        "agent_id": "2c74bf39-bc41-4bf0-a64a-4a1f24721a46"
+      },
+      "answer_context_count": 1,
+      "arms": {
+        "v1.0.0": {
+          "arm": "v1.0.0",
+          "reused": false,
+          "wall_latency_ms": 5938,
+          "outcomes": [
+            {
+              "metric": "faithfulness",
+              "status": "evaluated",
+              "score": 1.0,
+              "skipped_reason": null,
+              "latency_ms": 3489,
+              "error": null,
+              "judge_config": {
+                "agent": "rag_judge_faithfulness",
+                "model": "qwen-max",
+                "temperature": 0.0,
+                "max_tokens": 8192,
+                "prompt_version": "v1.0.0",
+                "resolved_prompt_version": "v1.0.0",
+                "prompt_sha256": "287053e9e67ad29fd2de597d1052b8d418040097910462e4a0f176b14295bfed",
+                "schema_version": "rag_judge_schema_v1",
+                "rubric_version": "v1.0.0",
+                "metric_version": "v1"
+              },
+              "token_usage": {
+                "input": 952,
+                "output": 139
+              },
+              "cost": "0",
+              "details": {
+                "claims": [
+                  {
+                    "claim": "订单实付 89 元寄往新疆，运费为 20 元。",
+                    "supported": true,
+                    "evidence": [
+                      "单笔订单实付满 99 元包邮；未满 99 元收取 10 元运费。",
+                      "新疆、西藏、内蒙古等偏远地区运费为 20 元，不参与包邮活动。"
+                    ],
+                    "reason": "上下文明确指出新疆属于偏远地区，且订单实付金额未满 99 元时运费为 20 元。",
+                    "claim_id": null,
+                    "claim_type": "factual_claim",
+                    "claim_subtype": null,
+                    "support_status": null,
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": []
+                  }
+                ],
+                "supported_count": 1,
+                "claim_count": 1,
+                "reason": ""
+              },
+              "raw_output": "{\n  \"claims\": [\n    {\"claim\": \"订单实付 89 元寄往新疆，运费为 20 元。\", \"supported\": true, \"evidence\": [\"单笔订单实付满 99 元包邮；未满 99 元收取 10 元运费。\", \"新疆、西藏、内蒙古等偏远地区运费为 20 元，不参与包邮活动。\"], \"reason\": \"上下文明确指出新疆属于偏远地区，且订单实付金额未满 99 元时运费为 20 元。\"}\n  ],\n  \"reason\": \"\"\n}",
+              "raw_truncated": false
+            },
+            {
+              "metric": "answer_correctness",
+              "status": "evaluated",
+              "score": 1.0,
+              "skipped_reason": null,
+              "latency_ms": 1336,
+              "error": null,
+              "judge_config": {
+                "agent": "rag_judge_answer_correctness",
+                "model": "qwen-max",
+                "temperature": 0.0,
+                "max_tokens": 8192,
+                "prompt_version": "v1.0.0",
+                "resolved_prompt_version": "v1.0.0",
+                "prompt_sha256": "106e11f2bc39806da5ecf090c6dbcd94d81ca5f53b968e5055d5a33833b30f94",
+                "schema_version": "rag_judge_schema_v1",
+                "rubric_version": "v1.0.0",
+                "metric_version": "v1"
+              },
+              "token_usage": {
+                "input": 628,
+                "output": 40
+              },
+              "cost": "0",
+              "details": {
+                "missing_points": [],
+                "wrong_facts": [],
+                "reason": "回答完全正确且完整，涵盖了关键事实。"
+              },
+              "raw_output": "{\n  \"score\": 1.0,\n  \"missing_points\": [],\n  \"wrong_facts\": [],\n  \"reason\": \"回答完全正确且完整，涵盖了关键事实。\"\n}",
+              "raw_truncated": false
+            },
+            {
+              "metric": "answer_relevancy",
+              "status": "evaluated",
+              "score": 1.0,
+              "skipped_reason": null,
+              "latency_ms": 1101,
+              "error": null,
+              "judge_config": {
+                "agent": "rag_judge_answer_relevancy",
+                "model": "qwen-max",
+                "temperature": 0.0,
+                "max_tokens": 8192,
+                "prompt_version": "v1.0.0",
+                "resolved_prompt_version": "v1.0.0",
+                "prompt_sha256": "27203126964ae0ca8f0bb8641cb3c2b145605cec706ef47c5432a0bbd6fad141",
+                "schema_version": "rag_judge_schema_v1",
+                "rubric_version": "v1.0.0",
+                "metric_version": "v1"
+              },
+              "token_usage": {
+                "input": 510,
+                "output": 29
+              },
+              "cost": "0",
+              "details": {
+                "reason": "直接、完整地回答了运费问题，并提供了详细的依据"
+              },
+              "raw_output": "{\n  \"score\": 1.0,\n  \"reason\": \"直接、完整地回答了运费问题，并提供了详细的依据\"\n}",
+              "raw_truncated": false
+            }
+          ]
+        },
+        "v1.1.2": {
+          "arm": "v1.1.2",
+          "reused": false,
+          "wall_latency_ms": 20890,
+          "outcomes": [
+            {
+              "metric": "faithfulness",
+              "status": "evaluated",
+              "score": 1.0,
+              "skipped_reason": null,
+              "latency_ms": 18198,
+              "error": null,
+              "judge_config": {
+                "agent": "rag_judge_faithfulness",
+                "model": "qwen-max",
+                "temperature": 0.0,
+                "max_tokens": 8192,
+                "prompt_version": "v1.1.2",
+                "resolved_prompt_version": "v1.1.2",
+                "prompt_sha256": "e95f04b556dd1a86e7abfbdd5dad75d3b834628490cdf460adb608dd02713b30",
+                "schema_version": "rag_judge_schema_v2",
+                "rubric_version": "v1.1.2",
+                "metric_version": "v2"
+              },
+              "token_usage": {
+                "input": 7960,
+                "output": 748
+              },
+              "cost": "0",
+              "details": {
+                "claims": [
+                  {
+                    "claim": "订单实付 89 元寄往新疆，运费为 20 元",
+                    "supported": null,
+                    "evidence": [],
+                    "reason": "C1 单句原文",
+                    "claim_id": "cl1",
+                    "claim_type": "factual_claim",
+                    "claim_subtype": "policy",
+                    "support_status": "supported",
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": [
+                      {
+                        "context_id": "C1",
+                        "quote": "新疆、西藏、内蒙古等偏远地区运费为 20 元，不参与包邮活动。"
+                      }
+                    ]
+                  },
+                  {
+                    "claim": "单笔订单实付满 99 元包邮；未满 99 元收取 10 元运费",
+                    "supported": null,
+                    "evidence": [],
+                    "reason": "C1 单句原文",
+                    "claim_id": "cl2",
+                    "claim_type": "factual_claim",
+                    "claim_subtype": "policy",
+                    "support_status": "supported",
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": [
+                      {
+                        "context_id": "C1",
+                        "quote": "单笔订单实付满 99 元包邮；未满 99 元收取 10 元运费。"
+                      }
+                    ]
+                  },
+                  {
+                    "claim": "新疆、西藏、内蒙古等偏远地区运费为 20 元，不参与包邮活动",
+                    "supported": null,
+                    "evidence": [],
+                    "reason": "C1 单句原文",
+                    "claim_id": "cl3",
+                    "claim_type": "factual_claim",
+                    "claim_subtype": "policy",
+                    "support_status": "supported",
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": [
+                      {
+                        "context_id": "C1",
+                        "quote": "新疆、西藏、内蒙古等偏远地区运费为 20 元，不参与包邮活动。"
+                      }
+                    ]
+                  },
+                  {
+                    "claim": "本订单实付 89 元 < 99 元，且收货地为新疆，因此不享受包邮，适用 20 元运费",
+                    "supported": null,
+                    "evidence": [],
+                    "reason": "两条单行原文共同推出",
+                    "claim_id": "cl4",
+                    "claim_type": "factual_claim",
+                    "claim_subtype": "policy",
+                    "support_status": "supported",
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": [
+                      {
+                        "context_id": "C1",
+                        "quote": "单笔订单实付满 99 元包邮；未满 99 元收取 10 元运费。"
+                      },
+                      {
+                        "context_id": "C1",
+                        "quote": "新疆、西藏、内蒙古等偏远地区运费为 20 元，不参与包邮活动。"
+                      }
+                    ]
+                  },
+                  {
+                    "claim": "该运费规则无例外说明，且未提及促销或会员等级可豁免此标准",
+                    "supported": null,
+                    "evidence": [],
+                    "reason": "文档未提及，absence 不进分母",
+                    "claim_id": "cl5",
+                    "claim_type": "non_factual",
+                    "claim_subtype": "absence",
+                    "support_status": null,
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": []
+                  }
+                ],
+                "reason": "",
+                "claim_count": 5,
+                "scorable_claim_count": 4,
+                "supported_count": 4,
+                "supported_claim_count": 4,
+                "unsupported_claim_count": 0,
+                "insufficient_evidence_count": 0,
+                "non_factual_count": 1,
+                "absence_count": 1,
+                "document_conflict": false,
+                "document_conflict_count": 0,
+                "contradiction_count": 0,
+                "insufficient_evidence_rate": 0.0,
+                "all_insufficient": false,
+                "evidence_validation": [
+                  {
+                    "claim_id": "cl1",
+                    "context_id": "C1",
+                    "quote": "新疆、西藏、内蒙古等偏远地区运费为 20 元，不参与包邮活动。",
+                    "ok": true,
+                    "error": null
+                  },
+                  {
+                    "claim_id": "cl2",
+                    "context_id": "C1",
+                    "quote": "单笔订单实付满 99 元包邮；未满 99 元收取 10 元运费。",
+                    "ok": true,
+                    "error": null
+                  },
+                  {
+                    "claim_id": "cl3",
+                    "context_id": "C1",
+                    "quote": "新疆、西藏、内蒙古等偏远地区运费为 20 元，不参与包邮活动。",
+                    "ok": true,
+                    "error": null
+                  },
+                  {
+                    "claim_id": "cl4",
+                    "context_id": "C1",
+                    "quote": "单笔订单实付满 99 元包邮；未满 99 元收取 10 元运费。",
+                    "ok": true,
+                    "error": null
+                  },
+                  {
+                    "claim_id": "cl4",
+                    "context_id": "C1",
+                    "quote": "新疆、西藏、内蒙古等偏远地区运费为 20 元，不参与包邮活动。",
+                    "ok": true,
+                    "error": null
+                  }
+                ],
+                "evidence_validation_failed": false,
+                "validation_errors": []
+              },
+              "raw_output": "{\n  \"claims\": [\n    {\n      \"claim_id\": \"cl1\",\n      \"claim\": \"订单实付 89 元寄往新疆，运费为 20 元\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"新疆、西藏、内蒙古等偏远地区运费为 20 元，不参与包邮活动。\"}\n      ],\n      \"reason\": \"C1 单句原文\"\n    },\n    {\n      \"claim_id\": \"cl2\",\n      \"claim\": \"单笔订单实付满 99 元包邮；未满 99 元收取 10 元运费\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"单笔订单实付满 99 元包邮；未满 99 元收取 10 元运费。\"}\n      ],\n      \"reason\": \"C1 单句原文\"\n    },\n    {\n      \"claim_id\": \"cl3\",\n      \"claim\": \"新疆、西藏、内蒙古等偏远地区运费为 20 元，不参与包邮活动\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"新疆、西藏、内蒙古等偏远地区运费为 20 元，不参与包邮活动。\"}\n      ],\n      \"reason\": \"C1 单句原文\"\n    },\n    {\n      \"claim_id\": \"cl4\",\n      \"claim\": \"本订单实付 89 元 < 99 元，且收货地为新疆，因此不享受包邮，适用 20 元运费\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"单笔订单实付满 99 元包邮；未满 99 元收取 10 元运费。\"},\n        {\"context_id\": \"C1\", \"quote\": \"新疆、西藏、内蒙古等偏远地区运费为 20 元，不参与包邮活动。\"}\n      ],\n      \"reason\": \"两条单行原文共同推出\"\n    },\n    {\n      \"claim_id\": \"cl5\",\n      \"claim\": \"该运费规则无例外说明，且未提及促销或会员等级可豁免此标准\",\n      \"claim_type\": \"non_factual\",\n      \"claim_subtype\": \"absence\",\n      \"support_status\": null,\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [],\n      \"reason\": \"文档未提及，absence 不进分母\"\n    }\n  ],\n  \"reason\": \"\"\n}",
+              "raw_truncated": false
+            },
+            {
+              "metric": "answer_correctness",
+              "status": "evaluated",
+              "score": 0.9,
+              "skipped_reason": null,
+              "latency_ms": 1469,
+              "error": null,
+              "judge_config": {
+                "agent": "rag_judge_answer_correctness",
+                "model": "qwen-max",
+                "temperature": 0.0,
+                "max_tokens": 8192,
+                "prompt_version": "v1.1.2",
+                "resolved_prompt_version": "v1.1.2",
+                "prompt_sha256": "2ab6eac2abe57dcfd647df328244ac3e5681fc93222938d6614e71037d49ae77",
+                "schema_version": "rag_judge_schema_v2",
+                "rubric_version": "v1.1.2",
+                "metric_version": "v2"
+              },
+              "token_usage": {
+                "input": 2028,
+                "output": 42
+              },
+              "cost": "0",
+              "details": {
+                "missing_points": [],
+                "wrong_facts": [],
+                "reason": "回答正确且完整，提供了运费规则的详细依据。"
+              },
+              "raw_output": "{\n  \"score\": 0.9,\n  \"missing_points\": [],\n  \"wrong_facts\": [],\n  \"reason\": \"回答正确且完整，提供了运费规则的详细依据。\"\n}",
+              "raw_truncated": false
+            },
+            {
+              "metric": "answer_relevancy",
+              "status": "evaluated",
+              "score": 1.0,
+              "skipped_reason": null,
+              "latency_ms": 1221,
+              "error": null,
+              "judge_config": {
+                "agent": "rag_judge_answer_relevancy",
+                "model": "qwen-max",
+                "temperature": 0.0,
+                "max_tokens": 8192,
+                "prompt_version": "v1.1.2",
+                "resolved_prompt_version": "v1.1.2",
+                "prompt_sha256": "0f8576b7dbf2e7ea1a02752680b0afe8c66677fe2eda823f4bcd28371ae4da84",
+                "schema_version": "rag_judge_schema_v2",
+                "rubric_version": "v1.1.2",
+                "metric_version": "v2"
+              },
+              "token_usage": {
+                "input": 1287,
+                "output": 33
+              },
+              "cost": "0",
+              "details": {
+                "reason": "回答完整回应了问题，明确给出了运费金额，并详细解释了依据。"
+              },
+              "raw_output": "{\n  \"score\": 1.0,\n  \"reason\": \"回答完整回应了问题，明确给出了运费金额，并详细解释了依据。\"\n}",
+              "raw_truncated": false
+            }
+          ]
+        }
+      },
+      "target_pass": true
+    },
+    {
+      "id": "Q23",
+      "category": "constraint",
+      "question": "生鲜食品签收后第 2 天发现质量问题，还能按政策反馈吗？",
+      "gold_answer": "不能按该条款反馈。生鲜食品质量问题需在签收后 24 小时内拍照反馈，超过 24 小时反馈不符合该条款。",
+      "gold_source": "docs/repair/phase3e/human-gold.json",
+      "gold_status": "human_reviewed",
+      "human_gold": true,
+      "provisional": false,
+      "group": "human_gold",
+      "target_group": "pilot10",
+      "target": {
+        "F": [
+          0.4,
+          0.5
+        ],
+        "C": [
+          0.0,
+          0.2
+        ],
+        "R": [
+          0.7,
+          1.0
+        ]
+      },
+      "answer": "是的，可以按政策反馈。\n\n根据文档第12条“特殊商品”规定：  \n**生鲜食品质量问题需在签收后 24 小时内拍照反馈**<kb doc=\"phase3d_doc.md\" chunk_id=\"b978479f-6440-4514-b220-6e48a9dbf1be\" kb_id=\"4ae8e147-6f76-4330-93f1-d2b3fef3d9ba\" />。  \n\n您是在签收后第 2 天（即超过 24 小时）才发现并反馈，**已超出政策规定的反馈时效**，因此原则上不符合质量反馈受理条件。\n\n⚠️ 注意：该时限是硬性要求，文档未提及例外情形或宽限期。24 小时起算点为“签收完成时间”（非签收日零点），且须“拍照反馈”（需保留问题实物及包装证据）。\n\n✅ 建议操作：  \n- 若尚未超时，立即通过订单页面或联系在线客服（9:00–21:00）提交带时间水印的照片凭证；  \n- 若已超时，可尝试联系客服说明具体情况（如物流延误导致开箱延迟、问题明显且可验证等），但是否受理由商家个案判断，政策不保证支持。\n\n缺失信息：文档未说明超时后申诉渠道或人工复核机制。如需进一步协助，可提供签收时间截图和问题照片，由客服评估是否特批处理。",
+      "contexts": [
+        {
+          "document_id": "4ee02c53-d4d1-4364-8a24-30a614ead1f8",
+          "chunk_id": "c65abc80-f589-49de-9a1f-77ad2689bdb9",
+          "title": "phase3d_doc.md",
+          "content": "# 售后服务政策（Phase 3E 验证文档 v2）\n\n## 1. 退款时效\n\n订单签收后 7 天内可申请无理由退款。审核通过后，款项将在 1-3 个工作日内原路退回。\n定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。\n\n## 2. 退款流程\n\n在「我的订单」中选择退款，填写原因并上传凭证，商家会在 48 小时内审核。\n审核通过后按原支付渠道退回；审核驳回会显示原因，可补充材料后重新提交。\n\n## 3. 换货政策\n\n签收后 7 天内，商品未使用且包装完整可申请换货，同一订单仅支持一次换货。\n换货需先寄回原商品，商家收到并验收后 48 小时内寄出新品；运费由责任方承担。\n\n## 4. 发票说明\n\n仅支持电子发票，提交申请后 24 小时内发送至下单邮箱。\n发票抬头可在开具前修改；已开具的发票需先申请红冲，再重新开具。\n暂不支持纸质发票和增值税专用发票。\n\n## 5. 发货时效\n\n现货商品在付款后 48 小时内发出；预售商品以商品页标注的发货时间为准。\n大件商品（家具、家电）发货时间为 5 个工作日内，配送前会电话预约。\n\n## 6. 物流查询\n\n订单发货后可在「我的订单」查看物流单号与实时轨迹。\n物流信息超过 24 小时未更新时，可联系客服协助核查。\n\n## 7. 运费规则\n\n单笔订单实付满 99 元包邮；未满 99 元收取 10 元运费。\n新疆、西藏、内蒙古等偏远地区运费为 20 元，不参与包邮活动。\n因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。\n\n## 8. 保修政策\n\n电子产品自签收之日起保修 12 个月，配件保修 3 个月。\n人为损坏、进水、私自拆修不在保修范围内。\n保修期内维修免费；保修期外维修需收取材料费和人工费。\n\n## 9. 优惠券规则\n\n优惠券自领取之日起 30 天内有效，逾期自动失效。\n同一订单只能使用一张优惠券，不能与会员折扣叠加。\n退款时优惠券若仍在有效期内会退回账户，已过期则不退回。\n\n## 10. 会员积分\n\n消费 1 元积 1 分，100 积分可抵扣 1 元。\n积分自获得之日起 12 个月内有效，逾期清零。\n积分不可转让、不可提现，仅限本账户使用。\n\n## 11. 客服时间\n\n在线客服服务时间为每天 9:00-21:00。\n客服热线 400-800-1234，服务时间同上。\n非服务时间可留言，客服会在次日 12:00 前回复。\n\n## 12. 特殊商品\n\n生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。\n虚拟商品（充值、会员、课程）一经售出不支持退款。\n定制商品支持质量问题退换，不支持无理由退换。\n\n## 13. 收货信息修改\n\n订单发货前可在「我的订单」修改收货地址和联系电话。\n已发货订单无法修改地址，可联系快递拦截或申请改派。",
+          "score": 0.6865886605175505,
+          "rank": 1,
+          "metadata": {
+            "knowledge_base_id": "4ae8e147-6f76-4330-93f1-d2b3fef3d9ba",
+            "chunk_index": 0,
+            "chunk_type": "text",
+            "truncated": false
+          }
+        },
+        {
+          "document_id": "4ee02c53-d4d1-4364-8a24-30a614ead1f8",
+          "chunk_id": "70aed937-0495-4ef4-8cc0-de7f58b9dc4b",
+          "title": "phase3d_doc.md",
+          "content": "# Summary\n一份详述退款、换货、发票、发货、物流、运费、保修、优惠券、积分、客服及特殊商品售后规则的客户服务政策文件。\n\n该文档是Phase 3E验证版本的售后服务政策，系统规定了消费者在订单履约各环节享有的权益与限制。内容涵盖退款（时效、范围、流程）、换货、电子发票开具与修改、发货与物流管理、运费承担规则、电子产品及配件保修期限与免责情形、优惠券使用与退还逻辑、会员积分累积与有效期、客服响应机制，以及生鲜、虚拟、定制等特殊商品的差异化售后条款。所有条款均以消费者签收时间为关键节点，并明确责任归属（如质量问题由商家承担运费，非质量问题由买家承担），强调操作路径（如通过「我的订单」发起申请）和时效承诺（如审核48小时内、退款1–3个工作日）。",
+          "score": 0.6158124402025851,
+          "rank": 2,
+          "metadata": {
+            "knowledge_base_id": "4ae8e147-6f76-4330-93f1-d2b3fef3d9ba",
+            "chunk_index": 3,
+            "chunk_type": "summary",
+            "truncated": false
+          }
+        }
+      ],
+      "context_source": "agent_chat",
+      "model_config": {
+        "agent_id": "2c74bf39-bc41-4bf0-a64a-4a1f24721a46"
+      },
+      "answer_context_count": 2,
+      "arms": {
+        "v1.0.0": {
+          "arm": "v1.0.0",
+          "reused": false,
+          "wall_latency_ms": 14080,
+          "outcomes": [
+            {
+              "metric": "faithfulness",
+              "status": "evaluated",
+              "score": 1.0,
+              "skipped_reason": null,
+              "latency_ms": 10844,
+              "error": null,
+              "judge_config": {
+                "agent": "rag_judge_faithfulness",
+                "model": "qwen-max",
+                "temperature": 0.0,
+                "max_tokens": 8192,
+                "prompt_version": "v1.0.0",
+                "resolved_prompt_version": "v1.0.0",
+                "prompt_sha256": "287053e9e67ad29fd2de597d1052b8d418040097910462e4a0f176b14295bfed",
+                "schema_version": "rag_judge_schema_v1",
+                "rubric_version": "v1.0.0",
+                "metric_version": "v1"
+              },
+              "token_usage": {
+                "input": 1782,
+                "output": 446
+              },
+              "cost": "0",
+              "details": {
+                "claims": [
+                  {
+                    "claim": "生鲜食品质量问题需在签收后 24 小时内拍照反馈",
+                    "supported": true,
+                    "evidence": [
+                      "生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。"
+                    ],
+                    "reason": "上下文中有明确依据",
+                    "claim_id": null,
+                    "claim_type": "factual_claim",
+                    "claim_subtype": null,
+                    "support_status": null,
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": []
+                  },
+                  {
+                    "claim": "您是在签收后第 2 天（即超过 24 小时）才发现并反馈，已超出政策规定的反馈时效",
+                    "supported": true,
+                    "evidence": [
+                      "生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。"
+                    ],
+                    "reason": "根据上下文规定，反馈时限为24小时，签收后第2天确实超出了该时限",
+                    "claim_id": null,
+                    "claim_type": "factual_claim",
+                    "claim_subtype": null,
+                    "support_status": null,
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": []
+                  },
+                  {
+                    "claim": "因此原则上不符合质量反馈受理条件",
+                    "supported": true,
+                    "evidence": [
+                      "生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。"
+                    ],
+                    "reason": "上下文规定了24小时内的反馈要求，超出时间则不符合受理条件",
+                    "claim_id": null,
+                    "claim_type": "factual_claim",
+                    "claim_subtype": null,
+                    "support_status": null,
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": []
+                  },
+                  {
+                    "claim": "该时限是硬性要求，文档未提及例外情形或宽限期",
+                    "supported": true,
+                    "evidence": [
+                      "生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。"
+                    ],
+                    "reason": "上下文没有提到任何例外情况或宽限期",
+                    "claim_id": null,
+                    "claim_type": "factual_claim",
+                    "claim_subtype": null,
+                    "support_status": null,
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": []
+                  },
+                  {
+                    "claim": "24 小时起算点为“签收完成时间”（非签收日零点），且须“拍照反馈”（需保留问题实物及包装证据）",
+                    "supported": true,
+                    "evidence": [
+                      "生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。"
+                    ],
+                    "reason": "上下文明确指出需要在签收后24小时内拍照反馈，隐含了从签收完成时间开始计算",
+                    "claim_id": null,
+                    "claim_type": "factual_claim",
+                    "claim_subtype": null,
+                    "support_status": null,
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": []
+                  }
+                ],
+                "supported_count": 5,
+                "claim_count": 5,
+                "reason": ""
+              },
+              "raw_output": "{\n  \"claims\": [\n    {\"claim\": \"生鲜食品质量问题需在签收后 24 小时内拍照反馈\", \"supported\": true, \"evidence\": [\"生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。\"], \"reason\": \"上下文中有明确依据\"},\n    {\"claim\": \"您是在签收后第 2 天（即超过 24 小时）才发现并反馈，已超出政策规定的反馈时效\", \"supported\": true, \"evidence\": [\"生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。\"], \"reason\": \"根据上下文规定，反馈时限为24小时，签收后第2天确实超出了该时限\"},\n    {\"claim\": \"因此原则上不符合质量反馈受理条件\", \"supported\": true, \"evidence\": [\"生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。\"], \"reason\": \"上下文规定了24小时内的反馈要求，超出时间则不符合受理条件\"},\n    {\"claim\": \"该时限是硬性要求，文档未提及例外情形或宽限期\", \"supported\": true, \"evidence\": [\"生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。\"], \"reason\": \"上下文没有提到任何例外情况或宽限期\"},\n    {\"claim\": \"24 小时起算点为“签收完成时间”（非签收日零点），且须“拍照反馈”（需保留问题实物及包装证据）\", \"supported\": true, \"evidence\": [\"生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。\"], \"reason\": \"上下文明确指出需要在签收后24小时内拍照反馈，隐含了从签收完成时间开始计算\"}\n  ],\n  \"reason\": \"\"\n}",
+              "raw_truncated": false
+            },
+            {
+              "metric": "answer_correctness",
+              "status": "evaluated",
+              "score": 0.8,
+              "skipped_reason": null,
+              "latency_ms": 1730,
+              "error": null,
+              "judge_config": {
+                "agent": "rag_judge_answer_correctness",
+                "model": "qwen-max",
+                "temperature": 0.0,
+                "max_tokens": 8192,
+                "prompt_version": "v1.0.0",
+                "resolved_prompt_version": "v1.0.0",
+                "prompt_sha256": "106e11f2bc39806da5ecf090c6dbcd94d81ca5f53b968e5055d5a33833b30f94",
+                "schema_version": "rag_judge_schema_v1",
+                "rubric_version": "v1.0.0",
+                "metric_version": "v1"
+              },
+              "token_usage": {
+                "input": 757,
+                "output": 49
+              },
+              "cost": "0",
+              "details": {
+                "missing_points": [],
+                "wrong_facts": [],
+                "reason": "回答在事实层面正确，但额外提供了建议操作，导致信息略显冗余。"
+              },
+              "raw_output": "{\n  \"score\": 0.8,\n  \"missing_points\": [],\n  \"wrong_facts\": [],\n  \"reason\": \"回答在事实层面正确，但额外提供了建议操作，导致信息略显冗余。\"\n}",
+              "raw_truncated": false
+            },
+            {
+              "metric": "answer_relevancy",
+              "status": "evaluated",
+              "score": 0.9,
+              "skipped_reason": null,
+              "latency_ms": 1502,
+              "error": null,
+              "judge_config": {
+                "agent": "rag_judge_answer_relevancy",
+                "model": "qwen-max",
+                "temperature": 0.0,
+                "max_tokens": 8192,
+                "prompt_version": "v1.0.0",
+                "resolved_prompt_version": "v1.0.0",
+                "prompt_sha256": "27203126964ae0ca8f0bb8641cb3c2b145605cec706ef47c5432a0bbd6fad141",
+                "schema_version": "rag_judge_schema_v1",
+                "rubric_version": "v1.0.0",
+                "metric_version": "v1"
+              },
+              "token_usage": {
+                "input": 625,
+                "output": 34
+              },
+              "cost": "0",
+              "details": {
+                "reason": "回答了核心问题，但包含了一些超出用户问题范围的建议和信息。"
+              },
+              "raw_output": "{\n  \"score\": 0.9,\n  \"reason\": \"回答了核心问题，但包含了一些超出用户问题范围的建议和信息。\"\n}",
+              "raw_truncated": false
+            }
+          ]
+        },
+        "v1.1.2": {
+          "arm": "v1.1.2",
+          "reused": false,
+          "wall_latency_ms": 33200,
+          "outcomes": [
+            {
+              "metric": "faithfulness",
+              "status": "evaluated",
+              "score": 0.0,
+              "skipped_reason": null,
+              "latency_ms": 28895,
+              "error": null,
+              "judge_config": {
+                "agent": "rag_judge_faithfulness",
+                "model": "qwen-max",
+                "temperature": 0.0,
+                "max_tokens": 8192,
+                "prompt_version": "v1.1.2",
+                "resolved_prompt_version": "v1.1.2",
+                "prompt_sha256": "e95f04b556dd1a86e7abfbdd5dad75d3b834628490cdf460adb608dd02713b30",
+                "schema_version": "rag_judge_schema_v2",
+                "rubric_version": "v1.1.2",
+                "metric_version": "v2"
+              },
+              "token_usage": {
+                "input": 8794,
+                "output": 1064
+              },
+              "cost": "0",
+              "details": {
+                "claims": [
+                  {
+                    "claim": "可以按政策反馈",
+                    "supported": null,
+                    "evidence": [],
+                    "reason": "首句结论与后文/金标矛盾",
+                    "claim_id": "cl1",
+                    "claim_type": "factual_claim",
+                    "claim_subtype": "policy",
+                    "support_status": "unsupported",
+                    "is_contradictory": true,
+                    "contradiction_with": [
+                      "cl2"
+                    ],
+                    "evidence_refs": []
+                  },
+                  {
+                    "claim": "已超出政策规定的反馈时效，原则上不符合质量反馈受理条件",
+                    "supported": null,
+                    "evidence": [],
+                    "reason": "C1 单句原文",
+                    "claim_id": "cl2",
+                    "claim_type": "factual_claim",
+                    "claim_subtype": "policy",
+                    "support_status": "insufficient_evidence",
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": [
+                      {
+                        "context_id": "C1",
+                        "quote": "生鲜食品质量问题需在签收后 24 小时内拍照反馈。"
+                      }
+                    ]
+                  },
+                  {
+                    "claim": "生鲜食品质量问题需在签收后 24 小时内拍照反馈",
+                    "supported": null,
+                    "evidence": [],
+                    "reason": "C1 单句原文",
+                    "claim_id": "cl3",
+                    "claim_type": "factual_claim",
+                    "claim_subtype": "policy",
+                    "support_status": "insufficient_evidence",
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": [
+                      {
+                        "context_id": "C1",
+                        "quote": "生鲜食品质量问题需在签收后 24 小时内拍照反馈。"
+                      }
+                    ]
+                  },
+                  {
+                    "claim": "该时限是硬性要求",
+                    "supported": null,
+                    "evidence": [],
+                    "reason": "C1 单句原文",
+                    "claim_id": "cl4",
+                    "claim_type": "factual_claim",
+                    "claim_subtype": "policy",
+                    "support_status": "insufficient_evidence",
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": [
+                      {
+                        "context_id": "C1",
+                        "quote": "生鲜食品质量问题需在签收后 24 小时内拍照反馈。"
+                      }
+                    ]
+                  },
+                  {
+                    "claim": "文档未提及例外情形或宽限期",
+                    "supported": null,
+                    "evidence": [],
+                    "reason": "absence",
+                    "claim_id": "cl5",
+                    "claim_type": "non_factual",
+                    "claim_subtype": "absence",
+                    "support_status": null,
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": []
+                  },
+                  {
+                    "claim": "24 小时起算点为“签收完成时间”（非签收日零点）",
+                    "supported": null,
+                    "evidence": [],
+                    "reason": "上下文未说明起算点",
+                    "claim_id": "cl6",
+                    "claim_type": "factual_claim",
+                    "claim_subtype": "policy",
+                    "support_status": "insufficient_evidence",
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": []
+                  },
+                  {
+                    "claim": "需保留问题实物及包装证据",
+                    "supported": null,
+                    "evidence": [],
+                    "reason": "规范性要求，但上下文未写",
+                    "claim_id": "cl7",
+                    "claim_type": "factual_claim",
+                    "claim_subtype": "policy",
+                    "support_status": "insufficient_evidence",
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": []
+                  },
+                  {
+                    "claim": "若尚未超时，立即通过订单页面或联系在线客服提交带时间水印的照片凭证",
+                    "supported": null,
+                    "evidence": [],
+                    "reason": "纯建议",
+                    "claim_id": "cl8",
+                    "claim_type": "non_factual",
+                    "claim_subtype": "advice",
+                    "support_status": null,
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": []
+                  },
+                  {
+                    "claim": "若已超时，可尝试联系客服说明具体情况，但是否受理由商家个案判断，政策不保证支持",
+                    "supported": null,
+                    "evidence": [],
+                    "reason": "纯建议",
+                    "claim_id": "cl9",
+                    "claim_type": "non_factual",
+                    "claim_subtype": "advice",
+                    "support_status": null,
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": []
+                  },
+                  {
+                    "claim": "文档未说明超时后申诉渠道或人工复核机制",
+                    "supported": null,
+                    "evidence": [],
+                    "reason": "absence",
+                    "claim_id": "cl10",
+                    "claim_type": "non_factual",
+                    "claim_subtype": "absence",
+                    "support_status": null,
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": []
+                  }
+                ],
+                "reason": "",
+                "claim_count": 10,
+                "scorable_claim_count": 6,
+                "supported_count": 0,
+                "supported_claim_count": 0,
+                "unsupported_claim_count": 1,
+                "insufficient_evidence_count": 5,
+                "non_factual_count": 4,
+                "absence_count": 2,
+                "document_conflict": false,
+                "document_conflict_count": 0,
+                "contradiction_count": 1,
+                "insufficient_evidence_rate": 0.833333,
+                "all_insufficient": false,
+                "evidence_validation": [
+                  {
+                    "claim_id": "cl2",
+                    "context_id": "C1",
+                    "quote": "生鲜食品质量问题需在签收后 24 小时内拍照反馈。",
+                    "ok": false,
+                    "error": "quote_not_found"
+                  },
+                  {
+                    "claim_id": "cl3",
+                    "context_id": "C1",
+                    "quote": "生鲜食品质量问题需在签收后 24 小时内拍照反馈。",
+                    "ok": false,
+                    "error": "quote_not_found"
+                  },
+                  {
+                    "claim_id": "cl4",
+                    "context_id": "C1",
+                    "quote": "生鲜食品质量问题需在签收后 24 小时内拍照反馈。",
+                    "ok": false,
+                    "error": "quote_not_found"
+                  }
+                ],
+                "evidence_validation_failed": true,
+                "validation_errors": [
+                  {
+                    "claim_id": "cl2",
+                    "code": "quote_not_found",
+                    "message": "evidence quote is not a verbatim substring",
+                    "context_id": "C1"
+                  },
+                  {
+                    "claim_id": "cl2",
+                    "code": "evidence_validation_failed",
+                    "message": "supported claim has invalid evidence; downgraded"
+                  },
+                  {
+                    "claim_id": "cl3",
+                    "code": "quote_not_found",
+                    "message": "evidence quote is not a verbatim substring",
+                    "context_id": "C1"
+                  },
+                  {
+                    "claim_id": "cl3",
+                    "code": "evidence_validation_failed",
+                    "message": "supported claim has invalid evidence; downgraded"
+                  },
+                  {
+                    "claim_id": "cl4",
+                    "code": "quote_not_found",
+                    "message": "evidence quote is not a verbatim substring",
+                    "context_id": "C1"
+                  },
+                  {
+                    "claim_id": "cl4",
+                    "code": "evidence_validation_failed",
+                    "message": "supported claim has invalid evidence; downgraded"
+                  }
+                ]
+              },
+              "raw_output": "{\n  \"claims\": [\n    {\n      \"claim_id\": \"cl1\",\n      \"claim\": \"可以按政策反馈\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"unsupported\",\n      \"is_contradictory\": true,\n      \"contradiction_with\": [\"cl2\"],\n      \"evidence_refs\": [],\n      \"reason\": \"首句结论与后文/金标矛盾\"\n    },\n    {\n      \"claim_id\": \"cl2\",\n      \"claim\": \"已超出政策规定的反馈时效，原则上不符合质量反馈受理条件\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"生鲜食品质量问题需在签收后 24 小时内拍照反馈。\"}\n      ],\n      \"reason\": \"C1 单句原文\"\n    },\n    {\n      \"claim_id\": \"cl3\",\n      \"claim\": \"生鲜食品质量问题需在签收后 24 小时内拍照反馈\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"生鲜食品质量问题需在签收后 24 小时内拍照反馈。\"}\n      ],\n      \"reason\": \"C1 单句原文\"\n    },\n    {\n      \"claim_id\": \"cl4\",\n      \"claim\": \"该时限是硬性要求\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"生鲜食品质量问题需在签收后 24 小时内拍照反馈。\"}\n      ],\n      \"reason\": \"C1 单句原文\"\n    },\n    {\n      \"claim_id\": \"cl5\",\n      \"claim\": \"文档未提及例外情形或宽限期\",\n      \"claim_type\": \"non_factual\",\n      \"claim_subtype\": \"absence\",\n      \"support_status\": null,\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [],\n      \"reason\": \"absence\"\n    },\n    {\n      \"claim_id\": \"cl6\",\n      \"claim\": \"24 小时起算点为“签收完成时间”（非签收日零点）\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"insufficient_evidence\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [],\n      \"reason\": \"上下文未说明起算点\"\n    },\n    {\n      \"claim_id\": \"cl7\",\n      \"claim\": \"需保留问题实物及包装证据\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"insufficient_evidence\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [],\n      \"reason\": \"规范性要求，但上下文未写\"\n    },\n    {\n      \"claim_id\": \"cl8\",\n      \"claim\": \"若尚未超时，立即通过订单页面或联系在线客服提交带时间水印的照片凭证\",\n      \"claim_type\": \"non_factual\",\n      \"claim_subtype\": \"advice\",\n      \"support_status\": null,\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [],\n      \"reason\": \"纯建议\"\n    },\n    {\n      \"claim_id\": \"cl9\",\n      \"claim\": \"若已超时，可尝试联系客服说明具体情况，但是否受理由商家个案判断，政策不保证支持\",\n      \"claim_type\": \"non_factual\",\n      \"claim_subtype\": \"advice\",\n      \"support_status\": null,\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [],\n      \"reason\": \"纯建议\"\n    },\n    {\n      \"claim_id\": \"cl10\",\n      \"claim\": \"文档未说明超时后申诉渠道或人工复核机制\",\n      \"claim_type\": \"non_factual\",\n      \"claim_subtype\": \"absence\",\n      \"support_status\": null,\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [],\n      \"reason\": \"absence\"\n    }\n  ],\n  \"reason\": \"\"\n}",
+              "raw_truncated": false
+            },
+            {
+              "metric": "answer_correctness",
+              "status": "evaluated",
+              "score": 0.0,
+              "skipped_reason": null,
+              "latency_ms": 2644,
+              "error": null,
+              "judge_config": {
+                "agent": "rag_judge_answer_correctness",
+                "model": "qwen-max",
+                "temperature": 0.0,
+                "max_tokens": 8192,
+                "prompt_version": "v1.1.2",
+                "resolved_prompt_version": "v1.1.2",
+                "prompt_sha256": "2ab6eac2abe57dcfd647df328244ac3e5681fc93222938d6614e71037d49ae77",
+                "schema_version": "rag_judge_schema_v2",
+                "rubric_version": "v1.1.2",
+                "metric_version": "v2"
+              },
+              "token_usage": {
+                "input": 2157,
+                "output": 57
+              },
+              "cost": "0",
+              "details": {
+                "missing_points": [
+                  "不能按该条款反馈"
+                ],
+                "wrong_facts": [
+                  "可以按政策反馈"
+                ],
+                "reason": "首句与后文关键事实矛盾，给出了错误的确定性结论。"
+              },
+              "raw_output": "{\n  \"score\": 0.0,\n  \"missing_points\": [\"不能按该条款反馈\"],\n  \"wrong_facts\": [\"可以按政策反馈\"],\n  \"reason\": \"首句与后文关键事实矛盾，给出了错误的确定性结论。\"\n}",
+              "raw_truncated": false
+            },
+            {
+              "metric": "answer_relevancy",
+              "status": "evaluated",
+              "score": 0.9,
+              "skipped_reason": null,
+              "latency_ms": 1659,
+              "error": null,
+              "judge_config": {
+                "agent": "rag_judge_answer_relevancy",
+                "model": "qwen-max",
+                "temperature": 0.0,
+                "max_tokens": 8192,
+                "prompt_version": "v1.1.2",
+                "resolved_prompt_version": "v1.1.2",
+                "prompt_sha256": "0f8576b7dbf2e7ea1a02752680b0afe8c66677fe2eda823f4bcd28371ae4da84",
+                "schema_version": "rag_judge_schema_v2",
+                "rubric_version": "v1.1.2",
+                "metric_version": "v2"
+              },
+              "token_usage": {
+                "input": 1402,
+                "output": 37
+              },
+              "cost": "0",
+              "details": {
+                "reason": "回答围绕用户问题展开，明确说明了政策规定和超时情况，并给出了下一步建议。"
+              },
+              "raw_output": "{\n  \"score\": 0.9,\n  \"reason\": \"回答围绕用户问题展开，明确说明了政策规定和超时情况，并给出了下一步建议。\"\n}",
+              "raw_truncated": false
+            }
+          ]
+        }
+      },
       "target_pass": false
     }
   ],
   "status": "stopped",
   "stop_reasons": [
-    "Q16/answer_relevancy: dropped 1.000->0.700 >0.10"
+    "Q23/F: 0.0 outside target [0.4, 0.5]",
+    "Q23: Human Gold supported claim downgraded by evidence"
   ],
   "totals": {
     "v1.0.0": {
-      "input_tokens": 38589,
-      "output_tokens": 4311,
-      "estimated_cost_cny": 0.134
+      "input_tokens": 56960,
+      "output_tokens": 7536,
+      "estimated_cost_cny": 0.209
     },
     "v1.1.2": {
-      "input_tokens": 178601,
-      "output_tokens": 6841,
-      "estimated_cost_cny": 0.4943
+      "input_tokens": 261291,
+      "output_tokens": 12817,
+      "estimated_cost_cny": 0.7501
     }
   },
   "known_misses": [
@@ -6013,6 +9393,19 @@
         0.9
       ],
       "note": "not PASS, not pure variance; target not moved"
+    },
+    {
+      "id": "Q16",
+      "kind": "known_human_gold_r_miss_judge_overstrict",
+      "F": 1.0,
+      "C": 0.9,
+      "R": 0.7,
+      "repeats": [
+        0.7,
+        0.7,
+        0.7
+      ],
+      "note": "answer matches gold; R judge required extra steps not in gold; not answer regression; target/R prompt unchanged"
     }
   ]
 }
