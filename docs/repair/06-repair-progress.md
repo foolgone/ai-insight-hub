@@ -1089,3 +1089,12 @@ alembic check   : No new upgrade operations detected
 - 未跑 Q24–Q28/Q30/Q32–Q34/Q37–Q40。
 - Token（27 条×2 臂）：v1.0.0 71,587/10,835；v1.1.1 210,936/16,708；估算 ¥0.9424。
 - 40 条未完成、未激活；v1.1.1 仍 design_draft/inactive。
+
+### v1.1.2 Q22 修复（2026-11-17）
+- 新建 `backend/app/prompts/rag_judge/v1.1.2`；C/R 继承 v1.1.1，仅 F 修改。
+- F 新增 quote 单行/保留换行规则、Q22 完整 5 条 JSON few-shot、absence 不进分母。
+- 新 F SHA：`3db91171edb644f8d2764b588bd1fafdadc044a44c2e7989f9fe1ae04ee2f80c`；C/R SHA 不变。
+- Q22 目标注册 F 0.8–1.0（期望 1.0）、C 0.9–1.0、R 0.9–1.0。
+- Q22 F 单案例：**F=1.0，4 scorable / 4 supported / 1 non_factual，6/6 evidence，validation_errors=[]**。
+- v1.1.2 未跑 40；v1.1.1 的 27/40 为旧 SHA，不能混合称为 40 条通过；若作为最终版本需整批重跑并重新验证 10 条闸门。
+- v1.1.2 仍 design_draft/inactive；默认 v1.0.0。

@@ -1,0 +1,61 @@
+{
+  "version": "v1.1.2",
+  "status": "design_draft",
+  "active": false,
+  "date": "2026-11-17",
+  "note": "v1.1.2：F 增加 quote 单行/保留换行、Q22 few-shot、absence 不进分母；C/R 继承 v1.1.1；默认仍 v1.0.0。",
+  "schema_version": "rag_judge_schema_v2",
+  "rubric_version": "v1.1.2",
+  "metric_version_mapping": {
+    "faithfulness": "v2",
+    "answer_correctness": "v2",
+    "answer_relevancy": "v2",
+    "retrieval_metrics": "v1"
+  },
+  "prompts": {
+    "faithfulness.txt": "3db91171edb644f8d2764b588bd1fafdadc044a44c2e7989f9fe1ae04ee2f80c",
+    "answer_correctness.txt": "2ab6eac2abe57dcfd647df328244ac3e5681fc93222938d6614e71037d49ae77",
+    "answer_relevancy.txt": "0f8576b7dbf2e7ea1a02752680b0afe8c66677fe2eda823f4bcd28371ae4da84"
+  },
+  "changes": {
+    "faithfulness": [
+      "quote 必须逐字连续复制；跨行引用保留换行，优先只引单行连续子串",
+      "Q22 few-shot：cl1-cl4 supported、cl5 absence 不进分母",
+      "文档未提及例外/促销/会员豁免 -> non_factual/absence，不得标 factual/policy/insufficient",
+      "其余规则继承 v1.1.1"
+    ],
+    "answer_correctness": [
+      "继承 v1.1.1（Q01 额外信息规则、Q36 冲突披露）"
+    ],
+    "answer_relevancy": [
+      "继承 v1.1.1"
+    ]
+  },
+  "activation_requirements": [
+    "人工审核通过 v1.1.1 设计",
+    "Schema 增加 claim_id/claim_type/claim_subtype/support_status/is_contradictory/contradiction_with/evidence_refs",
+    "Service 过滤 non_factual、zero-denominator skipped、evidence 校验、claim_subtype 校验",
+    "版本加载器显式选择 v1.1.1（默认仍 v1.0.0）",
+    "metric_version 升到 v2，metric_version_for 接收 prompt_version/config",
+    "10 条对照实验通过验收矩阵后才考虑 40 条"
+  ],
+  "open_issues": [
+    "Q22 F 单案例待验证（目标 0.8-1.0，期望 1.0）",
+    "v1.1.2 未跑 10/40；如作为最终版本，需整批重跑并重新验证 10 条闸门",
+    "Q10 evidence typo 字形规则留待 v1.1.2 之后评估",
+    "Q36 只验证披露冲突，未选 canonical 口径"
+  ],
+  "design_revision": "2026-11-17-v112",
+  "acceptance_matrix": "docs/repair/phase3e/prompt-v1.1.1-acceptance-matrix.json",
+  "fixtures": "docs/repair/phase3e/prompt-v1.1.1-fixtures.json",
+  "human_gold_coverage": {
+    "Q23": "human_gold",
+    "Q35": "human_gold",
+    "Q36": "human_gold",
+    "Q21#3": "human_gold_claim_only",
+    "Q11": "ai_draft_pending_human",
+    "Q29": "ai_draft_pending_human"
+  },
+  "implementation_status": "implemented_default_off",
+  "default_prompt_version": "v1.0.0"
+}

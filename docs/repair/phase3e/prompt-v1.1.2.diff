@@ -1,0 +1,100 @@
+--- v1.1.1/faithfulness.txt
++++ v1.1.2/faithfulness.txt
+@@ -20,7 +20,7 @@
+ 
+ `claim_subtype`（诊断标签，必须填写）：
+ - `policy`：政策/规则断言（factual_claim）
+-- `absence`：文档未说明/未提及某事实，无法提供肯定证据（non_factual）
++- `absence`：文档未说明/未提及某事实，无法提供肯定证据（non_factual）。文档未提及例外/促销/会员等级豁免等，标 absence，不进分母；不得标 factual/policy/insufficient。
+ - `conflict`：文档两处规则不一致的 meta 陈述（factual_claim；两处原文都可给出时 supported）
+ - `advice`：纯建议/下一步操作（non_factual）
+ - `meta`：其它元信息（non_factual）
+@@ -39,6 +39,7 @@
+ - `evidence_refs` 使用 `{ "context_id": "C1", "quote": "上下文原文" }`。
+ - `quote` 必须是所引用上下文的**逐字片段**；不能改写、拼接或引用外部知识。
+ - `quote` 必须从 contexts **连续复制**；不得加主语/前缀、改写，或拼接两个不连续片段。原句有前置分句时，复制整句或复制其中一个连续子串。
++- 跨行引用必须保留换行；更稳妥的是只引用**单行连续子串**，不得删除换行后用空格/句号拼接两行。
+   例：C1 的“生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。”可以引整句，也可以引“质量问题需在签收后 24 小时内拍照反馈”；不能自造“生鲜食品质量问题需…”。
+ - `context_id` 必须是输入中真实存在的编号；无法匹配真实上下文/片段时，support_status 不得为 supported。
+ - `context_id` 只看输入顺序（C1、C2、……），**不是文档章节号**。即使原文位于“## 7. 运费规则”，引用时仍写 `C1` 或 `C2`，不得写成 `C7`。
+@@ -260,3 +261,80 @@
+   ],
+   "reason": ""
+ }
++
++## Few-shot E（Q22：跨行 quote 与 absence）
++上下文 C1（节选）：
++“单笔订单实付满 99 元包邮；未满 99 元收取 10 元运费。
++新疆、西藏、内蒙古等偏远地区运费为 20 元，不参与包邮活动。”
++回答：
++“订单实付 89 元寄往新疆，运费为 20 元。因为实付未满 99 元，且新疆属于偏远地区，不参与包邮。”
++完整输出（quote 只引单行连续子串；cl5 为 absence，不进分母）：
++{
++  "claims": [
++    {
++      "claim_id": "cl1",
++      "claim": "订单实付 89 元寄往新疆，运费为 20 元",
++      "claim_type": "factual_claim",
++      "claim_subtype": "policy",
++      "support_status": "supported",
++      "is_contradictory": false,
++      "contradiction_with": [],
++      "evidence_refs": [
++        {"context_id": "C1", "quote": "新疆、西藏、内蒙古等偏远地区运费为 20 元，不参与包邮活动。"}
++      ],
++      "reason": "C1 单行原文"
++    },
++    {
++      "claim_id": "cl2",
++      "claim": "单笔订单实付满 99 元包邮；未满 99 元收取 10 元运费",
++      "claim_type": "factual_claim",
++      "claim_subtype": "policy",
++      "support_status": "supported",
++      "is_contradictory": false,
++      "contradiction_with": [],
++      "evidence_refs": [
++        {"context_id": "C1", "quote": "单笔订单实付满 99 元包邮；未满 99 元收取 10 元运费。"}
++      ],
++      "reason": "C1 单行原文"
++    },
++    {
++      "claim_id": "cl3",
++      "claim": "新疆、西藏、内蒙古等偏远地区运费为 20 元，不参与包邮活动",
++      "claim_type": "factual_claim",
++      "claim_subtype": "policy",
++      "support_status": "supported",
++      "is_contradictory": false,
++      "contradiction_with": [],
++      "evidence_refs": [
++        {"context_id": "C1", "quote": "新疆、西藏、内蒙古等偏远地区运费为 20 元，不参与包邮活动。"}
++      ],
++      "reason": "C1 单行原文"
++    },
++    {
++      "claim_id": "cl4",
++      "claim": "本订单实付 89 元 < 99 元，且收货地为新疆，因此不享受包邮，适用 20 元运费",
++      "claim_type": "factual_claim",
++      "claim_subtype": "policy",
++      "support_status": "supported",
++      "is_contradictory": false,
++      "contradiction_with": [],
++      "evidence_refs": [
++        {"context_id": "C1", "quote": "单笔订单实付满 99 元包邮；未满 99 元收取 10 元运费。"},
++        {"context_id": "C1", "quote": "新疆、西藏、内蒙古等偏远地区运费为 20 元，不参与包邮活动。"}
++      ],
++      "reason": "两条单行原文共同推出"
++    },
++    {
++      "claim_id": "cl5",
++      "claim": "该运费规则无例外说明，且未提及促销或会员等级可豁免此标准",
++      "claim_type": "non_factual",
++      "claim_subtype": "absence",
++      "support_status": null,
++      "is_contradictory": false,
++      "contradiction_with": [],
++      "evidence_refs": [],
++      "reason": "文档未提及，absence 不进分母"
++    }
++  ],
++  "reason": ""
++}

@@ -69,6 +69,13 @@
 - 这是 Human Gold supported claim 被 evidence 降级，且 F 1.0→0.4，按停止条件停止。
 - C details：`{"missing_points": [], "wrong_facts": [], "reason": "回答关键事实、条件与金标一致，且补充了相关运费规则的详细说明。"}`
 
+## v1.1.2 Q22 修复（单案例）
+
+- 新建 v1.1.2 F Prompt：quote 单行/保留换行、Q22 5 条 few-shot、absence 不进分母。
+- 新 F SHA：`3db91171edb644f8d2764b588bd1fafdadc044a44c2e7989f9fe1ae04ee2f80c`。
+- Q22 F 单案例：**F=1.0，4 scorable / 4 supported / 1 non_factual，6/6 evidence，validation_errors=[]**；cl5 absence。
+- 40 条 v1.1.2 **未重跑**；上述 27/40 为 v1.1.1 旧 SHA。若以 v1.1.2 为最终版本，必须整批重跑 40 条，不能混合 SHA 称为 40 条通过。
+
 ## 分组汇总
 
 | 组 | 已完成 | 说明 |

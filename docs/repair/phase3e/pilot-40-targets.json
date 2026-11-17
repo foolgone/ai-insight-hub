@@ -2,7 +2,7 @@
   "meta": {
     "name": "phase3e-pilot-40-targets",
     "status": "approved_scale_regression_only",
-    "note": "40 条是规模/回归运行，不是 40 条 Human Gold 验收；Human Gold 仅 13 条 + Q21#3 claim，其余 27 条 provisional。",
+    "note": "40 条规模/回归运行，不是 40 条 Human Gold 验收；Q22 目标为 v1.1.2 注册。",
     "human_gold_count": 13,
     "provisional_count": 27,
     "f_sha": "3519fd3b1bbbab9b117abd04f69304609146c2d2a05c39699483dea1740eda19",
@@ -14,7 +14,9 @@
       "human_gold_without_explicit": "no metric drop >0.10 vs v1.0.0; context_unavailable Faithfulness skipped is allowed",
       "provisional": "no schema failed, no all-invalid, no supported without evidence, no unexplained drop >0.10",
       "grouping": "Human Gold and provisional means must be reported separately; no mixed mean acceptance"
-    }
+    },
+    "f_sha_v112": "3db91171edb644f8d2764b588bd1fafdadc044a44c2e7989f9fe1ae04ee2f80c",
+    "rubric_version_v112": "v1.1.2"
   },
   "cases": [
     {
@@ -421,12 +423,26 @@
       "gold_source": "docs/repair/phase3e/human-gold.json",
       "group": "human_gold",
       "target_group": "human_gold",
-      "target_source": "human_gold",
+      "target_source": "human_gold_explicit_v112",
       "answer_context_count": 1,
-      "targets": {},
+      "targets": {
+        "F": [
+          0.8,
+          1.0
+        ],
+        "C": [
+          0.9,
+          1.0
+        ],
+        "R": [
+          0.9,
+          1.0
+        ]
+      },
       "rule": "no_schema_failed; no_all_invalid; no_supported_without_evidence; no_unexplained_drop_gt_0.10",
       "notes": [
-        "only C1 available for Faithfulness"
+        "only C1 available for Faithfulness",
+        "4 scorable all supported; cl5 absence not in denominator; Q22 target 0.8-1.0 expected 1.0"
       ]
     },
     {

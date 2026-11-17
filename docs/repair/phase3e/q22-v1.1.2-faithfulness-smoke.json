@@ -1,0 +1,178 @@
+{
+  "case_id": "Q22",
+  "metric": "faithfulness",
+  "prompt_version": "v1.1.2",
+  "prompt_sha256": "3db91171edb644f8d2764b588bd1fafdadc044a44c2e7989f9fe1ae04ee2f80c",
+  "model": "qwen-max",
+  "temperature": 0.0,
+  "max_tokens": 8192,
+  "status": "evaluated",
+  "score": 1.0,
+  "scorable_claim_count": 4,
+  "supported_claim_count": 4,
+  "unsupported_claim_count": 0,
+  "insufficient_evidence_count": 0,
+  "non_factual_count": 1,
+  "contradiction_count": 0,
+  "document_conflict_count": 0,
+  "evidence_count": 6,
+  "evidence_ok": 6,
+  "validation_errors": [],
+  "claims": [
+    {
+      "claim": "订单实付 89 元寄往新疆，运费为 20 元",
+      "supported": null,
+      "evidence": [],
+      "reason": "两条单行原文共同推出",
+      "claim_id": "cl1",
+      "claim_type": "factual_claim",
+      "claim_subtype": "policy",
+      "support_status": "supported",
+      "is_contradictory": false,
+      "contradiction_with": [],
+      "evidence_refs": [
+        {
+          "context_id": "C1",
+          "quote": "单笔订单实付满 99 元包邮；未满 99 元收取 10 元运费。"
+        },
+        {
+          "context_id": "C1",
+          "quote": "新疆、西藏、内蒙古等偏远地区运费为 20 元，不参与包邮活动。"
+        }
+      ]
+    },
+    {
+      "claim": "单笔订单实付满 99 元包邮；未满 99 元收取 10 元运费",
+      "supported": null,
+      "evidence": [],
+      "reason": "C1 单行原文",
+      "claim_id": "cl2",
+      "claim_type": "factual_claim",
+      "claim_subtype": "policy",
+      "support_status": "supported",
+      "is_contradictory": false,
+      "contradiction_with": [],
+      "evidence_refs": [
+        {
+          "context_id": "C1",
+          "quote": "单笔订单实付满 99 元包邮；未满 99 元收取 10 元运费。"
+        }
+      ]
+    },
+    {
+      "claim": "新疆、西藏、内蒙古等偏远地区运费为 20 元，不参与包邮活动",
+      "supported": null,
+      "evidence": [],
+      "reason": "C1 单行原文",
+      "claim_id": "cl3",
+      "claim_type": "factual_claim",
+      "claim_subtype": "policy",
+      "support_status": "supported",
+      "is_contradictory": false,
+      "contradiction_with": [],
+      "evidence_refs": [
+        {
+          "context_id": "C1",
+          "quote": "新疆、西藏、内蒙古等偏远地区运费为 20 元，不参与包邮活动。"
+        }
+      ]
+    },
+    {
+      "claim": "本订单实付 89 元 < 99 元，且收货地为新疆，因此不享受包邮，适用 20 元运费",
+      "supported": null,
+      "evidence": [],
+      "reason": "两条单行原文共同推出",
+      "claim_id": "cl4",
+      "claim_type": "factual_claim",
+      "claim_subtype": "policy",
+      "support_status": "supported",
+      "is_contradictory": false,
+      "contradiction_with": [],
+      "evidence_refs": [
+        {
+          "context_id": "C1",
+          "quote": "单笔订单实付满 99 元包邮；未满 99 元收取 10 元运费。"
+        },
+        {
+          "context_id": "C1",
+          "quote": "新疆、西藏、内蒙古等偏远地区运费为 20 元，不参与包邮活动。"
+        }
+      ]
+    },
+    {
+      "claim": "该运费规则无例外说明，且未提及促销或会员等级可豁免此标准",
+      "supported": null,
+      "evidence": [],
+      "reason": "文档未提及，absence 不进分母",
+      "claim_id": "cl5",
+      "claim_type": "non_factual",
+      "claim_subtype": "absence",
+      "support_status": null,
+      "is_contradictory": false,
+      "contradiction_with": [],
+      "evidence_refs": []
+    }
+  ],
+  "evidence_validation": [
+    {
+      "claim_id": "cl1",
+      "context_id": "C1",
+      "quote": "单笔订单实付满 99 元包邮；未满 99 元收取 10 元运费。",
+      "ok": true,
+      "error": null
+    },
+    {
+      "claim_id": "cl1",
+      "context_id": "C1",
+      "quote": "新疆、西藏、内蒙古等偏远地区运费为 20 元，不参与包邮活动。",
+      "ok": true,
+      "error": null
+    },
+    {
+      "claim_id": "cl2",
+      "context_id": "C1",
+      "quote": "单笔订单实付满 99 元包邮；未满 99 元收取 10 元运费。",
+      "ok": true,
+      "error": null
+    },
+    {
+      "claim_id": "cl3",
+      "context_id": "C1",
+      "quote": "新疆、西藏、内蒙古等偏远地区运费为 20 元，不参与包邮活动。",
+      "ok": true,
+      "error": null
+    },
+    {
+      "claim_id": "cl4",
+      "context_id": "C1",
+      "quote": "单笔订单实付满 99 元包邮；未满 99 元收取 10 元运费。",
+      "ok": true,
+      "error": null
+    },
+    {
+      "claim_id": "cl4",
+      "context_id": "C1",
+      "quote": "新疆、西藏、内蒙古等偏远地区运费为 20 元，不参与包邮活动。",
+      "ok": true,
+      "error": null
+    }
+  ],
+  "token_usage": {
+    "input": 5013,
+    "output": 791
+  },
+  "judge_config": {
+    "agent": "rag_judge_faithfulness",
+    "model": "qwen-max",
+    "temperature": 0.0,
+    "max_tokens": 8192,
+    "prompt_version": "v1.1.2",
+    "resolved_prompt_version": "v1.1.2",
+    "prompt_sha256": "3db91171edb644f8d2764b588bd1fafdadc044a44c2e7989f9fe1ae04ee2f80c",
+    "schema_version": "rag_judge_schema_v2",
+    "rubric_version": "v1.1.2",
+    "metric_version": "v2"
+  },
+  "raw_output": "{\n  \"claims\": [\n    {\n      \"claim_id\": \"cl1\",\n      \"claim\": \"订单实付 89 元寄往新疆，运费为 20 元\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"单笔订单实付满 99 元包邮；未满 99 元收取 10 元运费。\"},\n        {\"context_id\": \"C1\", \"quote\": \"新疆、西藏、内蒙古等偏远地区运费为 20 元，不参与包邮活动。\"}\n      ],\n      \"reason\": \"两条单行原文共同推出\"\n    },\n    {\n      \"claim_id\": \"cl2\",\n      \"claim\": \"单笔订单实付满 99 元包邮；未满 99 元收取 10 元运费\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"单笔订单实付满 99 元包邮；未满 99 元收取 10 元运费。\"}\n      ],\n      \"reason\": \"C1 单行原文\"\n    },\n    {\n      \"claim_id\": \"cl3\",\n      \"claim\": \"新疆、西藏、内蒙古等偏远地区运费为 20 元，不参与包邮活动\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"新疆、西藏、内蒙古等偏远地区运费为 20 元，不参与包邮活动。\"}\n      ],\n      \"reason\": \"C1 单行原文\"\n    },\n    {\n      \"claim_id\": \"cl4\",\n      \"claim\": \"本订单实付 89 元 < 99 元，且收货地为新疆，因此不享受包邮，适用 20 元运费\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"单笔订单实付满 99 元包邮；未满 99 元收取 10 元运费。\"},\n        {\"context_id\": \"C1\", \"quote\": \"新疆、西藏、内蒙古等偏远地区运费为 20 元，不参与包邮活动。\"}\n      ],\n      \"reason\": \"两条单行原文共同推出\"\n    },\n    {\n      \"claim_id\": \"cl5\",\n      \"claim\": \"该运费规则无例外说明，且未提及促销或会员等级可豁免此标准\",\n      \"claim_type\": \"non_factual\",\n      \"claim_subtype\": \"absence\",\n      \"support_status\": null,\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [],\n      \"reason\": \"文档未提及，absence 不进分母\"\n    }\n  ],\n  \"reason\": \"\"\n}",
+  "original_raw_output": null
+}

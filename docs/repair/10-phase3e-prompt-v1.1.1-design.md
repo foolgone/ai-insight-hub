@@ -292,6 +292,7 @@ Correctness/Relevancy 输出不变；`RagJudgeInput` 不变（不新增 answerab
 | v1.0.0 | v1.0.0 | rag_judge_schema_v1 | v1.0.0 | v1 | active_baseline |
 | v1.1.0 | v1.1.0 | rag_judge_schema_v2（拟） | v1.1.0 | v2（拟） | pending_review |
 | v1.1.1 | v1.1.1 | rag_judge_schema_v2 | v1.1.1 | v2 | design_draft |
+| v1.1.2 | v1.1.2 | rag_judge_schema_v2 | v1.1.2 | v2 | design_draft |
 
 - **metric_version 升到 v2**：Faithfulness 分母改变，Correctness/Relevancy 评分语义改变；避免 v1/v2 结果混入同一聚合。
 - `rubric_version` / `schema_version` 存入 `judge_config` 与结果 `details` 的 JSONB，**不新增数据库列、不迁移**。
@@ -571,3 +572,18 @@ Correctness/Relevancy 输出不变；`RagJudgeInput` 不变（不新增 answerab
 - Q36 披露 variant smoke：C=0.9、missing=[]、wrong_facts=[]，目标 0.9–1.0 通过；40 条只含 base answer；
 - Q11 target 已调整为 0.6–0.9；Q36 只验证“披露冲突”，未选 canonical 口径；
 - 不得把 dry-run PASS 当作 Prompt 质量证据；v1.1.1 仍 `design_draft` / `active=false`。
+
+---
+
+## 12. v1.1.2 Q22 修复（design_draft，未激活）
+
+- 新版本目录 `backend/app/prompts/rag_judge/v1.1.2`；C/R 正文继承 v1.1.1，仅 F 修改。
+- F Prompt：
+  - quote 必须逐字连续复制；跨行引用保留换行，优先只引**单行连续子串**；
+  - 新增 Q22 完整 5 条 JSON few-shot：cl1–cl4 supported，cl5 absence；
+  - “文档未提及例外/促销/会员豁免” → non_factual/absence，不进分母，不得标 factual/policy/insufficient。
+- 新 F SHA：`3db91171edb644f8d2764b588bd1fafdadc044a44c2e7989f9fe1ae04ee2f80c`；C SHA `2ab6eac…`、R SHA `0f8576…` 不变。
+- Q22 目标注册：F 0.8–1.0（期望 1.0）、C 0.9–1.0、R 0.9–1.0；4 scorable 全 supported，cl5 absence 不进分母。
+- Q22 F 单案例（v1.1.2）：**F=1.0，4 scorable / 4 supported / 1 non_factual，6/6 evidence，validation_errors=[]**。
+- 40 条 v1.1.2 **未重跑**；v1.1.1 的 27/40 为旧 SHA，不能与 v1.1.2 混合称为 40 条通过。若 v1.1.2 作为最终版本，必须整批重跑 40 条，并重新验证 10 条闸门。
+- v1.1.2 仍 `design_draft` / `active=false`；默认 v1.0.0。

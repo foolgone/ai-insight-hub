@@ -85,11 +85,24 @@ def test_explicit_constructor_version_overrides_setting(
     assert agent.metric_version == "v2"
 
 
+def test_explicit_v112_loads_v2_prompt() -> None:
+    agent = _agent(prompt_version="v1.1.2")
+
+    assert agent.prompt_version == "v1.1.2"
+    assert agent.schema_version == JUDGE_SCHEMA_V2
+    assert agent.rubric_version == "v1.1.2"
+    assert agent.metric_version == "v2"
+    manifest = load_prompt_manifest("v1.1.2")
+    assert agent.prompt_sha256 == manifest["prompts"]["faithfulness.txt"]
+
+
 def test_prompt_schema_and_metric_mapping() -> None:
     assert judge_schema_version("v1.0.0") == JUDGE_SCHEMA_V1
     assert judge_schema_version("v1.1.0") == JUDGE_SCHEMA_V1
     assert judge_schema_version("v1.1.1") == JUDGE_SCHEMA_V2
+    assert judge_schema_version("v1.1.2") == JUDGE_SCHEMA_V2
     assert metric_version_for_prompt("faithfulness", "v1.1.1") == "v2"
+    assert metric_version_for_prompt("faithfulness", "v1.1.2") == "v2"
     assert metric_version_for_prompt("faithfulness", "v1.0.0") == "v1"
     assert metric_version_for_prompt("answer_correctness", "v1.1.1") == "v2"
 
@@ -392,3 +405,13 @@ def test_v111_faithfulness_prompt_has_q23_full_json_and_quote_rule() -> None:
     assert "连续复制" in text
     assert "不能自造" in text
     assert "需保留问题实物及包装证据" in text
+
+
+def test_v112_faithfulness_prompt_has_single_line_quote_and_q22() -> None:
+    text = load_judge_prompt("v1.1.2", "faithfulness")
+
+    assert "跨行引用必须保留换行" in text
+    assert "单行连续子串" in text
+    assert "Few-shot E（Q22" in text
+    assert "该运费规则无例外说明" in text
+    assert "absence，不进分母" in text
