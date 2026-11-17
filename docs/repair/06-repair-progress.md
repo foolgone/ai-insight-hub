@@ -1098,3 +1098,11 @@ alembic check   : No new upgrade operations detected
 - Q22 F 单案例：**F=1.0，4 scorable / 4 supported / 1 non_factual，6/6 evidence，validation_errors=[]**。
 - v1.1.2 未跑 40；v1.1.1 的 27/40 为旧 SHA，不能混合称为 40 条通过；若作为最终版本需整批重跑并重新验证 10 条闸门。
 - v1.1.2 仍 design_draft/inactive；默认 v1.0.0。
+
+### v1.1.2 10 条闸门（2026-11-17，Q36 停止）
+- 完成 10/10；Q01/Q04/Q11/Q17/Q21/Q23/Q29/Q31/Q35 目标通过。
+- **Q36 F=0.75 低于目标 0.8–1.0**：cl1/cl6 原 supported，但 quote 跨句/跨 §1-§12 拼接，非 C1 逐字子串，`quote_not_found` 降级；F=6/8。
+- Q36 C=0.5、R=0.9；wrong_facts=[]。
+- 因 Q36 闸门失败，Q10/Q15/Q20 单案例未跑，40 条 v1.1.2 未启动。
+- Token（10 条×2 臂）：v1.0.0 32,612/6,252；v1.1.2 95,032/8,651；估算 ¥0.4494。
+- v1.1.2 仍 design_draft/inactive；未激活、未改 Human Gold/DB。

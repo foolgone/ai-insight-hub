@@ -587,3 +587,11 @@ Correctness/Relevancy 输出不变；`RagJudgeInput` 不变（不新增 answerab
 - Q22 F 单案例（v1.1.2）：**F=1.0，4 scorable / 4 supported / 1 non_factual，6/6 evidence，validation_errors=[]**。
 - 40 条 v1.1.2 **未重跑**；v1.1.1 的 27/40 为旧 SHA，不能与 v1.1.2 混合称为 40 条通过。若 v1.1.2 作为最终版本，必须整批重跑 40 条，并重新验证 10 条闸门。
 - v1.1.2 仍 `design_draft` / `active=false`；默认 v1.0.0。
+
+### 12.1 v1.1.2 10 条闸门（2026-11-17，Q36 停止）
+
+- 完成 10/10；Q01/Q04/Q11/Q17/Q21/Q23/Q29/Q31/Q35 目标通过。
+- **Q36 F=0.75 低于 0.8–1.0**：cl1/cl6 原 supported，但 quote 跨句/跨 §1-§12 拼接，非 C1 逐字子串，`quote_not_found` 降级；F=6/8。
+- Q36 C=0.5、R=0.9；wrong_facts=[]。
+- 因 Q36 失败，Q10/Q15/Q20 单案例未跑，40 条 v1.1.2 未启动。
+- 10 条闸门未通过；v1.1.2 仍 design_draft/inactive。
