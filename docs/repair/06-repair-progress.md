@@ -1106,3 +1106,13 @@ alembic check   : No new upgrade operations detected
 - 因 Q36 闸门失败，Q10/Q15/Q20 单案例未跑，40 条 v1.1.2 未启动。
 - Token（10 条×2 臂）：v1.0.0 32,612/6,252；v1.1.2 95,032/8,651；估算 ¥0.4494。
 - v1.1.2 仍 design_draft/inactive；未激活、未改 Human Gold/DB。
+
+### v1.1.2 Q36 few-shot 单案例（2026-11-17，新 F SHA，未通过严格门）
+- F 新增 Q36 canonical 8 条 JSON few-shot（cl1 core claim、cl5/cl6 拆 §1/§12、全部单句 quote）。
+- 新 F SHA：`81456bc56b6829e5029698a16054bde3dc2e55af4379194f85fd3974ef167fe8`；MANIFEST 与 `pilot-40-targets.json.meta.f_sha` 已同步。
+- Q36 base F 单案例：**F=0.875（7/8）**，scorable 8 / supported 7 / insufficient 1，evidence 9/10，`validation_errors` 2 条（cl1 `quote_not_found`），`document_conflict=0`。
+- F 落在注册目标 0.8–1.0 内，但 cl1 仍是“能否退款，取决于……”的 meta 总起句，且 quote 跨行拼接，属于 Human Gold supported claim 被 evidence 降级；未满足 evidence 单句逐字 / `validation_errors=[]`。
+- cl5/cl6 仍把 §1“已激活”与 §12“一经售出”合并，未按 canonical 拆开。
+- 因此 Q36 未通过严格门，未重跑 10 条闸门；旧 10 条结果（F SHA `3db91171…`）不可复用；Q10/Q15/Q20 未跑，40 条未启动。
+- Token：input 7,384 / output 1,146；估算 ¥0.0287。
+- v1.1.2 仍 design_draft/inactive；未激活、未改 Human Gold/DB。

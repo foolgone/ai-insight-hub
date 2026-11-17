@@ -415,3 +415,6 @@ def test_v112_faithfulness_prompt_has_single_line_quote_and_q22() -> None:
     assert "Few-shot E（Q22" in text
     assert "该运费规则无例外说明" in text
     assert "absence，不进分母" in text
+    assert "Few-shot F（Q36" in text
+    assert "§1 与 §12" in text
+    assert "虚拟商品（充值、会员、课程）一经售出不支持退款。" in text

@@ -17,7 +17,7 @@
    例：C1 的“生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。”可以引整句，也可以引“质量问题需在签收后 24 小时内拍照反馈”；不能自造“生鲜食品质量问题需…”。
  - `context_id` 必须是输入中真实存在的编号；无法匹配真实上下文/片段时，support_status 不得为 supported。
  - `context_id` 只看输入顺序（C1、C2、……），**不是文档章节号**。即使原文位于“## 7. 运费规则”，引用时仍写 `C1` 或 `C2`，不得写成 `C7`。
-@@ -260,3 +261,80 @@
+@@ -260,3 +261,202 @@
    ],
    "reason": ""
  }
@@ -94,6 +94,128 @@
 +      "contradiction_with": [],
 +      "evidence_refs": [],
 +      "reason": "文档未提及，absence 不进分母"
++    }
++  ],
++  "reason": ""
++}
++
++## Few-shot F（Q36：§1/§12 冲突，canonical 8 条 JSON）
++上下文 C1：
++“订单签收后 7 天内可申请无理由退款。
++定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。
++生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。
++虚拟商品（充值、会员、课程）一经售出不支持退款。
++定制商品支持质量问题退换，不支持无理由退换。”
++回答（base，无披露）：
++“普通商品 7 天内可退；定制/生鲜/已激活虚拟不支持；生鲜质量问题 24 小时内；虚拟商品按 §12 退不了；定制商品支持质量问题退换。”
++说明：base 只输出 cl1–cl7（7/7 supported），不要输出 cl8；只有回答明确披露 §1/§12 冲突时才输出 cl8（variant，8/8）。所有 quote 只引单句连续原文；cl5/cl6 必须拆开，不能把 §1 与 §12 合并。
++完整输出（base 去掉 cl8；cl8 仅 variant）：
++{
++  "claims": [
++    {
++      "claim_id": "cl1",
++      "claim": "普通商品签收后 7 天内可申请无理由退款",
++      "claim_type": "factual_claim",
++      "claim_subtype": "policy",
++      "support_status": "supported",
++      "is_contradictory": false,
++      "contradiction_with": [],
++      "evidence_refs": [
++        {"context_id": "C1", "quote": "订单签收后 7 天内可申请无理由退款。"}
++      ],
++      "reason": "C1 单句原文"
++    },
++    {
++      "claim_id": "cl2",
++      "claim": "定制类商品不支持无理由退款",
++      "claim_type": "factual_claim",
++      "claim_subtype": "policy",
++      "support_status": "supported",
++      "is_contradictory": false,
++      "contradiction_with": [],
++      "evidence_refs": [
++        {"context_id": "C1", "quote": "定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。"}
++      ],
++      "reason": "C1 单句原文"
++    },
++    {
++      "claim_id": "cl3",
++      "claim": "生鲜食品不支持无理由退款",
++      "claim_type": "factual_claim",
++      "claim_subtype": "policy",
++      "support_status": "supported",
++      "is_contradictory": false,
++      "contradiction_with": [],
++      "evidence_refs": [
++        {"context_id": "C1", "quote": "定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。"}
++      ],
++      "reason": "C1 单句原文"
++    },
++    {
++      "claim_id": "cl4",
++      "claim": "生鲜食品质量问题需在签收后 24 小时内拍照反馈",
++      "claim_type": "factual_claim",
++      "claim_subtype": "policy",
++      "support_status": "supported",
++      "is_contradictory": false,
++      "contradiction_with": [],
++      "evidence_refs": [
++        {"context_id": "C1", "quote": "生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。"}
++      ],
++      "reason": "C1 单句原文"
++    },
++    {
++      "claim_id": "cl5",
++      "claim": "已激活的虚拟商品不支持无理由退款",
++      "claim_type": "factual_claim",
++      "claim_subtype": "policy",
++      "support_status": "supported",
++      "is_contradictory": false,
++      "contradiction_with": [],
++      "evidence_refs": [
++        {"context_id": "C1", "quote": "定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。"}
++      ],
++      "reason": "§1 单句原文"
++    },
++    {
++      "claim_id": "cl6",
++      "claim": "虚拟商品（充值、会员、课程）一经售出不支持退款",
++      "claim_type": "factual_claim",
++      "claim_subtype": "policy",
++      "support_status": "supported",
++      "is_contradictory": false,
++      "contradiction_with": [],
++      "evidence_refs": [
++        {"context_id": "C1", "quote": "虚拟商品（充值、会员、课程）一经售出不支持退款。"}
++      ],
++      "reason": "§12 单句原文，不与 §1 合并"
++    },
++    {
++      "claim_id": "cl7",
++      "claim": "定制商品支持质量问题退换，不支持无理由退换",
++      "claim_type": "factual_claim",
++      "claim_subtype": "policy",
++      "support_status": "supported",
++      "is_contradictory": false,
++      "contradiction_with": [],
++      "evidence_refs": [
++        {"context_id": "C1", "quote": "定制商品支持质量问题退换，不支持无理由退换。"}
++      ],
++      "reason": "C1 单句原文"
++    },
++    {
++      "claim_id": "cl8",
++      "claim": "§1 与 §12 对虚拟商品范围表述不一致",
++      "claim_type": "factual_claim",
++      "claim_subtype": "conflict",
++      "support_status": "supported",
++      "is_contradictory": false,
++      "contradiction_with": [],
++      "evidence_refs": [
++        {"context_id": "C1", "quote": "定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。"},
++        {"context_id": "C1", "quote": "虚拟商品（充值、会员、课程）一经售出不支持退款。"}
++      ],
++      "reason": "仅回答披露冲突时输出；两条单句 refs，不拼接"
 +    }
 +  ],
 +  "reason": ""

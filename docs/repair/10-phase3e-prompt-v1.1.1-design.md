@@ -595,3 +595,14 @@ Correctness/Relevancy 输出不变；`RagJudgeInput` 不变（不新增 answerab
 - Q36 C=0.5、R=0.9；wrong_facts=[]。
 - 因 Q36 失败，Q10/Q15/Q20 单案例未跑，40 条 v1.1.2 未启动。
 - 10 条闸门未通过；v1.1.2 仍 design_draft/inactive。
+
+### 12.2 v1.1.2 Q36 few-shot 单案例（2026-11-17，新 F SHA）
+
+- F 增加 Q36 canonical 8 条 JSON few-shot：cl1 用普通商品 7 天 core claim；cl5/cl6 拆 §1/§12；所有 quote 单句。
+- 新 F SHA：`81456bc56b6829e5029698a16054bde3dc2e55af4379194f85fd3974ef167fe8`；C/R SHA 不变。
+- Q36 base F 单案例：F=0.875（7/8），scorable 8 / supported 7 / insufficient 1，evidence 9/10，`validation_errors` 2 条（cl1 `quote_not_found`），`document_conflict=0`。
+- F 在注册目标 0.8–1.0 内，但 cl1 仍是 meta 总起句 + 跨行拼接 quote，Human Gold supported claim 被 evidence 降级；未满足 evidence 单句逐字 / `validation_errors=[]`。
+- cl5/cl6 仍合并 §1“已激活”与 §12“一经售出”，未按 canonical 拆成两条。
+- Q36 未通过严格门；未重跑 10 条闸门，旧 10 条结果不可复用；Q10/Q15/Q20 未跑，40 条未启动。
+- Token：input 7,384 / output 1,146；估算 ¥0.0287。
+- v1.1.2 仍 design_draft/inactive；未激活、未改 Human Gold/DB。
