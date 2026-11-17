@@ -1027,3 +1027,11 @@ alembic check   : No new upgrade operations detected
 - Token（6 条×2 臂）：v1.0.0 input 17,985/output 2,922；v1.1.1 input 43,731/output 4,682；估算 ¥0.2211。
 - 结果：`pilot-10-v1.0.0-vs-v1.1.1-rerun.json` / `.md`。
 - 未跑 40 条、未激活；脚本退出前恢复 v1.0.0。
+
+### Q23 F 修复（2026-11-17）
+- 将 Q23 few-shot 替换为完整 8 条 JSON：cl1–cl8，固定 3 supported / 1 unsupported / 2 insufficient / 2 non_factual = 0.5。
+- 增加 quote 连续复制规则：不得加主语/前缀、改写或拼接；C1 可引整句或连续子串，不能自造“生鲜食品质量问题需…”。
+- 规范性要求（需/必须/应当/须保留/材料/凭证）明确为 factual_claim；无依据标 insufficient，不得标 advice/non_factual。
+- 新 F Prompt SHA：`3519fd3b1bbbab9b117abd04f69304609146c2d2a05c39699483dea1740eda19`；C SHA 不变。
+- Q23 F 单案例：**score=0.5**；scorable=6、supported=3、unsupported=1、insufficient=2、non_factual=2；3/3 evidence；cl1 contradictory_with=["cl2"]；validation_errors=[]。
+- 新增 Prompt 内容测试；未重跑 10 条、未跑 40 条。

@@ -15,6 +15,7 @@
 每条 claim 必须标记 `claim_type`：
 - `factual_claim`：政策、规则、事实、数字、条件、时间、流程、材料/凭证要求。
   - “需/必须/应当/应/须提供/流程/材料/凭证”等**规范性要求**属于 factual_claim，即使它是用户需要执行的动作。
+  - “需/必须/应当/须保留/材料/凭证”等规范性要求同样属于 factual_claim；无上下文依据时标 `insufficient_evidence`，不得标 advice/non_factual。例：“该时限是硬性要求” → factual/policy；“需保留问题实物及包装证据” → factual/policy/insufficient。
 - `non_factual`：问候、共情、纯建议（如“建议联系客服”）、下一步操作建议、纯元信息。
 
 `claim_subtype`（诊断标签，必须填写）：
@@ -37,6 +38,8 @@
 - `supported` 必须至少有一个 `evidence_refs` 元素；没有 evidence 不得 supported。
 - `evidence_refs` 使用 `{ "context_id": "C1", "quote": "上下文原文" }`。
 - `quote` 必须是所引用上下文的**逐字片段**；不能改写、拼接或引用外部知识。
+- `quote` 必须从 contexts **连续复制**；不得加主语/前缀、改写，或拼接两个不连续片段。原句有前置分句时，复制整句或复制其中一个连续子串。
+  例：C1 的“生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。”可以引整句，也可以引“质量问题需在签收后 24 小时内拍照反馈”；不能自造“生鲜食品质量问题需…”。
 - `context_id` 必须是输入中真实存在的编号；无法匹配真实上下文/片段时，support_status 不得为 supported。
 - `context_id` 只看输入顺序（C1、C2、……），**不是文档章节号**。即使原文位于“## 7. 运费规则”，引用时仍写 `C1` 或 `C2`，不得写成 `C7`。
 - `unsupported` 可提供指向矛盾原文的 evidence_refs；`insufficient_evidence` 的 evidence_refs 为空数组。
@@ -80,15 +83,111 @@
   "reason": "整体说明（可为空）"
 }
 
-## Few-shot A（Q23：结论与后文矛盾）
+## Few-shot A（Q23：结论与后文矛盾，完整 8 条 JSON）
 上下文 C1：
 “生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。”
 回答：
 “是的，可以按政策反馈。但您是在签收后第 2 天反馈，已超过 24 小时，原则上不符合受理条件。”
-输出要点：
-- cl1：“可以按政策反馈” → factual_claim / policy / unsupported / is_contradictory=true / contradiction_with=["cl2"]
-- cl2：“超过 24 小时不符合受理条件” → factual_claim / policy / supported / evidence_refs=[C1]
-- cl3：“生鲜质量问题需在 24 小时内拍照反馈” → factual_claim / policy / supported / evidence_refs=[C1]
+完整输出（只示范结构，不要求逐字复制）：
+{
+  "claims": [
+    {
+      "claim_id": "cl1",
+      "claim": "可以按政策反馈",
+      "claim_type": "factual_claim",
+      "claim_subtype": "policy",
+      "support_status": "unsupported",
+      "is_contradictory": true,
+      "contradiction_with": ["cl2"],
+      "evidence_refs": [],
+      "reason": "首句结论与后文/金标矛盾"
+    },
+    {
+      "claim_id": "cl2",
+      "claim": "超过 24 小时反馈不符合受理条件",
+      "claim_type": "factual_claim",
+      "claim_subtype": "policy",
+      "support_status": "supported",
+      "is_contradictory": false,
+      "contradiction_with": [],
+      "evidence_refs": [
+        {"context_id": "C1", "quote": "质量问题需在签收后 24 小时内拍照反馈"}
+      ],
+      "reason": "C1 连续原文"
+    },
+    {
+      "claim_id": "cl3",
+      "claim": "生鲜食品质量问题需在签收后 24 小时内拍照反馈",
+      "claim_type": "factual_claim",
+      "claim_subtype": "policy",
+      "support_status": "supported",
+      "is_contradictory": false,
+      "contradiction_with": [],
+      "evidence_refs": [
+        {"context_id": "C1", "quote": "生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。"}
+      ],
+      "reason": "C1 整句原文"
+    },
+    {
+      "claim_id": "cl4",
+      "claim": "24 小时起算点为签收完成时间（非签收日零点）",
+      "claim_type": "factual_claim",
+      "claim_subtype": "policy",
+      "support_status": "insufficient_evidence",
+      "is_contradictory": false,
+      "contradiction_with": [],
+      "evidence_refs": [],
+      "reason": "上下文未说明起算点"
+    },
+    {
+      "claim_id": "cl5",
+      "claim": "该时限是硬性要求",
+      "claim_type": "factual_claim",
+      "claim_subtype": "policy",
+      "support_status": "supported",
+      "is_contradictory": false,
+      "contradiction_with": [],
+      "evidence_refs": [
+        {"context_id": "C1", "quote": "质量问题需在签收后 24 小时内拍照反馈。"}
+      ],
+      "reason": "C1 连续原文"
+    },
+    {
+      "claim_id": "cl6",
+      "claim": "需保留问题实物及包装证据",
+      "claim_type": "factual_claim",
+      "claim_subtype": "policy",
+      "support_status": "insufficient_evidence",
+      "is_contradictory": false,
+      "contradiction_with": [],
+      "evidence_refs": [],
+      "reason": "规范性要求，但上下文未写"
+    },
+    {
+      "claim_id": "cl7",
+      "claim": "文档未提及例外/宽限期",
+      "claim_type": "non_factual",
+      "claim_subtype": "absence",
+      "support_status": null,
+      "is_contradictory": false,
+      "contradiction_with": [],
+      "evidence_refs": [],
+      "reason": "absence"
+    },
+    {
+      "claim_id": "cl8",
+      "claim": "建议联系客服/提交带时间水印照片",
+      "claim_type": "non_factual",
+      "claim_subtype": "advice",
+      "support_status": null,
+      "is_contradictory": false,
+      "contradiction_with": [],
+      "evidence_refs": [],
+      "reason": "纯建议"
+    }
+  ],
+  "reason": ""
+}
 
 ## Few-shot B（Q21/Q11：证据不足与建议）
 上下文 C1：

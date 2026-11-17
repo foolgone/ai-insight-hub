@@ -2968,6 +2968,23 @@
     },
     "q04_q17_q31_targets": "docs/repair/phase3e/pilot-10-additional-targets.json",
     "ten_case_completed": false,
-    "forty_case_run": false
+    "forty_case_run": false,
+    "q23_f_fix": {
+      "prompt_sha256": "3519fd3b1bbbab9b117abd04f69304609146c2d2a05c39699483dea1740eda19",
+      "status": "evaluated",
+      "score": 0.5,
+      "scorable_claim_count": 6,
+      "supported_claim_count": 3,
+      "unsupported_claim_count": 1,
+      "insufficient_evidence_count": 2,
+      "non_factual_count": 2,
+      "contradiction_count": 1,
+      "document_conflict_count": 0,
+      "evidence_ok": 3,
+      "evidence_count": 3,
+      "validation_errors": [],
+      "smoke_result": "docs/repair/phase3e/q23-v1.1.1-faithfulness-smoke.json"
+    },
+    "ten_case_rerun": false
   }
 }

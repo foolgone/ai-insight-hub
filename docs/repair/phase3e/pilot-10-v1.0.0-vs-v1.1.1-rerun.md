@@ -203,6 +203,14 @@
 - Q01/Q04/Q17 目标命中；Q01 C=0.9（额外信息规则生效），Q04 F=1.0、Q17 F=1.0。
 - 未运行 Q29/Q31/Q35/Q36；**Q36 disclosure 未验证**。
 
+## Q23 F 修复验证（单案例，不是 10 条）
+
+- 将 Q23 few-shot 替换为完整 8 条 JSON；增加 quote 连续复制规则；规范性要求归 factual。
+- 新 F Prompt SHA：`3519fd3b1bbbab9b117abd04f69304609146c2d2a05c39699483dea1740eda19`。
+- Q23 F 单案例：**score=0.5**；scorable=6、supported=3、unsupported=1、insufficient=2、non_factual=2；3/3 evidence；cl1 `contradictory_with=["cl2"]`；`validation_errors=[]`。
+- Q23 C/R 未重跑；上一轮 C=0.0（目标 0.0–0.2）、R=0.9 保持不变。
+- 10 条尚未重跑。
+
 ## Token / 成本（已完成 6 条 × 2 臂）
 
 | Arm | input | output | 估算成本（CNY） |

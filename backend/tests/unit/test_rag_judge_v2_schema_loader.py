@@ -381,3 +381,14 @@ def test_v111_correctness_prompt_has_extra_info_rule() -> None:
     assert "不扣分" in text
     assert "不用于“多说了正确内容”" in text
     assert "Q01" in text
+
+
+def test_v111_faithfulness_prompt_has_q23_full_json_and_quote_rule() -> None:
+    text = load_judge_prompt("v1.1.1", "faithfulness")
+
+    assert "Few-shot A（Q23" in text
+    assert "完整 8 条 JSON" in text
+    assert '"claim_id": "cl8"' in text
+    assert "连续复制" in text
+    assert "不能自造" in text
+    assert "需保留问题实物及包装证据" in text

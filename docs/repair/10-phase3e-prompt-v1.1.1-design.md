@@ -54,7 +54,8 @@
 
 ### 2.3 反例/few-shot
 
-- **Q23**：结论“可以按政策反馈” vs 后文“已超时不符合” → 结论 factual_claim / unsupported / `is_contradictory=true` / `contradiction_with=[C2]`；不能标 non_factual 排除。
+- **Q23**：完整 8 条 JSON few-shot（cl1–cl8），固定 3 supported / 1 unsupported / 2 insufficient / 2 non_factual = 0.5；cl1 `is_contradictory=true`、`contradiction_with=["cl2"]`；cl5“硬性要求”、cl6“保留实物及包装证据”必须为 factual_claim，不得归 advice/absence。
+- **quote 规则**：必须从 contexts 连续复制；不得加主语/前缀、改写或拼接不连续片段。C1 可引整句或“质量问题需在签收后 24 小时内拍照反馈”，不能自造“生鲜食品质量问题需…”。
 - **Q21#3**：“质量问题不受 7 天限制” → factual_claim / `insufficient_evidence`；原文只把 7 天限定在无理由退款，未规定普通商品质量问题期限。
 - **Q11**：“需提供照片/视频凭证” → factual_claim / insufficient_evidence；“建议联系客服” → non_factual，不进分母。
 
@@ -563,6 +564,7 @@ Correctness/Relevancy 输出不变；`RagJudgeInput` 不变（不新增 answerab
 - 10 条真实对比第一次因 **Q17 v1.1.1 Faithfulness schema failed** 停止（4/10）；Q17 单案例修复后已 **schema PASS、F=1.0、5/5 evidence、validation_errors=[]**；
 - 10 条重跑（2026-11-17）因 **Q01 Correctness 0.900→0.700（-0.200，无目标解释）** 停止（1/10）；Q01 C Prompt 修复后单案例 **C=0.9、missing=[]、wrong_facts=[]**；
 - 补 Q04/Q17/Q31 目标后再次重跑，完成 6/10，因 **Q23 F=0.0（目标 0.4–0.5；cl2 quote 非逐字，降级）** 停止；未跑 Q29/Q31/Q35/Q36；
+- Q23 F 修复：替换为 8 条完整 JSON few-shot（3 supported/1 unsupported/2 insufficient/2 non_factual），写入 quote 连续复制规则与规范性要求分类；新 F SHA `3519fd3b…`；Q23 F 单案例 **0.5、6/3/1/2/2、3/3 evidence、cl1 contradictory、validation_errors=[]**；
 - 未跑 40 条；
 - Q11 v1.1.1 F=0.833 属于合法 5/6 拆分；Q11 target 已调整为 0.6–0.9；Q36 未运行，disclosure 未验证；
 - 不得把 dry-run PASS 当作 Prompt 质量证据；v1.1.1 仍 `design_draft` / `active=false`。
