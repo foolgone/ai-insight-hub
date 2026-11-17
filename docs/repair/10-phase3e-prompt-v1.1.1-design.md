@@ -192,13 +192,15 @@ else:
 
 - 首句/结论与后文关键事实冲突，或同时给“可以/不可以” → 0.0–0.2；`wrong_facts` 必填。
 - `missing_points` 只列金标事实/条件；建议不算 missing point，除非金标明确要求。
-- 不因措辞、顺序、详细程度扣分；不评价语气/格式/长度。
+- **额外但正确、与问题相关的内容不扣分**；不得以“不必要的额外信息”为由降分。只有错误、与金标矛盾、改变结论、掩盖核心答案，或金标没有的事实承诺，才降分/写入 `wrong_facts`。
+- 正确但跑题的内容由 Relevancy 处理，Correctness 不重复扣分；不因措辞、顺序、详细程度扣分；不评价语气/格式/长度。
 
 ### 3.7 few-shot
 
 - Q23 首句矛盾 → 0.0–0.2 + wrong_facts。
 - Q35 发货 vs 到货 → 0.9–1.0；混淆 → 0.3–0.4。
 - Q36 冲突披露 → 0.9–1.0；只选一边 → 0.5–0.6。
+- Q01 正确且相关的额外例外 → 0.9–1.0；`missing_points=[]`、`wrong_facts=[]`。
 
 ---
 
@@ -413,6 +415,24 @@ Correctness/Relevancy 输出不变；`RagJudgeInput` 不变（不新增 answerab
 
 每个案例的完整 fixture、预期 Claim 拆分、标签、诊断、禁止行为、容差、回归规则见 JSON；本表只做摘要。
 
+#### 7.2.1 10 条对比补充目标（不进 6 案例矩阵）
+
+| Case | 指标 | 目标 | 说明 |
+|---|---|---|---|
+| Q01 | C | 0.9–1.0 | AI draft / provisional；正确且相关的额外例外不扣分 |
+| Q01 | F | 1.0 | 不退化为不必要扣分；5/5 supported 为期望 |
+| Q01 | R | 0.8–1.0 | 不退化 |
+
+**额外内容扣分边界（Correctness）**：
+
+| 额外内容 | Correctness |
+|---|---|
+| 正确且相关 | 不扣分，0.9–1.0 |
+| 正确但跑题 | Correctness 不扣；由 Relevancy 处理 |
+| 错误/无依据 | 降分 + `wrong_facts` |
+| 与金标矛盾/改变结论 | 降分，必要时 0.0–0.2 |
+| 金标没有的事实承诺 | 按 `wrong_facts` 处理 |
+
 ### 7.3 矩阵静态校验（不跑 Judge）
 
 激活前必须通过脚本校验：
@@ -522,6 +542,7 @@ Correctness/Relevancy 输出不变；`RagJudgeInput` 不变（不新增 answerab
 - 结构化失败保留首次/修复两次 raw output；null 集合字段宽容化；修复 Prompt 使用紧凑模板 + 完整 JSON 示例；
 - v1.1.1 Faithfulness 输入显式附带 `context_ids=["C1", ...]`（不改变 `RagJudgeInput`），避免模型把文档章节号当 context_id；
 - 共享 `parse_with_repair` 在无 `repair_example` 时回退到 `schema.model_json_schema()`，其它 Agent 修复能力不降级；
+- Q01 Correctness 规则：正确且相关的额外信息不扣分；`0.7–0.8` 不用于“多说了正确内容”；新增 Q01 few-shot；新 C SHA `2ab6eac…`；单案例 C=0.9、missing/wrong 为空；
 - Q17 单案例修复验证：attempt1/2 schema PASS 但 context_id 写成 C7（章节号）/quote 不命中；显式 `context_ids` 后 schema PASS、F=1.0、5/5 evidence、validation_errors=[]；新 F SHA `4ee65afb…`；
 - 新增单测全部通过；生产 Schema/Service 重跑同一 6 案例 dry-run，结果与设计稿 dry-run 一致（6/6、12/12）。
 
@@ -531,6 +552,7 @@ Correctness/Relevancy 输出不变；`RagJudgeInput` 不变（不新增 answerab
 - 回滚：删除该环境变量或设为 `v1.0.0`；v1.1.1 目录保留不会生效；
 - `MANIFEST.active` 仅记录状态，不作为硬门禁；显式选择才加载，默认不选；
 - 10 条真实对比第一次因 **Q17 v1.1.1 Faithfulness schema failed** 停止（4/10）；Q17 单案例修复后已 **schema PASS、F=1.0、5/5 evidence、validation_errors=[]**；
-- 10 条重跑（2026-11-17）因 **Q01 Correctness 0.900→0.700（-0.200，无目标解释）** 停止（1/10）；未跑 40 条；
+- 10 条重跑（2026-11-17）因 **Q01 Correctness 0.900→0.700（-0.200，无目标解释）** 停止（1/10）；Q01 C Prompt 修复后单案例 **C=0.9、missing=[]、wrong_facts=[]**，Q01 target 0.9–1.0；10 条尚未再次重跑；
+- 未跑 40 条；
 - Q11 v1.1.1 F=0.833 属于合法 5/6 拆分；Q11 target 已调整为 0.6–0.9；Q36 未运行，disclosure 未验证；
 - 不得把 dry-run PASS 当作 Prompt 质量证据；v1.1.1 仍 `design_draft` / `active=false`。

@@ -48,6 +48,14 @@
 | cl4 | 虚拟商品（如充值、会员、课程）一经售出不支持退款 | factual_claim/policy | supported | 1 |
 | cl5 | 定制商品仅支持因质量问题退换，不支持无理由退换 | factual_claim/policy | supported | 1 |
 
+## Q01 修复验证（单案例，不是 10 条）
+
+- 修改 v1.1.1 Correctness：正确且相关的额外信息不扣分；0.7–0.8 明确“不用于多说了正确内容”；新增 Q01 few-shot。
+- 新 C Prompt SHA：`2ab6eac2abe57dcfd647df328244ac3e5681fc93222938d6614e71037d49ae77`。
+- Q01 v1.1.1 C 单案例：**score=0.9**，`missing_points=[]`，`wrong_facts=[]`，reason 为“回答正确且完整地覆盖了金标中的关键事实，并补充了相关且正确的例外情况。”
+- 目标 0.9–1.0 已命中；10 条尚未重跑。
+- Q01 C 修复 smoke token：input 2,290 / output 51，估算约 ¥0.006。
+
 ## 发现
 
 - **停止条件命中：Q01 v1.1.1 Correctness 0.900→0.700（-0.200）**，Q01 不在 6 案例矩阵、无目标解释，按“未解释单指标下降 >0.10”立即停止。

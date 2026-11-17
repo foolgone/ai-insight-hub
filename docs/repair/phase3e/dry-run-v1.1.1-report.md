@@ -4,7 +4,7 @@
 >
 > 输入：fixture `answer_contexts`（C1–C2）；`retrieval_contexts`（R1–R4）未混入。
 > 合成输出：用矩阵 `expected_claims` 构造 v1.1.1 输出（不是 Judge 生成），用生产 Schema/Service 解析与计分；只验证 Schema/计分/证据规则能否接受矩阵预期，不代表 Prompt 的真实模型表现。
-> 生成：2026-11-16；脚本：`docs/repair/phase3e/dry_run_prompt_v1.1.1.py`。
+> 生成：2026-11-17；脚本：`docs/repair/phase3e/dry_run_prompt_v1.1.1.py`。
 
 ## 结论
 

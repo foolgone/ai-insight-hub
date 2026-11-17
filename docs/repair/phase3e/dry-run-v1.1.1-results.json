@@ -9,7 +9,7 @@
     "prompt_version": "v1.1.1",
     "prompt_status": "design_draft",
     "active": false,
-    "generated_on": "2026-11-16",
+    "generated_on": "2026-11-17",
     "matrix": "docs/repair/phase3e/prompt-v1.1.1-acceptance-matrix.json",
     "fixtures": "docs/repair/phase3e/prompt-v1.1.1-fixtures.json",
     "context_source": "fixture.answer_contexts",

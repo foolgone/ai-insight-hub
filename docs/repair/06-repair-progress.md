@@ -1010,3 +1010,10 @@ alembic check   : No new upgrade operations detected
 - 结果：`docs/repair/phase3e/pilot-10-v1.0.0-vs-v1.1.1-rerun.json` / `.md`。
 - 共享 `parse_with_repair` fallback 已补回 `schema.model_json_schema()`，并新增“默认修复 Prompt 含 Schema”测试；不影响 RagJudge 的完整示例路径。
 - 未跑 40 条、未激活；脚本退出前恢复 `RAG_JUDGE_PROMPT_VERSION=v1.0.0`。
+
+### Q01 Correctness 修复与单案例验证（2026-11-17）
+- 规则：正确且相关的额外信息不扣 Correctness；`0.7–0.8` 明确“不用于多说了正确内容”；新增 Q01 few-shot。
+- 新增 `pilot-10-additional-targets.json`：Q01 C 0.9–1.0、F 1.0、R 0.8–1.0，标记 provisional/AI draft。
+- 新 C Prompt SHA：`2ab6eac2abe57dcfd647df328244ac3e5681fc93222938d6614e71037d49ae77`。
+- Q01 C 单案例：**score=0.9，missing_points=[]，wrong_facts=[]**；reason 为“补充了相关且正确的例外情况”。
+- 未重跑 10 条、未跑 40 条；v1.1.1 仍 design_draft/inactive。

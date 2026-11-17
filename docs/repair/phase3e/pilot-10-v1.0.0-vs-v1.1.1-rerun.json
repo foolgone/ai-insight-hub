@@ -544,5 +544,19 @@
       "output_tokens": 735,
       "estimated_cost_cny": 0.0254
     }
+  },
+  "post_run": {
+    "q01_c_fix": {
+      "prompt_sha256": "2ab6eac2abe57dcfd647df328244ac3e5681fc93222938d6614e71037d49ae77",
+      "status": "evaluated",
+      "score": 0.9,
+      "missing_points": [],
+      "wrong_facts": [],
+      "reason": "回答正确且完整地覆盖了金标中的关键事实，并补充了相关且正确的例外情况。",
+      "smoke_result": "docs/repair/phase3e/q01-v1.1.1-correctness-smoke.json",
+      "target": "0.9-1.0"
+    },
+    "ten_case_rerun": false,
+    "forty_case_run": false
   }
 }

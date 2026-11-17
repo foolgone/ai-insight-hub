@@ -372,3 +372,12 @@ def test_v111_repair_example_is_complete_json() -> None:
     claim = example["claims"][0]
     assert claim["claim_type"] == "factual_claim"
     assert claim["evidence_refs"][0]["context_id"] == "C1"
+
+
+def test_v111_correctness_prompt_has_extra_info_rule() -> None:
+    text = load_judge_prompt("v1.1.1", "answer_correctness")
+
+    assert "额外但正确" in text
+    assert "不扣分" in text
+    assert "不用于“多说了正确内容”" in text
+    assert "Q01" in text

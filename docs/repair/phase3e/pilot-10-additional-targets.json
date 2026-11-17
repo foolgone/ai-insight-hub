@@ -1,0 +1,21 @@
+{
+  "meta": {
+    "name": "phase3e-pilot-10-additional-targets",
+    "note": "10 条 Pilot 中不在 6 案例验收矩阵的补充目标；不冒充 Human Gold。",
+    "source": "docs/repair/10-phase3e-prompt-v1.1.1-design.md#7.2.1",
+    "rule": "正确且与问题相关的额外信息不扣 Correctness；只有错误/矛盾/改变结论/掩盖核心/金标没有的事实承诺才降分或写 wrong_facts。"
+  },
+  "cases": [
+    {
+      "id": "Q01",
+      "human_gold": false,
+      "provisional": true,
+      "gold_source": "docs/repair/phase3e/candidates.json (AI draft, pending human)",
+      "targets": {
+        "faithfulness": "1.0",
+        "answer_correctness": "0.9-1.0",
+        "answer_relevancy": "0.8-1.0"
+      }
+    }
+  ]
+}
