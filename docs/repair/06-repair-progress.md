@@ -1128,3 +1128,12 @@ alembic check   : No new upgrade operations detected
 - 40 条继续：Q15 通过；**Q16 记为 known Human Gold R miss**（R=0.7，v1.0.0 R=1.0；三次稳定 0.7；回答与金标逐字一致，R 裁判要求金标未要求的“具体核查步骤”，属于 judge over-strictness，不改 R Prompt/目标）。
 - 40 条继续：Q17/Q18/Q19/Q20/Q21/Q22 通过；**Q23 F=0.0 停止**（目标 0.4–0.5，Human Gold supported quote 降级）。Q23 的 cl2/cl3/cl4 quote 合成为“生鲜食品质量问题需在签收后 24 小时内拍照反馈。”，原文是“生鲜食品签收后不支持无理由退货，质量问题需…”，6 条 `quote_not_found`；重跑 0.0/0.0/0.428571，2/3 复现。完成 23/40。
 - 40 条未完成、未通过；不能称为 40 条 Human Gold 验收。v1.1.2 仍 design_draft/inactive；未激活、未改 Human Gold/DB。
+
+### v1.1.3（2026-11-17，design_draft）
+- 新建 v1.1.3：F = v1.1.2 + Q23 最短连续子串；R = v1.1.2 + Q16 直接完整回答规则；C 继承不变。
+- 最终 F SHA：`3d35175bf97f4389a1cd6c52ed069ea0d7889227ab61e68b45c88529d58421bd`；R SHA：`394cd30c1453f0474ec6d25cf0305d8e3fb066151ac0f85e004b16117906891b`；C SHA 不变。
+- Q23 F 3/3：0.5/0.5/0.428571（目标 0.4–0.5）；Q16 R 3/3：0.9/0.9/1.0（目标 0.9–1.0）；Q13 F 3/3：1.0/1.0/1.0。
+- Q10/Q15/Q20/Q22 affected 全部通过：Q10 F=1.0、Q15 F=0.667、Q20 F=0.8、Q22 F=1.0/C=0.9/R=1.0。
+- **10 条闸门 v1.1.3：10/10 通过**（Q01/Q04/Q11/Q17/Q21/Q23/Q29/Q31/Q35/Q36）；Q35 F=0.833 有 2 条 quote_not_found，目标命中，按 known diagnostic 记录。
+- 40 条规模/回归：Q01–Q27 通过（Q14 known C miss，Q16 R 已修复，Q23 F=0.5，Q25 C 0.8→0.7 恰好 0.10 不是 >0.10）；**Q28 F=0.857 停止**（v1.0.0 1.0，下降 0.143）。Q28 重跑 0.875/0.875/0.875，唯一 insufficient 是“可申请催促/补偿/取消权益”的推断；Q28 无显式目标。完成 28/40。
+- 40 条未完成、未通过；v1.1.3 仍 design_draft/inactive；未激活、未改 Human Gold/DB。

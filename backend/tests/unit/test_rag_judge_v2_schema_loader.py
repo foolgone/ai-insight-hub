@@ -96,13 +96,26 @@ def test_explicit_v112_loads_v2_prompt() -> None:
     assert agent.prompt_sha256 == manifest["prompts"]["faithfulness.txt"]
 
 
+def test_explicit_v113_loads_v2_prompt() -> None:
+    agent = _agent(prompt_version="v1.1.3")
+
+    assert agent.prompt_version == "v1.1.3"
+    assert agent.schema_version == JUDGE_SCHEMA_V2
+    assert agent.rubric_version == "v1.1.3"
+    assert agent.metric_version == "v2"
+    manifest = load_prompt_manifest("v1.1.3")
+    assert agent.prompt_sha256 == manifest["prompts"]["faithfulness.txt"]
+
+
 def test_prompt_schema_and_metric_mapping() -> None:
     assert judge_schema_version("v1.0.0") == JUDGE_SCHEMA_V1
     assert judge_schema_version("v1.1.0") == JUDGE_SCHEMA_V1
     assert judge_schema_version("v1.1.1") == JUDGE_SCHEMA_V2
     assert judge_schema_version("v1.1.2") == JUDGE_SCHEMA_V2
+    assert judge_schema_version("v1.1.3") == JUDGE_SCHEMA_V2
     assert metric_version_for_prompt("faithfulness", "v1.1.1") == "v2"
     assert metric_version_for_prompt("faithfulness", "v1.1.2") == "v2"
+    assert metric_version_for_prompt("faithfulness", "v1.1.3") == "v2"
     assert metric_version_for_prompt("faithfulness", "v1.0.0") == "v1"
     assert metric_version_for_prompt("answer_correctness", "v1.1.1") == "v2"
 
@@ -426,3 +439,24 @@ def test_v112_faithfulness_prompt_has_single_line_quote_and_q22() -> None:
     assert "发货时间为 5 个工作日内" in text
     assert "Few-shot G（Q21" in text
     assert "该限制适用于普通商品" in text
+
+
+def test_v113_faithfulness_prompt_has_q23_shortest_substring() -> None:
+    text = load_judge_prompt("v1.1.3", "faithfulness")
+
+    assert "最短连续子串" in text
+    assert "不得把前一分句的主语/限定语拼到后一分句的谓词上" in text
+    assert "保持首尾标点与原文一致" in text
+    assert "不要补原文没有的句号" in text
+    assert "结尾**一律不带标点**" in text
+    assert "不得引用 answer 自身的句子" in text
+    assert "Q23 关键" in text
+    assert "生鲜食品质量问题需…" in text
+
+
+def test_v113_relevancy_prompt_has_direct_answer_rule() -> None:
+    text = load_judge_prompt("v1.1.3", "answer_relevancy")
+
+    assert "单一部分、直接完整的回答" in text
+    assert "Few-shot D（Q16" in text
+    assert "不得因“没有具体核查步骤/下一步建议”" in text

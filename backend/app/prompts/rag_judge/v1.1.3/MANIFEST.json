@@ -1,0 +1,71 @@
+{
+  "version": "v1.1.3",
+  "status": "design_draft",
+  "active": false,
+  "date": "2026-11-17",
+  "note": "v1.1.3：F 增加 Q23 最短连续子串规则/ few-shot；R 增加直接完整回答不要求额外步骤规则/ Q16 few-shot；C 继承 v1.1.2；默认仍 v1.0.0。",
+  "schema_version": "rag_judge_schema_v2",
+  "rubric_version": "v1.1.3",
+  "metric_version_mapping": {
+    "faithfulness": "v2",
+    "answer_correctness": "v2",
+    "answer_relevancy": "v2",
+    "retrieval_metrics": "v1"
+  },
+  "prompts": {
+    "faithfulness.txt": "3d35175bf97f4389a1cd6c52ed069ea0d7889227ab61e68b45c88529d58421bd",
+    "answer_correctness.txt": "2ab6eac2abe57dcfd647df328244ac3e5681fc93222938d6614e71037d49ae77",
+    "answer_relevancy.txt": "394cd30c1453f0474ec6d25cf0305d8e3fb066151ac0f85e004b16117906891b"
+  },
+  "changes": {
+    "faithfulness": [
+      "继承 v1.1.2 全部规则",
+      "quote 只复制支持 claim 的最短连续子串；不得把前一分句的主语/限定语拼到后一分句的谓词上",
+      "Q23 few-shot：cl2/cl3/cl5 统一引“质量问题需在签收后 24 小时内拍照反馈”，不加“生鲜食品”前缀",
+      "最短子串保持首尾标点一致：在逗号/分号处截断不得补句号",
+      "quote 必须来自 contexts，不得引用 answer 自身句子/括注",
+      "quote 结尾一律不带标点，规避分号/句号差异"
+    ],
+    "answer_correctness": [
+      "继承 v1.1.2（C 正文不变）"
+    ],
+    "answer_relevancy": [
+      "继承 v1.1.2 全部规则",
+      "单一部分、直接完整的回答不要求额外步骤/建议；不得因没有下一步建议把 0.9-1.0 降到 0.7-0.8",
+      "新增 Q16 few-shot：回答与金标一致时判 0.9-1.0"
+    ]
+  },
+  "activation_requirements": [
+    "人工审核通过 v1.1.3 设计",
+    "Q23 F 重跑 3 次均 0.4-0.5",
+    "Q16 R 重跑 3 次均 0.9-1.0",
+    "10 条闸门 v1.1.3 通过",
+    "40 条 v1.1.3 规模/回归完成；不是 40 条 Human Gold 验收",
+    "版本加载器显式选择 v1.1.3（默认仍 v1.0.0）"
+  ],
+  "open_issues": [
+    "Q23 F 已验证 3/3：0.5/0.5/0.428571，全部在 0.4-0.5；最短子串规则生效",
+    "Q13 F 已验证 3/3：1.0/1.0/1.0；短子串 + 结尾不带标点 + contexts-only 规则生效",
+    "Q16 R 已验证 3/3：0.9/0.9/1.0；直接完整回答规则生效",
+    "10 条闸门 v1.1.3：10/10 通过（F SHA 3d35175b…）",
+    "40 条规模/回归：28/40 停在 Q28 F=0.857（v1.0.0 1.0）；Q28 重跑 0.875/0.875/0.875，唯一 insufficient 是补偿/取消权益推断；Q28 无显式目标，待决定是否注册 F 0.8-1.0",
+    "Q14 C 本次 0.9，但按 known Human Gold C miss 记录（v1.1.2 重复多数 0.7）；Q14 F=skipped(context_unavailable)，不是 PASS",
+    "Q25 C 0.8->0.7 恰好 0.10，不是 >0.10；not a stop",
+    "v1.1.2 的 10/10 与 23/40 结果全部作废，不能与 v1.1.3 混用",
+    "Q10 evidence typo 字形规则留待后续评估",
+    "Q36 canonical 冲突口径未业务确认"
+  ],
+  "design_revision": "2026-11-17-v113d",
+  "acceptance_matrix": "docs/repair/phase3e/prompt-v1.1.1-acceptance-matrix.json",
+  "fixtures": "docs/repair/phase3e/prompt-v1.1.1-fixtures.json",
+  "human_gold_coverage": {
+    "Q23": "human_gold",
+    "Q35": "human_gold",
+    "Q36": "human_gold",
+    "Q21#3": "human_gold_claim_only",
+    "Q11": "ai_draft_pending_human",
+    "Q29": "ai_draft_pending_human"
+  },
+  "implementation_status": "implemented_default_off",
+  "default_prompt_version": "v1.0.0"
+}

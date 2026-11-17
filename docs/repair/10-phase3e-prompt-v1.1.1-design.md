@@ -619,3 +619,14 @@ Correctness/Relevancy 输出不变；`RagJudgeInput` 不变（不新增 answerab
 - 40 条继续：Q15 通过；**Q16 记为 known Human Gold R miss**（R=0.7，v1.0.0 R=1.0；三次稳定 0.7；回答与金标逐字一致，R 裁判要求金标未要求的“具体核查步骤”，属于 judge over-strictness，不改 R Prompt/目标）。
 - 40 条继续：Q17/Q18/Q19/Q20/Q21/Q22 通过；**Q23 F=0.0 停止**（目标 0.4–0.5，Human Gold supported quote 降级）。Q23 的 cl2/cl3/cl4 quote 合成为“生鲜食品质量问题需在签收后 24 小时内拍照反馈。”，原文是“生鲜食品签收后不支持无理由退货，质量问题需…”，6 条 `quote_not_found`；重跑 0.0/0.0/0.428571，2/3 复现。完成 23/40。
 - 40 条未完成、未通过；不能称为 40 条 Human Gold 验收。v1.1.2 仍 design_draft/inactive；未激活、未改 Human Gold/DB。
+
+## 13. v1.1.3（design_draft，未激活）
+
+- F：继承 v1.1.2，新增 Q23 最短连续子串规则（不得把前一分句主语拼到后一分句谓词；quote 结尾一律不带标点；quote 必须来自 contexts，不得引用 answer 自身句子/括注）。
+- R：继承 v1.1.2，新增“单一部分、直接完整的回答不要求额外步骤/建议；不得因没有下一步建议把 0.9–1.0 降到 0.7–0.8”；新增 Q16 few-shot。
+- C：继承 v1.1.2，正文不变。
+- SHA：F `3d35175b…`、R `394cd30c…`、C `2ab6eac…`；v1.1.3 仍 design_draft/active=false，默认 v1.0.0。
+- Q23 F 3/3：0.5/0.5/0.428571；Q16 R 3/3：0.9/0.9/1.0；Q13 F 3/3：1.0/1.0/1.0。
+- Q10/Q15/Q20/Q22 affected 通过；10 条闸门 v1.1.3 10/10 通过。
+- 40 条规模/回归：28/40 停在 Q28 F=0.857（v1.0.0 1.0，下降 0.143）；Q28 重跑 0.875/0.875/0.875，唯一 insufficient 是“可申请催促/补偿/取消权益”的推断；Q28 无显式目标。
+- 40 条未完成、未通过；不能称为 40 条 Human Gold 验收。未激活、未进入 Phase 4、未改 Human Gold/DB。
