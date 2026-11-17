@@ -1071,3 +1071,12 @@ alembic check   : No new upgrade operations detected
 - 未跑 Q16/Q18/Q19/Q20/Q22/Q24–Q28/Q30/Q32–Q34/Q37–Q40。
 - Token（22 条×2 臂）：v1.0.0 59,962/9,087；v1.1.1 172,935/13,207；估算 ¥0.7729。
 - Q36 披露 variant smoke C=0.9 已通过；40 条只含 base answer。
+
+### 40 条继续第二次（2026-11-17，stopped Q20）
+- Q15 注册 F 0.6–1.0（期望 0.667），Q14 F 标 unavailable；保持 F/C SHA。
+- 完成 26/40（HG 9/13，provisional 17/27）；Q16/Q18/Q19 通过。
+- **Q20 provisional F 1.0→0.8（-0.2）**：cl5“该政策适用于所有符合积分累积条件的订单”无上下文依据，insufficient；无显式目标，按未解释 F 下降 >0.10 停止。
+- Q20 C=0.9、R=1.0；wrong_facts=[]。
+- 未跑 Q22/Q24–Q28/Q30/Q32–Q34/Q37–Q40。
+- Token（26 条×2 臂）：v1.0.0 69,497/10,627；v1.1.1 203,574/15,838；估算 ¥0.9094。
+- 40 条未完成、未激活；v1.1.1 仍 design_draft/inactive。

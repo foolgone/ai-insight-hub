@@ -1,26 +1,26 @@
-# 40 条规模运行：v1.0.0 vs v1.1.1（22/40，Q15 停止）
+# 40 条规模运行：v1.0.0 vs v1.1.1（26/40，Q20 停止）
 
-> **40 条规模/回归运行，不是 40 条 Human Gold 验收。** Human Gold 仅 13 条 + Q21#3 claim；其余 27 条 provisional。
+> **40 条规模/回归运行，不是 40 条 Human Gold 验收。** Human Gold 13 条 + Q21#3 claim；其余 27 条 provisional。
 > v1.1.1 使用 F SHA 3519fd3b…、C SHA 2ab6eac…；Faithfulness 只用 answer_contexts（C1–C2）。
 
 ## 执行状态
 
 - 状态：**stopped**
 - 停止原因：
-  - `Q15/faithfulness: dropped 1.000->0.667 >0.10`
-- 已完成案例：**22/40**
-- Human Gold 已完成：**7/13**
-- Provisional 已完成：**15/27**
-- 未运行案例：Q16, Q18, Q19, Q20, Q22, Q24, Q25, Q26, Q27, Q28, Q30, Q32, Q33, Q34, Q37, Q38, Q39, Q40
+  - `Q20/faithfulness: dropped 1.000->0.800 >0.10`
+- 已完成案例：**26/40**
+- Human Gold 已完成：**9/13**
+- Provisional 已完成：**17/27**
+- 未运行案例：Q22, Q24, Q25, Q26, Q27, Q28, Q30, Q32, Q33, Q34, Q37, Q38, Q39, Q40
 - 模型：`qwen-max`；temperature=0.0；max_tokens=8192
 - 复用案例：Q01, Q04, Q11, Q17, Q21, Q23, Q29, Q31, Q35, Q36
 
 ## Q36 披露 variant 前置 smoke
 
-- `docs/repair/phase3e/q36-disclosure-variant-smoke.json`：C=0.9，missing=[]，wrong_facts=[]，目标 0.9–1.0，**通过**。
-- 40 条本身只含 Q36 base answer（未披露 variant）；base C=0.5 已通过 10 条验证。
+- `q36-disclosure-variant-smoke.json`：C=0.9，missing=[]，wrong_facts=[]，目标 0.9–1.0，**通过**。
+- 40 条只含 Q36 base answer（未披露 variant）；base C=0.5 已通过 10 条验证。
 
-## 逐案例（22/40）
+## 逐案例（26/40）
 
 | Case | 组 | v1.0.0 F/C/R | v1.1.1 F/C/R | 目标/规则 | 结果 |
 |---|---|---|---|---|---|
@@ -44,43 +44,48 @@
 | Q36 | HG | 1.000/0.900/0.900 | 0.857/0.500/0.900 | `{"F": [0.8, 1.0], "C": [0.5, 0.6], "R": [0.8, 1.0]}` | PASS |
 | Q12 | PROV | 0.400/1.000/1.000 | 0.667/0.900/1.000 | `no regression >0.10` | PASS |
 | Q13 | HG | 1.000/0.900/0.900 | 1.000/0.900/0.900 | `no regression >0.10` | PASS |
-| Q14 | HG | skipped(context_unavailable)/0.800/1.000 | skipped(context_unavailable)/0.900/0.900 | `no regression >0.10` | PASS |
-| Q15 | HG | 1.000/1.000/1.000 | 0.667/0.900/0.900 | `no regression >0.10` | STOP |
+| Q14 | HG | skipped(context_unavailable)/0.800/1.000 | skipped(context_unavailable)/0.900/0.900 | `{"F": "unavailable", "C": [0.8, 1.0], "R": [0.8, 1.0]}` | PASS(C/R; F n/a) |
+| Q15 | HG | 1.000/1.000/1.000 | 0.667/0.900/0.900 | `{"F": [0.6, 1.0], "C": [0.8, 1.0], "R": [0.8, 1.0]}` | PASS(purpose) |
+| Q16 | HG | 1.000/1.000/1.000 | 1.000/0.900/0.900 | `no regression >0.10` | PASS |
+| Q18 | PROV | 1.000/0.800/1.000 | 1.000/0.900/0.900 | `no regression >0.10` | PASS |
+| Q19 | HG | 0.600/0.900/1.000 | 0.833/0.900/0.900 | `no regression >0.10` | PASS |
+| Q20 | PROV | 1.000/0.900/1.000 | 0.800/0.900/1.000 | `no regression >0.10` | STOP |
 
-## Q10 evidence typo（不停止）
+## 特别诊断
 
-- provisional=true；F=0.5（1/2 supported）、C=0.9、R=0.9；`wrong_facts=[]`。
-- cl1 quote 为 `优惠券自领取之日起 30 夅内有效`，原文是 `30 天内有效`；单字形近字，`quote_not_found` 降级。
-- 按裁定记录为 `evidence_typo`，保持 F SHA，继续运行。
+- **Q10**：provisional `evidence_typo`，quote “30 夅内” vs “30 天内”；F=0.5、C=0.9、R=0.9；按裁定继续，不按事实回归。
+- **Q14**：F=`skipped(context_unavailable)`，**F 未评估，不算 PASS**；C/R=0.9/0.9。40 条 F 有效覆盖因此为 39/40。
+- **Q15**：Human Gold F=0.667，cl3“电话联系目的”为真实回答中的目的句，上下文未支持，insufficient；Q15 目标已注册 F 0.6–1.0，PASS。v1.0.0 的 1.0 是粗粒度合并，不是 v1.1.1 退化。
+- **Q20**：provisional F 1.0→0.8；cl5“该政策适用于所有符合积分累积条件的订单”无上下文依据，insufficient；无显式目标，按未解释 F 下降 >0.10 停止。
 
-## Q15 停止明细
+## Q20 停止明细
 
-- v1.0.0：F=1.0、C=1.0、R=1.0；v1.1.1：F=0.667、C=0.9、R=0.9。
-- F 1.0→0.667（-0.333）；Q15 是 Human Gold，无显式目标，按“未解释 F 下降 >0.10”停止。
-- F counts：scorable=3，supported=2，insufficient=1。
-- 多出的 cl3 为“电话联系的目的是确认收货时间及安排上门事宜”，上下文没有该目的，标 insufficient；这不是 quote typo，而是 claim 粒度/推断差异。
-- `wrong_facts`：[]
+- v1.0.0：F=1.0、C=0.9、R=1.0；v1.1.1：F=0.8、C=0.9、R=1.0。
+- F counts：scorable=5，supported=4，insufficient=1。
+- cl5 为“该政策适用于所有符合积分累积条件的订单，不区分商品类型”，上下文没有该概括性承诺，标 insufficient；F=4/5=0.8。
+- C details：`{"missing_points": [], "wrong_facts": [], "reason": "回答覆盖了金标中的所有关键事实，并且补充了正确的额外信息，不影响评分。"}`
+- Q20 为 provisional，无显式目标，按未解释 F 下降 >0.10 停止。
 
 ## 分组汇总
 
 | 组 | 已完成 | 说明 |
 |---|---|---|
-| human_gold | 7/13 | 不混算；样本未跑完，暂不给出验收均值 |
-| provisional | 15/27 | 不混算；样本未跑完，暂不给出验收均值 |
+| human_gold | 9/13 | 不混算；样本未跑完，暂不给出验收均值 |
+| provisional | 17/27 | 不混算；样本未跑完，暂不给出验收均值 |
 
-## Token / 成本（已完成 22 条 × 2 臂）
+## Token / 成本（26/40）
 
 | Arm | input | output | 估算成本（CNY） |
 |---|---|---|---|
-| v1.0.0 | 59962 | 9087 | 0.2311 |
-| v1.1.1 | 172935 | 13207 | 0.5418 |
-| **合计** |  |  | **0.7729** |
+| v1.0.0 | 69497 | 10627 | 0.2688 |
+| v1.1.1 | 203574 | 15838 | 0.6406 |
+| **合计** |  |  | **0.9094** |
 
-> 仅 22/40；Q01/Q04/Q11/Q17/Q21/Q23/Q29/Q31/Q35/Q36 为复用结果。
+> 仅 26/40；Q01/Q04/Q11/Q17/Q21/Q23/Q29/Q31/Q35/Q36 为复用结果。
 
 ## 边界
 
-- 40 条未完成；未跑 Q16/Q18/Q19/Q20/Q22/Q24–Q28/Q30/Q32–Q34/Q37–Q40。
+- 40 条未完成；未跑 Q22/Q24–Q28/Q30/Q32–Q34/Q37–Q40。
 - v1.1.1 仍 `design_draft` / `active=false`；脚本退出前恢复 v1.0.0。
 - 未激活、未改 Human Gold/Prompt 正文/DB；不进入 Phase 4。
 

@@ -246,12 +246,23 @@
       "gold_source": "docs/repair/phase3e/human-gold.json",
       "group": "human_gold",
       "target_group": "human_gold",
-      "target_source": "human_gold",
+      "target_source": "human_gold_explicit",
       "answer_context_count": 0,
-      "targets": {},
+      "targets": {
+        "F": "unavailable",
+        "C": [
+          0.8,
+          1.0
+        ],
+        "R": [
+          0.8,
+          1.0
+        ]
+      },
       "rule": "no_schema_failed; no_all_invalid; no_supported_without_evidence; no_unexplained_drop_gt_0.10",
       "notes": [
-        "context_unavailable: Faithfulness may skip; C/R still run"
+        "context_unavailable: Faithfulness may skip; C/R still run",
+        "F skipped(context_unavailable); F is unavailable, not a pass; C/R separate"
       ]
     },
     {
@@ -262,11 +273,26 @@
       "gold_source": "docs/repair/phase3e/human-gold.json",
       "group": "human_gold",
       "target_group": "human_gold",
-      "target_source": "human_gold",
+      "target_source": "human_gold_explicit",
       "answer_context_count": 2,
-      "targets": {},
+      "targets": {
+        "F": [
+          0.6,
+          1.0
+        ],
+        "C": [
+          0.8,
+          1.0
+        ],
+        "R": [
+          0.8,
+          1.0
+        ]
+      },
       "rule": "no_schema_failed; no_all_invalid; no_supported_without_evidence; no_unexplained_drop_gt_0.10",
-      "notes": []
+      "notes": [
+        "3 scorable: 2 supported + 1 purpose inference insufficient; F=0.667 expected; not factual regression"
+      ]
     },
     {
       "id": "Q16",
