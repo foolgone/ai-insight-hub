@@ -1135,5 +1135,6 @@ alembic check   : No new upgrade operations detected
 - Q23 F 3/3：0.5/0.5/0.428571（目标 0.4–0.5）；Q16 R 3/3：0.9/0.9/1.0（目标 0.9–1.0）；Q13 F 3/3：1.0/1.0/1.0。
 - Q10/Q15/Q20/Q22 affected 全部通过：Q10 F=1.0、Q15 F=0.667、Q20 F=0.8、Q22 F=1.0/C=0.9/R=1.0。
 - **10 条闸门 v1.1.3：10/10 通过**（Q01/Q04/Q11/Q17/Q21/Q23/Q29/Q31/Q35/Q36）；Q35 F=0.833 有 2 条 quote_not_found，目标命中，按 known diagnostic 记录。
-- 40 条规模/回归：Q01–Q27 通过（Q14 known C miss，Q16 R 已修复，Q23 F=0.5，Q25 C 0.8→0.7 恰好 0.10 不是 >0.10）；**Q28 F=0.857 停止**（v1.0.0 1.0，下降 0.143）。Q28 重跑 0.875/0.875/0.875，唯一 insufficient 是“可申请催促/补偿/取消权益”的推断；Q28 无显式目标。完成 28/40。
+- 40 条规模/回归：Q01–Q27 通过（Q14 F=unavailable，C=0.9 本次 pass、历史 C 0.7/0.7/0.9 方差；Q16 R 已修复；Q23 F=0.5；Q25 C 0.8→0.7 恰好 0.10 不是 >0.10）。Q28 注册 provisional F 0.8–1.0，F=0.857/重跑 0.875，PASS。
+- **Q30 F=0.25 停止**（Human Gold，v1.0.0 F=1.0；重跑 0.25/0.5/0.5）。Q30 不是 quote 失败：absence 已归 non_factual，但“国内履约前提/默认中国大陆”等范围推断被标 factual/insufficient。完成 30/40。
 - 40 条未完成、未通过；v1.1.3 仍 design_draft/inactive；未激活、未改 Human Gold/DB。

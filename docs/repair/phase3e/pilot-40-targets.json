@@ -543,11 +543,18 @@
       "gold_source": "docs/repair/phase3e/candidates.json (AI draft, pending human)",
       "group": "provisional",
       "target_group": "provisional",
-      "target_source": "provisional_general",
+      "target_source": "provisional_explicit",
       "answer_context_count": 2,
-      "targets": {},
+      "targets": {
+        "F": [
+          0.8,
+          1.0
+        ]
+      },
       "rule": "no_schema_failed; no_all_invalid; no_supported_without_evidence; no_unexplained_drop_gt_0.10",
-      "notes": []
+      "notes": [
+        "F 0.857 (6/7) and repeats 0.875/0.875/0.875 (7/8) in 0.8-1.0; only insufficient is the compensation/cancellation inference; v1.0.0 over-credited it"
+      ]
     },
     {
       "id": "Q29",

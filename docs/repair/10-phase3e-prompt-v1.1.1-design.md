@@ -628,5 +628,6 @@ Correctness/Relevancy 输出不变；`RagJudgeInput` 不变（不新增 answerab
 - SHA：F `3d35175b…`、R `394cd30c…`、C `2ab6eac…`；v1.1.3 仍 design_draft/active=false，默认 v1.0.0。
 - Q23 F 3/3：0.5/0.5/0.428571；Q16 R 3/3：0.9/0.9/1.0；Q13 F 3/3：1.0/1.0/1.0。
 - Q10/Q15/Q20/Q22 affected 通过；10 条闸门 v1.1.3 10/10 通过。
-- 40 条规模/回归：28/40 停在 Q28 F=0.857（v1.0.0 1.0，下降 0.143）；Q28 重跑 0.875/0.875/0.875，唯一 insufficient 是“可申请催促/补偿/取消权益”的推断；Q28 无显式目标。
+- 40 条规模/回归：Q01–Q27 通过（Q14 F=unavailable，C=0.9 本次 pass、历史 C 0.7/0.7/0.9 方差；Q16 R 已修复；Q23 F=0.5；Q25 C 0.8→0.7 恰好 0.10）；Q28 注册 provisional F 0.8–1.0，F=0.857/重跑 0.875，PASS。
+- **Q30 F=0.25 停止**（Human Gold，v1.0.0 F=1.0；重跑 0.25/0.5/0.5）。Q30 不是 quote 失败：absence 已归 non_factual，但“国内履约前提/默认中国大陆”等范围推断被标 factual/insufficient。完成 30/40。
 - 40 条未完成、未通过；不能称为 40 条 Human Gold 验收。未激活、未进入 Phase 4、未改 Human Gold/DB。
