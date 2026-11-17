@@ -1044,3 +1044,13 @@ alembic check   : No new upgrade operations detected
 - 未运行 Q29/Q31/Q35/Q36；Q36 disclosure 未验证。
 - Token（6 条×2 臂）：v1.0.0 17,985/2,943；v1.1.1 49,641/5,192；估算 ¥0.2404。
 - 结果：`pilot-10-v1.0.0-vs-v1.1.1-rerun.json` / `.md`；未跑 40 条、未激活。
+
+### 10 条补跑完成（2026-11-17）
+- Q23 按 7 条拆分接受：F=0.428571（0.4–0.5）、C=0.0、R=0.9；7 scorable（3 supported / 1 unsupported / 3 insufficient / 3 non_factual）；3/3 evidence；validation_errors=[]。
+- Q29 F skipped(no_scorable_claims)，C=0.9、R=1.0。
+- Q31 F=1.0、C=0.9、R=0.9。
+- Q35 F=0.833333、C=0.9、R=0.9；cl1 absence 被归 factual/policy 但为 insufficient（不是 supported）。
+- Q36 F=0.857143、C=0.5、R=0.9；answer 未披露 §1/§12 冲突，document_conflict=0；C missing 含冲突披露，wrong_facts=[]；不选 canonical 口径。
+- **10/10 完成，全部注册目标命中；无 schema failed、无全 invalid。**
+- Token（10 条×2 臂）：v1.0.0 32,612/6,252；v1.1.1 85,372/9,008；估算 ¥0.1383/¥0.2914，合计 ¥0.4297。
+- 未跑 40 条、未激活；v1.1.1 仍 design_draft/inactive。

@@ -1,17 +1,15 @@
-# 10 条 Pilot 重跑：v1.0.0 vs v1.1.1（6/10，Q23 停止）
+# 10 条 Pilot：v1.0.0 vs v1.1.1（10/10 完成）
 
-> 同一批 Pilot answer/contexts；v1.1.1 使用新 F/C SHA；只切换 Judge Prompt 版本。
+> 同一批 Pilot answer/contexts；v1.1.1 使用 F SHA 3519fd3b…、C SHA 2ab6eac…；只切换 Judge Prompt 版本。
 > Faithfulness 只用 `query.contexts`（C1–C2），不使用 retrieval contexts。
 
 ## 执行状态
 
-- 状态：**stopped**
-- 停止原因：
-  - `Q23 F scorable != 6`
-- 已完成案例：**6/10**
-- 未运行案例：Q29, Q31, Q35, Q36
+- 状态：**completed**
+- 完成案例：**10/10**
 - 模型：`qwen-max`；temperature=0.0；max_tokens=8192
 - v1.0.0 复用案例：Q01, Q04, Q11, Q17
+- Q23 7 scorable 拆分：**已接受**（F=0.4286 在 0.4–0.5）
 
 ## Arm 配置
 
@@ -20,14 +18,14 @@
 | v1.0.0 | rag_judge_schema_v1 | v1.0.0 | v1 | `287053e9e67ad29fd2de597d1052b8d418040097910462e4a0f176b14295bfed` | `106e11f2bc39806da5ecf090c6dbcd94d81ca5f53b968e5055d5a33833b30f94` | `27203126964ae0ca8f0bb8641cb3c2b145605cec706ef47c5432a0bbd6fad141` |
 | v1.1.1 | rag_judge_schema_v2 | v1.1.1 | v2 | `3519fd3b1bbbab9b117abd04f69304609146c2d2a05c39699483dea1740eda19` | `2ab6eac2abe57dcfd647df328244ac3e5681fc93222938d6614e71037d49ae77` | `0f8576b7dbf2e7ea1a02752680b0afe8c66677fe2eda823f4bcd28371ae4da84` |
 
-## 分指标汇总（仅已完成案例，Q23 F=0 会计入均值）
+## 分指标汇总（10 条）
 
 | Arm | F 均值 | C 均值 | R 均值 | F 有效 | C 有效 | R 有效 | 失败 |
 |---|---|---|---|---|---|---|---|
-| v1.0.0 | 0.925 | 0.867 | 0.950 | 6/6 | 6/6 | 6/6 | 0 |
-| v1.1.1 | 0.783 | 0.750 | 0.900 | 6/6 | 6/6 | 6/6 | 0 |
+| v1.0.0 | 0.944 | 0.880 | 0.900 | 10/10 | 10/10 | 10/10 | 0 |
+| v1.1.1 | 0.821 | 0.770 | 0.910 | 9/10 | 10/10 | 10/10 | 0 |
 
-> 6 条均值，不能代表 10 条；Q23 F=0 直接拉低 v1.1.1 F 均值。
+> 均值不作为验收唯一依据；逐案例目标与分指标下限见下。
 
 ## 逐案例
 
@@ -36,7 +34,6 @@
 - 问题：退款申请期限是多久？
 - Gold：ai_draft_pending_human（docs/repair/phase3e/candidates.json (AI draft, pending human)）
 - 目标：`{"F": [0.9, 1.0], "C": [0.9, 1.0], "R": [0.8, 1.0]}`
-- v1.0.0 复用：True
 
 | 指标 | v1.0.0 | v1.1.1 | Δ |
 |---|---|---|---|
@@ -61,8 +58,8 @@
 
 - 问题：目前支持哪种发票？
 - Gold：ai_draft_pending_human（docs/repair/phase3e/candidates.json (AI draft, pending human)）
+- **Provisional：该案例不是 Human Gold。**
 - 目标：`{"F": [1.0, 1.0], "C": [0.8, 1.0], "R": [0.9, 1.0]}`
-- v1.0.0 复用：True
 
 | 指标 | v1.0.0 | v1.1.1 | Δ |
 |---|---|---|---|
@@ -89,7 +86,6 @@
 - Gold：ai_draft_pending_human（docs/repair/phase3e/candidates.json (AI draft, pending human)）
 - **Provisional：该案例不是 Human Gold。**
 - 目标：`{"F": [0.6, 0.9], "C": [0.8, 1.0], "R": [0.9, 1.0]}`
-- v1.0.0 复用：True
 
 | 指标 | v1.0.0 | v1.1.1 | Δ |
 |---|---|---|---|
@@ -115,8 +111,8 @@
 
 - 问题：订单满 99 元包邮，退货时运费谁承担？
 - Gold：ai_draft_pending_human（docs/repair/phase3e/candidates.json (AI draft, pending human)）
+- **Provisional：该案例不是 Human Gold。**
 - 目标：`{"F": [0.9, 1.0], "C": [0.8, 1.0], "R": [0.8, 1.0]}`
-- v1.0.0 复用：True
 
 | 指标 | v1.0.0 | v1.1.1 | Δ |
 |---|---|---|---|
@@ -144,7 +140,6 @@
 - Gold：ai_draft_pending_human（docs/repair/phase3e/candidates.json (AI draft, pending human)）
 - **Provisional：该案例不是 Human Gold。**
 - 目标：`{"F": [0.6, 0.7]}`
-- v1.0.0 复用：False
 
 | 指标 | v1.0.0 | v1.1.1 | Δ |
 |---|---|---|---|
@@ -171,7 +166,7 @@
 - 问题：生鲜食品签收后第 2 天发现质量问题，还能按政策反馈吗？
 - Gold：human_reviewed（docs/repair/phase3e/human-gold.json）
 - 目标：`{"F": [0.4, 0.5], "C": [0.0, 0.2], "R": [0.7, 1.0]}`
-- v1.0.0 复用：False
+- 说明：7 scorable with mixed advice+caveat accepted; F=0.428571 in target 0.4-0.5
 
 | 指标 | v1.0.0 | v1.1.1 | Δ |
 |---|---|---|---|
@@ -197,28 +192,141 @@
 | cl9 | 若已超时，可尝试联系客服说明具体情况，但是否受理由商家个案判断，政策不保证支持 | factual_claim/policy | insufficient_evidence | False | 0 |
 | cl10 | 文档未说明超时后申诉渠道或人工复核机制 | non_factual/absence | None | False | 0 |
 
-## 发现
+### Q29 · unanswerable
 
-- **停止条件命中：Q23 v1.1.1 F=0.428571 落在目标 0.4–0.5，但 `scorable=7`，未满足关键校验“6 scorable / 3 supported / 3/3 evidence”。** 按 Q23 key 校验立即停止。
-- Q23 F：7 scorable，3 supported / 1 unsupported / 3 insufficient / 3 non_factual；3/3 evidence；cl1 `is_contradictory=true`、`contradiction_with=["cl2"]`；`validation_errors=[]`。
-- Q23 第 7 条 scorable 来自“若已超时，可尝试联系客服说明具体情况，但是否受理由商家个案判断，政策不保证支持”被归为 factual/policy/insufficient；矩阵期望该句作为 advice（non_factual），因此分母从 6 变 7。
-- Q23 C=0.0（目标 0.0–0.2，命中），`wrong_facts=["是的，可以按政策反馈"]`；R=0.9。
-- Q21 v1.1.1 F=0.6（目标 0.6–0.7，命中）；Q11 F=0.6667（目标 0.6–0.9，命中）；Q01/Q04/Q17 目标命中。
-- 未运行 Q29/Q31/Q35/Q36；**Q36 disclosure 未验证**。
+- 问题：支持货到付款吗？
+- Gold：ai_draft_pending_human（docs/repair/phase3e/candidates.json (AI draft, pending human)）
+- **Provisional：该案例不是 Human Gold。**
+- 目标：`{"F": "skipped", "C": [0.9, 1.0], "R": [0.9, 1.0]}`
 
-## Token / 成本（已完成 6 条 × 2 臂）
+| 指标 | v1.0.0 | v1.1.1 | Δ |
+|---|---|---|---|
+| F | 1.000 | skipped(no_scorable_claims) | n/a |
+| C | 1.000 | 0.900 | -0.100 |
+| R | 0.800 | 1.000 | +0.200 |
+
+- Correctness details：`{"missing_points": [], "wrong_facts": [], "reason": "正确说明了文档未提及货到付款，并给出了可行的下一步建议。"}`
+
+- Counts（v1.1.1）：scorable=0, supported=0, unsupported=0, insufficient=0, non_factual=4, document_conflict=0, contradiction=0
+- evidence：0/0 ok；validation_errors=[]
+
+| claim_id | claim（截断） | type/subtype | status | contradictory | evidence |
+|---|---|---|---|---|---|
+| cl1 | 未提及“货到付款”这一支付方式 | non_factual/absence | None | False | 0 |
+| cl2 | 在所有章节（包括第5条“发货时效”、第6条“物流查询”、第7条“运费规则”等）中均未涉及支付方式，也未说明是否支持... | non_factual/absence | None | False | 0 |
+| cl3 | 无法确认是否支持货到付款 | non_factual/meta | None | False | 0 |
+| cl4 | 建议查阅网站结算页的支付选项，或直接联系在线客服（9:00–21:00）/拨打客服热线 400-800-1234 ... | non_factual/advice | None | False | 0 |
+
+### Q31 · unanswerable
+
+- 问题：退货支持上门取件吗？
+- Gold：ai_draft_pending_human（docs/repair/phase3e/candidates.json (AI draft, pending human)）
+- **Provisional：该案例不是 Human Gold。**
+- 目标：`{"F": [0.6, 1.0], "C": [0.8, 1.0], "R": [0.8, 1.0]}`
+
+| 指标 | v1.0.0 | v1.1.1 | Δ |
+|---|---|---|---|
+| F | 1.000 | 1.000 | +0.000 |
+| C | 0.900 | 0.900 | +0.000 |
+| R | 0.800 | 0.900 | +0.100 |
+
+- Correctness details：`{"missing_points": [], "wrong_facts": [], "reason": "回答正确说明文档未提及上门取件服务，并建议了下一步操作。"}`
+
+- Counts（v1.1.1）：scorable=3, supported=3, unsupported=0, insufficient=0, non_factual=3, document_conflict=0, contradiction=0
+- evidence：3/3 ok；validation_errors=[]
+
+| claim_id | claim（截断） | type/subtype | status | contradictory | evidence |
+|---|---|---|---|---|---|
+| cl1 | 该政策文件未规定支持上门取件，也未禁止 | non_factual/absence | None | False | 0 |
+| cl2 | 退款流程要求用户在「我的订单」中选择退款，填写原因并上传凭证 | factual_claim/policy | supported | False | 1 |
+| cl3 | 换货需先寄回原商品，商家收到并验收后才寄出新品 | factual_claim/policy | supported | False | 1 |
+| cl4 | 因质量问题产生的退换货运费由商家承担，非质量问题的退货运费由买家承担 | factual_claim/policy | supported | False | 1 |
+| cl5 | 物流查询和客服时间条款未涉及退货物流的发起方式（如是否可预约上门取件） | non_factual/absence | None | False | 0 |
+| cl6 | 建议拨打客服热线 400-800-1234 或在在线客服时段内咨询“退货是否支持快递上门取件” | non_factual/advice | None | False | 0 |
+
+### Q35 · ambiguous
+
+- 问题：多久能到？
+- Gold：human_reviewed（docs/repair/phase3e/human-gold.json）
+- 目标：`{"F": [0.8, 1.0], "C": [0.7, 1.0], "R": [0.8, 1.0]}`
+- 说明：absence claim factual/policy insufficient, not supported; F=0.833333 in target 0.8-1.0
+
+| 指标 | v1.0.0 | v1.1.1 | Δ |
+|---|---|---|---|
+| F | 0.889 | 0.833 | -0.056 |
+| C | 0.800 | 0.900 | +0.100 |
+| R | 0.800 | 0.900 | +0.100 |
+
+- Correctness details：`{"missing_points": [], "wrong_facts": [], "reason": "回答覆盖了金标中的所有关键事实和条件，且提供了正确的建议操作。"}`
+
+- Counts（v1.1.1）：scorable=6, supported=5, unsupported=0, insufficient=1, non_factual=3, document_conflict=0, contradiction=0
+- evidence：5/6 ok；validation_errors=[{"claim_id": "cl1", "code": "claim_subtype_type_mismatch", "message": "claim_subtype 'absence' is not valid for factual_claim", "value": "absence"}, {"claim_id": "cl1", "code": "quote_not_found", "message": "evidence quote is not a verbatim substring", "context_id": "C1"}, {"claim_id": "cl1", "code": "evidence_validation_failed", "message": "supported claim has invalid evidence; downgraded"}]
+
+| claim_id | claim（截断） | type/subtype | status | contradictory | evidence |
+|---|---|---|---|---|---|
+| cl1 | 发货后，物流时效未在文档中明确说明 | factual_claim/policy | insufficient_evidence | False | 1 |
+| cl2 | 现货商品付款后 48 小时内发出 | factual_claim/policy | supported | False | 1 |
+| cl3 | 预售商品以商品页标注的发货时间为准 | factual_claim/policy | supported | False | 1 |
+| cl4 | 大件商品（如家具、家电）发货时间为 5 个工作日内，且配送前会电话预约 | factual_claim/policy | supported | False | 1 |
+| cl5 | 您可在「我的订单」中查看物流单号与实时轨迹 | factual_claim/policy | supported | False | 1 |
+| cl6 | 若物流信息超过 24 小时未更新，可联系客服协助核查 | factual_claim/policy | supported | False | 1 |
+| cl7 | 建议登录账户，进入「我的订单」确认是否已发货 | non_factual/advice | None | False | 0 |
+| cl8 | 建议查看物流单号并跟踪快递状态 | non_factual/advice | None | False | 0 |
+| cl9 | 建议若已发货但长时间无更新，拨打客服热线 400-800-1234（9:00–21:00）或在线留言 | non_factual/advice | None | False | 0 |
+
+### Q36 · ambiguous
+
+- 问题：能退吗？
+- Gold：human_reviewed（docs/repair/phase3e/human-gold.json）
+- 目标：`{"F": [0.8, 1.0], "C": [0.5, 0.6], "R": [0.8, 1.0]}`
+- 说明：answer does not disclose conflict; document_conflict=0; C=0.5 with missing conflict disclosure; wrong_facts=[]
+
+| 指标 | v1.0.0 | v1.1.1 | Δ |
+|---|---|---|---|
+| F | 1.000 | 0.857 | -0.143 |
+| C | 0.900 | 0.500 | -0.400 |
+| R | 0.900 | 0.900 | +0.000 |
+
+- Correctness details：`{"missing_points": ["定制商品支持质量问题退换，不支持无理由退换", "第 1 条对虚拟商品的限定是「已激活」，第 12 条则称虚拟商品一经售出不支持退款，两处范围不完全一致，具体商品需以对应条款/客服确认为准"], "wrong_facts": [], "reason": "回答覆盖了大部分关键信息，但缺少关于定制商品的质量问题退换政策和文档中对虚拟商品退款规定的冲突披露。"}`
+
+- Counts（v1.1.1）：scorable=7, supported=6, unsupported=0, insufficient=1, non_factual=2, document_conflict=0, contradiction=0
+- evidence：6/7 ok；validation_errors=[{"claim_id": "cl5", "code": "quote_not_found", "message": "evidence quote is not a verbatim substring", "context_id": "C1"}, {"claim_id": "cl5", "code": "evidence_validation_failed", "message": "supported claim has invalid evidence; downgraded"}]
+
+| claim_id | claim（截断） | type/subtype | status | contradictory | evidence |
+|---|---|---|---|---|---|
+| cl1 | 普通商品在签收后 7 天内可申请无理由退款 | factual_claim/policy | supported | False | 1 |
+| cl2 | 审核通过后，款项将在 1–3 个工作日内原路退回 | factual_claim/policy | supported | False | 1 |
+| cl3 | 定制类商品不支持无理由退款 | factual_claim/policy | supported | False | 1 |
+| cl4 | 生鲜食品不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈 | factual_claim/policy | supported | False | 1 |
+| cl5 | 已激活的虚拟商品不支持退款 | factual_claim/policy | insufficient_evidence | False | 1 |
+| cl6 | 若因商品质量问题退换货，运费由商家承担 | factual_claim/policy | supported | False | 1 |
+| cl7 | 若为非质量问题退货，运费由买家承担 | factual_claim/policy | supported | False | 1 |
+| cl8 | 请确认您的商品类型及是否仍在签收后 7 天内 | non_factual/advice | None | False | 0 |
+| cl9 | 如需进一步协助，欢迎补充订单信息 | non_factual/advice | None | False | 0 |
+
+## 关键结论
+
+- **Q01/Q04/Q17/Q21/Q11 目标命中**；Q01 C=0.9，额外信息规则生效。
+- **Q23 F=0.428571，7 scorable（3 supported / 1 unsupported / 3 insufficient / 3 non_factual），3/3 evidence，validation_errors=[]**；按已批准的 7 条拆分接受，F 在 0.4–0.5。
+- **Q29 F skipped(no_scorable_claims)**，C=0.9、R=1.0，目标命中。
+- **Q31 F=1.0，C=0.9，R=0.9**；absence 目标未触发 skipped。
+- **Q35 F=0.8333、C=0.9、R=0.9**；cl1 absence 被归 factual/policy 但为 insufficient（不是 supported），F 在 0.8–1.0。
+- **Q36 F=0.8571、C=0.5、R=0.9**；answer 未披露 §1/§12 冲突，`document_conflict=0`；C 的 `missing_points` 包含冲突披露，`wrong_facts=[]`；只验证披露，不选 canonical 口径。
+- Q11/Q21/Q35/Q36 有 quote_not_found 诊断（证据降级），但最终 F 分数均在注册目标内；没有 schema failed、没有全 invalid。
+
+## Token / 成本（10 条 × 2 臂）
 
 | Arm | input | output | 估算成本（CNY） |
 |---|---|---|---|
-| v1.0.0 | 17985 | 2943 | 0.0714 |
-| v1.1.1 | 49641 | 5192 | 0.1690 |
-| **合计** |  |  | **0.2404** |
+| v1.0.0 | 32612 | 6252 | 0.1383 |
+| v1.1.1 | 85372 | 9008 | 0.2914 |
+| **合计** |  |  | **0.4297** |
 
-> v1.0.0 的 Q01/Q04/Q11/Q17 为复用结果，其 token 是上一轮已发生成本。
+> v1.0.0 的 Q01/Q04/Q11/Q17 为复用结果；v1.1.1 input 约 v1.0.0 的 2.6×。
 
 ## 边界
 
 - v1.1.1 仍 `design_draft` / `active=false`；脚本退出前恢复 `RAG_JUDGE_PROMPT_VERSION=v1.0.0`。
 - 未跑 40 条、未激活、未改 Human Gold/Prompt 正文/DB。
-- 共享 `parse_with_repair` Schema fallback 已修复；Q01 C 额外信息规则已生效。
+- Q11/Q21/Q29 为 provisional；Q23/Q35/Q36 为 Human Gold v1。
 

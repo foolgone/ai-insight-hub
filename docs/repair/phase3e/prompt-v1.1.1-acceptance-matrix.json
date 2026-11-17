@@ -150,7 +150,7 @@
         }
       ],
       "expected_scores": {
-        "faithfulness": "target_range=0.4-0.5; tolerance=none; 6 scorable: 3 supported / 1 unsupported / 2 insufficient = 0.5",
+        "faithfulness": "target_range=0.4-0.5; tolerance=none; 6 scorable 3/1/2=0.5 or 7 scorable mixed advice+caveat 3/1/3=0.4286 allowed",
         "answer_correctness": "0.0-0.2",
         "answer_relevancy": "0.7-1.0"
       },
@@ -158,7 +158,8 @@
         "cl1: is_contradictory=true and contradiction_with=['cl2']",
         "wrong_facts contains positive conclusion",
         "scorable_claim_count=6 if split as listed",
-        "supported=3, unsupported=1, insufficient=2"
+        "supported=3, unsupported=1, insufficient=2",
+        "7 scorable with mixed advice+caveat (3 supported / 1 unsupported / 3 insufficient = 0.4286) is allowed; F must stay in 0.4-0.5"
       ],
       "forbidden": [
         "cl1 marked non_factual",

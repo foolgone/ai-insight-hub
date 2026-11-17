@@ -29,7 +29,17 @@
       "Q11",
       "Q17"
     ],
-    "note": "Same answers/contexts; v1.1.1 uses new F SHA; v1.0.0 reuses only fingerprint-matched cases."
+    "note": "Same answers/contexts; v1.1.1 uses new F SHA; v1.0.0 reuses only fingerprint-matched cases.",
+    "continued_from_cases": 9,
+    "q23_accepted_7_scorable": true,
+    "new_cases": [
+      "Q29",
+      "Q31",
+      "Q35",
+      "Q36"
+    ],
+    "q35_diagnostic": "absence factual/policy insufficient, not supported",
+    "q36_disclosure": "answer no disclosure; document_conflict=0; missing conflict disclosure; wrong_facts=[]"
   },
   "arm_configs": {
     "v1.0.0": {
@@ -551,7 +561,7 @@
       "gold_answer": "仅支持电子发票。",
       "gold_source": "docs/repair/phase3e/candidates.json (AI draft, pending human)",
       "gold_status": "ai_draft_pending_human",
-      "provisional": false,
+      "provisional": true,
       "answer": "目前仅支持**电子发票**<kb doc=\"phase3d_doc.md\" chunk_id=\"c65abc80-f589-49de-9a1f-77ad2689bdb9\" kb_id=\"4ae8e147-6f76-4330-93f1-d2b3fef3d9ba\" />。  \n- 电子发票在提交申请后 **24 小时内**发送至下单时填写的邮箱；  \n- 发票抬头可在开具前修改；  \n- 已开具的电子发票如需更正，须先申请**红冲**，再重新开具；  \n- **不支持纸质发票**和**增值税专用发票**<kb doc=\"phase3d_doc.md\" chunk_id=\"c65abc80-f589-49de-9a1f-77ad2689bdb9\" kb_id=\"4ae8e147-6f76-4330-93f1-d2b3fef3d9ba\" />。",
       "contexts": [
         {
@@ -1538,7 +1548,7 @@
       "gold_answer": "因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。",
       "gold_source": "docs/repair/phase3e/candidates.json (AI draft, pending human)",
       "gold_status": "ai_draft_pending_human",
-      "provisional": false,
+      "provisional": true,
       "answer": "根据售后服务政策，订单满 99 元包邮适用于**正向发货环节**；而**退货时的运费承担方取决于退换货原因**：\n\n- 若因**质量问题**退换货，运费由**商家承担**；  \n- 若为**非质量问题**（如无理由退货），运费由**买家承担**。\n\n该规则与是否满 99 元无关，不因包邮资格而改变退货运费责任归属。",
       "contexts": [
         {
@@ -3051,23 +3061,2136 @@
             }
           ]
         }
+      },
+      "result_note": "7 scorable with mixed advice+caveat accepted; F=0.428571 in target 0.4-0.5"
+    },
+    {
+      "id": "Q29",
+      "category": "unanswerable",
+      "question": "支持货到付款吗？",
+      "gold_answer": "文档未说明是否支持货到付款，无法确认。",
+      "gold_source": "docs/repair/phase3e/candidates.json (AI draft, pending human)",
+      "gold_status": "ai_draft_pending_human",
+      "provisional": true,
+      "answer": "根据当前提供的售后服务政策文档（Phase 3E 验证文档 v2），**未提及“货到付款”这一支付方式**<kb doc=\"phase3d_doc.md\" chunk_id=\"c65abc80-f589-49de-9a1f-77ad2689bdb9\" kb_id=\"4ae8e147-6f76-4330-93f1-d2b3fef3d9ba\" />。文档详细说明了退款时效、换货、发票、发货、物流、运费、保修、优惠券、积分、客服及特殊商品售后规则，但**在所有章节（包括第5条“发货时效”、第6条“物流查询”、第7条“运费规则”等）中均未涉及支付方式，也未说明是否支持货到付款**<kb doc=\"phase3d_doc.md\" chunk_id=\"cdf680b6-0280-44fd-8003-73901ac3e13e\" kb_id=\"4ae8e147-6f76-4330-93f1-d2b3fef3d9ba\" /><kb doc=\"phase3d_doc.md\" chunk_id=\"b978479f-6440-4514-b220-6e48a9dbf1be\" kb_id=\"4ae8e147-6f76-4330-93f1-d2b3fef3d9ba\" />。\n\n因此，依据现有材料，**无法确认是否支持货到付款**。\n\n✅ 建议下一步：  \n请查阅网站结算页的支付选项，或直接联系在线客服（9:00–21:00）/拨打客服热线 400-800-1234 进行确认<kb doc=\"phase3d_doc.md\" chunk_id=\"b978479f-6440-4514-b220-6e48a9dbf1be\" kb_id=\"4ae8e147-6f76-4330-93f1-d2b3fef3d9ba\" />。",
+      "contexts": [
+        {
+          "document_id": "4ee02c53-d4d1-4364-8a24-30a614ead1f8",
+          "chunk_id": "c65abc80-f589-49de-9a1f-77ad2689bdb9",
+          "title": "phase3d_doc.md",
+          "content": "# 售后服务政策（Phase 3E 验证文档 v2）\n\n## 1. 退款时效\n\n订单签收后 7 天内可申请无理由退款。审核通过后，款项将在 1-3 个工作日内原路退回。\n定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。\n\n## 2. 退款流程\n\n在「我的订单」中选择退款，填写原因并上传凭证，商家会在 48 小时内审核。\n审核通过后按原支付渠道退回；审核驳回会显示原因，可补充材料后重新提交。\n\n## 3. 换货政策\n\n签收后 7 天内，商品未使用且包装完整可申请换货，同一订单仅支持一次换货。\n换货需先寄回原商品，商家收到并验收后 48 小时内寄出新品；运费由责任方承担。\n\n## 4. 发票说明\n\n仅支持电子发票，提交申请后 24 小时内发送至下单邮箱。\n发票抬头可在开具前修改；已开具的发票需先申请红冲，再重新开具。\n暂不支持纸质发票和增值税专用发票。\n\n## 5. 发货时效\n\n现货商品在付款后 48 小时内发出；预售商品以商品页标注的发货时间为准。\n大件商品（家具、家电）发货时间为 5 个工作日内，配送前会电话预约。\n\n## 6. 物流查询\n\n订单发货后可在「我的订单」查看物流单号与实时轨迹。\n物流信息超过 24 小时未更新时，可联系客服协助核查。\n\n## 7. 运费规则\n\n单笔订单实付满 99 元包邮；未满 99 元收取 10 元运费。\n新疆、西藏、内蒙古等偏远地区运费为 20 元，不参与包邮活动。\n因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。\n\n## 8. 保修政策\n\n电子产品自签收之日起保修 12 个月，配件保修 3 个月。\n人为损坏、进水、私自拆修不在保修范围内。\n保修期内维修免费；保修期外维修需收取材料费和人工费。\n\n## 9. 优惠券规则\n\n优惠券自领取之日起 30 天内有效，逾期自动失效。\n同一订单只能使用一张优惠券，不能与会员折扣叠加。\n退款时优惠券若仍在有效期内会退回账户，已过期则不退回。\n\n## 10. 会员积分\n\n消费 1 元积 1 分，100 积分可抵扣 1 元。\n积分自获得之日起 12 个月内有效，逾期清零。\n积分不可转让、不可提现，仅限本账户使用。\n\n## 11. 客服时间\n\n在线客服服务时间为每天 9:00-21:00。\n客服热线 400-800-1234，服务时间同上。\n非服务时间可留言，客服会在次日 12:00 前回复。\n\n## 12. 特殊商品\n\n生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。\n虚拟商品（充值、会员、课程）一经售出不支持退款。\n定制商品支持质量问题退换，不支持无理由退换。\n\n## 13. 收货信息修改\n\n订单发货前可在「我的订单」修改收货地址和联系电话。\n已发货订单无法修改地址，可联系快递拦截或申请改派。",
+          "score": 0.6240037728316452,
+          "rank": 1,
+          "metadata": {
+            "knowledge_base_id": "4ae8e147-6f76-4330-93f1-d2b3fef3d9ba",
+            "chunk_index": 0,
+            "chunk_type": "text",
+            "truncated": false
+          }
+        },
+        {
+          "document_id": "4ee02c53-d4d1-4364-8a24-30a614ead1f8",
+          "chunk_id": "70aed937-0495-4ef4-8cc0-de7f58b9dc4b",
+          "title": "phase3d_doc.md",
+          "content": "# Summary\n一份详述退款、换货、发票、发货、物流、运费、保修、优惠券、积分、客服及特殊商品售后规则的客户服务政策文件。\n\n该文档是Phase 3E验证版本的售后服务政策，系统规定了消费者在订单履约各环节享有的权益与限制。内容涵盖退款（时效、范围、流程）、换货、电子发票开具与修改、发货与物流管理、运费承担规则、电子产品及配件保修期限与免责情形、优惠券使用与退还逻辑、会员积分累积与有效期、客服响应机制，以及生鲜、虚拟、定制等特殊商品的差异化售后条款。所有条款均以消费者签收时间为关键节点，并明确责任归属（如质量问题由商家承担运费，非质量问题由买家承担），强调操作路径（如通过「我的订单」发起申请）和时效承诺（如审核48小时内、退款1–3个工作日）。",
+          "score": 0.5806277431566664,
+          "rank": 2,
+          "metadata": {
+            "knowledge_base_id": "4ae8e147-6f76-4330-93f1-d2b3fef3d9ba",
+            "chunk_index": 3,
+            "chunk_type": "summary",
+            "truncated": false
+          }
+        }
+      ],
+      "context_source": "agent_chat",
+      "model_config": {
+        "agent_id": "2c74bf39-bc41-4bf0-a64a-4a1f24721a46"
+      },
+      "expected": {
+        "F": "skipped",
+        "C": [
+          0.9,
+          1.0
+        ],
+        "R": [
+          0.9,
+          1.0
+        ]
+      },
+      "matrix_case": "Q29",
+      "arms": {
+        "v1.0.0": {
+          "arm": "v1.0.0",
+          "reused": false,
+          "wall_latency_ms": 17501,
+          "outcomes": [
+            {
+              "metric": "faithfulness",
+              "status": "evaluated",
+              "score": 1.0,
+              "skipped_reason": null,
+              "latency_ms": 14355,
+              "error": null,
+              "judge_config": {
+                "agent": "rag_judge_faithfulness",
+                "model": "qwen-max",
+                "temperature": 0.0,
+                "max_tokens": 8192,
+                "prompt_version": "v1.0.0",
+                "resolved_prompt_version": "v1.0.0",
+                "prompt_sha256": "287053e9e67ad29fd2de597d1052b8d418040097910462e4a0f176b14295bfed",
+                "schema_version": "rag_judge_schema_v1",
+                "rubric_version": "v1.0.0",
+                "metric_version": "v1"
+              },
+              "token_usage": {
+                "input": 1918,
+                "output": 646
+              },
+              "cost": "0",
+              "details": {
+                "claims": [
+                  {
+                    "claim": "根据当前提供的售后服务政策文档（Phase 3E 验证文档 v2），未提及“货到付款”这一支付方式",
+                    "supported": true,
+                    "evidence": [
+                      "## 1. 退款时效\n\n订单签收后 7 天内可申请无理由退款。审核通过后，款项将在 1-3 个工作日内原路退回。",
+                      "## 5. 发货时效\n\n现货商品在付款后 48 小时内发出；预售商品以商品页标注的发货时间为准。",
+                      "## 7. 运费规则\n\n单笔订单实付满 99 元包邮；未满 99 元收取 10 元运费。"
+                    ],
+                    "reason": "文档中确实没有提到“货到付款”这一支付方式",
+                    "claim_id": null,
+                    "claim_type": "factual_claim",
+                    "claim_subtype": null,
+                    "support_status": null,
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": []
+                  },
+                  {
+                    "claim": "文档详细说明了退款时效、换货、发票、发货、物流、运费、保修、优惠券、积分、客服及特殊商品售后规则",
+                    "supported": true,
+                    "evidence": [
+                      "# 售后服务政策（Phase 3E 验证文档 v2）\n\n## 1. 退款时效\n\n订单签收后 7 天内可申请无理由退款。审核通过后，款项将在 1-3 个工作日内原路退回。",
+                      "## 3. 换货政策\n\n签收后 7 天内，商品未使用且包装完整可申请换货，同一订单仅支持一次换货。",
+                      "## 4. 发票说明\n\n仅支持电子发票，提交申请后 24 小时内发送至下单邮箱。"
+                    ],
+                    "reason": "文档确实详细说明了这些内容",
+                    "claim_id": null,
+                    "claim_type": "factual_claim",
+                    "claim_subtype": null,
+                    "support_status": null,
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": []
+                  },
+                  {
+                    "claim": "在所有章节（包括第5条“发货时效”、第6条“物流查询”、第7条“运费规则”等）中均未涉及支付方式，也未说明是否支持货到付款",
+                    "supported": true,
+                    "evidence": [
+                      "## 5. 发货时效\n\n现货商品在付款后 48 小时内发出；预售商品以商品页标注的发货时间为准。",
+                      "## 6. 物流查询\n\n订单发货后可在「我的订单」查看物流单号与实时轨迹。",
+                      "## 7. 运费规则\n\n单笔订单实付满 99 元包邮；未满 99 元收取 10 元运费。"
+                    ],
+                    "reason": "这些章节确实没有提到支付方式或货到付款",
+                    "claim_id": null,
+                    "claim_type": "factual_claim",
+                    "claim_subtype": null,
+                    "support_status": null,
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": []
+                  },
+                  {
+                    "claim": "无法确认是否支持货到付款",
+                    "supported": true,
+                    "evidence": [],
+                    "reason": "文档中没有关于货到付款的信息",
+                    "claim_id": null,
+                    "claim_type": "factual_claim",
+                    "claim_subtype": null,
+                    "support_status": null,
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": []
+                  }
+                ],
+                "supported_count": 4,
+                "claim_count": 4,
+                "reason": ""
+              },
+              "raw_output": "{\n  \"claims\": [\n    {\n      \"claim\": \"根据当前提供的售后服务政策文档（Phase 3E 验证文档 v2），未提及“货到付款”这一支付方式\",\n      \"supported\": true,\n      \"evidence\": [\n        \"## 1. 退款时效\\n\\n订单签收后 7 天内可申请无理由退款。审核通过后，款项将在 1-3 个工作日内原路退回。\",\n        \"## 5. 发货时效\\n\\n现货商品在付款后 48 小时内发出；预售商品以商品页标注的发货时间为准。\",\n        \"## 7. 运费规则\\n\\n单笔订单实付满 99 元包邮；未满 99 元收取 10 元运费。\"\n      ],\n      \"reason\": \"文档中确实没有提到“货到付款”这一支付方式\"\n    },\n    {\n      \"claim\": \"文档详细说明了退款时效、换货、发票、发货、物流、运费、保修、优惠券、积分、客服及特殊商品售后规则\",\n      \"supported\": true,\n      \"evidence\": [\n        \"# 售后服务政策（Phase 3E 验证文档 v2）\\n\\n## 1. 退款时效\\n\\n订单签收后 7 天内可申请无理由退款。审核通过后，款项将在 1-3 个工作日内原路退回。\",\n        \"## 3. 换货政策\\n\\n签收后 7 天内，商品未使用且包装完整可申请换货，同一订单仅支持一次换货。\",\n        \"## 4. 发票说明\\n\\n仅支持电子发票，提交申请后 24 小时内发送至下单邮箱。\"\n      ],\n      \"reason\": \"文档确实详细说明了这些内容\"\n    },\n    {\n      \"claim\": \"在所有章节（包括第5条“发货时效”、第6条“物流查询”、第7条“运费规则”等）中均未涉及支付方式，也未说明是否支持货到付款\",\n      \"supported\": true,\n      \"evidence\": [\n        \"## 5. 发货时效\\n\\n现货商品在付款后 48 小时内发出；预售商品以商品页标注的发货时间为准。\",\n        \"## 6. 物流查询\\n\\n订单发货后可在「我的订单」查看物流单号与实时轨迹。\",\n        \"## 7. 运费规则\\n\\n单笔订单实付满 99 元包邮；未满 99 元收取 10 元运费。\"\n      ],\n      \"reason\": \"这些章节确实没有提到支付方式或货到付款\"\n    },\n    {\n      \"claim\": \"无法确认是否支持货到付款\",\n      \"supported\": true,\n      \"evidence\": [],\n      \"reason\": \"文档中没有关于货到付款的信息\"\n    }\n  ],\n  \"reason\": \"\"\n}",
+              "raw_truncated": false
+            },
+            {
+              "metric": "answer_correctness",
+              "status": "evaluated",
+              "score": 1.0,
+              "skipped_reason": null,
+              "latency_ms": 1715,
+              "error": null,
+              "judge_config": {
+                "agent": "rag_judge_answer_correctness",
+                "model": "qwen-max",
+                "temperature": 0.0,
+                "max_tokens": 8192,
+                "prompt_version": "v1.0.0",
+                "resolved_prompt_version": "v1.0.0",
+                "prompt_sha256": "106e11f2bc39806da5ecf090c6dbcd94d81ca5f53b968e5055d5a33833b30f94",
+                "schema_version": "rag_judge_schema_v1",
+                "rubric_version": "v1.0.0",
+                "metric_version": "v1"
+              },
+              "token_usage": {
+                "input": 869,
+                "output": 48
+              },
+              "cost": "0",
+              "details": {
+                "missing_points": [],
+                "wrong_facts": [],
+                "reason": "回答正确且完整，明确指出文档未提及货到付款，并建议进一步确认。"
+              },
+              "raw_output": "{\n  \"score\": 1.0,\n  \"missing_points\": [],\n  \"wrong_facts\": [],\n  \"reason\": \"回答正确且完整，明确指出文档未提及货到付款，并建议进一步确认。\"\n}",
+              "raw_truncated": false
+            },
+            {
+              "metric": "answer_relevancy",
+              "status": "evaluated",
+              "score": 0.8,
+              "skipped_reason": null,
+              "latency_ms": 1418,
+              "error": null,
+              "judge_config": {
+                "agent": "rag_judge_answer_relevancy",
+                "model": "qwen-max",
+                "temperature": 0.0,
+                "max_tokens": 8192,
+                "prompt_version": "v1.0.0",
+                "resolved_prompt_version": "v1.0.0",
+                "prompt_sha256": "27203126964ae0ca8f0bb8641cb3c2b145605cec706ef47c5432a0bbd6fad141",
+                "schema_version": "rag_judge_schema_v1",
+                "rubric_version": "v1.0.0",
+                "metric_version": "v1"
+              },
+              "token_usage": {
+                "input": 761,
+                "output": 34
+              },
+              "cost": "0",
+              "details": {
+                "reason": "回答了核心问题，但没有直接给出明确的答案，而是建议用户进一步确认"
+              },
+              "raw_output": "{\n  \"score\": 0.8,\n  \"reason\": \"回答了核心问题，但没有直接给出明确的答案，而是建议用户进一步确认\"\n}",
+              "raw_truncated": false
+            }
+          ]
+        },
+        "v1.1.1": {
+          "arm": "v1.1.1",
+          "reused": false,
+          "wall_latency_ms": 14249,
+          "outcomes": [
+            {
+              "metric": "faithfulness",
+              "status": "skipped",
+              "score": null,
+              "skipped_reason": "no_scorable_claims",
+              "latency_ms": 10718,
+              "error": null,
+              "judge_config": {
+                "agent": "rag_judge_faithfulness",
+                "model": "qwen-max",
+                "temperature": 0.0,
+                "max_tokens": 8192,
+                "prompt_version": "v1.1.1",
+                "resolved_prompt_version": "v1.1.1",
+                "prompt_sha256": "3519fd3b1bbbab9b117abd04f69304609146c2d2a05c39699483dea1740eda19",
+                "schema_version": "rag_judge_schema_v2",
+                "rubric_version": "v1.1.1",
+                "metric_version": "v2"
+              },
+              "token_usage": {
+                "input": 5017,
+                "output": 443
+              },
+              "cost": "0",
+              "details": {
+                "claims": [
+                  {
+                    "claim": "未提及“货到付款”这一支付方式",
+                    "supported": null,
+                    "evidence": [],
+                    "reason": "文档未提及",
+                    "claim_id": "cl1",
+                    "claim_type": "non_factual",
+                    "claim_subtype": "absence",
+                    "support_status": null,
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": []
+                  },
+                  {
+                    "claim": "在所有章节（包括第5条“发货时效”、第6条“物流查询”、第7条“运费规则”等）中均未涉及支付方式，也未说明是否支持货到付款",
+                    "supported": null,
+                    "evidence": [],
+                    "reason": "文档未提及",
+                    "claim_id": "cl2",
+                    "claim_type": "non_factual",
+                    "claim_subtype": "absence",
+                    "support_status": null,
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": []
+                  },
+                  {
+                    "claim": "无法确认是否支持货到付款",
+                    "supported": null,
+                    "evidence": [],
+                    "reason": "基于文档内容的推论",
+                    "claim_id": "cl3",
+                    "claim_type": "non_factual",
+                    "claim_subtype": "meta",
+                    "support_status": null,
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": []
+                  },
+                  {
+                    "claim": "建议查阅网站结算页的支付选项，或直接联系在线客服（9:00–21:00）/拨打客服热线 400-800-1234 进行确认",
+                    "supported": null,
+                    "evidence": [],
+                    "reason": "纯建议",
+                    "claim_id": "cl4",
+                    "claim_type": "non_factual",
+                    "claim_subtype": "advice",
+                    "support_status": null,
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": []
+                  }
+                ],
+                "reason": "no_scorable_claims",
+                "claim_count": 4,
+                "scorable_claim_count": 0,
+                "supported_count": 0,
+                "supported_claim_count": 0,
+                "unsupported_claim_count": 0,
+                "insufficient_evidence_count": 0,
+                "non_factual_count": 4,
+                "absence_count": 2,
+                "document_conflict": false,
+                "document_conflict_count": 0,
+                "contradiction_count": 0,
+                "insufficient_evidence_rate": null,
+                "all_insufficient": false,
+                "evidence_validation": [],
+                "evidence_validation_failed": false,
+                "validation_errors": []
+              },
+              "raw_output": "{\n  \"claims\": [\n    {\n      \"claim_id\": \"cl1\",\n      \"claim\": \"未提及“货到付款”这一支付方式\",\n      \"claim_type\": \"non_factual\",\n      \"claim_subtype\": \"absence\",\n      \"support_status\": null,\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [],\n      \"reason\": \"文档未提及\"\n    },\n    {\n      \"claim_id\": \"cl2\",\n      \"claim\": \"在所有章节（包括第5条“发货时效”、第6条“物流查询”、第7条“运费规则”等）中均未涉及支付方式，也未说明是否支持货到付款\",\n      \"claim_type\": \"non_factual\",\n      \"claim_subtype\": \"absence\",\n      \"support_status\": null,\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [],\n      \"reason\": \"文档未提及\"\n    },\n    {\n      \"claim_id\": \"cl3\",\n      \"claim\": \"无法确认是否支持货到付款\",\n      \"claim_type\": \"non_factual\",\n      \"claim_subtype\": \"meta\",\n      \"support_status\": null,\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [],\n      \"reason\": \"基于文档内容的推论\"\n    },\n    {\n      \"claim_id\": \"cl4\",\n      \"claim\": \"建议查阅网站结算页的支付选项，或直接联系在线客服（9:00–21:00）/拨打客服热线 400-800-1234 进行确认\",\n      \"claim_type\": \"non_factual\",\n      \"claim_subtype\": \"advice\",\n      \"support_status\": null,\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [],\n      \"reason\": \"纯建议\"\n    }\n  ],\n  \"reason\": \"no_scorable_claims\"\n}",
+              "raw_truncated": false
+            },
+            {
+              "metric": "answer_correctness",
+              "status": "evaluated",
+              "score": 0.9,
+              "skipped_reason": null,
+              "latency_ms": 2060,
+              "error": null,
+              "judge_config": {
+                "agent": "rag_judge_answer_correctness",
+                "model": "qwen-max",
+                "temperature": 0.0,
+                "max_tokens": 8192,
+                "prompt_version": "v1.1.1",
+                "resolved_prompt_version": "v1.1.1",
+                "prompt_sha256": "2ab6eac2abe57dcfd647df328244ac3e5681fc93222938d6614e71037d49ae77",
+                "schema_version": "rag_judge_schema_v2",
+                "rubric_version": "v1.1.1",
+                "metric_version": "v2"
+              },
+              "token_usage": {
+                "input": 2269,
+                "output": 46
+              },
+              "cost": "0",
+              "details": {
+                "missing_points": [],
+                "wrong_facts": [],
+                "reason": "正确说明了文档未提及货到付款，并给出了可行的下一步建议。"
+              },
+              "raw_output": "{\n  \"score\": 0.9,\n  \"missing_points\": [],\n  \"wrong_facts\": [],\n  \"reason\": \"正确说明了文档未提及货到付款，并给出了可行的下一步建议。\"\n}",
+              "raw_truncated": false
+            },
+            {
+              "metric": "answer_relevancy",
+              "status": "evaluated",
+              "score": 1.0,
+              "skipped_reason": null,
+              "latency_ms": 1468,
+              "error": null,
+              "judge_config": {
+                "agent": "rag_judge_answer_relevancy",
+                "model": "qwen-max",
+                "temperature": 0.0,
+                "max_tokens": 8192,
+                "prompt_version": "v1.1.1",
+                "resolved_prompt_version": "v1.1.1",
+                "prompt_sha256": "0f8576b7dbf2e7ea1a02752680b0afe8c66677fe2eda823f4bcd28371ae4da84",
+                "schema_version": "rag_judge_schema_v2",
+                "rubric_version": "v1.1.1",
+                "metric_version": "v2"
+              },
+              "token_usage": {
+                "input": 1538,
+                "output": 34
+              },
+              "cost": "0",
+              "details": {
+                "reason": "明确说明文档未提及货到付款，无法确认，并给出了具体的下一步建议。"
+              },
+              "raw_output": "{\n  \"score\": 1.0,\n  \"reason\": \"明确说明文档未提及货到付款，无法确认，并给出了具体的下一步建议。\"\n}",
+              "raw_truncated": false
+            }
+          ]
+        }
       }
+    },
+    {
+      "id": "Q31",
+      "category": "unanswerable",
+      "question": "退货支持上门取件吗？",
+      "gold_answer": "文档只说明换货需寄回原商品，未说明是否支持上门取件。",
+      "gold_source": "docs/repair/phase3e/candidates.json (AI draft, pending human)",
+      "gold_status": "ai_draft_pending_human",
+      "provisional": true,
+      "answer": "根据当前提供的《售后服务政策（Phase 3E 验证文档 v2）》<kb doc=\"phase3d_doc.md\" chunk_id=\"c65abc80-f589-49de-9a1f-77ad2689bdb9\" kb_id=\"4ae8e147-6f76-4330-93f1-d2b3fef3d9ba\" />，文档中**未提及“上门取件”服务**。\n\n具体相关条款如下：\n- **退款流程**：要求用户“在「我的订单」中选择退款，填写原因并上传凭证”，审核通过后“按原支付渠道退回”<kb doc=\"phase3d_doc.md\" chunk_id=\"c65abc80-f589-49de-9a1f-77ad2689bdb9\" kb_id=\"4ae8e147-6f76-4330-93f1-d2b3fef3d9ba\" />；\n- **换货政策**：明确说明“换货需先寄回原商品”，商家收到并验收后才寄出新品<kb doc=\"phase3d_doc.md\" chunk_id=\"c65abc80-f589-49de-9a1f-77ad2689bdb9\" kb_id=\"4ae8e147-6f76-4330-93f1-d2b3fef3d9ba\" />；\n- **运费规则**：仅区分“因质量问题产生的退换货运费由商家承担”或“非质量问题的退货运费由买家承担”，但未说明取件方式（如是否支持快递上门揽收）<kb doc=\"phase3d_doc.md\" chunk_id=\"cdf680b6-0280-44fd-8003-73901ac3e13e\" kb_id=\"4ae8e147-6f76-4330-93f1-d2b3fef3d9ba\" />；\n- **物流与客服**：虽有“物流查询”和“客服时间”条款，但未涉及退货物流的发起方式（如是否可预约上门取件）<kb doc=\"phase3d_doc.md\" chunk_id=\"cdf680b6-0280-44fd-8003-73901ac3e13e\" kb_id=\"4ae8e147-6f76-4330-93f1-d2b3fef3d9ba\" /><kb doc=\"phase3d_doc.md\" chunk_id=\"b978479f-6440-4514-b220-6e48a9dbf1be\" kb_id=\"4ae8e147-6f76-4330-93f1-d2b3fef3d9ba\" />。\n\n✅ **结论**：该政策文件**未规定支持上门取件**，也未禁止；是否提供此项服务属于未明示的操作细节，需进一步向客服确认。\n\n🔍 **建议下一步**：  \n拨打客服热线 400-800-1234（服务时间：9:00–21:00），或在在线客服时段内咨询“退货是否支持快递上门取件”，以获取实时操作支持。",
+      "contexts": [
+        {
+          "document_id": "4ee02c53-d4d1-4364-8a24-30a614ead1f8",
+          "chunk_id": "c65abc80-f589-49de-9a1f-77ad2689bdb9",
+          "title": "phase3d_doc.md",
+          "content": "# 售后服务政策（Phase 3E 验证文档 v2）\n\n## 1. 退款时效\n\n订单签收后 7 天内可申请无理由退款。审核通过后，款项将在 1-3 个工作日内原路退回。\n定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。\n\n## 2. 退款流程\n\n在「我的订单」中选择退款，填写原因并上传凭证，商家会在 48 小时内审核。\n审核通过后按原支付渠道退回；审核驳回会显示原因，可补充材料后重新提交。\n\n## 3. 换货政策\n\n签收后 7 天内，商品未使用且包装完整可申请换货，同一订单仅支持一次换货。\n换货需先寄回原商品，商家收到并验收后 48 小时内寄出新品；运费由责任方承担。\n\n## 4. 发票说明\n\n仅支持电子发票，提交申请后 24 小时内发送至下单邮箱。\n发票抬头可在开具前修改；已开具的发票需先申请红冲，再重新开具。\n暂不支持纸质发票和增值税专用发票。\n\n## 5. 发货时效\n\n现货商品在付款后 48 小时内发出；预售商品以商品页标注的发货时间为准。\n大件商品（家具、家电）发货时间为 5 个工作日内，配送前会电话预约。\n\n## 6. 物流查询\n\n订单发货后可在「我的订单」查看物流单号与实时轨迹。\n物流信息超过 24 小时未更新时，可联系客服协助核查。\n\n## 7. 运费规则\n\n单笔订单实付满 99 元包邮；未满 99 元收取 10 元运费。\n新疆、西藏、内蒙古等偏远地区运费为 20 元，不参与包邮活动。\n因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。\n\n## 8. 保修政策\n\n电子产品自签收之日起保修 12 个月，配件保修 3 个月。\n人为损坏、进水、私自拆修不在保修范围内。\n保修期内维修免费；保修期外维修需收取材料费和人工费。\n\n## 9. 优惠券规则\n\n优惠券自领取之日起 30 天内有效，逾期自动失效。\n同一订单只能使用一张优惠券，不能与会员折扣叠加。\n退款时优惠券若仍在有效期内会退回账户，已过期则不退回。\n\n## 10. 会员积分\n\n消费 1 元积 1 分，100 积分可抵扣 1 元。\n积分自获得之日起 12 个月内有效，逾期清零。\n积分不可转让、不可提现，仅限本账户使用。\n\n## 11. 客服时间\n\n在线客服服务时间为每天 9:00-21:00。\n客服热线 400-800-1234，服务时间同上。\n非服务时间可留言，客服会在次日 12:00 前回复。\n\n## 12. 特殊商品\n\n生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。\n虚拟商品（充值、会员、课程）一经售出不支持退款。\n定制商品支持质量问题退换，不支持无理由退换。\n\n## 13. 收货信息修改\n\n订单发货前可在「我的订单」修改收货地址和联系电话。\n已发货订单无法修改地址，可联系快递拦截或申请改派。",
+          "score": 0.6611938591157283,
+          "rank": 1,
+          "metadata": {
+            "knowledge_base_id": "4ae8e147-6f76-4330-93f1-d2b3fef3d9ba",
+            "chunk_index": 0,
+            "chunk_type": "text",
+            "truncated": false
+          }
+        },
+        {
+          "document_id": "4ee02c53-d4d1-4364-8a24-30a614ead1f8",
+          "chunk_id": "70aed937-0495-4ef4-8cc0-de7f58b9dc4b",
+          "title": "phase3d_doc.md",
+          "content": "# Summary\n一份详述退款、换货、发票、发货、物流、运费、保修、优惠券、积分、客服及特殊商品售后规则的客户服务政策文件。\n\n该文档是Phase 3E验证版本的售后服务政策，系统规定了消费者在订单履约各环节享有的权益与限制。内容涵盖退款（时效、范围、流程）、换货、电子发票开具与修改、发货与物流管理、运费承担规则、电子产品及配件保修期限与免责情形、优惠券使用与退还逻辑、会员积分累积与有效期、客服响应机制，以及生鲜、虚拟、定制等特殊商品的差异化售后条款。所有条款均以消费者签收时间为关键节点，并明确责任归属（如质量问题由商家承担运费，非质量问题由买家承担），强调操作路径（如通过「我的订单」发起申请）和时效承诺（如审核48小时内、退款1–3个工作日）。",
+          "score": 0.6024715810652295,
+          "rank": 2,
+          "metadata": {
+            "knowledge_base_id": "4ae8e147-6f76-4330-93f1-d2b3fef3d9ba",
+            "chunk_index": 3,
+            "chunk_type": "summary",
+            "truncated": false
+          }
+        }
+      ],
+      "context_source": "agent_chat",
+      "model_config": {
+        "agent_id": "2c74bf39-bc41-4bf0-a64a-4a1f24721a46"
+      },
+      "expected": {
+        "F": [
+          0.6,
+          1.0
+        ],
+        "C": [
+          0.8,
+          1.0
+        ],
+        "R": [
+          0.8,
+          1.0
+        ]
+      },
+      "matrix_case": null,
+      "arms": {
+        "v1.0.0": {
+          "arm": "v1.0.0",
+          "reused": false,
+          "wall_latency_ms": 30651,
+          "outcomes": [
+            {
+              "metric": "faithfulness",
+              "status": "evaluated",
+              "score": 1.0,
+              "skipped_reason": null,
+              "latency_ms": 27102,
+              "error": null,
+              "judge_config": {
+                "agent": "rag_judge_faithfulness",
+                "model": "qwen-max",
+                "temperature": 0.0,
+                "max_tokens": 8192,
+                "prompt_version": "v1.0.0",
+                "resolved_prompt_version": "v1.0.0",
+                "prompt_sha256": "287053e9e67ad29fd2de597d1052b8d418040097910462e4a0f176b14295bfed",
+                "schema_version": "rag_judge_schema_v1",
+                "rubric_version": "v1.0.0",
+                "metric_version": "v1"
+              },
+              "token_usage": {
+                "input": 2188,
+                "output": 1107
+              },
+              "cost": "0",
+              "details": {
+                "claims": [
+                  {
+                    "claim": "根据当前提供的《售后服务政策（Phase 3E 验证文档 v2）》，文档中未提及“上门取件”服务。",
+                    "supported": true,
+                    "evidence": [
+                      "## 2. 退款流程\n\n在「我的订单」中选择退款，填写原因并上传凭证，商家会在 48 小时内审核。\n审核通过后按原支付渠道退回；审核驳回会显示原因，可补充材料后重新提交。",
+                      "## 3. 换货政策\n\n签收后 7 天内，商品未使用且包装完整可申请换货，同一订单仅支持一次换货。\n换货需先寄回原商品，商家收到并验收后 48 小时内寄出新品；运费由责任方承担。"
+                    ],
+                    "reason": "文档中确实没有提到任何关于上门取件的服务。",
+                    "claim_id": null,
+                    "claim_type": "factual_claim",
+                    "claim_subtype": null,
+                    "support_status": null,
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": []
+                  },
+                  {
+                    "claim": "退款流程要求用户在「我的订单」中选择退款，填写原因并上传凭证，审核通过后按原支付渠道退回。",
+                    "supported": true,
+                    "evidence": [
+                      "## 2. 退款流程\n\n在「我的订单」中选择退款，填写原因并上传凭证，商家会在 48 小时内审核。\n审核通过后按原支付渠道退回；审核驳回会显示原因，可补充材料后重新提交。"
+                    ],
+                    "reason": "文档明确说明了退款流程的步骤。",
+                    "claim_id": null,
+                    "claim_type": "factual_claim",
+                    "claim_subtype": null,
+                    "support_status": null,
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": []
+                  },
+                  {
+                    "claim": "换货政策明确说明换货需先寄回原商品，商家收到并验收后才寄出新品。",
+                    "supported": true,
+                    "evidence": [
+                      "## 3. 换货政策\n\n签收后 7 天内，商品未使用且包装完整可申请换货，同一订单仅支持一次换货。\n换货需先寄回原商品，商家收到并验收后 48 小时内寄出新品；运费由责任方承担。"
+                    ],
+                    "reason": "文档详细描述了换货的具体步骤。",
+                    "claim_id": null,
+                    "claim_type": "factual_claim",
+                    "claim_subtype": null,
+                    "support_status": null,
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": []
+                  },
+                  {
+                    "claim": "运费规则仅区分因质量问题产生的退换货运费由商家承担或非质量问题的退货运费由买家承担，但未说明取件方式。",
+                    "supported": true,
+                    "evidence": [
+                      "## 7. 运费规则\n\n单笔订单实付满 99 元包邮；未满 99 元收取 10 元运费。\n新疆、西藏、内蒙古等偏远地区运费为 20 元，不参与包邮活动。\n因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。"
+                    ],
+                    "reason": "文档中确实只提到了运费的责任方，没有提到具体的取件方式。",
+                    "claim_id": null,
+                    "claim_type": "factual_claim",
+                    "claim_subtype": null,
+                    "support_status": null,
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": []
+                  },
+                  {
+                    "claim": "物流与客服条款中未涉及退货物流的发起方式。",
+                    "supported": true,
+                    "evidence": [
+                      "## 6. 物流查询\n\n订单发货后可在「我的订单」查看物流单号与实时轨迹。\n物流信息超过 24 小时未更新时，可联系客服协助核查。",
+                      "## 11. 客服时间\n\n在线客服服务时间为每天 9:00-21:00。\n客服热线 400-800-1234，服务时间同上。\n非服务时间可留言，客服会在次日 12:00 前回复。"
+                    ],
+                    "reason": "文档中的物流和客服条款确实没有提到退货物流的发起方式。",
+                    "claim_id": null,
+                    "claim_type": "factual_claim",
+                    "claim_subtype": null,
+                    "support_status": null,
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": []
+                  },
+                  {
+                    "claim": "该政策文件未规定支持上门取件，也未禁止。",
+                    "supported": true,
+                    "evidence": [
+                      "## 2. 退款流程\n\n在「我的订单」中选择退款，填写原因并上传凭证，商家会在 48 小时内审核。\n审核通过后按原支付渠道退回；审核驳回会显示原因，可补充材料后重新提交。",
+                      "## 3. 换货政策\n\n签收后 7 天内，商品未使用且包装完整可申请换货，同一订单仅支持一次换货。\n换货需先寄回原商品，商家收到并验收后 48 小时内寄出新品；运费由责任方承担。",
+                      "## 7. 运费规则\n\n单笔订单实付满 99 元包邮；未满 99 元收取 10 元运费。\n新疆、西藏、内蒙古等偏远地区运费为 20 元，不参与包邮活动。\n因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。"
+                    ],
+                    "reason": "文档中确实没有明确规定是否支持上门取件，也没有禁止。",
+                    "claim_id": null,
+                    "claim_type": "factual_claim",
+                    "claim_subtype": null,
+                    "support_status": null,
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": []
+                  }
+                ],
+                "supported_count": 6,
+                "claim_count": 6,
+                "reason": ""
+              },
+              "raw_output": "{\n  \"claims\": [\n    {\n      \"claim\": \"根据当前提供的《售后服务政策（Phase 3E 验证文档 v2）》，文档中未提及“上门取件”服务。\",\n      \"supported\": true,\n      \"evidence\": [\n        \"## 2. 退款流程\\n\\n在「我的订单」中选择退款，填写原因并上传凭证，商家会在 48 小时内审核。\\n审核通过后按原支付渠道退回；审核驳回会显示原因，可补充材料后重新提交。\",\n        \"## 3. 换货政策\\n\\n签收后 7 天内，商品未使用且包装完整可申请换货，同一订单仅支持一次换货。\\n换货需先寄回原商品，商家收到并验收后 48 小时内寄出新品；运费由责任方承担。\"\n      ],\n      \"reason\": \"文档中确实没有提到任何关于上门取件的服务。\"\n    },\n    {\n      \"claim\": \"退款流程要求用户在「我的订单」中选择退款，填写原因并上传凭证，审核通过后按原支付渠道退回。\",\n      \"supported\": true,\n      \"evidence\": [\n        \"## 2. 退款流程\\n\\n在「我的订单」中选择退款，填写原因并上传凭证，商家会在 48 小时内审核。\\n审核通过后按原支付渠道退回；审核驳回会显示原因，可补充材料后重新提交。\"\n      ],\n      \"reason\": \"文档明确说明了退款流程的步骤。\"\n    },\n    {\n      \"claim\": \"换货政策明确说明换货需先寄回原商品，商家收到并验收后才寄出新品。\",\n      \"supported\": true,\n      \"evidence\": [\n        \"## 3. 换货政策\\n\\n签收后 7 天内，商品未使用且包装完整可申请换货，同一订单仅支持一次换货。\\n换货需先寄回原商品，商家收到并验收后 48 小时内寄出新品；运费由责任方承担。\"\n      ],\n      \"reason\": \"文档详细描述了换货的具体步骤。\"\n    },\n    {\n      \"claim\": \"运费规则仅区分因质量问题产生的退换货运费由商家承担或非质量问题的退货运费由买家承担，但未说明取件方式。\",\n      \"supported\": true,\n      \"evidence\": [\n        \"## 7. 运费规则\\n\\n单笔订单实付满 99 元包邮；未满 99 元收取 10 元运费。\\n新疆、西藏、内蒙古等偏远地区运费为 20 元，不参与包邮活动。\\n因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。\"\n      ],\n      \"reason\": \"文档中确实只提到了运费的责任方，没有提到具体的取件方式。\"\n    },\n    {\n      \"claim\": \"物流与客服条款中未涉及退货物流的发起方式。\",\n      \"supported\": true,\n      \"evidence\": [\n        \"## 6. 物流查询\\n\\n订单发货后可在「我的订单」查看物流单号与实时轨迹。\\n物流信息超过 24 小时未更新时，可联系客服协助核查。\",\n        \"## 11. 客服时间\\n\\n在线客服服务时间为每天 9:00-21:00。\\n客服热线 400-800-1234，服务时间同上。\\n非服务时间可留言，客服会在次日 12:00 前回复。\"\n      ],\n      \"reason\": \"文档中的物流和客服条款确实没有提到退货物流的发起方式。\"\n    },\n    {\n      \"claim\": \"该政策文件未规定支持上门取件，也未禁止。\",\n      \"supported\": true,\n      \"evidence\": [\n        \"## 2. 退款流程\\n\\n在「我的订单」中选择退款，填写原因并上传凭证，商家会在 48 小时内审核。\\n审核通过后按原支付渠道退回；审核驳回会显示原因，可补充材料后重新提交。\",\n        \"## 3. 换货政策\\n\\n签收后 7 天内，商品未使用且包装完整可申请换货，同一订单仅支持一次换货。\\n换货需先寄回原商品，商家收到并验收后 48 小时内寄出新品；运费由责任方承担。\",\n        \"## 7. 运费规则\\n\\n单笔订单实付满 99 元包邮；未满 99 元收取 10 元运费。\\n新疆、西藏、内蒙古等偏远地区运费为 20 元，不参与包邮活动。\\n因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。\"\n      ],\n      \"reason\": \"文档中确实没有明确规定是否支持上门取件，也没有禁止。\"\n    }\n  ],\n  \"reason\": \"\"\n}",
+              "raw_truncated": false
+            },
+            {
+              "metric": "answer_correctness",
+              "status": "evaluated",
+              "score": 0.9,
+              "skipped_reason": null,
+              "latency_ms": 2191,
+              "error": null,
+              "judge_config": {
+                "agent": "rag_judge_answer_correctness",
+                "model": "qwen-max",
+                "temperature": 0.0,
+                "max_tokens": 8192,
+                "prompt_version": "v1.0.0",
+                "resolved_prompt_version": "v1.0.0",
+                "prompt_sha256": "106e11f2bc39806da5ecf090c6dbcd94d81ca5f53b968e5055d5a33833b30f94",
+                "schema_version": "rag_judge_schema_v1",
+                "rubric_version": "v1.0.0",
+                "metric_version": "v1"
+              },
+              "token_usage": {
+                "input": 1146,
+                "output": 59
+              },
+              "cost": "0",
+              "details": {
+                "missing_points": [],
+                "wrong_facts": [],
+                "reason": "回答详细说明了文档中未提及上门取件服务，并给出了进一步咨询的建议，但稍微超出了金标答案的范围。"
+              },
+              "raw_output": "{\n  \"score\": 0.9,\n  \"missing_points\": [],\n  \"wrong_facts\": [],\n  \"reason\": \"回答详细说明了文档中未提及上门取件服务，并给出了进一步咨询的建议，但稍微超出了金标答案的范围。\"\n}",
+              "raw_truncated": false
+            },
+            {
+              "metric": "answer_relevancy",
+              "status": "evaluated",
+              "score": 0.8,
+              "skipped_reason": null,
+              "latency_ms": 1355,
+              "error": null,
+              "judge_config": {
+                "agent": "rag_judge_answer_relevancy",
+                "model": "qwen-max",
+                "temperature": 0.0,
+                "max_tokens": 8192,
+                "prompt_version": "v1.0.0",
+                "resolved_prompt_version": "v1.0.0",
+                "prompt_sha256": "27203126964ae0ca8f0bb8641cb3c2b145605cec706ef47c5432a0bbd6fad141",
+                "schema_version": "rag_judge_schema_v1",
+                "rubric_version": "v1.0.0",
+                "metric_version": "v1"
+              },
+              "token_usage": {
+                "input": 1031,
+                "output": 40
+              },
+              "cost": "0",
+              "details": {
+                "reason": "回答了核心问题，明确说明政策文件未提及上门取件服务，并建议用户进一步咨询客服确认。"
+              },
+              "raw_output": "{\n  \"score\": 0.8,\n  \"reason\": \"回答了核心问题，明确说明政策文件未提及上门取件服务，并建议用户进一步咨询客服确认。\"\n}",
+              "raw_truncated": false
+            }
+          ]
+        },
+        "v1.1.1": {
+          "arm": "v1.1.1",
+          "reused": false,
+          "wall_latency_ms": 20644,
+          "outcomes": [
+            {
+              "metric": "faithfulness",
+              "status": "evaluated",
+              "score": 1.0,
+              "skipped_reason": null,
+              "latency_ms": 17180,
+              "error": null,
+              "judge_config": {
+                "agent": "rag_judge_faithfulness",
+                "model": "qwen-max",
+                "temperature": 0.0,
+                "max_tokens": 8192,
+                "prompt_version": "v1.1.1",
+                "resolved_prompt_version": "v1.1.1",
+                "prompt_sha256": "3519fd3b1bbbab9b117abd04f69304609146c2d2a05c39699483dea1740eda19",
+                "schema_version": "rag_judge_schema_v2",
+                "rubric_version": "v1.1.1",
+                "metric_version": "v2"
+              },
+              "token_usage": {
+                "input": 5287,
+                "output": 757
+              },
+              "cost": "0",
+              "details": {
+                "claims": [
+                  {
+                    "claim": "该政策文件未规定支持上门取件，也未禁止",
+                    "supported": null,
+                    "evidence": [],
+                    "reason": "文档未提及是否支持上门取件",
+                    "claim_id": "cl1",
+                    "claim_type": "non_factual",
+                    "claim_subtype": "absence",
+                    "support_status": null,
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": []
+                  },
+                  {
+                    "claim": "退款流程要求用户在「我的订单」中选择退款，填写原因并上传凭证",
+                    "supported": null,
+                    "evidence": [],
+                    "reason": "C1 原文",
+                    "claim_id": "cl2",
+                    "claim_type": "factual_claim",
+                    "claim_subtype": "policy",
+                    "support_status": "supported",
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": [
+                      {
+                        "context_id": "C1",
+                        "quote": "在「我的订单」中选择退款，填写原因并上传凭证，商家会在 48 小时内审核。"
+                      }
+                    ]
+                  },
+                  {
+                    "claim": "换货需先寄回原商品，商家收到并验收后才寄出新品",
+                    "supported": null,
+                    "evidence": [],
+                    "reason": "C1 原文",
+                    "claim_id": "cl3",
+                    "claim_type": "factual_claim",
+                    "claim_subtype": "policy",
+                    "support_status": "supported",
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": [
+                      {
+                        "context_id": "C1",
+                        "quote": "换货需先寄回原商品，商家收到并验收后 48 小时内寄出新品；运费由责任方承担。"
+                      }
+                    ]
+                  },
+                  {
+                    "claim": "因质量问题产生的退换货运费由商家承担，非质量问题的退货运费由买家承担",
+                    "supported": null,
+                    "evidence": [],
+                    "reason": "C1 原文",
+                    "claim_id": "cl4",
+                    "claim_type": "factual_claim",
+                    "claim_subtype": "policy",
+                    "support_status": "supported",
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": [
+                      {
+                        "context_id": "C1",
+                        "quote": "因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。"
+                      }
+                    ]
+                  },
+                  {
+                    "claim": "物流查询和客服时间条款未涉及退货物流的发起方式（如是否可预约上门取件）",
+                    "supported": null,
+                    "evidence": [],
+                    "reason": "文档未提及是否支持上门取件",
+                    "claim_id": "cl5",
+                    "claim_type": "non_factual",
+                    "claim_subtype": "absence",
+                    "support_status": null,
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": []
+                  },
+                  {
+                    "claim": "建议拨打客服热线 400-800-1234 或在在线客服时段内咨询“退货是否支持快递上门取件”",
+                    "supported": null,
+                    "evidence": [],
+                    "reason": "纯建议",
+                    "claim_id": "cl6",
+                    "claim_type": "non_factual",
+                    "claim_subtype": "advice",
+                    "support_status": null,
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": []
+                  }
+                ],
+                "reason": "no_scorable_claims",
+                "claim_count": 6,
+                "scorable_claim_count": 3,
+                "supported_count": 3,
+                "supported_claim_count": 3,
+                "unsupported_claim_count": 0,
+                "insufficient_evidence_count": 0,
+                "non_factual_count": 3,
+                "absence_count": 2,
+                "document_conflict": false,
+                "document_conflict_count": 0,
+                "contradiction_count": 0,
+                "insufficient_evidence_rate": 0.0,
+                "all_insufficient": false,
+                "evidence_validation": [
+                  {
+                    "claim_id": "cl2",
+                    "context_id": "C1",
+                    "quote": "在「我的订单」中选择退款，填写原因并上传凭证，商家会在 48 小时内审核。",
+                    "ok": true,
+                    "error": null
+                  },
+                  {
+                    "claim_id": "cl3",
+                    "context_id": "C1",
+                    "quote": "换货需先寄回原商品，商家收到并验收后 48 小时内寄出新品；运费由责任方承担。",
+                    "ok": true,
+                    "error": null
+                  },
+                  {
+                    "claim_id": "cl4",
+                    "context_id": "C1",
+                    "quote": "因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。",
+                    "ok": true,
+                    "error": null
+                  }
+                ],
+                "evidence_validation_failed": false,
+                "validation_errors": []
+              },
+              "raw_output": "{\n  \"claims\": [\n    {\n      \"claim_id\": \"cl1\",\n      \"claim\": \"该政策文件未规定支持上门取件，也未禁止\",\n      \"claim_type\": \"non_factual\",\n      \"claim_subtype\": \"absence\",\n      \"support_status\": null,\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [],\n      \"reason\": \"文档未提及是否支持上门取件\"\n    },\n    {\n      \"claim_id\": \"cl2\",\n      \"claim\": \"退款流程要求用户在「我的订单」中选择退款，填写原因并上传凭证\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"在「我的订单」中选择退款，填写原因并上传凭证，商家会在 48 小时内审核。\"}\n      ],\n      \"reason\": \"C1 原文\"\n    },\n    {\n      \"claim_id\": \"cl3\",\n      \"claim\": \"换货需先寄回原商品，商家收到并验收后才寄出新品\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"换货需先寄回原商品，商家收到并验收后 48 小时内寄出新品；运费由责任方承担。\"}\n      ],\n      \"reason\": \"C1 原文\"\n    },\n    {\n      \"claim_id\": \"cl4\",\n      \"claim\": \"因质量问题产生的退换货运费由商家承担，非质量问题的退货运费由买家承担\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。\"}\n      ],\n      \"reason\": \"C1 原文\"\n    },\n    {\n      \"claim_id\": \"cl5\",\n      \"claim\": \"物流查询和客服时间条款未涉及退货物流的发起方式（如是否可预约上门取件）\",\n      \"claim_type\": \"non_factual\",\n      \"claim_subtype\": \"absence\",\n      \"support_status\": null,\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [],\n      \"reason\": \"文档未提及是否支持上门取件\"\n    },\n    {\n      \"claim_id\": \"cl6\",\n      \"claim\": \"建议拨打客服热线 400-800-1234 或在在线客服时段内咨询“退货是否支持快递上门取件”\",\n      \"claim_type\": \"non_factual\",\n      \"claim_subtype\": \"advice\",\n      \"support_status\": null,\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [],\n      \"reason\": \"纯建议\"\n    }\n  ],\n  \"reason\": \"no_scorable_claims\"\n}",
+              "raw_truncated": false
+            },
+            {
+              "metric": "answer_correctness",
+              "status": "evaluated",
+              "score": 0.9,
+              "skipped_reason": null,
+              "latency_ms": 1558,
+              "error": null,
+              "judge_config": {
+                "agent": "rag_judge_answer_correctness",
+                "model": "qwen-max",
+                "temperature": 0.0,
+                "max_tokens": 8192,
+                "prompt_version": "v1.1.1",
+                "resolved_prompt_version": "v1.1.1",
+                "prompt_sha256": "2ab6eac2abe57dcfd647df328244ac3e5681fc93222938d6614e71037d49ae77",
+                "schema_version": "rag_judge_schema_v2",
+                "rubric_version": "v1.1.1",
+                "metric_version": "v2"
+              },
+              "token_usage": {
+                "input": 2546,
+                "output": 46
+              },
+              "cost": "0",
+              "details": {
+                "missing_points": [],
+                "wrong_facts": [],
+                "reason": "回答正确说明文档未提及上门取件服务，并建议了下一步操作。"
+              },
+              "raw_output": "{\n  \"score\": 0.9,\n  \"missing_points\": [],\n  \"wrong_facts\": [],\n  \"reason\": \"回答正确说明文档未提及上门取件服务，并建议了下一步操作。\"\n}",
+              "raw_truncated": false
+            },
+            {
+              "metric": "answer_relevancy",
+              "status": "evaluated",
+              "score": 0.9,
+              "skipped_reason": null,
+              "latency_ms": 1903,
+              "error": null,
+              "judge_config": {
+                "agent": "rag_judge_answer_relevancy",
+                "model": "qwen-max",
+                "temperature": 0.0,
+                "max_tokens": 8192,
+                "prompt_version": "v1.1.1",
+                "resolved_prompt_version": "v1.1.1",
+                "prompt_sha256": "0f8576b7dbf2e7ea1a02752680b0afe8c66677fe2eda823f4bcd28371ae4da84",
+                "schema_version": "rag_judge_schema_v2",
+                "rubric_version": "v1.1.1",
+                "metric_version": "v2"
+              },
+              "token_usage": {
+                "input": 1808,
+                "output": 33
+              },
+              "cost": "0",
+              "details": {
+                "reason": "回答明确说明文档未提及上门取件服务，并给出了具体的下一步建议。"
+              },
+              "raw_output": "{\n  \"score\": 0.9,\n  \"reason\": \"回答明确说明文档未提及上门取件服务，并给出了具体的下一步建议。\"\n}",
+              "raw_truncated": false
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "Q35",
+      "category": "ambiguous",
+      "question": "多久能到？",
+      "gold_answer": "需要区分「发货」和「到货」：文档只规定发货时效——现货商品付款后 48 小时内发出，预售商品以商品页标注时间为准，大件商品 5 个工作日内发出且配送前电话预约；文档未说明快递运输/送达需要多久。发货后可在「我的订单」查看物流轨迹，超过 24 小时未更新可联系客服。若问的是到货时间，仅凭文档无法给出具体时间。",
+      "gold_source": "docs/repair/phase3e/human-gold.json",
+      "gold_status": "human_reviewed",
+      "provisional": false,
+      "answer": "“多久能到？”取决于商品类型和发货时间，根据售后服务政策（Phase 3E 验证文档 v2）：\n\n- **现货商品**：付款后 **48 小时内发出**；  \n- **预售商品**：以商品页标注的发货时间为准；  \n- **大件商品（如家具、家电）**：发货时间为 **5 个工作日内**，且配送前会电话预约。\n\n发货后，物流时效未在文档中明确说明，但您可在「我的订单」中查看物流单号与实时轨迹；若物流信息 **超过 24 小时未更新**，可联系客服协助核查。\n\n✅ 建议操作：  \n1. 登录账户，进入「我的订单」确认是否已发货；  \n2. 查看物流单号并跟踪快递状态；  \n3. 若已发货但长时间无更新，拨打客服热线 400-800-1234（9:00–21:00）或在线留言。\n\n如您能提供具体订单号或商品类型（如是否为大件/预售/生鲜等），我可进一步帮您预估送达时间。",
+      "contexts": [
+        {
+          "document_id": "4ee02c53-d4d1-4364-8a24-30a614ead1f8",
+          "chunk_id": "c65abc80-f589-49de-9a1f-77ad2689bdb9",
+          "title": "phase3d_doc.md",
+          "content": "# 售后服务政策（Phase 3E 验证文档 v2）\n\n## 1. 退款时效\n\n订单签收后 7 天内可申请无理由退款。审核通过后，款项将在 1-3 个工作日内原路退回。\n定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。\n\n## 2. 退款流程\n\n在「我的订单」中选择退款，填写原因并上传凭证，商家会在 48 小时内审核。\n审核通过后按原支付渠道退回；审核驳回会显示原因，可补充材料后重新提交。\n\n## 3. 换货政策\n\n签收后 7 天内，商品未使用且包装完整可申请换货，同一订单仅支持一次换货。\n换货需先寄回原商品，商家收到并验收后 48 小时内寄出新品；运费由责任方承担。\n\n## 4. 发票说明\n\n仅支持电子发票，提交申请后 24 小时内发送至下单邮箱。\n发票抬头可在开具前修改；已开具的发票需先申请红冲，再重新开具。\n暂不支持纸质发票和增值税专用发票。\n\n## 5. 发货时效\n\n现货商品在付款后 48 小时内发出；预售商品以商品页标注的发货时间为准。\n大件商品（家具、家电）发货时间为 5 个工作日内，配送前会电话预约。\n\n## 6. 物流查询\n\n订单发货后可在「我的订单」查看物流单号与实时轨迹。\n物流信息超过 24 小时未更新时，可联系客服协助核查。\n\n## 7. 运费规则\n\n单笔订单实付满 99 元包邮；未满 99 元收取 10 元运费。\n新疆、西藏、内蒙古等偏远地区运费为 20 元，不参与包邮活动。\n因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。\n\n## 8. 保修政策\n\n电子产品自签收之日起保修 12 个月，配件保修 3 个月。\n人为损坏、进水、私自拆修不在保修范围内。\n保修期内维修免费；保修期外维修需收取材料费和人工费。\n\n## 9. 优惠券规则\n\n优惠券自领取之日起 30 天内有效，逾期自动失效。\n同一订单只能使用一张优惠券，不能与会员折扣叠加。\n退款时优惠券若仍在有效期内会退回账户，已过期则不退回。\n\n## 10. 会员积分\n\n消费 1 元积 1 分，100 积分可抵扣 1 元。\n积分自获得之日起 12 个月内有效，逾期清零。\n积分不可转让、不可提现，仅限本账户使用。\n\n## 11. 客服时间\n\n在线客服服务时间为每天 9:00-21:00。\n客服热线 400-800-1234，服务时间同上。\n非服务时间可留言，客服会在次日 12:00 前回复。\n\n## 12. 特殊商品\n\n生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。\n虚拟商品（充值、会员、课程）一经售出不支持退款。\n定制商品支持质量问题退换，不支持无理由退换。\n\n## 13. 收货信息修改\n\n订单发货前可在「我的订单」修改收货地址和联系电话。\n已发货订单无法修改地址，可联系快递拦截或申请改派。",
+          "score": 0.6011588042822941,
+          "rank": 1,
+          "metadata": {
+            "knowledge_base_id": "4ae8e147-6f76-4330-93f1-d2b3fef3d9ba",
+            "chunk_index": 0,
+            "chunk_type": "text",
+            "truncated": false
+          }
+        },
+        {
+          "document_id": "4ee02c53-d4d1-4364-8a24-30a614ead1f8",
+          "chunk_id": "70aed937-0495-4ef4-8cc0-de7f58b9dc4b",
+          "title": "phase3d_doc.md",
+          "content": "# Summary\n一份详述退款、换货、发票、发货、物流、运费、保修、优惠券、积分、客服及特殊商品售后规则的客户服务政策文件。\n\n该文档是Phase 3E验证版本的售后服务政策，系统规定了消费者在订单履约各环节享有的权益与限制。内容涵盖退款（时效、范围、流程）、换货、电子发票开具与修改、发货与物流管理、运费承担规则、电子产品及配件保修期限与免责情形、优惠券使用与退还逻辑、会员积分累积与有效期、客服响应机制，以及生鲜、虚拟、定制等特殊商品的差异化售后条款。所有条款均以消费者签收时间为关键节点，并明确责任归属（如质量问题由商家承担运费，非质量问题由买家承担），强调操作路径（如通过「我的订单」发起申请）和时效承诺（如审核48小时内、退款1–3个工作日）。",
+          "score": 0.5266309281732969,
+          "rank": 2,
+          "metadata": {
+            "knowledge_base_id": "4ae8e147-6f76-4330-93f1-d2b3fef3d9ba",
+            "chunk_index": 3,
+            "chunk_type": "summary",
+            "truncated": false
+          }
+        }
+      ],
+      "context_source": "agent_chat",
+      "model_config": {
+        "agent_id": "2c74bf39-bc41-4bf0-a64a-4a1f24721a46"
+      },
+      "expected": {
+        "F": [
+          0.8,
+          1.0
+        ],
+        "C": [
+          0.7,
+          1.0
+        ],
+        "R": [
+          0.8,
+          1.0
+        ]
+      },
+      "matrix_case": "Q35",
+      "arms": {
+        "v1.0.0": {
+          "arm": "v1.0.0",
+          "reused": false,
+          "wall_latency_ms": 23628,
+          "outcomes": [
+            {
+              "metric": "faithfulness",
+              "status": "evaluated",
+              "score": 0.888889,
+              "skipped_reason": null,
+              "latency_ms": 20374,
+              "error": null,
+              "judge_config": {
+                "agent": "rag_judge_faithfulness",
+                "model": "qwen-max",
+                "temperature": 0.0,
+                "max_tokens": 8192,
+                "prompt_version": "v1.0.0",
+                "resolved_prompt_version": "v1.0.0",
+                "prompt_sha256": "287053e9e67ad29fd2de597d1052b8d418040097910462e4a0f176b14295bfed",
+                "schema_version": "rag_judge_schema_v1",
+                "rubric_version": "v1.0.0",
+                "metric_version": "v1"
+              },
+              "token_usage": {
+                "input": 1672,
+                "output": 759
+              },
+              "cost": "0",
+              "details": {
+                "claims": [
+                  {
+                    "claim": "“多久能到？”取决于商品类型和发货时间",
+                    "supported": true,
+                    "evidence": [
+                      "现货商品在付款后 48 小时内发出；预售商品以商品页标注的发货时间为准。",
+                      "大件商品（家具、家电）发货时间为 5 个工作日内，配送前会电话预约。"
+                    ],
+                    "reason": "上下文明确说明了不同商品类型的发货时间。",
+                    "claim_id": null,
+                    "claim_type": "factual_claim",
+                    "claim_subtype": null,
+                    "support_status": null,
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": []
+                  },
+                  {
+                    "claim": "现货商品：付款后 48 小时内发出",
+                    "supported": true,
+                    "evidence": [
+                      "现货商品在付款后 48 小时内发出"
+                    ],
+                    "reason": "上下文明确说明了现货商品的发货时间。",
+                    "claim_id": null,
+                    "claim_type": "factual_claim",
+                    "claim_subtype": null,
+                    "support_status": null,
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": []
+                  },
+                  {
+                    "claim": "预售商品：以商品页标注的发货时间为准",
+                    "supported": true,
+                    "evidence": [
+                      "预售商品以商品页标注的发货时间为准"
+                    ],
+                    "reason": "上下文明确说明了预售商品的发货时间。",
+                    "claim_id": null,
+                    "claim_type": "factual_claim",
+                    "claim_subtype": null,
+                    "support_status": null,
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": []
+                  },
+                  {
+                    "claim": "大件商品（如家具、家电）：发货时间为 5 个工作日内，且配送前会电话预约",
+                    "supported": true,
+                    "evidence": [
+                      "大件商品（家具、家电）发货时间为 5 个工作日内，配送前会电话预约"
+                    ],
+                    "reason": "上下文明确说明了大件商品的发货时间和配送前的电话预约。",
+                    "claim_id": null,
+                    "claim_type": "factual_claim",
+                    "claim_subtype": null,
+                    "support_status": null,
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": []
+                  },
+                  {
+                    "claim": "发货后，物流时效未在文档中明确说明",
+                    "supported": true,
+                    "evidence": [],
+                    "reason": "上下文中确实没有明确说明物流时效。",
+                    "claim_id": null,
+                    "claim_type": "factual_claim",
+                    "claim_subtype": null,
+                    "support_status": null,
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": []
+                  },
+                  {
+                    "claim": "您可在「我的订单」中查看物流单号与实时轨迹",
+                    "supported": true,
+                    "evidence": [
+                      "订单发货后可在「我的订单」查看物流单号与实时轨迹。"
+                    ],
+                    "reason": "上下文明确说明了可以在「我的订单」中查看物流信息。",
+                    "claim_id": null,
+                    "claim_type": "factual_claim",
+                    "claim_subtype": null,
+                    "support_status": null,
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": []
+                  },
+                  {
+                    "claim": "若物流信息超过 24 小时未更新，可联系客服协助核查",
+                    "supported": true,
+                    "evidence": [
+                      "物流信息超过 24 小时未更新时，可联系客服协助核查。"
+                    ],
+                    "reason": "上下文明确说明了物流信息长时间未更新时可以联系客服。",
+                    "claim_id": null,
+                    "claim_type": "factual_claim",
+                    "claim_subtype": null,
+                    "support_status": null,
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": []
+                  },
+                  {
+                    "claim": "建议操作：1. 登录账户，进入「我的订单」确认是否已发货；2. 查看物流单号并跟踪快递状态；3. 若已发货但长时间无更新，拨打客服热线 400-800-1234（9:00–21:00）或在线留言",
+                    "supported": false,
+                    "evidence": [],
+                    "reason": "这些建议操作虽然合理，但并没有直接从上下文中提取出来。",
+                    "claim_id": null,
+                    "claim_type": "factual_claim",
+                    "claim_subtype": null,
+                    "support_status": null,
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": []
+                  },
+                  {
+                    "claim": "客服热线 400-800-1234，服务时间同上",
+                    "supported": true,
+                    "evidence": [
+                      "客服热线 400-800-1234，服务时间同上。"
+                    ],
+                    "reason": "上下文明确提供了客服热线和服务时间。",
+                    "claim_id": null,
+                    "claim_type": "factual_claim",
+                    "claim_subtype": null,
+                    "support_status": null,
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": []
+                  }
+                ],
+                "supported_count": 8,
+                "claim_count": 9,
+                "reason": ""
+              },
+              "raw_output": "{\n  \"claims\": [\n    {\n      \"claim\": \"“多久能到？”取决于商品类型和发货时间\",\n      \"supported\": true,\n      \"evidence\": [\n        \"现货商品在付款后 48 小时内发出；预售商品以商品页标注的发货时间为准。\",\n        \"大件商品（家具、家电）发货时间为 5 个工作日内，配送前会电话预约。\"\n      ],\n      \"reason\": \"上下文明确说明了不同商品类型的发货时间。\"\n    },\n    {\n      \"claim\": \"现货商品：付款后 48 小时内发出\",\n      \"supported\": true,\n      \"evidence\": [\n        \"现货商品在付款后 48 小时内发出\"\n      ],\n      \"reason\": \"上下文明确说明了现货商品的发货时间。\"\n    },\n    {\n      \"claim\": \"预售商品：以商品页标注的发货时间为准\",\n      \"supported\": true,\n      \"evidence\": [\n        \"预售商品以商品页标注的发货时间为准\"\n      ],\n      \"reason\": \"上下文明确说明了预售商品的发货时间。\"\n    },\n    {\n      \"claim\": \"大件商品（如家具、家电）：发货时间为 5 个工作日内，且配送前会电话预约\",\n      \"supported\": true,\n      \"evidence\": [\n        \"大件商品（家具、家电）发货时间为 5 个工作日内，配送前会电话预约\"\n      ],\n      \"reason\": \"上下文明确说明了大件商品的发货时间和配送前的电话预约。\"\n    },\n    {\n      \"claim\": \"发货后，物流时效未在文档中明确说明\",\n      \"supported\": true,\n      \"evidence\": [],\n      \"reason\": \"上下文中确实没有明确说明物流时效。\"\n    },\n    {\n      \"claim\": \"您可在「我的订单」中查看物流单号与实时轨迹\",\n      \"supported\": true,\n      \"evidence\": [\n        \"订单发货后可在「我的订单」查看物流单号与实时轨迹。\"\n      ],\n      \"reason\": \"上下文明确说明了可以在「我的订单」中查看物流信息。\"\n    },\n    {\n      \"claim\": \"若物流信息超过 24 小时未更新，可联系客服协助核查\",\n      \"supported\": true,\n      \"evidence\": [\n        \"物流信息超过 24 小时未更新时，可联系客服协助核查。\"\n      ],\n      \"reason\": \"上下文明确说明了物流信息长时间未更新时可以联系客服。\"\n    },\n    {\n      \"claim\": \"建议操作：1. 登录账户，进入「我的订单」确认是否已发货；2. 查看物流单号并跟踪快递状态；3. 若已发货但长时间无更新，拨打客服热线 400-800-1234（9:00–21:00）或在线留言\",\n      \"supported\": false,\n      \"evidence\": [],\n      \"reason\": \"这些建议操作虽然合理，但并没有直接从上下文中提取出来。\"\n    },\n    {\n      \"claim\": \"客服热线 400-800-1234，服务时间同上\",\n      \"supported\": true,\n      \"evidence\": [\n        \"客服热线 400-800-1234，服务时间同上。\"\n      ],\n      \"reason\": \"上下文明确提供了客服热线和服务时间。\"\n    }\n  ],\n  \"reason\": \"\"\n}",
+              "raw_truncated": false
+            },
+            {
+              "metric": "answer_correctness",
+              "status": "evaluated",
+              "score": 0.8,
+              "skipped_reason": null,
+              "latency_ms": 1637,
+              "error": null,
+              "judge_config": {
+                "agent": "rag_judge_answer_correctness",
+                "model": "qwen-max",
+                "temperature": 0.0,
+                "max_tokens": 8192,
+                "prompt_version": "v1.0.0",
+                "resolved_prompt_version": "v1.0.0",
+                "prompt_sha256": "106e11f2bc39806da5ecf090c6dbcd94d81ca5f53b968e5055d5a33833b30f94",
+                "schema_version": "rag_judge_schema_v1",
+                "rubric_version": "v1.0.0",
+                "metric_version": "v1"
+              },
+              "token_usage": {
+                "input": 714,
+                "output": 51
+              },
+              "cost": "0",
+              "details": {
+                "missing_points": [
+                  "需要区分「发货」和「到货」"
+                ],
+                "wrong_facts": [],
+                "reason": "回答中未明确区分发货时间和到货时间"
+              },
+              "raw_output": "{\n  \"score\": 0.8,\n  \"missing_points\": [\"需要区分「发货」和「到货」\"],\n  \"wrong_facts\": [],\n  \"reason\": \"回答中未明确区分发货时间和到货时间\"\n}",
+              "raw_truncated": false
+            },
+            {
+              "metric": "answer_relevancy",
+              "status": "evaluated",
+              "score": 0.8,
+              "skipped_reason": null,
+              "latency_ms": 1614,
+              "error": null,
+              "judge_config": {
+                "agent": "rag_judge_answer_relevancy",
+                "model": "qwen-max",
+                "temperature": 0.0,
+                "max_tokens": 8192,
+                "prompt_version": "v1.0.0",
+                "resolved_prompt_version": "v1.0.0",
+                "prompt_sha256": "27203126964ae0ca8f0bb8641cb3c2b145605cec706ef47c5432a0bbd6fad141",
+                "schema_version": "rag_judge_schema_v1",
+                "rubric_version": "v1.0.0",
+                "metric_version": "v1"
+              },
+              "token_usage": {
+                "input": 515,
+                "output": 30
+              },
+              "cost": "0",
+              "details": {
+                "reason": "回答了核心问题，但缺少具体送达时间的预估"
+              },
+              "raw_output": "{\n  \"score\": 0.8,\n  \"reason\": \"回答了核心问题，但缺少具体送达时间的预估\"\n}",
+              "raw_truncated": false
+            }
+          ]
+        },
+        "v1.1.1": {
+          "arm": "v1.1.1",
+          "reused": false,
+          "wall_latency_ms": 29184,
+          "outcomes": [
+            {
+              "metric": "faithfulness",
+              "status": "evaluated",
+              "score": 0.833333,
+              "skipped_reason": null,
+              "latency_ms": 25351,
+              "error": null,
+              "judge_config": {
+                "agent": "rag_judge_faithfulness",
+                "model": "qwen-max",
+                "temperature": 0.0,
+                "max_tokens": 8192,
+                "prompt_version": "v1.1.1",
+                "resolved_prompt_version": "v1.1.1",
+                "prompt_sha256": "3519fd3b1bbbab9b117abd04f69304609146c2d2a05c39699483dea1740eda19",
+                "schema_version": "rag_judge_schema_v2",
+                "rubric_version": "v1.1.1",
+                "metric_version": "v2"
+              },
+              "token_usage": {
+                "input": 4771,
+                "output": 1090
+              },
+              "cost": "0",
+              "details": {
+                "claims": [
+                  {
+                    "claim": "发货后，物流时效未在文档中明确说明",
+                    "supported": null,
+                    "evidence": [],
+                    "reason": "C1 原文",
+                    "claim_id": "cl1",
+                    "claim_type": "factual_claim",
+                    "claim_subtype": "policy",
+                    "support_status": "insufficient_evidence",
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": [
+                      {
+                        "context_id": "C1",
+                        "quote": "订单发货后可在「我的订单」查看物流单号与实时轨迹。物流信息超过 24 小时未更新时，可联系客服协助核查。"
+                      }
+                    ]
+                  },
+                  {
+                    "claim": "现货商品付款后 48 小时内发出",
+                    "supported": null,
+                    "evidence": [],
+                    "reason": "C1 原文",
+                    "claim_id": "cl2",
+                    "claim_type": "factual_claim",
+                    "claim_subtype": "policy",
+                    "support_status": "supported",
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": [
+                      {
+                        "context_id": "C1",
+                        "quote": "现货商品在付款后 48 小时内发出"
+                      }
+                    ]
+                  },
+                  {
+                    "claim": "预售商品以商品页标注的发货时间为准",
+                    "supported": null,
+                    "evidence": [],
+                    "reason": "C1 原文",
+                    "claim_id": "cl3",
+                    "claim_type": "factual_claim",
+                    "claim_subtype": "policy",
+                    "support_status": "supported",
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": [
+                      {
+                        "context_id": "C1",
+                        "quote": "预售商品以商品页标注的发货时间为准"
+                      }
+                    ]
+                  },
+                  {
+                    "claim": "大件商品（如家具、家电）发货时间为 5 个工作日内，且配送前会电话预约",
+                    "supported": null,
+                    "evidence": [],
+                    "reason": "C1 原文",
+                    "claim_id": "cl4",
+                    "claim_type": "factual_claim",
+                    "claim_subtype": "policy",
+                    "support_status": "supported",
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": [
+                      {
+                        "context_id": "C1",
+                        "quote": "大件商品（家具、家电）发货时间为 5 个工作日内，配送前会电话预约"
+                      }
+                    ]
+                  },
+                  {
+                    "claim": "您可在「我的订单」中查看物流单号与实时轨迹",
+                    "supported": null,
+                    "evidence": [],
+                    "reason": "C1 原文",
+                    "claim_id": "cl5",
+                    "claim_type": "factual_claim",
+                    "claim_subtype": "policy",
+                    "support_status": "supported",
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": [
+                      {
+                        "context_id": "C1",
+                        "quote": "订单发货后可在「我的订单」查看物流单号与实时轨迹"
+                      }
+                    ]
+                  },
+                  {
+                    "claim": "若物流信息超过 24 小时未更新，可联系客服协助核查",
+                    "supported": null,
+                    "evidence": [],
+                    "reason": "C1 原文",
+                    "claim_id": "cl6",
+                    "claim_type": "factual_claim",
+                    "claim_subtype": "policy",
+                    "support_status": "supported",
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": [
+                      {
+                        "context_id": "C1",
+                        "quote": "物流信息超过 24 小时未更新时，可联系客服协助核查"
+                      }
+                    ]
+                  },
+                  {
+                    "claim": "建议登录账户，进入「我的订单」确认是否已发货",
+                    "supported": null,
+                    "evidence": [],
+                    "reason": "纯建议",
+                    "claim_id": "cl7",
+                    "claim_type": "non_factual",
+                    "claim_subtype": "advice",
+                    "support_status": null,
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": []
+                  },
+                  {
+                    "claim": "建议查看物流单号并跟踪快递状态",
+                    "supported": null,
+                    "evidence": [],
+                    "reason": "纯建议",
+                    "claim_id": "cl8",
+                    "claim_type": "non_factual",
+                    "claim_subtype": "advice",
+                    "support_status": null,
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": []
+                  },
+                  {
+                    "claim": "建议若已发货但长时间无更新，拨打客服热线 400-800-1234（9:00–21:00）或在线留言",
+                    "supported": null,
+                    "evidence": [],
+                    "reason": "纯建议",
+                    "claim_id": "cl9",
+                    "claim_type": "non_factual",
+                    "claim_subtype": "advice",
+                    "support_status": null,
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": []
+                  }
+                ],
+                "reason": "",
+                "claim_count": 9,
+                "scorable_claim_count": 6,
+                "supported_count": 5,
+                "supported_claim_count": 5,
+                "unsupported_claim_count": 0,
+                "insufficient_evidence_count": 1,
+                "non_factual_count": 3,
+                "absence_count": 0,
+                "document_conflict": false,
+                "document_conflict_count": 0,
+                "contradiction_count": 0,
+                "insufficient_evidence_rate": 0.166667,
+                "all_insufficient": false,
+                "evidence_validation": [
+                  {
+                    "claim_id": "cl1",
+                    "context_id": "C1",
+                    "quote": "订单发货后可在「我的订单」查看物流单号与实时轨迹。物流信息超过 24 小时未更新时，可联系客服协助核查。",
+                    "ok": false,
+                    "error": "quote_not_found"
+                  },
+                  {
+                    "claim_id": "cl2",
+                    "context_id": "C1",
+                    "quote": "现货商品在付款后 48 小时内发出",
+                    "ok": true,
+                    "error": null
+                  },
+                  {
+                    "claim_id": "cl3",
+                    "context_id": "C1",
+                    "quote": "预售商品以商品页标注的发货时间为准",
+                    "ok": true,
+                    "error": null
+                  },
+                  {
+                    "claim_id": "cl4",
+                    "context_id": "C1",
+                    "quote": "大件商品（家具、家电）发货时间为 5 个工作日内，配送前会电话预约",
+                    "ok": true,
+                    "error": null
+                  },
+                  {
+                    "claim_id": "cl5",
+                    "context_id": "C1",
+                    "quote": "订单发货后可在「我的订单」查看物流单号与实时轨迹",
+                    "ok": true,
+                    "error": null
+                  },
+                  {
+                    "claim_id": "cl6",
+                    "context_id": "C1",
+                    "quote": "物流信息超过 24 小时未更新时，可联系客服协助核查",
+                    "ok": true,
+                    "error": null
+                  }
+                ],
+                "evidence_validation_failed": true,
+                "validation_errors": [
+                  {
+                    "claim_id": "cl1",
+                    "code": "claim_subtype_type_mismatch",
+                    "message": "claim_subtype 'absence' is not valid for factual_claim",
+                    "value": "absence"
+                  },
+                  {
+                    "claim_id": "cl1",
+                    "code": "quote_not_found",
+                    "message": "evidence quote is not a verbatim substring",
+                    "context_id": "C1"
+                  },
+                  {
+                    "claim_id": "cl1",
+                    "code": "evidence_validation_failed",
+                    "message": "supported claim has invalid evidence; downgraded"
+                  }
+                ]
+              },
+              "raw_output": "{\n  \"claims\": [\n    {\n      \"claim_id\": \"cl1\",\n      \"claim\": \"发货后，物流时效未在文档中明确说明\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"absence\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"订单发货后可在「我的订单」查看物流单号与实时轨迹。物流信息超过 24 小时未更新时，可联系客服协助核查。\"}\n      ],\n      \"reason\": \"C1 原文\"\n    },\n    {\n      \"claim_id\": \"cl2\",\n      \"claim\": \"现货商品付款后 48 小时内发出\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"现货商品在付款后 48 小时内发出\"}\n      ],\n      \"reason\": \"C1 原文\"\n    },\n    {\n      \"claim_id\": \"cl3\",\n      \"claim\": \"预售商品以商品页标注的发货时间为准\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"预售商品以商品页标注的发货时间为准\"}\n      ],\n      \"reason\": \"C1 原文\"\n    },\n    {\n      \"claim_id\": \"cl4\",\n      \"claim\": \"大件商品（如家具、家电）发货时间为 5 个工作日内，且配送前会电话预约\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"大件商品（家具、家电）发货时间为 5 个工作日内，配送前会电话预约\"}\n      ],\n      \"reason\": \"C1 原文\"\n    },\n    {\n      \"claim_id\": \"cl5\",\n      \"claim\": \"您可在「我的订单」中查看物流单号与实时轨迹\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"订单发货后可在「我的订单」查看物流单号与实时轨迹\"}\n      ],\n      \"reason\": \"C1 原文\"\n    },\n    {\n      \"claim_id\": \"cl6\",\n      \"claim\": \"若物流信息超过 24 小时未更新，可联系客服协助核查\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"物流信息超过 24 小时未更新时，可联系客服协助核查\"}\n      ],\n      \"reason\": \"C1 原文\"\n    },\n    {\n      \"claim_id\": \"cl7\",\n      \"claim\": \"建议登录账户，进入「我的订单」确认是否已发货\",\n      \"claim_type\": \"non_factual\",\n      \"claim_subtype\": \"advice\",\n      \"support_status\": null,\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [],\n      \"reason\": \"纯建议\"\n    },\n    {\n      \"claim_id\": \"cl8\",\n      \"claim\": \"建议查看物流单号并跟踪快递状态\",\n      \"claim_type\": \"non_factual\",\n      \"claim_subtype\": \"advice\",\n      \"support_status\": null,\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [],\n      \"reason\": \"纯建议\"\n    },\n    {\n      \"claim_id\": \"cl9\",\n      \"claim\": \"建议若已发货但长时间无更新，拨打客服热线 400-800-1234（9:00–21:00）或在线留言\",\n      \"claim_type\": \"non_factual\",\n      \"claim_subtype\": \"advice\",\n      \"support_status\": null,\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [],\n      \"reason\": \"纯建议\"\n    }\n  ],\n  \"reason\": \"\"\n}",
+              "raw_truncated": false
+            },
+            {
+              "metric": "answer_correctness",
+              "status": "evaluated",
+              "score": 0.9,
+              "skipped_reason": null,
+              "latency_ms": 2094,
+              "error": null,
+              "judge_config": {
+                "agent": "rag_judge_answer_correctness",
+                "model": "qwen-max",
+                "temperature": 0.0,
+                "max_tokens": 8192,
+                "prompt_version": "v1.1.1",
+                "resolved_prompt_version": "v1.1.1",
+                "prompt_sha256": "2ab6eac2abe57dcfd647df328244ac3e5681fc93222938d6614e71037d49ae77",
+                "schema_version": "rag_judge_schema_v2",
+                "rubric_version": "v1.1.1",
+                "metric_version": "v2"
+              },
+              "token_usage": {
+                "input": 2114,
+                "output": 48
+              },
+              "cost": "0",
+              "details": {
+                "missing_points": [],
+                "wrong_facts": [],
+                "reason": "回答覆盖了金标中的所有关键事实和条件，且提供了正确的建议操作。"
+              },
+              "raw_output": "{\n  \"score\": 0.9,\n  \"missing_points\": [],\n  \"wrong_facts\": [],\n  \"reason\": \"回答覆盖了金标中的所有关键事实和条件，且提供了正确的建议操作。\"\n}",
+              "raw_truncated": false
+            },
+            {
+              "metric": "answer_relevancy",
+              "status": "evaluated",
+              "score": 0.9,
+              "skipped_reason": null,
+              "latency_ms": 1736,
+              "error": null,
+              "judge_config": {
+                "agent": "rag_judge_answer_relevancy",
+                "model": "qwen-max",
+                "temperature": 0.0,
+                "max_tokens": 8192,
+                "prompt_version": "v1.1.1",
+                "resolved_prompt_version": "v1.1.1",
+                "prompt_sha256": "0f8576b7dbf2e7ea1a02752680b0afe8c66677fe2eda823f4bcd28371ae4da84",
+                "schema_version": "rag_judge_schema_v2",
+                "rubric_version": "v1.1.1",
+                "metric_version": "v2"
+              },
+              "token_usage": {
+                "input": 1292,
+                "output": 45
+              },
+              "cost": "0",
+              "details": {
+                "reason": "回答区分了发货和到货时间，详细说明了不同类型商品的发货时间，并给出了查看物流状态和联系客服的具体建议。"
+              },
+              "raw_output": "{\n  \"score\": 0.9,\n  \"reason\": \"回答区分了发货和到货时间，详细说明了不同类型商品的发货时间，并给出了查看物流状态和联系客服的具体建议。\"\n}",
+              "raw_truncated": false
+            }
+          ]
+        }
+      },
+      "result_note": "absence claim factual/policy insufficient, not supported; F=0.833333 in target 0.8-1.0"
+    },
+    {
+      "id": "Q36",
+      "category": "ambiguous",
+      "question": "能退吗？",
+      "gold_answer": "需要确认商品类型、签收时间、是否已激活、是否存在质量问题。按文档：普通商品签收后 7 天内可申请无理由退款；定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款；生鲜食品质量问题需在签收后 24 小时内拍照反馈；虚拟商品（充值、会员、课程）一经售出不支持退款；定制商品支持质量问题退换，不支持无理由退换。注意：第 1 条对虚拟商品的限定是「已激活」，第 12 条则称虚拟商品一经售出不支持退款，两处范围不完全一致，具体商品需以对应条款/客服确认为准。",
+      "gold_source": "docs/repair/phase3e/human-gold.json",
+      "gold_status": "human_reviewed",
+      "provisional": false,
+      "answer": "能否退款，取决于具体商品类型和签收时间：\n\n- ✅ **可以无理由退款**：普通商品在**签收后 7 天内**可申请无理由退款；审核通过后，款项将在 **1–3 个工作日内原路退回**<kb doc=\"phase3d_doc.md\" chunk_id=\"c65abc80-f589-49de-9a1f-77ad2689bdb9\" kb_id=\"4ae8e147-6f76-4330-93f1-d2b3fef3d9ba\" />。  \n- ❌ **不支持无理由退款**的三类商品：  \n  - 定制类商品  \n  - 生鲜食品（质量问题除外，需签收后 **24 小时内**拍照反馈）<kb doc=\"phase3d_doc.md\" chunk_id=\"b978479f-6440-4514-b220-6e48a9dbf1be\" kb_id=\"4ae8e147-6f76-4330-93f1-d2b3fef3d9ba\" />  \n  - 已激活的虚拟商品（如充值、会员、课程等，一经售出**不支持退款**）<kb doc=\"phase3d_doc.md\" chunk_id=\"b978479f-6440-4514-b220-6e48a9dbf1be\" kb_id=\"4ae8e147-6f76-4330-93f1-d2b3fef3d9ba\" />\n\n此外：\n- 若因**商品质量问题**退换货，运费由商家承担；  \n- 若为**非质量问题退货**，运费由买家承担<kb doc=\"phase3d_doc.md\" chunk_id=\"cdf680b6-0280-44fd-8003-73901ac3e13e\" kb_id=\"4ae8e147-6f76-4330-93f1-d2b3fef3d9ba\" />。\n\n请确认您的商品类型及是否仍在签收后 7 天内。如需进一步协助（例如判断是否属于定制/虚拟类、是否已激活、或是否涉及质量问题），欢迎补充订单信息。",
+      "contexts": [
+        {
+          "document_id": "4ee02c53-d4d1-4364-8a24-30a614ead1f8",
+          "chunk_id": "c65abc80-f589-49de-9a1f-77ad2689bdb9",
+          "title": "phase3d_doc.md",
+          "content": "# 售后服务政策（Phase 3E 验证文档 v2）\n\n## 1. 退款时效\n\n订单签收后 7 天内可申请无理由退款。审核通过后，款项将在 1-3 个工作日内原路退回。\n定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。\n\n## 2. 退款流程\n\n在「我的订单」中选择退款，填写原因并上传凭证，商家会在 48 小时内审核。\n审核通过后按原支付渠道退回；审核驳回会显示原因，可补充材料后重新提交。\n\n## 3. 换货政策\n\n签收后 7 天内，商品未使用且包装完整可申请换货，同一订单仅支持一次换货。\n换货需先寄回原商品，商家收到并验收后 48 小时内寄出新品；运费由责任方承担。\n\n## 4. 发票说明\n\n仅支持电子发票，提交申请后 24 小时内发送至下单邮箱。\n发票抬头可在开具前修改；已开具的发票需先申请红冲，再重新开具。\n暂不支持纸质发票和增值税专用发票。\n\n## 5. 发货时效\n\n现货商品在付款后 48 小时内发出；预售商品以商品页标注的发货时间为准。\n大件商品（家具、家电）发货时间为 5 个工作日内，配送前会电话预约。\n\n## 6. 物流查询\n\n订单发货后可在「我的订单」查看物流单号与实时轨迹。\n物流信息超过 24 小时未更新时，可联系客服协助核查。\n\n## 7. 运费规则\n\n单笔订单实付满 99 元包邮；未满 99 元收取 10 元运费。\n新疆、西藏、内蒙古等偏远地区运费为 20 元，不参与包邮活动。\n因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。\n\n## 8. 保修政策\n\n电子产品自签收之日起保修 12 个月，配件保修 3 个月。\n人为损坏、进水、私自拆修不在保修范围内。\n保修期内维修免费；保修期外维修需收取材料费和人工费。\n\n## 9. 优惠券规则\n\n优惠券自领取之日起 30 天内有效，逾期自动失效。\n同一订单只能使用一张优惠券，不能与会员折扣叠加。\n退款时优惠券若仍在有效期内会退回账户，已过期则不退回。\n\n## 10. 会员积分\n\n消费 1 元积 1 分，100 积分可抵扣 1 元。\n积分自获得之日起 12 个月内有效，逾期清零。\n积分不可转让、不可提现，仅限本账户使用。\n\n## 11. 客服时间\n\n在线客服服务时间为每天 9:00-21:00。\n客服热线 400-800-1234，服务时间同上。\n非服务时间可留言，客服会在次日 12:00 前回复。\n\n## 12. 特殊商品\n\n生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。\n虚拟商品（充值、会员、课程）一经售出不支持退款。\n定制商品支持质量问题退换，不支持无理由退换。\n\n## 13. 收货信息修改\n\n订单发货前可在「我的订单」修改收货地址和联系电话。\n已发货订单无法修改地址，可联系快递拦截或申请改派。",
+          "score": 0.6261404485098756,
+          "rank": 1,
+          "metadata": {
+            "knowledge_base_id": "4ae8e147-6f76-4330-93f1-d2b3fef3d9ba",
+            "chunk_index": 0,
+            "chunk_type": "text",
+            "truncated": false
+          }
+        },
+        {
+          "document_id": "4ee02c53-d4d1-4364-8a24-30a614ead1f8",
+          "chunk_id": "70aed937-0495-4ef4-8cc0-de7f58b9dc4b",
+          "title": "phase3d_doc.md",
+          "content": "# Summary\n一份详述退款、换货、发票、发货、物流、运费、保修、优惠券、积分、客服及特殊商品售后规则的客户服务政策文件。\n\n该文档是Phase 3E验证版本的售后服务政策，系统规定了消费者在订单履约各环节享有的权益与限制。内容涵盖退款（时效、范围、流程）、换货、电子发票开具与修改、发货与物流管理、运费承担规则、电子产品及配件保修期限与免责情形、优惠券使用与退还逻辑、会员积分累积与有效期、客服响应机制，以及生鲜、虚拟、定制等特殊商品的差异化售后条款。所有条款均以消费者签收时间为关键节点，并明确责任归属（如质量问题由商家承担运费，非质量问题由买家承担），强调操作路径（如通过「我的订单」发起申请）和时效承诺（如审核48小时内、退款1–3个工作日）。",
+          "score": 0.5778889689233158,
+          "rank": 2,
+          "metadata": {
+            "knowledge_base_id": "4ae8e147-6f76-4330-93f1-d2b3fef3d9ba",
+            "chunk_index": 3,
+            "chunk_type": "summary",
+            "truncated": false
+          }
+        }
+      ],
+      "context_source": "agent_chat",
+      "model_config": {
+        "agent_id": "2c74bf39-bc41-4bf0-a64a-4a1f24721a46"
+      },
+      "expected": {
+        "F": [
+          0.8,
+          1.0
+        ],
+        "C": [
+          0.5,
+          0.6
+        ],
+        "R": [
+          0.8,
+          1.0
+        ]
+      },
+      "matrix_case": "Q36",
+      "arms": {
+        "v1.0.0": {
+          "arm": "v1.0.0",
+          "reused": false,
+          "wall_latency_ms": 13701,
+          "outcomes": [
+            {
+              "metric": "faithfulness",
+              "status": "evaluated",
+              "score": 1.0,
+              "skipped_reason": null,
+              "latency_ms": 10249,
+              "error": null,
+              "judge_config": {
+                "agent": "rag_judge_faithfulness",
+                "model": "qwen-max",
+                "temperature": 0.0,
+                "max_tokens": 8192,
+                "prompt_version": "v1.0.0",
+                "resolved_prompt_version": "v1.0.0",
+                "prompt_sha256": "287053e9e67ad29fd2de597d1052b8d418040097910462e4a0f176b14295bfed",
+                "schema_version": "rag_judge_schema_v1",
+                "rubric_version": "v1.0.0",
+                "metric_version": "v1"
+              },
+              "token_usage": {
+                "input": 1959,
+                "output": 439
+              },
+              "cost": "0",
+              "details": {
+                "claims": [
+                  {
+                    "claim": "普通商品在签收后 7 天内可申请无理由退款",
+                    "supported": true,
+                    "evidence": [
+                      "订单签收后 7 天内可申请无理由退款。"
+                    ],
+                    "reason": "上下文明确支持",
+                    "claim_id": null,
+                    "claim_type": "factual_claim",
+                    "claim_subtype": null,
+                    "support_status": null,
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": []
+                  },
+                  {
+                    "claim": "审核通过后，款项将在 1–3 个工作日内原路退回",
+                    "supported": true,
+                    "evidence": [
+                      "审核通过后，款项将在 1-3 个工作日内原路退回。"
+                    ],
+                    "reason": "上下文明确支持",
+                    "claim_id": null,
+                    "claim_type": "factual_claim",
+                    "claim_subtype": null,
+                    "support_status": null,
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": []
+                  },
+                  {
+                    "claim": "定制类商品不支持无理由退款",
+                    "supported": true,
+                    "evidence": [
+                      "定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。"
+                    ],
+                    "reason": "上下文明确支持",
+                    "claim_id": null,
+                    "claim_type": "factual_claim",
+                    "claim_subtype": null,
+                    "support_status": null,
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": []
+                  },
+                  {
+                    "claim": "生鲜食品（质量问题除外，需签收后 24 小时内拍照反馈）不支持无理由退款",
+                    "supported": true,
+                    "evidence": [
+                      "生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。"
+                    ],
+                    "reason": "上下文明确支持",
+                    "claim_id": null,
+                    "claim_type": "factual_claim",
+                    "claim_subtype": null,
+                    "support_status": null,
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": []
+                  },
+                  {
+                    "claim": "已激活的虚拟商品（如充值、会员、课程等，一经售出不支持退款）",
+                    "supported": true,
+                    "evidence": [
+                      "虚拟商品（充值、会员、课程）一经售出不支持退款。"
+                    ],
+                    "reason": "上下文明确支持",
+                    "claim_id": null,
+                    "claim_type": "factual_claim",
+                    "claim_subtype": null,
+                    "support_status": null,
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": []
+                  },
+                  {
+                    "claim": "若因商品质量问题退换货，运费由商家承担",
+                    "supported": true,
+                    "evidence": [
+                      "因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。"
+                    ],
+                    "reason": "上下文明确支持",
+                    "claim_id": null,
+                    "claim_type": "factual_claim",
+                    "claim_subtype": null,
+                    "support_status": null,
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": []
+                  },
+                  {
+                    "claim": "若为非质量问题退货，运费由买家承担",
+                    "supported": true,
+                    "evidence": [
+                      "因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。"
+                    ],
+                    "reason": "上下文明确支持",
+                    "claim_id": null,
+                    "claim_type": "factual_claim",
+                    "claim_subtype": null,
+                    "support_status": null,
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": []
+                  }
+                ],
+                "supported_count": 7,
+                "claim_count": 7,
+                "reason": ""
+              },
+              "raw_output": "{\n  \"claims\": [\n    {\"claim\": \"普通商品在签收后 7 天内可申请无理由退款\", \"supported\": true, \"evidence\": [\"订单签收后 7 天内可申请无理由退款。\"], \"reason\": \"上下文明确支持\"},\n    {\"claim\": \"审核通过后，款项将在 1–3 个工作日内原路退回\", \"supported\": true, \"evidence\": [\"审核通过后，款项将在 1-3 个工作日内原路退回。\"], \"reason\": \"上下文明确支持\"},\n    {\"claim\": \"定制类商品不支持无理由退款\", \"supported\": true, \"evidence\": [\"定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。\"], \"reason\": \"上下文明确支持\"},\n    {\"claim\": \"生鲜食品（质量问题除外，需签收后 24 小时内拍照反馈）不支持无理由退款\", \"supported\": true, \"evidence\": [\"生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。\"], \"reason\": \"上下文明确支持\"},\n    {\"claim\": \"已激活的虚拟商品（如充值、会员、课程等，一经售出不支持退款）\", \"supported\": true, \"evidence\": [\"虚拟商品（充值、会员、课程）一经售出不支持退款。\"], \"reason\": \"上下文明确支持\"},\n    {\"claim\": \"若因商品质量问题退换货，运费由商家承担\", \"supported\": true, \"evidence\": [\"因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。\"], \"reason\": \"上下文明确支持\"},\n    {\"claim\": \"若为非质量问题退货，运费由买家承担\", \"supported\": true, \"evidence\": [\"因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。\"], \"reason\": \"上下文明确支持\"}\n  ],\n  \"reason\": \"\"\n}",
+              "raw_truncated": false
+            },
+            {
+              "metric": "answer_correctness",
+              "status": "evaluated",
+              "score": 0.9,
+              "skipped_reason": null,
+              "latency_ms": 2002,
+              "error": null,
+              "judge_config": {
+                "agent": "rag_judge_answer_correctness",
+                "model": "qwen-max",
+                "temperature": 0.0,
+                "max_tokens": 8192,
+                "prompt_version": "v1.0.0",
+                "resolved_prompt_version": "v1.0.0",
+                "prompt_sha256": "106e11f2bc39806da5ecf090c6dbcd94d81ca5f53b968e5055d5a33833b30f94",
+                "schema_version": "rag_judge_schema_v1",
+                "rubric_version": "v1.0.0",
+                "metric_version": "v1"
+              },
+              "token_usage": {
+                "input": 1052,
+                "output": 56
+              },
+              "cost": "0",
+              "details": {
+                "missing_points": [
+                  "定制商品支持质量问题退换，不支持无理由退换"
+                ],
+                "wrong_facts": [],
+                "reason": "回答中缺少关于定制商品在质量问题下的退换政策"
+              },
+              "raw_output": "{\n  \"score\": 0.9,\n  \"missing_points\": [\"定制商品支持质量问题退换，不支持无理由退换\"],\n  \"wrong_facts\": [],\n  \"reason\": \"回答中缺少关于定制商品在质量问题下的退换政策\"\n}",
+              "raw_truncated": false
+            },
+            {
+              "metric": "answer_relevancy",
+              "status": "evaluated",
+              "score": 0.9,
+              "skipped_reason": null,
+              "latency_ms": 1439,
+              "error": null,
+              "judge_config": {
+                "agent": "rag_judge_answer_relevancy",
+                "model": "qwen-max",
+                "temperature": 0.0,
+                "max_tokens": 8192,
+                "prompt_version": "v1.0.0",
+                "resolved_prompt_version": "v1.0.0",
+                "prompt_sha256": "27203126964ae0ca8f0bb8641cb3c2b145605cec706ef47c5432a0bbd6fad141",
+                "schema_version": "rag_judge_schema_v1",
+                "rubric_version": "v1.0.0",
+                "metric_version": "v1"
+              },
+              "token_usage": {
+                "input": 802,
+                "output": 40
+              },
+              "cost": "0",
+              "details": {
+                "reason": "回答了能否退款的问题，并提供了详细的条件和分类，但需要用户确认具体商品类型和签收时间"
+              },
+              "raw_output": "{\n  \"score\": 0.9,\n  \"reason\": \"回答了能否退款的问题，并提供了详细的条件和分类，但需要用户确认具体商品类型和签收时间\"\n}",
+              "raw_truncated": false
+            }
+          ]
+        },
+        "v1.1.1": {
+          "arm": "v1.1.1",
+          "reused": false,
+          "wall_latency_ms": 29317,
+          "outcomes": [
+            {
+              "metric": "faithfulness",
+              "status": "evaluated",
+              "score": 0.857143,
+              "skipped_reason": null,
+              "latency_ms": 23521,
+              "error": null,
+              "judge_config": {
+                "agent": "rag_judge_faithfulness",
+                "model": "qwen-max",
+                "temperature": 0.0,
+                "max_tokens": 8192,
+                "prompt_version": "v1.1.1",
+                "resolved_prompt_version": "v1.1.1",
+                "prompt_sha256": "3519fd3b1bbbab9b117abd04f69304609146c2d2a05c39699483dea1740eda19",
+                "schema_version": "rag_judge_schema_v2",
+                "rubric_version": "v1.1.1",
+                "metric_version": "v2"
+              },
+              "token_usage": {
+                "input": 5058,
+                "output": 1107
+              },
+              "cost": "0",
+              "details": {
+                "claims": [
+                  {
+                    "claim": "普通商品在签收后 7 天内可申请无理由退款",
+                    "supported": null,
+                    "evidence": [],
+                    "reason": "C1 原文",
+                    "claim_id": "cl1",
+                    "claim_type": "factual_claim",
+                    "claim_subtype": "policy",
+                    "support_status": "supported",
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": [
+                      {
+                        "context_id": "C1",
+                        "quote": "订单签收后 7 天内可申请无理由退款。"
+                      }
+                    ]
+                  },
+                  {
+                    "claim": "审核通过后，款项将在 1–3 个工作日内原路退回",
+                    "supported": null,
+                    "evidence": [],
+                    "reason": "C1 原文",
+                    "claim_id": "cl2",
+                    "claim_type": "factual_claim",
+                    "claim_subtype": "policy",
+                    "support_status": "supported",
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": [
+                      {
+                        "context_id": "C1",
+                        "quote": "审核通过后，款项将在 1-3 个工作日内原路退回。"
+                      }
+                    ]
+                  },
+                  {
+                    "claim": "定制类商品不支持无理由退款",
+                    "supported": null,
+                    "evidence": [],
+                    "reason": "C1 原文",
+                    "claim_id": "cl3",
+                    "claim_type": "factual_claim",
+                    "claim_subtype": "policy",
+                    "support_status": "supported",
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": [
+                      {
+                        "context_id": "C1",
+                        "quote": "定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。"
+                      }
+                    ]
+                  },
+                  {
+                    "claim": "生鲜食品不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈",
+                    "supported": null,
+                    "evidence": [],
+                    "reason": "C1 原文",
+                    "claim_id": "cl4",
+                    "claim_type": "factual_claim",
+                    "claim_subtype": "policy",
+                    "support_status": "supported",
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": [
+                      {
+                        "context_id": "C1",
+                        "quote": "生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。"
+                      }
+                    ]
+                  },
+                  {
+                    "claim": "已激活的虚拟商品不支持退款",
+                    "supported": null,
+                    "evidence": [],
+                    "reason": "C1 原文",
+                    "claim_id": "cl5",
+                    "claim_type": "factual_claim",
+                    "claim_subtype": "policy",
+                    "support_status": "insufficient_evidence",
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": [
+                      {
+                        "context_id": "C1",
+                        "quote": "已激活的虚拟商品（如充值、会员、课程等，一经售出**不支持退款**）"
+                      }
+                    ]
+                  },
+                  {
+                    "claim": "若因商品质量问题退换货，运费由商家承担",
+                    "supported": null,
+                    "evidence": [],
+                    "reason": "C1 原文",
+                    "claim_id": "cl6",
+                    "claim_type": "factual_claim",
+                    "claim_subtype": "policy",
+                    "support_status": "supported",
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": [
+                      {
+                        "context_id": "C1",
+                        "quote": "因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。"
+                      }
+                    ]
+                  },
+                  {
+                    "claim": "若为非质量问题退货，运费由买家承担",
+                    "supported": null,
+                    "evidence": [],
+                    "reason": "C1 原文",
+                    "claim_id": "cl7",
+                    "claim_type": "factual_claim",
+                    "claim_subtype": "policy",
+                    "support_status": "supported",
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": [
+                      {
+                        "context_id": "C1",
+                        "quote": "因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。"
+                      }
+                    ]
+                  },
+                  {
+                    "claim": "请确认您的商品类型及是否仍在签收后 7 天内",
+                    "supported": null,
+                    "evidence": [],
+                    "reason": "纯建议",
+                    "claim_id": "cl8",
+                    "claim_type": "non_factual",
+                    "claim_subtype": "advice",
+                    "support_status": null,
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": []
+                  },
+                  {
+                    "claim": "如需进一步协助，欢迎补充订单信息",
+                    "supported": null,
+                    "evidence": [],
+                    "reason": "纯建议",
+                    "claim_id": "cl9",
+                    "claim_type": "non_factual",
+                    "claim_subtype": "advice",
+                    "support_status": null,
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": []
+                  }
+                ],
+                "reason": "",
+                "claim_count": 9,
+                "scorable_claim_count": 7,
+                "supported_count": 6,
+                "supported_claim_count": 6,
+                "unsupported_claim_count": 0,
+                "insufficient_evidence_count": 1,
+                "non_factual_count": 2,
+                "absence_count": 0,
+                "document_conflict": false,
+                "document_conflict_count": 0,
+                "contradiction_count": 0,
+                "insufficient_evidence_rate": 0.142857,
+                "all_insufficient": false,
+                "evidence_validation": [
+                  {
+                    "claim_id": "cl1",
+                    "context_id": "C1",
+                    "quote": "订单签收后 7 天内可申请无理由退款。",
+                    "ok": true,
+                    "error": null
+                  },
+                  {
+                    "claim_id": "cl2",
+                    "context_id": "C1",
+                    "quote": "审核通过后，款项将在 1-3 个工作日内原路退回。",
+                    "ok": true,
+                    "error": null
+                  },
+                  {
+                    "claim_id": "cl3",
+                    "context_id": "C1",
+                    "quote": "定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。",
+                    "ok": true,
+                    "error": null
+                  },
+                  {
+                    "claim_id": "cl4",
+                    "context_id": "C1",
+                    "quote": "生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。",
+                    "ok": true,
+                    "error": null
+                  },
+                  {
+                    "claim_id": "cl5",
+                    "context_id": "C1",
+                    "quote": "已激活的虚拟商品（如充值、会员、课程等，一经售出**不支持退款**）",
+                    "ok": false,
+                    "error": "quote_not_found"
+                  },
+                  {
+                    "claim_id": "cl6",
+                    "context_id": "C1",
+                    "quote": "因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。",
+                    "ok": true,
+                    "error": null
+                  },
+                  {
+                    "claim_id": "cl7",
+                    "context_id": "C1",
+                    "quote": "因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。",
+                    "ok": true,
+                    "error": null
+                  }
+                ],
+                "evidence_validation_failed": true,
+                "validation_errors": [
+                  {
+                    "claim_id": "cl5",
+                    "code": "quote_not_found",
+                    "message": "evidence quote is not a verbatim substring",
+                    "context_id": "C1"
+                  },
+                  {
+                    "claim_id": "cl5",
+                    "code": "evidence_validation_failed",
+                    "message": "supported claim has invalid evidence; downgraded"
+                  }
+                ]
+              },
+              "raw_output": "{\n  \"claims\": [\n    {\n      \"claim_id\": \"cl1\",\n      \"claim\": \"普通商品在签收后 7 天内可申请无理由退款\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"订单签收后 7 天内可申请无理由退款。\"}\n      ],\n      \"reason\": \"C1 原文\"\n    },\n    {\n      \"claim_id\": \"cl2\",\n      \"claim\": \"审核通过后，款项将在 1–3 个工作日内原路退回\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"审核通过后，款项将在 1-3 个工作日内原路退回。\"}\n      ],\n      \"reason\": \"C1 原文\"\n    },\n    {\n      \"claim_id\": \"cl3\",\n      \"claim\": \"定制类商品不支持无理由退款\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。\"}\n      ],\n      \"reason\": \"C1 原文\"\n    },\n    {\n      \"claim_id\": \"cl4\",\n      \"claim\": \"生鲜食品不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。\"}\n      ],\n      \"reason\": \"C1 原文\"\n    },\n    {\n      \"claim_id\": \"cl5\",\n      \"claim\": \"已激活的虚拟商品不支持退款\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"已激活的虚拟商品（如充值、会员、课程等，一经售出**不支持退款**）\"}\n      ],\n      \"reason\": \"C1 原文\"\n    },\n    {\n      \"claim_id\": \"cl6\",\n      \"claim\": \"若因商品质量问题退换货，运费由商家承担\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。\"}\n      ],\n      \"reason\": \"C1 原文\"\n    },\n    {\n      \"claim_id\": \"cl7\",\n      \"claim\": \"若为非质量问题退货，运费由买家承担\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。\"}\n      ],\n      \"reason\": \"C1 原文\"\n    },\n    {\n      \"claim_id\": \"cl8\",\n      \"claim\": \"请确认您的商品类型及是否仍在签收后 7 天内\",\n      \"claim_type\": \"non_factual\",\n      \"claim_subtype\": \"advice\",\n      \"support_status\": null,\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [],\n      \"reason\": \"纯建议\"\n    },\n    {\n      \"claim_id\": \"cl9\",\n      \"claim\": \"如需进一步协助，欢迎补充订单信息\",\n      \"claim_type\": \"non_factual\",\n      \"claim_subtype\": \"advice\",\n      \"support_status\": null,\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [],\n      \"reason\": \"纯建议\"\n    }\n  ],\n  \"reason\": \"\"\n}",
+              "raw_truncated": false
+            },
+            {
+              "metric": "answer_correctness",
+              "status": "evaluated",
+              "score": 0.5,
+              "skipped_reason": null,
+              "latency_ms": 4020,
+              "error": null,
+              "judge_config": {
+                "agent": "rag_judge_answer_correctness",
+                "model": "qwen-max",
+                "temperature": 0.0,
+                "max_tokens": 8192,
+                "prompt_version": "v1.1.1",
+                "resolved_prompt_version": "v1.1.1",
+                "prompt_sha256": "2ab6eac2abe57dcfd647df328244ac3e5681fc93222938d6614e71037d49ae77",
+                "schema_version": "rag_judge_schema_v2",
+                "rubric_version": "v1.1.1",
+                "metric_version": "v2"
+              },
+              "token_usage": {
+                "input": 2452,
+                "output": 129
+              },
+              "cost": "0",
+              "details": {
+                "missing_points": [
+                  "定制商品支持质量问题退换，不支持无理由退换",
+                  "第 1 条对虚拟商品的限定是「已激活」，第 12 条则称虚拟商品一经售出不支持退款，两处范围不完全一致，具体商品需以对应条款/客服确认为准"
+                ],
+                "wrong_facts": [],
+                "reason": "回答覆盖了大部分关键信息，但缺少关于定制商品的质量问题退换政策和文档中对虚拟商品退款规定的冲突披露。"
+              },
+              "raw_output": "{\n  \"score\": 0.5,\n  \"missing_points\": [\n    \"定制商品支持质量问题退换，不支持无理由退换\",\n    \"第 1 条对虚拟商品的限定是「已激活」，第 12 条则称虚拟商品一经售出不支持退款，两处范围不完全一致，具体商品需以对应条款/客服确认为准\"\n  ],\n  \"wrong_facts\": [],\n  \"reason\": \"回答覆盖了大部分关键信息，但缺少关于定制商品的质量问题退换政策和文档中对虚拟商品退款规定的冲突披露。\"\n}",
+              "raw_truncated": false
+            },
+            {
+              "metric": "answer_relevancy",
+              "status": "evaluated",
+              "score": 0.9,
+              "skipped_reason": null,
+              "latency_ms": 1773,
+              "error": null,
+              "judge_config": {
+                "agent": "rag_judge_answer_relevancy",
+                "model": "qwen-max",
+                "temperature": 0.0,
+                "max_tokens": 8192,
+                "prompt_version": "v1.1.1",
+                "resolved_prompt_version": "v1.1.1",
+                "prompt_sha256": "0f8576b7dbf2e7ea1a02752680b0afe8c66677fe2eda823f4bcd28371ae4da84",
+                "schema_version": "rag_judge_schema_v2",
+                "rubric_version": "v1.1.1",
+                "metric_version": "v2"
+              },
+              "token_usage": {
+                "input": 1579,
+                "output": 38
+              },
+              "cost": "0",
+              "details": {
+                "reason": "回答详细列出了不同商品类型和签收时间的退款条件，并给出了进一步协助的建议。"
+              },
+              "raw_output": "{\n  \"score\": 0.9,\n  \"reason\": \"回答详细列出了不同商品类型和签收时间的退款条件，并给出了进一步协助的建议。\"\n}",
+              "raw_truncated": false
+            }
+          ]
+        }
+      },
+      "result_note": "answer does not disclose conflict; document_conflict=0; C=0.5 with missing conflict disclosure; wrong_facts=[]"
     }
   ],
-  "status": "stopped",
-  "stop_reasons": [
-    "Q23 F scorable != 6"
-  ],
+  "status": "completed",
+  "stop_reasons": [],
   "totals": {
     "v1.0.0": {
-      "input_tokens": 17985,
-      "output_tokens": 2943,
-      "estimated_cost_cny": 0.0714
+      "input_tokens": 32612,
+      "output_tokens": 6252,
+      "estimated_cost_cny": 0.1383
     },
     "v1.1.1": {
-      "input_tokens": 49641,
-      "output_tokens": 5192,
-      "estimated_cost_cny": 0.169
+      "input_tokens": 85372,
+      "output_tokens": 9008,
+      "estimated_cost_cny": 0.2914
     }
   },
   "post_run": {
