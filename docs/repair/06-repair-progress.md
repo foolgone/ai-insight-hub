@@ -1035,3 +1035,12 @@ alembic check   : No new upgrade operations detected
 - 新 F Prompt SHA：`3519fd3b1bbbab9b117abd04f69304609146c2d2a05c39699483dea1740eda19`；C SHA 不变。
 - Q23 F 单案例：**score=0.5**；scorable=6、supported=3、unsupported=1、insufficient=2、non_factual=2；3/3 evidence；cl1 contradictory_with=["cl2"]；validation_errors=[]。
 - 新增 Prompt 内容测试；未重跑 10 条、未跑 40 条。
+
+### 10 条重跑第三次（2026-11-17，stopped Q23 计数）
+- 使用 F SHA `3519fd3b…`、C SHA `2ab6eac…`；完成 Q01/Q04/Q11/Q17/Q21/Q23（6/10）。
+- Q01/Q04/Q17/Q21/Q11 目标命中；Q11 F=0.6667（0.6–0.9）。
+- **Q23 F=0.428571，分数在 0.4–0.5，但 scorable=7（要求 6）**：3 supported / 1 unsupported / 3 insufficient / 3 non_factual；3/3 evidence；cl1 contradictory；validation_errors=[]。
+- 第 7 条 scorable 来自“若已超时，可尝试联系客服说明具体情况……”被归 factual/policy，矩阵期望为 advice；按 Q23 key 校验停止。
+- 未运行 Q29/Q31/Q35/Q36；Q36 disclosure 未验证。
+- Token（6 条×2 臂）：v1.0.0 17,985/2,943；v1.1.1 49,641/5,192；估算 ¥0.2404。
+- 结果：`pilot-10-v1.0.0-vs-v1.1.1-rerun.json` / `.md`；未跑 40 条、未激活。

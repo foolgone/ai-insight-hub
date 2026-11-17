@@ -22,7 +22,7 @@
     ],
     "answer_source": "phase3e_runs.json (frozen Pilot, 40 items)",
     "context_source": "query.contexts (answer_contexts, C1-C2)",
-    "new_f_prompt_sha": "4ee65afb3e7ea8b4b5e361e41ea75b74173142a8c26c97dedc7139ba37c86317",
+    "new_f_prompt_sha": "3519fd3b1bbbab9b117abd04f69304609146c2d2a05c39699483dea1740eda19",
     "reused_v1_cases": [
       "Q01",
       "Q04",
@@ -55,7 +55,7 @@
       "rubric_version": "v1.1.1",
       "metric_version": "v2",
       "prompt_sha256": {
-        "faithfulness.txt": "4ee65afb3e7ea8b4b5e361e41ea75b74173142a8c26c97dedc7139ba37c86317",
+        "faithfulness.txt": "3519fd3b1bbbab9b117abd04f69304609146c2d2a05c39699483dea1740eda19",
         "answer_correctness.txt": "2ab6eac2abe57dcfd647df328244ac3e5681fc93222938d6614e71037d49ae77",
         "answer_relevancy.txt": "0f8576b7dbf2e7ea1a02752680b0afe8c66677fe2eda823f4bcd28371ae4da84"
       }
@@ -302,14 +302,14 @@
         "v1.1.1": {
           "arm": "v1.1.1",
           "reused": false,
-          "wall_latency_ms": 20040,
+          "wall_latency_ms": 21093,
           "outcomes": [
             {
               "metric": "faithfulness",
               "status": "evaluated",
               "score": 1.0,
               "skipped_reason": null,
-              "latency_ms": 16277,
+              "latency_ms": 17098,
               "error": null,
               "judge_config": {
                 "agent": "rag_judge_faithfulness",
@@ -318,13 +318,13 @@
                 "max_tokens": 8192,
                 "prompt_version": "v1.1.1",
                 "resolved_prompt_version": "v1.1.1",
-                "prompt_sha256": "4ee65afb3e7ea8b4b5e361e41ea75b74173142a8c26c97dedc7139ba37c86317",
+                "prompt_sha256": "3519fd3b1bbbab9b117abd04f69304609146c2d2a05c39699483dea1740eda19",
                 "schema_version": "rag_judge_schema_v2",
                 "rubric_version": "v1.1.1",
                 "metric_version": "v2"
               },
               "token_usage": {
-                "input": 4050,
+                "input": 5035,
                 "output": 664
               },
               "cost": "0",
@@ -483,7 +483,7 @@
               "status": "evaluated",
               "score": 0.9,
               "skipped_reason": null,
-              "latency_ms": 2043,
+              "latency_ms": 2368,
               "error": null,
               "judge_config": {
                 "agent": "rag_judge_answer_correctness",
@@ -499,15 +499,15 @@
               },
               "token_usage": {
                 "input": 2290,
-                "output": 52
+                "output": 51
               },
               "cost": "0",
               "details": {
                 "missing_points": [],
                 "wrong_facts": [],
-                "reason": "回答包含了金标中的关键事实，并且补充了正确且相关的额外信息，没有矛盾或错误。"
+                "reason": "回答包含了金标中的关键事实，并补充了正确且相关的例外情况，没有矛盾或错误。"
               },
-              "raw_output": "{\n  \"score\": 0.9,\n  \"missing_points\": [],\n  \"wrong_facts\": [],\n  \"reason\": \"回答包含了金标中的关键事实，并且补充了正确且相关的额外信息，没有矛盾或错误。\"\n}",
+              "raw_output": "{\n  \"score\": 0.9,\n  \"missing_points\": [],\n  \"wrong_facts\": [],\n  \"reason\": \"回答包含了金标中的关键事实，并补充了正确且相关的例外情况，没有矛盾或错误。\"\n}",
               "raw_truncated": false
             },
             {
@@ -515,7 +515,7 @@
               "status": "evaluated",
               "score": 0.9,
               "skipped_reason": null,
-              "latency_ms": 1706,
+              "latency_ms": 1610,
               "error": null,
               "judge_config": {
                 "agent": "rag_judge_answer_relevancy",
@@ -531,13 +531,13 @@
               },
               "token_usage": {
                 "input": 1556,
-                "output": 38
+                "output": 36
               },
               "cost": "0",
               "details": {
-                "reason": "回答详细说明了不同商品类型的退款申请期限，并且对每种类型的具体条件进行了区分。"
+                "reason": "回答完整回应了主要问题，并详细说明了不同商品类型的退款申请期限和条件。"
               },
-              "raw_output": "{\n  \"score\": 0.9,\n  \"reason\": \"回答详细说明了不同商品类型的退款申请期限，并且对每种类型的具体条件进行了区分。\"\n}",
+              "raw_output": "{\n  \"score\": 0.9,\n  \"reason\": \"回答完整回应了主要问题，并详细说明了不同商品类型的退款申请期限和条件。\"\n}",
               "raw_truncated": false
             }
           ]
@@ -799,14 +799,14 @@
         "v1.1.1": {
           "arm": "v1.1.1",
           "reused": false,
-          "wall_latency_ms": 16142,
+          "wall_latency_ms": 17918,
           "outcomes": [
             {
               "metric": "faithfulness",
               "status": "evaluated",
               "score": 1.0,
               "skipped_reason": null,
-              "latency_ms": 12692,
+              "latency_ms": 13673,
               "error": null,
               "judge_config": {
                 "agent": "rag_judge_faithfulness",
@@ -815,14 +815,14 @@
                 "max_tokens": 8192,
                 "prompt_version": "v1.1.1",
                 "resolved_prompt_version": "v1.1.1",
-                "prompt_sha256": "4ee65afb3e7ea8b4b5e361e41ea75b74173142a8c26c97dedc7139ba37c86317",
+                "prompt_sha256": "3519fd3b1bbbab9b117abd04f69304609146c2d2a05c39699483dea1740eda19",
                 "schema_version": "rag_judge_schema_v2",
                 "rubric_version": "v1.1.1",
                 "metric_version": "v2"
               },
               "token_usage": {
-                "input": 3256,
-                "output": 603
+                "input": 4241,
+                "output": 623
               },
               "cost": "0",
               "details": {
@@ -841,7 +841,7 @@
                     "evidence_refs": [
                       {
                         "context_id": "C1",
-                        "quote": "仅支持电子发票"
+                        "quote": "仅支持电子发票，提交申请后 24 小时内发送至下单邮箱。"
                       }
                     ]
                   },
@@ -859,7 +859,7 @@
                     "evidence_refs": [
                       {
                         "context_id": "C1",
-                        "quote": "提交申请后 24 小时内发送至下单邮箱"
+                        "quote": "提交申请后 24 小时内发送至下单邮箱。"
                       }
                     ]
                   },
@@ -877,7 +877,7 @@
                     "evidence_refs": [
                       {
                         "context_id": "C1",
-                        "quote": "发票抬头可在开具前修改"
+                        "quote": "发票抬头可在开具前修改；"
                       }
                     ]
                   },
@@ -895,7 +895,7 @@
                     "evidence_refs": [
                       {
                         "context_id": "C1",
-                        "quote": "已开具的发票需先申请红冲，再重新开具"
+                        "quote": "已开具的发票需先申请红冲，再重新开具。"
                       }
                     ]
                   },
@@ -913,7 +913,7 @@
                     "evidence_refs": [
                       {
                         "context_id": "C1",
-                        "quote": "暂不支持纸质发票和增值税专用发票"
+                        "quote": "暂不支持纸质发票和增值税专用发票。"
                       }
                     ]
                   }
@@ -936,35 +936,35 @@
                   {
                     "claim_id": "cl1",
                     "context_id": "C1",
-                    "quote": "仅支持电子发票",
+                    "quote": "仅支持电子发票，提交申请后 24 小时内发送至下单邮箱。",
                     "ok": true,
                     "error": null
                   },
                   {
                     "claim_id": "cl2",
                     "context_id": "C1",
-                    "quote": "提交申请后 24 小时内发送至下单邮箱",
+                    "quote": "提交申请后 24 小时内发送至下单邮箱。",
                     "ok": true,
                     "error": null
                   },
                   {
                     "claim_id": "cl3",
                     "context_id": "C1",
-                    "quote": "发票抬头可在开具前修改",
+                    "quote": "发票抬头可在开具前修改；",
                     "ok": true,
                     "error": null
                   },
                   {
                     "claim_id": "cl4",
                     "context_id": "C1",
-                    "quote": "已开具的发票需先申请红冲，再重新开具",
+                    "quote": "已开具的发票需先申请红冲，再重新开具。",
                     "ok": true,
                     "error": null
                   },
                   {
                     "claim_id": "cl5",
                     "context_id": "C1",
-                    "quote": "暂不支持纸质发票和增值税专用发票",
+                    "quote": "暂不支持纸质发票和增值税专用发票。",
                     "ok": true,
                     "error": null
                   }
@@ -972,7 +972,7 @@
                 "evidence_validation_failed": false,
                 "validation_errors": []
               },
-              "raw_output": "{\n  \"claims\": [\n    {\n      \"claim_id\": \"cl1\",\n      \"claim\": \"目前仅支持电子发票\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"仅支持电子发票\"}\n      ],\n      \"reason\": \"C1 原文\"\n    },\n    {\n      \"claim_id\": \"cl2\",\n      \"claim\": \"电子发票在提交申请后 24 小时内发送至下单时填写的邮箱\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"提交申请后 24 小时内发送至下单邮箱\"}\n      ],\n      \"reason\": \"C1 原文\"\n    },\n    {\n      \"claim_id\": \"cl3\",\n      \"claim\": \"发票抬头可在开具前修改\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"发票抬头可在开具前修改\"}\n      ],\n      \"reason\": \"C1 原文\"\n    },\n    {\n      \"claim_id\": \"cl4\",\n      \"claim\": \"已开具的电子发票如需更正，须先申请红冲，再重新开具\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"已开具的发票需先申请红冲，再重新开具\"}\n      ],\n      \"reason\": \"C1 原文\"\n    },\n    {\n      \"claim_id\": \"cl5\",\n      \"claim\": \"不支持纸质发票和增值税专用发票\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"暂不支持纸质发票和增值税专用发票\"}\n      ],\n      \"reason\": \"C1 原文\"\n    }\n  ],\n  \"reason\": \"\"\n}",
+              "raw_output": "{\n  \"claims\": [\n    {\n      \"claim_id\": \"cl1\",\n      \"claim\": \"目前仅支持电子发票\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"仅支持电子发票，提交申请后 24 小时内发送至下单邮箱。\"}\n      ],\n      \"reason\": \"C1 原文\"\n    },\n    {\n      \"claim_id\": \"cl2\",\n      \"claim\": \"电子发票在提交申请后 24 小时内发送至下单时填写的邮箱\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"提交申请后 24 小时内发送至下单邮箱。\"}\n      ],\n      \"reason\": \"C1 原文\"\n    },\n    {\n      \"claim_id\": \"cl3\",\n      \"claim\": \"发票抬头可在开具前修改\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"发票抬头可在开具前修改；\"}\n      ],\n      \"reason\": \"C1 原文\"\n    },\n    {\n      \"claim_id\": \"cl4\",\n      \"claim\": \"已开具的电子发票如需更正，须先申请红冲，再重新开具\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"已开具的发票需先申请红冲，再重新开具。\"}\n      ],\n      \"reason\": \"C1 原文\"\n    },\n    {\n      \"claim_id\": \"cl5\",\n      \"claim\": \"不支持纸质发票和增值税专用发票\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"暂不支持纸质发票和增值税专用发票。\"}\n      ],\n      \"reason\": \"C1 原文\"\n    }\n  ],\n  \"reason\": \"\"\n}",
               "raw_truncated": false
             },
             {
@@ -980,7 +980,7 @@
               "status": "evaluated",
               "score": 0.9,
               "skipped_reason": null,
-              "latency_ms": 1855,
+              "latency_ms": 2022,
               "error": null,
               "judge_config": {
                 "agent": "rag_judge_answer_correctness",
@@ -996,15 +996,15 @@
               },
               "token_usage": {
                 "input": 1994,
-                "output": 46
+                "output": 55
               },
               "cost": "0",
               "details": {
                 "missing_points": [],
                 "wrong_facts": [],
-                "reason": "回答关键事实与金标一致，额外提供了正确且相关的政策细节。"
+                "reason": "回答准确且完整地说明了目前仅支持电子发票，并补充了相关细节，这些细节是正确且相关的。"
               },
-              "raw_output": "{\n  \"score\": 0.9,\n  \"missing_points\": [],\n  \"wrong_facts\": [],\n  \"reason\": \"回答关键事实与金标一致，额外提供了正确且相关的政策细节。\"\n}",
+              "raw_output": "{\n  \"score\": 0.9,\n  \"missing_points\": [],\n  \"wrong_facts\": [],\n  \"reason\": \"回答准确且完整地说明了目前仅支持电子发票，并补充了相关细节，这些细节是正确且相关的。\"\n}",
               "raw_truncated": false
             },
             {
@@ -1012,7 +1012,7 @@
               "status": "evaluated",
               "score": 0.9,
               "skipped_reason": null,
-              "latency_ms": 1592,
+              "latency_ms": 2219,
               "error": null,
               "judge_config": {
                 "agent": "rag_judge_answer_relevancy",
@@ -1028,13 +1028,13 @@
               },
               "token_usage": {
                 "input": 1270,
-                "output": 42
+                "output": 33
               },
               "cost": "0",
               "details": {
-                "reason": "回答明确说明了目前支持的发票类型，并提供了电子发票的相关细节，同时指出了不支持的发票类型。"
+                "reason": "回答明确说明了支持的发票类型，并提供了相关的细节和限制条件。"
               },
-              "raw_output": "{\n  \"score\": 0.9,\n  \"reason\": \"回答明确说明了目前支持的发票类型，并提供了电子发票的相关细节，同时指出了不支持的发票类型。\"\n}",
+              "raw_output": "{\n  \"score\": 0.9,\n  \"reason\": \"回答明确说明了支持的发票类型，并提供了相关的细节和限制条件。\"\n}",
               "raw_truncated": false
             }
           ]
@@ -1264,14 +1264,14 @@
         "v1.1.1": {
           "arm": "v1.1.1",
           "reused": false,
-          "wall_latency_ms": 28688,
+          "wall_latency_ms": 20081,
           "outcomes": [
             {
               "metric": "faithfulness",
               "status": "evaluated",
-              "score": 0.6,
+              "score": 0.666667,
               "skipped_reason": null,
-              "latency_ms": 24514,
+              "latency_ms": 16440,
               "error": null,
               "judge_config": {
                 "agent": "rag_judge_faithfulness",
@@ -1280,14 +1280,14 @@
                 "max_tokens": 8192,
                 "prompt_version": "v1.1.1",
                 "resolved_prompt_version": "v1.1.1",
-                "prompt_sha256": "4ee65afb3e7ea8b4b5e361e41ea75b74173142a8c26c97dedc7139ba37c86317",
+                "prompt_sha256": "3519fd3b1bbbab9b117abd04f69304609146c2d2a05c39699483dea1740eda19",
                 "schema_version": "rag_judge_schema_v2",
                 "rubric_version": "v1.1.1",
                 "metric_version": "v2"
               },
               "token_usage": {
-                "input": 3879,
-                "output": 657
+                "input": 4864,
+                "output": 760
               },
               "cost": "0",
               "details": {
@@ -1347,7 +1347,7 @@
                     ]
                   },
                   {
-                    "claim": "若该定制商品存在质量问题，可以依据第12条“特殊商品”条款申请退换货",
+                    "claim": "若该定制商品存在质量问题，仍可依据第12条“特殊商品”条款申请退换货",
                     "supported": null,
                     "evidence": [],
                     "reason": "C1 原文",
@@ -1365,11 +1365,29 @@
                     ]
                   },
                   {
-                    "claim": "用户当前仅可就质量问题发起售后申请，需提供相应凭证（如照片、视频等），由商家审核认定后处理",
+                    "claim": "用户当前仅可就质量问题发起售后申请",
                     "supported": null,
                     "evidence": [],
-                    "reason": "上下文未提及需要提供照片或视频凭证的具体要求",
+                    "reason": "C1 原文",
                     "claim_id": "cl5",
+                    "claim_type": "factual_claim",
+                    "claim_subtype": "policy",
+                    "support_status": "supported",
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": [
+                      {
+                        "context_id": "C1",
+                        "quote": "定制商品支持质量问题退换，不支持无理由退换。"
+                      }
+                    ]
+                  },
+                  {
+                    "claim": "需提供相应凭证（如照片、视频等），由商家审核认定后处理",
+                    "supported": null,
+                    "evidence": [],
+                    "reason": "上下文未写",
+                    "claim_id": "cl6",
                     "claim_type": "factual_claim",
                     "claim_subtype": "policy",
                     "support_status": "insufficient_evidence",
@@ -1379,10 +1397,10 @@
                   }
                 ],
                 "reason": "",
-                "claim_count": 5,
-                "scorable_claim_count": 5,
-                "supported_count": 3,
-                "supported_claim_count": 3,
+                "claim_count": 6,
+                "scorable_claim_count": 6,
+                "supported_count": 4,
+                "supported_claim_count": 4,
                 "unsupported_claim_count": 0,
                 "insufficient_evidence_count": 2,
                 "non_factual_count": 0,
@@ -1390,7 +1408,7 @@
                 "document_conflict": false,
                 "document_conflict_count": 0,
                 "contradiction_count": 0,
-                "insufficient_evidence_rate": 0.4,
+                "insufficient_evidence_rate": 0.333333,
                 "all_insufficient": false,
                 "evidence_validation": [
                   {
@@ -1420,6 +1438,13 @@
                     "quote": "定制商品支持质量问题退换，不支持无理由退换。",
                     "ok": true,
                     "error": null
+                  },
+                  {
+                    "claim_id": "cl5",
+                    "context_id": "C1",
+                    "quote": "定制商品支持质量问题退换，不支持无理由退换。",
+                    "ok": true,
+                    "error": null
                   }
                 ],
                 "evidence_validation_failed": true,
@@ -1437,7 +1462,7 @@
                   }
                 ]
               },
-              "raw_output": "{\n  \"claims\": [\n    {\n      \"claim_id\": \"cl1\",\n      \"claim\": \"签收第 5 天的定制商品不可以无理由退款\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"订单签收后 7 天内可申请无理由退款。定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。\"}\n      ],\n      \"reason\": \"C1 原文\"\n    },\n    {\n      \"claim_id\": \"cl2\",\n      \"claim\": \"订单签收后 7 天内可申请无理由退款\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"订单签收后 7 天内可申请无理由退款。\"}\n      ],\n      \"reason\": \"C1 原文\"\n    },\n    {\n      \"claim_id\": \"cl3\",\n      \"claim\": \"定制类商品不支持无理由退款\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。\"}\n      ],\n      \"reason\": \"C1 原文\"\n    },\n    {\n      \"claim_id\": \"cl4\",\n      \"claim\": \"若该定制商品存在质量问题，可以依据第12条“特殊商品”条款申请退换货\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"定制商品支持质量问题退换，不支持无理由退换。\"}\n      ],\n      \"reason\": \"C1 原文\"\n    },\n    {\n      \"claim_id\": \"cl5\",\n      \"claim\": \"用户当前仅可就质量问题发起售后申请，需提供相应凭证（如照片、视频等），由商家审核认定后处理\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"insufficient_evidence\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [],\n      \"reason\": \"上下文未提及需要提供照片或视频凭证的具体要求\"\n    }\n  ],\n  \"reason\": \"\"\n}",
+              "raw_output": "{\n  \"claims\": [\n    {\n      \"claim_id\": \"cl1\",\n      \"claim\": \"签收第 5 天的定制商品不可以无理由退款\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"订单签收后 7 天内可申请无理由退款。定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。\"}\n      ],\n      \"reason\": \"C1 原文\"\n    },\n    {\n      \"claim_id\": \"cl2\",\n      \"claim\": \"订单签收后 7 天内可申请无理由退款\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"订单签收后 7 天内可申请无理由退款。\"}\n      ],\n      \"reason\": \"C1 原文\"\n    },\n    {\n      \"claim_id\": \"cl3\",\n      \"claim\": \"定制类商品不支持无理由退款\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。\"}\n      ],\n      \"reason\": \"C1 原文\"\n    },\n    {\n      \"claim_id\": \"cl4\",\n      \"claim\": \"若该定制商品存在质量问题，仍可依据第12条“特殊商品”条款申请退换货\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"定制商品支持质量问题退换，不支持无理由退换。\"}\n      ],\n      \"reason\": \"C1 原文\"\n    },\n    {\n      \"claim_id\": \"cl5\",\n      \"claim\": \"用户当前仅可就质量问题发起售后申请\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"定制商品支持质量问题退换，不支持无理由退换。\"}\n      ],\n      \"reason\": \"C1 原文\"\n    },\n    {\n      \"claim_id\": \"cl6\",\n      \"claim\": \"需提供相应凭证（如照片、视频等），由商家审核认定后处理\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"insufficient_evidence\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [],\n      \"reason\": \"上下文未写\"\n    }\n  ],\n  \"reason\": \"\"\n}",
               "raw_truncated": false
             },
             {
@@ -1445,7 +1470,7 @@
               "status": "evaluated",
               "score": 0.9,
               "skipped_reason": null,
-              "latency_ms": 1999,
+              "latency_ms": 1837,
               "error": null,
               "judge_config": {
                 "agent": "rag_judge_answer_correctness",
@@ -1467,9 +1492,9 @@
               "details": {
                 "missing_points": [],
                 "wrong_facts": [],
-                "reason": "回答准确且完整地覆盖了金标中的关键事实，额外提供了关于质量问题退换货的正确信息。"
+                "reason": "回答正确且完整，明确指出了定制商品不支持无理由退款，并补充了质量问题退换的相关政策。"
               },
-              "raw_output": "{\n  \"score\": 0.9,\n  \"missing_points\": [],\n  \"wrong_facts\": [],\n  \"reason\": \"回答准确且完整地覆盖了金标中的关键事实，额外提供了关于质量问题退换货的正确信息。\"\n}",
+              "raw_output": "{\n  \"score\": 0.9,\n  \"missing_points\": [],\n  \"wrong_facts\": [],\n  \"reason\": \"回答正确且完整，明确指出了定制商品不支持无理由退款，并补充了质量问题退换的相关政策。\"\n}",
               "raw_truncated": false
             },
             {
@@ -1477,7 +1502,7 @@
               "status": "evaluated",
               "score": 0.9,
               "skipped_reason": null,
-              "latency_ms": 2172,
+              "latency_ms": 1801,
               "error": null,
               "judge_config": {
                 "agent": "rag_judge_answer_relevancy",
@@ -1493,13 +1518,13 @@
               },
               "token_usage": {
                 "input": 1385,
-                "output": 39
+                "output": 41
               },
               "cost": "0",
               "details": {
-                "reason": "完整回应了问题，明确说明定制商品不支持无理由退款，并补充了质量问题的处理方式。"
+                "reason": "回答明确指出定制商品不支持无理由退款，并解释了原因，同时提供了质量问题的退换货途径。"
               },
-              "raw_output": "{\n  \"score\": 0.9,\n  \"reason\": \"完整回应了问题，明确说明定制商品不支持无理由退款，并补充了质量问题的处理方式。\"\n}",
+              "raw_output": "{\n  \"score\": 0.9,\n  \"reason\": \"回答明确指出定制商品不支持无理由退款，并解释了原因，同时提供了质量问题的退换货途径。\"\n}",
               "raw_truncated": false
             }
           ]
@@ -1746,14 +1771,14 @@
         "v1.1.1": {
           "arm": "v1.1.1",
           "reused": false,
-          "wall_latency_ms": 19996,
+          "wall_latency_ms": 19908,
           "outcomes": [
             {
               "metric": "faithfulness",
               "status": "evaluated",
               "score": 1.0,
               "skipped_reason": null,
-              "latency_ms": 16350,
+              "latency_ms": 16290,
               "error": null,
               "judge_config": {
                 "agent": "rag_judge_faithfulness",
@@ -1762,14 +1787,14 @@
                 "max_tokens": 8192,
                 "prompt_version": "v1.1.1",
                 "resolved_prompt_version": "v1.1.1",
-                "prompt_sha256": "4ee65afb3e7ea8b4b5e361e41ea75b74173142a8c26c97dedc7139ba37c86317",
+                "prompt_sha256": "3519fd3b1bbbab9b117abd04f69304609146c2d2a05c39699483dea1740eda19",
                 "schema_version": "rag_judge_schema_v2",
                 "rubric_version": "v1.1.1",
                 "metric_version": "v2"
               },
               "token_usage": {
-                "input": 3632,
-                "output": 647
+                "input": 4617,
+                "output": 764
               },
               "cost": "0",
               "details": {
@@ -1847,7 +1872,7 @@
                     ]
                   },
                   {
-                    "claim": "该规则与是否满 99 元无关，不因包邮资格而改变退货运费责任归属",
+                    "claim": "该规则与是否满 99 元无关",
                     "supported": null,
                     "evidence": [],
                     "reason": "C2 原文",
@@ -1863,13 +1888,31 @@
                         "quote": "因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。"
                       }
                     ]
+                  },
+                  {
+                    "claim": "不因包邮资格而改变退货运费责任归属",
+                    "supported": null,
+                    "evidence": [],
+                    "reason": "C2 原文",
+                    "claim_id": "cl6",
+                    "claim_type": "factual_claim",
+                    "claim_subtype": "policy",
+                    "support_status": "supported",
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": [
+                      {
+                        "context_id": "C2",
+                        "quote": "因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。"
+                      }
+                    ]
                   }
                 ],
                 "reason": "",
-                "claim_count": 5,
-                "scorable_claim_count": 5,
-                "supported_count": 5,
-                "supported_claim_count": 5,
+                "claim_count": 6,
+                "scorable_claim_count": 6,
+                "supported_count": 6,
+                "supported_claim_count": 6,
                 "unsupported_claim_count": 0,
                 "insufficient_evidence_count": 0,
                 "non_factual_count": 0,
@@ -1914,12 +1957,19 @@
                     "quote": "因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。",
                     "ok": true,
                     "error": null
+                  },
+                  {
+                    "claim_id": "cl6",
+                    "context_id": "C2",
+                    "quote": "因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。",
+                    "ok": true,
+                    "error": null
                   }
                 ],
                 "evidence_validation_failed": false,
                 "validation_errors": []
               },
-              "raw_output": "{\n  \"claims\": [\n    {\n      \"claim_id\": \"cl1\",\n      \"claim\": \"订单满 99 元包邮适用于正向发货环节\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C2\", \"quote\": \"单笔订单实付满 99 元包邮\"}\n      ],\n      \"reason\": \"C2 原文\"\n    },\n    {\n      \"claim_id\": \"cl2\",\n      \"claim\": \"退货时的运费承担方取决于退换货原因\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C2\", \"quote\": \"因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。\"}\n      ],\n      \"reason\": \"C2 原文\"\n    },\n    {\n      \"claim_id\": \"cl3\",\n      \"claim\": \"若因质量问题退换货，运费由商家承担\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C2\", \"quote\": \"因质量问题产生的退换货运费由商家承担\"}\n      ],\n      \"reason\": \"C2 原文\"\n    },\n    {\n      \"claim_id\": \"cl4\",\n      \"claim\": \"若为非质量问题（如无理由退货），运费由买家承担\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C2\", \"quote\": \"非质量问题的退货运费由买家承担\"}\n      ],\n      \"reason\": \"C2 原文\"\n    },\n    {\n      \"claim_id\": \"cl5\",\n      \"claim\": \"该规则与是否满 99 元无关，不因包邮资格而改变退货运费责任归属\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C2\", \"quote\": \"因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。\"}\n      ],\n      \"reason\": \"C2 原文\"\n    }\n  ],\n  \"reason\": \"\"\n}",
+              "raw_output": "{\n  \"claims\": [\n    {\n      \"claim_id\": \"cl1\",\n      \"claim\": \"订单满 99 元包邮适用于正向发货环节\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C2\", \"quote\": \"单笔订单实付满 99 元包邮\"}\n      ],\n      \"reason\": \"C2 原文\"\n    },\n    {\n      \"claim_id\": \"cl2\",\n      \"claim\": \"退货时的运费承担方取决于退换货原因\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C2\", \"quote\": \"因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。\"}\n      ],\n      \"reason\": \"C2 原文\"\n    },\n    {\n      \"claim_id\": \"cl3\",\n      \"claim\": \"若因质量问题退换货，运费由商家承担\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C2\", \"quote\": \"因质量问题产生的退换货运费由商家承担\"}\n      ],\n      \"reason\": \"C2 原文\"\n    },\n    {\n      \"claim_id\": \"cl4\",\n      \"claim\": \"若为非质量问题（如无理由退货），运费由买家承担\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C2\", \"quote\": \"非质量问题的退货运费由买家承担\"}\n      ],\n      \"reason\": \"C2 原文\"\n    },\n    {\n      \"claim_id\": \"cl5\",\n      \"claim\": \"该规则与是否满 99 元无关\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C2\", \"quote\": \"因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。\"}\n      ],\n      \"reason\": \"C2 原文\"\n    },\n    {\n      \"claim_id\": \"cl6\",\n      \"claim\": \"不因包邮资格而改变退货运费责任归属\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C2\", \"quote\": \"因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。\"}\n      ],\n      \"reason\": \"C2 原文\"\n    }\n  ],\n  \"reason\": \"\"\n}",
               "raw_truncated": false
             },
             {
@@ -1927,7 +1977,7 @@
               "status": "evaluated",
               "score": 0.9,
               "skipped_reason": null,
-              "latency_ms": 2064,
+              "latency_ms": 1841,
               "error": null,
               "judge_config": {
                 "agent": "rag_judge_answer_correctness",
@@ -1943,15 +1993,15 @@
               },
               "token_usage": {
                 "input": 1878,
-                "output": 49
+                "output": 47
               },
               "cost": "0",
               "details": {
                 "missing_points": [],
                 "wrong_facts": [],
-                "reason": "回答完整覆盖了金标中的所有关键事实和条件，且没有引入错误信息。"
+                "reason": "回答涵盖了金标中的所有关键事实和条件，且没有矛盾或错误。"
               },
-              "raw_output": "{\n  \"score\": 0.9,\n  \"missing_points\": [],\n  \"wrong_facts\": [],\n  \"reason\": \"回答完整覆盖了金标中的所有关键事实和条件，且没有引入错误信息。\"\n}",
+              "raw_output": "{\n  \"score\": 0.9,\n  \"missing_points\": [],\n  \"wrong_facts\": [],\n  \"reason\": \"回答涵盖了金标中的所有关键事实和条件，且没有矛盾或错误。\"\n}",
               "raw_truncated": false
             },
             {
@@ -1959,7 +2009,7 @@
               "status": "evaluated",
               "score": 0.9,
               "skipped_reason": null,
-              "latency_ms": 1579,
+              "latency_ms": 1774,
               "error": null,
               "judge_config": {
                 "agent": "rag_judge_answer_relevancy",
@@ -1975,13 +2025,13 @@
               },
               "token_usage": {
                 "input": 1138,
-                "output": 44
+                "output": 38
               },
               "cost": "0",
               "details": {
-                "reason": "回答详细区分了不同退换货原因下的运费承担方，并明确说明了包邮政策不影响退货运费责任归属。"
+                "reason": "回答详细区分了不同退换货原因下的运费承担方，并明确说明与订单金额无关。"
               },
-              "raw_output": "{\n  \"score\": 0.9,\n  \"reason\": \"回答详细区分了不同退换货原因下的运费承担方，并明确说明了包邮政策不影响退货运费责任归属。\"\n}",
+              "raw_output": "{\n  \"score\": 0.9,\n  \"reason\": \"回答详细区分了不同退换货原因下的运费承担方，并明确说明与订单金额无关。\"\n}",
               "raw_truncated": false
             }
           ]
@@ -2042,14 +2092,14 @@
         "v1.0.0": {
           "arm": "v1.0.0",
           "reused": false,
-          "wall_latency_ms": 14424,
+          "wall_latency_ms": 14578,
           "outcomes": [
             {
               "metric": "faithfulness",
               "status": "evaluated",
-              "score": 1.0,
+              "score": 0.8,
               "skipped_reason": null,
-              "latency_ms": 11435,
+              "latency_ms": 11534,
               "error": null,
               "judge_config": {
                 "agent": "rag_judge_faithfulness",
@@ -2065,7 +2115,7 @@
               },
               "token_usage": {
                 "input": 1915,
-                "output": 509
+                "output": 491
               },
               "cost": "0",
               "details": {
@@ -2091,7 +2141,7 @@
                     "evidence": [
                       "订单签收后 7 天内可申请无理由退款。"
                     ],
-                    "reason": "上下文明确指出无理由退款的时效为签收后 7 天内，因此第 10 天确实超出了时效。",
+                    "reason": "上下文明确指出无理由退款的时效为签收后 7 天内，因此第 10 天确实超出了这个时效窗口。",
                     "claim_id": null,
                     "claim_type": "factual_claim",
                     "claim_subtype": null,
@@ -2104,9 +2154,10 @@
                     "claim": "该限制适用于“普通商品”（即非定制、非生鲜、非已激活虚拟商品）",
                     "supported": true,
                     "evidence": [
+                      "订单签收后 7 天内可申请无理由退款。",
                       "定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。"
                     ],
-                    "reason": "上下文明确指出定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款，因此普通商品适用该限制。",
+                    "reason": "上下文明确指出无理由退款的时效为签收后 7 天内，并且特别说明了定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。",
                     "claim_id": null,
                     "claim_type": "factual_claim",
                     "claim_subtype": null,
@@ -2117,12 +2168,9 @@
                   },
                   {
                     "claim": "若商品存在质量问题，则不受 7 天无理由限制，仍可依据保修或退换货政策主张权益",
-                    "supported": true,
-                    "evidence": [
-                      "定制商品支持质量问题退换，不支持无理由退换。",
-                      "因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。"
-                    ],
-                    "reason": "上下文提到质量问题可以退换，并且运费由商家承担，说明质量问题不受 7 天无理由限制。",
+                    "supported": false,
+                    "evidence": [],
+                    "reason": "上下文没有明确提到质量问题的商品可以不受 7 天无理由限制进行退款。",
                     "claim_id": null,
                     "claim_type": "factual_claim",
                     "claim_subtype": null,
@@ -2137,7 +2185,7 @@
                     "evidence": [
                       "在线客服服务时间为每天 9:00-21:00。"
                     ],
-                    "reason": "上下文明确指出了客服的服务时间是 9:00-21:00。",
+                    "reason": "上下文明确指出了客服的服务时间为 9:00-21:00。",
                     "claim_id": null,
                     "claim_type": "factual_claim",
                     "claim_subtype": null,
@@ -2147,11 +2195,11 @@
                     "evidence_refs": []
                   }
                 ],
-                "supported_count": 5,
+                "supported_count": 4,
                 "claim_count": 5,
                 "reason": ""
               },
-              "raw_output": "{\n  \"claims\": [\n    {\n      \"claim\": \"无理由退款仅限订单签收后 7 天内申请\",\n      \"supported\": true,\n      \"evidence\": [\n        \"订单签收后 7 天内可申请无理由退款。\"\n      ],\n      \"reason\": \"上下文明确指出无理由退款的时效为签收后 7 天内。\"\n    },\n    {\n      \"claim\": \"签收第 10 天已超出该时效窗口（7 天）\",\n      \"supported\": true,\n      \"evidence\": [\n        \"订单签收后 7 天内可申请无理由退款。\"\n      ],\n      \"reason\": \"上下文明确指出无理由退款的时效为签收后 7 天内，因此第 10 天确实超出了时效。\"\n    },\n    {\n      \"claim\": \"该限制适用于“普通商品”（即非定制、非生鲜、非已激活虚拟商品）\",\n      \"supported\": true,\n      \"evidence\": [\n        \"定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。\"\n      ],\n      \"reason\": \"上下文明确指出定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款，因此普通商品适用该限制。\"\n    },\n    {\n      \"claim\": \"若商品存在质量问题，则不受 7 天无理由限制，仍可依据保修或退换货政策主张权益\",\n      \"supported\": true,\n      \"evidence\": [\n        \"定制商品支持质量问题退换，不支持无理由退换。\",\n        \"因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。\"\n      ],\n      \"reason\": \"上下文提到质量问题可以退换，并且运费由商家承担，说明质量问题不受 7 天无理由限制。\"\n    },\n    {\n      \"claim\": \"如需进一步协助，建议联系客服（9:00–21:00）核实具体订单情况\",\n      \"supported\": true,\n      \"evidence\": [\n        \"在线客服服务时间为每天 9:00-21:00。\"\n      ],\n      \"reason\": \"上下文明确指出了客服的服务时间是 9:00-21:00。\"\n    }\n  ],\n  \"reason\": \"\"\n}",
+              "raw_output": "{\n  \"claims\": [\n    {\n      \"claim\": \"无理由退款仅限订单签收后 7 天内申请\",\n      \"supported\": true,\n      \"evidence\": [\n        \"订单签收后 7 天内可申请无理由退款。\"\n      ],\n      \"reason\": \"上下文明确指出无理由退款的时效为签收后 7 天内。\"\n    },\n    {\n      \"claim\": \"签收第 10 天已超出该时效窗口（7 天）\",\n      \"supported\": true,\n      \"evidence\": [\n        \"订单签收后 7 天内可申请无理由退款。\"\n      ],\n      \"reason\": \"上下文明确指出无理由退款的时效为签收后 7 天内，因此第 10 天确实超出了这个时效窗口。\"\n    },\n    {\n      \"claim\": \"该限制适用于“普通商品”（即非定制、非生鲜、非已激活虚拟商品）\",\n      \"supported\": true,\n      \"evidence\": [\n        \"订单签收后 7 天内可申请无理由退款。\",\n        \"定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。\"\n      ],\n      \"reason\": \"上下文明确指出无理由退款的时效为签收后 7 天内，并且特别说明了定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。\"\n    },\n    {\n      \"claim\": \"若商品存在质量问题，则不受 7 天无理由限制，仍可依据保修或退换货政策主张权益\",\n      \"supported\": false,\n      \"evidence\": [],\n      \"reason\": \"上下文没有明确提到质量问题的商品可以不受 7 天无理由限制进行退款。\"\n    },\n    {\n      \"claim\": \"如需进一步协助，建议联系客服（9:00–21:00）核实具体订单情况\",\n      \"supported\": true,\n      \"evidence\": [\n        \"在线客服服务时间为每天 9:00-21:00。\"\n      ],\n      \"reason\": \"上下文明确指出了客服的服务时间为 9:00-21:00。\"\n    }\n  ],\n  \"reason\": \"\"\n}",
               "raw_truncated": false
             },
             {
@@ -2159,7 +2207,7 @@
               "status": "evaluated",
               "score": 0.9,
               "skipped_reason": null,
-              "latency_ms": 1469,
+              "latency_ms": 1466,
               "error": null,
               "judge_config": {
                 "agent": "rag_judge_answer_correctness",
@@ -2175,15 +2223,15 @@
               },
               "token_usage": {
                 "input": 870,
-                "output": 43
+                "output": 42
               },
               "cost": "0",
               "details": {
                 "missing_points": [],
                 "wrong_facts": [],
-                "reason": "回答正确且完整，但包含了一些额外的详细信息。"
+                "reason": "回答正确且完整，但包含了额外的详细信息。"
               },
-              "raw_output": "{\n  \"score\": 0.9,\n  \"missing_points\": [],\n  \"wrong_facts\": [],\n  \"reason\": \"回答正确且完整，但包含了一些额外的详细信息。\"\n}",
+              "raw_output": "{\n  \"score\": 0.9,\n  \"missing_points\": [],\n  \"wrong_facts\": [],\n  \"reason\": \"回答正确且完整，但包含了额外的详细信息。\"\n}",
               "raw_truncated": false
             },
             {
@@ -2191,7 +2239,7 @@
               "status": "evaluated",
               "score": 1.0,
               "skipped_reason": null,
-              "latency_ms": 1517,
+              "latency_ms": 1574,
               "error": null,
               "judge_config": {
                 "agent": "rag_judge_answer_relevancy",
@@ -2207,13 +2255,13 @@
               },
               "token_usage": {
                 "input": 758,
-                "output": 45
+                "output": 43
               },
               "cost": "0",
               "details": {
-                "reason": "直接、完整地回答了问题，明确说明了签收后第10天不能无理由退款，并补充了相关细节。"
+                "reason": "直接、完整地回答了问题，明确指出签收后第10天不能无理由退款，并提供了相关政策依据。"
               },
-              "raw_output": "{\n  \"score\": 1.0,\n  \"reason\": \"直接、完整地回答了问题，明确说明了签收后第10天不能无理由退款，并补充了相关细节。\"\n}",
+              "raw_output": "{\n  \"score\": 1.0,\n  \"reason\": \"直接、完整地回答了问题，明确指出签收后第10天不能无理由退款，并提供了相关政策依据。\"\n}",
               "raw_truncated": false
             }
           ]
@@ -2221,14 +2269,14 @@
         "v1.1.1": {
           "arm": "v1.1.1",
           "reused": false,
-          "wall_latency_ms": 22906,
+          "wall_latency_ms": 19753,
           "outcomes": [
             {
               "metric": "faithfulness",
               "status": "evaluated",
               "score": 0.6,
               "skipped_reason": null,
-              "latency_ms": 19140,
+              "latency_ms": 16122,
               "error": null,
               "judge_config": {
                 "agent": "rag_judge_faithfulness",
@@ -2237,20 +2285,20 @@
                 "max_tokens": 8192,
                 "prompt_version": "v1.1.1",
                 "resolved_prompt_version": "v1.1.1",
-                "prompt_sha256": "4ee65afb3e7ea8b4b5e361e41ea75b74173142a8c26c97dedc7139ba37c86317",
+                "prompt_sha256": "3519fd3b1bbbab9b117abd04f69304609146c2d2a05c39699483dea1740eda19",
                 "schema_version": "rag_judge_schema_v2",
                 "rubric_version": "v1.1.1",
                 "metric_version": "v2"
               },
               "token_usage": {
-                "input": 4029,
-                "output": 761
+                "input": 5014,
+                "output": 757
               },
               "cost": "0",
               "details": {
                 "claims": [
                   {
-                    "claim": "不可以。",
+                    "claim": "不可以无理由退款",
                     "supported": null,
                     "evidence": [],
                     "reason": "C1 原文",
@@ -2268,7 +2316,7 @@
                     ]
                   },
                   {
-                    "claim": "无理由退款仅限订单签收后 7 天内申请。",
+                    "claim": "无理由退款仅限订单签收后 7 天内申请",
                     "supported": null,
                     "evidence": [],
                     "reason": "C1 原文",
@@ -2286,7 +2334,7 @@
                     ]
                   },
                   {
-                    "claim": "签收第 10 天已超出该时效窗口（7 天），因此不支持无理由退款。",
+                    "claim": "签收第 10 天已超出该时效窗口（7 天）",
                     "supported": null,
                     "evidence": [],
                     "reason": "C1 原文",
@@ -2304,7 +2352,7 @@
                     ]
                   },
                   {
-                    "claim": "该限制适用于“普通商品”（即非定制、非生鲜、非已激活虚拟商品）。",
+                    "claim": "该限制适用于“普通商品”（即非定制、非生鲜、非已激活虚拟商品）",
                     "supported": null,
                     "evidence": [],
                     "reason": "C1 原文",
@@ -2322,10 +2370,10 @@
                     ]
                   },
                   {
-                    "claim": "若商品存在质量问题，则不受 7 天无理由限制，仍可依据保修或退换货政策主张权益。",
+                    "claim": "若商品存在质量问题，则不受 7 天无理由限制，仍可依据保修或退换货政策主张权益",
                     "supported": null,
                     "evidence": [],
-                    "reason": "上下文未明确说明质量问题是否受 7 天无理由限制的影响",
+                    "reason": "上下文未明确说明质量问题是否不受 7 天无理由限制",
                     "claim_id": "cl5",
                     "claim_type": "factual_claim",
                     "claim_subtype": "policy",
@@ -2335,7 +2383,7 @@
                     "evidence_refs": []
                   },
                   {
-                    "claim": "如需进一步协助，建议联系客服（9:00–21:00）核实具体订单情况。",
+                    "claim": "如需进一步协助，建议联系客服（9:00–21:00）核实具体订单情况",
                     "supported": null,
                     "evidence": [],
                     "reason": "纯建议",
@@ -2407,7 +2455,7 @@
                   }
                 ]
               },
-              "raw_output": "{\n  \"claims\": [\n    {\n      \"claim_id\": \"cl1\",\n      \"claim\": \"不可以。\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"订单签收后 7 天内可申请无理由退款。\"}\n      ],\n      \"reason\": \"C1 原文\"\n    },\n    {\n      \"claim_id\": \"cl2\",\n      \"claim\": \"无理由退款仅限订单签收后 7 天内申请。\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"订单签收后 7 天内可申请无理由退款。\"}\n      ],\n      \"reason\": \"C1 原文\"\n    },\n    {\n      \"claim_id\": \"cl3\",\n      \"claim\": \"签收第 10 天已超出该时效窗口（7 天），因此不支持无理由退款。\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"订单签收后 7 天内可申请无理由退款。\"}\n      ],\n      \"reason\": \"C1 原文\"\n    },\n    {\n      \"claim_id\": \"cl4\",\n      \"claim\": \"该限制适用于“普通商品”（即非定制、非生鲜、非已激活虚拟商品）。\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"订单签收后 7 天内可申请无理由退款。定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。\"}\n      ],\n      \"reason\": \"C1 原文\"\n    },\n    {\n      \"claim_id\": \"cl5\",\n      \"claim\": \"若商品存在质量问题，则不受 7 天无理由限制，仍可依据保修或退换货政策主张权益。\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"insufficient_evidence\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [],\n      \"reason\": \"上下文未明确说明质量问题是否受 7 天无理由限制的影响\"\n    },\n    {\n      \"claim_id\": \"cl6\",\n      \"claim\": \"如需进一步协助，建议联系客服（9:00–21:00）核实具体订单情况。\",\n      \"claim_type\": \"non_factual\",\n      \"claim_subtype\": \"advice\",\n      \"support_status\": null,\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [],\n      \"reason\": \"纯建议\"\n    }\n  ],\n  \"reason\": \"\"\n}",
+              "raw_output": "{\n  \"claims\": [\n    {\n      \"claim_id\": \"cl1\",\n      \"claim\": \"不可以无理由退款\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"订单签收后 7 天内可申请无理由退款。\"}\n      ],\n      \"reason\": \"C1 原文\"\n    },\n    {\n      \"claim_id\": \"cl2\",\n      \"claim\": \"无理由退款仅限订单签收后 7 天内申请\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"订单签收后 7 天内可申请无理由退款。\"}\n      ],\n      \"reason\": \"C1 原文\"\n    },\n    {\n      \"claim_id\": \"cl3\",\n      \"claim\": \"签收第 10 天已超出该时效窗口（7 天）\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"订单签收后 7 天内可申请无理由退款。\"}\n      ],\n      \"reason\": \"C1 原文\"\n    },\n    {\n      \"claim_id\": \"cl4\",\n      \"claim\": \"该限制适用于“普通商品”（即非定制、非生鲜、非已激活虚拟商品）\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"订单签收后 7 天内可申请无理由退款。定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。\"}\n      ],\n      \"reason\": \"C1 原文\"\n    },\n    {\n      \"claim_id\": \"cl5\",\n      \"claim\": \"若商品存在质量问题，则不受 7 天无理由限制，仍可依据保修或退换货政策主张权益\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"insufficient_evidence\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [],\n      \"reason\": \"上下文未明确说明质量问题是否不受 7 天无理由限制\"\n    },\n    {\n      \"claim_id\": \"cl6\",\n      \"claim\": \"如需进一步协助，建议联系客服（9:00–21:00）核实具体订单情况\",\n      \"claim_type\": \"non_factual\",\n      \"claim_subtype\": \"advice\",\n      \"support_status\": null,\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [],\n      \"reason\": \"纯建议\"\n    }\n  ],\n  \"reason\": \"\"\n}",
               "raw_truncated": false
             },
             {
@@ -2415,7 +2463,7 @@
               "status": "evaluated",
               "score": 0.9,
               "skipped_reason": null,
-              "latency_ms": 2105,
+              "latency_ms": 2093,
               "error": null,
               "judge_config": {
                 "agent": "rag_judge_answer_correctness",
@@ -2431,15 +2479,15 @@
               },
               "token_usage": {
                 "input": 2270,
-                "output": 47
+                "output": 59
               },
               "cost": "0",
               "details": {
                 "missing_points": [],
                 "wrong_facts": [],
-                "reason": "回答正确且完整，补充了关于质量问题的政策，但不影响核心答案。"
+                "reason": "回答准确地指出了无理由退款的期限是签收后7天内，并且补充了关于质量问题的正确且相关的信息。"
               },
-              "raw_output": "{\n  \"score\": 0.9,\n  \"missing_points\": [],\n  \"wrong_facts\": [],\n  \"reason\": \"回答正确且完整，补充了关于质量问题的政策，但不影响核心答案。\"\n}",
+              "raw_output": "{\n  \"score\": 0.9,\n  \"missing_points\": [],\n  \"wrong_facts\": [],\n  \"reason\": \"回答准确地指出了无理由退款的期限是签收后7天内，并且补充了关于质量问题的正确且相关的信息。\"\n}",
               "raw_truncated": false
             },
             {
@@ -2447,7 +2495,7 @@
               "status": "evaluated",
               "score": 0.9,
               "skipped_reason": null,
-              "latency_ms": 1658,
+              "latency_ms": 1535,
               "error": null,
               "judge_config": {
                 "agent": "rag_judge_answer_relevancy",
@@ -2467,9 +2515,9 @@
               },
               "cost": "0",
               "details": {
-                "reason": "完整回应了问题，明确说明了普通商品无理由退款的时效，并补充了质量问题的处理方式及建议联系客服。"
+                "reason": "完整回应了问题，明确说明了普通商品无理由退款的时效限制，并补充了质量问题的处理方式及下一步建议。"
               },
-              "raw_output": "{\n  \"score\": 0.9,\n  \"reason\": \"完整回应了问题，明确说明了普通商品无理由退款的时效，并补充了质量问题的处理方式及建议联系客服。\"\n}",
+              "raw_output": "{\n  \"score\": 0.9,\n  \"reason\": \"完整回应了问题，明确说明了普通商品无理由退款的时效限制，并补充了质量问题的处理方式及下一步建议。\"\n}",
               "raw_truncated": false
             }
           ]
@@ -2538,14 +2586,14 @@
         "v1.0.0": {
           "arm": "v1.0.0",
           "reused": false,
-          "wall_latency_ms": 13514,
+          "wall_latency_ms": 14080,
           "outcomes": [
             {
               "metric": "faithfulness",
               "status": "evaluated",
-              "score": 0.75,
+              "score": 1.0,
               "skipped_reason": null,
-              "latency_ms": 10429,
+              "latency_ms": 10844,
               "error": null,
               "judge_config": {
                 "agent": "rag_judge_faithfulness",
@@ -2561,7 +2609,7 @@
               },
               "token_usage": {
                 "input": 1782,
-                "output": 411
+                "output": 446
               },
               "cost": "0",
               "details": {
@@ -2572,7 +2620,7 @@
                     "evidence": [
                       "生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。"
                     ],
-                    "reason": "上下文明确指出生鲜食品的质量问题需在签收后 24 小时内拍照反馈。",
+                    "reason": "上下文中有明确依据",
                     "claim_id": null,
                     "claim_type": "factual_claim",
                     "claim_subtype": null,
@@ -2583,9 +2631,26 @@
                   },
                   {
                     "claim": "您是在签收后第 2 天（即超过 24 小时）才发现并反馈，已超出政策规定的反馈时效",
-                    "supported": false,
-                    "evidence": [],
-                    "reason": "上下文未提及用户具体发现和反馈的时间，无法确认是否超过 24 小时。",
+                    "supported": true,
+                    "evidence": [
+                      "生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。"
+                    ],
+                    "reason": "根据上下文规定，反馈时限为24小时，签收后第2天确实超出了该时限",
+                    "claim_id": null,
+                    "claim_type": "factual_claim",
+                    "claim_subtype": null,
+                    "support_status": null,
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": []
+                  },
+                  {
+                    "claim": "因此原则上不符合质量反馈受理条件",
+                    "supported": true,
+                    "evidence": [
+                      "生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。"
+                    ],
+                    "reason": "上下文规定了24小时内的反馈要求，超出时间则不符合受理条件",
                     "claim_id": null,
                     "claim_type": "factual_claim",
                     "claim_subtype": null,
@@ -2600,7 +2665,7 @@
                     "evidence": [
                       "生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。"
                     ],
-                    "reason": "上下文中的规定没有提到任何例外情形或宽限期。",
+                    "reason": "上下文没有提到任何例外情况或宽限期",
                     "claim_id": null,
                     "claim_type": "factual_claim",
                     "claim_subtype": null,
@@ -2615,7 +2680,7 @@
                     "evidence": [
                       "生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。"
                     ],
-                    "reason": "上下文明确指出需要在签收后 24 小时内拍照反馈，并隐含了起算点为签收完成时间。",
+                    "reason": "上下文明确指出需要在签收后24小时内拍照反馈，隐含了从签收完成时间开始计算",
                     "claim_id": null,
                     "claim_type": "factual_claim",
                     "claim_subtype": null,
@@ -2625,11 +2690,11 @@
                     "evidence_refs": []
                   }
                 ],
-                "supported_count": 3,
-                "claim_count": 4,
+                "supported_count": 5,
+                "claim_count": 5,
                 "reason": ""
               },
-              "raw_output": "{\n  \"claims\": [\n    {\n      \"claim\": \"生鲜食品质量问题需在签收后 24 小时内拍照反馈\",\n      \"supported\": true,\n      \"evidence\": [\n        \"生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。\"\n      ],\n      \"reason\": \"上下文明确指出生鲜食品的质量问题需在签收后 24 小时内拍照反馈。\"\n    },\n    {\n      \"claim\": \"您是在签收后第 2 天（即超过 24 小时）才发现并反馈，已超出政策规定的反馈时效\",\n      \"supported\": false,\n      \"evidence\": [],\n      \"reason\": \"上下文未提及用户具体发现和反馈的时间，无法确认是否超过 24 小时。\"\n    },\n    {\n      \"claim\": \"该时限是硬性要求，文档未提及例外情形或宽限期\",\n      \"supported\": true,\n      \"evidence\": [\n        \"生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。\"\n      ],\n      \"reason\": \"上下文中的规定没有提到任何例外情形或宽限期。\"\n    },\n    {\n      \"claim\": \"24 小时起算点为“签收完成时间”（非签收日零点），且须“拍照反馈”（需保留问题实物及包装证据）\",\n      \"supported\": true,\n      \"evidence\": [\n        \"生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。\"\n      ],\n      \"reason\": \"上下文明确指出需要在签收后 24 小时内拍照反馈，并隐含了起算点为签收完成时间。\"\n    }\n  ],\n  \"reason\": \"\"\n}",
+              "raw_output": "{\n  \"claims\": [\n    {\"claim\": \"生鲜食品质量问题需在签收后 24 小时内拍照反馈\", \"supported\": true, \"evidence\": [\"生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。\"], \"reason\": \"上下文中有明确依据\"},\n    {\"claim\": \"您是在签收后第 2 天（即超过 24 小时）才发现并反馈，已超出政策规定的反馈时效\", \"supported\": true, \"evidence\": [\"生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。\"], \"reason\": \"根据上下文规定，反馈时限为24小时，签收后第2天确实超出了该时限\"},\n    {\"claim\": \"因此原则上不符合质量反馈受理条件\", \"supported\": true, \"evidence\": [\"生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。\"], \"reason\": \"上下文规定了24小时内的反馈要求，超出时间则不符合受理条件\"},\n    {\"claim\": \"该时限是硬性要求，文档未提及例外情形或宽限期\", \"supported\": true, \"evidence\": [\"生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。\"], \"reason\": \"上下文没有提到任何例外情况或宽限期\"},\n    {\"claim\": \"24 小时起算点为“签收完成时间”（非签收日零点），且须“拍照反馈”（需保留问题实物及包装证据）\", \"supported\": true, \"evidence\": [\"生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。\"], \"reason\": \"上下文明确指出需要在签收后24小时内拍照反馈，隐含了从签收完成时间开始计算\"}\n  ],\n  \"reason\": \"\"\n}",
               "raw_truncated": false
             },
             {
@@ -2637,7 +2702,7 @@
               "status": "evaluated",
               "score": 0.8,
               "skipped_reason": null,
-              "latency_ms": 1621,
+              "latency_ms": 1730,
               "error": null,
               "judge_config": {
                 "agent": "rag_judge_answer_correctness",
@@ -2653,15 +2718,15 @@
               },
               "token_usage": {
                 "input": 757,
-                "output": 46
+                "output": 49
               },
               "cost": "0",
               "details": {
                 "missing_points": [],
                 "wrong_facts": [],
-                "reason": "回答虽然详细，但核心信息与金标一致，只是提供了额外建议"
+                "reason": "回答在事实层面正确，但额外提供了建议操作，导致信息略显冗余。"
               },
-              "raw_output": "{\n  \"score\": 0.8,\n  \"missing_points\": [],\n  \"wrong_facts\": [],\n  \"reason\": \"回答虽然详细，但核心信息与金标一致，只是提供了额外建议\"\n}",
+              "raw_output": "{\n  \"score\": 0.8,\n  \"missing_points\": [],\n  \"wrong_facts\": [],\n  \"reason\": \"回答在事实层面正确，但额外提供了建议操作，导致信息略显冗余。\"\n}",
               "raw_truncated": false
             },
             {
@@ -2669,7 +2734,7 @@
               "status": "evaluated",
               "score": 0.9,
               "skipped_reason": null,
-              "latency_ms": 1461,
+              "latency_ms": 1502,
               "error": null,
               "judge_config": {
                 "agent": "rag_judge_answer_relevancy",
@@ -2685,13 +2750,13 @@
               },
               "token_usage": {
                 "input": 625,
-                "output": 30
+                "output": 34
               },
               "cost": "0",
               "details": {
-                "reason": "回答了核心问题，但包含了一些额外的建议和信息"
+                "reason": "回答了核心问题，但包含了一些超出用户问题范围的建议和信息。"
               },
-              "raw_output": "{\n  \"score\": 0.9,\n  \"reason\": \"回答了核心问题，但包含了一些额外的建议和信息\"\n}",
+              "raw_output": "{\n  \"score\": 0.9,\n  \"reason\": \"回答了核心问题，但包含了一些超出用户问题范围的建议和信息。\"\n}",
               "raw_truncated": false
             }
           ]
@@ -2699,14 +2764,14 @@
         "v1.1.1": {
           "arm": "v1.1.1",
           "reused": false,
-          "wall_latency_ms": 21635,
+          "wall_latency_ms": 25353,
           "outcomes": [
             {
               "metric": "faithfulness",
               "status": "evaluated",
-              "score": 0.0,
+              "score": 0.428571,
               "skipped_reason": null,
-              "latency_ms": 18756,
+              "latency_ms": 21497,
               "error": null,
               "judge_config": {
                 "agent": "rag_judge_faithfulness",
@@ -2715,14 +2780,14 @@
                 "max_tokens": 8192,
                 "prompt_version": "v1.1.1",
                 "resolved_prompt_version": "v1.1.1",
-                "prompt_sha256": "4ee65afb3e7ea8b4b5e361e41ea75b74173142a8c26c97dedc7139ba37c86317",
+                "prompt_sha256": "3519fd3b1bbbab9b117abd04f69304609146c2d2a05c39699483dea1740eda19",
                 "schema_version": "rag_judge_schema_v2",
                 "rubric_version": "v1.1.1",
                 "metric_version": "v2"
               },
               "token_usage": {
-                "input": 3896,
-                "output": 803
+                "input": 4881,
+                "output": 1073
               },
               "cost": "0",
               "details": {
@@ -2731,7 +2796,7 @@
                     "claim": "可以按政策反馈",
                     "supported": null,
                     "evidence": [],
-                    "reason": "上下文规定生鲜食品质量问题需在签收后24小时内拍照反馈，超过24小时原则上不符合受理条件。",
+                    "reason": "首句结论与后文/金标矛盾",
                     "claim_id": "cl1",
                     "claim_type": "factual_claim",
                     "claim_subtype": "policy",
@@ -2743,42 +2808,78 @@
                     "evidence_refs": []
                   },
                   {
-                    "claim": "已超出政策规定的反馈时效，因此原则上不符合质量反馈受理条件",
+                    "claim": "已超出政策规定的反馈时效，原则上不符合质量反馈受理条件",
                     "supported": null,
                     "evidence": [],
-                    "reason": "C1 原文",
+                    "reason": "C1 连续原文",
                     "claim_id": "cl2",
                     "claim_type": "factual_claim",
                     "claim_subtype": "policy",
-                    "support_status": "insufficient_evidence",
+                    "support_status": "supported",
                     "is_contradictory": false,
                     "contradiction_with": [],
                     "evidence_refs": [
                       {
                         "context_id": "C1",
-                        "quote": "生鲜食品质量问题需在签收后 24 小时内拍照反馈"
+                        "quote": "质量问题需在签收后 24 小时内拍照反馈"
                       }
                     ]
                   },
                   {
-                    "claim": "该时限是硬性要求，文档未提及例外情形或宽限期",
+                    "claim": "生鲜食品质量问题需在签收后 24 小时内拍照反馈",
                     "supported": null,
                     "evidence": [],
-                    "reason": "虽然文档规定了24小时的反馈时限，但并未明确说明是否为硬性要求或是否有例外情况。",
+                    "reason": "C1 整句原文",
                     "claim_id": "cl3",
                     "claim_type": "factual_claim",
                     "claim_subtype": "policy",
-                    "support_status": "insufficient_evidence",
+                    "support_status": "supported",
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": [
+                      {
+                        "context_id": "C1",
+                        "quote": "生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。"
+                      }
+                    ]
+                  },
+                  {
+                    "claim": "该时限是硬性要求",
+                    "supported": null,
+                    "evidence": [],
+                    "reason": "C1 连续原文",
+                    "claim_id": "cl4",
+                    "claim_type": "factual_claim",
+                    "claim_subtype": "policy",
+                    "support_status": "supported",
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": [
+                      {
+                        "context_id": "C1",
+                        "quote": "质量问题需在签收后 24 小时内拍照反馈。"
+                      }
+                    ]
+                  },
+                  {
+                    "claim": "文档未提及例外情形或宽限期",
+                    "supported": null,
+                    "evidence": [],
+                    "reason": "absence",
+                    "claim_id": "cl5",
+                    "claim_type": "non_factual",
+                    "claim_subtype": "absence",
+                    "support_status": null,
                     "is_contradictory": false,
                     "contradiction_with": [],
                     "evidence_refs": []
                   },
                   {
-                    "claim": "24小时起算点为“签收完成时间”（非签收日零点），且须“拍照反馈”（需保留问题实物及包装证据）",
+                    "claim": "24 小时起算点为签收完成时间（非签收日零点）",
                     "supported": null,
                     "evidence": [],
-                    "reason": "文档未详细说明24小时的起算点和具体反馈方式。",
-                    "claim_id": "cl4",
+                    "reason": "上下文未说明起算点",
+                    "claim_id": "cl6",
                     "claim_type": "factual_claim",
                     "claim_subtype": "policy",
                     "support_status": "insufficient_evidence",
@@ -2787,11 +2888,24 @@
                     "evidence_refs": []
                   },
                   {
-                    "claim": "若尚未超时，立即通过订单页面或联系在线客服提交带时间水印的照片凭证",
+                    "claim": "需保留问题实物及包装证据",
                     "supported": null,
                     "evidence": [],
-                    "reason": "建议操作",
-                    "claim_id": "cl5",
+                    "reason": "规范性要求，但上下文未写",
+                    "claim_id": "cl7",
+                    "claim_type": "factual_claim",
+                    "claim_subtype": "policy",
+                    "support_status": "insufficient_evidence",
+                    "is_contradictory": false,
+                    "contradiction_with": [],
+                    "evidence_refs": []
+                  },
+                  {
+                    "claim": "建议立即通过订单页面或联系在线客服提交带时间水印的照片凭证",
+                    "supported": null,
+                    "evidence": [],
+                    "reason": "纯建议",
+                    "claim_id": "cl8",
                     "claim_type": "non_factual",
                     "claim_subtype": "advice",
                     "support_status": null,
@@ -2803,11 +2917,11 @@
                     "claim": "若已超时，可尝试联系客服说明具体情况，但是否受理由商家个案判断，政策不保证支持",
                     "supported": null,
                     "evidence": [],
-                    "reason": "建议操作",
-                    "claim_id": "cl6",
-                    "claim_type": "non_factual",
-                    "claim_subtype": "advice",
-                    "support_status": null,
+                    "reason": "上下文未明确说明超时后的处理方式",
+                    "claim_id": "cl9",
+                    "claim_type": "factual_claim",
+                    "claim_subtype": "policy",
+                    "support_status": "insufficient_evidence",
                     "is_contradictory": false,
                     "contradiction_with": [],
                     "evidence_refs": []
@@ -2816,8 +2930,8 @@
                     "claim": "文档未说明超时后申诉渠道或人工复核机制",
                     "supported": null,
                     "evidence": [],
-                    "reason": "文档确实未提及超时后的申诉渠道或人工复核机制",
-                    "claim_id": "cl7",
+                    "reason": "absence",
+                    "claim_id": "cl10",
                     "claim_type": "non_factual",
                     "claim_subtype": "absence",
                     "support_status": null,
@@ -2827,44 +2941,46 @@
                   }
                 ],
                 "reason": "",
-                "claim_count": 7,
-                "scorable_claim_count": 4,
-                "supported_count": 0,
-                "supported_claim_count": 0,
+                "claim_count": 10,
+                "scorable_claim_count": 7,
+                "supported_count": 3,
+                "supported_claim_count": 3,
                 "unsupported_claim_count": 1,
                 "insufficient_evidence_count": 3,
                 "non_factual_count": 3,
-                "absence_count": 1,
+                "absence_count": 2,
                 "document_conflict": false,
                 "document_conflict_count": 0,
                 "contradiction_count": 1,
-                "insufficient_evidence_rate": 0.75,
+                "insufficient_evidence_rate": 0.428571,
                 "all_insufficient": false,
                 "evidence_validation": [
                   {
                     "claim_id": "cl2",
                     "context_id": "C1",
-                    "quote": "生鲜食品质量问题需在签收后 24 小时内拍照反馈",
-                    "ok": false,
-                    "error": "quote_not_found"
-                  }
-                ],
-                "evidence_validation_failed": true,
-                "validation_errors": [
-                  {
-                    "claim_id": "cl2",
-                    "code": "quote_not_found",
-                    "message": "evidence quote is not a verbatim substring",
-                    "context_id": "C1"
+                    "quote": "质量问题需在签收后 24 小时内拍照反馈",
+                    "ok": true,
+                    "error": null
                   },
                   {
-                    "claim_id": "cl2",
-                    "code": "evidence_validation_failed",
-                    "message": "supported claim has invalid evidence; downgraded"
+                    "claim_id": "cl3",
+                    "context_id": "C1",
+                    "quote": "生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。",
+                    "ok": true,
+                    "error": null
+                  },
+                  {
+                    "claim_id": "cl4",
+                    "context_id": "C1",
+                    "quote": "质量问题需在签收后 24 小时内拍照反馈。",
+                    "ok": true,
+                    "error": null
                   }
-                ]
+                ],
+                "evidence_validation_failed": false,
+                "validation_errors": []
               },
-              "raw_output": "```json\n{\n  \"claims\": [\n    {\n      \"claim_id\": \"cl1\",\n      \"claim\": \"可以按政策反馈\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"unsupported\",\n      \"is_contradictory\": true,\n      \"contradiction_with\": [\"cl2\"],\n      \"evidence_refs\": [],\n      \"reason\": \"上下文规定生鲜食品质量问题需在签收后24小时内拍照反馈，超过24小时原则上不符合受理条件。\"\n    },\n    {\n      \"claim_id\": \"cl2\",\n      \"claim\": \"已超出政策规定的反馈时效，因此原则上不符合质量反馈受理条件\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"生鲜食品质量问题需在签收后 24 小时内拍照反馈\"}\n      ],\n      \"reason\": \"C1 原文\"\n    },\n    {\n      \"claim_id\": \"cl3\",\n      \"claim\": \"该时限是硬性要求，文档未提及例外情形或宽限期\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"insufficient_evidence\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [],\n      \"reason\": \"虽然文档规定了24小时的反馈时限，但并未明确说明是否为硬性要求或是否有例外情况。\"\n    },\n    {\n      \"claim_id\": \"cl4\",\n      \"claim\": \"24小时起算点为“签收完成时间”（非签收日零点），且须“拍照反馈”（需保留问题实物及包装证据）\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"insufficient_evidence\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [],\n      \"reason\": \"文档未详细说明24小时的起算点和具体反馈方式。\"\n    },\n    {\n      \"claim_id\": \"cl5\",\n      \"claim\": \"若尚未超时，立即通过订单页面或联系在线客服提交带时间水印的照片凭证\",\n      \"claim_type\": \"non_factual\",\n      \"claim_subtype\": \"advice\",\n      \"support_status\": null,\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [],\n      \"reason\": \"建议操作\"\n    },\n    {\n      \"claim_id\": \"cl6\",\n      \"claim\": \"若已超时，可尝试联系客服说明具体情况，但是否受理由商家个案判断，政策不保证支持\",\n      \"claim_type\": \"non_factual\",\n      \"claim_subtype\": \"advice\",\n      \"support_status\": null,\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [],\n      \"reason\": \"建议操作\"\n    },\n    {\n      \"claim_id\": \"cl7\",\n      \"claim\": \"文档未说明超时后申诉渠道或人工复核机制\",\n      \"claim_type\": \"non_factual\",\n      \"claim_subtype\": \"absence\",\n      \"support_status\": null,\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [],\n      \"reason\": \"文档确实未提及超时后的申诉渠道或人工复核机制\"\n    }\n  ],\n  \"reason\": \"\"\n}\n```",
+              "raw_output": "{\n  \"claims\": [\n    {\n      \"claim_id\": \"cl1\",\n      \"claim\": \"可以按政策反馈\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"unsupported\",\n      \"is_contradictory\": true,\n      \"contradiction_with\": [\"cl2\"],\n      \"evidence_refs\": [],\n      \"reason\": \"首句结论与后文/金标矛盾\"\n    },\n    {\n      \"claim_id\": \"cl2\",\n      \"claim\": \"已超出政策规定的反馈时效，原则上不符合质量反馈受理条件\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"质量问题需在签收后 24 小时内拍照反馈\"}\n      ],\n      \"reason\": \"C1 连续原文\"\n    },\n    {\n      \"claim_id\": \"cl3\",\n      \"claim\": \"生鲜食品质量问题需在签收后 24 小时内拍照反馈\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。\"}\n      ],\n      \"reason\": \"C1 整句原文\"\n    },\n    {\n      \"claim_id\": \"cl4\",\n      \"claim\": \"该时限是硬性要求\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"质量问题需在签收后 24 小时内拍照反馈。\"}\n      ],\n      \"reason\": \"C1 连续原文\"\n    },\n    {\n      \"claim_id\": \"cl5\",\n      \"claim\": \"文档未提及例外情形或宽限期\",\n      \"claim_type\": \"non_factual\",\n      \"claim_subtype\": \"absence\",\n      \"support_status\": null,\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [],\n      \"reason\": \"absence\"\n    },\n    {\n      \"claim_id\": \"cl6\",\n      \"claim\": \"24 小时起算点为签收完成时间（非签收日零点）\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"insufficient_evidence\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [],\n      \"reason\": \"上下文未说明起算点\"\n    },\n    {\n      \"claim_id\": \"cl7\",\n      \"claim\": \"需保留问题实物及包装证据\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"insufficient_evidence\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [],\n      \"reason\": \"规范性要求，但上下文未写\"\n    },\n    {\n      \"claim_id\": \"cl8\",\n      \"claim\": \"建议立即通过订单页面或联系在线客服提交带时间水印的照片凭证\",\n      \"claim_type\": \"non_factual\",\n      \"claim_subtype\": \"advice\",\n      \"support_status\": null,\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [],\n      \"reason\": \"纯建议\"\n    },\n    {\n      \"claim_id\": \"cl9\",\n      \"claim\": \"若已超时，可尝试联系客服说明具体情况，但是否受理由商家个案判断，政策不保证支持\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"insufficient_evidence\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [],\n      \"reason\": \"上下文未明确说明超时后的处理方式\"\n    },\n    {\n      \"claim_id\": \"cl10\",\n      \"claim\": \"文档未说明超时后申诉渠道或人工复核机制\",\n      \"claim_type\": \"non_factual\",\n      \"claim_subtype\": \"absence\",\n      \"support_status\": null,\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [],\n      \"reason\": \"absence\"\n    }\n  ],\n  \"reason\": \"\"\n}",
               "raw_truncated": false
             },
             {
@@ -2872,7 +2988,7 @@
               "status": "evaluated",
               "score": 0.0,
               "skipped_reason": null,
-              "latency_ms": 1670,
+              "latency_ms": 1627,
               "error": null,
               "judge_config": {
                 "agent": "rag_judge_answer_correctness",
@@ -2908,7 +3024,7 @@
               "status": "evaluated",
               "score": 0.9,
               "skipped_reason": null,
-              "latency_ms": 1206,
+              "latency_ms": 2225,
               "error": null,
               "judge_config": {
                 "agent": "rag_judge_answer_relevancy",
@@ -2924,13 +3040,13 @@
               },
               "token_usage": {
                 "input": 1402,
-                "output": 36
+                "output": 37
               },
               "cost": "0",
               "details": {
-                "reason": "回答详细解释了政策规定，并针对用户的具体情况给出了明确的建议和下一步操作。"
+                "reason": "回答完整回应了问题，明确说明了政策规定及超时情况，并给出了下一步建议。"
               },
-              "raw_output": "{\n  \"score\": 0.9,\n  \"reason\": \"回答详细解释了政策规定，并针对用户的具体情况给出了明确的建议和下一步操作。\"\n}",
+              "raw_output": "{\n  \"score\": 0.9,\n  \"reason\": \"回答完整回应了问题，明确说明了政策规定及超时情况，并给出了下一步建议。\"\n}",
               "raw_truncated": false
             }
           ]
@@ -2940,51 +3056,41 @@
   ],
   "status": "stopped",
   "stop_reasons": [
-    "Q23/F: 0.0 outside target (0.4, 0.5)",
-    "Q23/F: dropped 0.750->0.000 >0.10 without target"
+    "Q23 F scorable != 6"
   ],
   "totals": {
     "v1.0.0": {
       "input_tokens": 17985,
-      "output_tokens": 2922,
-      "estimated_cost_cny": 0.0712
+      "output_tokens": 2943,
+      "estimated_cost_cny": 0.0714
     },
     "v1.1.1": {
-      "input_tokens": 43731,
-      "output_tokens": 4682,
-      "estimated_cost_cny": 0.1499
+      "input_tokens": 49641,
+      "output_tokens": 5192,
+      "estimated_cost_cny": 0.169
     }
   },
   "post_run": {
     "q01_c_fix": {
       "prompt_sha256": "2ab6eac2abe57dcfd647df328244ac3e5681fc93222938d6614e71037d49ae77",
-      "status": "evaluated",
       "score": 0.9,
       "missing_points": [],
       "wrong_facts": [],
-      "reason": "回答正确且完整地覆盖了金标中的关键事实，并补充了相关且正确的例外情况。",
-      "smoke_result": "docs/repair/phase3e/q01-v1.1.1-correctness-smoke.json",
-      "target": "0.9-1.0"
+      "smoke_result": "docs/repair/phase3e/q01-v1.1.1-correctness-smoke.json"
     },
-    "q04_q17_q31_targets": "docs/repair/phase3e/pilot-10-additional-targets.json",
-    "ten_case_completed": false,
-    "forty_case_run": false,
     "q23_f_fix": {
       "prompt_sha256": "3519fd3b1bbbab9b117abd04f69304609146c2d2a05c39699483dea1740eda19",
-      "status": "evaluated",
-      "score": 0.5,
-      "scorable_claim_count": 6,
-      "supported_claim_count": 3,
-      "unsupported_claim_count": 1,
-      "insufficient_evidence_count": 2,
-      "non_factual_count": 2,
-      "contradiction_count": 1,
-      "document_conflict_count": 0,
-      "evidence_ok": 3,
-      "evidence_count": 3,
-      "validation_errors": [],
+      "single_case_score": 0.5,
+      "ten_case_score": 0.428571,
+      "ten_case_scorable": 7,
+      "ten_case_supported": 3,
+      "ten_case_evidence_ok": 3,
+      "ten_case_validation_errors": [],
+      "stop_reason": "Q23 F scorable != 6",
       "smoke_result": "docs/repair/phase3e/q23-v1.1.1-faithfulness-smoke.json"
     },
-    "ten_case_rerun": false
+    "additional_targets": "docs/repair/phase3e/pilot-10-additional-targets.json",
+    "ten_case_completed": false,
+    "forty_case_run": false
   }
 }
