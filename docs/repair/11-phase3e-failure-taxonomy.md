@@ -155,7 +155,7 @@ C/R 指标校准用 `M` 标记，不归入 S/R 的 claim 分类；报告单列�
 | Q31 | F | “未规定上门取件”“未涉及取件方式” factual/insufficient；quote 诊断 | absence/meta + quote | S/E | 否 | 是 | 否 | 否 | 是（Q32/Q35） | absence/meta 不进分母；quote 最短子串 |
 | Q32 | F | “无法确认积分支持礼品兑换” factual/insufficient，F 0.75 | 不确定结论被建 factual | S | 否 | 是 | 否 | 否 | 是（Q31/Q35） | 无法确认/信息不足 → meta/absence |
 | Q35 | F | “物流时效未明确说明” factual/insufficient；2 条 quote 诊断 | absence + quote | S/E | 否 | 是 | 否 | 否 | 是（Q31/Q32） | absence 归 non_factual；quote 最短子串 |
-| Q36 | F | cl1 meta 总起 + cl6 合并 §1/§12，F 0.75→1.0 | 原子性 + 冲突合并 | A/E | 否 | 是 | 否 | 部分（冲突口径未选边） | 是（Q22/Q23） | 总起句 meta；§1/§12 拆两条；冲突仅 variant |
+| Q36 | F | cl1 条件句被当 meta + cl6 合并 §1/§12，F 0.75→1.0 | 原子性 + 冲突合并 + 条件句误分类 | A/R | 否 | 是 | 否 | 部分（冲突口径未选边） | 是（Q17/Q30） | cl1“能否退款取决于…”是 condition/policy_scope factual，应 supported；§1/§12 拆两条；不得靠排除条件句取得 F=1.0 |
 | Q33 | F | 未运行；预期 context_unavailable | 无上下文 | C（预期） | 是 | 否 | 否 | 否 | 是（Q14） | 先跑再定；F unavailable；C/R 独立 |
 | Q34/Q37/Q40 | F | 只有 C1 | 上下文受限 | C | 是 | 否 | 否 | 否 | 是 | 报告注明；不据此判 F 退化 |
 | Q38/Q39 | — | 未运行 | — | — | — | — | — | — | — | 不推测 |
@@ -222,7 +222,7 @@ C/R 指标校准用 `M` 标记，不归入 S/R 的 claim 分类；报告单列�
 | M Metric calibration | Q16、Q25 | R 过严/C 方差；与 claim 分类分开标记 |
 | C Context/Answerability | Q14、Q33、C1-only | 数据/报告边界，不是 Prompt 特例 |
 
-**P0 汇总**：Q17/Q30 的 v1.1.x 修复把 `policy_relationship`/`policy_scope` 移出分母；v1.2.0 不沿用。Q17 可能回到 0.8，Q30 可能回到 0.5；这不是“回答退化”，而是语义修正，相关目标必须重新审批。
+**P0 汇总**：Q17/Q30 的 v1.1.x 修复把 `policy_relationship`/`policy_scope` 移出分母；v1.2.0 不沿用。Q17 可能回到 0.8，Q30 可能回到 0.5；Q36 的“能否退款取决于……”也必须保留为 condition/policy_scope factual。这不是“回答退化”，而是语义修正，相关目标必须重新审批。
 
 ## 7. 结论
 

@@ -1,6 +1,6 @@
 # Prompt v1.2.0 设计草案
 
-> 状态：设计草案；**语义规范尚未冻结（P0 待修）**。本文不创建 v1.2.0 运行时版本，不修改 Prompt/Service/Schema/API/DB，不运行 Judge。
+> 状态：设计草案；**P0 已修正，待复核/未冻结**。本文不创建 v1.2.0 运行时版本，不修改 Prompt/Service/Schema/API/DB，不运行 Judge。
 >
 > 设计目标：从“逐案例补 few-shot”转为“先冻结 Judge 语义，再用通用规则与结构化 Schema 实现”。P0：`policy_scope` / `policy_relationship` 是 factual，不得退出 F 分母。
 
@@ -78,7 +78,7 @@ v1.0.0 → v1.1.5 的经验：
 2. **Q30/Q17 型**：政策范围/关系断言 → factual；无依据 insufficient；只有文档覆盖/章节关系才 doc_scope/doc_relationship。
 3. **Q20 型**：全称/适用范围断言 → policy_scope factual；无依据 insufficient。
 4. **Q32 型**：无法确认/信息不足 → uncertainty/absence。
-5. **Q36 型**：文档冲突披露 + §1/§12 分条 + 两条单句证据。
+5. **Q36 型**：文档冲突披露 + “能否退款取决于……”是 condition/`policy_scope` factual，不是 meta；§1/§12 分条 + 两条单句证据；Q36 F 目标可保持 0.8–1.0，但不得靠排除条件句取得。
 
 不再为 Q22/Q23/Q30/Q32/Q17 各加独立长 few-shot；用同一组模式覆盖。政策范围/关系不能通过 few-shot 教成 meta。
 
@@ -218,8 +218,10 @@ v1.0.0 → v1.1.5 的经验：
 | Q21#3 单 claim | 与整条 F 混淆 | 单 claim 与整条分开报告 |
 | Q30/Q32 目标边界 | 目标漂移 | 先改语义，再注册目标；不先移动目标 |
 | P0 政策范围/关系回到 factual | Q17/Q30 的 v1.1.x 目标失效 | 重新审批 Q17/Q30 目标，不静默沿用 1.0 |
+| absence/uncertainty 分类变化 | Q19/Q31/Q32/Q35 的 F/目标变化 | 冻结后重跑 baseline；Q32 目标重新注册 |
 | Q14 key_facts 未启用 | C 仍 known non-pass | v1.2.0 不启用 key_facts；Q14 保留 non-pass |
 | 8 条未运行/6 条 baseline 缺失 | 40 条不完整 | 先补 baseline，再算整体 |
+| 40 条 final labels 文件缺失 | 分层口径混用 | 补 final labels；在此之前报告注明用 candidates 原始分类 |
 | C/R 高方差 | 单次结论不可靠 | 3 次重复 + 独立校准集 |
 | 成本超预算 | 无法完成 | 分阶段：单案例→10 条→40 条，逐段签字 |
 

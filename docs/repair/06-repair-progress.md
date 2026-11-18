@@ -1165,4 +1165,6 @@ alembic check   : No new upgrade operations detected
 - 失败归因：Scope/Meta/absence/uncertainty 误建 factual、Evidence 最短子串、条件/权益推断、Claim 原子性、C/R 校准、Context 可用性。
 - 审核结果：`approve_with_changes`；四份文档通过，但 **v1.2.0 语义规范暂不冻结**。
 - P0 修正：`policy_scope` / `policy_relationship` 保持 factual（无依据 insufficient），只有 `doc_scope` / `doc_relationship` / absence / uncertainty 为 non_factual；Q17/Q30 目标需重新审批。
+- Q36 残留修正：“能否退款，取决于具体商品类型和签收时间”是 condition/policy_scope factual，不是 meta；Q36 F 目标 0.8–1.0 可保留，但不得靠排除条件句取得。
+- P2：补 Q17/Q20/Q30/Q19/Q31/Q32/Q35/Q36 的目标影响表；分层表区分原始 candidates（10/10/8/6/6）与最终人工分类（12/8/9/6/5）；Q14 保留 known non-pass。
 - 未修改 Prompt/Service/Schema/API/DB；未创建或激活 v1.2.0；未运行新的 Judge；未进入 Phase 4。

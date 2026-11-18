@@ -54,7 +54,7 @@
 | `doc_scope` | **关于文档覆盖范围/章节归属**的 meta 陈述，不是政策在现实中的适用范围 | “文档详细说明了退款、换货、发票等章节”；“该问题位于文档第 7 节” |
 | `doc_relationship` | **关于文档章节/条款之间编排关系**的 meta 陈述，不是政策规则之间的关系 | “§1 与 §12 分属不同章节” |
 | `uncertainty` | 无法确认/无法判断/信息不足的结论句 | “无法确认积分支持礼品兑换” |
-| `meta` | 其它纯元信息、总起/分类引导句 | “能否退款，取决于具体商品类型和签收时间” |
+| `meta` | 其它纯元信息、组织/导航句 | “下面分三部分说明：退款、换货、发票”；“以下按商品类型分别说明” |
 | `advice` | 纯建议、下一步操作 | “建议联系客服核实” |
 | `greeting` | 问候、共情、礼貌语 | “您好，很高兴为您服务” |
 
@@ -62,6 +62,7 @@
 - “政策适用于所有订单”“默认适用于中国大陆”是 `policy_scope`（factual），不是 `doc_scope`。
 - “该规则与是否满 99 元无关”是 `policy_relationship`（factual），不是 `doc_relationship`。
 - 只有“文档有没有写/覆盖什么/章节怎么排”才是 `absence` / `doc_scope` / `doc_relationship` / `meta`。
+- “能否退款，取决于具体商品类型和签收时间”“是否支持取决于……”是 policy condition/`policy_scope`（factual），不是 meta；文档明确写了普通商品/特殊商品规则时应 supported。
 
 ### 3.3 判断顺序
 
@@ -82,6 +83,7 @@
 | “文档详细说明了退款、换货、发票……” | 文档覆盖 | `meta` / `doc_scope`（non_factual） | 不进分母 |
 | “政策适用于所有订单” | 政策适用范围 | `policy_scope`（factual） | 文档明确写 → supported；否则 insufficient |
 | “该规则与是否满 99 元无关” | 政策规则关系 | `policy_relationship`（factual） | 文档明确写 → supported；否则 insufficient |
+| “能否退款，取决于具体商品类型和签收时间” | 退款条件/适用范围 | `condition` / `policy_scope`（factual） | 文档明确写普通/特殊商品规则 → supported；否则 insufficient |
 | “默认适用于中国大陆境内订单” | 政策地域范围 | `policy_scope`（factual） | 文档明确写 → supported；否则 insufficient |
 | “以国内履约场景为前提” | 政策地域范围 | `policy_scope`（factual） | 文档明确写 → supported；否则 insufficient |
 | “§1 与 §12 对虚拟商品范围不一致” | 文档条款冲突 | `conflict`（factual） | 两处原文都可给出 → supported |
@@ -217,6 +219,7 @@
 - 多步算术/派生结论（如“第 10 天 > 7 天”“实付 89 元寄新疆适用 20 元运费”）可以 supported，但必须使用 `derived` 子类型，并引用其依据规则的最短连续子串；每一步都要有明确规则。
 - 目的、权益、补偿、取消、催单等推断：没有明确条款 → insufficient。
 - 全称 generalization / 政策适用范围：`policy_scope`（factual）；没有明确条款 → insufficient。
+- “取决于/区分/需确认”类句子：`condition` / `policy_scope`（factual）；文档明确写条件 → supported；不得归 meta。Q36 的“能否退款取决于……”应 supported。
 - 规则关系/独立性：`policy_relationship`（factual）；没有明确写出“无关/不依赖/优先” → insufficient。
 - 文档章节/覆盖关系：`doc_relationship` / `doc_scope`（non_factual）。
 - Q21#3：保持 insufficient；不得因为“字面上可推出”就 supported。
@@ -295,8 +298,9 @@
 - Q32 “无法确认”类回答是否允许 0.75 目标，或必须 meta/1.0。
 - Q35/Q36 quote 诊断是否接受为 known diagnostic。
 - **P0 目标冲突**：v1.1.x 的 Q17 F 0.9–1.0、Q30 F 1.0 是在把 `policy_relationship`/`policy_scope` 移出分母后得到的；v1.2.0 将其保留为 factual/insufficient 后，Q17 可能回到 0.8、Q30 可能回到 0.5。目标必须重新审批，不得静默沿用。
+- **absence/uncertainty 目标影响**：Q32 的“无法确认”将归 uncertainty，F 可能 skipped/1.0；Q19/Q31/Q35 的 absence/meta 归 non_factual 后分母变化，相关目标/基线需重审。
 - **C 覆盖缺口**：如果未来仍决定把政策范围/关系排除出 F，必须新增 C 规则或独立 claim-correctness；否则错误适用范围/关系没有指标能抓到。
 
 ## 14. 一句话总结
 
-**先判“是不是事实”，再判“有没有逐字证据”，最后才判“支持不支持”；文档有没有写/无法确认是 non_factual，政策在现实中的适用范围/规则关系是 factual，文档没写就 insufficient。**
+**先判“是不是事实”，再判“有没有逐字证据”，最后才判“支持不支持”；文档有没有写/无法确认是 non_factual，政策在现实中的适用范围、规则关系、取决于/区分条件是 factual，文档没写就 insufficient。**

@@ -43,7 +43,7 @@ Human Gold 范围以 `docs/repair/phase3e/human-gold.json` 为准：
 - 目标通过：30/32（Q14 为 non-pass；Q32 为停止点）。
 - Q14：F unavailable；C=0.7 本次低于 0.8–1.0，历史 0.7/0.7/0.9 方差；只计一次 non-pass。
 - Q32：provisional F=0.75；cl1“无法确认”应归 meta；未决。
-- **P0 未冻结**：Q17/Q30 的 v1.1.x 目标是在把 `policy_scope`/`policy_relationship` 移出分母后得到的；v1.2.0 将政策范围/关系保留为 factual，Q17 可能回到 0.8、Q30 可能回到 0.5，目标必须重新审批，不得沿用 1.0。
+- **P0 未冻结**：Q17/Q30 的 v1.1.x 目标是在把 `policy_scope`/`policy_relationship` 移出分母后得到的；v1.2.0 将政策范围/关系保留为 factual，Q17 可能回到 0.8、Q30 可能回到 0.5，目标必须重新审批，不得沿用 1.0。Q32/Q19/Q31/Q35 也受 absence/uncertainty 分类变化影响，见 §2.4。
 - 未运行：Q33–Q40 共 8 条。
 - 基线：Q33/Q34/Q37/Q38/Q39/Q40 缺 v1.0.0 baseline；Q35/Q36 旧报告有 baseline，可复用。
 
@@ -66,6 +66,45 @@ Human Gold 范围以 `docs/repair/phase3e/human-gold.json` 为准：
 
 示例口径：
 > v1.1.5：32/40 完成，30/32 目标通过；Q14 F unavailable/C variance；Q32 未决；Q33–Q40 未运行。不是 40 条通过，也不是 40 条 Human Gold 验收。
+
+### 2.4 分类变化 → 目标影响（P0 后必须重审）
+
+| Case | v1.1.x 口径 | v1.2.0 口径 | F 可能变化 | 目标动作 |
+|---|---|---|---|---|
+| Q17 | policy relationship 被移出分母 → F=1.0 | `policy_relationship` factual；无依据 insufficient | 可能回到 0.8 | 重新审批 0.9–1.0，不得静默沿用 |
+| Q20 | policy scope/generalization factual/insufficient | `policy_scope` factual | 约 0.8，可能不变 | 目标 0.6–1.0 可保留，但需重跑 baseline |
+| Q30 | policy scope 被移出分母 → F=1.0 | `policy_scope` factual；无依据 insufficient | 可能回到 0.5 | 目标 0.4–1.0 可保留，但 expected 改为 0.5；需重批 |
+| Q19 | absence/示例推断部分被排除 | `absence` non_factual；示例仍 insufficient | 可能升高或分母缩小 | 无显式目标；重跑 baseline，不新增目标 |
+| Q31 | absence/meta 部分被排除 | `absence` non_factual；quote 仍需校验 | 可能升高 | 目标 0.6–1.0 可保留；重跑 baseline |
+| Q32 | “无法确认”被标 factual/insufficient | `uncertainty` non_factual | 可能 skipped 或 1.0 | 无目标；冻结后注册 skipped/1.0 口径 |
+| Q35 | absence 被排除 | `absence` non_factual；quote 仍校验 | 可能升高 | 目标 0.8–1.0 可保留；重跑 baseline |
+| Q36 | “能否退款取决于……”被当 meta 排除 | `condition` / `policy_scope` factual；应 supported | 可能不变或变化 | F 0.8–1.0 可保留；不得靠排除条件句取得 |
+| Q21 | Q21#3 insufficient | 不变 | 不变 | 目标 0.6–0.7 保留 |
+| Q14 | F unavailable；C 方差 | 不变 | 不可评估 | 保留 known non-pass；不因 key_facts 改成 PASS |
+
+> 所有受影响目标必须在 v1.2.0 语义冻结后重新签字；不得把 v1.1.x 的 meta 排除结果直接搬进 v1.2.0。
+
+### 2.5 分层口径
+
+项目里有两套分类，必须写明：
+
+| 口径 | 来源 | 数量 | 用途 |
+|---|---|---|---|
+| 原始候选分层 | `candidates.json` | direct 10 / multi 10 / constraint 8 / unanswerable 6 / ambiguous 6 | 覆盖统计、原始抽样 |
+| 最终人工分类 | 人工审核口径（Q15→direct、Q16→constraint、Q40→direct） | direct 12 / multi 8 / constraint 9 / unanswerable 6 / ambiguous 5 | HG 校准、最终报告 |
+
+最终人工分类明细（按 40 条口径）：
+
+| 层 | 案例 |
+|---|---|
+| direct | Q01–Q10、Q15、Q40 |
+| multi | Q11–Q14、Q17–Q20 |
+| constraint | Q16、Q21–Q28 |
+| unanswerable | Q29–Q34 |
+| ambiguous | Q35–Q39 |
+
+- `human-gold.json` 只覆盖 13 条 HG，不能单独给出 40 条最终分类；40 条最终分类需要一份单独的 final labels 文件（待补）。
+- 在 final labels 文件补齐前，报告必须注明用的是哪套口径；不得把 candidates 原始分类写成“最终分类”。
 
 ## 3. 缺失 baseline 补齐策略
 
@@ -156,9 +195,9 @@ Human Gold 范围以 `docs/repair/phase3e/human-gold.json` 为准：
 
 ### 6.2 分层验收
 
-按题型分层：
+**下表是原始候选分层（`candidates.json`，用于覆盖统计）：**
 
-| 层 | 案例（按 candidates.json category，一层一案例） | 验收 |
+| 层 | 案例（原始 candidates.json category，一层一案例） | 验收 |
 |---|---|---|
 | direct | Q01–Q10 | 直接回答、单部分 |
 | multi | Q11–Q20 | 多部分/条件分支 |
@@ -166,7 +205,7 @@ Human Gold 范围以 `docs/repair/phase3e/human-gold.json` 为准：
 | unanswerable | Q29–Q34 | absence/无法确认/context_unavailable |
 | ambiguous | Q35–Q40 | 模糊/冲突披露 |
 
-> 分层以 `candidates.json` 的 `category` 为准，每案例只归一层；Q14/Q33 的 `context_unavailable` 在所属层内单独标注，不另开层。
+> 原始分层为 10/10/8/6/6。**HG 校准/最终报告应使用 §2.5 的最终人工分类（12/8/9/6/5）**；Q15→direct、Q16→constraint、Q40→direct。两套口径不得混用。
 
 每层至少报告：
 - 完成数；
@@ -219,7 +258,7 @@ Human Gold 范围以 `docs/repair/phase3e/human-gold.json` 为准：
   "targets": {"passed": 30, "total_run": 32, "known_issues": []},
   "known_issues": [
     {"case_id": "Q14", "kind": "F_unavailable", "detail": "C=0.7 this run; historical 0.7/0.7/0.9; one non-pass only"},
-    {"case_id": "Q32", "kind": "meta_misclass", "detail": "cl1 should be uncertainty/non_factual"}
+    {"case_id": "Q32", "kind": "uncertainty_misclass", "detail": "cl1 should be uncertainty/non_factual"}
   ],
   "repeats": [{"case_id": "Q16", "metric": "R", "scores": [0.9, 0.9, 1.0]}],
   "baseline": {"reused": 30, "new": 2, "missing": 6, "available_not_run": 2}
