@@ -1169,5 +1169,6 @@ alembic check   : No new upgrade operations detected
 - `target_status` 是冻结前变更来源（reapproval/new_target 是历史类型），不是仍待审批；active target meta 已记录该说明。
 - Q32 冻结前提：F 0.9–1.0 以 3 个 factual 点为前提；若 v1.2.0 把它们归为 uncertainty/absence 导致 skipped，算目标未命中，不得 skipped 兜底。
 - Schema/Service 设计：`docs/repair/15-phase3e-v1.2.0-schema-service-design.md`；Schema v3、Metric v3；缺 subtype 报错；policy_scope/relationship 不回退。
+- P1-1/P1-2 修正：测试矩阵拆为 Service unit negative / Judge acceptance negative；缺 subtype → 整条 failed(schema)；supported_without_evidence → 降级 insufficient（保留分母）；Service 不做语义纠正。
 - 下一步顺序：负向测试 → 单案例（Q17/Q30/Q32/Q36）→ 10 条 → 40 条；Schema/目标复核前不创建/激活 v1.2.0、不跑 Judge。
 - 未修改 Prompt/Service/Schema/API/DB；未创建或激活 v1.2.0；未运行新的 Judge；未进入 Phase 4。

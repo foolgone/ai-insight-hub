@@ -1,8 +1,8 @@
 # v1.2.0 Schema / 子类型 / Service 设计
 
-> 状态：设计草案，等待人工审核。
+> 状态：设计草案；**P1-1（测试分层）与 P1-2（行为定死）已修，待复核**。本文不创建/激活 v1.2.0，不修改 Prompt/Service/Schema/API/DB，不运行 Judge。
+>
 > 依据：`12-judge-semantic-spec.md`（2026-11-18 frozen）、`pilot-40-final-labels.json`（SHA `f139623f…`）、`pilot-40-targets-v1.2.0.json`（SHA `34357b34…`）。
-> 本文不创建/激活 v1.2.0，不修改 Prompt/Service/Schema/API/DB，不运行 Judge。
 
 ## 1. 三个版本决策
 
@@ -48,6 +48,16 @@
 - `policy_scope` / `policy_relationship` 必须在分母；Service 不得用“找不到 evidence → 改 non_factual”兜底；
 - `doc_scope` / `doc_relationship` / `absence` / `uncertainty` 不进入分母；
 - 旧 `scope` / `relationship` 字段只作为 v2 历史解析，不作为 v3 新输出。
+
+### 1.4 实现前置决策（P1-2 定死）
+
+| 决策 | 结果 |
+|---|---|
+| 缺 `claim_subtype` / 非法 subtype / type 不一致 | **整条 metric `failed(schema)`**；无分数、不进分母/均值；不默认 subtype、不默认 supported |
+| `supported_without_evidence` | **降级 `insufficient_evidence`**，记错误；claim 保留在分母；不 drop、不整条 failed |
+| 全部 factual 都 insufficient | F=`evaluated` 0.0；不是 skipped，也不是 `failed(all_invalid)` |
+| Service 语义纠正 | **禁止**；Service 只校验 subtype/type/evidence，不猜 policy_scope 或自动改写 |
+| 恰好 0.10 | 不停止；`>0.10 + 1e-9` 才停止 |
 
 ## 2. Schema 设计
 
@@ -95,7 +105,8 @@
 - factual 必须有 `support_status`；non_factual 必须 null。
 - `supported` 必须至少一条 evidence；`insufficient_evidence` 为空数组。
 - `conflict` 必须有两条互不为子串的 evidence；否则 `conflict_single_sided_evidence`。
-- 缺 subtype / 非法 subtype → `failed(schema)` 或该 claim validation error；不得默认 supported。
+- **缺 subtype / 非法 subtype：整条 metric `failed(schema)`，不产出分数、不进入分母/均值**；不得降级为默认 subtype，也不得默认 supported。
+- `claim_type` 与 subtype 不一致（factual 使用 non_factual subtype，或反之）：整条 metric `failed(schema)`。
 
 ## 3. Service 设计
 
@@ -103,7 +114,8 @@
 
 - 只有 `factual_claim` 进入 F 分母。
 - `non_factual` 全部排除，不因“看起来像政策”而进分母。
-- `policy_scope` / `policy_relationship` 是 factual；Service 不得把它们当 meta。
+- `policy_scope` / `policy_relationship` 是 factual；**分类由 Prompt/Judge 负责，Service 不做语义纠正**：Service 只校验 subtype 枚举、claim_type 一致性与 evidence，不得用关键词猜“这其实是 policy_scope”并自动改回 factual。
+- 如果 Judge 把 policy_scope 标成 meta，这是 Judge acceptance failure；Service 应按收到的 subtype 处理（non_factual 排除），但该 Run 必须在 Judge acceptance 负向测试中失败，不能当 PASS。
 - `absence` / `doc_scope` / `doc_relationship` / `uncertainty` / `meta` / `advice` / `greeting` 不进入分母。
 
 ### 3.2 状态边界
@@ -113,10 +125,15 @@
 | `evaluated` | 有 scorable factual | 进入 |
 | `skipped(no_scorable_claims)` | 全部 non_factual | 不进入，单独列 |
 | `skipped(context_unavailable)` | 无上下文 | 不进入，单独列 F unavailable |
-| `failed(schema)` | 结构化失败 | 不进入 |
-| `failed(all_invalid)` | 全部 claim 校验失败 | 不进入 |
-| `supported_without_evidence` | supported 无 evidence | 该 claim 失败/降级，按规则 |
-| `evidence_validation_failed` | quote 非逐字 | 降级 insufficient，记错误 |
+| `failed(schema)` | 缺/非法 subtype、claim_type/subtype 不一致、结构化失败 | 不进入，无分数 |
+| `failed(all_invalid)` | 全部 claim 因 schema/validation 无效，无法构成有效 claim 集 | 不进入 |
+| `supported_without_evidence` | supported 无 evidence | **降级 insufficient_evidence**，记错误；该 claim 保留在分母，作为未支持 |
+| `evidence_validation_failed` | quote 非逐字/引用 answer | 降级 insufficient，记错误；该 claim 保留在分母 |
+
+**定死行为**：
+- `supported_without_evidence` 统一降级 `insufficient_evidence`，记 `supported_without_evidence`；不 drop、不整条 failed。
+- 如果全部 factual 都因无 evidence/quote 失败降级，F=`evaluated` 0.0；不是 `skipped`，也不是 `failed(all_invalid)`。
+- `failed(all_invalid)` 只用于 claim 集结构性无效（缺 subtype、非法 subtype、type 不一致等）；不用于“全部 insufficient”。
 
 ### 3.3 Evidence
 
@@ -142,32 +159,42 @@
 
 ## 4. 测试矩阵
 
-### 4.1 负向测试（先写）
+### 4.1 Service unit negative（不跑模型）
 
-1. `policy_scope` 被标 `meta` → validation error / 不得通过。
-2. `policy_relationship` 被标 `doc_relationship` → validation error。
-3. Q36 “能否退款取决于……”被标 `meta` → 不得通过。
-4. `absence` / `uncertainty` 进入 F 分母 → 失败。
-5. `doc_scope` / `doc_relationship` 进入分母 → 失败。
-6. 缺 `claim_subtype` → validation error，不默认 supported。
-7. `supported` 无 evidence → 失败/降级。
-8. quote 引用 answer 自身 → `quote_not_found`。
-9. quote 跨行拼接/主语+谓词合成 → `quote_not_found`。
-10. conflict 单边证据/嵌套 → `conflict_single_sided_evidence`。
-11. duplicate claim_id → 保留首条 + 错误。
-12. context_unavailable 输出 0 → 失败；应 skipped(context_unavailable)。
-13. all invalid 输出 skipped → 失败；应 failed(all_invalid)。
-14. 恰好 0.10 触发停止 → 失败；应不停止。
-15. Q32 3 个 factual 点被归 uncertainty → 目标未命中，不得 skipped 兜底。
+1. 缺 `claim_subtype` → 整条 `failed(schema)`，无分数。
+2. 非法 `claim_subtype` → `failed(schema)`。
+3. `claim_type` 与 subtype 不一致 → `failed(schema)`。
+4. `supported` 无 evidence → 降级 `insufficient_evidence`，记 `supported_without_evidence`；claim 留在分母。
+5. quote 非逐字/引用 answer → 降级 `insufficient_evidence`，记 `evidence_validation_failed`；claim 留在分母。
+6. conflict 单边/嵌套证据 → `conflict_single_sided_evidence`。
+7. duplicate `claim_id` → 保留首条，记 `duplicate_claim_id`。
+8. `context_unavailable` 输出 0 → 失败；应 `skipped(context_unavailable)`。
+9. 全 invalid 输出 skipped → 失败；应 `failed(all_invalid)`。
+10. 全部 factual 都 insufficient → `evaluated` 0.0；不是 skipped，也不是 failed。
+11. 恰好 0.10 → 不停止；`>0.10 + 1e-9` 才停止。
+12. non_factual 进入分母 → 失败。
+13. factual 的 `policy_scope`/`policy_relationship` 被 Service 自动改写成 meta → 失败（Service 不得做语义纠正）。
 
-### 4.2 单案例
+### 4.2 Judge acceptance negative（跑模型，比对标签）
+
+1. `policy_scope` 被标 `meta` → acceptance fail。
+2. `policy_relationship` 被标 `doc_relationship` → acceptance fail。
+3. Q36 “能否退款取决于……”被标 `meta` → acceptance fail。
+4. `absence` / `uncertainty` 被标 factual → acceptance fail。
+5. Q32 三个 factual 点被归 uncertainty → 目标未命中，不得 skipped 兜底。
+6. Q17 policy_relationship 被移出分母 → F 目标失败。
+7. Q30 policy_scope 被移出分母 → F 目标失败。
+
+> 这些不是 Service 单测：Service 只看到 `claim_subtype`，无法从文本判断“这句话原本是 policy_scope”。语义标签正确性由 Judge acceptance test 负责。
+
+### 4.3 单案例
 
 - Q17：policy_relationship factual → F 0.7–0.9。
 - Q30：policy_scope factual → F 0.4–1.0（expected 0.5）。
 - Q32：3 factual + uncertainty → F 0.9–1.0；不得 skipped。
 - Q36：condition sentence factual + conflict → F 0.8–1.0；variant C 0.9–1.0。
 
-### 4.3 分层与整体
+### 4.4 分层与整体
 
 - 先 10 条闸门：Q01/Q04/Q11/Q17/Q21/Q23/Q29/Q31/Q35/Q36。
 - 再补 Q33–Q40 与 6 条 baseline；完成 40 条。

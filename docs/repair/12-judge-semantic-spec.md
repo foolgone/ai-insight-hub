@@ -20,6 +20,7 @@
 | 备注 1 | “取决于/区分/需确认”优先 `condition`；`policy_scope` 只用于“适用于哪些订单/地区/对象”；两者都是 factual，不影响分母 |
 | 备注 2 | 40 条 final_labels 已冻结（2026-11-18，SHA `f139623fef80b55716fce0c773e776d284a5167683eb91559b23e49cabd000eb`）；13 条 HG 来自 human-gold.json，27 条 provisional 用 candidates.json 原始 category；40 条报告只能使用该文件作为分类来源 |
 | 运营补记 | 2026-11-18 final_labels 已冻结；2026-11-18 目标表已冻结；两者都不改变语义基线；active target 文件是目标唯一来源 |
+| P1-2 实现澄清 | 2026-11-18：`supported_without_evidence` 统一降级 `insufficient_evidence`（保留分母）；缺/非法 subtype → 整条 `failed(schema)`；不改变 claim taxonomy/语义分类 |
 | 变更控制 | 冻结后任何语义变化必须新开 freeze record + 新版本号；不得在 v1.2.0 内为单案例加 Prompt 特例 |
 
 **语义冻结 + 目标表冻结 ≠ 运行时激活**：目标表已冻结（`pilot-40-targets-v1.2.0.json`，SHA `34357b34…`）；v1.2.0 运行时未创建/未激活；任何 Judge 运行仍需另行申请。
@@ -178,8 +179,8 @@
 ### 5.4 证据校验与降级
 
 - `quote_not_found`：quote 不是逐字子串 → 该 evidence 无效。
-- `supported` 但 evidence 无效 → 降级 `insufficient_evidence`，记 `evidence_validation_failed`。
-- `supported_without_evidence` → 直接判为校验失败，不进入 supported。
+- `supported_without_evidence` → 降级 `insufficient_evidence`，记 `supported_without_evidence`；claim 保留在分母，不 drop、不整条 failed。
+- `supported` 但 evidence 无效 → 降级 `insufficient_evidence`，记 `evidence_validation_failed`；claim 保留在分母。
 - 冲突 claim 必须有两条 `(context_id, quote)` 去重且互不为子串的证据；否则记 `conflict_single_sided_evidence`。
 - 重复 `claim_id`：保留首条，跳过后续，记 `duplicate_claim_id`。
 
@@ -269,11 +270,11 @@
 | `evaluated` | 有 scorable claim | 是 | 按目标 |
 | `skipped(no_scorable_claims)` | 全部 non_factual | 否 | 仅当目标为 skipped |
 | `skipped(context_unavailable)` | 无上下文 | 否 | 否；F unavailable |
-| `failed(schema)` | 结构化输出失败 | 否 | 否 |
-| `failed(all_invalid)` | 全部 claims 校验失败 | 否 | 否 |
-| `supported_without_evidence` | supported 无 evidence | 否 | 否 |
-| `evidence_validation_failed` | quote 不逐字/降级 | 否（该 claim 降级） | 视降级后分数 |
-| `duplicate_claim_id` | 重复 claim_id | 否（保留首条） | 需记录 |
+| `failed(schema)` | 缺/非法 subtype、type 不一致、结构化失败 | 否 | 否 |
+| `failed(all_invalid)` | 全部 claims 因 schema/validation 结构性无效 | 否 | 否 |
+| `supported_without_evidence` | supported 无 evidence | 是（claim 降级 insufficient，保留分母） | 否 |
+| `evidence_validation_failed` | quote 不逐字/引用 answer | 是（claim 降级 insufficient，保留分母） | 视降级后分数 |
+| `duplicate_claim_id` | 重复 claim_id | 是（保留首条） | 需记录 |
 | `conflict_single_sided_evidence` | 冲突证据单边/嵌套 | 否 | 需记录 |
 | `context_unavailable` + C/R | 只有 F 不可用 | C/R 是 | Q14 不是 clean pass |
 
