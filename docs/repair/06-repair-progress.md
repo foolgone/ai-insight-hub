@@ -1163,8 +1163,7 @@ alembic check   : No new upgrade operations detected
   - `docs/repair/14-prompt-v1.2.0-design.md`
 - 数据盘点：40 条中 13 HG / 27 provisional；v1.1.5 完成 32/40；Q33–Q40 未运行；6 条缺 v1.0.0 baseline（Q35/Q36 旧 baseline 可用）。
 - 失败归因：Scope/Meta/absence/uncertainty 误建 factual、Evidence 最短子串、条件/权益推断、Claim 原子性、C/R 校准、Context 可用性。
-- 审核结果：`approve_with_changes`；四份文档通过，但 **v1.2.0 语义规范暂不冻结**。
-- P0 修正：`policy_scope` / `policy_relationship` 保持 factual（无依据 insufficient），只有 `doc_scope` / `doc_relationship` / absence / uncertainty 为 non_factual；Q17/Q30 目标需重新审批。
-- Q36 残留修正：“能否退款，取决于具体商品类型和签收时间”是 condition/policy_scope factual，不是 meta；Q36 F 目标 0.8–1.0 可保留，但不得靠排除条件句取得。
-- P2：补 Q17/Q20/Q30/Q19/Q31/Q32/Q35/Q36 的目标影响表；分层表区分原始 candidates（10/10/8/6/6）与最终人工分类（12/8/9/6/5）；Q14 保留 known non-pass。
+- 审核结果：`approve_with_changes`；P0 残留（Q36 条件句）已修，**语义规范 v1.2.0 于 2026-11-18 冻结**（复核人江晚；复核基线 commit `9db8885`）。
+- 冻结备注：`condition` 优先于 `policy_scope`（“取决于/区分/需确认”→condition；policy_scope 只用于适用订单/地区/对象；两者都是 factual）；40 条 final_labels 待补（13 HG 来自 human-gold，27 provisional 来自 candidates），是 40 条报告前置，不是语义冻结条件。
+- 语义冻结 ≠ 目标冻结：Q17/Q30/Q32 等目标仍需重新审批；不得沿用 v1.1.x meta 排除结果。
 - 未修改 Prompt/Service/Schema/API/DB；未创建或激活 v1.2.0；未运行新的 Judge；未进入 Phase 4。

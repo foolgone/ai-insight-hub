@@ -1,8 +1,25 @@
-# Judge 语义规范草案（v1.2.0 依据）
+# Judge 语义规范 v1.2.0（已冻结）
 
-> 状态：草案；**P0 已按 `approve_with_changes` 修正，但语义规范尚未冻结**。本文是 v1.2.0 Prompt 与 Service 的共同依据，不是运行时实现。
+> 状态：**已冻结（2026-11-18）**。本文是 v1.2.0 Prompt 与 Service 的共同依据，不是运行时实现。
 >
 > 适用指标：Faithfulness（F）、Answer Correctness（C）、Answer Relevancy（R）。三指标共享 Claim 语义，但分母和判定边界不同。
+
+## 冻结记录
+
+| 项 | 值 |
+|---|---|
+| 规范版本 | v1.2.0 semantic spec |
+| 状态 | **frozen** |
+| 冻结日期 | 2026-11-18 |
+| 复核人 | 江晚 |
+| 复核基线（commit SHA） | `9db8885` |
+| 运行时状态 | v1.2.0 未创建、未激活；默认仍 v1.0.0 |
+| 目标状态 | **未冻结**；Q17/Q30/Q32 等目标需重新审批 |
+| 备注 1 | “取决于/区分/需确认”优先 `condition`；`policy_scope` 只用于“适用于哪些订单/地区/对象”；两者都是 factual，不影响分母 |
+| 备注 2 | 40 条 final_labels 待补；13 条 HG 来自 human-gold.json，27 条 provisional 用 candidates.json 原始 category；合并后才能按最终分类分层 |
+| 变更控制 | 冻结后任何语义变化必须新开 freeze record + 新版本号；不得在 v1.2.0 内为单案例加 Prompt 特例 |
+
+**语义冻结 ≠ 目标冻结**：Q17/Q30/Q32 等目标仍按 `13-phase3e-acceptance-plan.md` 重新签字；不得沿用 v1.1.x 的 meta 排除结果。
 
 ## 1. 规范目标
 
@@ -43,6 +60,11 @@
 | `conflict` | 文档两处规则不一致的 meta 陈述（只在回答披露冲突时） | “§1 与 §12 对虚拟商品范围表述不一致” |
 
 **注意**：`policy_scope` 与 `policy_relationship` 是 **factual_claim**，不是文档元信息；文档没有明确写出时，应判 `insufficient_evidence`，留在 F 分母中。只有“文档覆盖范围/章节关系”才是 non_factual（见 3.2）。
+
+**分类优先级（冻结备注）**：
+- “取决于/区分/需确认”类句子优先 `condition`。
+- `policy_scope` 只用于“适用于哪些订单/地区/对象”。
+- 两者都是 factual，不影响 F 分母；同一类句子不要在两个 subtype 之间摇摆。
 
 ### 3.2 non_factual
 
@@ -300,6 +322,7 @@
 - **P0 目标冲突**：v1.1.x 的 Q17 F 0.9–1.0、Q30 F 1.0 是在把 `policy_relationship`/`policy_scope` 移出分母后得到的；v1.2.0 将其保留为 factual/insufficient 后，Q17 可能回到 0.8、Q30 可能回到 0.5。目标必须重新审批，不得静默沿用。
 - **absence/uncertainty 目标影响**：Q32 的“无法确认”将归 uncertainty，F 可能 skipped/1.0；Q19/Q31/Q35 的 absence/meta 归 non_factual 后分母变化，相关目标/基线需重审。
 - **C 覆盖缺口**：如果未来仍决定把政策范围/关系排除出 F，必须新增 C 规则或独立 claim-correctness；否则错误适用范围/关系没有指标能抓到。
+- **40 条 final_labels 待补**：13 条 HG 用 `human-gold.json`，27 条 provisional 用 `candidates.json` 原始 category；合并成 40 条 final_labels 后才能按最终分类分层。该文件是 40 条报告前置，不是语义规范冻结条件。
 
 ## 14. 一句话总结
 

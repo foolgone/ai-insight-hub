@@ -1,6 +1,6 @@
 # Prompt v1.2.0 设计草案
 
-> 状态：设计草案；**P0 已修正，待复核/未冻结**。本文不创建 v1.2.0 运行时版本，不修改 Prompt/Service/Schema/API/DB，不运行 Judge。
+> 状态：设计草案；**语义规范已于 2026-11-18 冻结，v1.2.0 运行时未创建/未激活，目标未冻结**。本文不创建 v1.2.0 运行时版本，不修改 Prompt/Service/Schema/API/DB，不运行 Judge。
 >
 > 设计目标：从“逐案例补 few-shot”转为“先冻结 Judge 语义，再用通用规则与结构化 Schema 实现”。P0：`policy_scope` / `policy_relationship` 是 factual，不得退出 F 分母。
 
@@ -229,12 +229,13 @@ v1.0.0 → v1.1.5 的经验：
 
 本文只交付设计。建议下一步（需人工批准）：
 
-1. 审核 `12-judge-semantic-spec.md` 的 P0 修正，冻结 v1.2.0 语义。
+1. 语义规范已于 2026-11-18 冻结（`12-judge-semantic-spec.md`）；冻结后不再改语义，任何变化需新 freeze record。
 2. 审核本设计的 Schema/Service 变化，确认新增 `policy_scope` / `policy_relationship` / `doc_scope` / `doc_relationship` / `derived` / `fact` / `process` / `uncertainty` / `condition` / `normative_requirement`。
-3. 重新审批 Q17/Q30 等受 P0 影响的目标；不得沿用 v1.1.x 通过 meta 排除得到的目标。
-4. 创建 v1.2.0 Prompt 目录（仅 design_draft，不激活）。
-5. 先跑单案例/负向测试，再跑 10 条，再补 baseline，最后 40 条。
-6. 任何阶段失败按 `13-phase3e-acceptance-plan.md` 停止，不累积 known miss。
+3. 重新审批 Q17/Q30/Q32 等受影响目标；不得沿用 v1.1.x 通过 meta 排除得到的目标。
+4. 补 40 条 final_labels：13 条 HG 用 `human-gold.json`，27 条 provisional 用 `candidates.json` 原始 category，合并后再按最终分类分层。
+5. 创建 v1.2.0 Prompt 目录（仅 design_draft，不激活）。
+6. 先跑单案例/负向测试，再跑 10 条，再补 baseline，最后 40 条。
+7. 任何阶段失败按 `13-phase3e-acceptance-plan.md` 停止，不累积 known miss。
 
 ## 11. 一句话总结
 
