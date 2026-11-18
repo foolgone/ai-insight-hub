@@ -18,7 +18,8 @@
 | 运行时状态 | v1.2.0 未创建、未激活；默认仍 v1.0.0 |
 | 目标状态 | **未冻结**；Q17/Q30/Q32 等目标需重新审批 |
 | 备注 1 | “取决于/区分/需确认”优先 `condition`；`policy_scope` 只用于“适用于哪些订单/地区/对象”；两者都是 factual，不影响分母 |
-| 备注 2 | 40 条 final_labels 待补；13 条 HG 来自 human-gold.json，27 条 provisional 用 candidates.json 原始 category；合并后才能按最终分类分层 |
+| 备注 2 | 40 条 final_labels 已冻结（2026-11-18，SHA `f139623fef80b55716fce0c773e776d284a5167683eb91559b23e49cabd000eb`）；13 条 HG 来自 human-gold.json，27 条 provisional 用 candidates.json 原始 category；40 条报告只能使用该文件作为分类来源 |
+| 运营补记 | 2026-11-18 final_labels 已冻结；这是分类冻结，不改变语义基线与目标状态 |
 | 变更控制 | 冻结后任何语义变化必须新开 freeze record + 新版本号；不得在 v1.2.0 内为单案例加 Prompt 特例 |
 
 **语义冻结 ≠ 目标冻结**：Q17/Q30/Q32 等目标仍按 `13-phase3e-acceptance-plan.md` 重新签字；不得沿用 v1.1.x 的 meta 排除结果。
@@ -324,7 +325,7 @@
 - **P0 目标冲突**：v1.1.x 的 Q17 F 0.9–1.0、Q30 F 1.0 是在把 `policy_relationship`/`policy_scope` 移出分母后得到的；v1.2.0 将其保留为 factual/insufficient 后，Q17 可能回到 0.8、Q30 可能回到 0.5。目标必须重新审批，不得静默沿用。
 - **absence/uncertainty 目标影响**：Q32 的“无法确认”将归 uncertainty，F 可能 skipped/1.0；Q19/Q31/Q35 的 absence/meta 归 non_factual 后分母变化，相关目标/基线需重审。
 - **C 覆盖缺口**：如果未来仍决定把政策范围/关系排除出 F，必须新增 C 规则或独立 claim-correctness；否则错误适用范围/关系没有指标能抓到。
-- **40 条 final_labels 待补**：13 条 HG 用 `human-gold.json`，27 条 provisional 用 `candidates.json` 原始 category；合并成 40 条 final_labels 后才能按最终分类分层。该文件是 40 条报告前置，不是语义规范冻结条件。
+- **40 条 final_labels 已冻结**：`pilot-40-final-labels.json`，SHA `f139623fef80b55716fce0c773e776d284a5167683eb91559b23e49cabd000eb`；13 条 HG 用 `human-gold.json`，27 条 provisional 用 `candidates.json` 原始 category；40 条报告只能使用该文件作为分类来源。分类冻结不等于目标冻结。
 
 ## 14. 一句话总结
 

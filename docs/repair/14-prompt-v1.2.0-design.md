@@ -221,7 +221,7 @@ v1.0.0 → v1.1.5 的经验：
 | absence/uncertainty 分类变化 | Q19/Q31/Q32/Q35 的 F/目标变化 | 冻结后重跑 baseline；Q32 目标重新注册 |
 | Q14 key_facts 未启用 | C 仍 known non-pass | v1.2.0 不启用 key_facts；Q14 保留 non-pass |
 | 8 条未运行/6 条 baseline 缺失 | 40 条不完整 | 先补 baseline，再算整体 |
-| 40 条 final labels 文件缺失 | 分层口径混用 | 补 final labels；在此之前报告注明用 candidates 原始分类 |
+| 40 条 final_labels 已冻结 | 分类与目标混淆 | 40 条报告只用 `pilot-40-final-labels.json`（SHA `f139623f…`）；目标另批 |
 | C/R 高方差 | 单次结论不可靠 | 3 次重复 + 独立校准集 |
 | 成本超预算 | 无法完成 | 分阶段：单案例→10 条→40 条，逐段签字 |
 
@@ -230,7 +230,7 @@ v1.0.0 → v1.1.5 的经验：
 本文只交付设计。建议下一步（需人工批准）：
 
 1. 语义规范已于 2026-11-18 冻结（`12-judge-semantic-spec.md`）；冻结后不再改语义，任何变化需新 freeze record。
-2. 补 40 条 final_labels：13 条 HG 用 `human-gold.json`，27 条 provisional 用 `candidates.json` 原始 category；生成并冻结 final_labels，作为 40 条报告唯一分类来源。
+2. 40 条 final_labels 已冻结：`pilot-40-final-labels.json`，SHA `f139623f…`；13 条 HG 来自 `human-gold.json`，27 条 provisional 来自 `candidates.json`；40 条报告只能使用该文件。
 3. 重新审批目标：Q17（policy_relationship factual，F 可能回 0.8）、Q30（policy_scope factual，expected 0.5）、Q32（uncertainty，可能 skipped/1.0）、Q19/Q31/Q35（absence/meta 分类变化，重跑 baseline 后再定）；Q36 条件句 factual，F 0.8–1.0 可留但不得靠排除条件句。
 4. 设计 v1.2.0 Schema / Service / 子类型：`fact` / `process` / `derived` / `policy_scope` / `policy_relationship` / `doc_scope` / `doc_relationship`；分母、evidence、skip/failed 按冻结规范。
 5. 先写负向测试（policy_scope 误归 meta、Q36 条件句误归 meta、absence 进分母等），再做单案例、10 条、40 条。

@@ -4,7 +4,7 @@
 >
 > 核心原则：**13 条 Human Gold 用于校准，27 条 provisional 只用于观察，40 条整体只用于规模/回归；三者不能混成一个“通过率”。**
 >
-> 前置：40 条 final_labels 待补；Q17/Q30/Q32 等目标需重新签字。语义冻结不等于目标冻结。
+> 前置：40 条 final_labels 已冻结（`pilot-40-final-labels.json`，SHA `f139623f…`）；Q17/Q30/Q32 等目标仍需重新签字。语义冻结不等于目标冻结。
 
 ## 1. 数据角色
 
@@ -105,8 +105,8 @@ Human Gold 范围以 `docs/repair/phase3e/human-gold.json` 为准：
 | unanswerable | Q29–Q34 |
 | ambiguous | Q35–Q39 |
 
-- `human-gold.json` 只覆盖 13 条 HG，不能单独给出 40 条最终分类；40 条最终分类需要一份单独的 final labels 文件（待补）。
-- 在 final labels 文件补齐前，报告必须注明用的是哪套口径；不得把 candidates 原始分类写成“最终分类”。
+- `human-gold.json` 只覆盖 13 条 HG；40 条最终分类已冻结在 `pilot-40-final-labels.json`（SHA `f139623f…`）。
+- 40 条报告只能使用 `pilot-40-final-labels.json` 作为分类来源；不得再把 candidates 原始分类写成“最终分类”。
 
 ## 3. 缺失 baseline 补齐策略
 
@@ -255,6 +255,7 @@ Human Gold 范围以 `docs/repair/phase3e/human-gold.json` 为准：
 ```json
 {
   "version": {"f_sha": "...", "c_sha": "...", "r_sha": "...", "model": "...", "temperature": 0.0},
+  "final_labels": {"file": "pilot-40-final-labels.json", "sha256": "f139623f..."},
   "completion": {"run": 40, "completed": 32, "not_run": ["Q33", "Q34", "Q35", "Q36", "Q37", "Q38", "Q39", "Q40"]},
   "groups": {"human_gold": 13, "provisional": 27},
   "targets": {"passed": 30, "total_run": 32, "known_issues": []},
