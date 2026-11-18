@@ -118,6 +118,17 @@ def test_explicit_v114_loads_v2_prompt() -> None:
     assert agent.prompt_sha256 == manifest["prompts"]["faithfulness.txt"]
 
 
+def test_explicit_v115_loads_v2_prompt() -> None:
+    agent = _agent(prompt_version="v1.1.5")
+
+    assert agent.prompt_version == "v1.1.5"
+    assert agent.schema_version == JUDGE_SCHEMA_V2
+    assert agent.rubric_version == "v1.1.5"
+    assert agent.metric_version == "v2"
+    manifest = load_prompt_manifest("v1.1.5")
+    assert agent.prompt_sha256 == manifest["prompts"]["faithfulness.txt"]
+
+
 def test_prompt_schema_and_metric_mapping() -> None:
     assert judge_schema_version("v1.0.0") == JUDGE_SCHEMA_V1
     assert judge_schema_version("v1.1.0") == JUDGE_SCHEMA_V1
@@ -125,10 +136,12 @@ def test_prompt_schema_and_metric_mapping() -> None:
     assert judge_schema_version("v1.1.2") == JUDGE_SCHEMA_V2
     assert judge_schema_version("v1.1.3") == JUDGE_SCHEMA_V2
     assert judge_schema_version("v1.1.4") == JUDGE_SCHEMA_V2
+    assert judge_schema_version("v1.1.5") == JUDGE_SCHEMA_V2
     assert metric_version_for_prompt("faithfulness", "v1.1.1") == "v2"
     assert metric_version_for_prompt("faithfulness", "v1.1.2") == "v2"
     assert metric_version_for_prompt("faithfulness", "v1.1.3") == "v2"
     assert metric_version_for_prompt("faithfulness", "v1.1.4") == "v2"
+    assert metric_version_for_prompt("faithfulness", "v1.1.5") == "v2"
     assert metric_version_for_prompt("faithfulness", "v1.0.0") == "v1"
     assert metric_version_for_prompt("answer_correctness", "v1.1.1") == "v2"
 
@@ -483,3 +496,12 @@ def test_v114_faithfulness_prompt_has_q30_scope_rule() -> None:
     assert "Few-shot H（Q30" in text
     assert "现有条款默认适用于中国大陆境内订单" in text
     assert "未定义签收是否包含境外地址" in text
+
+
+def test_v115_faithfulness_prompt_has_q17_relation_rule() -> None:
+    text = load_judge_prompt("v1.1.5", "faithfulness")
+
+    assert "规则之间的关系、独立性、适用范围推断" in text
+    assert "Few-shot I（Q17" in text
+    assert "该规则与是否满 99 元无关" in text
+    assert "规则关系/独立性推断" in text

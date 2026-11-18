@@ -1145,3 +1145,12 @@ alembic check   : No new upgrade operations detected
 - Q30 F 3/3：**1.0/1.0/1.0**，2 scorable（偏远运费、签收起算）+ 5 non_factual；C=0.9、R=0.9；范围/地域推断不再被标 factual。
 - 10 条闸门 v1.1.4：Q01/Q04/Q11 通过；**Q17 F=0.8 停止**（目标 0.9–1.0）。cl5“该规则与是否满 99 元无关”被标 factual/insufficient；v1.0.0/v1.1.3 标 supported，属于规则关系/独立性推断。
 - v1.1.4 未跑 40；v1.1.3 的 10/30 结果全部作废。仍 design_draft/inactive；未激活、未改 Human Gold/DB。
+
+### v1.1.5（2026-11-18，design_draft）
+- F = v1.1.4 + 规则关系/独立性推断归 meta、Q17 few-shot；R/C 继承 v1.1.4。
+- F SHA：`6d45fa102c6efcf6897e8e84f1a1b417b5720dfa78d617e206a6a0f3db49791c`；R SHA `394cd30c…`、C SHA `2ab6eac…` 不变。
+- Q17 F 3/3：**1.0/1.0/1.0**，cl5 归 meta；Q30 F 3/3：**1.0/1.0/1.0**。
+- **10 条闸门 v1.1.5：10/10 通过**；Q31 4 条 quote 诊断、Q35 2 条，目标命中。
+- 40 条规模/回归：Q01–Q31 通过；**Q32 F=0.75 停止**（v1.0.0 1.0；重跑 3 次均 0.75）。cl1“无法确认积分支持礼品兑换功能”被标 factual/insufficient；应为 non_factual/meta。完成 32/40。
+- Q14 F=unavailable；C=0.7 本次低于 0.8–1.0，历史 0.7/0.7/0.9 方差；单次 non-pass，不重复记 F+C。
+- 40 条未完成、未通过；v1.1.5 仍 design_draft/inactive；未激活、未改 Human Gold/DB。
