@@ -1,0 +1,236 @@
+# Phase 3E 验收方案（v1.2.0 重设计）
+
+> 状态：草案，等待人工审核。本文只定义验收流程，不修改运行时代码，不运行新的 Judge。
+>
+> 核心原则：**13 条 Human Gold 用于校准，27 条 provisional 只用于观察，40 条整体只用于规模/回归；三者不能混成一个“通过率”。**
+
+## 1. 数据角色
+
+| 数据 | 数量 | 角色 | 可写成什么 | 不可写成什么 |
+|---|---:|---|---|---|
+| Human Gold 基础题 | 13 | 校准/验收锚点 | “HG 校准通过/未通过” | “40 条 Human Gold 通过” |
+| Human Gold Claim | 1（Q21#3） | 单 claim 校准 | “Q21#3 为 insufficient” | “整条回答等于该 claim” |
+| Provisional 基础题 | 27 | 观察/回归 | “provisional 观察结果” | “人工 Gold 通过” |
+| 40 条整体 | 40 | 规模/回归 | “39/40 目标通过 + known issues” | “40 条通过” |
+
+Human Gold 范围以 `docs/repair/phase3e/human-gold.json` 为准：
+- 13 条基础题；
+- 1 条 claim（Q21#3）；
+- 35 条 claims 中仅 1 条已确认，34 条 pending；
+- key_facts 41 条（supported 38 / evidence_insufficient 2 / ambiguous 1）。
+
+## 2. 40 条报告统计口径
+
+### 2.1 必须分组的指标
+
+报告至少分三组：
+
+| 组 | 数量 | 统计 |
+|---|---:|---|
+| Human Gold | 13 | F/C/R 分布、目标命中、known non-pass、F unavailable |
+| Provisional | 27 | F/C/R 分布、目标命中、观察性结论 |
+| 40 条整体 | 40 | 运行完成度、目标通过数、known issues、未运行数 |
+
+**禁止**：
+- 把 HG 与 provisional 合并成一个均值；
+- 把 provisional 结果写成人工 Gold；
+- 把“目标通过”写成“Human Gold 通过”；
+- 把单次模型输出写成绝对真值。
+
+### 2.2 当前口径（v1.1.5）
+
+- 完成：32/40。
+- 目标通过：30/32（Q14 为 non-pass；Q32 为停止点）。
+- Q14：F unavailable；C=0.7 本次低于 0.8–1.0，历史 0.7/0.7/0.9 方差；只计一次 non-pass。
+- Q32：provisional F=0.75；cl1“无法确认”应归 meta；未决。
+- 未运行：Q33–Q40 共 8 条。
+- 基线：Q33/Q34/Q37/Q38/Q39/Q40 缺 v1.0.0 baseline；Q35/Q36 旧报告有 baseline，可复用。
+
+### 2.3 最终 40 条报告模板
+
+必须包含：
+
+1. **版本**：F/C/R SHA、模型、temperature、max_tokens、日期。
+2. **完成度**：完成/未完成、停止点、未运行列表。
+3. **分组表**：HG 13、Provisional 27、整体 40。
+4. **目标通过数**：明确“目标通过”不是“HG 通过”。
+5. **known issues**：
+   - Q14 F unavailable / C variance；
+   - Q32 meta 误分类（若未修）；
+   - Q35/Q36 quote 诊断；
+   - Q31 quote 诊断；
+   - Q10 typo（若出现）。
+6. **重复实验**：高方差案例的 3 次结果。
+7. **结论**：只能写“规模/回归结果”，不能写“40 条 Human Gold 验收通过”。
+
+示例口径：
+> v1.1.5：32/40 完成，30/32 目标通过；Q14 F unavailable/C variance；Q32 未决；Q33–Q40 未运行。不是 40 条通过，也不是 40 条 Human Gold 验收。
+
+## 3. 缺失 baseline 补齐策略
+
+### 3.1 当前缺口
+
+- 未运行 8 条：Q33–Q40。
+- 缺 v1.0.0 baseline 6 条：Q33、Q34、Q37、Q38、Q39、Q40。
+- Q35、Q36 的 v1.0.0 baseline 在旧 40 条报告中，可复用。
+- 因此补齐策略是：**跑 8 条 v1.1.x/v1.2.0 + 补 6 条 baseline + 复用 Q35/Q36 baseline**。
+
+### 3.2 补齐顺序
+
+1. 先冻结 v1.0.0 baseline：对 6 条缺失 case 跑一次 v1.0.0，保存 fingerprint。
+2. 再跑目标版本 8 条；Q35/Q36 复用旧 baseline，但必须校验 fingerprint。
+3. 补齐后再计算 40 条整体统计；未补齐前不得计算“40 条均值”。
+4. 如果 baseline 与新 Run 的模型配置不一致（model/temperature/max_tokens），baseline 不可复用，必须重跑。
+
+### 3.3 不得用“补 8 条 baseline”掩盖
+
+- 8 条是未运行，不等于 8 条 baseline 全缺。
+- 6 条 baseline 缺失，2 条 baseline 可复用。
+- 报告中必须写清楚“未运行”“baseline 缺失”“baseline 可复用”三者。
+
+## 4. Prompt SHA 与历史 Run 管理
+
+### 4.1 版本锁
+
+- 每次 F/C/R Prompt 变更 → 新版本目录 + 新 SHA。
+- 一次实验只能使用一个 F SHA、一个 C SHA、一个 R SHA。
+- 报告必须写全 SHA；缺一不可。
+- 不得把 v1.1.2 的 10 条与 v1.1.3 的 30 条拼接成 40 条。
+
+### 4.2 历史 Run
+
+- 旧 Run 只读归档，不删除。
+- 新版本运行前，旧结果标记 `invalidated_by_sha_change`。
+- 任何 known miss/known diagnostic 必须绑定当时 SHA；不能跨版本继承。
+- 版本目录保留；默认 `RAG_JUDGE_PROMPT_VERSION=v1.0.0`。
+
+### 4.3 指纹校验
+
+- 复用 baseline/旧结果前，校验：prompt SHA、model、temperature、max_tokens、schema_version、metric_version。
+- 任一不一致 → 不得复用。
+- 复用失败必须记录原因，不得静默使用。
+
+## 5. 高方差与重复实验
+
+### 5.1 何时重复
+
+以下情况必须重复 3 次：
+
+- Human Gold 单案例目标边界（F/C/R 落在目标上下界 0.1 内）；
+- 历史出现 ≥0.2 波动的案例；
+- R 指标出现 0.9→0.7 或 C 出现 0.8→0.7；
+- 任何 known miss 的定性判断；
+- 新版本首次跑 10 条闸门中的 HG 案例。
+
+### 5.2 判定
+
+| 场景 | 要求 |
+|---|---|
+| 硬门禁（Q23/Q30/Q17 等 HG/关键案例） | 3/3 在目标内；2/3 只能“观察”，不得开 40 |
+| 一般 HG 目标 | 3 次中至少 2 次在目标内，且无 HG quote 降级；报告全部 3 次 |
+| Provisional 观察 | 3 次全部报告；不因单次高/低直接下结论 |
+| 高方差 | 标 `high_variance=true`；记录 min/median/max；不得只报最好一次 |
+| 已知非 Judge 问题 | 单独列，不进入 Judge 方差统计 |
+
+### 5.3 禁止
+
+- 只跑一次就宣称通过；
+- 跑三次只报最好一次；
+- 用“复跑直到通过”替代规则修复；
+- 把 known miss 写成 PASS；
+- 把单次 0.9 当成稳定 0.9。
+
+## 6. 验收分层
+
+### 6.1 单案例层
+
+每个案例必须满足：
+
+1. Schema/JSON 合法；不是 `failed`。
+2. 不是 `all_invalid`（全部 claims 校验失败）。
+3. `supported` 必须有有效 evidence；不得 `supported_without_evidence`。
+4. Human Gold：不得出现 supported claim 被 quote 降级（Q35/Q36 的 known diagnostic 需显式允许）。
+5. 目标范围内（F/C/R 或 skipped/unavailable）。
+6. 高方差案例 3 次结果符合 5.2。
+
+### 6.2 分层验收
+
+按题型分层：
+
+| 层 | 案例 | 验收 |
+|---|---|---|
+| direct | Q05/Q13/Q16/Q19/Q22/Q37/Q40 等 | 直接回答、条件、单部分 |
+| multi | Q11/Q12/Q14/Q15/Q17/Q18/Q19/Q22 等 | 多部分/条件分支 |
+| constraint | Q01/Q04/Q21/Q22/Q23/Q24–Q28/Q36 等 | 约束/冲突/运算 |
+| unanswerable | Q29/Q30/Q31/Q32/Q33 等 | absence/无法确认 |
+| ambiguous | Q35/Q36/Q37/Q38/Q39/Q40 等 | 模糊/冲突披露 |
+
+每层至少报告：
+- 完成数；
+- 目标通过数；
+- known issues；
+- high variance 数。
+
+### 6.3 整体验收
+
+- **10 条闸门**：10/10 目标通过；不得有 HG quote 降级、schema failed、all invalid。
+- **40 条规模/回归**：完成 40/40；目标通过数 + known issues 分开报告；不得写“40 条 Human Gold 通过”。
+- **Human Gold 校准**：13 条中 clean pass 数；Q14 F unavailable 单独列；Q21#3 单 claim 单独列。
+- **Provisional 观察**：27 条只作观察；不得把 provisional 目标通过写成 HG 通过。
+
+## 7. 停止条件
+
+以下任一触发停止，不得继续累积：
+
+1. Schema failed / 结构化输出失败。
+2. 全部 claims invalid。
+3. Human Gold supported claim 被 quote 降级（除已显式允许的 Q35/Q36 known diagnostic）。
+4. `supported_without_evidence`。
+5. 重复 `claim_id` 或冲突证据单边/嵌套。
+6. 未解释的指标下降 >0.10（浮点比较用容差；恰好 0.10 不停止）。
+7. 同一 provisional 案例第二次 evidence typo / 数字改变。
+8. 高方差案例 3 次中 2 次低于硬门禁。
+
+停止后必须：
+- 记录 case、metric、现象、根因、SHA；
+- 不把该 case 写成 PASS；
+- 决定“规则修复 / 目标注册 / 数据修复 / 停止”，不得默认继续。
+
+## 8. Q14 与 Context 可用性
+
+- Q14：F=`skipped(context_unavailable)`，F 不可评估；不是 PASS，不是 0。
+- Q14 C：本次 0.7 低于 0.8–1.0，历史 0.7/0.7/0.9 方差；只计一次 non-pass，不重复记 F+C。
+- Q33：同样 `context_unavailable`；未运行前不推测。
+- C1-only（Q22/Q26/Q27/Q34/Q37/Q40）：报告必须注明单上下文；不得与双上下文混算 F 均值。
+- `context_unavailable` 不计入 F 分母，也不进入 F 通过率；单独列“F unavailable”。
+
+## 9. 报告字段（最小集）
+
+每次 Run 必须输出：
+
+```json
+{
+  "version": {"f_sha": "...", "c_sha": "...", "r_sha": "...", "model": "...", "temperature": 0.0},
+  "completion": {"run": 40, "completed": 32, "not_run": ["Q33"]},
+  "groups": {"human_gold": 13, "provisional": 27},
+  "targets": {"passed": 30, "total_run": 32, "known_issues": []},
+  "known_issues": [
+    {"case_id": "Q14", "kind": "F_unavailable", "detail": "..."},
+    {"case_id": "Q32", "kind": "meta_misclass", "detail": "..."}
+  ],
+  "repeats": [{"case_id": "Q16", "metric": "R", "scores": [0.9, 0.9, 1.0]}],
+  "baseline": {"reused": 30, "new": 2, "missing": 6}
+}
+```
+
+## 10. 成本与执行边界
+
+- 10 条闸门：约 ¥0.6（双版本）。
+- 40 条整批：约 ¥1.4–1.8（含 baseline 补齐）。
+- 高方差重复：约 ¥0.2–0.4。
+- v1.2.0 完整验证预计 ¥2.5–3.0。
+- 不激活、不进入 Phase 4、不修改 Human Gold/Prompt 正文/DB；任何激活需人工签字。
+
+## 11. 一句话总结
+
+**13 条 HG 是校准锚点，27 条 provisional 是观察样本，40 条是规模/回归；只有“分层 + 重复 + SHA 锁定 + known issue 分列”的报告，才允许进入人工审核。**

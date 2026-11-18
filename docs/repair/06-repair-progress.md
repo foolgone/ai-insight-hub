@@ -1154,3 +1154,13 @@ alembic check   : No new upgrade operations detected
 - 40 条规模/回归：Q01–Q31 通过；**Q32 F=0.75 停止**（v1.0.0 1.0；重跑 3 次均 0.75）。cl1“无法确认积分支持礼品兑换功能”被标 factual/insufficient；应为 non_factual/meta。完成 32/40。
 - Q14 F=unavailable；C=0.7 本次低于 0.8–1.0，历史 0.7/0.7/0.9 方差；单次 non-pass，不重复记 F+C。
 - 40 条未完成、未通过；v1.1.5 仍 design_draft/inactive；未激活、未改 Human Gold/DB。
+
+### v1.2.0 规划（2026-11-18，只分析/设计）
+- 停止 v1.1.x 单案例逐条修补；新增四份文档：
+  - `docs/repair/11-phase3e-failure-taxonomy.md`
+  - `docs/repair/12-judge-semantic-spec.md`
+  - `docs/repair/13-phase3e-acceptance-plan.md`
+  - `docs/repair/14-prompt-v1.2.0-design.md`
+- 数据盘点：40 条中 13 HG / 27 provisional；v1.1.5 完成 32/40；Q33–Q40 未运行；6 条缺 v1.0.0 baseline（Q35/Q36 旧 baseline 可用）。
+- 失败归因：Scope/Meta/absence/uncertainty 误建 factual、Evidence 最短子串、条件/权益推断、Claim 原子性、C/R 校准、Context 可用性。
+- 未修改 Prompt/Service/Schema/API/DB；未创建或激活 v1.2.0；未运行新的 Judge；未进入 Phase 4。
