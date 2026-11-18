@@ -230,11 +230,11 @@ v1.0.0 → v1.1.5 的经验：
 本文只交付设计。建议下一步（需人工批准）：
 
 1. 语义规范已于 2026-11-18 冻结（`12-judge-semantic-spec.md`）；冻结后不再改语义，任何变化需新 freeze record。
-2. 审核本设计的 Schema/Service 变化，确认新增 `policy_scope` / `policy_relationship` / `doc_scope` / `doc_relationship` / `derived` / `fact` / `process` / `uncertainty` / `condition` / `normative_requirement`。
-3. 重新审批 Q17/Q30/Q32 等受影响目标；不得沿用 v1.1.x 通过 meta 排除得到的目标。
-4. 补 40 条 final_labels：13 条 HG 用 `human-gold.json`，27 条 provisional 用 `candidates.json` 原始 category，合并后再按最终分类分层。
-5. 创建 v1.2.0 Prompt 目录（仅 design_draft，不激活）。
-6. 先跑单案例/负向测试，再跑 10 条，再补 baseline，最后 40 条。
+2. 补 40 条 final_labels：13 条 HG 用 `human-gold.json`，27 条 provisional 用 `candidates.json` 原始 category；生成并冻结 final_labels，作为 40 条报告唯一分类来源。
+3. 重新审批目标：Q17（policy_relationship factual，F 可能回 0.8）、Q30（policy_scope factual，expected 0.5）、Q32（uncertainty，可能 skipped/1.0）、Q19/Q31/Q35（absence/meta 分类变化，重跑 baseline 后再定）；Q36 条件句 factual，F 0.8–1.0 可留但不得靠排除条件句。
+4. 设计 v1.2.0 Schema / Service / 子类型：`fact` / `process` / `derived` / `policy_scope` / `policy_relationship` / `doc_scope` / `doc_relationship`；分母、evidence、skip/failed 按冻结规范。
+5. 先写负向测试（policy_scope 误归 meta、Q36 条件句误归 meta、absence 进分母等），再做单案例、10 条、40 条。
+6. 不创建/激活 v1.2.0，不跑 Judge；等 Schema/目标设计复核后再申请运行。
 7. 任何阶段失败按 `13-phase3e-acceptance-plan.md` 停止，不累积 known miss。
 
 ## 11. 一句话总结
