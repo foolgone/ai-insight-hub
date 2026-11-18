@@ -1,6 +1,6 @@
 {
   "file": "pilot-40-targets-v1.2.0.json",
-  "sha256": "070960c9c7ea953f1fe4e6ec5f19ce4b8b0fbeb99f529bc9041bf814c894f300",
+  "sha256": "34357b34c3d0fc85e78f90eeebb353b25a148926e3a55b19f17cc23b08b2b5eb",
   "sha256_file": "pilot-40-targets-v1.2.0.sha256",
   "row_count": 40,
   "status": "frozen",
@@ -74,8 +74,8 @@
       "name": "sha_sidecar",
       "ok": true,
       "detail": {
-        "actual": "070960c9c7ea953f1fe4e6ec5f19ce4b8b0fbeb99f529bc9041bf814c894f300",
-        "sidecar": "070960c9c7ea953f1fe4e6ec5f19ce4b8b0fbeb99f529bc9041bf814c894f300"
+        "actual": "34357b34c3d0fc85e78f90eeebb353b25a148926e3a55b19f17cc23b08b2b5eb",
+        "sidecar": "34357b34c3d0fc85e78f90eeebb353b25a148926e3a55b19f17cc23b08b2b5eb"
       }
     },
     {
@@ -336,6 +336,16 @@
           1.0
         ]
       }
+    },
+    {
+      "name": "target_status_note",
+      "ok": true,
+      "detail": "target_status records pre-freeze change provenance; all rows are approved in this frozen table. reapproval_required/new_target_proposed are historical change types, not pending approvals."
+    },
+    {
+      "name": "revision_note",
+      "ok": true,
+      "detail": "v1.0.1"
     }
   ],
   "all_pass": true

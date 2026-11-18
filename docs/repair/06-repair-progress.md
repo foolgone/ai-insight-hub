@@ -1165,7 +1165,9 @@ alembic check   : No new upgrade operations detected
 - 失败归因：Scope/Meta/absence/uncertainty 误建 factual、Evidence 最短子串、条件/权益推断、Claim 原子性、C/R 校准、Context 可用性。
 - 审核结果：`approve_with_changes`；P0 残留（Q36 条件句）已修，**语义规范 v1.2.0 于 2026-11-18 冻结**（复核人江晚；语义基线 commit `9db8885`；冻结记录 commit `b50830b`）。
 - 冻结备注：`condition` 优先于 `policy_scope`（“取决于/区分/需确认”→condition；policy_scope 只用于适用订单/地区/对象；两者都是 factual）；40 条 final_labels 已冻结（`pilot-40-final-labels.json`，SHA `f139623f…`；13 HG 来自 human-gold，27 provisional 来自 candidates），是 40 条报告唯一分类来源。
-- 语义规范 + 目标表已冻结：`pilot-40-targets-v1.2.0.json`（SHA `070960c9…`，2026-11-18）为目标唯一来源；`pilot-40-targets-v1.2.0-reapproval` 仅保留历史；旧 `pilot-40-targets.json` 只读。
+- 语义规范 + 目标表已冻结：`pilot-40-targets-v1.2.0.json`（revision v1.0.1，SHA `34357b34…`，2026-11-18）为目标唯一来源；`pilot-40-targets-v1.2.0-reapproval` 仅保留历史；旧 `pilot-40-targets.json` 只读。
+- `target_status` 是冻结前变更来源（reapproval/new_target 是历史类型），不是仍待审批；active target meta 已记录该说明。
 - Q32 冻结前提：F 0.9–1.0 以 3 个 factual 点为前提；若 v1.2.0 把它们归为 uncertainty/absence 导致 skipped，算目标未命中，不得 skipped 兜底。
-- 下一步顺序：Schema/子类型/Service 设计 → 负向测试 → 单案例 → 10 条 → 40 条；Schema 复核前不创建/激活 v1.2.0、不跑 Judge。
+- Schema/Service 设计：`docs/repair/15-phase3e-v1.2.0-schema-service-design.md`；Schema v3、Metric v3；缺 subtype 报错；policy_scope/relationship 不回退。
+- 下一步顺序：负向测试 → 单案例（Q17/Q30/Q32/Q36）→ 10 条 → 40 条；Schema/目标复核前不创建/激活 v1.2.0、不跑 Judge。
 - 未修改 Prompt/Service/Schema/API/DB；未创建或激活 v1.2.0；未运行新的 Judge；未进入 Phase 4。

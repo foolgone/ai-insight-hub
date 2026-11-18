@@ -31,7 +31,10 @@
     },
     "sha256_file": "pilot-40-targets-v1.2.0.sha256",
     "runtime_active": false,
-    "note": "Active target table for v1.2.0; v1.2.0 runtime is not created/activated; no Judge run."
+    "note": "Active target table for v1.2.0; v1.2.0 runtime is not created/activated; no Judge run.",
+    "revision": "v1.0.1",
+    "target_status_note": "target_status records pre-freeze change provenance; all rows are approved in this frozen table. reapproval_required/new_target_proposed are historical change types, not pending approvals.",
+    "revision_note": "v1.0.1 metadata-only revision: add target_status provenance note; target values unchanged."
   },
   "cases": [
     {

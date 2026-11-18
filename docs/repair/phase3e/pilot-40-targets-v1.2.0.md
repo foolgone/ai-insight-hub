@@ -4,8 +4,8 @@
 > 状态：**frozen**
 > 冻结日期：2026-11-18
 > 冻结人：江晚
-> SHA256：`070960c9c7ea953f1fe4e6ec5f19ce4b8b0fbeb99f529bc9041bf814c894f300`
-> 校验：`pilot-40-targets-v1.2.0.validation.json`（22/22 通过）
+> SHA256：`34357b34c3d0fc85e78f90eeebb353b25a148926e3a55b19f17cc23b08b2b5eb`
+> 校验：`pilot-40-targets-v1.2.0.validation.json`（24/24 通过）
 
 ## 1. 权威关系
 
@@ -64,9 +64,11 @@ Q32 的 F 0.9–1.0 基于以下 3 个 factual 点仍存在：
 | reapproval_with_variant | 1（Q36） |
 | **合计** | **40** |
 
+> `target_status` 记录的是**冻结前的变更来源**；本表中所有行都已批准。`reapproval_required` / `new_target_proposed` 是历史变更类型，不代表仍待审批。
+
 ## 6. 校验
 
-`pilot-40-targets-v1.2.0.validation.json` 22/22 通过，包括：
+`pilot-40-targets-v1.2.0.validation.json` 24/24 通过，包括：
 
 - 40 行、Q01–Q40、无重复；
 - SHA 与 `.sha256` 一致；
@@ -76,6 +78,7 @@ Q32 的 F 0.9–1.0 基于以下 3 个 factual 点仍存在：
 - Q32 不是 skipped，且前提备注存在；
 - target_source 计数 5/5/8/22；
 - target_status 计数 31/3/2/2/1/1；
+- target_status 来源说明与 revision v1.0.1 存在；
 - `runtime_active=false`。
 
 ## 7. 冻结边界

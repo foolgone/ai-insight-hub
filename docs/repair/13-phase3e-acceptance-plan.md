@@ -4,7 +4,7 @@
 >
 > 核心原则：**13 条 Human Gold 用于校准，27 条 provisional 只用于观察，40 条整体只用于规模/回归；三者不能混成一个“通过率”。**
 >
-> 前置：40 条 final_labels 已冻结（`pilot-40-final-labels.json`，SHA `f139623f…`）；目标表已冻结（`pilot-40-targets-v1.2.0.json`，SHA `070960c9…`）；v1.2.0 运行时未创建/未激活。
+> 前置：40 条 final_labels 已冻结（`pilot-40-final-labels.json`，SHA `f139623f…`）；目标表已冻结（`pilot-40-targets-v1.2.0.json`，SHA `34357b34…`）；v1.2.0 运行时未创建/未激活。
 
 ## 1. 数据角色
 
@@ -84,7 +84,7 @@ Human Gold 范围以 `docs/repair/phase3e/human-gold.json` 为准：
 | Q21 | Q21#3 insufficient | 不变 | 不变 | 目标 0.6–0.7 保留 |
 | Q14 | F unavailable；C 方差 | 不变 | 不可评估 | 保留 known non-pass；不因 key_facts 改成 PASS |
 
-> 目标表已冻结（2026-11-18）：`pilot-40-targets-v1.2.0.json`，SHA `070960c9…`；`pilot-40-final-labels.json` 只作分类来源，active target 文件是目标唯一来源；旧 `pilot-40-targets.json` 只读保留。
+> 目标表已冻结（2026-11-18）：`pilot-40-targets-v1.2.0.json`，SHA `34357b34…`；`pilot-40-final-labels.json` 只作分类来源，active target 文件是目标唯一来源；旧 `pilot-40-targets.json` 只读保留。
 >
 > 重批提案 `pilot-40-targets-v1.2.0-reapproval.json` 保留为历史记录；active target 文件已取代其 `proposed_pending_human` 状态。
 
