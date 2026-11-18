@@ -1,10 +1,10 @@
 # Phase 3E 验收方案（v1.2.0 重设计）
 
-> 状态：语义规范已于 2026-11-18 冻结；**验收方案与目标仍未冻结**，等待审核。本文只定义验收流程，不修改运行时代码，不运行新的 Judge。
+> 状态：语义规范已于 2026-11-18 冻结；目标表已于 2026-11-18 冻结；**验收方案仍待审核**。本文只定义验收流程，不修改运行时代码，不运行新的 Judge。
 >
 > 核心原则：**13 条 Human Gold 用于校准，27 条 provisional 只用于观察，40 条整体只用于规模/回归；三者不能混成一个“通过率”。**
 >
-> 前置：40 条 final_labels 已冻结（`pilot-40-final-labels.json`，SHA `f139623f…`）；Q17/Q30/Q32 等目标仍需重新签字。语义冻结不等于目标冻结。
+> 前置：40 条 final_labels 已冻结（`pilot-40-final-labels.json`，SHA `f139623f…`）；目标表已冻结（`pilot-40-targets-v1.2.0.json`，SHA `070960c9…`）；v1.2.0 运行时未创建/未激活。
 
 ## 1. 数据角色
 
@@ -84,9 +84,9 @@ Human Gold 范围以 `docs/repair/phase3e/human-gold.json` 为准：
 | Q21 | Q21#3 insufficient | 不变 | 不变 | 目标 0.6–0.7 保留 |
 | Q14 | F unavailable；C 方差 | 不变 | 不可评估 | 保留 known non-pass；不因 key_facts 改成 PASS |
 
-> 所有受影响目标必须在 v1.2.0 语义冻结后重新签字；不得把 v1.1.x 的 meta 排除结果直接搬进 v1.2.0。
+> 目标表已冻结（2026-11-18）：`pilot-40-targets-v1.2.0.json`，SHA `070960c9…`；`pilot-40-final-labels.json` 只作分类来源，active target 文件是目标唯一来源；旧 `pilot-40-targets.json` 只读保留。
 >
-> 目标重批提案：`pilot-40-targets-v1.2.0-reapproval.json` / `.md`（18/18 校验，`proposed_pending_human`；旧 `pilot-40-targets.json` 未修改）。
+> 重批提案 `pilot-40-targets-v1.2.0-reapproval.json` 保留为历史记录；active target 文件已取代其 `proposed_pending_human` 状态。
 
 ### 2.5 分层口径
 

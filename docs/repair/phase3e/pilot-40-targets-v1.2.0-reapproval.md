@@ -1,11 +1,11 @@
 # v1.2.0 目标重批提案（PENDING）
 
 > 文件：`pilot-40-targets-v1.2.0-reapproval.json`
-> 状态：**proposed_pending_human**
+> 状态：**历史提案；已于 2026-11-18 批准并冻结为 `pilot-40-targets-v1.2.0.json`（SHA `070960c9…`）**
 > 依据：`12-judge-semantic-spec.md`（2026-11-18 frozen）
 > 分类来源：`pilot-40-final-labels.json`（SHA `f139623f…`）
 > 旧目标：`pilot-40-targets.json`（未修改）
-> **未用于任何 Run；未替换旧目标；签字后才可生成 active target 文件。**
+> **本文件保留作历史；active target 文件才是目标唯一来源。**
 
 ## 1. 受影响案例
 

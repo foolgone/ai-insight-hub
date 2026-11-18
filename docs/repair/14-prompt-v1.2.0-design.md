@@ -1,6 +1,6 @@
 # Prompt v1.2.0 设计草案
 
-> 状态：设计草案；**语义规范已于 2026-11-18 冻结，v1.2.0 运行时未创建/未激活，目标未冻结**。本文不创建 v1.2.0 运行时版本，不修改 Prompt/Service/Schema/API/DB，不运行 Judge。
+> 状态：设计草案；**语义规范已于 2026-11-18 冻结，目标表已于 2026-11-18 冻结，v1.2.0 运行时未创建/未激活**。本文不创建 v1.2.0 运行时版本，不修改 Prompt/Service/Schema/API/DB，不运行 Judge。
 >
 > 设计目标：从“逐案例补 few-shot”转为“先冻结 Judge 语义，再用通用规则与结构化 Schema 实现”。P0：`policy_scope` / `policy_relationship` 是 factual，不得退出 F 分母。
 
@@ -216,12 +216,12 @@ v1.0.0 → v1.1.5 的经验：
 | Q36 冲突口径未选边 | 无法定义 canonical | 只验证披露；业务确认后再选边 |
 | Q14 金标/答案差异 | C 目标争议 | 保留 missing_points；不因 F 失败改 C |
 | Q21#3 单 claim | 与整条 F 混淆 | 单 claim 与整条分开报告 |
-| Q30/Q32 目标边界 | 目标漂移 | 先改语义，再注册目标；不先移动目标 |
-| P0 政策范围/关系回到 factual | Q17/Q30 的 v1.1.x 目标失效 | 重新审批 Q17/Q30 目标，不静默沿用 1.0 |
-| absence/uncertainty 分类变化 | Q19/Q31/Q32/Q35 的 F/目标变化 | 冻结后重跑 baseline；Q32 目标重新注册 |
+| Q30/Q32 目标边界 | 目标漂移 | 目标表已冻结：Q30 0.4–1.0 expected 0.5；Q32 0.9–1.0 以 3 个 factual 点为前提，skipped 不兜底 |
+| P0 政策范围/关系回到 factual | Q17/Q30 的 v1.1.x 目标失效 | active target：Q17 0.7–0.9、Q30 0.4–1.0；不沿用 1.0 |
+| absence/uncertainty 分类变化 | Q19/Q31/Q32/Q35 的 F/目标变化 | active target 已定；冻结后重跑 baseline |
 | Q14 key_facts 未启用 | C 仍 known non-pass | v1.2.0 不启用 key_facts；Q14 保留 non-pass |
 | 8 条未运行/6 条 baseline 缺失 | 40 条不完整 | 先补 baseline，再算整体 |
-| 40 条 final_labels 已冻结 | 分类与目标混淆 | 40 条报告只用 `pilot-40-final-labels.json`（SHA `f139623f…`）；目标另批 |
+| 40 条 final_labels / 目标表已冻结 | 分类与目标混淆 | 40 条报告用 final_labels SHA `f139623f…`；目标用 active target SHA `070960c9…` |
 | C/R 高方差 | 单次结论不可靠 | 3 次重复 + 独立校准集 |
 | 成本超预算 | 无法完成 | 分阶段：单案例→10 条→40 条，逐段签字 |
 
@@ -231,7 +231,7 @@ v1.0.0 → v1.1.5 的经验：
 
 1. 语义规范已于 2026-11-18 冻结（`12-judge-semantic-spec.md`）；冻结后不再改语义，任何变化需新 freeze record。
 2. 40 条 final_labels 已冻结：`pilot-40-final-labels.json`，SHA `f139623f…`；13 条 HG 来自 `human-gold.json`，27 条 provisional 来自 `candidates.json`；40 条报告只能使用该文件。
-3. 重新审批目标：使用 `pilot-40-targets-v1.2.0-reapproval.json` / `.md`（Q17/Q30/Q32/Q19/Q20/Q31/Q35/Q36/Q14）；签字前不生成 active target。
+3. 目标表已冻结：`pilot-40-targets-v1.2.0.json`，SHA `070960c9…`；使用 active target 文件，`pilot-40-targets-v1.2.0-reapproval` 仅保留为历史。
 4. 设计 v1.2.0 Schema / Service / 子类型：`fact` / `process` / `derived` / `policy_scope` / `policy_relationship` / `doc_scope` / `doc_relationship`；分母、evidence、skip/failed 按冻结规范。
 5. 先写负向测试（policy_scope 误归 meta、Q36 条件句误归 meta、absence 进分母等），再做单案例、10 条、40 条。
 6. 不创建/激活 v1.2.0，不跑 Judge；等 Schema/目标设计复核后再申请运行。
