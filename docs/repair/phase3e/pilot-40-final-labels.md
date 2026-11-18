@@ -58,6 +58,8 @@
 - pilot10：Q01、Q04、Q17、Q29、Q31
 - additional：Q14、Q15、Q20、Q22、Q28、Q30
 
+**来源优先级备注（P3）**：`target_source` 同一案例只取一个来源，优先级为 `matrix > pilot10 > additional > none`。Q29 同时出现在 10 条闸门与 6 案例矩阵中，因两处目标同值，取 `pilot10`；因此 `matrix` 计数是 5，不是 6。该备注不改变分类、分数或 SHA。
+
 ## 5. Baseline 状态
 
 | 状态 | 数量 |

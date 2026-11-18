@@ -253,5 +253,10 @@
       "detail": "condition_sentence;conflict_disclosure"
     }
   ],
-  "all_pass": true
+  "all_pass": true,
+  "notes": [
+    "target_source priority: matrix > pilot10 > additional > none; one source per case.",
+    "Q29 is pilot10 because the 10-gate target has the same values as the matrix target; matrix count is 5, not 6.",
+    "This note does not change labels, scores, or the frozen SHA."
+  ]
 }

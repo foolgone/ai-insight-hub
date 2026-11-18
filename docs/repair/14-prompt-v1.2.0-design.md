@@ -231,7 +231,7 @@ v1.0.0 → v1.1.5 的经验：
 
 1. 语义规范已于 2026-11-18 冻结（`12-judge-semantic-spec.md`）；冻结后不再改语义，任何变化需新 freeze record。
 2. 40 条 final_labels 已冻结：`pilot-40-final-labels.json`，SHA `f139623f…`；13 条 HG 来自 `human-gold.json`，27 条 provisional 来自 `candidates.json`；40 条报告只能使用该文件。
-3. 重新审批目标：Q17（policy_relationship factual，F 可能回 0.8）、Q30（policy_scope factual，expected 0.5）、Q32（uncertainty，可能 skipped/1.0）、Q19/Q31/Q35（absence/meta 分类变化，重跑 baseline 后再定）；Q36 条件句 factual，F 0.8–1.0 可留但不得靠排除条件句。
+3. 重新审批目标：使用 `pilot-40-targets-v1.2.0-reapproval.json` / `.md`（Q17/Q30/Q32/Q19/Q20/Q31/Q35/Q36/Q14）；签字前不生成 active target。
 4. 设计 v1.2.0 Schema / Service / 子类型：`fact` / `process` / `derived` / `policy_scope` / `policy_relationship` / `doc_scope` / `doc_relationship`；分母、evidence、skip/failed 按冻结规范。
 5. 先写负向测试（policy_scope 误归 meta、Q36 条件句误归 meta、absence 进分母等），再做单案例、10 条、40 条。
 6. 不创建/激活 v1.2.0，不跑 Judge；等 Schema/目标设计复核后再申请运行。

@@ -85,6 +85,8 @@ Human Gold 范围以 `docs/repair/phase3e/human-gold.json` 为准：
 | Q14 | F unavailable；C 方差 | 不变 | 不可评估 | 保留 known non-pass；不因 key_facts 改成 PASS |
 
 > 所有受影响目标必须在 v1.2.0 语义冻结后重新签字；不得把 v1.1.x 的 meta 排除结果直接搬进 v1.2.0。
+>
+> 目标重批提案：`pilot-40-targets-v1.2.0-reapproval.json` / `.md`（18/18 校验，`proposed_pending_human`；旧 `pilot-40-targets.json` 未修改）。
 
 ### 2.5 分层口径
 
