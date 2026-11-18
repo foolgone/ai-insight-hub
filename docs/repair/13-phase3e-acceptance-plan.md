@@ -43,6 +43,7 @@ Human Gold 范围以 `docs/repair/phase3e/human-gold.json` 为准：
 - 目标通过：30/32（Q14 为 non-pass；Q32 为停止点）。
 - Q14：F unavailable；C=0.7 本次低于 0.8–1.0，历史 0.7/0.7/0.9 方差；只计一次 non-pass。
 - Q32：provisional F=0.75；cl1“无法确认”应归 meta；未决。
+- **P0 未冻结**：Q17/Q30 的 v1.1.x 目标是在把 `policy_scope`/`policy_relationship` 移出分母后得到的；v1.2.0 将政策范围/关系保留为 factual，Q17 可能回到 0.8、Q30 可能回到 0.5，目标必须重新审批，不得沿用 1.0。
 - 未运行：Q33–Q40 共 8 条。
 - 基线：Q33/Q34/Q37/Q38/Q39/Q40 缺 v1.0.0 baseline；Q35/Q36 旧报告有 baseline，可复用。
 
@@ -157,13 +158,15 @@ Human Gold 范围以 `docs/repair/phase3e/human-gold.json` 为准：
 
 按题型分层：
 
-| 层 | 案例 | 验收 |
+| 层 | 案例（按 candidates.json category，一层一案例） | 验收 |
 |---|---|---|
-| direct | Q05/Q13/Q16/Q19/Q22/Q37/Q40 等 | 直接回答、条件、单部分 |
-| multi | Q11/Q12/Q14/Q15/Q17/Q18/Q19/Q22 等 | 多部分/条件分支 |
-| constraint | Q01/Q04/Q21/Q22/Q23/Q24–Q28/Q36 等 | 约束/冲突/运算 |
-| unanswerable | Q29/Q30/Q31/Q32/Q33 等 | absence/无法确认 |
-| ambiguous | Q35/Q36/Q37/Q38/Q39/Q40 等 | 模糊/冲突披露 |
+| direct | Q01–Q10 | 直接回答、单部分 |
+| multi | Q11–Q20 | 多部分/条件分支 |
+| constraint | Q21–Q28 | 约束/运算/冲突 |
+| unanswerable | Q29–Q34 | absence/无法确认/context_unavailable |
+| ambiguous | Q35–Q40 | 模糊/冲突披露 |
+
+> 分层以 `candidates.json` 的 `category` 为准，每案例只归一层；Q14/Q33 的 `context_unavailable` 在所属层内单独标注，不另开层。
 
 每层至少报告：
 - 完成数；
@@ -199,7 +202,7 @@ Human Gold 范围以 `docs/repair/phase3e/human-gold.json` 为准：
 ## 8. Q14 与 Context 可用性
 
 - Q14：F=`skipped(context_unavailable)`，F 不可评估；不是 PASS，不是 0。
-- Q14 C：本次 0.7 低于 0.8–1.0，历史 0.7/0.7/0.9 方差；只计一次 non-pass，不重复记 F+C。
+- Q14 C：本次 0.7 低于 0.8–1.0，历史 0.7/0.7/0.9 方差；只计一次 non-pass，不重复记 F+C。报告只能写“Q14 F unavailable / C 0.7 本次方差”，不得写成“F miss + C miss 两个失败”。
 - Q33：同样 `context_unavailable`；未运行前不推测。
 - C1-only（Q22/Q26/Q27/Q34/Q37/Q40）：报告必须注明单上下文；不得与双上下文混算 F 均值。
 - `context_unavailable` 不计入 F 分母，也不进入 F 通过率；单独列“F unavailable”。
@@ -211,24 +214,27 @@ Human Gold 范围以 `docs/repair/phase3e/human-gold.json` 为准：
 ```json
 {
   "version": {"f_sha": "...", "c_sha": "...", "r_sha": "...", "model": "...", "temperature": 0.0},
-  "completion": {"run": 40, "completed": 32, "not_run": ["Q33"]},
+  "completion": {"run": 40, "completed": 32, "not_run": ["Q33", "Q34", "Q35", "Q36", "Q37", "Q38", "Q39", "Q40"]},
   "groups": {"human_gold": 13, "provisional": 27},
   "targets": {"passed": 30, "total_run": 32, "known_issues": []},
   "known_issues": [
-    {"case_id": "Q14", "kind": "F_unavailable", "detail": "..."},
-    {"case_id": "Q32", "kind": "meta_misclass", "detail": "..."}
+    {"case_id": "Q14", "kind": "F_unavailable", "detail": "C=0.7 this run; historical 0.7/0.7/0.9; one non-pass only"},
+    {"case_id": "Q32", "kind": "meta_misclass", "detail": "cl1 should be uncertainty/non_factual"}
   ],
   "repeats": [{"case_id": "Q16", "metric": "R", "scores": [0.9, 0.9, 1.0]}],
-  "baseline": {"reused": 30, "new": 2, "missing": 6}
+  "baseline": {"reused": 30, "new": 2, "missing": 6, "available_not_run": 2}
 }
 ```
+
+> `reused + new + missing + available_not_run = 40`；Q35/Q36 的 baseline 在旧报告中，属于 `available_not_run`。
 
 ## 10. 成本与执行边界
 
 - 10 条闸门：约 ¥0.6（双版本）。
 - 40 条整批：约 ¥1.4–1.8（含 baseline 补齐）。
 - 高方差重复：约 ¥0.2–0.4。
-- v1.2.0 完整验证预计 ¥2.5–3.0。
+- v1.2.0 增量直接成本约 ¥2.5–3.1；加 30% 缓冲约 **¥3.3–4.0**。
+- 已花 v1.1.x 约 ¥5–6；完整程序总预算按 **¥8–10** 估算，分阶段签字，不一次批准。
 - 不激活、不进入 Phase 4、不修改 Human Gold/Prompt 正文/DB；任何激活需人工签字。
 
 ## 11. 一句话总结

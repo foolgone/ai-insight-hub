@@ -10,10 +10,10 @@
 
 | 项目 | 数量 | 说明 |
 |---|---:|---|
-| 候选总数 | 40 | `docs/repair/phase3e/pilot-40-targets.json` |
-| Human Gold 基础题 | 13 | 人工确认基础答案 |
+| 候选总数 | 40 | 候选数据在 `candidates.json`；目标与分组在 `pilot-40-targets.json` |
+| Human Gold 基础题 | 13 | 人工确认基础答案（`human-gold.json`） |
 | Human Gold Claim | 1 | Q21#3“质量问题不受 7 天无理由限制” |
-| Provisional 基础题 | 27 | AI draft，pending human |
+| Provisional 基础题 | 27 | AI draft，pending human（`candidates.json`） |
 | Human Gold claims 总量 | 35 | 已确认 1，待确认 34 |
 | key_facts | 41 | 人工确认：supported 38 / evidence_insufficient 2 / ambiguous 1 |
 
@@ -38,7 +38,7 @@
 
 | Case | 组 | 状态 | v1.0.0 baseline | 备注 |
 |---|---|---|---|---|
-| Q33 | PROV | not run | missing | `context_unavailable` |
+| Q33 | PROV | not run | missing | 预期 `context_unavailable` |
 | Q34 | PROV | not run | missing | only C1 |
 | Q35 | HG | not run | old report available | absence/quote 诊断历史 |
 | Q36 | HG | not run | old report available | §1/§12 冲突未业务选边 |
@@ -57,7 +57,7 @@
 
 | 类型 | Case | 说明 |
 |---|---|---|
-| `context_unavailable` | Q14、Q33 | F 无法评估；不是 F=0，也不是 PASS |
+| `context_unavailable` | Q14、Q33（Q33 预期） | F 无法评估；不是 F=0，也不是 PASS |
 | 只有 C1 | Q22、Q26、Q27、Q34、Q37、Q40 | Faithfulness 可用上下文受限，报告必须注明 |
 | 回答内部矛盾（有意） | Q23 | 首句“可以按政策反馈”与后文“已超 24 小时不符合”冲突；C 应低分 |
 | 文档冲突未选边 | Q36 | §1/§12 对虚拟商品范围表述不一致；只验证披露，不选 canonical |
@@ -84,7 +84,7 @@
 | Q14 | HG | explicit | NON-PASS skipped/0.7/1.0 | new | F unavailable；C 方差 |
 | Q15 | HG | explicit | PASS 0.75/0.9/1.0 | reused | purpose inference |
 | Q16 | HG | — | PASS 1.0/0.9/0.9 | reused | 历史 R over-strict |
-| Q17 | PROV | explicit | PASS 1.0/0.9/0.9 | reused | 规则关系已归 meta |
+| Q17 | PROV | explicit | PASS 1.0/0.9/0.9 | reused | v1.1.5 meta fix；P0 下应回 factual/insufficient |
 | Q18 | PROV | — | PASS 1.0/0.9/0.9 | reused | — |
 | Q19 | HG | — | PASS 0.714/0.9/0.9 | reused | absence/示例推断 |
 | Q20 | PROV | explicit | PASS 0.8/0.9/0.9 | reused | generalization |
@@ -97,10 +97,10 @@
 | Q27 | PROV | — | PASS 1.0/0.9/1.0 | reused | only C1 |
 | Q28 | PROV | explicit | PASS 0.857/0.9/0.9 | reused | 目标已注册 |
 | Q29 | PROV | explicit | PASS skipped/0.9/1.0 | reused | 正确 skip |
-| Q30 | HG | explicit | PASS 1.0/0.9/0.9 | reused | scope/region 已归 meta |
+| Q30 | HG | explicit | PASS 1.0/0.9/0.9 | reused | v1.1.5 meta fix；P0 下 policy_scope 应回 factual |
 | Q31 | PROV | explicit | PASS 0.833/0.9/0.9 | reused | quote/absence 诊断 |
 | Q32 | PROV | — | **STOP 0.75/0.9/0.9** | new | “无法确认”误标 factual |
-| Q33 | PROV | — | not run | missing | context_unavailable |
+| Q33 | PROV | — | not run | missing | 预期 context_unavailable |
 | Q34 | PROV | — | not run | missing | only C1 |
 | Q35 | HG | explicit | not run | old report | absence/quote |
 | Q36 | HG | explicit | not run | old report | 冲突披露 |
@@ -117,11 +117,17 @@
 |---|---|---|
 | A | Claim 原子性 | 合并/拆分/粒度错误，导致分母变化或事实被混合 |
 | E | Evidence 定位与支持充分性 | quote 不逐字、跨行/标点/主语拼接、answer 引用、证据不足 |
-| S | Scope / Meta / 额外信息 | 范围/地域/文档覆盖/absence/无法确认/规则关系/建议被误建为 factual |
-| R | Relationship / Conflict / 条件推导 | 规则关系、条件分支、目的/权益推断、回答内部矛盾、文档冲突 |
+| S | Scope / Meta / absence / uncertainty | 文档覆盖、absence、无法确认、建议等 non_factual；**政策范围/政策关系不在此类，见 R-policy** |
+| R | Relationship / Conflict / 条件推导 | 政策范围/关系（factual）、条件分支、目的/权益推断、回答内部矛盾、文档冲突 |
 | C | Answerability / Context 可用性 | context_unavailable、只有 C1、无有效 claim、skip/failed 边界 |
+| M | Metric calibration（横切标记） | C/R 的 judge 过严/方差；不是 claim 分类，报告单独标记 |
 
-C/R 指标的校准问题不单独新增第六类，归入 S（额外信息期望）或 R（条件/完整性）并在报告中单列“指标校准”。
+**P0 边界**：
+- “文档未说明 X”“无法确认 X”“文档覆盖/章节关系” → S，non_factual。
+- “政策适用于所有订单”“默认适用于中国大陆”“该规则与满 99 无关” → R-policy，factual；无依据 → insufficient，留在 F 分母。
+- **不得**把政策范围/关系归入 S；否则 F 会漏掉无依据的范围/关系断言。
+
+C/R 指标校准用 `M` 标记，不归入 S/R 的 claim 分类；报告单列。
 
 ## 3. 失败案例逐条记录
 
@@ -134,23 +140,23 @@ C/R 指标的校准问题不单独新增第六类，归入 S（额外信息期�
 | Q12 | F | “不含节假日/银行延迟” insufficient，F 0.667 | 条件外推 | R | 否 | 是 | 否 | 否 | 是（Q24/Q28） | 只支持文档明确写的条件；外部条件不进 supported |
 | Q14 | F/C | F skipped；C=0.7/0.9 不稳 | context 不可用；回答缺“未开具前” | C | 是 | 部分 | 否 | 是 | 否 | F unavailable 独立；C 用 key_facts 而非单次 judge |
 | Q15 | F | purpose inference insufficient，F 0.5–1.0 | 目的/后续安排推断无依据 | A/R | 否 | 是 | 否 | 否 | 是（Q28） | 目的/权益推断单独 claim；无依据 insufficient |
-| Q16 | R | 直接完整回答 R=0.7 | R 裁判要求额外步骤 | S | 否 | 是（R） | 否 | 否 | 可能 | 单一部分直接回答不因缺建议降 0.9–1.0 |
-| Q17 | F | 规则关系“与满 99 无关” factual/insufficient，F 0.8 | 规则关系推断被建 factual | S | 否 | 是 | 否 | 否 | 是（Q19/Q31/Q32/Q35） | 规则关系/独立性归 meta，不进分母 |
+| Q16 | R | 直接完整回答 R=0.7 | R 裁判要求额外步骤 | M | 否 | 是（R） | 否 | 否 | 可能 | 单一部分直接回答不因缺建议降 0.9–1.0 |
+| Q17 | F | 规则关系“与满 99 无关” factual/insufficient，F 0.8 | 政策规则关系被 v1.1.5 移出分母 | R-policy | 否 | 是 | 否 | 否 | 是（Q20/Q30） | `policy_relationship` 保持 factual；无依据 insufficient；Q17 目标需重新审批 |
 | Q19 | F | “未区分退款原因” factual/insufficient；示例日期推断 | absence/meta + 合成示例 | S/R | 否 | 是 | 否 | 否 | 是（Q31/Q32） | absence/meta 不进分母；禁止合成示例 |
 | Q20 | F | “适用于所有订单” insufficient，F 0.8 | 全称 generalization 无依据 | R | 否 | 是 | 否 | 否 | 是（Q28） | 全称量词需明确依据；无依据 insufficient |
 | Q21 | F | Q21#3 insufficient，F 0.6 | 条件/期限推断 | R | 部分（HG claim 已复核） | 是 | 否 | 否（已复核） | 是（Q28） | 只支持文档明确条件；Q21#3 保持 insufficient |
 | Q22 | F | cl1/cl4 cross-line quote，F 0.4 | 删除换行拼接 | E | 否 | 是 | 否（校验正确） | 否 | 是（Q23/Q31/Q35/Q36） | 最短单行连续子串；跨行保换行 |
 | Q23 | F | “生鲜食品质量问题需…” quote 合成，F 0.0 | 主语+谓词拼接 | E | 否 | 是 | 否（校验正确） | 否 | 是（Q13/Q22） | 最短子串；不得拼主语+谓词 |
 | Q24 | F | “改派可能产生额外运费/不保证成功” insufficient | 额外条件推断 | R | 否 | 是 | 否 | 否 | 是（Q12/Q28） | 额外条件/概率不进 supported |
-| Q25 | C | C 0.8→0.7，恰好 0.10 | C 对额外正确信息偏严 | S | 否 | 是（C） | 否（阈值比较需容差） | 否 | 可能 | 正确额外信息不记 wrong_fact；`>0.10` 用容差 |
+| Q25 | C | C 0.8→0.7，恰好 0.10 | C 对额外正确信息偏严 | M | 否 | 是（C） | 否（阈值比较需容差） | 否 | 可能 | 正确额外信息不记 wrong_fact；`>0.10` 用容差 |
 | Q28 | F | “可申请催促/补偿/取消” insufficient，F 0.857 | 权益推断无依据 | R | 否 | 是 | 否 | 否 | 是（Q15/Q21） | 补偿/取消等权益需明确写；否则 insufficient |
 | Q29 | F | F skipped | 全部 absence/meta，正确 | S | 否 | 否 | 否 | 否 | 是（Q33） | 全部 non_factual → skip；不是 1.0 |
-| Q30 | F | 范围/地域推断 factual/insufficient，F 0.25→1.0 | scope/region 误建 factual | S | 否 | 是 | 否 | 否 | 是（Q31/Q32/Q35） | scope/region 归 meta/absence；混合句拆分 |
+| Q30 | F | 范围/地域推断 factual/insufficient，F 0.25→1.0 | v1.1.4 把政策范围移出分母 | R-policy | 否 | 是 | 否 | 否 | 是（Q17/Q20） | `policy_scope` 保持 factual；无依据 insufficient；Q30 目标需重新审批 |
 | Q31 | F | “未规定上门取件”“未涉及取件方式” factual/insufficient；quote 诊断 | absence/meta + quote | S/E | 否 | 是 | 否 | 否 | 是（Q32/Q35） | absence/meta 不进分母；quote 最短子串 |
 | Q32 | F | “无法确认积分支持礼品兑换” factual/insufficient，F 0.75 | 不确定结论被建 factual | S | 否 | 是 | 否 | 否 | 是（Q31/Q35） | 无法确认/信息不足 → meta/absence |
 | Q35 | F | “物流时效未明确说明” factual/insufficient；2 条 quote 诊断 | absence + quote | S/E | 否 | 是 | 否 | 否 | 是（Q31/Q32） | absence 归 non_factual；quote 最短子串 |
 | Q36 | F | cl1 meta 总起 + cl6 合并 §1/§12，F 0.75→1.0 | 原子性 + 冲突合并 | A/E | 否 | 是 | 否 | 部分（冲突口径未选边） | 是（Q22/Q23） | 总起句 meta；§1/§12 拆两条；冲突仅 variant |
-| Q33 | F | F skipped | context_unavailable | C | 是 | 否 | 否 | 否 | 是（Q14） | F unavailable；C/R 独立 |
+| Q33 | F | 未运行；预期 context_unavailable | 无上下文 | C（预期） | 是 | 否 | 否 | 否 | 是（Q14） | 先跑再定；F unavailable；C/R 独立 |
 | Q34/Q37/Q40 | F | 只有 C1 | 上下文受限 | C | 是 | 否 | 否 | 否 | 是 | 报告注明；不据此判 F 退化 |
 | Q38/Q39 | — | 未运行 | — | — | — | — | — | — | — | 不推测 |
 
@@ -160,20 +166,22 @@ C/R 指标的校准问题不单独新增第六类，归入 S（额外信息期�
 
 - 跨行拼接、标点改变、主语+谓词合成、answer 自身引用。
 - 这些失败都被 Service 正确降级；不是 Service 校验过严，而是 Prompt 没有稳定约束“最短连续子串”。
-- v1.1.3 的“结尾一律不带标点 + 最短子串 + contexts-only”已显著降低，但仍会出现（Q31/Q35）。
+- v1.1.3 的“最短子串 + contexts-only”降低了跨行/合成，但仍会出现（Q31/Q35）。
+- **证据标点口径**：v1.2.0 不强制“quote 结尾不带标点”；允许逐字保留原文标点，只要 quote 是连续子串。当前 Service 只做 `quote.strip() in context`，规范必须与 Service 对齐。
 - v1.2.0 应把 evidence 约束做成统一的输出契约和校验，不再靠案例 few-shot。
 
-### P2 Scope / Meta / absence / uncertainty（Q19/Q29/Q30/Q31/Q32/Q35）
+### P2 Scope / Meta / absence / uncertainty（Q19/Q29/Q31/Q32/Q35）
 
-- “未提及/未涉及/未规定/无法确认/默认适用于/不依赖另一规则”被反复标成 factual/insufficient。
-- 这是 F 分母污染的主要来源；Q30 从 0.25 修到 1.0 就是证据。
-- v1.2.0 需要明确的 non_factual 子类型：`absence`、`scope`、`relationship`、`uncertainty`、`meta`、`advice`。
-- 只有文档明确写出的规则、条件、范围才进 factual 分母。
+- “未提及/未涉及/未规定/无法确认/文档覆盖描述”被反复标成 factual/insufficient。
+- 这是 F 分母污染的主要来源；Q31/Q32/Q35 都出现。
+- v1.2.0 需要明确的 non_factual 子类型：`absence`、`doc_scope`、`doc_relationship`、`uncertainty`、`meta`、`advice`。
+- **P0 例外**：政策范围/政策关系（“默认适用于中国大陆”“该规则与满 99 无关”“适用于所有订单”）不是 non_factual，而是 `policy_scope` / `policy_relationship` factual；无依据时 insufficient，留在分母。v1.1.x 把 Q17/Q30 移出分母的做法在 v1.2.0 不成立。
 
-### P3 Relationship / 条件推导（Q12/Q15/Q17/Q20/Q21/Q24/Q28）
+### P3 Relationship / 条件推导（Q12/Q15/Q17/Q20/Q21/Q24/Q28/Q30）
 
-- 规则关系、目的、补偿/取消权益、全称 generalization、外部条件，模型倾向“合理推断为 supported”。
+- 规则关系、政策范围、目的、补偿/取消权益、全称 generalization、外部条件，模型倾向“合理推断为 supported”。
 - 这些不是事实错误，而是“推断强度”问题；应按 insufficient，而不是 supported。
+- **P0**：政策范围/关系是 factual；不能像 v1.1.x 那样归 meta 退出分母。Q17/Q30 的目标需重新审批。
 - Q21#3 是人工确认的 insufficient，Q28 是后来注册的 provisional 目标；应统一规则，不再逐案例加目标。
 
 ### P4 Claim 原子性（Q15/Q19/Q23/Q36/Q21）
@@ -209,9 +217,12 @@ C/R 指标的校准问题不单独新增第六类，归入 S（额外信息期�
 |---|---|---|
 | A Claim 原子性 | Q15、Q19、Q23、Q36、Q21 | 需要统一原子性规范，不能逐案例 few-shot |
 | E Evidence | Q10、Q22、Q23、Q31、Q35、Q36、Q13 | Prompt 约束 + Service 校验共同问题；Service 目前正确 |
-| S Scope/Meta/额外信息 | Q16、Q17、Q19、Q30、Q31、Q32、Q35、Q25 | 最大类；v1.2.0 的核心 |
-| R Relationship/条件 | Q12、Q15、Q20、Q21、Q24、Q28 | 推断强度问题；统一 insufficient 规则 |
+| S Scope/Meta/absence/uncertainty | Q19、Q31、Q32、Q35 | 文档覆盖/absence/无法确认；v1.2.0 需统一 non_factual |
+| R Relationship/条件 | Q12、Q15、Q17、Q20、Q21、Q24、Q28、Q30 | 政策范围/关系是 factual；无依据 insufficient；目标需重审 |
+| M Metric calibration | Q16、Q25 | R 过严/C 方差；与 claim 分类分开标记 |
 | C Context/Answerability | Q14、Q33、C1-only | 数据/报告边界，不是 Prompt 特例 |
+
+**P0 汇总**：Q17/Q30 的 v1.1.x 修复把 `policy_relationship`/`policy_scope` 移出分母；v1.2.0 不沿用。Q17 可能回到 0.8，Q30 可能回到 0.5；这不是“回答退化”，而是语义修正，相关目标必须重新审批。
 
 ## 7. 结论
 

@@ -1,6 +1,6 @@
 # Judge 语义规范草案（v1.2.0 依据）
 
-> 状态：草案，等待人工审核。本文是 v1.2.0 Prompt 与 Service 的共同依据，不是运行时实现。
+> 状态：草案；**P0 已按 `approve_with_changes` 修正，但语义规范尚未冻结**。本文是 v1.2.0 Prompt 与 Service 的共同依据，不是运行时实现。
 >
 > 适用指标：Faithfulness（F）、Answer Correctness（C）、Answer Relevancy（R）。三指标共享 Claim 语义，但分母和判定边界不同。
 
@@ -16,8 +16,8 @@
 | 术语 | 定义 |
 |---|---|
 | claim | 回答中一个可独立判定真假或可独立归类的断言 |
-| factual_claim | 对政策、事实、数字、条件、时间、流程、规范性要求的断言 |
-| non_factual | 问候、共情、建议、absence、scope/meta、relationship、uncertainty 等非事实断言 |
+| factual_claim | 对政策、事实、数字、条件、时间、流程、规范性要求、派生结论、政策范围/政策关系的断言 |
+| non_factual | 问候、共情、建议、absence、doc_scope/doc_relationship、uncertainty、meta 等非事实断言 |
 | support_status | factual_claim 的支持状态：supported / unsupported / insufficient_evidence |
 | evidence_ref | 指向 contexts 的逐字片段：`{context_id, quote}` |
 | scorable claim | 进入 F 分母的 factual claim |
@@ -35,7 +35,14 @@
 | `policy` | 文档明确写出的政策、规则、数字、时限、费用、流程 | “订单签收后 7 天内可申请无理由退款” |
 | `condition` | 文档明确写出的条件、例外、适用范围、前置条件 | “定制类商品不支持无理由退款” |
 | `normative_requirement` | 文档明确写出的“需/必须/应/须提供/保留/提交”要求 | “质量问题需在签收后 24 小时内拍照反馈” |
+| `fact` | 文档明确写出的非政策性事实（主体、时间、渠道、状态等） | “在线客服服务时间为每天 9:00-21:00” |
+| `process` | 文档明确写出的操作步骤/流程 | “在「我的订单」中选择退款，填写原因并上传凭证” |
+| `derived` | 由明确规则/条件/数字推导出的结论（算术、期限比较、条件组合） | “第 10 天已超出 7 天时限”；“实付 89 元且寄往新疆，适用 20 元运费” |
+| `policy_scope` | 对政策在现实中的适用范围、对象、地域的断言 | “该政策适用于所有订单”；“默认适用于中国大陆境内订单” |
+| `policy_relationship` | 对两条政策/规则之间关系、独立性、优先级的断言 | “该规则与是否满 99 元无关”；“退货运费不依赖包邮资格” |
 | `conflict` | 文档两处规则不一致的 meta 陈述（只在回答披露冲突时） | “§1 与 §12 对虚拟商品范围表述不一致” |
+
+**注意**：`policy_scope` 与 `policy_relationship` 是 **factual_claim**，不是文档元信息；文档没有明确写出时，应判 `insufficient_evidence`，留在 F 分母中。只有“文档覆盖范围/章节关系”才是 non_factual（见 3.2）。
 
 ### 3.2 non_factual
 
@@ -44,12 +51,17 @@
 | 子类型 | 定义 | 示例 |
 |---|---|---|
 | `absence` | 文档未说明/未提及/未涉及某事实 | “文档未提及货到付款” |
-| `scope` | 文档未明确写的适用范围/地域/对象推断 | “默认适用于中国大陆境内订单” |
-| `relationship` | 规则之间的关系、独立性、依赖、优先级推断 | “该规则与是否满 99 元无关” |
+| `doc_scope` | **关于文档覆盖范围/章节归属**的 meta 陈述，不是政策在现实中的适用范围 | “文档详细说明了退款、换货、发票等章节”；“该问题位于文档第 7 节” |
+| `doc_relationship` | **关于文档章节/条款之间编排关系**的 meta 陈述，不是政策规则之间的关系 | “§1 与 §12 分属不同章节” |
 | `uncertainty` | 无法确认/无法判断/信息不足的结论句 | “无法确认积分支持礼品兑换” |
-| `meta` | 文档覆盖范围、章节内容、总起/分类引导句 | “文档详细说明了退款时效、换货、发票……” |
+| `meta` | 其它纯元信息、总起/分类引导句 | “能否退款，取决于具体商品类型和签收时间” |
 | `advice` | 纯建议、下一步操作 | “建议联系客服核实” |
 | `greeting` | 问候、共情、礼貌语 | “您好，很高兴为您服务” |
+
+**不得混用**：
+- “政策适用于所有订单”“默认适用于中国大陆”是 `policy_scope`（factual），不是 `doc_scope`。
+- “该规则与是否满 99 元无关”是 `policy_relationship`（factual），不是 `doc_relationship`。
+- 只有“文档有没有写/覆盖什么/章节怎么排”才是 `absence` / `doc_scope` / `doc_relationship` / `meta`。
 
 ### 3.3 判断顺序
 
@@ -60,6 +72,22 @@
 5. 最后由 Service 计算分母与状态。
 
 **不得反向操作**：不能因为“找不到 evidence”就把 factual 改成 non_factual；也不能因为“看起来合理”就把 non_factual 改成 supported。
+
+### 3.4 Scope / Meta / Relationship 判定表（P0）
+
+| 句子 | 断言对象 | 分类 | 支持状态 |
+|---|---|---|---|
+| “文档未说明是否支持海外配送” | 文档覆盖 | `absence`（non_factual） | 不进分母 |
+| “无法确认积分支持礼品兑换” | 认知状态 | `uncertainty`（non_factual） | 不进分母 |
+| “文档详细说明了退款、换货、发票……” | 文档覆盖 | `meta` / `doc_scope`（non_factual） | 不进分母 |
+| “政策适用于所有订单” | 政策适用范围 | `policy_scope`（factual） | 文档明确写 → supported；否则 insufficient |
+| “该规则与是否满 99 元无关” | 政策规则关系 | `policy_relationship`（factual） | 文档明确写 → supported；否则 insufficient |
+| “默认适用于中国大陆境内订单” | 政策地域范围 | `policy_scope`（factual） | 文档明确写 → supported；否则 insufficient |
+| “以国内履约场景为前提” | 政策地域范围 | `policy_scope`（factual） | 文档明确写 → supported；否则 insufficient |
+| “§1 与 §12 对虚拟商品范围不一致” | 文档条款冲突 | `conflict`（factual） | 两处原文都可给出 → supported |
+| “§1 与 §12 分属不同章节” | 文档编排关系 | `doc_relationship`（non_factual） | 不进分母 |
+
+**决策**：政策范围/政策关系断言不能退出 F 分母；否则“无依据的适用范围/关系”没有任何指标能抓到。若未来仍要将它们排除，必须新增 C 规则或独立 claim-correctness 指标，并重新定义验收目标。
 
 ## 4. Claim 原子性
 
@@ -108,7 +136,7 @@
 - `quote` 必须是 contexts 的逐字连续子串；不得改写、拼接、补主语。
 - 优先使用支持该 claim 的**最短连续子串**。
 - 跨行引用必须保留换行；更稳妥的是只引单行连续子串。
-- `quote` 结尾一律不带标点（句号/分号/逗号/冒号）；只复制到最后一个汉字/数字/字母。
+- `quote` 允许保留原文标点；只要是逐字连续子串即可，不强制去掉句号/分号。不得改写标点，也不得在分句截断处补原文没有的标点。
 - 如果 claim 含主语，而主语在另一分句，仍只引谓词所在的最短子串，不要自造“主语+谓词”。
 
 ### 5.3 支持充分性
@@ -133,19 +161,26 @@
 ### 6.1 不进 F 分母
 
 以下一律 non_factual，不进入 F 分母：
-- “文档未提及/未说明/未涉及/未规定……”
-- “默认适用于中国大陆境内订单”
-- “以国内履约场景为前提”
-- “该规则与是否满 99 元无关”
-- “不因包邮资格改变责任归属”
-- “无法确认/无法判断/信息不足”
-- “文档详细说明了退款、换货、发票……”
-- “建议联系客服/查看页面/提供订单号”
+- “文档未提及/未说明/未涉及/未规定……” → `absence`
+- “无法确认/无法判断/信息不足” → `uncertainty`
+- “文档详细说明了退款、换货、发票……” → `meta` / `doc_scope`
+- “§1 与 §12 分属不同章节” → `doc_relationship`
+- “建议联系客服/查看页面/提供订单号” → `advice`
+
+**以下不是 non_factual，必须留在 F 分母**：
+- “默认适用于中国大陆境内订单” → `policy_scope`（factual）
+- “以国内履约场景为前提” → `policy_scope`（factual）
+- “该规则与是否满 99 元无关” → `policy_relationship`（factual）
+- “不因包邮资格改变责任归属” → `policy_relationship`（factual）
+- “政策适用于所有订单” → `policy_scope`（factual）
+
+这些断言文档没有明确写时，判 `insufficient_evidence`；不得标 non_factual/meta，也不得退出分母。
 
 ### 6.2 混合句
 
-- 事实部分：factual；未定义/范围/关系部分：non_factual。
-- 不得整句标 factual/insufficient。
+- 事实部分：factual；文档覆盖/absence/uncertainty 部分：non_factual。
+- 政策范围/政策关系属于事实部分，仍为 factual；不得因为“范围/关系”字眼就归 meta。
+- 不得整句标 factual/insufficient；也不得把整个混合句都归 non_factual。
 - 不得因为 non_factual 部分存在，就把 factual 部分也标 non_factual。
 
 ### 6.3 全称与推断
@@ -179,12 +214,14 @@
 ## 8. 条件分支与规则推导
 
 - 只支持文档明确写出的条件、例外、时限、费用。
-- 多步算术（如“第 10 天 > 7 天”）可以 supported，但每一步必须有明确规则。
+- 多步算术/派生结论（如“第 10 天 > 7 天”“实付 89 元寄新疆适用 20 元运费”）可以 supported，但必须使用 `derived` 子类型，并引用其依据规则的最短连续子串；每一步都要有明确规则。
 - 目的、权益、补偿、取消、催单等推断：没有明确条款 → insufficient。
-- 全称 generalization：没有明确条款 → insufficient。
-- 规则关系/独立性：默认 non_factual/relationship；只有文档明确写出“无关/不依赖/优先”才 factual。
+- 全称 generalization / 政策适用范围：`policy_scope`（factual）；没有明确条款 → insufficient。
+- 规则关系/独立性：`policy_relationship`（factual）；没有明确写出“无关/不依赖/优先” → insufficient。
+- 文档章节/覆盖关系：`doc_relationship` / `doc_scope`（non_factual）。
 - Q21#3：保持 insufficient；不得因为“字面上可推出”就 supported。
 - Q28：补偿/取消权益保持 insufficient；目标已注册，但语义不变。
+- **P0 影响**：v1.1.x 曾把 Q17/Q30 的政策范围/关系移出分母，从而得到 Q17 F=1.0、Q30 F=1.0；v1.2.0 不再沿用该口径。Q17 的 cl5、Q30 的“默认中国大陆/国内履约前提”应回到 factual/insufficient，相关目标必须重新审批。
 
 ## 9. Answerability 与 Context 可用性
 
@@ -219,7 +256,8 @@
 - 分母：scorable factual claims。
 - 分子：supported。
 - non_factual 不进分母。
-- 不允许把 absence/meta/scope/relationship/uncertainty 作为 supported factual。
+- 不允许把 absence/doc_scope/doc_relationship/meta/uncertainty 作为 supported factual。
+- `policy_scope` / `policy_relationship` 是 factual：可以 supported，也可以 insufficient；不得标 non_factual 退出分母。
 - 不允许因为回答“更长/更多建议”而提高 F。
 
 ### 11.2 Answer Correctness
@@ -256,7 +294,9 @@
 - Q30 海外配送 absence 的报告口径。
 - Q32 “无法确认”类回答是否允许 0.75 目标，或必须 meta/1.0。
 - Q35/Q36 quote 诊断是否接受为 known diagnostic。
+- **P0 目标冲突**：v1.1.x 的 Q17 F 0.9–1.0、Q30 F 1.0 是在把 `policy_relationship`/`policy_scope` 移出分母后得到的；v1.2.0 将其保留为 factual/insufficient 后，Q17 可能回到 0.8、Q30 可能回到 0.5。目标必须重新审批，不得静默沿用。
+- **C 覆盖缺口**：如果未来仍决定把政策范围/关系排除出 F，必须新增 C 规则或独立 claim-correctness；否则错误适用范围/关系没有指标能抓到。
 
 ## 14. 一句话总结
 
-**先判“是不是事实”，再判“有没有逐字证据”，最后才判“支持不支持”；范围、关系、absence、无法确认不是事实，不能进 F 分母。**
+**先判“是不是事实”，再判“有没有逐字证据”，最后才判“支持不支持”；文档有没有写/无法确认是 non_factual，政策在现实中的适用范围/规则关系是 factual，文档没写就 insufficient。**

@@ -1,8 +1,8 @@
 # Prompt v1.2.0 设计草案
 
-> 状态：设计草案，等待人工审核。本文不创建 v1.2.0 运行时版本，不修改 Prompt/Service/Schema/API/DB，不运行 Judge。
+> 状态：设计草案；**语义规范尚未冻结（P0 待修）**。本文不创建 v1.2.0 运行时版本，不修改 Prompt/Service/Schema/API/DB，不运行 Judge。
 >
-> 设计目标：从“逐案例补 few-shot”转为“先冻结 Judge 语义，再用通用规则与结构化 Schema 实现”。
+> 设计目标：从“逐案例补 few-shot”转为“先冻结 Judge 语义，再用通用规则与结构化 Schema 实现”。P0：`policy_scope` / `policy_relationship` 是 factual，不得退出 F 分母。
 
 ## 1. 背景与结论
 
@@ -10,7 +10,7 @@ v1.0.0 → v1.1.5 的经验：
 
 - v1.1.x 的 10 条闸门多次通过，但每次扩到 40 条都会暴露新的语义边界（Q22/Q23/Q30/Q32/Q17）。
 - 失败集中在三类：
-  1. **non_factual 被误建为 factual**（absence/scope/relationship/uncertainty）；
+  1. **non_factual 边界混用**：absence/uncertainty 被误建 factual；policy scope/relationship 被误移出 factual（P0）。
   2. **evidence quote 合成/跨行/标点**；
   3. **条件/目的/权益推断被过度 supported**。
 - 逐案例 few-shot 会让 Prompt 膨胀，且不可证明覆盖；v1.2.0 必须用**统一 taxonomy + 结构化输出 + Service 校验**替代。
@@ -35,7 +35,7 @@ v1.0.0 → v1.1.5 的经验：
   "claim_id": "cl1",
   "claim": "...",
   "claim_type": "factual_claim | non_factual",
-  "claim_subtype": "policy | condition | normative_requirement | conflict | absence | scope | relationship | uncertainty | meta | advice | greeting",
+  "claim_subtype": "policy | condition | normative_requirement | fact | process | derived | policy_scope | policy_relationship | conflict | absence | doc_scope | doc_relationship | uncertainty | meta | advice | greeting",
   "support_status": "supported | unsupported | insufficient_evidence | null",
   "is_contradictory": false,
   "contradiction_with": [],
@@ -45,24 +45,27 @@ v1.0.0 → v1.1.5 的经验：
 ```
 
 关键变化：
-- 把 `scope`、`relationship`、`uncertainty` 从 `meta` 细分为独立子类型；便于统计和 Service 排除。
+- **P0 边界**：`policy_scope`、`policy_relationship` 是 factual；文档没有明确写时判 insufficient，留在 F 分母。`doc_scope`、`doc_relationship`、`absence`、`uncertainty` 才是 non_factual。
 - `condition` 独立于 `policy`，用于条件/例外/时限。
 - `normative_requirement` 独立，避免“需提供凭证”被误判 advice。
+- 增加 `fact` / `process` / `derived`：派生结论（第 10 天 > 7 天、89 元+新疆运费 20）不再硬塞 policy。
 - `conflict` 只在回答披露文档冲突时出现。
+- v1.1.x 的 Q17/Q30 目标（通过把政策范围/关系移出分母得到）在 v1.2.0 下可能失效，必须重新审批。
 
 ### 3.2 Claim 提取规则
 
 - 先判“是不是事实”，再判“支持不支持”。
 - 一条 claim 一个可判定事实；混合句拆成 factual + non_factual。
-- 事实部分：文档明确写的政策、条件、数字、时限、流程、规范性要求。
-- 非事实部分：absence、scope、relationship、uncertainty、meta、advice、greeting。
+- 事实部分：文档明确写的政策、条件、数字、时限、流程、规范性要求、派生结论。
+- **政策范围/政策关系**：`policy_scope` / `policy_relationship` factual；无明确依据 → insufficient，不进 non_factual。
+- 非事实部分：absence、doc_scope、doc_relationship、uncertainty、meta、advice、greeting。
 - 目的/权益/补偿/取消/全称 generalization：默认 insufficient，除非文档明确写。
 - 引用原文是回答内容；引用中的独立事实要拆；quote 必须来自 contexts。
 
 ### 3.3 Evidence 规则
 
 - quote 只引 contexts 的最短连续子串。
-- 结尾一律不带标点；跨行保留换行；不得拼主语+谓词。
+- 允许保留原文标点；不得改写标点/补原文没有的标点；跨行保留换行；不得拼主语+谓词。
 - 不得引用 answer 自身/括注。
 - supported 必须有 evidence；insufficient 空数组；unsupported 可给矛盾证据。
 - Service 继续做逐字校验、降级、重复/冲突检查。
@@ -72,12 +75,12 @@ v1.0.0 → v1.1.5 的经验：
 只保留模式级 few-shot，建议 5 组：
 
 1. **Q23 型**：回答内部矛盾 + 最短子串（不按案例 ID）。
-2. **Q30 型**：scope/region 推断 + 混合句拆分。
-3. **Q17 型**：规则关系/独立性 → meta。
+2. **Q30/Q17 型**：政策范围/关系断言 → factual；无依据 insufficient；只有文档覆盖/章节关系才 doc_scope/doc_relationship。
+3. **Q20 型**：全称/适用范围断言 → policy_scope factual；无依据 insufficient。
 4. **Q32 型**：无法确认/信息不足 → uncertainty/absence。
 5. **Q36 型**：文档冲突披露 + §1/§12 分条 + 两条单句证据。
 
-不再为 Q22/Q23/Q30/Q32/Q17 各加独立长 few-shot；用同一组模式覆盖。
+不再为 Q22/Q23/Q30/Q32/Q17 各加独立长 few-shot；用同一组模式覆盖。政策范围/关系不能通过 few-shot 教成 meta。
 
 ### 3.5 输出稳定性
 
@@ -92,8 +95,8 @@ v1.0.0 → v1.1.5 的经验：
 - `wrong_facts`：与金标/文档矛盾；**正确且相关的额外信息不算 wrong_fact**。
 - 单一部分、直接完整回答，不因缺少额外步骤/建议降分。
 - 不把“回答更长/更多建议”当作正确性加分。
-- 可选未来输入 key_facts（41 条人工确认），但当前 Schema 不变；启用需单独设计。
-- Q14 类：回答缺“未开具前可以修改”是答案问题，不是 F 问题；C 应保留 missing_points。
+- **v1.2.0 不启用 key_facts**：当前 C Prompt 只读 gold_answer；启用 key_facts 需要单独 Schema/输入改造，不在本版本范围。Q14 仍按已知 non-pass 记录（F unavailable + C 方差），不因 key_facts 被悄悄修好。
+- Q14 类：回答缺“未开具前可以修改”是答案问题，不是 F 问题；C 应保留 `missing_points`。
 
 ## 5. Answer Relevancy Prompt 方向
 
@@ -109,12 +112,13 @@ v1.0.0 → v1.1.5 的经验：
 
 ### 6.1 Schema
 
-- `claim_subtype` 扩展：`condition`、`normative_requirement`、`scope`、`relationship`、`uncertainty`。
+- `claim_subtype` 扩展：`condition`、`normative_requirement`、`fact`、`process`、`derived`、`policy_scope`、`policy_relationship`、`uncertainty`、`doc_scope`、`doc_relationship`。
 - `claim_type` 仍两类：factual_claim / non_factual。
 - `support_status` 仅 factual；non_factual 为 null。
 - `evidence_refs` 保持 `{context_id, quote}`；可增加 `validation_status`（设计）。
 - 增加 Run 级 `prompt_version` / `schema_version` / `metric_version` 元数据（已有）。
-- 可选 `claim_scope`（回答/文档/通用）暂不引入，避免过度设计。
+- `policy_scope` / `policy_relationship` 归 factual；`doc_scope` / `doc_relationship` 归 non_factual。
+- 不引入 `claim_scope`（回答/文档/通用）字段，避免过度设计；用子类型表达。
 
 ### 6.2 Service
 
@@ -178,7 +182,8 @@ v1.0.0 → v1.1.5 的经验：
 - quote 主语+谓词合成；
 - quote 引用 answer；
 - absence 标 factual；
-- scope/relationship/uncertainty 标 factual；
+- 把 `doc_scope` / `doc_relationship` / `uncertainty` 标成 factual；
+- 把 `policy_scope` / `policy_relationship` 标成 non_factual（P0 错误）；
 - 全称 generalization；
 - supported 无 evidence；
 - 重复 claim_id；
@@ -195,9 +200,11 @@ v1.0.0 → v1.1.5 的经验：
 | 10 条闸门 | v1.2.0 双版本 | ¥0.6 |
 | 40 条 | 40 条 + 6 条 baseline 补齐 | ¥1.4–1.8 |
 | 重复/异常 | 高方差复跑 | ¥0.2–0.4 |
-| **合计** |  | **¥2.5–3.1** |
+| 直接合计 |  | **¥2.5–3.1** |
+| 30% 缓冲 | 模型/重跑/失败 | **¥0.8–0.9** |
+| **建议预算** |  | **¥3.3–4.0** |
 
-成本按 DashScope 实际账单重算；不包含人工审核时间。
+成本按 DashScope 实际账单重算；不包含人工审核时间。已花 v1.1.x 约 ¥5–6，完整程序总预算按 ¥8–10 分阶段签字。
 
 ## 9. 风险与未解决问题
 
@@ -210,6 +217,8 @@ v1.0.0 → v1.1.5 的经验：
 | Q14 金标/答案差异 | C 目标争议 | 保留 missing_points；不因 F 失败改 C |
 | Q21#3 单 claim | 与整条 F 混淆 | 单 claim 与整条分开报告 |
 | Q30/Q32 目标边界 | 目标漂移 | 先改语义，再注册目标；不先移动目标 |
+| P0 政策范围/关系回到 factual | Q17/Q30 的 v1.1.x 目标失效 | 重新审批 Q17/Q30 目标，不静默沿用 1.0 |
+| Q14 key_facts 未启用 | C 仍 known non-pass | v1.2.0 不启用 key_facts；Q14 保留 non-pass |
 | 8 条未运行/6 条 baseline 缺失 | 40 条不完整 | 先补 baseline，再算整体 |
 | C/R 高方差 | 单次结论不可靠 | 3 次重复 + 独立校准集 |
 | 成本超预算 | 无法完成 | 分阶段：单案例→10 条→40 条，逐段签字 |
@@ -218,11 +227,12 @@ v1.0.0 → v1.1.5 的经验：
 
 本文只交付设计。建议下一步（需人工批准）：
 
-1. 审核 `12-judge-semantic-spec.md`，冻结 v1.2.0 语义。
-2. 审核本设计的 Schema/Service 变化，确认是否新增 `scope/relationship/uncertainty/condition/normative_requirement`。
-3. 创建 v1.2.0 Prompt 目录（仅 design_draft，不激活）。
-4. 先跑单案例/负向测试，再跑 10 条，再补 baseline，最后 40 条。
-5. 任何阶段失败按 `13-phase3e-acceptance-plan.md` 停止，不累积 known miss。
+1. 审核 `12-judge-semantic-spec.md` 的 P0 修正，冻结 v1.2.0 语义。
+2. 审核本设计的 Schema/Service 变化，确认新增 `policy_scope` / `policy_relationship` / `doc_scope` / `doc_relationship` / `derived` / `fact` / `process` / `uncertainty` / `condition` / `normative_requirement`。
+3. 重新审批 Q17/Q30 等受 P0 影响的目标；不得沿用 v1.1.x 通过 meta 排除得到的目标。
+4. 创建 v1.2.0 Prompt 目录（仅 design_draft，不激活）。
+5. 先跑单案例/负向测试，再跑 10 条，再补 baseline，最后 40 条。
+6. 任何阶段失败按 `13-phase3e-acceptance-plan.md` 停止，不累积 known miss。
 
 ## 11. 一句话总结
 
