@@ -1169,6 +1169,22 @@ alembic check   : No new upgrade operations detected
 - `target_status` 是冻结前变更来源（reapproval/new_target 是历史类型），不是仍待审批；active target meta 已记录该说明。
 - Q32 冻结前提：F 0.9–1.0 以 3 个 factual 点为前提；若 v1.2.0 把它们归为 uncertainty/absence 导致 skipped，算目标未命中，不得 skipped 兜底。
 - Schema/Service 设计：`docs/repair/15-phase3e-v1.2.0-schema-service-design.md`；Schema v3、Metric v3；缺 subtype 报错；policy_scope/relationship 不回退。
-- P1-1/P1-2 修正：测试矩阵拆为 Service unit negative / Judge acceptance negative；缺 subtype → 整条 failed(schema)；supported_without_evidence → 降级 insufficient（保留分母）；Service 不做语义纠正。
-- 下一步顺序：负向测试 → 单案例（Q17/Q30/Q32/Q36）→ 10 条 → 40 条；Schema/目标复核前不创建/激活 v1.2.0、不跑 Judge。
+- P1-1 已关闭：测试矩阵拆为 Service unit negative / Judge acceptance negative；Service 不做语义纠正。
+- P1-2 最终决策（`M1-B-002`）：缺/非法 subtype、supported 无 evidence、context_id 不存在、quote 非逐字/引用 answer → 整条 metric `invalid(contract_violation)`；合法 insufficient 不进 F 分母但单独统计；全 insufficient → `skipped(no_decidable_claims)`；全 non_factual → `skipped(no_scorable_claims)`。
+- 冻结控制：`12-judge-semantic-spec.md` 恢复到 `92ce3ab` 原文，旧 freeze record 未改写；新增 `docs/repair/16-m1b-decision-record.md` 记录语义修订与目标影响。
+- 目标影响（P0，A 方案历史）：新 F 分母使 Q21（0.6→1.0，目标 0.6–0.7）、Q23（0.5→0.75，目标 0.4–0.5）不可达/越界；Q17/Q11 处于边界。B 方案改用 `F_coverage`（旧分母）后该冲突消失；目标未按 B 冻结前，M1-B 不能 `accepted`。
+- 下一步顺序：先定 §4 目标方案（A/B/C）→ 负向测试 → 单案例（Q17/Q21/Q30/Q32/Q36）→ 10 条 → 40 条；Schema/目标复核前不创建/激活 v1.2.0、不跑 Judge。
+- M2 只读审计：`docs/repair/17-m2-readonly-workbench-api-audit.md`；后端 Run 列表/详情/结果/失败样本/Trace 可用，前端 0 页面；P0 需显式排序、Case 客户端聚合、控制 results 负载；P1 缺 Case 聚合、compare、子 Run 可见性、summary 去重。
+- B 方案设计评估（2026-11-19）：`docs/repair/18-m1b-dual-metric-design-evaluation.md`（`M1-B-003`，`proposed_pending_human`）；`F_coverage` 30/30 有分数案例复现旧 F（Q14/Q29 skip），现有目标可继续用；`F_strict` 29/30=1.0，只作诊断；全 insufficient 建议 `F_strict=skip`、`F_coverage=0+all_insufficient`；待人工冻结后再实现。
+- M1-B-003 冻结草案（2026-11-19）：`docs/repair/19-m1b-003-freeze-draft.md`；D1–D4 已写入，含展示名、双行生命周期、全 insufficient 边界、三检查点、11 条单测/生命周期测试；状态 `freeze_draft_pending_human`。
+- M1-B-003-r1 修订（2026-11-19）：`approve_with_changes`；4 项关闭 + 术语统一（`unsupported`≠contradiction、`contains_unsupported_claims` 标签、Run 不可变/retry 快照/唯一键复核、Item 级 evaluated/skipped/invalid/failed）；新增 `20-m1b-003-revision-record.md`；`19` 当时 SHA `1abfc221…`，21/21 validation。
+- M1-B-003-r2 契约收尾（2026-11-19）：Item 级计数语义（`completed_items=evaluated_items`、distinct item、四类终态 + `unprocessed` 守恒、3 items/6 rows/3 cases 示例）+ invalid 持久化契约（独立 invalid 优先；`failed+invalid_reason` 聚合归 invalid；不进均值；不算执行失败）；`19` SHA `d2d2e0de…`，33/33 validation；仍 `freeze_draft_pending_human`。
+- 目标 revision v1.0.2：`pilot-40-targets-v1.2.0-v1.0.2.json`，SHA `3ee15dfc…`，20/20 validation；40 条数值与 v1.0.1 完全一致；旧文件/SHA 未覆盖。
+- 静态重算：`m1b003_static_recalc.py` → `m1b003-static-recalc.json`，SHA `53787fbb…`，13/13 validation；Q17/Q32 的 v1.2.0 预期值单独标记，不与 v1.1.5 实测混写。
 - 未修改 Prompt/Service/Schema/API/DB；未创建或激活 v1.2.0；未运行新的 Judge；未进入 Phase 4。
+
+### M1-C Stage 0 / Stage 1 预审（2026-11-19，只审计/设计）
+- Stage 0：`docs/repair/22-m1c-stage0-gap-list.md`；逐项差距 G01–G24，Schema v3 纳入 M1-C，migration 022 upgrade/rollback 方案（A 方案 invalid + invalid_reason + derived_from_result_id + run counters）。
+- Stage 1：`docs/repair/23-m1c-stage1-test-list.md`；12 条核心测试（T01–T12）+ 5 条静态目标回归（Q11/Q17/Q21/Q23/Q32）。
+- 关键缺口：当前代码仍 Schema v2；subtype 默认归一；单 F 无 strict；result status 无 invalid；run completed 含 skipped；retry 用当前指纹；migration 022 不存在。
+- 未修改业务代码/迁移/DB；未创建/激活 v1.2.0；未跑 Judge；未启动 M1-C。

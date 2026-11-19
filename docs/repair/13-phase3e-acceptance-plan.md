@@ -5,6 +5,8 @@
 > 核心原则：**13 条 Human Gold 用于校准，27 条 provisional 只用于观察，40 条整体只用于规模/回归；三者不能混成一个“通过率”。**
 >
 > 前置：40 条 final_labels 已冻结（`pilot-40-final-labels.json`，SHA `f139623f…`）；目标表已冻结（`pilot-40-targets-v1.2.0.json`，SHA `34357b34…`）；v1.2.0 运行时未创建/未激活。
+>
+> **2026-11-19 更新：人工改选方案 B（F_strict + F_coverage）。现有 `F` 目标映射到 `F_coverage`；`F_strict` 只作诊断。本文 §2.4 中“新分母 F=1.0 / Q21 不可达”等描述属于 A 方案的历史评估，B 下不再成立；B 的指标定义与目标映射见 `18-m1b-dual-metric-design-evaluation.md`（`M1-B-003`，`proposed_pending_human`）。**
 
 ## 1. 数据角色
 
@@ -45,7 +47,7 @@ Human Gold 范围以 `docs/repair/phase3e/human-gold.json` 为准：
 - 目标通过：30/32（Q14 为 non-pass；Q32 为停止点）。
 - Q14：F unavailable；C=0.7 本次低于 0.8–1.0，历史 0.7/0.7/0.9 方差；只计一次 non-pass。
 - Q32：provisional F=0.75；cl1“无法确认”应归 meta；未决。
-- **P0 未冻结**：Q17/Q30 的 v1.1.x 目标是在把 `policy_scope`/`policy_relationship` 移出分母后得到的；v1.2.0 将政策范围/关系保留为 factual，Q17 可能回到 0.8、Q30 可能回到 0.5，目标必须重新审批，不得沿用 1.0。Q32/Q19/Q31/Q35 也受 absence/uncertainty 分类变化影响，见 §2.4。
+- **P0 曾未冻结（现已冻结）**：Q17/Q30 的 v1.1.x 目标是在把 `policy_scope`/`policy_relationship` 移出分母后得到的；v1.2.0 将政策范围/关系保留为 factual。目标已由 active target 冻结（Q17 0.7–0.9、Q30 0.4–1.0），但 M1-B-002 改变 F 分母，Q17/Q21 等目标需按 `16-m1b-decision-record.md` §4 重算，见 §2.4。
 - 未运行：Q33–Q40 共 8 条。
 - 基线：Q33/Q34/Q37/Q38/Q39/Q40 缺 v1.0.0 baseline；Q35/Q36 旧报告有 baseline，可复用。
 
@@ -71,18 +73,22 @@ Human Gold 范围以 `docs/repair/phase3e/human-gold.json` 为准：
 
 ### 2.4 分类变化 → 目标影响（P0 后必须重审）
 
+> **2026-11-19 注：以下为 A 方案（单 F 排除 insufficient）的历史评估；B 方案下 `F_coverage` 恢复旧分母，Q21/Q23 的“不可达/越界”不再成立。保留此表用于解释为什么改选 B。**
+
 | Case | v1.1.x 口径 | v1.2.0 口径 | F 可能变化 | 目标动作 |
 |---|---|---|---|---|
-| Q17 | policy relationship 被移出分母 → F=1.0 | `policy_relationship` factual；无依据 insufficient | 可能回到 0.8 | 重新审批 0.9–1.0，不得静默沿用 |
-| Q20 | policy scope/generalization factual/insufficient | `policy_scope` factual | 约 0.8，可能不变 | 目标 0.6–1.0 可保留，但需重跑 baseline |
-| Q30 | policy scope 被移出分母 → F=1.0 | `policy_scope` factual；无依据 insufficient | 可能回到 0.5 | 目标 0.4–1.0 可保留，但 expected 改为 0.5；需重批 |
-| Q19 | absence/示例推断部分被排除 | `absence` non_factual；示例仍 insufficient | 可能升高或分母缩小 | 无显式目标；重跑 baseline，不新增目标 |
-| Q31 | absence/meta 部分被排除 | `absence` non_factual；quote 仍需校验 | 可能升高 | 目标 0.6–1.0 可保留；重跑 baseline |
-| Q32 | “无法确认”被标 factual/insufficient | `uncertainty` non_factual | 可能 skipped 或 1.0 | 无目标；冻结后注册 skipped/1.0 口径 |
-| Q35 | absence 被排除 | `absence` non_factual；quote 仍校验 | 可能升高 | 目标 0.8–1.0 可保留；重跑 baseline |
-| Q36 | “能否退款取决于……”被当 meta 排除 | `condition` / `policy_scope` factual；应 supported | 可能不变或变化 | F 0.8–1.0 可保留；不得靠排除条件句取得 |
-| Q21 | Q21#3 insufficient | 不变 | 不变 | 目标 0.6–0.7 保留 |
+| Q17 | policy relationship 被移出分母 → F=1.0 | `policy_relationship` factual；无依据 insufficient | 新公式 1.0；旧口径 0.8 | 已冻结 F 0.7–0.9；**新分母下待重算**（`16-m1b-decision-record.md` §4） |
+| Q20 | policy scope/generalization factual/insufficient | `policy_scope` factual | 约 0.8，可能不变 | 已冻结 F 0.6–1.0；重跑 baseline |
+| Q30 | policy scope 被移出分母 → F=1.0 | `policy_scope` factual；无依据 insufficient | 可能回到 0.5 | 已冻结 F 0.4–1.0（expected 0.5） |
+| Q19 | absence/示例推断部分被排除 | `absence` non_factual；示例仍 insufficient | 可能升高或分母缩小 | 已冻结 F 0.6–1.0；重跑 baseline |
+| Q31 | absence/meta 部分被排除 | `absence` non_factual；quote 仍需校验 | 可能升高 | 已冻结 F 0.6–1.0；重跑 baseline |
+| Q32 | “无法确认”被标 factual/insufficient | `uncertainty` non_factual | 新公式 1.0；旧口径 0.75 | 已冻结 F 0.9–1.0；3 factual 前提；skipped 算未命中 |
+| Q35 | absence 被排除 | `absence` non_factual；quote 仍校验 | 可能升高 | 已冻结 F 0.8–1.0；重跑 baseline |
+| Q36 | “能否退款取决于……”被当 meta 排除 | `condition` / `policy_scope` factual；应 supported | 可能不变或变化 | 已冻结 F 0.8–1.0；C base 0.5–0.6 / variant 0.9–1.0 |
+| Q21 | Q21#3 insufficient | 不变 | 新公式 1.0；旧口径 0.6 | 已冻结 0.6–0.7；**新分母不可达，待决策** |
 | Q14 | F unavailable；C 方差 | 不变 | 不可评估 | 保留 known non-pass；不因 key_facts 改成 PASS |
+
+> **分母变更（M1-B-002，A 方案）**：F = supported/(supported+unsupported)，insufficient 不进分母。上表“新公式”是用 v1.1.5 结果静态重算，不是新运行。A 下 Q21/Q23 与 frozen target 直接冲突，Q17/Q11 边界；B 方案改用 `F_coverage`（旧分母）后该冲突消失，见 `18-m1b-dual-metric-design-evaluation.md`。目标未按 B 冻结前，不得把 40 条结果写成目标通过，也不得修改 frozen target 的 SHA。
 
 > 目标表已冻结（2026-11-18）：`pilot-40-targets-v1.2.0.json`，SHA `34357b34…`；`pilot-40-final-labels.json` 只作分类来源，active target 文件是目标唯一来源；旧 `pilot-40-targets.json` 只读保留。
 >
@@ -171,7 +177,7 @@ Human Gold 范围以 `docs/repair/phase3e/human-gold.json` 为准：
 | 场景 | 要求 |
 |---|---|
 | 硬门禁（Q23/Q30/Q17 等 HG/关键案例） | 3/3 在目标内；2/3 只能“观察”，不得开 40 |
-| 一般 HG 目标 | 3 次中至少 2 次在目标内，且无 HG quote 降级；报告全部 3 次 |
+| 一般 HG 目标 | 3 次中至少 2 次在目标内，且无 HG quote invalid；报告全部 3 次 |
 | Provisional 观察 | 3 次全部报告；不因单次高/低直接下结论 |
 | 高方差 | 标 `high_variance=true`；记录 min/median/max；不得只报最好一次 |
 | 已知非 Judge 问题 | 单独列，不进入 Judge 方差统计 |
@@ -190,11 +196,11 @@ Human Gold 范围以 `docs/repair/phase3e/human-gold.json` 为准：
 
 每个案例必须满足：
 
-1. Schema/JSON 合法；不是 `failed`。
-2. 不是 `all_invalid`（全部 claims 校验失败）。
-3. `supported` 必须有有效 evidence；不得 `supported_without_evidence`。
-4. Human Gold：不得出现 supported claim 被 quote 降级（Q35/Q36 的 known diagnostic 需显式允许）。
-5. 目标范围内（F/C/R 或 skipped/unavailable）。
+1. Schema/JSON 合法；不是 `invalid(contract_violation)` 或 `failed(execution)`。
+2. 不是“全部 claim 结构性无效”；该情况整条 `invalid`。
+3. `supported` 必须有有效 evidence；`supported_without_evidence` → 整条 `invalid`。
+4. Human Gold：不得出现 supported claim 被 quote 判 invalid（Q35/Q36 的 known diagnostic 需显式允许）。
+5. 目标范围内（F/C/R 或 skipped/unavailable）；F 目标必须注明分母口径（M1-B-002）。
 6. 高方差案例 3 次结果符合 5.2。
 
 ### 6.2 分层验收
@@ -219,23 +225,25 @@ Human Gold 范围以 `docs/repair/phase3e/human-gold.json` 为准：
 
 ### 6.3 整体验收
 
-- **10 条闸门**：10/10 目标通过；不得有 HG quote 降级、schema failed、all invalid。
+- **10 条闸门**：10/10 目标通过；不得有 HG supported quote invalid、`invalid(contract_violation)`、`failed(execution)`。
 - **40 条规模/回归**：完成 40/40；目标通过数 + known issues 分开报告；不得写“40 条 Human Gold 通过”。
 - **Human Gold 校准**：13 条中 clean pass 数；Q14 F unavailable 单独列；Q21#3 单 claim 单独列。
 - **Provisional 观察**：27 条只作观察；不得把 provisional 目标通过写成 HG 通过。
+- **系统质量**：`invalid`、`failed(execution)`、`skipped(no_scorable_claims)`、`skipped(no_decidable_claims)`、`skipped(context_unavailable)` 分别计数；insufficient_count/ratio 单列。
 
 ## 7. 停止条件
 
 以下任一触发停止，不得继续累积：
 
-1. Schema failed / 结构化输出失败。
-2. 全部 claims invalid。
-3. Human Gold supported claim 被 quote 降级（除已显式允许的 Q35/Q36 known diagnostic）。
-4. `supported_without_evidence`。
+1. `invalid(contract_violation)` / 结构化输出失败。
+2. 全部 claim 结构性无效（整条 invalid）。
+3. Human Gold supported claim 被 quote 判 invalid（除已显式允许的 Q35/Q36 known diagnostic）。
+4. `supported_without_evidence` → 整条 `invalid`。
 5. 重复 `claim_id` 或冲突证据单边/嵌套。
 6. 未解释的指标下降 >0.10（浮点比较用容差；恰好 0.10 不停止）。
 7. 同一 provisional 案例第二次 evidence typo / 数字改变。
 8. 高方差案例 3 次中 2 次低于硬门禁。
+9. `insufficient_ratio` 异常升高但 F 因分母缩小而上升（分母效应，不得当质量提升）。
 
 停止后必须：
 - 记录 case、metric、现象、根因、SHA；

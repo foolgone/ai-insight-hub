@@ -1,0 +1,981 @@
+{
+ "meta": {
+  "name": "m1b003-static-recalc",
+  "kind": "static_recalculation_not_judge_run",
+  "generated_on": "2026-11-19",
+  "input_file": "pilot-40-v1.0.0-vs-v1.1.5.json",
+  "input_sha256": "29732088952ad406d296b2c7d8fd5d34f427fd1e703b9818e2bebf80374a5c68",
+  "target_file": "pilot-40-targets-v1.2.0-v1.0.2.json",
+  "target_sha256": "3ee15dfca66fe13f0a45fda84ecf2612483f2de107ad079b196a6bd6344d5846",
+  "script_file": "m1b003_static_recalc.py",
+  "script_sha256": "e21c930b9e9678d4d19c87bd80850db891fbe40135c00de33f313052a97953b4",
+  "row_count": 40,
+  "definitions": {
+   "F_strict": "S / (S + U)",
+   "F_coverage": "S / (S + U + I)",
+   "S": "factual_claim + supported",
+   "U": "factual_claim + unsupported",
+   "I": "factual_claim + insufficient_evidence",
+   "N": "non_factual"
+  },
+  "expected_conversions": {
+   "Q17": {
+    "is_expected": true,
+    "not_observed": true,
+    "basis": "v1.2.0 expected: cl5 policy_relationship factual/insufficient; v1.1.5 cl5 was meta",
+    "delta": {
+     "I": 1,
+     "N": -1
+    }
+   },
+   "Q32": {
+    "is_expected": true,
+    "not_observed": true,
+    "basis": "v1.2.0 expected: cl1 uncertainty non_factual; v1.1.5 cl1 was factual/insufficient",
+    "delta": {
+     "I": -1,
+     "N": 1
+    }
+   }
+  },
+  "q32_note": "Q32 expected_v1.2.0 is an expected conversion, not an observed v1.1.5 result. Do not mix with observed values.",
+  "q17_note": "Q17 expected_v1.2.0 is an expected conversion, not an observed v1.1.5 result. Do not mix with observed values.",
+  "not_for_runtime": true
+ },
+ "cases": [
+  {
+   "case_id": "Q01",
+   "target_F": [
+    0.9,
+    1.0
+   ],
+   "observed": {
+    "status": "evaluated",
+    "old_F": 1.0,
+    "counts": {
+     "S": 7,
+     "U": 0,
+     "I": 0,
+     "N": 0
+    },
+    "F_strict": 1.0,
+    "F_coverage": 1.0,
+    "F_strict_status": "evaluated",
+    "F_coverage_status": "evaluated",
+    "all_insufficient": false,
+    "unsupported_count": 0,
+    "insufficient_count": 0,
+    "insufficient_ratio": 0.0,
+    "unsupported_ratio": 0.0,
+    "target_pass": "in"
+   },
+   "expected_v1.2.0": null
+  },
+  {
+   "case_id": "Q02",
+   "target_F": null,
+   "observed": {
+    "status": "evaluated",
+    "old_F": 1.0,
+    "counts": {
+     "S": 1,
+     "U": 0,
+     "I": 0,
+     "N": 0
+    },
+    "F_strict": 1.0,
+    "F_coverage": 1.0,
+    "F_strict_status": "evaluated",
+    "F_coverage_status": "evaluated",
+    "all_insufficient": false,
+    "unsupported_count": 0,
+    "insufficient_count": 0,
+    "insufficient_ratio": 0.0,
+    "unsupported_ratio": 0.0,
+    "target_pass": "no_target"
+   },
+   "expected_v1.2.0": null
+  },
+  {
+   "case_id": "Q03",
+   "target_F": null,
+   "observed": {
+    "status": "evaluated",
+    "old_F": 1.0,
+    "counts": {
+     "S": 2,
+     "U": 0,
+     "I": 0,
+     "N": 0
+    },
+    "F_strict": 1.0,
+    "F_coverage": 1.0,
+    "F_strict_status": "evaluated",
+    "F_coverage_status": "evaluated",
+    "all_insufficient": false,
+    "unsupported_count": 0,
+    "insufficient_count": 0,
+    "insufficient_ratio": 0.0,
+    "unsupported_ratio": 0.0,
+    "target_pass": "no_target"
+   },
+   "expected_v1.2.0": null
+  },
+  {
+   "case_id": "Q04",
+   "target_F": [
+    1.0,
+    1.0
+   ],
+   "observed": {
+    "status": "evaluated",
+    "old_F": 1.0,
+    "counts": {
+     "S": 5,
+     "U": 0,
+     "I": 0,
+     "N": 0
+    },
+    "F_strict": 1.0,
+    "F_coverage": 1.0,
+    "F_strict_status": "evaluated",
+    "F_coverage_status": "evaluated",
+    "all_insufficient": false,
+    "unsupported_count": 0,
+    "insufficient_count": 0,
+    "insufficient_ratio": 0.0,
+    "unsupported_ratio": 0.0,
+    "target_pass": "in"
+   },
+   "expected_v1.2.0": null
+  },
+  {
+   "case_id": "Q05",
+   "target_F": null,
+   "observed": {
+    "status": "evaluated",
+    "old_F": 1.0,
+    "counts": {
+     "S": 1,
+     "U": 0,
+     "I": 0,
+     "N": 0
+    },
+    "F_strict": 1.0,
+    "F_coverage": 1.0,
+    "F_strict_status": "evaluated",
+    "F_coverage_status": "evaluated",
+    "all_insufficient": false,
+    "unsupported_count": 0,
+    "insufficient_count": 0,
+    "insufficient_ratio": 0.0,
+    "unsupported_ratio": 0.0,
+    "target_pass": "no_target"
+   },
+   "expected_v1.2.0": null
+  },
+  {
+   "case_id": "Q06",
+   "target_F": null,
+   "observed": {
+    "status": "evaluated",
+    "old_F": 1.0,
+    "counts": {
+     "S": 1,
+     "U": 0,
+     "I": 0,
+     "N": 0
+    },
+    "F_strict": 1.0,
+    "F_coverage": 1.0,
+    "F_strict_status": "evaluated",
+    "F_coverage_status": "evaluated",
+    "all_insufficient": false,
+    "unsupported_count": 0,
+    "insufficient_count": 0,
+    "insufficient_ratio": 0.0,
+    "unsupported_ratio": 0.0,
+    "target_pass": "no_target"
+   },
+   "expected_v1.2.0": null
+  },
+  {
+   "case_id": "Q07",
+   "target_F": null,
+   "observed": {
+    "status": "evaluated",
+    "old_F": 1.0,
+    "counts": {
+     "S": 2,
+     "U": 0,
+     "I": 0,
+     "N": 0
+    },
+    "F_strict": 1.0,
+    "F_coverage": 1.0,
+    "F_strict_status": "evaluated",
+    "F_coverage_status": "evaluated",
+    "all_insufficient": false,
+    "unsupported_count": 0,
+    "insufficient_count": 0,
+    "insufficient_ratio": 0.0,
+    "unsupported_ratio": 0.0,
+    "target_pass": "no_target"
+   },
+   "expected_v1.2.0": null
+  },
+  {
+   "case_id": "Q08",
+   "target_F": null,
+   "observed": {
+    "status": "evaluated",
+    "old_F": 1.0,
+    "counts": {
+     "S": 1,
+     "U": 0,
+     "I": 0,
+     "N": 0
+    },
+    "F_strict": 1.0,
+    "F_coverage": 1.0,
+    "F_strict_status": "evaluated",
+    "F_coverage_status": "evaluated",
+    "all_insufficient": false,
+    "unsupported_count": 0,
+    "insufficient_count": 0,
+    "insufficient_ratio": 0.0,
+    "unsupported_ratio": 0.0,
+    "target_pass": "no_target"
+   },
+   "expected_v1.2.0": null
+  },
+  {
+   "case_id": "Q09",
+   "target_F": null,
+   "observed": {
+    "status": "evaluated",
+    "old_F": 1.0,
+    "counts": {
+     "S": 3,
+     "U": 0,
+     "I": 0,
+     "N": 0
+    },
+    "F_strict": 1.0,
+    "F_coverage": 1.0,
+    "F_strict_status": "evaluated",
+    "F_coverage_status": "evaluated",
+    "all_insufficient": false,
+    "unsupported_count": 0,
+    "insufficient_count": 0,
+    "insufficient_ratio": 0.0,
+    "unsupported_ratio": 0.0,
+    "target_pass": "no_target"
+   },
+   "expected_v1.2.0": null
+  },
+  {
+   "case_id": "Q10",
+   "target_F": null,
+   "observed": {
+    "status": "evaluated",
+    "old_F": 1.0,
+    "counts": {
+     "S": 2,
+     "U": 0,
+     "I": 0,
+     "N": 0
+    },
+    "F_strict": 1.0,
+    "F_coverage": 1.0,
+    "F_strict_status": "evaluated",
+    "F_coverage_status": "evaluated",
+    "all_insufficient": false,
+    "unsupported_count": 0,
+    "insufficient_count": 0,
+    "insufficient_ratio": 0.0,
+    "unsupported_ratio": 0.0,
+    "target_pass": "no_target"
+   },
+   "expected_v1.2.0": null
+  },
+  {
+   "case_id": "Q11",
+   "target_F": [
+    0.6,
+    0.9
+   ],
+   "observed": {
+    "status": "evaluated",
+    "old_F": 0.833333,
+    "counts": {
+     "S": 5,
+     "U": 0,
+     "I": 1,
+     "N": 0
+    },
+    "F_strict": 1.0,
+    "F_coverage": 0.833333,
+    "F_strict_status": "evaluated",
+    "F_coverage_status": "evaluated",
+    "all_insufficient": false,
+    "unsupported_count": 0,
+    "insufficient_count": 1,
+    "insufficient_ratio": 0.166667,
+    "unsupported_ratio": 0.0,
+    "target_pass": "in"
+   },
+   "expected_v1.2.0": null
+  },
+  {
+   "case_id": "Q12",
+   "target_F": null,
+   "observed": {
+    "status": "evaluated",
+    "old_F": 0.666667,
+    "counts": {
+     "S": 2,
+     "U": 0,
+     "I": 1,
+     "N": 1
+    },
+    "F_strict": 1.0,
+    "F_coverage": 0.666667,
+    "F_strict_status": "evaluated",
+    "F_coverage_status": "evaluated",
+    "all_insufficient": false,
+    "unsupported_count": 0,
+    "insufficient_count": 1,
+    "insufficient_ratio": 0.333333,
+    "unsupported_ratio": 0.0,
+    "target_pass": "no_target"
+   },
+   "expected_v1.2.0": null
+  },
+  {
+   "case_id": "Q13",
+   "target_F": null,
+   "observed": {
+    "status": "evaluated",
+    "old_F": 1.0,
+    "counts": {
+     "S": 7,
+     "U": 0,
+     "I": 0,
+     "N": 0
+    },
+    "F_strict": 1.0,
+    "F_coverage": 1.0,
+    "F_strict_status": "evaluated",
+    "F_coverage_status": "evaluated",
+    "all_insufficient": false,
+    "unsupported_count": 0,
+    "insufficient_count": 0,
+    "insufficient_ratio": 0.0,
+    "unsupported_ratio": 0.0,
+    "target_pass": "no_target"
+   },
+   "expected_v1.2.0": null
+  },
+  {
+   "case_id": "Q14",
+   "target_F": "unavailable",
+   "observed": {
+    "status": "skipped",
+    "skipped_reason": "context_unavailable",
+    "error": null,
+    "F_coverage": null,
+    "F_strict": null
+   },
+   "expected_v1.2.0": null
+  },
+  {
+   "case_id": "Q15",
+   "target_F": [
+    0.6,
+    1.0
+   ],
+   "observed": {
+    "status": "evaluated",
+    "old_F": 0.75,
+    "counts": {
+     "S": 3,
+     "U": 0,
+     "I": 1,
+     "N": 0
+    },
+    "F_strict": 1.0,
+    "F_coverage": 0.75,
+    "F_strict_status": "evaluated",
+    "F_coverage_status": "evaluated",
+    "all_insufficient": false,
+    "unsupported_count": 0,
+    "insufficient_count": 1,
+    "insufficient_ratio": 0.25,
+    "unsupported_ratio": 0.0,
+    "target_pass": "in"
+   },
+   "expected_v1.2.0": null
+  },
+  {
+   "case_id": "Q16",
+   "target_F": null,
+   "observed": {
+    "status": "evaluated",
+    "old_F": 1.0,
+    "counts": {
+     "S": 1,
+     "U": 0,
+     "I": 0,
+     "N": 0
+    },
+    "F_strict": 1.0,
+    "F_coverage": 1.0,
+    "F_strict_status": "evaluated",
+    "F_coverage_status": "evaluated",
+    "all_insufficient": false,
+    "unsupported_count": 0,
+    "insufficient_count": 0,
+    "insufficient_ratio": 0.0,
+    "unsupported_ratio": 0.0,
+    "target_pass": "no_target"
+   },
+   "expected_v1.2.0": null
+  },
+  {
+   "case_id": "Q17",
+   "target_F": [
+    0.7,
+    0.9
+   ],
+   "observed": {
+    "status": "evaluated",
+    "old_F": 1.0,
+    "counts": {
+     "S": 4,
+     "U": 0,
+     "I": 0,
+     "N": 1
+    },
+    "F_strict": 1.0,
+    "F_coverage": 1.0,
+    "F_strict_status": "evaluated",
+    "F_coverage_status": "evaluated",
+    "all_insufficient": false,
+    "unsupported_count": 0,
+    "insufficient_count": 0,
+    "insufficient_ratio": 0.0,
+    "unsupported_ratio": 0.0,
+    "target_pass": "above"
+   },
+   "expected_v1.2.0": {
+    "is_expected": true,
+    "not_observed": true,
+    "basis": "v1.2.0 expected: cl5 policy_relationship factual/insufficient; v1.1.5 cl5 was meta",
+    "counts": {
+     "S": 4,
+     "U": 0,
+     "I": 1,
+     "N": 0
+    },
+    "F_strict": 1.0,
+    "F_coverage": 0.8,
+    "F_strict_status": "evaluated",
+    "F_coverage_status": "evaluated",
+    "all_insufficient": false,
+    "unsupported_count": 0,
+    "insufficient_count": 1,
+    "insufficient_ratio": 0.2,
+    "unsupported_ratio": 0.0,
+    "target_pass": "in"
+   }
+  },
+  {
+   "case_id": "Q18",
+   "target_F": null,
+   "observed": {
+    "status": "evaluated",
+    "old_F": 1.0,
+    "counts": {
+     "S": 5,
+     "U": 0,
+     "I": 0,
+     "N": 0
+    },
+    "F_strict": 1.0,
+    "F_coverage": 1.0,
+    "F_strict_status": "evaluated",
+    "F_coverage_status": "evaluated",
+    "all_insufficient": false,
+    "unsupported_count": 0,
+    "insufficient_count": 0,
+    "insufficient_ratio": 0.0,
+    "unsupported_ratio": 0.0,
+    "target_pass": "no_target"
+   },
+   "expected_v1.2.0": null
+  },
+  {
+   "case_id": "Q19",
+   "target_F": [
+    0.6,
+    1.0
+   ],
+   "observed": {
+    "status": "evaluated",
+    "old_F": 0.714286,
+    "counts": {
+     "S": 5,
+     "U": 0,
+     "I": 2,
+     "N": 0
+    },
+    "F_strict": 1.0,
+    "F_coverage": 0.714286,
+    "F_strict_status": "evaluated",
+    "F_coverage_status": "evaluated",
+    "all_insufficient": false,
+    "unsupported_count": 0,
+    "insufficient_count": 2,
+    "insufficient_ratio": 0.285714,
+    "unsupported_ratio": 0.0,
+    "target_pass": "in"
+   },
+   "expected_v1.2.0": null
+  },
+  {
+   "case_id": "Q20",
+   "target_F": [
+    0.6,
+    1.0
+   ],
+   "observed": {
+    "status": "evaluated",
+    "old_F": 0.8,
+    "counts": {
+     "S": 4,
+     "U": 0,
+     "I": 1,
+     "N": 0
+    },
+    "F_strict": 1.0,
+    "F_coverage": 0.8,
+    "F_strict_status": "evaluated",
+    "F_coverage_status": "evaluated",
+    "all_insufficient": false,
+    "unsupported_count": 0,
+    "insufficient_count": 1,
+    "insufficient_ratio": 0.2,
+    "unsupported_ratio": 0.0,
+    "target_pass": "in"
+   },
+   "expected_v1.2.0": null
+  },
+  {
+   "case_id": "Q21",
+   "target_F": [
+    0.6,
+    0.7
+   ],
+   "observed": {
+    "status": "evaluated",
+    "old_F": 0.6,
+    "counts": {
+     "S": 3,
+     "U": 0,
+     "I": 2,
+     "N": 1
+    },
+    "F_strict": 1.0,
+    "F_coverage": 0.6,
+    "F_strict_status": "evaluated",
+    "F_coverage_status": "evaluated",
+    "all_insufficient": false,
+    "unsupported_count": 0,
+    "insufficient_count": 2,
+    "insufficient_ratio": 0.4,
+    "unsupported_ratio": 0.0,
+    "target_pass": "in"
+   },
+   "expected_v1.2.0": null
+  },
+  {
+   "case_id": "Q22",
+   "target_F": [
+    0.8,
+    1.0
+   ],
+   "observed": {
+    "status": "evaluated",
+    "old_F": 1.0,
+    "counts": {
+     "S": 4,
+     "U": 0,
+     "I": 0,
+     "N": 1
+    },
+    "F_strict": 1.0,
+    "F_coverage": 1.0,
+    "F_strict_status": "evaluated",
+    "F_coverage_status": "evaluated",
+    "all_insufficient": false,
+    "unsupported_count": 0,
+    "insufficient_count": 0,
+    "insufficient_ratio": 0.0,
+    "unsupported_ratio": 0.0,
+    "target_pass": "in"
+   },
+   "expected_v1.2.0": null
+  },
+  {
+   "case_id": "Q23",
+   "target_F": [
+    0.4,
+    0.5
+   ],
+   "observed": {
+    "status": "evaluated",
+    "old_F": 0.5,
+    "counts": {
+     "S": 3,
+     "U": 1,
+     "I": 2,
+     "N": 4
+    },
+    "F_strict": 0.75,
+    "F_coverage": 0.5,
+    "F_strict_status": "evaluated",
+    "F_coverage_status": "evaluated",
+    "all_insufficient": false,
+    "unsupported_count": 1,
+    "insufficient_count": 2,
+    "insufficient_ratio": 0.333333,
+    "unsupported_ratio": 0.166667,
+    "target_pass": "in"
+   },
+   "expected_v1.2.0": null
+  },
+  {
+   "case_id": "Q24",
+   "target_F": null,
+   "observed": {
+    "status": "evaluated",
+    "old_F": 0.666667,
+    "counts": {
+     "S": 2,
+     "U": 0,
+     "I": 1,
+     "N": 2
+    },
+    "F_strict": 1.0,
+    "F_coverage": 0.666667,
+    "F_strict_status": "evaluated",
+    "F_coverage_status": "evaluated",
+    "all_insufficient": false,
+    "unsupported_count": 0,
+    "insufficient_count": 1,
+    "insufficient_ratio": 0.333333,
+    "unsupported_ratio": 0.0,
+    "target_pass": "no_target"
+   },
+   "expected_v1.2.0": null
+  },
+  {
+   "case_id": "Q25",
+   "target_F": null,
+   "observed": {
+    "status": "evaluated",
+    "old_F": 1.0,
+    "counts": {
+     "S": 2,
+     "U": 0,
+     "I": 0,
+     "N": 0
+    },
+    "F_strict": 1.0,
+    "F_coverage": 1.0,
+    "F_strict_status": "evaluated",
+    "F_coverage_status": "evaluated",
+    "all_insufficient": false,
+    "unsupported_count": 0,
+    "insufficient_count": 0,
+    "insufficient_ratio": 0.0,
+    "unsupported_ratio": 0.0,
+    "target_pass": "no_target"
+   },
+   "expected_v1.2.0": null
+  },
+  {
+   "case_id": "Q26",
+   "target_F": null,
+   "observed": {
+    "status": "evaluated",
+    "old_F": 1.0,
+    "counts": {
+     "S": 1,
+     "U": 0,
+     "I": 0,
+     "N": 0
+    },
+    "F_strict": 1.0,
+    "F_coverage": 1.0,
+    "F_strict_status": "evaluated",
+    "F_coverage_status": "evaluated",
+    "all_insufficient": false,
+    "unsupported_count": 0,
+    "insufficient_count": 0,
+    "insufficient_ratio": 0.0,
+    "unsupported_ratio": 0.0,
+    "target_pass": "no_target"
+   },
+   "expected_v1.2.0": null
+  },
+  {
+   "case_id": "Q27",
+   "target_F": null,
+   "observed": {
+    "status": "evaluated",
+    "old_F": 1.0,
+    "counts": {
+     "S": 5,
+     "U": 0,
+     "I": 0,
+     "N": 0
+    },
+    "F_strict": 1.0,
+    "F_coverage": 1.0,
+    "F_strict_status": "evaluated",
+    "F_coverage_status": "evaluated",
+    "all_insufficient": false,
+    "unsupported_count": 0,
+    "insufficient_count": 0,
+    "insufficient_ratio": 0.0,
+    "unsupported_ratio": 0.0,
+    "target_pass": "no_target"
+   },
+   "expected_v1.2.0": null
+  },
+  {
+   "case_id": "Q28",
+   "target_F": [
+    0.8,
+    1.0
+   ],
+   "observed": {
+    "status": "evaluated",
+    "old_F": 0.857143,
+    "counts": {
+     "S": 6,
+     "U": 0,
+     "I": 1,
+     "N": 1
+    },
+    "F_strict": 1.0,
+    "F_coverage": 0.857143,
+    "F_strict_status": "evaluated",
+    "F_coverage_status": "evaluated",
+    "all_insufficient": false,
+    "unsupported_count": 0,
+    "insufficient_count": 1,
+    "insufficient_ratio": 0.142857,
+    "unsupported_ratio": 0.0,
+    "target_pass": "in"
+   },
+   "expected_v1.2.0": null
+  },
+  {
+   "case_id": "Q29",
+   "target_F": "skipped",
+   "observed": {
+    "status": "skipped",
+    "skipped_reason": "no_scorable_claims",
+    "error": null,
+    "F_coverage": null,
+    "F_strict": null
+   },
+   "expected_v1.2.0": null
+  },
+  {
+   "case_id": "Q30",
+   "target_F": [
+    0.4,
+    1.0
+   ],
+   "observed": {
+    "status": "evaluated",
+    "old_F": 1.0,
+    "counts": {
+     "S": 1,
+     "U": 0,
+     "I": 0,
+     "N": 5
+    },
+    "F_strict": 1.0,
+    "F_coverage": 1.0,
+    "F_strict_status": "evaluated",
+    "F_coverage_status": "evaluated",
+    "all_insufficient": false,
+    "unsupported_count": 0,
+    "insufficient_count": 0,
+    "insufficient_ratio": 0.0,
+    "unsupported_ratio": 0.0,
+    "target_pass": "in"
+   },
+   "expected_v1.2.0": null
+  },
+  {
+   "case_id": "Q31",
+   "target_F": [
+    0.6,
+    1.0
+   ],
+   "observed": {
+    "status": "evaluated",
+    "old_F": 0.833333,
+    "counts": {
+     "S": 5,
+     "U": 0,
+     "I": 1,
+     "N": 3
+    },
+    "F_strict": 1.0,
+    "F_coverage": 0.833333,
+    "F_strict_status": "evaluated",
+    "F_coverage_status": "evaluated",
+    "all_insufficient": false,
+    "unsupported_count": 0,
+    "insufficient_count": 1,
+    "insufficient_ratio": 0.166667,
+    "unsupported_ratio": 0.0,
+    "target_pass": "in"
+   },
+   "expected_v1.2.0": null
+  },
+  {
+   "case_id": "Q32",
+   "target_F": [
+    0.9,
+    1.0
+   ],
+   "observed": {
+    "status": "evaluated",
+    "old_F": 0.75,
+    "counts": {
+     "S": 3,
+     "U": 0,
+     "I": 1,
+     "N": 2
+    },
+    "F_strict": 1.0,
+    "F_coverage": 0.75,
+    "F_strict_status": "evaluated",
+    "F_coverage_status": "evaluated",
+    "all_insufficient": false,
+    "unsupported_count": 0,
+    "insufficient_count": 1,
+    "insufficient_ratio": 0.25,
+    "unsupported_ratio": 0.0,
+    "target_pass": "below"
+   },
+   "expected_v1.2.0": {
+    "is_expected": true,
+    "not_observed": true,
+    "basis": "v1.2.0 expected: cl1 uncertainty non_factual; v1.1.5 cl1 was factual/insufficient",
+    "counts": {
+     "S": 3,
+     "U": 0,
+     "I": 0,
+     "N": 3
+    },
+    "F_strict": 1.0,
+    "F_coverage": 1.0,
+    "F_strict_status": "evaluated",
+    "F_coverage_status": "evaluated",
+    "all_insufficient": false,
+    "unsupported_count": 0,
+    "insufficient_count": 0,
+    "insufficient_ratio": 0.0,
+    "unsupported_ratio": 0.0,
+    "target_pass": "in"
+   }
+  },
+  {
+   "case_id": "Q33",
+   "target_F": null,
+   "observed": {
+    "status": "not_run",
+    "reason": "Q33-Q40 not run in v1.1.5"
+   },
+   "expected_v1.2.0": null
+  },
+  {
+   "case_id": "Q34",
+   "target_F": null,
+   "observed": {
+    "status": "not_run",
+    "reason": "Q33-Q40 not run in v1.1.5"
+   },
+   "expected_v1.2.0": null
+  },
+  {
+   "case_id": "Q35",
+   "target_F": [
+    0.8,
+    1.0
+   ],
+   "observed": {
+    "status": "not_run",
+    "reason": "Q33-Q40 not run in v1.1.5"
+   },
+   "expected_v1.2.0": null
+  },
+  {
+   "case_id": "Q36",
+   "target_F": [
+    0.8,
+    1.0
+   ],
+   "observed": {
+    "status": "not_run",
+    "reason": "Q33-Q40 not run in v1.1.5"
+   },
+   "expected_v1.2.0": null
+  },
+  {
+   "case_id": "Q37",
+   "target_F": null,
+   "observed": {
+    "status": "not_run",
+    "reason": "Q33-Q40 not run in v1.1.5"
+   },
+   "expected_v1.2.0": null
+  },
+  {
+   "case_id": "Q38",
+   "target_F": null,
+   "observed": {
+    "status": "not_run",
+    "reason": "Q33-Q40 not run in v1.1.5"
+   },
+   "expected_v1.2.0": null
+  },
+  {
+   "case_id": "Q39",
+   "target_F": null,
+   "observed": {
+    "status": "not_run",
+    "reason": "Q33-Q40 not run in v1.1.5"
+   },
+   "expected_v1.2.0": null
+  },
+  {
+   "case_id": "Q40",
+   "target_F": null,
+   "observed": {
+    "status": "not_run",
+    "reason": "Q33-Q40 not run in v1.1.5"
+   },
+   "expected_v1.2.0": null
+  }
+ ]
+}

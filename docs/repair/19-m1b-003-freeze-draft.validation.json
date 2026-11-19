@@ -1,0 +1,175 @@
+{
+ "file": "19-m1b-003-freeze-draft.md",
+ "sha256": "d2d2e0decd84fee57b68acf90e862189c09acf6ce608d92578f6346f7cc5183d",
+ "sha256_file": "19-m1b-003-freeze-draft.sha256",
+ "status": "freeze_draft_pending_human",
+ "revision": "M1-B-003-r2",
+ "checks": [
+  {
+   "name": "unsupported_not_contradiction",
+   "ok": true,
+   "detail": true
+  },
+  {
+   "name": "fstrict_explanation",
+   "ok": true,
+   "detail": true
+  },
+  {
+   "name": "no_active_contradiction_or_mixed",
+   "ok": true,
+   "detail": true
+  },
+  {
+   "name": "contains_unsupported_claims_label",
+   "ok": true,
+   "detail": true
+  },
+  {
+   "name": "run_config_immutable",
+   "ok": true,
+   "detail": true
+  },
+  {
+   "name": "retry_is_child_run",
+   "ok": true,
+   "detail": true
+  },
+  {
+   "name": "unique_key_reviewed",
+   "ok": true,
+   "detail": true
+  },
+  {
+   "name": "item_level_status",
+   "ok": true,
+   "detail": true
+  },
+  {
+   "name": "case_count_not_row_count",
+   "ok": true,
+   "detail": true
+  },
+  {
+   "name": "completed_items_semantics",
+   "ok": true,
+   "detail": true
+  },
+  {
+   "name": "item_status_mutually_exclusive",
+   "ok": true,
+   "detail": true
+  },
+  {
+   "name": "conservation_relation",
+   "ok": true,
+   "detail": true
+  },
+  {
+   "name": "cross_metric_example",
+   "ok": true,
+   "detail": true
+  },
+  {
+   "name": "invalid_persistence_contract",
+   "ok": true,
+   "detail": true
+  },
+  {
+   "name": "invalid_metric_counts",
+   "ok": true,
+   "detail": true
+  },
+  {
+   "name": "invalid_not_in_mean",
+   "ok": true,
+   "detail": true
+  },
+  {
+   "name": "invalid_not_execution_failure",
+   "ok": true,
+   "detail": true
+  },
+  {
+   "name": "r2_two_items_closed",
+   "ok": true,
+   "detail": true
+  },
+  {
+   "name": "unified_terminology",
+   "ok": true,
+   "detail": true
+  },
+  {
+   "name": "d1_d4_formulas_unchanged",
+   "ok": true,
+   "detail": true
+  },
+  {
+   "name": "d1_display_names_unchanged",
+   "ok": true,
+   "detail": true
+  },
+  {
+   "name": "d3_all_insufficient_unchanged",
+   "ok": true,
+   "detail": true
+  },
+  {
+   "name": "d4_observation_fields_unchanged",
+   "ok": true,
+   "detail": true
+  },
+  {
+   "name": "target_shas_unchanged",
+   "ok": true,
+   "detail": true
+  },
+  {
+   "name": "status_pending_not_accepted",
+   "ok": true,
+   "detail": true
+  },
+  {
+   "name": "four_issues_closed",
+   "ok": true,
+   "detail": true
+  },
+  {
+   "name": "revision_record_referenced",
+   "ok": true,
+   "detail": true
+  },
+  {
+   "name": "revision_record_exists",
+   "ok": true,
+   "detail": true
+  },
+  {
+   "name": "revision_record_sha_matches",
+   "ok": true,
+   "detail": true
+  },
+  {
+   "name": "no_runtime_changes",
+   "ok": true,
+   "detail": []
+  },
+  {
+   "name": "old_target_sha_unchanged",
+   "ok": true,
+   "detail": "34357b34c3d0fc85e78f90eeebb353b25a148926e3a55b19f17cc23b08b2b5eb"
+  },
+  {
+   "name": "new_target_sha_unchanged",
+   "ok": true,
+   "detail": "3ee15dfca66fe13f0a45fda84ecf2612483f2de107ad079b196a6bd6344d5846"
+  },
+  {
+   "name": "final_labels_sha_unchanged",
+   "ok": true,
+   "detail": "f139623fef80b55716fce0c773e776d284a5167683eb91559b23e49cabd000eb"
+  }
+ ],
+ "all_pass": true
+}

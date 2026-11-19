@@ -2,7 +2,9 @@
 
 > 状态：设计草案；**语义规范已于 2026-11-18 冻结，目标表已于 2026-11-18 冻结，v1.2.0 运行时未创建/未激活**。本文不创建 v1.2.0 运行时版本，不修改 Prompt/Service/Schema/API/DB，不运行 Judge。
 >
-> 设计目标：从“逐案例补 few-shot”转为“先冻结 Judge 语义，再用通用规则与结构化 Schema 实现”。P0：`policy_scope` / `policy_relationship` 是 factual，不得退出 F 分母。
+> 设计目标：从“逐案例补 few-shot”转为“先冻结 Judge 语义，再用通用规则与结构化 Schema 实现”。P0：`policy_scope` / `policy_relationship` 是 factual，不得被判 non_factual；合法 `insufficient_evidence` 不进 F 分母，但单独统计。
+>
+> **2026-11-19 更新：人工改选方案 B（F_strict + F_coverage）。本文的单 F 表述作为历史设计保留；`F_coverage` 包含 insufficient，`F_strict` 排除 insufficient，详见 `18-m1b-dual-metric-design-evaluation.md`（`M1-B-003`，`proposed_pending_human`）。B 冻结前，本文不作为实现依据。**
 
 ## 1. 背景与结论
 
@@ -20,7 +22,7 @@ v1.0.0 → v1.1.5 的经验：
 1. 语义优先：先定义“什么算 claim、什么进分母”，再写 Prompt。
 2. 规则可复用：禁止案例 ID 特例；few-shot 只展示模式，不展示答案。
 3. Schema 先行：claim 类型/子类型/状态由 Schema 约束，Prompt 只负责分类。
-4. Service 守门：分母、skip、failed、evidence 降级、重复/冲突由 Service 统一处理。
+4. Service 守门：分母、skip、invalid、evidence 契约、重复/冲突由 Service 统一处理。
 5. 版本隔离：v1.0.0 保持 baseline；v1.2.0 默认 inactive；旧 Run 不混 SHA。
 6. 可重复：高方差案例 3 次；报告全部结果，不报最好一次。
 
@@ -45,12 +47,12 @@ v1.0.0 → v1.1.5 的经验：
 ```
 
 关键变化：
-- **P0 边界**：`policy_scope`、`policy_relationship` 是 factual；文档没有明确写时判 insufficient，留在 F 分母。`doc_scope`、`doc_relationship`、`absence`、`uncertainty` 才是 non_factual。
+- **P0 边界**：`policy_scope`、`policy_relationship` 是 factual；文档没有明确写时判 insufficient，不判 non_factual；insufficient 不进 F 分母，但单独统计。`doc_scope`、`doc_relationship`、`absence`、`uncertainty` 才是 non_factual。
 - `condition` 独立于 `policy`，用于条件/例外/时限。
 - `normative_requirement` 独立，避免“需提供凭证”被误判 advice。
 - 增加 `fact` / `process` / `derived`：派生结论（第 10 天 > 7 天、89 元+新疆运费 20）不再硬塞 policy。
 - `conflict` 只在回答披露文档冲突时出现。
-- v1.1.x 的 Q17/Q30 目标（通过把政策范围/关系移出分母得到）在 v1.2.0 下可能失效，必须重新审批。
+- Q17/Q30 目标已冻结；但 M1-B-002 改变 F 分母，含 insufficient 的目标需按 `16-m1b-decision-record.md` §4 重算。
 
 ### 3.2 Claim 提取规则
 
@@ -85,7 +87,7 @@ v1.0.0 → v1.1.5 的经验：
 ### 3.5 输出稳定性
 
 - temperature 0.0；max_tokens 足够。
-- 结构化失败重试一次；仍失败 → `failed`，不进入均值。
+- 结构化失败不重试为正分；一次受控修复后仍违约 → `invalid(contract_violation)`，不进入均值。
 - 不允许 Service 用“默认 supported”兜底。
 
 ## 4. Answer Correctness Prompt 方向
@@ -122,13 +124,14 @@ v1.0.0 → v1.1.5 的经验：
 
 ### 6.2 Service
 
-- 分母：只统计 factual_claim；non_factual 全部排除。
+- 分母：factual 中 supported + unsupported 进入；non_factual 排除；insufficient 排除但单独统计。
 - `skipped(no_scorable_claims)`：全部 non_factual。
+- `skipped(no_decidable_claims)`：全部 factual 都是 insufficient；不是 0.0。
 - `skipped(context_unavailable)`：无上下文；F unavailable。
-- `failed(schema)` / `failed(all_invalid)`：不进入均值。
-- evidence：逐字校验、最短子串、answer 引用拒绝、降级、重复/冲突检查。
-- 冲突：conflict 必须有两条互不为子串的 evidence；base 不因文档冲突扣分。
-- 统计：HG/provisional 分组；C1-only/context_unavailable 单独列；known issue 分列。
+- `invalid(contract_violation)` / `failed(execution)`：不进入均值，无分数。
+- evidence：逐字校验、最短子串、answer 引用拒绝；缺失/非逐字/context 不存在 → 整条 invalid；存在但不支持 → unsupported。
+- 冲突：conflict 必须有两条互不为子串的 evidence；单边/嵌套 → invalid。
+- 统计：HG/provisional 分组；C1-only/context_unavailable 单独列；insufficient_count/ratio 单列；known issue 分列。
 - 浮点：`>0.10` 使用容差（`old - new > 0.10 + 1e-9`），恰好 0.10 不停止。
 
 ### 6.3 兼容性
@@ -150,12 +153,12 @@ v1.0.0 → v1.1.5 的经验：
 - Prompt loader：v1.2.0 manifest/SHA/版本映射。
 - Schema：claim_type/subtype/status/evidence/contradiction/conflict。
 - Service：
-  - non_factual 不进分母；
-  - supported 无 evidence 降级；
-  - quote 非逐字降级；
+  - non_factual 不进分母；insufficient 不进分母但单独统计；
+  - supported 无 evidence → invalid；
+  - quote 非逐字 / context_id 不存在 → invalid；
   - duplicate claim_id；
   - conflict 单边证据；
-  - context_unavailable / no_scorable / failed；
+  - context_unavailable / no_scorable / no_decidable / invalid / failed(execution)；
   - 浮点 0.10 边界。
 - 版本：v1.0.0 默认、v1.2.0 显式选择、旧版本兼容。
 
@@ -189,7 +192,7 @@ v1.0.0 → v1.1.5 的经验：
 - 重复 claim_id；
 - conflict 单边证据；
 - context_unavailable 标 0；
-- all invalid 标 skip；
+- all invalid → `invalid(contract_violation)`，不得标 skip；
 - 恰好 0.10 误停。
 
 ## 8. 实验与成本
@@ -232,7 +235,7 @@ v1.0.0 → v1.1.5 的经验：
 1. 语义规范已于 2026-11-18 冻结（`12-judge-semantic-spec.md`）；冻结后不再改语义，任何变化需新 freeze record。
 2. 40 条 final_labels 已冻结：`pilot-40-final-labels.json`，SHA `f139623f…`；13 条 HG 来自 `human-gold.json`，27 条 provisional 来自 `candidates.json`；40 条报告只能使用该文件。
 3. 目标表已冻结：`pilot-40-targets-v1.2.0.json`，SHA `34357b34…`；使用 active target 文件，`pilot-40-targets-v1.2.0-reapproval` 仅保留为历史。
-4. 设计 v1.2.0 Schema / Service / 子类型：`fact` / `process` / `derived` / `policy_scope` / `policy_relationship` / `doc_scope` / `doc_relationship`；分母、evidence、skip/failed 按冻结规范。详见 `15-phase3e-v1.2.0-schema-service-design.md`（Schema v3 / Metric v3）。
+4. 设计 v1.2.0 Schema / Service / 子类型：`fact` / `process` / `derived` / `policy_scope` / `policy_relationship` / `doc_scope` / `doc_relationship`；分母、evidence、skip/invalid 按 `16-m1b-decision-record.md`（M1-B-002）。详见 `15-phase3e-v1.2.0-schema-service-design.md`（Schema v3 / Metric v3）。
 5. 先写负向测试（policy_scope 误归 meta、Q36 条件句误归 meta、absence 进分母等），再做单案例、10 条、40 条。
 6. 不创建/激活 v1.2.0，不跑 Judge；等 Schema/目标设计复核后再申请运行。
 7. 任何阶段失败按 `13-phase3e-acceptance-plan.md` 停止，不累积 known miss。
