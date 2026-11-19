@@ -30,11 +30,13 @@ from app.agents.base import (
 from app.core.config import settings
 from app.schemas.agents.rag_judge import (
     JUDGE_SCHEMA_V2,
+    JUDGE_SCHEMA_V3,
     METRIC_OUTPUT_SCHEMAS,
     RagJudgeInput,
     RagJudgeMetric,
     judge_schema_version,
     metric_version_for_prompt,
+    output_schema_for,
 )
 
 PROMPT_DIR = Path(__file__).resolve().parents[1] / "prompts" / "rag_judge"
@@ -113,9 +115,17 @@ class RagJudgeAgent(BaseAgent):
         self.metric: RagJudgeMetric = metric
         self.prompt_version = resolve_prompt_version(prompt_version)
         manifest = load_prompt_manifest(self.prompt_version)
-        self.schema_version = str(
-            manifest.get("schema_version") or judge_schema_version(self.prompt_version)
-        )
+        expected_schema_version = judge_schema_version(self.prompt_version)
+        manifest_schema_version = manifest.get("schema_version")
+        if (
+            manifest_schema_version is not None
+            and manifest_schema_version != expected_schema_version
+        ):
+            raise RagJudgePromptError(
+                "rag judge manifest schema_version mismatch: "
+                f"{manifest_schema_version!r} != {expected_schema_version!r}"
+            )
+        self.schema_version = str(manifest_schema_version or expected_schema_version)
         self.rubric_version = str(manifest.get("rubric_version") or self.prompt_version)
         self.prompt_status = str(manifest.get("status") or "unknown")
         self.prompt_active = bool(manifest.get("active", False))
@@ -131,7 +141,7 @@ class RagJudgeAgent(BaseAgent):
             llm=llm,
             credentials=credentials,
         )
-        self.output_schema = METRIC_OUTPUT_SCHEMAS[metric]
+        self.output_schema = output_schema_for(metric, self.schema_version)
 
     # ------------------------------------------------------------------ 元信息
 
@@ -160,7 +170,7 @@ class RagJudgeAgent(BaseAgent):
         user_payload: dict[str, Any] = {"query": payload.query}
         if self.metric == "faithfulness":
             user_payload["answer"] = payload.answer
-            if self.schema_version == JUDGE_SCHEMA_V2:
+            if self.schema_version in (JUDGE_SCHEMA_V2, JUDGE_SCHEMA_V3):
                 # 显式给 context_id，避免模型把文档章节号（如 ## 7）当成 C7。
                 user_payload["contexts"] = payload.contexts
                 user_payload["context_ids"] = [
@@ -201,7 +211,9 @@ class RagJudgeAgent(BaseAgent):
                 raise AgentInputError("answer is required for answer_relevancy")
 
     def _validate_output(self, data: Any) -> dict[str, Any]:
-        schema = METRIC_OUTPUT_SCHEMAS[self.metric]
+        schema = self.output_schema
+        if schema is None:
+            raise AgentOutputError("rag judge output schema is not configured")
         if isinstance(data, schema):
             parsed = data
         else:
@@ -223,7 +235,7 @@ class RagJudgeAgent(BaseAgent):
     def _repair_example(self) -> str | None:
         """给修复轮一条完整合法 JSON，避免长 schema 导致半截输出。"""
         if self.metric == "faithfulness":
-            if self.schema_version == JUDGE_SCHEMA_V2:
+            if self.schema_version in (JUDGE_SCHEMA_V2, JUDGE_SCHEMA_V3):
                 return json.dumps(
                     {
                         "claims": [

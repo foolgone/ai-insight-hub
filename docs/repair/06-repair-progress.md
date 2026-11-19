@@ -1189,9 +1189,9 @@ alembic check   : No new upgrade operations detected
 - 关键缺口：当前代码仍 Schema v2；subtype 默认归一；只有 `faithfulness` 一条指标、无 strict；result status 无 invalid；run completed 含 skipped；retry 用当前指纹；migration 022 不存在。
 - 未修改业务代码/迁移/DB；未创建/激活 v1.2.0；未跑 Judge；未启动 M1-C；Stage 0/1 rev2.1 已通过（2026-11-19 复审）。
 
-### M1-C C1 设计与变更范围（2026-11-19，只设计）
+### M1-C C1 设计与变更范围（2026-11-19，已实现/本地验证）
 - C1 报告：`docs/repair/24-m1c-c1-design-scope.md`；范围仅 Schema v3 注册、V3 输出模型、loader/agent 选择、v1/v2 兼容、Service v3 guard。
 - 设计要点：`JUDGE_SCHEMA_V3`、`v1.2.0→v3`、`metric_version=v3` 版本映射；独立 `FaithfulnessClaimV3` / `FaithfulnessOutputV3`；v3 严格 subtype/support_status/evidence_refs；`judge_trace` / `_faithfulness_score` 遇 v3 抛 `RagJudgePromptError`（不实现 v3 计分）；MANIFEST `schema_version` 必须与 `judge_schema_version(prompt_version)` 一致；v1/v2 模型与测试不变；17 条 C1 测试。
-- 边界：不创建 v1.2.0 Prompt，不写 migration 022，不改 model/repo/API，Service 只加 v3 guard；C1 测试用 `tmp_path` fixture。
-- 实施顺序调整为：C1 Schema v3 → C2 migration 022 + model/repo 字段 → C3 Service 双指标/invalid/聚合/retry → C4 目标回归。
-- 未修改业务代码；C1 代码未开始；migration 022 未创建/执行；v1.2.0 未创建/激活；Judge 未运行。
+- 实现：`app/schemas/agents/rag_judge.py`、`app/agents/rag_judge_agent.py`、`app/services/rag_judge_service.py`（仅 guard）、`tests/unit/test_rag_judge_schema_v3.py`、`tests/unit/test_rag_judge_v2_schema_loader.py`（仅映射断言）。
+- 验证：C1 + v2 定向测试 113 passed；全量 `pytest -m "not prompt"` passed；black/flake8/mypy/lint-imports 通过。
+- 边界：未创建 v1.2.0 Prompt，未写 migration 022，未改 model/repo/API，未跑 Judge；C1 状态 `implemented/verified`，未 accepted；C2 未启动。

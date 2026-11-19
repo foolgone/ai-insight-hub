@@ -228,7 +228,7 @@ non_factual:
 | 13 | Service guard：`_faithfulness_score(schema_version=v3)` | 直接抛同一错误；不得走 v1 的 `supported` 路径 |
 | 14 | MANIFEST 版本一致性（4 cases，tmp_path 复制/改写） | ① v1.1.5 写 v3 → 报错；② v1.2.0 写 v3 → 通过；③ 缺 `schema_version` → 按 `judge_schema_version` 回退；④ 未知值 → 报错 |
 | 15 | Agent v3 选择 | 临时 v1.2.0 MANIFEST + Prompt fixture → `schema_version=v3`、`output_schema` 为 V3、repair example 含 `evidence_refs` |
-| 16 | Agent v2 不变 | v2 `output_schema` 仍为 V2 模型；repair example 仍含 `supported`/`evidence` |
+| 16 | Agent v2 不变 | v2 `output_schema` 仍为 V2 模型；repair example 仍为 v2 格式（`support_status`/`evidence_refs`，无 `supported` 布尔） |
 | 17 | 边界 | `PROMPT_DIR/v1.2.0` 不存在；C1 未创建真实 Prompt；显式加载 v1.2.0 会按现有 loader 报 `manifest missing` |
 
 运行命令：

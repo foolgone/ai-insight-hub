@@ -20,11 +20,12 @@ from typing import Any, Literal
 from loguru import logger
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.agents.rag_judge_agent import RagJudgeAgent, resolve_prompt_version
+from app.agents.rag_judge_agent import RagJudgeAgent, RagJudgePromptError, resolve_prompt_version
 from app.models import QaDatasetItem, RagTrace
 from app.schemas.agents.rag_judge import (
     JUDGE_SCHEMA_V1,
     JUDGE_SCHEMA_V2,
+    JUDGE_SCHEMA_V3,
     RAG_JUDGE_METRICS,
     RagJudgeMetric,
     judge_schema_version,
@@ -515,6 +516,8 @@ def _faithfulness_score(
     v1.0.0：全部 claims 进分母，``supported`` 为事实源（行为不变）；
     v1.1.1：``factual_claim`` 进分母，non_factual 不进；0 scorable → skipped。
     """
+    if schema_version == JUDGE_SCHEMA_V3:
+        raise RagJudgePromptError("v3 scoring not implemented until C3")
     claims = list(data.get("claims") or [])
     if schema_version != JUDGE_SCHEMA_V2:
         total = len(claims)
@@ -619,6 +622,8 @@ async def judge_trace(
 
     resolved_prompt_version = resolve_prompt_version(prompt_version)
     resolved_schema_version = schema_version or judge_schema_version(resolved_prompt_version)
+    if resolved_schema_version == JUDGE_SCHEMA_V3:
+        raise RagJudgePromptError("v3 scoring not implemented until C3")
     contexts = _contexts_from_trace(trace)
     gold_answer = _gold_answer_of(item)
     factory: AgentFactory = agent_factory or (
