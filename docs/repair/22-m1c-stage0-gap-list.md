@@ -42,12 +42,14 @@
 
 | 子阶段 | 内容 | 退出条件 |
 |---|---|---|
-| C1 | Schema v3 + loader + v1/v2 兼容 | Schema/loader 单测通过 |
-| C2 | Service 双指标 + invalid 契约；`expected_metrics` 必须含 `faithfulness_strict` 派生项，禁止只写 `judge_metrics` | Stage 1 十二条核心测试 + 附加契约测试通过 |
-| C3 | migration 022 + 聚合/retry/Item 计数 | migration upgrade/rollback 测试通过 |
+| C1 | Schema v3 + loader + v1/v2 兼容；注册 v1.2.0→v3 版本映射 | Schema/loader 单测通过；v1/v2 测试不变 |
+| C2 | migration 022 + model/schema/repo 字段（invalid/derived/run counts） | 测试库 upgrade/downgrade 通过；字段可读写 |
+| C3 | Service 双指标 + invalid/聚合/retry/Item 计数；`expected_metrics` 必须含 `faithfulness_strict` 派生项，禁止只写 `judge_metrics` | Stage 1 十二条核心测试 + 附加契约测试通过 |
 | C4 | 目标回归 + 10 条/40 条准备 | 静态目标回归通过；不跑 Judge |
 
 **如果 M1-C 不包含 Schema v3，则 C2/C3 无法实现，应直接阻塞，不允许“先写 Service 再补 Schema”。**
+
+> 顺序说明（2026-11-19 复审）：C2 先落 migration 022 + model/schema/repo 字段，再进入 C3 Service；因为 `invalid`/`invalid_reason`/`derived_from_result_id`/run counters 依赖 022，若 C3 先写会撞旧 CHECK。
 
 ### 1.1 Schema v3 子类型冻结说明（M1-C 实现依据）
 
