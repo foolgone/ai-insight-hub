@@ -147,6 +147,8 @@ r1 只定义契约，以下由 M1-C 实现，当前未改：
 4. 双指标 `expected_metrics`、`derived_from_result_id`、item 级聚合。
 5. 标签/术语 API/前端映射。
 
+> r2 修正（以 `19-m1b-003-freeze-draft.md` 为准）：默认 Prompt/Schema 漂移**不阻止** retry，retry 仍复制父快照；只有调用方显式换 Prompt/Schema/模型/检索配置，或父快照不可用，才拒绝 retry、要求新建 Run。上条第 1 项按此口径执行。
+
 ## 6. 剩余未决问题
 
 1. 是否接受 r1 冻结草案与目标 revision v1.0.2；

@@ -8,9 +8,9 @@
 > 4. 未冻结的定义/目标，不得进入代码实现。
 >
 > 最后更新：2026-11-19
-> 当前阶段：**M1-B-003-r2 契约收尾完成，待人工最终审核**
-> 当前阻塞决策：**是否接受 `19-m1b-003-freeze-draft.md`（r2）与目标 revision v1.0.2**
-> 当前不做：M1-C 实现、M2 前端、Judge 运行、v1.2.0 创建/激活
+> 当前阶段：**M1-C Stage 0/1 文档 rev2 已修订，待人工复审；r2 仍待最终接受**
+> 当前阻塞决策：**Stage 0/1 rev2 是否通过；通过后才批准 M1-C 启动与 migration 022 实现**
+> 当前不做：M1-C 实现、migration 022 创建/执行、M2 前端、Judge 运行、v1.2.0 创建/激活
 
 ---
 
@@ -19,23 +19,25 @@
 | 项 | 状态 |
 |---|---|
 | 项目阶段 | 核心研发向产品化过渡 |
-| 主线 | M1 评测可信度；M1-B-003-r2 待最终审核 |
+| 主线 | M1 评测可信度；M1-C Stage 0/1 rev2 待复审 |
 | 并行 A | M2 只读工作台；API 审计完成，前端未开始 |
 | 并行 B | M4-A 生产约束；未开始 |
 | M3 优化闭环 | 未开始；等 M1 可信、M2 可用 |
-| 当前可写代码？ | **否**；M1-B-003-r2 尚未 accepted |
+| 当前可写代码？ | **否**；Stage 0/1 rev2 未通过、M1-B-003-r2 尚未 accepted |
 | 当前可跑 Judge？ | **否** |
 | v1.2.0 | 未创建、未激活；`runtime_active=false` |
-| 最近一次决策 | 2026-11-19 r2 契约收尾：Item 计数 + invalid 持久化 |
-| 下一个交付 | 人工最终审核 r2 + 目标 revision v1.0.2 |
+| 最近一次决策 | 2026-11-19 Stage 0 `approve_with_changes`；Stage 1 退回修订；M1-C 暂不批准 |
+| 下一个交付 | 人工复审 Stage 0/1 rev2 |
 
 ### 现在只需要一个决定
 
+**当前先审 Stage 0/1 rev2；r2 的最终接受仍单独保留。**
+
 | 选项 | 含义 | 结果 |
 |---|---|---|
-| **接受 r2** | 接受 `19-m1b-003-freeze-draft.md`（r2）与目标 revision v1.0.2 | M1-B 可进入 `accepted` 决策，随后单独批准 M1-C |
-| **接受但改条款** | 接受方向，但改 Item 计数/invalid 持久化条款 | 先改 r3，再审核 |
-| **退回** | r2 仍有语义/目标/契约问题 | 留在 M1-B，不进入实现 |
+| **通过 Stage 0/1 rev2** | 接受 rev2 的差距清单、migration 022 设计、12 条测试 | 再单独批准 M1-C 启动与 migration 022 实现 |
+| **继续改文档** | Stage 0/1 仍有口径/测试/回填问题 | 留在文档修订，不进入实现 |
+| **接受 r2（并行）** | 接受 `19-m1b-003-freeze-draft.md`（r2）与目标 revision v1.0.2 | M1-B 可进入 `accepted` 决策，但仍需 Stage 0/1 通过才启动 M1-C |
 
 ---
 
@@ -213,19 +215,19 @@
 
 ### 5.2 M1-C（冻结后）
 
-> Stage 0 差距清单：`22-m1c-stage0-gap-list.md`；Stage 1 测试清单：`23-m1c-stage1-test-list.md`。M1-C 未启动；本轮只审计/测试设计，不改业务代码。
+> Stage 0 差距清单：`22-m1c-stage0-gap-list.md`（rev2）；Stage 1 测试清单：`23-m1c-stage1-test-list.md`（rev2）。两文档已按审核 7 项修订，**待人工复审**；M1-C 未启动，本轮只审计/测试设计，不改业务代码。
 
 | 任务 | 内容 | 验收 |
 |---|---|---|
 | Schema v3 | `claim_subtype` 枚举、`support_status` 必填、v1/v2 兼容 | Schema 单测 |
-| Service 双指标 | `faithfulness` + `faithfulness_strict`、S/U/I 计数、全 insufficient 语义 | 11 条 Service 单测 |
+| Service 双指标 | `faithfulness` + `faithfulness_strict`、S/U/I 计数、全 insufficient 语义 | 12 条核心测试 + 附加契约测试 |
 | 错误契约 | 缺 subtype / supported 无 evidence / quote 非逐字 → invalid | 负向测试 |
 | 聚合/重试 | 两 metric 都进 `expected_metrics`；缺 strict 也算缺失；Case 数不按 row 翻倍 | 聚合/重试测试 |
 | 双行生命周期 | `derived_from_result_id`、同 Run/Item/Version、删除级联、失败传播 | 生命周期测试 |
-| Run 不可变/retry | `retry_run` 复制父快照；Prompt/Schema 变化拒绝 retry、新建 Run | 配置一致性测试 |
+| Run 不可变/retry | `retry_run` 复制父快照；默认 Prompt/Schema 漂移仍复制父快照；显式换配置或父快照不可用才拒绝 retry、新建 Run | 配置一致性测试 |
 | Item 聚合 | `completed_items=evaluated_items`；新增 `invalid_items`；completion/success 分开 | 聚合测试 |
 | 术语契约 | API/前端显示“证据覆盖 / 可判定事实 / 评测覆盖率 / 证据不足比例” | 前端/API 契约测试 |
-| 持久化 | `invalid` 枚举或 `failed + invalid_reason`；不得并入 failed | migration/契约测试 |
+| 持久化 | 采用 A：独立 `invalid` 状态 + `invalid_reason`；不得并入 failed | migration/契约测试 |
 | 标签体系 | `contains_unsupported_claims`、`contains_insufficient_claims`、`evidence_undecidable` 等主标签 | 标签/展示测试 |
 | Judge acceptance | 标签正确性，不是 Service 单测 | 7 条负向语义测试 |
 
