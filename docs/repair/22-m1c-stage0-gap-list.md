@@ -42,7 +42,7 @@
 
 | 子阶段 | 内容 | 退出条件 |
 |---|---|---|
-| C1 | Schema v3 + loader + v1/v2 兼容；注册 v1.2.0→v3 版本映射 | Schema/loader 单测通过；v1/v2 测试不变 |
+| C1 | Schema v3 + loader + v1/v2 兼容；注册 v1.2.0→v3 版本映射；MANIFEST 版本一致性校验；Service v3 guard（不实现计分） | Schema/loader/guard 单测通过；v1/v2 测试不变 |
 | C2 | migration 022 + model/schema/repo 字段（invalid/derived/run counts） | 测试库 upgrade/downgrade 通过；字段可读写 |
 | C3 | Service 双指标 + invalid/聚合/retry/Item 计数；`expected_metrics` 必须含 `faithfulness_strict` 派生项，禁止只写 `judge_metrics` | Stage 1 十二条核心测试 + 附加契约测试通过 |
 | C4 | 目标回归 + 10 条/40 条准备 | 静态目标回归通过；不跑 Judge |
