@@ -1,7 +1,7 @@
 # M1-C Stage 0：当前代码 vs r2 差距清单
 
 > 状态：审计/设计，只读代码；**不修改业务代码、不创建 migration 022、不跑 Judge**。
-> 版本：Stage 0 rev2（2026-11-19，按人工审核 7 项修订）。
+> 版本：Stage 0 rev2.1（2026-11-19，按人工审核 7 项修订，并修 partial/unprocessed 与 v3 expected metrics 注记）。
 > 依据：`19-m1b-003-freeze-draft.md`（r2，指标/生命周期/invalid 的唯一契约来源）、`21-m1b-003-r2-revision-record.md`、`12-judge-semantic-spec.md`（frozen）、`15-phase3e-v1.2.0-schema-service-design.md`（仅 §2.1 子类型表）、`README.md`。
 > 目标：在写 M1-C 代码前，把“r2 契约 → 当前代码 → 差距 → M1-C 动作”逐项对齐。
 
@@ -10,7 +10,7 @@
 ### 0.1 结论
 
 1. **Schema v3 必须纳入 M1-C（C1）**；当前代码仍是 Schema v2，不能先写 Service 再补 Schema。
-2. **migration 022 采用 A**：独立 `invalid` + `invalid_reason` + `derived_from_result_id`；run 增加 `evaluated_items/invalid_items/unprocessed_items`；回填按 `failed > invalid > evaluated > skipped`。
+2. **migration 022 采用 A**：独立 `invalid` + `invalid_reason` + `derived_from_result_id`；run 增加 `evaluated_items/invalid_items/unprocessed_items`；回填按 `failed > invalid > evaluated > skipped`，**有终态 row 才进四类，只有无任何 row 才是 `unprocessed`**。
 3. **`completed_items` 采用 A**：022 回填为 `evaluated_items`，旧值备份，回滚恢复；不再一列两义。
 4. **Stage 1 十二条核心测试 L01–L12** 对应审核 12 项；T07/T08 为 `invalid`；T11 拆 T11a/T11b；T12 浮点仅附加；v2 降级只在 V01。
 5. 本轮仍**不批准** M1-C 启动、migration 022 创建/执行、v1.2.0 创建/激活、Judge 运行。
@@ -20,7 +20,7 @@
 | # | 审核意见 | 本版处理 | 位置 |
 |---|---|---|---|
 | 1 | T07/T08 必须是 `invalid`，不得沿用 P1-2 降级 | Stage 1 的 T07/T08 改为 `invalid(contract_violation)`；降级只放 v2 历史兼容测试 V01 | `23-...` §2 |
-| 2 | migration 回填必须按 Item 优先级 | 回填按 `failed > invalid > evaluated > skipped`，并重算四类 Item 计数 | §3.1 |
+| 2 | migration 回填必须按 Item 优先级 | 回填按 `failed > invalid > evaluated > skipped`；有终态 row 的 partial item 归 skipped；只有无任何 row 才是 unprocessed | §3.1 |
 | 3 | `completed_items` 不得一列两义 | 采用 A：022 回填 `completed_items = evaluated_items`；旧值备份，回滚恢复 | §3.1 / §3.2 |
 | 4 | 目标 SHA 引用错误 | Stage 1 目标改为 `pilot-40-targets-v1.2.0-v1.0.2.json`（`3ee15dfc…`）；`34357b34…` 只读 | `23-...` §3 |
 | 5 | Schema v3 子类型权威来源不清 | 新增 §1.1：子类型以 `12-judge-semantic-spec.md` §3.1/§3.2 为准，`15-...` §2.1 只做 Schema 映射；指标/生命周期冲突时 r2 优先 | §1.1 |
@@ -43,7 +43,7 @@
 | 子阶段 | 内容 | 退出条件 |
 |---|---|---|
 | C1 | Schema v3 + loader + v1/v2 兼容 | Schema/loader 单测通过 |
-| C2 | Service 双指标 + invalid 契约 | Stage 1 十二条核心测试 + 附加契约测试通过 |
+| C2 | Service 双指标 + invalid 契约；`expected_metrics` 必须含 `faithfulness_strict` 派生项，禁止只写 `judge_metrics` | Stage 1 十二条核心测试 + 附加契约测试通过 |
 | C3 | migration 022 + 聚合/retry/Item 计数 | migration upgrade/rollback 测试通过 |
 | C4 | 目标回归 + 10 条/40 条准备 | 静态目标回归通过；不跑 Judge |
 
@@ -188,25 +188,12 @@ Revision：`022_m1c_dual_faithfulness`，`down_revision="d4e8b1c6f902"`。
    CREATE TABLE rag_evaluation_runs_022_completed_backup AS
    SELECT id, completed_items FROM rag_evaluation_runs;
    ```
-5. 按 **Item 优先级**回填四类计数：
+5. 按 **Item 优先级**回填四类计数（只有存在至少一条 result row 的 Item 才进入四类）：
    ```sql
-   WITH run_expected AS (
-       SELECT
-           id AS run_id,
-           (
-               CASE WHEN jsonb_typeof(config_snapshot -> 'metrics') = 'array'
-                    THEN jsonb_array_length(config_snapshot -> 'metrics') ELSE 0 END
-               +
-               CASE WHEN jsonb_typeof(config_snapshot -> 'judge_metrics') = 'array'
-                    THEN jsonb_array_length(config_snapshot -> 'judge_metrics') ELSE 0 END
-           ) AS expected_metric_count
-       FROM rag_evaluation_runs
-   ),
-   item_state AS (
+   WITH item_state AS (
        SELECT
            r.run_id,
            r.dataset_item_id,
-           count(*) AS row_count,
            bool_or(r.status = 'failed')    AS has_failed,
            bool_or(r.status = 'invalid')   AS has_invalid,
            bool_or(r.status = 'evaluated') AS has_evaluated
@@ -215,32 +202,22 @@ Revision：`022_m1c_dual_faithfulness`，`down_revision="d4e8b1c6f902"`。
    ),
    item_bucket AS (
        SELECT
-           s.run_id,
-           s.dataset_item_id,
+           run_id,
            CASE
-               WHEN s.has_failed THEN 'failed'
-               WHEN s.has_invalid THEN 'invalid'
-               WHEN s.has_evaluated THEN 'evaluated'
-               WHEN (
-                   e.expected_metric_count = 0
-                   AND s.row_count >= 1
-               ) OR (
-                   e.expected_metric_count > 0
-                   AND s.row_count >= e.expected_metric_count
-               ) THEN 'skipped'
-               ELSE 'unprocessed'
+               WHEN has_failed THEN 'failed'
+               WHEN has_invalid THEN 'invalid'
+               WHEN has_evaluated THEN 'evaluated'
+               ELSE 'skipped'
            END AS bucket
-       FROM item_state AS s
-       JOIN run_expected AS e ON e.run_id = s.run_id
+       FROM item_state
    ),
    run_counts AS (
        SELECT
            run_id,
-           count(*) FILTER (WHERE bucket = 'evaluated')   AS evaluated_items,
-           count(*) FILTER (WHERE bucket = 'invalid')     AS invalid_items,
-           count(*) FILTER (WHERE bucket = 'failed')      AS failed_items,
-           count(*) FILTER (WHERE bucket = 'skipped')     AS skipped_items,
-           count(*) FILTER (WHERE bucket = 'unprocessed') AS partial_unprocessed,
+           count(*) FILTER (WHERE bucket = 'evaluated') AS evaluated_items,
+           count(*) FILTER (WHERE bucket = 'invalid')   AS invalid_items,
+           count(*) FILTER (WHERE bucket = 'failed')    AS failed_items,
+           count(*) FILTER (WHERE bucket = 'skipped')   AS skipped_items,
            count(*) AS distinct_items
        FROM item_bucket
        GROUP BY run_id
@@ -250,8 +227,7 @@ Revision：`022_m1c_dual_faithfulness`，`down_revision="d4e8b1c6f902"`。
        invalid_items     = COALESCE(c.invalid_items, 0),
        failed_items      = COALESCE(c.failed_items, 0),
        skipped_items     = COALESCE(c.skipped_items, 0),
-       unprocessed_items = GREATEST(run.total_items - COALESCE(c.distinct_items, 0), 0)
-                           + COALESCE(c.partial_unprocessed, 0),
+       unprocessed_items = GREATEST(run.total_items - COALESCE(c.distinct_items, 0), 0),
        completed_items   = COALESCE(c.evaluated_items, 0)
    FROM run_counts AS c
    WHERE c.run_id = run.id;
@@ -277,16 +253,18 @@ Revision：`022_m1c_dual_faithfulness`，`down_revision="d4e8b1c6f902"`。
 | 1 | `failed` | 任一 result 为 `failed` |
 | 2 | `invalid` | 无 failed，任一 result 为 `invalid` |
 | 3 | `evaluated` | 无 failed/invalid，任一 result 为 `evaluated` |
-| 4 | `skipped` | 无 failed/invalid/evaluated，且 `row_count >= expected_metric_count`（全部 expected metric 为 skipped） |
-| 5 | `unprocessed` | 没有任何 result row，或 `row_count < expected_metric_count`（缺少终态行；pending/running/cancelled） |
+| 4 | `skipped` | 无 failed/invalid/evaluated，但至少有一条 result row（含 partial metric coverage） |
+| 5 | `unprocessed` | 没有任何 result row |
 
-- `expected_metric_count = jsonb_array_length(config_snapshot.metrics) + jsonb_array_length(config_snapshot.judge_metrics)`；配置缺失时退回“有任意 row 即视为全覆盖”的保守规则。
-- 部分行（例如 coverage skipped、strict 缺失）属于 `unprocessed`，不得因为“已有 skipped 行”就算 `skipped`。
+- `distinct_items` = 至少有一条 result row 的 item 数；`unprocessed_items = GREATEST(total_items - distinct_items, 0)`。
+- 有终态 row 的 partial item（例如 coverage skipped、strict 缺失）归 `skipped`；缺 metric 只做 partial 诊断，不改变 Item bucket，不进入 `unprocessed`。
 - 旧数据没有 `invalid`，所以 `invalid_items = 0`；但 SQL 仍按优先级写，保证 022 之后可重复执行/可验证。
 - `failed_items` / `skipped_items` 也按 Item 优先级重算，保证守恒关系成立。
 - `completed_items = evaluated_items`（A 方案），不再保留“含 skipped 的已处理数”语义。
 - API 可同时暴露 `completed_items` 与 `evaluated_items`，但二者必须相等；不得一个含 skipped、一个不含。
 - 旧值保存在 `rag_evaluation_runs_022_completed_backup`，只用于回滚。
+
+> **v3 expected metrics（C2 约束）**：022 的 SQL 不使用 `expected_metric_count`，partial metric coverage 只作为诊断，不参与 Item bucket。C2 必须保证 v3 的 `config_snapshot` / `expected_metrics` = 基础 `judge_metrics` + `faithfulness_strict` 派生项，**禁止只写 `judge_metrics`**；否则后续 metric 覆盖诊断会把“缺 strict”误判为 partial。
 
 **Step 3：不回填 strict**
 
@@ -355,7 +333,7 @@ Revision：`022_m1c_dual_faithfulness`，`down_revision="d4e8b1c6f902"`。
 - [ ] Schema v3 纳入 M1-C 的 C1，且 §1.1 子类型权威来源确认。
 - [ ] migration 022 的 upgrade/downgrade 方案经人工审核。
 - [ ] invalid A 方案确认（status=invalid + invalid_reason）。
-- [ ] 回填按 `failed > invalid > evaluated > skipped`，并覆盖 `unprocessed`。
+- [ ] 回填按 `failed > invalid > evaluated > skipped`；有终态 row 的 partial item 归 skipped；只有无任何 row 才是 `unprocessed`。
 - [ ] `completed_items` 采用 A 方案（回填 = evaluated；旧值备份；回滚恢复）。
 - [ ] Stage 1 十二条核心测试 + 附加契约测试预期确认（见 `23-...`）。
 - [ ] 全文无旧 A 口径：契约违约统一 `invalid`，不把 v2 降级写成 v3 契约，不用单指标作为目标口径。

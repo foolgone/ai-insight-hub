@@ -1,14 +1,14 @@
 # M1-C Stage 1：测试清单与预期结果
 
 > 状态：测试设计，只写清单；**不写业务代码、不跑 Judge、不创建/激活 v1.2.0**。
-> 版本：Stage 1 rev2（2026-11-19，按人工审核退回意见重写）。
-> 依据：`19-m1b-003-freeze-draft.md`（r2，唯一指标/生命周期/invalid 契约）、`22-m1c-stage0-gap-list.md`（rev2）、`12-judge-semantic-spec.md`（frozen）、`15-phase3e-v1.2.0-schema-service-design.md` §2.1。
+> 版本：Stage 1 rev2.1（2026-11-19，按人工审核退回意见重写，并修 L09 partial item 归 skipped）。
+> 依据：`19-m1b-003-freeze-draft.md`（r2，唯一指标/生命周期/invalid 契约）、`22-m1c-stage0-gap-list.md`（rev2.1）、`12-judge-semantic-spec.md`（frozen）、`15-phase3e-v1.2.0-schema-service-design.md` §2.1。
 >
 > **本版最重要的修正：**
 > 1. 十二条核心测试改为审核列出的 12 项生命周期/聚合要求（L01–L12）；
 > 2. **T07/T08 改为 `invalid(contract_violation)`**，删除旧的“降级 I / coverage 0.5 / evaluated 0.0”预期；
 > 3. T11 拆成 T11a（默认漂移仍复制父快照）与 T11b（显式换配置新建 Run）；
-> 4. 补 evaluated+failed 同 Item、cancelled/timeout `unprocessed`、均值排除、历史 Run 兼容、只缺 strict 的派生；
+> 4. 补 evaluated+failed 同 Item、cancelled/timeout `unprocessed`、均值排除、历史 Run 兼容、只缺 strict 的派生；**partial item 归 skipped，只有无任何 row 才是 `unprocessed`**；
 > 5. T12 浮点只作为附加测试，不再占用核心第 12 条；
 > 6. v2 降级语义只允许出现在 V01 历史兼容测试，不得进入 v3 契约测试；
 > 7. 目标 SHA 改为 `pilot-40-targets-v1.2.0-v1.0.2.json`（`3ee15dfc…`），`34357b34…` 只读。
@@ -62,7 +62,7 @@
 | L06 | evaluated + failed 跨 Metric（2 Items） | failed=1、evaluated=1；F mean=0.75 |
 | L07 | invalid vs execution failed（4 Items） | invalid=1、failed=1、evaluated=1、skipped=1；不混算 |
 | L08 | 全 insufficient | coverage 0.0 evaluated；strict skip；Item evaluated |
-| L09 | cancelled / timeout（5 Items） | unprocessed=2；completion=0.6 |
+| L09 | cancelled / timeout（5 Items） | skipped=1、unprocessed=1；completion=0.8；partial item 归 skipped |
 | L10 | 守恒（10 Items） | 4+1+2+1+2=10；completed=4 |
 | L11 | 均值排除（5 rows） | mean=0.75；evaluated=2 |
 | L12 | 历史 v2 Run | completed 回填=2；不补 strict；不混算 |
@@ -270,23 +270,25 @@
 
 - Run 选中 5 个 item，metrics = coverage + strict；
 - I1 evaluated、I2 invalid、I3 failed；
-- I4 只有 coverage skipped、strict 缺失（部分行）；
+- I4 只有 coverage skipped、strict 缺失（有终态 row，partial metric coverage）；
 - I5 完全没有 result row；
 - Run 因用户取消或时间预算耗尽停止：`stopped_reason=cancelled` 或 `time_budget_exhausted`。
 
 **Expected**
 
 - `total_items=5`；
-- `evaluated_items=1`、`invalid_items=1`、`failed_items=1`、`skipped_items=0`、`unprocessed_items=2`；
-- `processed_items=3`、`completion_rate=3/5=0.6`、`success_rate=1/5=0.2`；
+- `evaluated_items=1`、`invalid_items=1`、`failed_items=1`、`skipped_items=1`、`unprocessed_items=1`；
+- `processed_items=4`、`completion_rate=4/5=0.8`、`success_rate=1/5=0.2`；
 - `completed_items=1`；
-- 守恒：`5 = 1 + 1 + 1 + 0 + 2`；
-- I4（部分行）与 I5（无行）都算 unprocessed，不得生成/补全 skipped 行，不得计入 skipped_items；
+- 守恒：`5 = 1 + 1 + 1 + 1 + 1`；
+- I4 按已有终态 row 归 `skipped`；缺 strict 只是 metric 覆盖诊断，不改变 Item bucket，不生成/补全 strict skipped 行；
+- I5 无任何 row，归 `unprocessed`；不得生成/补全 skipped 行；
 - `stopped_reason` 保留，不以 unprocessed 伪装“已处理”。
 
 **Negative**
 
-- 把 I4 或 I5 算 skipped → 失败；
+- 把 I4 算 unprocessed → 失败（有终态 row）；
+- 把 I5 算 skipped → 失败（无 row）；
 - 把 completion_rate 算成 1.0 → 失败。
 
 #### L10 Item 数量守恒（含 unprocessed）
@@ -295,7 +297,7 @@
 
 - `total_items=10`；
 - Item 状态分布：evaluated=4、invalid=1、failed=2、skipped=1、unprocessed=2；
-- 每个 processed item 有 coverage+strict 两行，共 8×2=16 rows；本场景的 2 个 unprocessed item 无行（部分行 unprocessed 见 L09）。
+- 每个 processed item 有 coverage+strict 两行，共 8×2=16 rows；本场景的 2 个 unprocessed item 均无 result row（partial item 归 skipped，见 L09）。
 
 **Expected**
 
@@ -352,6 +354,7 @@
 - 旧 result row 仍是 `metric_version=v2`，不被改写为 v3；
 - 不回填 strict；旧 Run 不因迁移产生新行；
 - API 返回 v2 数据，不用 v3 语义重新解释；
+- 若旧 Run 存在 partial item（有终态 skipped row、缺 metric），按 L09 归 skipped，不进 unprocessed；`unprocessed` 只统计无任何 row 的 item；
 - 新 v3 Run 单独聚合，v2/v3 均值不混算；
 - retry 旧 Run：父 v2 快照可用 → 子 Run 仍为 v2，不升级 v3；父快照不可用 → 拒绝 retry，不得用当前 v3 默认兜底；
 - 旧 v2 payload 的旧 subtype 名称可解析；旧 subtype 归一/降级只在 v2 路径。
@@ -486,7 +489,7 @@ F04/F05: 无 factual 分母 / 无上下文 -> skipped
 - L06 的 I1 必须算 failed，但 F_coverage 均值仍包含其 evaluated 行（0.75）；不得把 Item failed 当成 F 行 failed；
 - L07 invalid 与 failed 独立计数、独立标签、均不进均值；
 - L08 Item 不得 skipped；coverage 0.0 进均值；strict 不补 0；
-- L09 `unprocessed_items=2`，不得伪装 skipped；
+- L09 `skipped_items=1`、`unprocessed_items=1`；partial item 归 skipped，只有无任何 row 才 unprocessed；不得把 I5 伪装 skipped；
 - L10 守恒 `total = evaluated + invalid + failed + skipped + unprocessed`；
 - L11 均值分母只含 evaluated；
 - L12 旧 Run 保持 v2，不回填 strict，不混算；`completed_items` 回填为 evaluated。

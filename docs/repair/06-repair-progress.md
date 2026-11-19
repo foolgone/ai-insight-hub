@@ -1184,7 +1184,7 @@ alembic check   : No new upgrade operations detected
 - 未修改 Prompt/Service/Schema/API/DB；未创建或激活 v1.2.0；未运行新的 Judge；未进入 Phase 4。
 
 ### M1-C Stage 0 / Stage 1 预审（2026-11-19，只审计/设计）
-- Stage 0 rev2：`docs/repair/22-m1c-stage0-gap-list.md`；逐项差距 G01–G25，Schema v3 纳入 M1-C；新增 §1.1 子类型冻结说明（子类型以 `12` §3.1/§3.2 为准，`15` §2.1 只做 Schema 映射；指标/生命周期冲突时 r2 优先）；migration 022 upgrade/rollback 方案（A 方案 invalid + invalid_reason + derived_from_result_id + run counters）；回填按 `failed > invalid > evaluated > skipped`；`completed_items` 采用 A（回填 = evaluated，旧值备份/回滚恢复）。
-- Stage 1 rev2：`docs/repair/23-m1c-stage1-test-list.md`；12 条核心生命周期/聚合测试 L01–L12（retry 继承/默认漂移/显式换配置、双行一 Item、evaluated+skipped、evaluated+failed、invalid vs execution failed、全 insufficient、cancelled/timeout unprocessed、守恒、均值排除、历史兼容）；附加 F01–F05、T06–T10、T12、V01；T07/T08 改为 `invalid(contract_violation)`；目标 SHA 改为 `3ee15dfc…`。
+- Stage 0 rev2.1：`docs/repair/22-m1c-stage0-gap-list.md`；逐项差距 G01–G25，Schema v3 纳入 M1-C；新增 §1.1 子类型冻结说明（子类型以 `12` §3.1/§3.2 为准，`15` §2.1 只做 Schema 映射；指标/生命周期冲突时 r2 优先）；C2 `expected_metrics` 必须含 `faithfulness_strict`；migration 022 upgrade/rollback 方案（A 方案 invalid + invalid_reason + derived_from_result_id + run counters）；回填按 `failed > invalid > evaluated > skipped`，有终态 row 的 partial item 归 skipped，只有无任何 row 才是 unprocessed；`completed_items` 采用 A（回填 = evaluated，旧值备份/回滚恢复）。
+- Stage 1 rev2.1：`docs/repair/23-m1c-stage1-test-list.md`；12 条核心生命周期/聚合测试 L01–L12（retry 继承/默认漂移/显式换配置、双行一 Item、evaluated+skipped、evaluated+failed、invalid vs execution failed、全 insufficient、cancelled/timeout unprocessed、守恒、均值排除、历史兼容）；附加 F01–F05、T06–T10、T12、V01；T07/T08 改为 `invalid(contract_violation)`；L09 partial item 归 skipped、只有无 row 才是 unprocessed；目标 SHA 改为 `3ee15dfc…`。
 - 关键缺口：当前代码仍 Schema v2；subtype 默认归一；只有 `faithfulness` 一条指标、无 strict；result status 无 invalid；run completed 含 skipped；retry 用当前指纹；migration 022 不存在。
-- 未修改业务代码/迁移/DB；未创建/激活 v1.2.0；未跑 Judge；未启动 M1-C；Stage 0/1 rev2 待人工复审。
+- 未修改业务代码/迁移/DB；未创建/激活 v1.2.0；未跑 Judge；未启动 M1-C；Stage 0/1 rev2.1 待人工复审。
