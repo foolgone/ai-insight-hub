@@ -141,6 +141,8 @@ def _result_values(row: RagEvaluationResult) -> dict[str, Any]:
         "metric_name": row.metric_name,
         "metric_version": row.metric_version or "v1",
         "status": row.status,
+        "invalid_reason": row.invalid_reason,
+        "derived_from_result_id": row.derived_from_result_id,
         "score": row.score,
         "skipped_reason": row.skipped_reason,
         "details": row.details or {},

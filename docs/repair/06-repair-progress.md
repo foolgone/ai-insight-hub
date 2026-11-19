@@ -1195,3 +1195,10 @@ alembic check   : No new upgrade operations detected
 - 实现：`app/schemas/agents/rag_judge.py`、`app/agents/rag_judge_agent.py`、`app/services/rag_judge_service.py`（仅 guard）、`tests/unit/test_rag_judge_schema_v3.py`、`tests/unit/test_rag_judge_v2_schema_loader.py`（仅映射断言）。
 - 验证：C1 + v2 定向测试 113 passed；全量 `pytest -m "not prompt"` passed；black/flake8/mypy/lint-imports 通过。
 - 边界：未创建 v1.2.0 Prompt，未写 migration 022，未改 model/repo/API，未跑 Judge；C1 状态 `implemented/verified`，未 accepted；C2 未启动。
+
+### M1-C C2 migration 022 + model/repo 字段（2026-11-19，已实现/本地验证）
+- 迁移：`backend/migrations/versions/20261119_1800_f3a9c2d7e1b4_022_m1c_dual_faithfulness.py`；result 增加 `invalid` status、`invalid_reason`、`derived_from_result_id`；run 增加 `evaluated_items`/`invalid_items`/`unprocessed_items`；回填按 `failed > invalid > evaluated > skipped`，partial item 归 skipped，`unprocessed = total - distinct_items`；`completed_items = evaluated_items`，旧值进 `rag_evaluation_runs_022_completed_backup`，downgrade 恢复。
+- 模型：`app/models/rag_evaluation.py` 新字段与 CHECK；`app/repositories/rag_evaluation.py` 批量写入新字段；`app/schemas/rag_evaluation.py` + `app/api/v1/rag_evaluations.py` 透出 response 字段。
+- 迁移支持：`migrations/env.py` 忽略内部备份表，`alembic check` 无漂移。
+- 验证：新增 `tests/integration/test_migration_022.py`；`alembic upgrade/downgrade` 往返、回填、backup 恢复、invalid reason 约束通过；全量 `pytest -m "not prompt"` passed；mypy/lint-imports/black/flake8 通过；`alembic check` No new upgrade operations。
+- 边界：未实现 Service 双指标/invalid/聚合/retry；未跑 Judge；未在生产执行 migration；未创建/激活 v1.2.0；C2 状态 `implemented/verified`，未 accepted；C3 未启动。

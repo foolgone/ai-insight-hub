@@ -103,6 +103,11 @@ class RagEvaluationRun(Base):
     completed_items: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("0"))
     skipped_items: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("0"))
     failed_items: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("0"))
+    evaluated_items: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("0"))
+    invalid_items: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("0"))
+    unprocessed_items: Mapped[int] = mapped_column(
+        Integer, nullable=False, server_default=text("0")
+    )
     status: Mapped[str] = mapped_column(
         String(20), nullable=False, server_default=text("'pending'")
     )
@@ -121,7 +126,18 @@ class RagEvaluationResult(Base):
 
     __tablename__ = "rag_evaluation_results"
     __table_args__ = (
-        CheckConstraint("status IN ('evaluated', 'skipped', 'failed')", name="status_valid"),
+        CheckConstraint(
+            "status IN ('evaluated', 'skipped', 'invalid', 'failed')",
+            name="rag_eval_result_status_m1c",
+        ),
+        CheckConstraint(
+            "status <> 'invalid' OR invalid_reason IS NOT NULL",
+            name="rag_eval_result_invalid_reason_required",
+        ),
+        CheckConstraint(
+            "invalid_reason IS NULL OR status IN ('invalid', 'failed')",
+            name="rag_eval_result_invalid_reason_status",
+        ),
         Index(
             "uk_rag_evaluation_results_run_item_metric",
             "run_id",
@@ -133,6 +149,7 @@ class RagEvaluationResult(Base):
         Index("idx_rag_evaluation_results_run_metric", "run_id", "metric_name", "status"),
         Index("idx_rag_evaluation_results_run_status", "run_id", "status"),
         Index("idx_rag_evaluation_results_trace", "trace_id"),
+        Index("idx_rag_evaluation_results_derived_from", "derived_from_result_id"),
     )
 
     id: Mapped[uuid.UUID] = mapped_column(
@@ -155,6 +172,11 @@ class RagEvaluationResult(Base):
     metric_name: Mapped[str] = mapped_column(String(40), nullable=False)
     metric_version: Mapped[str] = mapped_column(String(20), nullable=False)
     status: Mapped[str] = mapped_column(String(20), nullable=False)
+    invalid_reason: Mapped[str | None] = mapped_column(String(80))
+    derived_from_result_id: Mapped[uuid.UUID | None] = mapped_column(
+        PG_UUID(as_uuid=True),
+        ForeignKey("rag_evaluation_results.id", ondelete="CASCADE"),
+    )
     score: Mapped[float | None] = mapped_column(Float)
     skipped_reason: Mapped[str | None] = mapped_column(String(60))
     details: Mapped[dict[str, Any]] = mapped_column(

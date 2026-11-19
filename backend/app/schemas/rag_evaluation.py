@@ -91,6 +91,8 @@ class RagEvaluationResultRead(BaseSchema):
     metric_name: str
     metric_version: str
     status: str
+    invalid_reason: str | None
+    derived_from_result_id: uuid.UUID | None
     score: float | None
     skipped_reason: str | None
     details: dict[str, Any]
@@ -124,6 +126,9 @@ class RagEvaluationRunRead(BaseSchema):
     completed_items: int
     skipped_items: int
     failed_items: int
+    evaluated_items: int
+    invalid_items: int
+    unprocessed_items: int
     status: str
     aggregate: dict[str, Any] | None
     error_message: str | None
@@ -146,6 +151,9 @@ class RagEvaluationRunListItem(BaseSchema):
     completed_items: int
     skipped_items: int
     failed_items: int
+    evaluated_items: int
+    invalid_items: int
+    unprocessed_items: int
     status: str
     error_message: str | None
     created_at: datetime

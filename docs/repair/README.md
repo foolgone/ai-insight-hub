@@ -8,9 +8,9 @@
 > 4. 未冻结的定义/目标，不得进入代码实现。
 >
 > 最后更新：2026-11-19
-> 当前阶段：**M1-C C1 已实现并本地验证（implemented/verified），待人工审核**
-> 当前阻塞决策：**C1 完成报告是否通过；通过后才进入 C2 migration 022**
-> 当前不做：C2/C3、migration 022 创建/执行、M2 前端、Judge 运行、v1.2.0 创建/激活
+> 当前阶段：**M1-C C2 已实现并本地验证（implemented/verified），待人工审核**
+> 当前阻塞决策：**C2 完成报告是否通过；通过后才进入 C3 Service**
+> 当前不做：C3、Judge、M2/M3、migration 022 生产执行、v1.2.0 创建/激活
 
 ---
 
@@ -19,25 +19,25 @@
 | 项 | 状态 |
 |---|---|
 | 项目阶段 | 核心研发向产品化过渡 |
-| 主线 | M1 评测可信度；M1-C C1 待审核 |
+| 主线 | M1 评测可信度；M1-C C2 待审核 |
 | 并行 A | M2 只读工作台；API 审计完成，前端未开始 |
 | 并行 B | M4-A 生产约束；未开始 |
 | M3 优化闭环 | 未开始；等 M1 可信、M2 可用 |
-| 当前可写代码？ | **否**；C1 待审核；C2 未启动 |
+| 当前可写代码？ | **否**；C2 待审核；C3 未启动 |
 | 当前可跑 Judge？ | **否** |
 | v1.2.0 | 未创建、未激活；`runtime_active=false` |
-| 最近一次决策 | 2026-11-19 C1 设计通过；C1 代码 implemented/verified |
-| 下一个交付 | 人工审核 C1 完成报告 |
+| 最近一次决策 | 2026-11-19 C1 通过；C2 代码 implemented/verified |
+| 下一个交付 | 人工审核 C2 完成报告 |
 
 ### 现在只需要一个决定
 
-**当前先审 C1 完成报告；通过后才进入 C2 migration 022。**
+**当前先审 C2 完成报告；通过后才进入 C3 Service。**
 
 | 选项 | 含义 | 结果 |
 |---|---|---|
-| **通过 C1** | 接受 Schema v3 注册、V3 模型、loader/agent、guard 与 17 条测试 | 进入 C2 migration 022 设计与测试库 upgrade/downgrade |
-| **退回 C1** | C1 仍有版本/兼容/guard 问题 | 留在 C1，不进入 C2 |
-| **暂缓** | 不进入 C2 | 维持现状 |
+| **通过 C2** | 接受 migration 022、model/repo/schema 字段与回填测试 | 进入 C3 Service 双指标/invalid/聚合/retry |
+| **退回 C2** | migration/回填/字段仍有问题 | 留在 C2，不进入 C3 |
+| **暂缓** | 不进入 C3 | 维持现状，migration 022 不上生产 |
 
 ---
 
@@ -215,7 +215,7 @@
 
 ### 5.2 M1-C（冻结后）
 
-> C1 设计与变更范围：`24-m1c-c1-design-scope.md`；C1 已 implemented/verified，**待审核**。C2 migration 022 未启动。
+> C1 已通过；C2 migration 022 + model/repo/schema 字段已 implemented/verified，**待审核**。C3 Service 未启动。
 >
 > 实施顺序：C1 Schema v3 → C2 migration 022 + model/repo 字段 → C3 Service 双指标/invalid/聚合/retry → C4 目标回归。
 
