@@ -1217,9 +1217,10 @@ alembic check   : No new upgrade operations detected
 - 边界：未改 Judge Prompt、未创建/激活 v1.2.0、未跑 Judge、未改 C2 migration、未上生产；C3 状态 `implemented/verified`，未 accepted；C4 未启动。
 - 复审（2026-11-20）：summary 父子 Run 重复计数修复；C3 **阶段验收通过**；C4 批准设计/范围。
 
-### M1-C C4 设计与范围（2026-11-20，只设计，未跑 Judge）
+### M1-C C4 静态目标回归 / 40 条盘点（2026-11-20，implemented/verified，未跑 Judge）
 - C4 报告：`docs/repair/26-m1c-c4-design-scope.md`；范围：静态目标回归 Q11/Q17/Q21/Q23/Q32、10 条闸门准备、40 条完整性盘点、报告模板。
-- 关键口径：Q17/Q32 只写 v1.2.0 预期标签；HG 13 / provisional 27 分开；invalid/skipped/failed/unprocessed、insufficient_count/ratio、prompt/schema/metric SHA 单列。
-- 40 条盘点：6 条 missing baseline（Q33/Q34/Q37/Q38/Q39/Q40）标记 baseline_missing；Q14/Q33 context_unavailable 单列；C1-only 6 条（Q22/Q26/Q27/Q34/Q37/Q40）单列；Q35/Q36 仅用 old run 参考。
-- 待确认：missing baseline 方案 A/B、Q35/Q36 是否后续单独批准、summary 保持 root-only、P2 三项单独小修。
-- 边界：未写 C4 脚本、未跑 10/40 Judge、未改 Prompt、未激活 v1.2.0、未启动 M2/M3。
+- 静态目标：`m1c_c4_static_targets.py` → `m1c-c4-static-targets.json/md`，SHA `3ead3bdf…`，validation pass；Q11/Q21/Q23 observed v1.1.5，Q17/Q32 expected v1.2.0。
+- 40 条盘点：`m1c_c4_inventory.py` → `m1c-c4-inventory.json/md`，SHA `581b7158…`，validation pass；HG 13 / provisional 27、分类 12/9/8/6/5、baseline 30/6/2/2、context 32/6/2。
+- 特殊列表：`baseline_missing=Q33/Q34/Q37/Q38/Q39/Q40`、`baseline_delta=unavailable`；Q14/Q33 context_unavailable；C1-only Q22/Q26/Q27/Q34/Q37/Q40；Q35/Q36 old run only。
+- 报告模板：`m1c-c4-report-template.md`；HG/provisional 分开、invalid/skipped/failed/unprocessed、insufficient、SHA、known issue。
+- 边界：未跑 10/40 Judge、未激活 v1.2.0、未改 Prompt、未启动 M2/M3；C4 状态 `implemented/verified`，未 accepted。

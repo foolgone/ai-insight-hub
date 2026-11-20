@@ -1,0 +1,787 @@
+{
+ "meta": {
+  "name": "m1c-c4-inventory",
+  "kind": "static_inventory_not_judge_run",
+  "generated_on": "2026-11-20",
+  "target_file": "pilot-40-targets-v1.2.0-v1.0.2.json",
+  "target_sha256": "3ee15dfca66fe13f0a45fda84ecf2612483f2de107ad079b196a6bd6344d5846",
+  "labels_file": "pilot-40-final-labels.json",
+  "labels_sha256": "f139623fef80b55716fce0c773e776d284a5167683eb91559b23e49cabd000eb",
+  "script_file": "m1c_c4_inventory.py",
+  "script_sha256": "6909fce36d71652d3fde28dda211f06f61f8ea377fe0212a08145892a7c00d24",
+  "row_count": 40,
+  "group_counts": {
+   "provisional": 27,
+   "human_gold": 13
+  },
+  "category_counts": {
+   "direct": 12,
+   "multi": 8,
+   "constraint": 9,
+   "unanswerable": 6,
+   "ambiguous": 5
+  },
+  "baseline_counts": {
+   "reused": 30,
+   "new": 2,
+   "missing": 6,
+   "available_old_run": 2
+  },
+  "context_counts": {
+   "2": 32,
+   "unavailable": 2,
+   "1": 6
+  },
+  "target_source_counts": {
+   "pilot10": 5,
+   "none": 24,
+   "matrix": 5,
+   "additional": 6
+  },
+  "target_status_counts": {
+   "unchanged": 31,
+   "known_non_pass_reapproval": 1,
+   "reapproval_required": 2,
+   "new_target_proposed": 2,
+   "unchanged_rebaseline": 3,
+   "reapproval_with_variant": 1
+  },
+  "special_lists": {
+   "missing_baseline": [
+    "Q33",
+    "Q34",
+    "Q37",
+    "Q38",
+    "Q39",
+    "Q40"
+   ],
+   "context_unavailable": [
+    "Q14",
+    "Q33"
+   ],
+   "c1_only": [
+    "Q22",
+    "Q26",
+    "Q27",
+    "Q34",
+    "Q37",
+    "Q40"
+   ],
+   "available_old_run": [
+    "Q35",
+    "Q36"
+   ],
+   "new_baseline": [
+    "Q14",
+    "Q32"
+   ],
+   "known_non_pass": [
+    "Q14"
+   ],
+   "category_changed": [
+    "Q40"
+   ]
+  },
+  "baseline_policy": {
+   "missing_baseline": "baseline_delta: unavailable; exclude from delta/improvement claims",
+   "available_old_run": "old run only; not v1.2.0 measured",
+   "context_unavailable": "F unavailable; exclude from F target pass rate",
+   "c1_only": "single context; report separately"
+  },
+  "not_for_runtime": true
+ },
+ "cases": [
+  {
+   "case_id": "Q01",
+   "group": "provisional",
+   "final_category": "direct",
+   "context_availability": "2",
+   "baseline_status": "reused",
+   "baseline_delta": "available",
+   "target_source": "pilot10",
+   "known_issue": "",
+   "targets": {
+    "F": [
+     0.9,
+     1.0
+    ],
+    "C": [
+     0.9,
+     1.0
+    ],
+    "R": [
+     0.8,
+     1.0
+    ]
+   },
+   "target_status": "unchanged"
+  },
+  {
+   "case_id": "Q02",
+   "group": "provisional",
+   "final_category": "direct",
+   "context_availability": "2",
+   "baseline_status": "reused",
+   "baseline_delta": "available",
+   "target_source": "none",
+   "known_issue": "",
+   "targets": {},
+   "target_status": "unchanged"
+  },
+  {
+   "case_id": "Q03",
+   "group": "provisional",
+   "final_category": "direct",
+   "context_availability": "2",
+   "baseline_status": "reused",
+   "baseline_delta": "available",
+   "target_source": "none",
+   "known_issue": "",
+   "targets": {},
+   "target_status": "unchanged"
+  },
+  {
+   "case_id": "Q04",
+   "group": "provisional",
+   "final_category": "direct",
+   "context_availability": "2",
+   "baseline_status": "reused",
+   "baseline_delta": "available",
+   "target_source": "pilot10",
+   "known_issue": "",
+   "targets": {
+    "F": [
+     1.0,
+     1.0
+    ],
+    "C": [
+     0.8,
+     1.0
+    ],
+    "R": [
+     0.9,
+     1.0
+    ]
+   },
+   "target_status": "unchanged"
+  },
+  {
+   "case_id": "Q05",
+   "group": "human_gold",
+   "final_category": "direct",
+   "context_availability": "2",
+   "baseline_status": "reused",
+   "baseline_delta": "available",
+   "target_source": "none",
+   "known_issue": "",
+   "targets": {},
+   "target_status": "unchanged"
+  },
+  {
+   "case_id": "Q06",
+   "group": "provisional",
+   "final_category": "direct",
+   "context_availability": "2",
+   "baseline_status": "reused",
+   "baseline_delta": "available",
+   "target_source": "none",
+   "known_issue": "",
+   "targets": {},
+   "target_status": "unchanged"
+  },
+  {
+   "case_id": "Q07",
+   "group": "provisional",
+   "final_category": "direct",
+   "context_availability": "2",
+   "baseline_status": "reused",
+   "baseline_delta": "available",
+   "target_source": "none",
+   "known_issue": "",
+   "targets": {},
+   "target_status": "unchanged"
+  },
+  {
+   "case_id": "Q08",
+   "group": "provisional",
+   "final_category": "direct",
+   "context_availability": "2",
+   "baseline_status": "reused",
+   "baseline_delta": "available",
+   "target_source": "none",
+   "known_issue": "",
+   "targets": {},
+   "target_status": "unchanged"
+  },
+  {
+   "case_id": "Q09",
+   "group": "provisional",
+   "final_category": "direct",
+   "context_availability": "2",
+   "baseline_status": "reused",
+   "baseline_delta": "available",
+   "target_source": "none",
+   "known_issue": "",
+   "targets": {},
+   "target_status": "unchanged"
+  },
+  {
+   "case_id": "Q10",
+   "group": "provisional",
+   "final_category": "direct",
+   "context_availability": "2",
+   "baseline_status": "reused",
+   "baseline_delta": "available",
+   "target_source": "none",
+   "known_issue": "evidence_typo_history",
+   "targets": {},
+   "target_status": "unchanged"
+  },
+  {
+   "case_id": "Q11",
+   "group": "provisional",
+   "final_category": "multi",
+   "context_availability": "2",
+   "baseline_status": "reused",
+   "baseline_delta": "available",
+   "target_source": "matrix",
+   "known_issue": "normative_requirement",
+   "targets": {
+    "F": [
+     0.6,
+     0.9
+    ],
+    "C": [
+     0.8,
+     1.0
+    ],
+    "R": [
+     0.9,
+     1.0
+    ]
+   },
+   "target_status": "unchanged"
+  },
+  {
+   "case_id": "Q12",
+   "group": "provisional",
+   "final_category": "multi",
+   "context_availability": "2",
+   "baseline_status": "reused",
+   "baseline_delta": "available",
+   "target_source": "none",
+   "known_issue": "conditional_inference",
+   "targets": {},
+   "target_status": "unchanged"
+  },
+  {
+   "case_id": "Q13",
+   "group": "human_gold",
+   "final_category": "multi",
+   "context_availability": "2",
+   "baseline_status": "reused",
+   "baseline_delta": "available",
+   "target_source": "none",
+   "known_issue": "",
+   "targets": {},
+   "target_status": "unchanged"
+  },
+  {
+   "case_id": "Q14",
+   "group": "human_gold",
+   "final_category": "multi",
+   "context_availability": "unavailable",
+   "baseline_status": "new",
+   "baseline_delta": "unavailable",
+   "target_source": "additional",
+   "known_issue": "context_unavailable;C_variance;known_non_pass",
+   "targets": {
+    "F": "unavailable",
+    "C": [
+     0.8,
+     1.0
+    ],
+    "R": [
+     0.8,
+     1.0
+    ]
+   },
+   "target_status": "known_non_pass_reapproval"
+  },
+  {
+   "case_id": "Q15",
+   "group": "human_gold",
+   "final_category": "direct",
+   "context_availability": "2",
+   "baseline_status": "reused",
+   "baseline_delta": "available",
+   "target_source": "additional",
+   "known_issue": "purpose_inference",
+   "targets": {
+    "F": [
+     0.6,
+     1.0
+    ],
+    "C": [
+     0.8,
+     1.0
+    ],
+    "R": [
+     0.8,
+     1.0
+    ]
+   },
+   "target_status": "unchanged"
+  },
+  {
+   "case_id": "Q16",
+   "group": "human_gold",
+   "final_category": "constraint",
+   "context_availability": "2",
+   "baseline_status": "reused",
+   "baseline_delta": "available",
+   "target_source": "none",
+   "known_issue": "R_overstrict_history",
+   "targets": {},
+   "target_status": "unchanged"
+  },
+  {
+   "case_id": "Q17",
+   "group": "provisional",
+   "final_category": "multi",
+   "context_availability": "2",
+   "baseline_status": "reused",
+   "baseline_delta": "available",
+   "target_source": "pilot10",
+   "known_issue": "policy_relationship_target_reapproval",
+   "targets": {
+    "F": [
+     0.7,
+     0.9
+    ],
+    "C": [
+     0.8,
+     1.0
+    ],
+    "R": [
+     0.8,
+     1.0
+    ]
+   },
+   "target_status": "reapproval_required"
+  },
+  {
+   "case_id": "Q18",
+   "group": "provisional",
+   "final_category": "multi",
+   "context_availability": "2",
+   "baseline_status": "reused",
+   "baseline_delta": "available",
+   "target_source": "none",
+   "known_issue": "",
+   "targets": {},
+   "target_status": "unchanged"
+  },
+  {
+   "case_id": "Q19",
+   "group": "human_gold",
+   "final_category": "multi",
+   "context_availability": "2",
+   "baseline_status": "reused",
+   "baseline_delta": "available",
+   "target_source": "none",
+   "known_issue": "absence_meta_classification",
+   "targets": {
+    "F": [
+     0.6,
+     1.0
+    ],
+    "C": [
+     0.8,
+     1.0
+    ],
+    "R": [
+     0.8,
+     1.0
+    ]
+   },
+   "target_status": "new_target_proposed"
+  },
+  {
+   "case_id": "Q20",
+   "group": "provisional",
+   "final_category": "multi",
+   "context_availability": "2",
+   "baseline_status": "reused",
+   "baseline_delta": "available",
+   "target_source": "additional",
+   "known_issue": "policy_scope_generalization",
+   "targets": {
+    "F": [
+     0.6,
+     1.0
+    ],
+    "C": [
+     0.8,
+     1.0
+    ],
+    "R": [
+     0.8,
+     1.0
+    ]
+   },
+   "target_status": "unchanged_rebaseline"
+  },
+  {
+   "case_id": "Q21",
+   "group": "provisional",
+   "final_category": "constraint",
+   "context_availability": "2",
+   "baseline_status": "reused",
+   "baseline_delta": "available",
+   "target_source": "matrix",
+   "known_issue": "Q21#3_insufficient",
+   "targets": {
+    "F": [
+     0.6,
+     0.7
+    ]
+   },
+   "target_status": "unchanged"
+  },
+  {
+   "case_id": "Q22",
+   "group": "human_gold",
+   "final_category": "constraint",
+   "context_availability": "1",
+   "baseline_status": "reused",
+   "baseline_delta": "available",
+   "target_source": "additional",
+   "known_issue": "cross_line_quote_history",
+   "targets": {
+    "F": [
+     0.8,
+     1.0
+    ],
+    "C": [
+     0.9,
+     1.0
+    ],
+    "R": [
+     0.9,
+     1.0
+    ]
+   },
+   "target_status": "unchanged"
+  },
+  {
+   "case_id": "Q23",
+   "group": "human_gold",
+   "final_category": "constraint",
+   "context_availability": "2",
+   "baseline_status": "reused",
+   "baseline_delta": "available",
+   "target_source": "matrix",
+   "known_issue": "quote_synthesis_history;internal_contradiction",
+   "targets": {
+    "F": [
+     0.4,
+     0.5
+    ],
+    "C": [
+     0.0,
+     0.2
+    ],
+    "R": [
+     0.7,
+     1.0
+    ]
+   },
+   "target_status": "unchanged"
+  },
+  {
+   "case_id": "Q24",
+   "group": "provisional",
+   "final_category": "constraint",
+   "context_availability": "2",
+   "baseline_status": "reused",
+   "baseline_delta": "available",
+   "target_source": "none",
+   "known_issue": "extra_condition_inference",
+   "targets": {},
+   "target_status": "unchanged"
+  },
+  {
+   "case_id": "Q25",
+   "group": "provisional",
+   "final_category": "constraint",
+   "context_availability": "2",
+   "baseline_status": "reused",
+   "baseline_delta": "available",
+   "target_source": "none",
+   "known_issue": "C_exact_0.10",
+   "targets": {},
+   "target_status": "unchanged"
+  },
+  {
+   "case_id": "Q26",
+   "group": "provisional",
+   "final_category": "constraint",
+   "context_availability": "1",
+   "baseline_status": "reused",
+   "baseline_delta": "available",
+   "target_source": "none",
+   "known_issue": "C1_only",
+   "targets": {},
+   "target_status": "unchanged"
+  },
+  {
+   "case_id": "Q27",
+   "group": "provisional",
+   "final_category": "constraint",
+   "context_availability": "1",
+   "baseline_status": "reused",
+   "baseline_delta": "available",
+   "target_source": "none",
+   "known_issue": "C1_only",
+   "targets": {},
+   "target_status": "unchanged"
+  },
+  {
+   "case_id": "Q28",
+   "group": "provisional",
+   "final_category": "constraint",
+   "context_availability": "2",
+   "baseline_status": "reused",
+   "baseline_delta": "available",
+   "target_source": "additional",
+   "known_issue": "compensation_inference",
+   "targets": {
+    "F": [
+     0.8,
+     1.0
+    ]
+   },
+   "target_status": "unchanged"
+  },
+  {
+   "case_id": "Q29",
+   "group": "provisional",
+   "final_category": "unanswerable",
+   "context_availability": "2",
+   "baseline_status": "reused",
+   "baseline_delta": "available",
+   "target_source": "pilot10",
+   "known_issue": "correct_skip",
+   "targets": {
+    "F": "skipped",
+    "C": [
+     0.9,
+     1.0
+    ],
+    "R": [
+     0.9,
+     1.0
+    ]
+   },
+   "target_status": "unchanged"
+  },
+  {
+   "case_id": "Q30",
+   "group": "human_gold",
+   "final_category": "unanswerable",
+   "context_availability": "2",
+   "baseline_status": "reused",
+   "baseline_delta": "available",
+   "target_source": "additional",
+   "known_issue": "policy_scope_target_reapproval",
+   "targets": {
+    "F": [
+     0.4,
+     1.0
+    ],
+    "C": [
+     0.8,
+     1.0
+    ],
+    "R": [
+     0.8,
+     1.0
+    ]
+   },
+   "target_status": "reapproval_required"
+  },
+  {
+   "case_id": "Q31",
+   "group": "provisional",
+   "final_category": "unanswerable",
+   "context_availability": "2",
+   "baseline_status": "reused",
+   "baseline_delta": "available",
+   "target_source": "pilot10",
+   "known_issue": "quote_absence_diagnostic",
+   "targets": {
+    "F": [
+     0.6,
+     1.0
+    ],
+    "C": [
+     0.8,
+     1.0
+    ],
+    "R": [
+     0.8,
+     1.0
+    ]
+   },
+   "target_status": "unchanged_rebaseline"
+  },
+  {
+   "case_id": "Q32",
+   "group": "provisional",
+   "final_category": "unanswerable",
+   "context_availability": "2",
+   "baseline_status": "new",
+   "baseline_delta": "unavailable",
+   "target_source": "none",
+   "known_issue": "uncertainty_misclass",
+   "targets": {
+    "F": [
+     0.9,
+     1.0
+    ],
+    "C": [
+     0.8,
+     1.0
+    ],
+    "R": [
+     0.8,
+     1.0
+    ]
+   },
+   "target_status": "new_target_proposed"
+  },
+  {
+   "case_id": "Q33",
+   "group": "provisional",
+   "final_category": "unanswerable",
+   "context_availability": "unavailable",
+   "baseline_status": "missing",
+   "baseline_delta": "unavailable",
+   "target_source": "none",
+   "known_issue": "context_unavailable;not_run",
+   "targets": {},
+   "target_status": "unchanged"
+  },
+  {
+   "case_id": "Q34",
+   "group": "provisional",
+   "final_category": "unanswerable",
+   "context_availability": "1",
+   "baseline_status": "missing",
+   "baseline_delta": "unavailable",
+   "target_source": "none",
+   "known_issue": "C1_only;not_run",
+   "targets": {},
+   "target_status": "unchanged"
+  },
+  {
+   "case_id": "Q35",
+   "group": "human_gold",
+   "final_category": "ambiguous",
+   "context_availability": "2",
+   "baseline_status": "available_old_run",
+   "baseline_delta": "old_run_only",
+   "target_source": "matrix",
+   "known_issue": "absence_quote_diagnostic",
+   "targets": {
+    "F": [
+     0.8,
+     1.0
+    ],
+    "C": [
+     0.7,
+     1.0
+    ],
+    "R": [
+     0.8,
+     1.0
+    ]
+   },
+   "target_status": "unchanged_rebaseline"
+  },
+  {
+   "case_id": "Q36",
+   "group": "human_gold",
+   "final_category": "ambiguous",
+   "context_availability": "2",
+   "baseline_status": "available_old_run",
+   "baseline_delta": "old_run_only",
+   "target_source": "matrix",
+   "known_issue": "condition_sentence;conflict_disclosure",
+   "targets": {
+    "F": [
+     0.8,
+     1.0
+    ],
+    "C": [
+     0.5,
+     0.6
+    ],
+    "R": [
+     0.8,
+     1.0
+    ]
+   },
+   "target_status": "reapproval_with_variant"
+  },
+  {
+   "case_id": "Q37",
+   "group": "human_gold",
+   "final_category": "ambiguous",
+   "context_availability": "1",
+   "baseline_status": "missing",
+   "baseline_delta": "unavailable",
+   "target_source": "none",
+   "known_issue": "C1_only;not_run",
+   "targets": {},
+   "target_status": "unchanged"
+  },
+  {
+   "case_id": "Q38",
+   "group": "provisional",
+   "final_category": "ambiguous",
+   "context_availability": "2",
+   "baseline_status": "missing",
+   "baseline_delta": "unavailable",
+   "target_source": "none",
+   "known_issue": "",
+   "targets": {},
+   "target_status": "unchanged"
+  },
+  {
+   "case_id": "Q39",
+   "group": "provisional",
+   "final_category": "ambiguous",
+   "context_availability": "2",
+   "baseline_status": "missing",
+   "baseline_delta": "unavailable",
+   "target_source": "none",
+   "known_issue": "",
+   "targets": {},
+   "target_status": "unchanged"
+  },
+  {
+   "case_id": "Q40",
+   "group": "human_gold",
+   "final_category": "direct",
+   "context_availability": "1",
+   "baseline_status": "missing",
+   "baseline_delta": "unavailable",
+   "target_source": "none",
+   "known_issue": "C1_only;not_run;category_changed",
+   "targets": {},
+   "target_status": "unchanged"
+  }
+ ]
+}

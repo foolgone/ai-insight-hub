@@ -1,0 +1,122 @@
+{
+ "meta": {
+  "name": "m1c-c4-static-targets",
+  "kind": "static_target_regression_not_judge_run",
+  "generated_on": "2026-11-20",
+  "target_file": "pilot-40-targets-v1.2.0-v1.0.2.json",
+  "target_sha256": "3ee15dfca66fe13f0a45fda84ecf2612483f2de107ad079b196a6bd6344d5846",
+  "target_revision": "v1.0.2",
+  "labels_file": "pilot-40-final-labels.json",
+  "labels_sha256": "f139623fef80b55716fce0c773e776d284a5167683eb91559b23e49cabd000eb",
+  "recalc_file": "m1b003-static-recalc.json",
+  "recalc_sha256": "53787fbb2a434953354bd821b62581e6e56ba5db10751149c236f1e7656437bb",
+  "script_file": "m1c_c4_static_targets.py",
+  "script_sha256": "a509c43350a5fc76ec2874dfa9a98ff61d54e6341b6a1b26aa15ea1e6f82a13f",
+  "row_count": 5,
+  "q17_note": "Q17 uses expected v1.2.0 labels, not observed Judge output.",
+  "q32_note": "Q32 uses expected v1.2.0 labels, not observed Judge output.",
+  "not_for_runtime": true
+ },
+ "cases": [
+  {
+   "case_id": "Q11",
+   "group": "provisional",
+   "final_category": "multi",
+   "target_F": [
+    0.6,
+    0.9
+   ],
+   "source": "observed_v1.1.5",
+   "not_observed": false,
+   "basis": null,
+   "F_coverage": 0.833333,
+   "F_strict": 1.0,
+   "F_coverage_status": "evaluated",
+   "F_strict_status": "evaluated",
+   "all_insufficient": false,
+   "insufficient_count": 1,
+   "insufficient_ratio": 0.166667,
+   "target_pass": "in"
+  },
+  {
+   "case_id": "Q17",
+   "group": "provisional",
+   "final_category": "multi",
+   "target_F": [
+    0.7,
+    0.9
+   ],
+   "source": "expected_v1.2.0",
+   "not_observed": true,
+   "basis": "v1.2.0 expected: cl5 policy_relationship factual/insufficient; v1.1.5 cl5 was meta",
+   "F_coverage": 0.8,
+   "F_strict": 1.0,
+   "F_coverage_status": "evaluated",
+   "F_strict_status": "evaluated",
+   "all_insufficient": false,
+   "insufficient_count": 1,
+   "insufficient_ratio": 0.2,
+   "target_pass": "in"
+  },
+  {
+   "case_id": "Q21",
+   "group": "provisional",
+   "final_category": "constraint",
+   "target_F": [
+    0.6,
+    0.7
+   ],
+   "source": "observed_v1.1.5",
+   "not_observed": false,
+   "basis": null,
+   "F_coverage": 0.6,
+   "F_strict": 1.0,
+   "F_coverage_status": "evaluated",
+   "F_strict_status": "evaluated",
+   "all_insufficient": false,
+   "insufficient_count": 2,
+   "insufficient_ratio": 0.4,
+   "target_pass": "in"
+  },
+  {
+   "case_id": "Q23",
+   "group": "human_gold",
+   "final_category": "constraint",
+   "target_F": [
+    0.4,
+    0.5
+   ],
+   "source": "observed_v1.1.5",
+   "not_observed": false,
+   "basis": null,
+   "F_coverage": 0.5,
+   "F_strict": 0.75,
+   "F_coverage_status": "evaluated",
+   "F_strict_status": "evaluated",
+   "all_insufficient": false,
+   "insufficient_count": 2,
+   "insufficient_ratio": 0.333333,
+   "target_pass": "in"
+  },
+  {
+   "case_id": "Q32",
+   "group": "provisional",
+   "final_category": "unanswerable",
+   "target_F": [
+    0.9,
+    1.0
+   ],
+   "source": "expected_v1.2.0",
+   "not_observed": true,
+   "basis": "v1.2.0 expected: cl1 uncertainty non_factual; v1.1.5 cl1 was factual/insufficient",
+   "F_coverage": 1.0,
+   "F_strict": 1.0,
+   "F_coverage_status": "evaluated",
+   "F_strict_status": "evaluated",
+   "all_insufficient": false,
+   "insufficient_count": 0,
+   "insufficient_ratio": 0.0,
+   "target_pass": "in"
+  }
+ ]
+}

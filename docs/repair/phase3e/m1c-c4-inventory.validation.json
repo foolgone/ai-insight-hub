@@ -1,0 +1,59 @@
+{
+ "name": "m1c-c4-inventory-validation",
+ "status": "pass",
+ "checks": [
+  {
+   "check": "target_sha256",
+   "ok": true
+  },
+  {
+   "check": "labels_sha256",
+   "ok": true
+  },
+  {
+   "check": "row_count",
+   "ok": true
+  },
+  {
+   "check": "group_counts",
+   "ok": true
+  },
+  {
+   "check": "category_counts",
+   "ok": true
+  },
+  {
+   "check": "baseline_counts",
+   "ok": true
+  },
+  {
+   "check": "context_counts",
+   "ok": true
+  },
+  {
+   "check": "missing_baseline",
+   "ok": true
+  },
+  {
+   "check": "context_unavailable",
+   "ok": true
+  },
+  {
+   "check": "c1_only",
+   "ok": true
+  },
+  {
+   "check": "available_old_run",
+   "ok": true
+  },
+  {
+   "check": "new_baseline",
+   "ok": true
+  },
+  {
+   "check": "missing_delta_unavailable",
+   "ok": true
+  }
+ ],
+ "output_sha256": "581b71589b801849e7f6c045aead88d67741d164a0689ca1bae5b51eecc9d326"
+}

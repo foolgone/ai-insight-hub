@@ -1,6 +1,7 @@
 # M1-C C4：目标回归 / 10 条闸门准备 / 40 条盘点与报告模板
 
 > 状态：C4 设计/范围报告，待人工审核；**不跑 Judge、不激活 v1.2.0、不改 Prompt、不启动 M2/M3**。
+> 实现状态：C4 静态目标回归/40 条盘点/报告模板已完成并本地验证（2026-11-20，`implemented/verified`）；10/40 Judge 未运行。
 > 依据：`19-m1b-003-freeze-draft.md`（r2）、`23-m1c-stage1-test-list.md`（rev2.1）、`25-m1c-c3-design-scope.md`（rev2.1）、`pilot-40-targets-v1.2.0-v1.0.2.json`、`pilot-40-final-labels.json`、`m1b003-static-recalc.json/md`。
 > 范围：**仅 C4 设计与范围**；C4 测试/脚本需审核通过后编写；10/40 Judge 运行需单独批准。
 
@@ -168,15 +169,15 @@
 - 把 F_strict 当目标通过率；
 - 缺 prompt/schema/metric SHA。
 
-## 6. 计划文件与脚本（审核通过后再写）
+## 6. 计划文件与脚本（已按本设计实现）
 
 | 文件 | 用途 |
 |---|---|
 | `docs/repair/26-m1c-c4-design-scope.md` | 本设计 |
 | `docs/repair/phase3e/m1c_c4_static_targets.py` | 静态目标回归 Q11/Q17/Q21/Q23/Q32 |
-| `docs/repair/phase3e/m1c-c4-static-targets.json` / `.md` | 静态目标回归输出 |
+| `docs/repair/phase3e/m1c-c4-static-targets.json` / `.md` / `.sha256` / `.validation.json` | 静态目标回归输出与校验 |
 | `docs/repair/phase3e/m1c_c4_inventory.py` | 40 条分类/目标/context/baseline 盘点 |
-| `docs/repair/phase3e/m1c-c4-inventory.json` / `.md` | 40 条盘点输出 |
+| `docs/repair/phase3e/m1c-c4-inventory.json` / `.md` / `.sha256` / `.validation.json` | 40 条盘点输出与校验 |
 | `docs/repair/phase3e/m1c-c4-report-template.md` | 报告模板 |
 
 约束：
