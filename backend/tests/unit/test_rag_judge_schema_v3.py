@@ -3,9 +3,7 @@ from __future__ import annotations
 
 import hashlib
 import json
-import uuid
 from pathlib import Path
-from types import SimpleNamespace
 from typing import Any
 
 import pytest
@@ -30,7 +28,7 @@ from app.schemas.agents.rag_judge import (
     judge_schema_version,
     metric_version_for_prompt,
 )
-from app.services.rag_judge_service import _faithfulness_score, judge_trace
+from app.services.rag_judge_service import _faithfulness_score
 
 pytestmark = pytest.mark.unit
 
@@ -230,29 +228,6 @@ def test_v1_v2_payload_still_parses() -> None:
 
 
 # --------------------------------------------------------------------------- Service guard
-
-
-async def test_judge_trace_v3_guard_raises_before_agent() -> None:
-    called = False
-
-    def factory(metric: str) -> RagJudgeAgent:
-        nonlocal called
-        called = True
-        raise AssertionError("agent factory must not be called for v3")
-
-    trace = SimpleNamespace(id=uuid.uuid4(), user_id=uuid.uuid4(), task_id=None)
-
-    with pytest.raises(RagJudgePromptError, match="v3 scoring not implemented until C3"):
-        await judge_trace(
-            None,
-            trace=trace,  # type: ignore[arg-type]
-            metrics=["faithfulness"],
-            agent_factory=factory,  # type: ignore[arg-type]
-            prompt_version="v1.0.0",
-            schema_version=JUDGE_SCHEMA_V3,
-        )
-
-    assert called is False
 
 
 def test_faithfulness_score_v3_guard_raises() -> None:

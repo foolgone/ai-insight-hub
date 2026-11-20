@@ -97,6 +97,7 @@ async def test_invoke_success() -> None:
 
     assert result.success is True
     assert result.data == {"answer": "hello"}
+    assert result.error_type is None
     assert result.metadata["agent"] == "dummy_agent"
     assert result.metadata["attempts"] == 1
     assert result.token_usage == {"input": 10, "output": 5}
@@ -112,6 +113,7 @@ async def test_invoke_returns_failure_for_invalid_input() -> None:
 
     assert result.success is False
     assert any("AgentInputError" in item for item in result.errors)
+    assert result.error_type == "AgentInputError"
     assert llm.calls == []
 
 
@@ -157,6 +159,7 @@ async def test_invoke_fails_when_structured_output_unrepaired() -> None:
 
     assert result.success is False
     assert any("StructuredOutputError" in item for item in result.errors)
+    assert result.error_type == "StructuredOutputError"
 
 
 async def test_stopped_degradation_rejects_invocation(monkeypatch) -> None:

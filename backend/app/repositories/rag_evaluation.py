@@ -208,11 +208,30 @@ async def results_for_item(
     return list(rows.scalars().all())
 
 
+async def get_result_by_key(
+    session: AsyncSession,
+    *,
+    run_id: uuid.UUID,
+    dataset_item_id: uuid.UUID,
+    metric_name: str,
+    metric_version: str,
+) -> RagEvaluationResult | None:
+    return await session.scalar(
+        select(RagEvaluationResult).where(
+            RagEvaluationResult.run_id == run_id,
+            RagEvaluationResult.dataset_item_id == dataset_item_id,
+            RagEvaluationResult.metric_name == metric_name,
+            RagEvaluationResult.metric_version == metric_version,
+        )
+    )
+
+
 __all__ = [
     "RESULT_SORTABLE",
     "SORTABLE",
     "add_results_ignore_conflicts",
     "add_run",
+    "get_result_by_key",
     "get_run",
     "list_child_runs",
     "list_results",

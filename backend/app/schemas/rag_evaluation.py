@@ -44,6 +44,7 @@ class RagEvaluationCreate(BaseSchema):
     precision_mode: PrecisionMode = "at_k"
     metrics: list[str] | None = None
     judge_metrics: list[str] | None = None
+    judge_prompt_version: str | None = Field(default=None, max_length=20)
     item_ids: list[uuid.UUID] | None = None
 
     @model_validator(mode="after")
@@ -166,8 +167,12 @@ class MetricAggregate(BaseSchema):
     mean: float | None
     evaluated: int
     skipped: int
+    invalid: int = 0
     failed: int
     coverage: float
+    insufficient_count: int = 0
+    insufficient_ratio: float | None = None
+    all_insufficient_count: int = 0
     skip_reasons: dict[str, int] = Field(default_factory=dict)
 
 

@@ -1,6 +1,7 @@
 # M1-C C3：Service 双指标 / invalid / 聚合 / retry 设计与变更范围
 
 > 状态：C3 设计/范围报告，待人工审核；**不写代码、不改 Service、不跑 Judge、不创建/激活 v1.2.0**。
+> 实现状态：C3 已按本设计完成实现并本地验证（2026-11-20，`implemented/verified`）；本文件仍作为设计与验收依据。
 > 版本：C3 设计 rev2.1（2026-11-20，补 credential 异常边界与 failure_kind 枚举）。
 > 依据：`19-m1b-003-freeze-draft.md`（r2）、`22-m1c-stage0-gap-list.md`（rev2.1）、`23-m1c-stage1-test-list.md`（rev2.1）、`12-judge-semantic-spec.md`、`15-phase3e-v1.2.0-schema-service-design.md` §2.1。
 > 范围：**仅 C3**（Service 双指标、invalid、Item 聚合、retry、聚合/API 映射）。C2 migration 022 已完成；C4 目标回归不在本轮。

@@ -216,6 +216,7 @@ def _copy_parent_result(
         status=parent.status,
         score=parent.score,
         skipped_reason=parent.skipped_reason,
+        invalid_reason=parent.invalid_reason,
         details=details,
         judge_config=dict(parent.judge_config or {}),
         raw_output=parent.raw_output,
@@ -223,6 +224,98 @@ def _copy_parent_result(
         latency_ms=parent.latency_ms,
         error_message=parent.error_message,
     )
+
+
+def _strict_row_from_coverage(
+    *, run: RagEvaluationRun, item: QaDatasetItem, coverage: RagEvaluationResult
+) -> RagEvaluationResult:
+    details = dict(coverage.details or {})
+    supported = int(details.get("supported_count") or 0)
+    unsupported = int(details.get("unsupported_count") or 0)
+    insufficient = int(details.get("insufficient_evidence_count") or 0)
+    strict_details = {
+        "claim_count": details.get("claim_count"),
+        "supported_count": supported,
+        "unsupported_count": unsupported,
+        "insufficient_evidence_count": insufficient,
+        "non_factual_count": details.get("non_factual_count"),
+        "scorable_claim_count": details.get("scorable_claim_count"),
+        "all_insufficient": details.get("all_insufficient"),
+        "insufficient_ratio": details.get("insufficient_ratio"),
+    }
+    status = "skipped"
+    score: float | None = None
+    skipped_reason: str | None = None
+    invalid_reason: str | None = None
+    error_message: str | None = None
+    if service.is_invalid_result(coverage):
+        status = "invalid"
+        invalid_reason = coverage.invalid_reason or "contract_violation"
+    elif service.is_execution_failed(coverage):
+        status = "failed"
+        error_message = coverage.error_message
+        strict_details["failure_kind"] = (coverage.details or {}).get("failure_kind")
+        strict_details["agent_error_type"] = (coverage.details or {}).get("agent_error_type")
+    elif coverage.status == "skipped":
+        status = "skipped"
+        skipped_reason = coverage.skipped_reason
+    elif coverage.status == "evaluated":
+        if details.get("all_insufficient") or supported + unsupported == 0:
+            status = "skipped"
+            skipped_reason = "no_decidable_claims"
+        else:
+            status = "evaluated"
+            score = details.get("strict_score")
+            if score is None:
+                score = round(supported / (supported + unsupported), 6)
+            strict_details["strict_score"] = score
+            strict_details["strict_gap"] = round(float(coverage.score or 0.0) - float(score), 6)
+    return RagEvaluationResult(
+        run_id=run.id,
+        dataset_item_id=item.id,
+        trace_id=coverage.trace_id,
+        metric_name=service.FAITHFULNESS_STRICT_METRIC,
+        metric_version=coverage.metric_version,
+        status=status,
+        score=score,
+        skipped_reason=skipped_reason,
+        invalid_reason=invalid_reason,
+        derived_from_result_id=coverage.id,
+        details=strict_details,
+        judge_config=dict(coverage.judge_config or {}),
+        error_message=error_message,
+    )
+
+
+async def _persist_item_rows(
+    session: AsyncSession,
+    *,
+    run: RagEvaluationRun,
+    item: QaDatasetItem,
+    rows: Sequence[RagEvaluationResult],
+    derived_metrics: Sequence[str],
+) -> None:
+    await repo.add_results_ignore_conflicts(session, rows)
+    if service.FAITHFULNESS_STRICT_METRIC not in derived_metrics:
+        return
+    coverage = await repo.get_result_by_key(
+        session,
+        run_id=run.id,
+        dataset_item_id=item.id,
+        metric_name="faithfulness",
+        metric_version=service.metric_version_for(
+            "faithfulness", service.judge_prompt_version_of(run)
+        ),
+    )
+    if coverage is None:
+        logger.warning(
+            "rag evaluation strict derive skipped without coverage run={} item={}",
+            run.id,
+            item.id,
+        )
+        return
+    strict = _strict_row_from_coverage(run=run, item=item, coverage=coverage)
+    await repo.add_results_ignore_conflicts(session, [strict])
 
 
 async def _evaluate_trace(
@@ -321,6 +414,7 @@ async def _evaluate_trace(
                     status=judge.status,
                     score=judge.score,
                     skipped_reason=judge.skipped_reason,
+                    invalid_reason=judge.invalid_reason,
                     details=details,
                     judge_config=dict(judge.judge_config or {}),
                     raw_output=judge.raw_output,
@@ -379,7 +473,9 @@ async def _process_item(
     judge_metrics: Sequence[str],
 ) -> None:
     started = time.monotonic()
-    expected = [*metrics, *judge_metrics]
+    expected = service.expected_metrics(run)
+    base_expected = [*metrics, *judge_metrics]
+    derived_metrics = [metric for metric in expected if metric not in base_expected]
 
     parent_results: dict[str, RagEvaluationResult] = {}
     if run.parent_run_id is not None:
@@ -390,7 +486,7 @@ async def _process_item(
 
     to_execute: list[str] = []
     ready: list[RagEvaluationResult] = []
-    for metric in expected:
+    for metric in base_expected:
         parent = parent_results.get(metric)
         if parent is not None and _parent_result_reusable(parent, run, metric):
             ready.append(_copy_parent_result(run=run, item=item, parent=parent))
@@ -429,7 +525,13 @@ async def _process_item(
                 latency = int((time.monotonic() - started) * 1000)
                 for row in ready:
                     row.details = {**(row.details or {}), "item_latency_ms": latency}
-                await repo.add_results_ignore_conflicts(session, ready)
+                await _persist_item_rows(
+                    session,
+                    run=run,
+                    item=item,
+                    rows=ready,
+                    derived_metrics=derived_metrics,
+                )
         except Exception as exc:  # noqa: BLE001 - 单条失败隔离
             logger.opt(exception=exc).warning(
                 "rag evaluation item failed run={} item={}", run.id, item.id
@@ -442,16 +544,28 @@ async def _process_item(
                     metric=metric,
                     error=f"{type(exc).__name__}: {exc}",
                 )
-                for metric in expected
+                for metric in base_expected
             ]
             for row in failed:
                 row.details = {**(row.details or {}), "item_latency_ms": latency}
-            await repo.add_results_ignore_conflicts(session, failed)
+            await _persist_item_rows(
+                session,
+                run=run,
+                item=item,
+                rows=failed,
+                derived_metrics=derived_metrics,
+            )
     else:
         latency = int((time.monotonic() - started) * 1000)
         for row in ready:
             row.details = {**(row.details or {}), "item_latency_ms": latency}
-        await repo.add_results_ignore_conflicts(session, ready)
+        await _persist_item_rows(
+            session,
+            run=run,
+            item=item,
+            rows=ready,
+            derived_metrics=derived_metrics,
+        )
 
 
 async def _verify_dataset(session: AsyncSession, run: RagEvaluationRun) -> bool:

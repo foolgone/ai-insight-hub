@@ -141,6 +141,8 @@ class AgentResult:
     duration: float = 0.0
     token_usage: dict[str, int] = field(default_factory=lambda: {"input": 0, "output": 0})
     cost: Decimal = Decimal("0")
+    # 失败结构类型（异常类名）；成功为 None。用于区分输出违约/执行失败。
+    error_type: str | None = None
     # 最后一次实际用于解析的模型输出原文（含修复轮）；默认 None，不影响既有 Agent。
     raw_text: str | None = None
     # 首次（未修复）模型输出；仅结构化失败时保留，便于定位原始非法点。
@@ -422,6 +424,7 @@ class BaseAgent(ABC):
                     "input_guard_hits": len(guard_hits),
                 },
                 errors=[f"{type(exc).__name__}: {exc}"],
+                error_type=type(exc).__name__,
                 warnings=list(guard_hits),
                 duration=duration,
                 token_usage=token_usage,

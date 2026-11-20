@@ -21,18 +21,22 @@ from loguru import logger
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.agents.rag_judge_agent import RagJudgeAgent, RagJudgePromptError, resolve_prompt_version
+from app.core.exceptions import LLMCredentialInvalidError, LLMCredentialNotConfiguredError
 from app.models import QaDatasetItem, RagTrace
 from app.schemas.agents.rag_judge import (
+    FACTUAL_CLAIM_SUBTYPES_V3,
+    FAITHFULNESS_STRICT_METRIC,
     JUDGE_SCHEMA_V1,
     JUDGE_SCHEMA_V2,
     JUDGE_SCHEMA_V3,
+    NON_FACTUAL_CLAIM_SUBTYPES_V3,
     RAG_JUDGE_METRICS,
     RagJudgeMetric,
     judge_schema_version,
     metric_version_for_prompt,
 )
 
-JudgeStatus = Literal["evaluated", "skipped", "failed"]
+JudgeStatus = Literal["evaluated", "skipped", "invalid", "failed"]
 
 # 上下文与原始输出上限：避免把超长 Trace 原样塞进 Prompt / 结果
 MAX_CONTEXTS = 20
@@ -56,6 +60,8 @@ class JudgeOutcome:
     status: JudgeStatus
     score: float | None = None
     skipped_reason: str | None = None
+    invalid_reason: str | None = None
+    error_type: str | None = None
     details: dict[str, Any] = field(default_factory=dict)
     judge_config: dict[str, Any] = field(default_factory=dict)
     raw_output: str | None = None
@@ -604,6 +610,399 @@ def _faithfulness_score(
     return round(len(supported) / len(scorable), 6), details, None
 
 
+@dataclass(frozen=True)
+class _V3Score:
+    status: JudgeStatus
+    score: float | None
+    details: dict[str, Any]
+    skipped_reason: str | None = None
+    invalid_reason: str | None = None
+
+
+def _v3_evidence_refs(
+    raw_refs: Any,
+    *,
+    claim_id: str,
+    context_map: dict[str, str],
+    errors: list[dict[str, Any]],
+    checks: list[dict[str, Any]],
+) -> list[dict[str, str]]:
+    if raw_refs is None:
+        return []
+    if not isinstance(raw_refs, list):
+        errors.append(
+            _validation_error(claim_id, "evidence_refs_invalid", "evidence_refs must be a list")
+        )
+        return []
+    normalized: list[dict[str, str]] = []
+    for raw_ref in raw_refs:
+        if not isinstance(raw_ref, dict):
+            errors.append(
+                _validation_error(
+                    claim_id, "evidence_ref_invalid", "evidence_ref must be an object"
+                )
+            )
+            continue
+        context_id = str(raw_ref.get("context_id") or "")
+        quote = str(raw_ref.get("quote") or "")
+        normalized.append({"context_id": context_id, "quote": quote})
+        ok = True
+        error = None
+        if not context_id or context_id not in context_map:
+            ok, error = False, "unknown_context_id"
+        elif not quote.strip():
+            ok, error = False, "empty_quote"
+        elif quote.strip() not in context_map[context_id].strip():
+            ok, error = False, "quote_not_found"
+        checks.append(
+            {
+                "claim_id": claim_id,
+                "context_id": context_id,
+                "quote": quote,
+                "ok": ok,
+                "error": error,
+            }
+        )
+        if not ok:
+            errors.append(
+                _validation_error(
+                    claim_id,
+                    error or "evidence_invalid",
+                    "evidence_ref violates v3 contract",
+                    context_id=context_id,
+                )
+            )
+    return normalized
+
+
+def _v3_claim(
+    raw: Any,
+    index: int,
+    *,
+    context_map: dict[str, str],
+    errors: list[dict[str, Any]],
+    warnings: list[dict[str, Any]],
+    checks: list[dict[str, Any]],
+) -> dict[str, Any] | None:
+    if not isinstance(raw, dict):
+        errors.append(_validation_error(f"cl{index}", "claim_invalid", "claim must be an object"))
+        return None
+    claim_id = str(raw.get("claim_id") or f"cl{index}")
+    claim_type = raw.get("claim_type")
+    if claim_type not in CLAIM_TYPES:
+        errors.append(
+            _validation_error(
+                claim_id,
+                "claim_type_invalid",
+                "claim_type must be factual_claim/non_factual",
+                value=claim_type,
+            )
+        )
+        return None
+    subtype = raw.get("claim_subtype")
+    allowed = (
+        FACTUAL_CLAIM_SUBTYPES_V3
+        if claim_type == "factual_claim"
+        else NON_FACTUAL_CLAIM_SUBTYPES_V3
+    )
+    if subtype not in allowed:
+        errors.append(
+            _validation_error(
+                claim_id,
+                "claim_subtype_invalid",
+                f"claim_subtype {subtype!r} is not valid for {claim_type}",
+                value=subtype,
+            )
+        )
+        return None
+
+    support_status = raw.get("support_status")
+    if claim_type == "factual_claim":
+        if support_status not in SUPPORT_STATUSES:
+            errors.append(
+                _validation_error(
+                    claim_id,
+                    "support_status_invalid",
+                    "factual_claim requires support_status",
+                    value=support_status,
+                )
+            )
+            return None
+    elif support_status is not None:
+        errors.append(
+            _validation_error(
+                claim_id,
+                "non_factual_support_status",
+                "non_factual must not have support_status",
+                value=support_status,
+            )
+        )
+        return None
+
+    refs = _v3_evidence_refs(
+        raw.get("evidence_refs"),
+        claim_id=claim_id,
+        context_map=context_map,
+        errors=errors,
+        checks=checks,
+    )
+    if claim_type == "factual_claim":
+        if support_status == "supported" and not refs:
+            errors.append(
+                _validation_error(
+                    claim_id,
+                    "supported_without_evidence",
+                    "supported v3 claim requires evidence_refs",
+                )
+            )
+        if support_status == "insufficient_evidence" and refs:
+            errors.append(
+                _validation_error(
+                    claim_id,
+                    "insufficient_with_evidence",
+                    "insufficient_evidence must not have evidence_refs",
+                )
+            )
+        if subtype == "conflict" and support_status == "supported":
+            quotes = {ref["quote"].strip() for ref in refs}
+            has_substring = any(
+                left != right and (left in right or right in left)
+                for left in quotes
+                for right in quotes
+            )
+            if len(quotes) < 2 or has_substring:
+                errors.append(
+                    _validation_error(
+                        claim_id,
+                        "conflict_single_sided_evidence",
+                        "conflict claim needs two distinct, non-nested quotes",
+                    )
+                )
+
+    claim = dict(raw)
+    claim["claim_id"] = claim_id
+    claim["claim_type"] = claim_type
+    claim["claim_subtype"] = subtype
+    claim["support_status"] = support_status
+    claim["evidence_refs"] = refs
+    return claim
+
+
+def _faithfulness_score_v3(
+    data: dict[str, Any],
+    *,
+    contexts: Sequence[str],
+) -> tuple[_V3Score, _V3Score]:
+    """v3：同 claims 派生 coverage/strict；契约违约整条 invalid。"""
+    context_map = {f"C{index}": str(content) for index, content in enumerate(contexts, 1)}
+    errors: list[dict[str, Any]] = []
+    warnings: list[dict[str, Any]] = []
+    checks: list[dict[str, Any]] = []
+    normalized: list[dict[str, Any]] = []
+    seen_ids: set[str] = set()
+    for index, raw in enumerate(data.get("claims") or [], 1):
+        claim = _v3_claim(
+            raw,
+            index,
+            context_map=context_map,
+            errors=errors,
+            warnings=warnings,
+            checks=checks,
+        )
+        if claim is None:
+            continue
+        if claim["claim_id"] in seen_ids:
+            warnings.append(
+                _validation_error(
+                    claim["claim_id"],
+                    "duplicate_claim_id",
+                    "duplicate claim_id skipped",
+                )
+            )
+            continue
+        seen_ids.add(claim["claim_id"])
+        normalized.append(claim)
+
+    factual = [claim for claim in normalized if claim["claim_type"] == "factual_claim"]
+    supported = [claim for claim in factual if claim["support_status"] == "supported"]
+    unsupported = [claim for claim in factual if claim["support_status"] == "unsupported"]
+    insufficient = [
+        claim for claim in factual if claim["support_status"] == "insufficient_evidence"
+    ]
+    non_factual = [claim for claim in normalized if claim["claim_type"] == "non_factual"]
+    counts = {
+        "claim_count": len(normalized),
+        "supported_count": len(supported),
+        "unsupported_count": len(unsupported),
+        "insufficient_evidence_count": len(insufficient),
+        "non_factual_count": len(non_factual),
+        "scorable_claim_count": len(factual),
+        "all_insufficient": bool(factual) and not supported and not unsupported,
+        "insufficient_ratio": (round(len(insufficient) / len(factual), 6) if factual else None),
+        "validation_errors": errors,
+        "warnings": warnings,
+        "evidence_validation": checks,
+    }
+    if errors:
+        coverage_details = {**counts, "claims": normalized, "reason": data.get("reason") or ""}
+        strict_invalid_details = {
+            key: counts[key]
+            for key in (
+                "claim_count",
+                "supported_count",
+                "unsupported_count",
+                "insufficient_evidence_count",
+                "non_factual_count",
+                "scorable_claim_count",
+                "all_insufficient",
+                "insufficient_ratio",
+            )
+        }
+        return (
+            _V3Score(
+                status="invalid",
+                score=None,
+                details=coverage_details,
+                invalid_reason="contract_violation",
+            ),
+            _V3Score(
+                status="invalid",
+                score=None,
+                details=strict_invalid_details,
+                invalid_reason="contract_violation",
+            ),
+        )
+
+    coverage_details = {
+        **counts,
+        "claims": normalized,
+        "reason": data.get("reason") or "",
+    }
+    strict_details = {
+        key: counts[key]
+        for key in (
+            "claim_count",
+            "supported_count",
+            "unsupported_count",
+            "insufficient_evidence_count",
+            "non_factual_count",
+            "scorable_claim_count",
+            "all_insufficient",
+            "insufficient_ratio",
+        )
+    }
+    denom = len(factual)
+    if denom == 0:
+        skipped = _V3Score(
+            status="skipped",
+            score=None,
+            details=coverage_details,
+            skipped_reason="no_scorable_claims",
+        )
+        strict = _V3Score(
+            status="skipped",
+            score=None,
+            details=strict_details,
+            skipped_reason="no_scorable_claims",
+        )
+        return skipped, strict
+
+    coverage_score = round(len(supported) / denom, 6)
+    coverage_details["all_insufficient"] = not supported and not unsupported
+    if not supported and not unsupported:
+        strict = _V3Score(
+            status="skipped",
+            score=None,
+            details=strict_details,
+            skipped_reason="no_decidable_claims",
+        )
+        return (
+            _V3Score(status="evaluated", score=0.0, details=coverage_details),
+            strict,
+        )
+
+    strict_denom = len(supported) + len(unsupported)
+    strict_score = round(len(supported) / strict_denom, 6)
+    strict_details["strict_score"] = strict_score
+    strict_details["strict_gap"] = round(coverage_score - strict_score, 6)
+    return (
+        _V3Score(status="evaluated", score=coverage_score, details=coverage_details),
+        _V3Score(status="evaluated", score=strict_score, details=strict_details),
+    )
+
+
+def _failure_fields(error_type: str | None) -> tuple[JudgeStatus, str | None, str]:
+    if error_type in {"AgentOutputError", "StructuredOutputError"}:
+        return "invalid", "contract_violation", "contract"
+    if error_type == "AgentInputError":
+        return "failed", None, "input_error"
+    if error_type == "AgentTimeoutError":
+        return "failed", None, "timeout"
+    if error_type in {"AgentExecutionError", "AgentDegradedError"}:
+        return "failed", None, "execution"
+    if error_type in {"LLMCredentialNotConfiguredError", "LLMCredentialInvalidError"}:
+        return "failed", None, "credential"
+    return "failed", None, "unknown"
+
+
+def _strict_details(details: dict[str, Any]) -> dict[str, Any]:
+    keys = (
+        "claim_count",
+        "supported_count",
+        "unsupported_count",
+        "insufficient_evidence_count",
+        "non_factual_count",
+        "scorable_claim_count",
+        "all_insufficient",
+        "insufficient_ratio",
+        "strict_score",
+        "strict_gap",
+        "failure_kind",
+        "agent_error_type",
+    )
+    return {key: details[key] for key in keys if key in details}
+
+
+def _v3_outcome(
+    *,
+    metric_name: str,
+    metric_version: str,
+    result: _V3Score,
+    judge_config: dict[str, Any],
+    raw_output: str | None,
+    raw_truncated: bool,
+    latency_ms: int,
+    usage: dict[str, Any] | None = None,
+) -> JudgeOutcome:
+    return JudgeOutcome(
+        metric_name=metric_name,
+        metric_version=metric_version,
+        status=result.status,
+        score=result.score,
+        skipped_reason=result.skipped_reason,
+        invalid_reason=result.invalid_reason,
+        details={**result.details, **(usage or {})},
+        judge_config=judge_config,
+        raw_output=raw_output,
+        raw_truncated=raw_truncated,
+        latency_ms=latency_ms,
+    )
+
+
+def _strict_from_outcome(outcome: JudgeOutcome) -> JudgeOutcome:
+    return JudgeOutcome(
+        metric_name=FAITHFULNESS_STRICT_METRIC,
+        metric_version=outcome.metric_version,
+        status=outcome.status,
+        score=None,
+        skipped_reason=outcome.skipped_reason,
+        invalid_reason=outcome.invalid_reason,
+        error_type=outcome.error_type,
+        details=_strict_details(outcome.details),
+        judge_config=dict(outcome.judge_config or {}),
+    )
+
+
 async def judge_trace(
     session: AsyncSession | None,
     *,
@@ -622,8 +1021,6 @@ async def judge_trace(
 
     resolved_prompt_version = resolve_prompt_version(prompt_version)
     resolved_schema_version = schema_version or judge_schema_version(resolved_prompt_version)
-    if resolved_schema_version == JUDGE_SCHEMA_V3:
-        raise RagJudgePromptError("v3 scoring not implemented until C3")
     contexts = _contexts_from_trace(trace)
     gold_answer = _gold_answer_of(item)
     factory: AgentFactory = agent_factory or (
@@ -637,51 +1034,114 @@ async def judge_trace(
 
         reason = _skip_reason(metric, trace=trace, contexts=contexts, gold_answer=gold_answer)
         if reason is not None:
-            outcomes.append(
-                _skipped(
-                    metric,
-                    reason,
-                    prompt_version=resolved_prompt_version,
-                )
+            skipped = _skipped(
+                metric,
+                reason,
+                prompt_version=resolved_prompt_version,
             )
+            outcomes.append(skipped)
+            if resolved_schema_version == JUDGE_SCHEMA_V3 and metric == "faithfulness":
+                outcomes.append(_strict_from_outcome(skipped))
             continue
 
         agent = factory(metric)
         agent_schema_version = getattr(agent, "schema_version", resolved_schema_version)
+        run_v3 = agent_schema_version == JUDGE_SCHEMA_V3
+        judge_config = _judge_config(agent, model=None)
         started = time.perf_counter()
-        result = await agent.judge(
-            _payload(metric, trace=trace, contexts=contexts, gold_answer=gold_answer),
-            session=session,
-            scope=f"rag_judge:{trace.id}:{metric}",
-            user_id=trace.user_id,
-            task_id=trace.task_id,
-        )
+        try:
+            result = await agent.judge(
+                _payload(metric, trace=trace, contexts=contexts, gold_answer=gold_answer),
+                session=session,
+                scope=f"rag_judge:{trace.id}:{metric}",
+                user_id=trace.user_id,
+                task_id=trace.task_id,
+            )
+        except (LLMCredentialNotConfiguredError, LLMCredentialInvalidError) as exc:
+            latency_ms = int((time.perf_counter() - started) * 1000)
+            failed = JudgeOutcome(
+                metric_name=metric,
+                metric_version=agent.metric_version,
+                status="failed",
+                error_type=type(exc).__name__,
+                details={
+                    "failure_kind": "credential",
+                    "agent_error_type": type(exc).__name__,
+                },
+                judge_config=judge_config,
+                latency_ms=latency_ms,
+                error_message=str(exc)[:2000],
+            )
+            outcomes.append(failed)
+            if run_v3 and metric == "faithfulness":
+                outcomes.append(_strict_from_outcome(failed))
+            logger.warning(
+                "rag judge credential failed trace={} metric={} error={}",
+                trace.id,
+                metric,
+                type(exc).__name__,
+            )
+            continue
+        except Exception as exc:  # noqa: BLE001 - 未知执行异常不得冒泡为 500
+            latency_ms = int((time.perf_counter() - started) * 1000)
+            failed = JudgeOutcome(
+                metric_name=metric,
+                metric_version=agent.metric_version,
+                status="failed",
+                error_type=type(exc).__name__,
+                details={
+                    "failure_kind": "unknown",
+                    "agent_error_type": type(exc).__name__,
+                },
+                judge_config=judge_config,
+                latency_ms=latency_ms,
+                error_message=str(exc)[:2000],
+            )
+            outcomes.append(failed)
+            if run_v3 and metric == "faithfulness":
+                outcomes.append(_strict_from_outcome(failed))
+            logger.opt(exception=exc).warning(
+                "rag judge unexpected failure trace={} metric={}", trace.id, metric
+            )
+            continue
+
         latency_ms = int((time.perf_counter() - started) * 1000)
         raw_output, raw_truncated = _truncate_raw(result.raw_text)
-        config = _judge_config(agent, model=str(result.metadata.get("model") or "") or None)
+        model = str(result.metadata.get("model") or "") or None
+        config = {**judge_config, "model": model} if model else judge_config
 
         if not result.success or result.data is None:
+            error_type = getattr(result, "error_type", None)
+            if run_v3:
+                status, invalid_reason, failure_kind = _failure_fields(error_type)
+            else:
+                status, invalid_reason, failure_kind = "failed", None, "execution"
             original_raw, original_truncated = _truncate_raw(
                 getattr(result, "original_raw_text", None)
             )
-            outcomes.append(
-                JudgeOutcome(
-                    metric_name=metric,
-                    metric_version=agent.metric_version,
-                    status="failed",
-                    details={
-                        "errors": list(result.errors),
-                        "original_raw_output": original_raw,
-                        "original_raw_truncated": original_truncated,
-                        **_usage_details(result),
-                    },
-                    judge_config=config,
-                    raw_output=raw_output,
-                    raw_truncated=raw_truncated,
-                    latency_ms=latency_ms,
-                    error_message=("; ".join(result.errors) or "judge failed")[:2000],
-                )
+            failed = JudgeOutcome(
+                metric_name=metric,
+                metric_version=agent.metric_version,
+                status=status,
+                invalid_reason=invalid_reason,
+                error_type=error_type,
+                details={
+                    "errors": list(result.errors),
+                    "failure_kind": failure_kind,
+                    "agent_error_type": error_type,
+                    "original_raw_output": original_raw,
+                    "original_raw_truncated": original_truncated,
+                    **_usage_details(result),
+                },
+                judge_config=config,
+                raw_output=raw_output,
+                raw_truncated=raw_truncated,
+                latency_ms=latency_ms,
+                error_message=("; ".join(result.errors) or "judge failed")[:2000],
             )
+            outcomes.append(failed)
+            if run_v3 and metric == "faithfulness":
+                outcomes.append(_strict_from_outcome(failed))
             logger.warning(
                 "rag judge failed trace={} metric={} error={}",
                 trace.id,
@@ -692,6 +1152,35 @@ async def judge_trace(
 
         data = dict(result.data)
         if metric == "faithfulness":
+            if run_v3:
+                coverage, strict = _faithfulness_score_v3(data, contexts=contexts)
+                outcomes.append(
+                    _v3_outcome(
+                        metric_name=metric,
+                        metric_version=agent.metric_version,
+                        result=coverage,
+                        judge_config=config,
+                        raw_output=raw_output,
+                        raw_truncated=raw_truncated,
+                        latency_ms=latency_ms,
+                        usage=_usage_details(result),
+                    )
+                )
+                outcomes.append(
+                    _v3_outcome(
+                        metric_name=FAITHFULNESS_STRICT_METRIC,
+                        metric_version=metric_version_for_prompt(
+                            FAITHFULNESS_STRICT_METRIC, resolved_prompt_version
+                        ),
+                        result=strict,
+                        judge_config=config,
+                        raw_output=None,
+                        raw_truncated=False,
+                        latency_ms=0,
+                    )
+                )
+                continue
+
             score, details, skipped_reason = _faithfulness_score(
                 data,
                 contexts=contexts,
@@ -730,12 +1219,25 @@ async def judge_trace(
         score_value = data.get("score")
         score = float(score_value) if isinstance(score_value, (int, float)) else None
         if score is None or not math.isfinite(score) or score < 0 or score > 1:
+            if run_v3:
+                status, invalid_reason, failure_kind = (
+                    "invalid",
+                    "contract_violation",
+                    "contract",
+                )
+            else:
+                status, invalid_reason, failure_kind = "failed", None, "execution"
             outcomes.append(
                 JudgeOutcome(
                     metric_name=metric,
                     metric_version=agent.metric_version,
-                    status="failed",
-                    details={"invalid_score": score_value, **_usage_details(result)},
+                    status=status,
+                    invalid_reason=invalid_reason,
+                    details={
+                        "invalid_score": score_value,
+                        "failure_kind": failure_kind,
+                        **_usage_details(result),
+                    },
                     judge_config=config,
                     raw_output=raw_output,
                     raw_truncated=raw_truncated,

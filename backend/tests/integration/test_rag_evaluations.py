@@ -152,7 +152,10 @@ async def test_full_run_retrieve_mode(
     assert run["status"] == "completed"
     assert run["task_status"] == "completed"
     assert run["task_progress"] == 100
-    assert run["completed_items"] == 3
+    assert run["completed_items"] == 2
+    assert run["evaluated_items"] == 2
+    assert run["invalid_items"] == 0
+    assert run["unprocessed_items"] == 0
     assert run["skipped_items"] == 1
     assert run["failed_items"] == 0
     aggregate = run["aggregate"]
@@ -643,10 +646,10 @@ async def test_recover_stale_runs_marks_task_and_run_failed(test_user, db_sessio
     assert task.error_message == "worker heartbeat timeout"
 
 
-async def test_retry_does_not_reuse_when_judge_fingerprint_changes(
+async def test_retry_copies_parent_snapshot_when_default_model_changes(
     client, auth_headers, test_user, db_session, monkeypatch
 ) -> None:
-    """Prompt/模型参数变了 → 不得复制父 Run 的 evaluated 结果。"""
+    """默认模型变了 → retry 仍复制父快照，不换口径。"""
     monkeypatch.setattr(enqueue, "enqueue_rag_evaluation", _fake_enqueue())
     state = {"fail_relevancy": True}
 
@@ -686,6 +689,7 @@ async def test_retry_does_not_reuse_when_judge_fingerprint_changes(
     await execute_run(db_session, uuid.UUID(parent_created["run_id"]))
     parent = await _get_run(client, auth_headers, parent_created["run_id"])
     assert parent["status"] == "partial_failed"
+    parent_model = parent["judge_config"]["metric_fingerprints"]["faithfulness"]["model"]
 
     state["fail_relevancy"] = False
     monkeypatch.setattr(settings, "DEFAULT_LLM_MODEL", "another-model")
@@ -693,14 +697,22 @@ async def test_retry_does_not_reuse_when_judge_fingerprint_changes(
     assert retry.status_code == 202, retry.text
     child_id = retry.json()["run_id"]
     child = await _get_run(client, auth_headers, child_id)
-    assert child["judge_config"]["metric_fingerprints"]["faithfulness"]["model"] == (
-        "another-model"
+    assert child["judge_config"]["metric_fingerprints"]["faithfulness"]["model"] == parent_model
+    assert (
+        child["config_snapshot"]["judge_config"]["metric_fingerprints"]["faithfulness"][
+            "prompt_sha256"
+        ]
+        == parent["config_snapshot"]["judge_config"]["metric_fingerprints"]["faithfulness"][
+            "prompt_sha256"
+        ]
     )
 
     await execute_run(db_session, uuid.UUID(child_id))
     rows = (await client.get(f"{BASE}/{child_id}/results", headers=auth_headers)).json()["items"]
-    assert all("reused_from_run_id" not in row["details"] for row in rows)
-    assert {row["status"] for row in rows} == {"evaluated"}
+    by_metric = {row["metric_name"]: row for row in rows}
+    assert "reused_from_run_id" in by_metric["faithfulness"]["details"]
+    assert "reused_from_run_id" in by_metric["answer_correctness"]["details"]
+    assert "reused_from_run_id" not in by_metric["answer_relevancy"]["details"]
 
 
 async def test_retry_does_not_reuse_trace_when_retrieval_config_changes(
@@ -776,3 +788,212 @@ async def test_recover_stale_skips_run_held_by_live_worker(test_user, db_session
     await db_session.refresh(run)
     assert run.status == "failed"
     assert run.error_message == "stale_worker"
+
+
+async def test_v3_dual_rows_and_aggregate(
+    client, auth_headers, test_user, db_session, monkeypatch
+) -> None:
+    """v3：coverage 先写，strict 派生；aggregate 含 invalid/insufficient。"""
+    monkeypatch.setattr(enqueue, "enqueue_rag_evaluation", _fake_enqueue())
+
+    def fake_build_judge_config(judge_metrics, *, prompt_version=None):  # noqa: ANN001
+        return {
+            "model": "fake-judge",
+            "temperature": 0.0,
+            "max_tokens": 100,
+            "prompt_version": "v1.2.0",
+            "schema_version": "rag_judge_schema_v3",
+            "rubric_version": "v1.2.0",
+            "metric_versions": {metric: "v3" for metric in judge_metrics},
+            "metric_fingerprints": {},
+        }
+
+    monkeypatch.setattr(
+        "app.services.rag_evaluation_service.build_judge_config",
+        fake_build_judge_config,
+    )
+
+    async def fake_judge_trace(
+        session,
+        *,
+        trace,
+        item=None,
+        metrics=None,
+        agent_factory=None,
+        prompt_version=None,
+        schema_version=None,
+    ):
+        del session, trace, item, agent_factory, prompt_version, schema_version
+        rows: list[JudgeOutcome] = []
+        for metric in metrics or []:
+            if metric != "faithfulness":
+                continue
+            rows.append(
+                JudgeOutcome(
+                    metric_name="faithfulness",
+                    metric_version="v3",
+                    status="evaluated",
+                    score=0.6,
+                    details={
+                        "claims": [{"claim": "x"}],
+                        "supported_count": 3,
+                        "unsupported_count": 0,
+                        "insufficient_evidence_count": 2,
+                        "non_factual_count": 0,
+                        "claim_count": 5,
+                        "scorable_claim_count": 5,
+                        "all_insufficient": False,
+                        "insufficient_ratio": 0.4,
+                    },
+                    judge_config={},
+                )
+            )
+            rows.append(
+                JudgeOutcome(
+                    metric_name="faithfulness_strict",
+                    metric_version="v3",
+                    status="evaluated",
+                    score=1.0,
+                    details={
+                        "supported_count": 3,
+                        "unsupported_count": 0,
+                        "insufficient_evidence_count": 2,
+                    },
+                    judge_config={},
+                )
+            )
+        return rows
+
+    monkeypatch.setattr("app.services.rag_evaluation_runner.judge_trace", fake_judge_trace)
+    _, version, _ = await _seed(
+        db_session, test_user, queries=["退款多久到账？"], evidence=[_evidence_doc()]
+    )
+    created = await _create_run(
+        client,
+        auth_headers,
+        version,
+        execution_mode="query",
+        judge_metrics=["faithfulness"],
+        judge_prompt_version="v1.2.0",
+    )
+    await execute_run(db_session, uuid.UUID(created["run_id"]))
+
+    run = await _get_run(client, auth_headers, created["run_id"])
+    assert run["evaluated_items"] == 1
+    assert run["invalid_items"] == 0
+    assert run["completed_items"] == 1
+    assert run["completed_items"] == run["evaluated_items"]
+    assert run["config_snapshot"]["derived_metrics"] == ["faithfulness_strict"]
+    assert run["config_snapshot"]["metric_versions"]["faithfulness_strict"] == "v3"
+    aggregate = run["aggregate"]
+    assert aggregate["metrics"]["faithfulness"]["insufficient_count"] == 2
+    assert aggregate["metrics"]["faithfulness"]["insufficient_ratio"] == pytest.approx(0.4)
+    assert aggregate["metrics"]["faithfulness_strict"]["mean"] == pytest.approx(1.0)
+
+    rows = (await client.get(f"{BASE}/{created['run_id']}/results", headers=auth_headers)).json()[
+        "items"
+    ]
+    assert len(rows) == 2
+    coverage = next(row for row in rows if row["metric_name"] == "faithfulness")
+    strict = next(row for row in rows if row["metric_name"] == "faithfulness_strict")
+    assert strict["derived_from_result_id"] == coverage["id"]
+    assert "claims" not in strict["details"]
+    assert strict["score"] == pytest.approx(1.0)
+
+
+async def test_create_with_missing_v120_prompt_rejected(
+    client, auth_headers, test_user, db_session
+) -> None:
+    """C3：显式 v1.2.0 但 Prompt 不存在 → 400/409，不创建 Run。"""
+    _, version, _ = await _seed(
+        db_session, test_user, queries=["退款多久到账？"], evidence=[_evidence_doc()]
+    )
+    payload = {
+        "dataset_version_id": str(version.id),
+        "execution_mode": "query",
+        "adapter": "mock",
+        "split": "test",
+        "judge_metrics": ["faithfulness"],
+        "judge_prompt_version": "v1.2.0",
+    }
+    response = await client.post(BASE, headers=auth_headers, json=payload)
+    assert response.status_code in (400, 409)
+
+
+async def test_v3_invalid_rows_persist_and_count(
+    client, auth_headers, test_user, db_session, monkeypatch
+) -> None:
+    """v3 invalid 必须写 invalid_reason；不进入 failed_items/均值。"""
+    monkeypatch.setattr(enqueue, "enqueue_rag_evaluation", _fake_enqueue())
+
+    def fake_build_judge_config(judge_metrics, *, prompt_version=None):  # noqa: ANN001
+        return {
+            "model": "fake-judge",
+            "temperature": 0.0,
+            "max_tokens": 100,
+            "prompt_version": "v1.2.0",
+            "schema_version": "rag_judge_schema_v3",
+            "rubric_version": "v1.2.0",
+            "metric_versions": {metric: "v3" for metric in judge_metrics},
+            "metric_fingerprints": {},
+        }
+
+    monkeypatch.setattr(
+        "app.services.rag_evaluation_service.build_judge_config",
+        fake_build_judge_config,
+    )
+
+    async def fake_judge_trace(
+        session,
+        *,
+        trace,
+        item=None,
+        metrics=None,
+        agent_factory=None,
+        prompt_version=None,
+        schema_version=None,
+    ):
+        del session, trace, item, agent_factory, prompt_version, schema_version
+        return [
+            JudgeOutcome(
+                metric_name="faithfulness",
+                metric_version="v3",
+                status="invalid",
+                invalid_reason="contract_violation",
+                details={"validation_errors": [{"code": "claim_subtype_invalid"}]},
+                judge_config={},
+            )
+        ]
+
+    monkeypatch.setattr("app.services.rag_evaluation_runner.judge_trace", fake_judge_trace)
+    _, version, _ = await _seed(
+        db_session, test_user, queries=["退款多久到账？"], evidence=[_evidence_doc()]
+    )
+    created = await _create_run(
+        client,
+        auth_headers,
+        version,
+        execution_mode="query",
+        judge_metrics=["faithfulness"],
+        judge_prompt_version="v1.2.0",
+    )
+    await execute_run(db_session, uuid.UUID(created["run_id"]))
+
+    run = await _get_run(client, auth_headers, created["run_id"])
+    assert run["invalid_items"] == 1
+    assert run["failed_items"] == 0
+    assert run["evaluated_items"] == 0
+    assert run["completed_items"] == 0
+    assert run["status"] == "partial_failed"
+
+    rows = (await client.get(f"{BASE}/{created['run_id']}/results", headers=auth_headers)).json()[
+        "items"
+    ]
+    assert len(rows) == 2
+    assert {row["metric_name"] for row in rows} == {
+        "faithfulness",
+        "faithfulness_strict",
+    }
+    for row in rows:
+        assert row["status"] == "invalid"
+        assert row["invalid_reason"] == "contract_violation"

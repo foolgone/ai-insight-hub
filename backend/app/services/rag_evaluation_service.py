@@ -13,7 +13,7 @@ from loguru import logger
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.agents.rag_judge_agent import RagJudgeAgent, resolve_prompt_version
+from app.agents.rag_judge_agent import RagJudgeAgent, RagJudgePromptError, resolve_prompt_version
 from app.core.advisory_lock import AdvisoryLock
 from app.core.config import settings
 from app.core.exceptions import (
@@ -33,7 +33,10 @@ from app.models import (
 from app.repositories import qa_dataset as qa_repo
 from app.repositories import rag_evaluation as repo
 from app.schemas.agents.rag_judge import (
+    FAITHFULNESS_STRICT_METRIC,
+    JUDGE_SCHEMA_V3,
     RAG_JUDGE_METRICS,
+    judge_schema_version,
     metric_version_for_prompt,
 )
 from app.schemas.rag_evaluation import RagEvaluationCreate
@@ -61,10 +64,31 @@ now_naive = _now_naive
 
 
 def metric_version_for(metric_name: str, prompt_version: str | None = None) -> str:
-    """指标版本：Judge v1.1.1 → v2；检索指标始终 v1。"""
-    if metric_name in RAG_JUDGE_METRICS:
+    """指标版本：Judge/派生指标按 Prompt；检索指标始终 v1。"""
+    if metric_name in RAG_JUDGE_METRICS or metric_name == FAITHFULNESS_STRICT_METRIC:
         return metric_version_for_prompt(metric_name, prompt_version)
     return RETRIEVAL_METRIC_VERSION
+
+
+def is_invalid_result(row: RagEvaluationResult) -> bool:
+    """A/B invalid 统一识别：status=invalid 或 failed+invalid_reason。"""
+    return row.status == "invalid" or (row.status == "failed" and bool(row.invalid_reason))
+
+
+def is_execution_failed(row: RagEvaluationResult) -> bool:
+    """只有 failed 且无 invalid_reason 才是执行失败。"""
+    return row.status == "failed" and not row.invalid_reason
+
+
+def item_bucket(rows: Sequence[RagEvaluationResult]) -> str:
+    """Item 状态：failed > invalid > evaluated > skipped（有 row 即非 unprocessed）。"""
+    if any(is_execution_failed(row) for row in rows):
+        return "failed"
+    if any(is_invalid_result(row) for row in rows):
+        return "invalid"
+    if any(row.status == "evaluated" for row in rows):
+        return "evaluated"
+    return "skipped"
 
 
 def judge_prompt_version_of(run: RagEvaluationRun) -> str:
@@ -97,17 +121,21 @@ def build_retrieval_config(
     return config
 
 
-def build_judge_config(judge_metrics: Sequence[str]) -> dict[str, Any]:
+def build_judge_config(
+    judge_metrics: Sequence[str], *, prompt_version: str | None = None
+) -> dict[str, Any]:
     """当前 Judge 指纹（模型/温度/max_tokens/Prompt SHA/Schema/指标版本）。
 
-    重试 Run 必须用**当前**指纹，不能照抄父 Run；否则 Prompt/模型变更后仍会复用旧结果。
+    仅用于新建 Run；retry 必须复制父 Run 快照，不得调用本函数。
     """
     if not judge_metrics:
         return {}
-    prompt_version = resolve_prompt_version()
+    resolved_prompt_version = resolve_prompt_version(prompt_version)
     fingerprints: dict[str, Any] = {}
     for metric in judge_metrics:
-        agent = RagJudgeAgent(metric)  # type: ignore[arg-type]
+        agent = RagJudgeAgent(
+            metric, prompt_version=resolved_prompt_version  # type: ignore[arg-type]
+        )
         fingerprints[metric] = {
             "agent": agent.config.name,
             "model": settings.DEFAULT_LLM_MODEL,
@@ -123,7 +151,7 @@ def build_judge_config(judge_metrics: Sequence[str]) -> dict[str, Any]:
     return {
         "model": settings.DEFAULT_LLM_MODEL,
         "temperature": settings.DEFAULT_TEMPERATURE,
-        "prompt_version": prompt_version,
+        "prompt_version": resolved_prompt_version,
         "schema_version": next((item["schema_version"] for item in fingerprints.values()), None),
         "rubric_version": next((item["rubric_version"] for item in fingerprints.values()), None),
         "metric_versions": {
@@ -137,6 +165,16 @@ def expected_metrics(run: RagEvaluationRun) -> list[str]:
     snapshot = run.config_snapshot or {}
     metrics = list(snapshot.get("metrics") or [])
     metrics.extend(snapshot.get("judge_metrics") or [])
+    derived = list(snapshot.get("derived_metrics") or [])
+    if (
+        not derived
+        and judge_schema_version(judge_prompt_version_of(run)) == JUDGE_SCHEMA_V3
+        and "faithfulness" in snapshot.get("judge_metrics", [])
+    ):
+        derived = [FAITHFULNESS_STRICT_METRIC]
+    for metric in derived:
+        if metric not in metrics:
+            metrics.append(metric)
     return metrics
 
 
@@ -212,8 +250,25 @@ async def create_run(
         precision_mode=payload.precision_mode,
         split=payload.split,
     )
-    judge_config = build_judge_config(judge_metrics)
+    try:
+        judge_config = build_judge_config(
+            judge_metrics, prompt_version=payload.judge_prompt_version
+        )
+    except RagJudgePromptError as exc:
+        raise RagEvaluationInvalidError(
+            "指定的 Judge Prompt 不可用",
+            details={
+                "judge_prompt_version": payload.judge_prompt_version,
+                "error": str(exc)[:500],
+            },
+        ) from exc
     judge_prompt_version = judge_config.get("prompt_version")
+    derived_metrics: list[str] = []
+    if (
+        judge_schema_version(judge_prompt_version) == JUDGE_SCHEMA_V3
+        and "faithfulness" in judge_metrics
+    ):
+        derived_metrics = [FAITHFULNESS_STRICT_METRIC]
 
     config_snapshot = {
         "dataset_id": str(dataset.id),
@@ -228,9 +283,10 @@ async def create_run(
         "limit": payload.limit,
         "metrics": metrics,
         "judge_metrics": judge_metrics,
+        "derived_metrics": derived_metrics,
         "metric_versions": {
             metric: metric_version_for(metric, judge_prompt_version)
-            for metric in [*metrics, *judge_metrics]
+            for metric in [*metrics, *judge_metrics, *derived_metrics]
         },
         "retrieval_config": retrieval_config,
         "judge_config": judge_config,
@@ -354,6 +410,78 @@ async def cancel_run(session: AsyncSession, *, user: User, run_id: uuid.UUID) ->
     return run
 
 
+def _assert_parent_snapshot_available(parent: RagEvaluationRun) -> str:
+    """校验父 Run 的 Prompt/Schema/指标版本仍可用；不可用则拒绝 retry。"""
+    prompt_version = judge_prompt_version_of(parent)
+    snapshot = parent.config_snapshot or {}
+    judge_metrics = list(snapshot.get("judge_metrics") or [])
+    try:
+        fingerprints = (parent.judge_config or {}).get("metric_fingerprints") or {}
+        for metric in judge_metrics:
+            agent = RagJudgeAgent(metric, prompt_version=prompt_version)
+            current_sha = agent.prompt_sha256
+            expected_sha = (fingerprints.get(metric) or {}).get("prompt_sha256")
+            if expected_sha and expected_sha != current_sha:
+                raise RagEvaluationConflictError(
+                    "父快照 Prompt 内容已变化，必须新建 Run",
+                    details={"metric": metric, "prompt_version": prompt_version},
+                )
+    except RagJudgePromptError as exc:
+        raise RagEvaluationConflictError(
+            "父快照不可用，必须新建 Run",
+            details={"prompt_version": prompt_version, "error": str(exc)[:500]},
+        ) from exc
+
+    expected_schema = judge_schema_version(prompt_version)
+    snapshot_schema = (parent.judge_config or {}).get("schema_version") or (
+        (snapshot.get("judge_config") or {}).get("schema_version")
+    )
+    if snapshot_schema and snapshot_schema != expected_schema:
+        raise RagEvaluationConflictError(
+            "父快照 Schema 不可用，必须新建 Run",
+            details={"snapshot_schema": snapshot_schema, "expected_schema": expected_schema},
+        )
+
+    expected_versions = snapshot.get("metric_versions") or {}
+    for metric in judge_metrics:
+        current = metric_version_for(metric, prompt_version)
+        recorded = expected_versions.get(metric)
+        if recorded and recorded != current:
+            raise RagEvaluationConflictError(
+                "父快照指标版本不可用，必须新建 Run",
+                details={
+                    "metric": metric,
+                    "snapshot_version": recorded,
+                    "current_version": current,
+                },
+            )
+    return prompt_version
+
+
+def retry_candidates(
+    *,
+    all_ids: set[uuid.UUID],
+    expected: Sequence[str],
+    expected_versions: dict[str, str],
+    state: dict[uuid.UUID, dict[str, RagEvaluationResult]],
+) -> list[uuid.UUID]:
+    """Item 级重试候选：任一 invalid 排除整个 Item。"""
+    candidates: list[uuid.UUID] = []
+    for item_id in all_ids:
+        rows = state.get(item_id, {})
+        if any(is_invalid_result(row) for row in rows.values()):
+            continue
+        needs_retry = any(
+            metric not in rows
+            or is_execution_failed(rows[metric])
+            or rows[metric].metric_version != expected_versions[metric]
+            for metric in expected
+        )
+        if needs_retry:
+            candidates.append(item_id)
+    return sorted(candidates, key=str)
+
+
 async def retry_run(
     session: AsyncSession, *, user: User, run_id: uuid.UUID
 ) -> tuple[RagEvaluationRun, Task]:
@@ -368,28 +496,23 @@ async def retry_run(
         )
 
     all_ids = {uuid.UUID(str(item)) for item in (parent.item_selection or {}).get("item_ids", [])}
-    judge_metrics = list((parent.config_snapshot or {}).get("judge_metrics") or [])
-    retry_judge = build_judge_config(judge_metrics)
-    retry_prompt_version = retry_judge.get("prompt_version")
-    # 选中集 = 有 failed 指标 / 缺指标 / 指标版本过期（无结果也属于缺指标）
+    retry_prompt_version = _assert_parent_snapshot_available(parent)
+    retry_judge = dict(parent.judge_config or {})
     expected = expected_metrics(parent)
+    expected_versions = {
+        metric: metric_version_for(metric, retry_prompt_version) for metric in expected
+    }
     parent_results = await repo.results_for_run(session, parent.id)
     state: dict[uuid.UUID, dict[str, RagEvaluationResult]] = defaultdict(dict)
     for row in parent_results:
         state[row.dataset_item_id][row.metric_name] = row
 
-    candidates: list[uuid.UUID] = []
-    for item_id in all_ids:
-        rows = state.get(item_id, {})
-        needs_retry = any(
-            metric not in rows
-            or rows[metric].status == "failed"
-            or rows[metric].metric_version != metric_version_for(metric, retry_prompt_version)
-            for metric in expected
-        )
-        if needs_retry:
-            candidates.append(item_id)
-    candidates.sort(key=str)
+    candidates = retry_candidates(
+        all_ids=all_ids,
+        expected=expected,
+        expected_versions=expected_versions,
+        state=state,
+    )
     if not candidates:
         raise RagEvaluationConflictError("没有失败的样本需要重试", details={"run_id": str(parent.id)})
 
@@ -406,21 +529,12 @@ async def retry_run(
     await session.flush()
 
     retry_retrieval = dict(parent.retrieval_config or {})
-    if parent.adapter == "weknora":
-        # 用当前环境重新指纹；KB/Agent 变了 → 与父 Trace 不一致 → 不复用（安全方向）
-        retry_retrieval.update(
-            {
-                "knowledge_base_id": settings.WEKNORA_KB_ID or None,
-                "agent_id": settings.WEKNORA_AGENT_ID or None,
-                "tenant_id": settings.WEKNORA_TENANT_ID or None,
-            }
-        )
     retry_snapshot = dict(parent.config_snapshot or {})
     retry_snapshot["retrieval_config"] = retry_retrieval
     retry_snapshot["judge_config"] = retry_judge
-    retry_snapshot["metric_versions"] = {
-        metric: metric_version_for(metric, retry_prompt_version) for metric in expected
-    }
+    retry_snapshot["metric_versions"] = expected_versions
+    if FAITHFULNESS_STRICT_METRIC in expected:
+        retry_snapshot["derived_metrics"] = [FAITHFULNESS_STRICT_METRIC]
 
     run = RagEvaluationRun(
         id=new_run_id,
@@ -504,7 +618,8 @@ def build_aggregate(
         rows = grouped.get(metric, [])
         evaluated = [row for row in rows if row.status == "evaluated" and row.score is not None]
         skipped = [row for row in rows if row.status == "skipped"]
-        failed = [row for row in rows if row.status == "failed"]
+        invalid = [row for row in rows if is_invalid_result(row)]
+        failed = [row for row in rows if is_execution_failed(row)]
         mean = (
             round(
                 sum(float(row.score) for row in evaluated if row.score is not None)
@@ -515,16 +630,50 @@ def build_aggregate(
             else None
         )
         skip_reasons = Counter(row.skipped_reason or "unknown" for row in skipped)
-        metrics_payload[metric] = {
+        payload: dict[str, Any] = {
             "metric_version": metric_version_for(metric, prompt_version),
             "mean": mean,
             "evaluated": len(evaluated),
             "skipped": len(skipped),
+            "invalid": len(invalid),
             "failed": len(failed),
             "coverage": round(len(evaluated) / total, 4) if total else 0.0,
             "skip_reasons": dict(skip_reasons),
         }
+        if metric == "faithfulness":
+            supported_count = sum(
+                int((row.details or {}).get("supported_count") or 0) for row in evaluated
+            )
+            unsupported_count = sum(
+                int((row.details or {}).get("unsupported_count") or 0) for row in evaluated
+            )
+            insufficient_count = sum(
+                int((row.details or {}).get("insufficient_evidence_count") or 0)
+                for row in evaluated
+            )
+            denom = supported_count + unsupported_count + insufficient_count
+            payload.update(
+                {
+                    "supported_count": supported_count,
+                    "unsupported_count": unsupported_count,
+                    "insufficient_count": insufficient_count,
+                    "insufficient_ratio": (round(insufficient_count / denom, 6) if denom else None),
+                    "all_insufficient_count": sum(
+                        1 for row in evaluated if (row.details or {}).get("all_insufficient")
+                    ),
+                }
+            )
+        metrics_payload[metric] = payload
 
+    evaluated_items = (
+        run.evaluated_items
+        if getattr(run, "evaluated_items", None) is not None
+        else run.completed_items
+    ) or 0
+    invalid_items = getattr(run, "invalid_items", 0) or 0
+    failed_items = getattr(run, "failed_items", 0) or 0
+    skipped_items = getattr(run, "skipped_items", 0) or 0
+    processed = evaluated_items + invalid_items + failed_items + skipped_items
     return {
         "dataset_id": str(run.dataset_id) if run.dataset_id else None,
         "dataset_name": run.dataset_name,
@@ -533,10 +682,15 @@ def build_aggregate(
         "adapter": run.adapter,
         "items": {
             "total": total,
-            "completed": run.completed_items,
-            "failed": run.failed_items,
-            "skipped": run.skipped_items,
+            "evaluated": evaluated_items,
+            "invalid": invalid_items,
+            "failed": failed_items,
+            "skipped": skipped_items,
             "unprocessed": unprocessed_items,
+            "processed": processed,
+            "completed": run.completed_items,
+            "completion_rate": round(processed / total, 6) if total else 0.0,
+            "success_rate": round(evaluated_items / total, 6) if total else 0.0,
         },
         "metrics": metrics_payload,
     }
@@ -551,29 +705,33 @@ async def finalize_run(
     for row in results:
         by_item[row.dataset_item_id].append(row)
 
+    evaluated_items = 0
+    invalid_items = 0
     failed_items = 0
     skipped_items = 0
-    completed_items = 0
     for rows in by_item.values():
-        statuses = [row.status for row in rows]
-        has_failed = any(status == "failed" for status in statuses)
-        all_present = len(rows) >= len(expected)
-        if has_failed:
+        bucket = item_bucket(rows)
+        if bucket == "failed":
             failed_items += 1
-        if all_present and not has_failed and all(status == "skipped" for status in statuses):
+        elif bucket == "invalid":
+            invalid_items += 1
+        elif bucket == "evaluated":
+            evaluated_items += 1
+        else:
             skipped_items += 1
-        if all_present and not has_failed:
-            completed_items += 1
 
     unprocessed = max(0, run.total_items - len(by_item))
-    run.completed_items = completed_items
-    run.skipped_items = skipped_items
+    run.evaluated_items = evaluated_items
+    run.invalid_items = invalid_items
     run.failed_items = failed_items
+    run.skipped_items = skipped_items
+    run.unprocessed_items = unprocessed
+    run.completed_items = evaluated_items
 
-    # Run 状态按**结果粒度**判定（重试也按指标粒度）：
-    # 只有所有预期结果都是 failed 才算 failed；存在任一非 failed 结果即 partial_failed。
+    # Run 状态：invalid 不是 execution failed；全部执行失败才算 failed。
     expected_total = len(expected) * run.total_items
-    failed_results = sum(1 for row in results if row.status == "failed")
+    execution_failed_results = sum(1 for row in results if is_execution_failed(row))
+    invalid_results = sum(1 for row in results if is_invalid_result(row))
 
     if run.status != RUN_CANCELLED:
         if stopped_reason == STOP_TIME_BUDGET and unprocessed > 0:
@@ -583,12 +741,12 @@ async def finalize_run(
             run.status = RUN_COMPLETED
         elif unprocessed > 0:
             run.status = RUN_PARTIAL_FAILED
-        elif failed_results == 0:
-            run.status = RUN_COMPLETED
-        elif expected_total and failed_results >= expected_total:
+        elif expected_total and execution_failed_results >= expected_total:
             run.status = RUN_FAILED
-        else:
+        elif execution_failed_results > 0 or invalid_results > 0:
             run.status = RUN_PARTIAL_FAILED
+        else:
+            run.status = RUN_COMPLETED
     if run.status != RUN_CANCELLED:
         run.completed_at = _now_naive()
     elif run.completed_at is None:
@@ -596,11 +754,15 @@ async def finalize_run(
     run.aggregate = build_aggregate(run, results, unprocessed_items=unprocessed)
     await session.flush()
     logger.info(
-        "rag evaluation finalized run={} status={} items={} failed={} unprocessed={}",
+        "rag evaluation finalized run={} status={} items={} evaluated={} invalid={} "
+        "failed={} skipped={} unprocessed={}",
         run.id,
         run.status,
         run.total_items,
+        evaluated_items,
+        invalid_items,
         failed_items,
+        skipped_items,
         unprocessed,
     )
     return run
@@ -661,7 +823,12 @@ async def summary(
                     "weighted_sum": 0.0,
                     "evaluated": 0,
                     "skipped": 0,
+                    "invalid": 0,
                     "failed": 0,
+                    "supported_count": 0,
+                    "unsupported_count": 0,
+                    "insufficient_count": 0,
+                    "all_insufficient_count": 0,
                     "skip_reasons": Counter(),
                 },
             )
@@ -669,7 +836,12 @@ async def summary(
                 slot["weighted_sum"] += float(payload["mean"]) * int(payload["evaluated"])
             slot["evaluated"] += int(payload.get("evaluated") or 0)
             slot["skipped"] += int(payload.get("skipped") or 0)
+            slot["invalid"] += int(payload.get("invalid") or 0)
             slot["failed"] += int(payload.get("failed") or 0)
+            slot["supported_count"] += int(payload.get("supported_count") or 0)
+            slot["unsupported_count"] += int(payload.get("unsupported_count") or 0)
+            slot["insufficient_count"] += int(payload.get("insufficient_count") or 0)
+            slot["all_insufficient_count"] += int(payload.get("all_insufficient_count") or 0)
             slot["skip_reasons"].update(payload.get("skip_reasons") or {})
 
     result: list[dict[str, Any]] = []
@@ -685,10 +857,30 @@ async def summary(
                     "mean": mean,
                     "evaluated": evaluated,
                     "skipped": slot["skipped"],
+                    "invalid": slot["invalid"],
                     "failed": slot["failed"],
                     "coverage": round(evaluated / group["total_items"], 4)
                     if group["total_items"]
                     else 0.0,
+                    "insufficient_count": slot["insufficient_count"],
+                    "insufficient_ratio": (
+                        round(
+                            slot["insufficient_count"]
+                            / (
+                                slot["supported_count"]
+                                + slot["unsupported_count"]
+                                + slot["insufficient_count"]
+                            ),
+                            6,
+                        )
+                        if (
+                            slot["supported_count"]
+                            + slot["unsupported_count"]
+                            + slot["insufficient_count"]
+                        )
+                        else None
+                    ),
+                    "all_insufficient_count": slot["all_insufficient_count"],
                     "skip_reasons": dict(slot["skip_reasons"]),
                 }
             )

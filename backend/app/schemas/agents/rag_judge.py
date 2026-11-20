@@ -22,6 +22,9 @@ RAG_JUDGE_METRICS: tuple[RagJudgeMetric, ...] = (
     "answer_relevancy",
 )
 
+FAITHFULNESS_STRICT_METRIC = "faithfulness_strict"
+RAG_JUDGE_DERIVED_METRICS: tuple[str, ...] = (FAITHFULNESS_STRICT_METRIC,)
+
 # 指标版本：与 Prompt 版本解耦（Prompt 可迭代，指标口径不变则版本不变）
 RAG_JUDGE_METRIC_VERSION: dict[str, str] = {
     "faithfulness": "v1",
@@ -46,6 +49,7 @@ RAG_JUDGE_METRIC_VERSION_V2: dict[str, str] = {
 
 RAG_JUDGE_METRIC_VERSION_V3: dict[str, str] = {
     "faithfulness": "v3",
+    "faithfulness_strict": "v3",
     "answer_correctness": "v3",
     "answer_relevancy": "v3",
 }
@@ -60,11 +64,12 @@ def judge_schema_version(prompt_version: str | None) -> str:
 
 def metric_version_for_prompt(metric_name: str, prompt_version: str | None = None) -> str:
     """Judge 指标版本：v1.2.0 → v3；v1.1.1 → v2；默认/其它 → v1。"""
-    if metric_name in RAG_JUDGE_METRICS:
+    judge_metric = metric_name in RAG_JUDGE_METRICS or metric_name in RAG_JUDGE_DERIVED_METRICS
+    if judge_metric:
         if prompt_version in JUDGE_V3_PROMPT_VERSIONS:
             return RAG_JUDGE_METRIC_VERSION_V3[metric_name]
         if prompt_version in JUDGE_V2_PROMPT_VERSIONS:
-            return RAG_JUDGE_METRIC_VERSION_V2[metric_name]
+            return RAG_JUDGE_METRIC_VERSION_V2.get(metric_name, "v2")
     return RAG_JUDGE_METRIC_VERSION.get(metric_name, "v1")
 
 
@@ -322,6 +327,7 @@ __all__ = [
     "ClaimSubtypeV3",
     "EvidenceRef",
     "FACTUAL_CLAIM_SUBTYPES_V3",
+    "FAITHFULNESS_STRICT_METRIC",
     "FactualClaimSubtypeV3",
     "FaithfulnessClaim",
     "FaithfulnessClaimV3",
@@ -336,6 +342,7 @@ __all__ = [
     "METRIC_OUTPUT_SCHEMAS_V3",
     "NON_FACTUAL_CLAIM_SUBTYPES_V3",
     "NonFactualClaimSubtypeV3",
+    "RAG_JUDGE_DERIVED_METRICS",
     "RAG_JUDGE_METRICS",
     "RAG_JUDGE_METRIC_VERSION",
     "RAG_JUDGE_METRIC_VERSION_V2",

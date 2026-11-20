@@ -1203,9 +1203,13 @@ alembic check   : No new upgrade operations detected
 - 验证：`tests/integration/test_migration_022.py` 6 tests；覆盖 A/B invalid、execution failed、invalid/evaluated 同 Item、failed/invalid 同 Item、partial skipped、无 row unprocessed、5 类守恒、无 result Run、backup 恢复、downgrade 拒绝 A/B/strict、derived CASCADE、v1/v2 版本不变；全量 `pytest -m "not prompt"` passed；mypy/lint-imports/black/flake8 通过；`alembic check` No new upgrade operations。
 - 边界：未实现 Service 双指标/invalid/聚合/retry；未跑 Judge；未在生产执行 migration；未创建/激活 v1.2.0；C2 状态 `implemented/verified`，未 accepted；C3 未启动。
 
-### M1-C C3 设计与变更范围（2026-11-20，只设计，rev2.1）
-- C3 报告：`docs/repair/25-m1c-c3-design-scope.md`；范围：Service 双指标、invalid A/B、Item 聚合、retry、aggregate/API 映射。
-- 设计要点：coverage/strict 同 claims 派生；coverage 先写、strict 带 `derived_from_result_id`；`expected_metrics`/snapshot 增加 `derived_metrics=[faithfulness_strict]` 与 strict metric_version；invalid A 新写、B 兼容读取；Item 优先级 `failed > invalid > evaluated > skipped`；`completed=evaluated`；retry 复制父快照，invalid 按 Item 级排除，strict-only 不调 Judge。
-- P0/P1 关闭：`AgentResult.error_type` + BaseAgent 写入；credential 两类异常在 `judge_trace` 边界转 failed+credential；create 显式 v1.2.0 前置校验拒绝；snapshot `derived_metrics`/strict version；aggregate `insufficient_count/ratio/all_insufficient_count`；retry Item 级 invalid 排除。
-- 待确认：显式换配置入口是否用 `RagEvaluationCreate.judge_prompt_version`；AgentInputError 归 `failed+input_error`；Run 遇 invalid 用 `partial_failed`。
-- 边界：未改 Service/Prompt/migration；未跑 Judge；未创建/激活 v1.2.0；C3 代码未开始。
+### M1-C C3 实现（2026-11-20，implemented/verified）
+- 设计：`docs/repair/25-m1c-c3-design-scope.md`（rev2.1）；范围：Service 双指标、invalid A/B、Item 聚合、retry、aggregate/API 映射。
+- 实现文件：`app/agents/base.py`、`app/schemas/agents/rag_judge.py`、`app/services/rag_judge_service.py`、`app/services/rag_evaluation_service.py`、`app/services/rag_evaluation_runner.py`、`app/repositories/rag_evaluation.py`、`app/schemas/rag_evaluation.py`、`app/api/v1/rag_evaluations.py`。
+- 双指标：coverage/strict 同 claims 派生；coverage 先写、strict 带 `derived_from_result_id`；strict 不存完整 claims/evidence/raw_output；strict 不调 Judge。
+- expected_metrics：snapshot 写 `derived_metrics=[faithfulness_strict]` 与 strict metric_version；旧 v3 快照运行时回退补 strict。
+- invalid：A 新写入 `status=invalid + invalid_reason`；B `failed+invalid_reason` 聚合归 invalid；`AgentResult.error_type` 区分 Output/Structured（invalid）与 Execution/Timeout/Input/unknown（failed）；credential 两类异常在 `judge_trace` 边界转 failed+credential。
+- 聚合：Item 优先级 `failed > invalid > evaluated > skipped`；unprocessed 只算无 row；`completed=evaluated`；aggregate/summary 增加 invalid 与 insufficient_count/ratio/all_insufficient_count。
+- retry：复制父 `judge_config/config_snapshot/retrieval_config`；默认漂移不拒绝；父快照不可用拒绝；invalid 按 Item 级排除；strict-only 从 child coverage 派生，不调 Judge。
+- 验证：新增 `tests/unit/test_rag_evaluation_v3_rules.py`（17 tests）、v3 双行/无效行集成测试；更新 retry snapshot/base agent 断言；全量 `pytest -m "not prompt"` passed；black/flake8/mypy/lint-imports 通过。
+- 边界：未改 Judge Prompt、未创建/激活 v1.2.0、未跑 Judge、未改 C2 migration、未上生产；C3 状态 `implemented/verified`，未 accepted；C4 未启动。
