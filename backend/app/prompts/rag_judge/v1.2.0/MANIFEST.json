@@ -1,11 +1,11 @@
 {
   "version": "v1.2.0",
-  "status": "design_draft",
+  "status": "frozen",
   "active": false,
-  "frozen": false,
+  "frozen": true,
   "runtime_active": false,
   "date": "2026-11-20",
-  "note": "M1-D-0：v1.2.0 Prompt 设计草案。对齐 r2 双指标、Schema v3 与 invalid 契约；默认仍 v1.0.0，未激活、未跑 Judge。faithfulness_strict 由 Service 派生，不是独立 Prompt。",
+  "note": "M1-D-0：v1.2.0 Prompt 已 metadata-only 冻结。对齐 r2 双指标、Schema v3 与 invalid 契约；active=false，默认仍 v1.0.0，未激活、未跑 Judge。faithfulness_strict 由 Service 派生，不是独立 Prompt。",
   "schema_version": "rag_judge_schema_v3",
   "rubric_version": "v1.2.0",
   "metric_version_mapping": {

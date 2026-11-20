@@ -1,6 +1,6 @@
 # Prompt v1.2.0 设计与冻结提案（M1-D-0）
 
-> 状态：`design_draft` / `freeze_pending_human`。**未激活、未跑 Judge、未上生产。**
+> 状态：设计已通过；2026-11-20 人工批准 **metadata-only freeze**（`status=frozen`、`active=false`，见 `27-m1d0-prompt-freeze-record.md`）。**未激活、未跑 Judge、未上生产。**
 > 日期：2026-11-20。
 > 范围：修订 v1.2.0 Prompt 设计；创建 `backend/app/prompts/rag_judge/v1.2.0/` 下的 3 个 Prompt、MANIFEST 与 version.txt；补 loader / Schema v3 / v1-v2 回归测试；输出 SHA 与冻结提案。
 > 明确不做：跑 Judge（单案例/10 条/40 条）、激活 v1.2.0、修改 v1.0.0/v1.1.x Prompt、修改 Schema v2 语义、修改 r2 / 目标 v1.0.2 / Human Gold / provisional、修改 C2 migration 022、启动 M2/M3、混入 C3 P2 小修、自行宣布 M1-C 或 M1-D accepted。
@@ -13,8 +13,8 @@
    - `faithfulness_strict` = **F_strict** = `S / (S + U)`，只作诊断。
 3. `faithfulness_strict` 由 Service 从同一次 Faithfulness 输出派生，**不写第二个 Prompt、不额外调用 LLM、不进入 `RAG_JUDGE_METRICS`、不写入 `judge_metrics`**。
 4. 旧单 F / 单 A 口径已删除；v1.2.0 不再用“排除 insufficient 后的单 F”或“单独 A 指标”描述 Faithfulness。
-5. v1.2.0 资产状态为 `design_draft`、`active=false`、`frozen=false`；默认 `RAG_JUDGE_PROMPT_VERSION` 仍为 `v1.0.0`。
-6. 本轮只创建 `design_draft` 资产；冻结需人工审核后另开 freeze record，不得自行改 `frozen` 或 `active=true`。
+5. v1.2.0 资产状态为 `frozen`、`active=false`、`runtime_active=false`；默认 `RAG_JUDGE_PROMPT_VERSION` 仍为 `v1.0.0`。
+6. 冻结已由人工批准且为 metadata-only；激活、默认版本切换与 Judge 均需另行批准，不得自行改 `active=true`。
 
 ## 2. 冻结输入
 
@@ -28,7 +28,7 @@
 | 静态重算 `m1b003-static-recalc.json` | `53787fbb2a434953354bd821b62581e6e56ba5db10751149c236f1e7656437bb` | 只读 |
 | C4 静态目标 `m1c-c4-static-targets.json` | `3ead3bdf8e354d3968d6dcc77561068d9c2a455ec42070e16dda20e58d2c5f44` | 只读 |
 | C4 40 条盘点 `m1c-c4-inventory.json` | `581b71589b801849e7f6c045aead88d67741d164a0689ca1bae5b51eecc9d326` | 只读 |
-| v1.2.0 Prompt 目录 | `backend/app/prompts/rag_judge/v1.2.0/` | 本轮新建 `design_draft` |
+| v1.2.0 Prompt 目录 | `backend/app/prompts/rag_judge/v1.2.0/` | `frozen`（metadata-only） |
 
 目标使用 v1.0.2；旧 `pilot-40-targets-v1.2.0.json`（`34357b34…`）只作历史，不覆盖、不混用。Q17/Q32 的 v1.2.0 值仍是预期标签，不是实测。
 
@@ -237,19 +237,21 @@ Prompt 明确要求：
 | `faithfulness.txt` | `b637775869163fdd7bd2545ca9b79197c10193d2937c9bef4e61add72e934d61` |
 | `answer_correctness.txt` | `a50520de0122216c9238d23c110967c3bbe259586ef24db100ee874a4ce35e95` |
 | `answer_relevancy.txt` | `a5386070407381098bcc14fc8c67a8853f94ebaa91d188e473ef92237dc58d88` |
-| `MANIFEST.json` | `5a98be00f8762a67d12b453f70dd17eea6228949a48914339740d8412e8e6a7b` |
+| `MANIFEST.json`（frozen） | `ee1c25be8767bf66069f92e769fd8dd1d986cb950d9e96d3f550af587c35f778` |
+| `MANIFEST.json`（冻结前 `design_draft`，`071c3b6`） | `5a98be00f8762a67d12b453f70dd17eea6228949a48914339740d8412e8e6a7b` |
 | `version.txt` | `v1.2.0` |
-| `m1d-prompt-v1.2.0-validation.json` | `907886bd0ad86a0f335f346966efed939a36be1ea852d608b9aa2623ffc7d493` |
-| `m1d_prompt_assets_validate.py` | `5155383b12fa44bbabc1536911b3cd797a9257d290b8cad4dd54e7a197dec5c9` |
+| `m1d-prompt-v1.2.0-validation.json`（frozen） | `21326f2cb3d275a7fe84291a87c2a04243e57dab23d0be2abd8fa27a42beb5f8` |
+| `m1d-prompt-v1.2.0-validation.json`（冻结前 `design_draft`） | `907886bd0ad86a0f335f346966efed939a36be1ea852d608b9aa2623ffc7d493` |
+| `m1d_prompt_assets_validate.py` | `bddb26e6935b4673d87d366c07abcc21b0403ce05cc7220a51c8eae1e69d4490` |
 
 ### 8.2 MANIFEST 必填字段
 
 | 字段 | 值 |
 |---|---|
 | `version` | `v1.2.0` |
-| `status` | `design_draft` |
+| `status` | `frozen` |
 | `active` | `false` |
-| `frozen` | `false` |
+| `frozen` | `true` |
 | `runtime_active` | `false` |
 | `schema_version` | `rag_judge_schema_v3` |
 | `rubric_version` | `v1.2.0` |
@@ -265,7 +267,7 @@ Prompt 明确要求：
 |---|---|---|---|---|---|
 | `v1.0.0` | v1 | v1 | 是 | `active_baseline` | 不改 |
 | `v1.1.1`–`v1.1.5` | v2 | v2 | 否 | 只读归档 | 不改；旧结果不混 SHA |
-| `v1.2.0` | v3 | v3 | 否 | `design_draft` | 显式选择才加载；`active=false` |
+| `v1.2.0` | v3 | v3 | 否 | `frozen`（未激活） | 显式选择才加载；`active=false` |
 
 - `RAG_JUDGE_PROMPT_VERSION` 默认仍 `v1.0.0`。
 - 目录存在不会自动切换默认版本；默认解析不读取 v1.2.0。
@@ -322,25 +324,25 @@ Prompt 明确要求：
 - 把 `faithfulness_strict` 写进 `judge_metrics`；
 - 默认版本被 v1.2.0 目录意外改变。
 
-## 10. 冻结提案
+## 10. 冻结提案与结果
 
 ### 10.1 本轮已完成
 
 - 修订本设计文档，删除旧单 F / 单 A 口径，明确双指标、Schema v3、invalid、strict 派生。
 - 创建 `v1.2.0/faithfulness.txt`、`answer_correctness.txt`、`answer_relevancy.txt`。
-- 创建 `MANIFEST.json`（`design_draft`、`active=false`、v3、rubric v1.2.0）与 `version.txt`。
+- 创建 `MANIFEST.json`（v3、rubric v1.2.0）与 `version.txt`；初始 `design_draft`，后按人工批准改为 `frozen`。
 - 记录 3 个 Prompt 与 MANIFEST 的 SHA256。
 - 增加 loader / Schema v3 / 默认版本隔离 / v1-v2 回归测试。
-- 运行静态校验脚本 `m1d_prompt_assets_validate.py`，22/22 通过，输出 `m1d-prompt-v1.2.0-validation.json`（SHA `907886bd…`）。
-- 输出本冻结提案与 activation requirements。
+- 静态校验 22/22 通过；冻结前 validation SHA `907886bd…`，冻结后 `21326f2c…`。
+- 输出冻结提案、freeze record 与 activation requirements。
 
 ### 10.2 状态
 
 | 项 | 状态 |
 |---|---|
-| v1.2.0 Prompt 资产 | `design_draft` |
+| v1.2.0 Prompt 资产 | `frozen` |
 | active | `false` |
-| frozen | `false` |
+| frozen | `true` |
 | 默认版本 | `v1.0.0` |
 | Judge 运行 | 未运行 |
 | 生产 | 未上线 |
@@ -354,15 +356,15 @@ Prompt 明确要求：
 3. evidence / invalid 规则是否过严或过松。
 4. few-shot 是否仍含案例特例（本轮已移除案例 ID，保留模式）。
 5. MANIFEST 的 `status` / `active` / `derived_metrics` 是否正确。
-6. 是否批准进入 `freeze_pending_human` → `frozen` 的下一步。
+6. metadata-only freeze 已批准；10 条 Judge 尚未批准。
 
 ### 10.4 Activation requirements
 
-冻结与激活分开，全部满足才可讨论激活：
+冻结与激活分开；冻结已完成，激活仍需全部满足：
 
-1. 人工审核通过本设计与 3 个 Prompt 正文。
-2. 人工审核通过 MANIFEST 字段与 SHA。
-3. 另开 freeze record，明确 `status=frozen`、审核人、日期与 SHA。
+1. 人工审核通过本设计与 3 个 Prompt 正文（已完成）。
+2. 人工审核通过 MANIFEST 字段与 SHA（已完成）。
+3. 另开 freeze record，明确 `status=frozen`、审核人、日期与 SHA（已完成，见 `27-…`）。
 4. 单独批准 10 条 Judge；10 条通过后才申请 40 条。
 5. 40 条 Judge 报告必须写 `prompt_version + schema_version + metric_version + prompt_sha256`。
 6. 激活默认版本必须是单独变更，不得在本轮或冻结时顺带修改 `RAG_JUDGE_PROMPT_VERSION`。
@@ -374,7 +376,7 @@ Prompt 明确要求：
 - 本轮**未激活 v1.2.0**：默认仍 `v1.0.0`，MANIFEST `active=false`。
 - 本轮**未修改** v1.0.0 / v1.1.x Prompt、Schema v2 语义、r2 冻结草案、目标 v1.0.2、Human Gold / provisional、migration 022。
 - 本轮**未启动** M2 / M3，**未混入** C3 P2 小修。
-- 本轮**未宣布** M1-C / M1-D accepted；状态只能是 `design_draft` / `freeze_pending_human`。
+- 本轮**未宣布** M1-C / M1-D accepted；状态为 `frozen` / `active=false`，仍未 accepted。
 - Q17/Q32 的 v1.2.0 值仍是预期标签，不是实测；Q14/Q33 仍按 context_unavailable 处理；40 条 baseline_missing 仍写 `baseline_delta: unavailable`。
 
 ## 12. 一句话总结

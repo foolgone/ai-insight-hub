@@ -1,6 +1,6 @@
 """M1-D-0 prompt asset validation (NOT a Judge run).
 
-Validates the v1.2.0 design_draft assets: manifest fields, prompt SHA256,
+Validates the frozen v1.2.0 assets: manifest fields, approved prompt SHA256,
 Schema v3 subtype coverage, no case-specific IDs, and v1/v2 prompt integrity.
 
 Run:
@@ -23,6 +23,11 @@ MD_FILE = Path(__file__).resolve().parent / "m1d-prompt-v1.2.0-validation.md"
 SHA_FILE = Path(__file__).resolve().parent / "m1d-prompt-v1.2.0-validation.sha256"
 
 PROMPT_FILES = ("faithfulness.txt", "answer_correctness.txt", "answer_relevancy.txt")
+APPROVED_PROMPT_SHA = {
+    "faithfulness.txt": "b637775869163fdd7bd2545ca9b79197c10193d2937c9bef4e61add72e934d61",
+    "answer_correctness.txt": "a50520de0122216c9238d23c110967c3bbe259586ef24db100ee874a4ce35e95",
+    "answer_relevancy.txt": "a5386070407381098bcc14fc8c67a8853f94ebaa91d188e473ef92237dc58d88",
+}
 FACTUAL_SUBTYPES = (
     "policy",
     "condition",
@@ -108,11 +113,11 @@ def main() -> None:
     checks: list[dict[str, Any]] = [
         {"check": "manifest_version", "ok": manifest.get("version") == VERSION},
         {
-            "check": "manifest_status_design_draft",
-            "ok": manifest.get("status") == "design_draft",
+            "check": "manifest_status_frozen",
+            "ok": manifest.get("status") == "frozen",
         },
         {"check": "manifest_active_false", "ok": manifest.get("active") is False},
-        {"check": "manifest_frozen_false", "ok": manifest.get("frozen") is False},
+        {"check": "manifest_frozen_true", "ok": manifest.get("frozen") is True},
         {
             "check": "manifest_schema_v3",
             "ok": manifest.get("schema_version") == "rag_judge_schema_v3",
@@ -140,7 +145,8 @@ def main() -> None:
         {
             "check": "prompt_sha256",
             "ok": all(
-                manifest["prompts"].get(name) == digest for name, digest in prompt_sha.items()
+                prompt_sha[name] == digest == manifest["prompts"].get(name)
+                for name, digest in APPROVED_PROMPT_SHA.items()
             ),
         },
         {
@@ -198,7 +204,7 @@ def main() -> None:
     lines = [
         "# M1-D-0 v1.2.0 Prompt 资产校验（非 Judge 运行）",
         "",
-        "> 状态：`design_draft` / `active=false`；未跑 Judge、未激活、未上生产。",
+        "> 状态：`frozen` / `active=false`；metadata-only 冻结，未激活、未跑 Judge、未上生产。",
         f"> Prompt 版本：`{VERSION}`",
         f"> Schema：`{manifest.get('schema_version')}`；rubric：`{manifest.get('rubric_version')}`",
         f"> MANIFEST SHA256：`{manifest_sha}`",
@@ -217,7 +223,7 @@ def main() -> None:
             "## 检查",
             "",
             f"- 检查项：{len(checks)}；通过：{len(checks) - len(failed)}；失败：{len(failed)}",
-            "- 默认版本：`v1.0.0`；v1.2.0 只能显式加载。",
+            "- 默认版本：`v1.0.0`；v1.2.0 已 metadata-only 冻结，但仍只能显式加载。",
             "- `faithfulness_strict` 只在 `derived_metrics`，不在 `judge_metrics`。",
             "- 未运行 Judge；未修改 v1.0.0/v1.1.x Prompt。",
         ]

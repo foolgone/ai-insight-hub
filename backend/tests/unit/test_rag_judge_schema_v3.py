@@ -296,7 +296,7 @@ def test_agent_v2_repair_example_unchanged() -> None:
 def test_v120_prompt_assets_exist_but_are_inactive() -> None:
     assert (PROMPT_DIR / "v1.2.0" / "faithfulness.txt").is_file()
     manifest = load_prompt_manifest("v1.2.0")
-    assert manifest["status"] == "design_draft"
+    assert manifest["status"] == "frozen"
     assert manifest["active"] is False
     assert manifest["schema_version"] == JUDGE_SCHEMA_V3
     assert load_judge_prompt("v1.2.0", "faithfulness")

@@ -1,4 +1,4 @@
-"""M1-D-0：v1.2.0 design_draft Prompt 资产、loader 与 Schema v3 校验。"""
+"""M1-D-0：v1.2.0 frozen Prompt 资产、loader 与 Schema v3 校验。"""
 from __future__ import annotations
 
 import hashlib
@@ -46,13 +46,13 @@ def _first_claims_payload(text: str) -> dict:
     raise AssertionError("prompt must contain a fenced claims JSON example")
 
 
-def test_manifest_is_design_draft_v3_and_inactive() -> None:
+def test_manifest_is_frozen_v3_and_inactive() -> None:
     manifest = load_prompt_manifest(VERSION)
 
     assert manifest["version"] == VERSION
-    assert manifest["status"] == "design_draft"
+    assert manifest["status"] == "frozen"
     assert manifest["active"] is False
-    assert manifest["frozen"] is False
+    assert manifest["frozen"] is True
     assert manifest["runtime_active"] is False
     assert manifest["schema_version"] == "rag_judge_schema_v3"
     assert manifest["rubric_version"] == VERSION
@@ -88,7 +88,7 @@ def test_v120_is_explicit_and_default_stays_v100(
     assert explicit_agent.schema_version == JUDGE_SCHEMA_V3
     assert explicit_agent.metric_version == "v3"
     assert explicit_agent.rubric_version == VERSION
-    assert explicit_agent.prompt_status == "design_draft"
+    assert explicit_agent.prompt_status == "frozen"
     assert explicit_agent.prompt_active is False
     assert explicit_agent.output_schema is FaithfulnessOutputV3
 
