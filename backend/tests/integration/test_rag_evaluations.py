@@ -97,7 +97,11 @@ async def _seed(
 
 
 def _evidence_doc() -> dict[str, Any]:
-    return {"document_id": MOCK_DOC, "chunk_id": MOCK_CHUNK, "evidence_text": "退款 1-3 天到账"}
+    return {
+        "document_id": MOCK_DOC,
+        "chunk_id": MOCK_CHUNK,
+        "evidence_text": "退款 1-3 天到账",
+    }
 
 
 def _fake_enqueue():
@@ -901,10 +905,10 @@ async def test_v3_dual_rows_and_aggregate(
     assert strict["score"] == pytest.approx(1.0)
 
 
-async def test_create_with_missing_v120_prompt_rejected(
+async def test_create_with_missing_prompt_version_rejected(
     client, auth_headers, test_user, db_session
 ) -> None:
-    """C3：显式 v1.2.0 但 Prompt 不存在 → 400/409，不创建 Run。"""
+    """显式未知 Prompt 版本 → 400/409，不创建 Run。"""
     _, version, _ = await _seed(
         db_session, test_user, queries=["退款多久到账？"], evidence=[_evidence_doc()]
     )
@@ -914,7 +918,7 @@ async def test_create_with_missing_v120_prompt_rejected(
         "adapter": "mock",
         "split": "test",
         "judge_metrics": ["faithfulness"],
-        "judge_prompt_version": "v1.2.0",
+        "judge_prompt_version": "v9.9.9",
     }
     response = await client.post(BASE, headers=auth_headers, json=payload)
     assert response.status_code in (400, 409)

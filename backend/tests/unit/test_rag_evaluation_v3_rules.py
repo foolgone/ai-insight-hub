@@ -345,7 +345,7 @@ def test_retry_parent_missing_prompt_rejected() -> None:
 
     parent = SimpleNamespace(
         config_snapshot={"judge_metrics": ["faithfulness"]},
-        judge_config={"prompt_version": "v1.2.0"},
+        judge_config={"prompt_version": "v9.9.9"},
     )
     with pytest.raises(RagEvaluationConflictError, match="父快照不可用"):
         _assert_parent_snapshot_available(parent)  # type: ignore[arg-type]

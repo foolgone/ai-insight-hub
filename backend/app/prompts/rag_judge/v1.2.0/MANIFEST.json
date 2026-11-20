@@ -1,0 +1,76 @@
+{
+  "version": "v1.2.0",
+  "status": "design_draft",
+  "active": false,
+  "frozen": false,
+  "runtime_active": false,
+  "date": "2026-11-20",
+  "note": "M1-D-0：v1.2.0 Prompt 设计草案。对齐 r2 双指标、Schema v3 与 invalid 契约；默认仍 v1.0.0，未激活、未跑 Judge。faithfulness_strict 由 Service 派生，不是独立 Prompt。",
+  "schema_version": "rag_judge_schema_v3",
+  "rubric_version": "v1.2.0",
+  "metric_version_mapping": {
+    "faithfulness": "v3",
+    "faithfulness_strict": "v3",
+    "answer_correctness": "v3",
+    "answer_relevancy": "v3",
+    "retrieval_metrics": "v1"
+  },
+  "judge_metrics": [
+    "faithfulness",
+    "answer_correctness",
+    "answer_relevancy"
+  ],
+  "derived_metrics": [
+    "faithfulness_strict"
+  ],
+  "faithfulness_strict": {
+    "source": "derived_from_faithfulness",
+    "prompt": null,
+    "role": "diagnostic",
+    "target": null
+  },
+  "prompts": {
+    "faithfulness.txt": "b637775869163fdd7bd2545ca9b79197c10193d2937c9bef4e61add72e934d61",
+    "answer_correctness.txt": "a50520de0122216c9238d23c110967c3bbe259586ef24db100ee874a4ce35e95",
+    "answer_relevancy.txt": "a5386070407381098bcc14fc8c67a8853f94ebaa91d188e473ef92237dc58d88"
+  },
+  "changes": {
+    "faithfulness": [
+      "改用 Schema v3：claim_type + 16 个 claim_subtype + support_status + evidence_refs",
+      "policy_scope / policy_relationship 保持 factual；无明确依据时 insufficient，不转 non_factual",
+      "doc_scope / doc_relationship 只表示文档覆盖/章节关系，不表示政策范围/政策关系",
+      "supported 无 evidence、quote 非逐字、context_id 不存在、引用 answer、conflict 单边 -> 整条 invalid(contract_violation)",
+      "禁止旧字段 supported / evidence；v3 只读 evidence_refs",
+      "不输出总分；F_coverage 与 faithfulness_strict 由 Service 派生"
+    ],
+    "answer_correctness": [
+      "继承 v1.1.5 的 C 评分规则",
+      "移除案例 ID 标签；保留模式级 few-shot",
+      "明确不根据 Faithfulness 的 claim 分类改变 C 分数"
+    ],
+    "answer_relevancy": [
+      "继承 v1.1.5 的 R 评分规则",
+      "移除案例 ID 标签；保留模式级 few-shot",
+      "明确不因额外事实/建议加分，只判断问题覆盖度"
+    ]
+  },
+  "activation_requirements": [
+    "人工审核 v1.2.0 Prompt 正文、Schema v3 输出示例与 few-shot 模式",
+    "人工审核 MANIFEST 的 schema_version / rubric_version / metric mapping",
+    "确认默认 RAG_JUDGE_PROMPT_VERSION 仍为 v1.0.0；本 MANIFEST 保持 active=false",
+    "另开 freeze record，由人工批准后才允许把 status 改为 frozen",
+    "冻结后仍需单独批准 10 条 Judge；通过后才申请 40 条 Judge",
+    "不得用本 MANIFEST 自行把 M1-C 或 M1-D 标为 accepted"
+  ],
+  "open_issues": [
+    "本版本仅为 design_draft，未跑任何 Judge，未产生 v1.2.0 实测结果",
+    "Q17/Q32 的 v1.2.0 预期标签不是实测；不得写成 observed",
+    "Q36 文档冲突的 canonical 口径仍需业务确认",
+    "Q14 的 C 金标与 key_facts 未在 v1.2.0 启用",
+    "faithfulness_strict 只作诊断，不设目标，不进入 judge_metrics",
+    "10/40 Judge 尚未批准；v1.2.0 未激活、未上生产"
+  ],
+  "default_prompt_version": "v1.0.0",
+  "implementation_status": "design_draft_default_off",
+  "design_record": "docs/repair/14-prompt-v1.2.0-design.md"
+}

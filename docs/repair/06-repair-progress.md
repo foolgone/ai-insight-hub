@@ -1224,3 +1224,13 @@ alembic check   : No new upgrade operations detected
 - 特殊列表：`baseline_missing=Q33/Q34/Q37/Q38/Q39/Q40`、`baseline_delta=unavailable`；Q14/Q33 context_unavailable；C1-only Q22/Q26/Q27/Q34/Q37/Q40；Q35/Q36 old run only。
 - 报告模板：`m1c-c4-report-template.md`；HG/provisional 分开、invalid/skipped/failed/unprocessed、insufficient、SHA、known issue。
 - 边界：未跑 10/40 Judge、未激活 v1.2.0、未改 Prompt、未启动 M2/M3；C4 状态 `implemented/verified`，未 accepted。
+
+### M1-D-0 v1.2.0 Prompt 设计与 design_draft 资产（2026-11-20，implemented/verified，未跑 Judge）
+- 设计：`docs/repair/14-prompt-v1.2.0-design.md`；删除旧单 F / 单 A 口径，明确 r2 双指标、Schema v3、invalid、strict 派生、默认版本隔离、冻结提案与 activation requirements。
+- 资产：`backend/app/prompts/rag_judge/v1.2.0/`；`faithfulness.txt`、`answer_correctness.txt`、`answer_relevancy.txt`、`MANIFEST.json`、`version.txt`。
+- MANIFEST：`schema_version=rag_judge_schema_v3`、`rubric_version=v1.2.0`、`status=design_draft`、`active=false`、`frozen=false`、`runtime_active=false`；`judge_metrics` 不含 `faithfulness_strict`，strict 只在 `derived_metrics`；默认 `v1.0.0`。
+- Prompt SHA：F `b6377758…`、C `a50520de…`、R `a5386070…`；MANIFEST `5a98be00…`。
+- Schema v3：9 个 factual + 7 个 non_factual 共 16 个 subtype；`support_status` 仅 factual；`evidence_refs` 为唯一证据字段；拒绝旧 `supported` / `evidence`；`supported` 无证据、quote 非逐字、context_id 不存在、conflict 单边 → `invalid(contract_violation)`。
+- 测试：新增 `tests/unit/test_rag_judge_v120_prompt_assets.py`；更新 `test_rag_judge_schema_v3.py` 的 v1.2.0 资产断言；将“v1.2.0 Prompt 缺失”集成测试改为未知版本 `v9.9.9`；定向 loader/Schema/v1-v2 回归通过。
+- 静态校验：`m1d_prompt_assets_validate.py` → `m1d-prompt-v1.2.0-validation.json`，SHA `907886bd…`，22/22 pass；校验 MANIFEST、Prompt SHA、16 subtype、无案例 ID、strict 不进 judge_metrics、v1/v1.1.5 Prompt 完整性。
+- 边界：未跑 Judge（单/10/40）、未激活 v1.2.0、未修改 v1.0.0/v1.1.x Prompt、未改 Schema v2、未改 r2/目标 v1.0.2/Human Gold/provisional、未改 migration 022、未启动 M2/M3、未混入 C3 P2；状态 `design_draft` / `implemented/verified`，未 accepted；10/40 Judge 仍未批准。

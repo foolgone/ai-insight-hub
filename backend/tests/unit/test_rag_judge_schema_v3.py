@@ -15,6 +15,7 @@ from app.agents.rag_judge_agent import (
     RagJudgeAgent,
     RagJudgePromptError,
     load_judge_prompt,
+    load_prompt_manifest,
 )
 from app.schemas.agents.rag_judge import (
     FACTUAL_CLAIM_SUBTYPES_V3,
@@ -292,7 +293,10 @@ def test_agent_v2_repair_example_unchanged() -> None:
     assert "supported" not in claim
 
 
-def test_v120_prompt_directory_not_created() -> None:
-    assert not (PROMPT_DIR / "v1.2.0").exists()
-    with pytest.raises(RagJudgePromptError, match="manifest missing"):
-        load_judge_prompt("v1.2.0", "faithfulness")
+def test_v120_prompt_assets_exist_but_are_inactive() -> None:
+    assert (PROMPT_DIR / "v1.2.0" / "faithfulness.txt").is_file()
+    manifest = load_prompt_manifest("v1.2.0")
+    assert manifest["status"] == "design_draft"
+    assert manifest["active"] is False
+    assert manifest["schema_version"] == JUDGE_SCHEMA_V3
+    assert load_judge_prompt("v1.2.0", "faithfulness")

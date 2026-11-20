@@ -8,9 +8,9 @@
 > 4. 未冻结的定义/目标，不得进入代码实现。
 >
 > 最后更新：2026-11-20
-> 当前阶段：**M1-C C4 静态目标回归/40 条盘点/报告模板已完成并本地验证，待审核；10/40 Judge 未运行**
-> 当前阻塞决策：**C4 静态结果是否通过；通过后才申请 10 条 Judge**
-> 当前不做：10/40 Judge、M2/M3、v1.2.0 创建/激活、生产 migration
+> 当前阶段：**M1-D-0 v1.2.0 Prompt 设计与 design_draft 资产已完成并本地验证，待人工审核；10/40 Judge 未运行**
+> 当前阻塞决策：**v1.2.0 design_draft 是否通过；冻结需另开 freeze record**
+> 当前不做：10/40 Judge、v1.2.0 激活/上生产、M2/M3、生产 migration
 
 ---
 
@@ -19,25 +19,25 @@
 | 项 | 状态 |
 |---|---|
 | 项目阶段 | 核心研发向产品化过渡 |
-| 主线 | M1 评测可信度；M1-C C4 静态结果待审核 |
+| 主线 | M1 评测可信度；M1-D-0 v1.2.0 Prompt design_draft 待审核 |
 | 并行 A | M2 只读工作台；API 审计完成，前端未开始 |
 | 并行 B | M4-A 生产约束；未开始 |
 | M3 优化闭环 | 未开始；等 M1 可信、M2 可用 |
-| 当前可写代码？ | **否**；C4 静态结果待审核；10/40 Judge 未批准 |
+| 当前可写代码？ | **否**；v1.2.0 design_draft 待审核；10/40 Judge 未批准 |
 | 当前可跑 Judge？ | **否** |
-| v1.2.0 | 未创建、未激活；`runtime_active=false` |
-| 最近一次决策 | 2026-11-20 C4 设计通过；C4 静态脚本 implemented/verified |
-| 下一个交付 | 人工审核 C4 静态结果 |
+| v1.2.0 | 已创建 `design_draft` Prompt 资产；`active=false`、未激活、未上生产 |
+| 最近一次决策 | 2026-11-20 M1-D-0 批准执行；v1.2.0 `design_draft` 已交付 |
+| 下一个交付 | 人工审核 v1.2.0 Prompt 设计与冻结提案 |
 
 ### 现在只需要一个决定
 
-**当前先审 C4 静态结果；通过后才申请 10 条 Judge。**
+**当前先审 v1.2.0 `design_draft`；不跑 Judge，冻结需另开 freeze record。**
 
 | 选项 | 含义 | 结果 |
 |---|---|---|
-| **通过 C4 静态结果** | 接受静态目标回归、40 条盘点、报告模板 | 单独申请 10 条 Judge |
-| **退回** | 静态数值/盘点/模板需修 | 留在 C4 静态，不跑 Judge |
-| **暂缓** | 不申请 Judge | 维持 C4 静态完成 |
+| **通过 design_draft** | 接受 3 个 Prompt、MANIFEST、SHA 与测试 | 进入 freeze 审核；10 条 Judge 仍需单独批准 |
+| **退回** | Prompt 语义/证据/invalid 契约需修 | 留在 `design_draft`，不跑 Judge |
+| **暂缓** | 不进入冻结 | 维持 `design_draft`，默认仍 v1.0.0 |
 
 ---
 
@@ -60,7 +60,7 @@
 | 里程碑 | 状态 | 已完成证据 | 当前阻塞/下一步 |
 |---|---|---|---|
 | **M0 评测基础设施** | `accepted`（冻结维护） | Dataset/Version/Item、RAG Adapter、Trace、检索指标、Judge、Run/Celery、持久化聚合、WeKnora 联调 | 只修缺陷/兼容，不再架构重构 |
-| **M1 评测可信度** | `in_progress` | M1-A 语义/Gold/target 已冻结；M1-B 已出 B 双指标草案（`18-…`）；P1-1 关闭；P1-2 证据契约已定 | **B 草案未冻结**；M1-C/D/E 未开始 |
+| **M1 评测可信度** | `in_progress` | M1-A 语义/Gold/target 已冻结；M1-B B 双指标草案（`19-…`）；M1-C C1–C4 已实现/验证；M1-D-0 v1.2.0 Prompt `design_draft` | **B 草案未冻结**；10/40 Judge 未批准；M1-E 未开始 |
 | **M2 评测工作台** | `audit_complete` / 实现 `not_started` | API 审计完成：Run/详情/结果/失败/Trace 可用；前端 0 页面 | 等 M1-B 冻结后再决定是否写 P0 前端 |
 | **M3 RAG 优化闭环** | `not_started` | 无 | 依赖 M1 可信 + M2 可用 |
 | **M4 生产交付** | 基础已有 / 约束 `not_started` | 认证、加密、限流、Prometheus/Grafana/Sentry、备份/恢复演练 | M4-A：租户、保留期、审计、告警、成本、数据权利 |
@@ -69,10 +69,10 @@
 
 | 工作包 | 状态 | 交付/证据 |
 |---|---|---|
-| M1-A 语义规范 + Gold + 目标 | `accepted` | 语义规范冻结 2026-11-18；final_labels SHA `f139623f…`；active target SHA `34357b34…`（revision v1.0.1） |
+| M1-A 语义规范 + Gold + 目标 | `accepted` | 语义规范冻结 2026-11-18；final_labels SHA `f139623f…`；target v1.0.2 SHA `3ee15dfc…`（`freeze_draft_pending_human`，旧 v1.0.1 只读） |
 | M1-B Schema/Service 定稿 | `implemented`，**未 `accepted`** | P1-1 关闭；P1-2 证据契约已定；B 双指标冻结草案 `19-…` 待审核 |
-| M1-C 实现与测试 | `not_started` | 依赖 M1-B-003 冻结 |
-| M1-D 有限实验 | `not_started` | 单案例 → 10 条 → 40 条；补 6 条 v1.0.0 baseline |
+| M1-C 实现与测试 | `implemented` / `verified`，**未 `accepted`** | C1 Schema v3、C2 migration 022、C3 Service 双指标/invalid/聚合/retry、C4 静态回归已完成；10/40 Judge 未运行 |
+| M1-D 有限实验 | `in_progress`（仅 M1-D-0） | M1-D-0 v1.2.0 Prompt `design_draft` 已交付；10/40 Judge 未批准 |
 | M1-E 质量验收 | `not_started` | 四组报告（HG/provisional/40 条/系统质量）+ 已知问题决定 + SHA 追溯 |
 
 ### 2.2 门禁视角
@@ -80,7 +80,7 @@
 | 门禁 | 状态 | 说明 |
 |---|---|---|
 | G1 数据 | 部分 | 数据集/版本/校验和已有；保留期/隔离未定 |
-| G2 评测 | 未过 | B 指标定义未冻结；v1.2.0 未实现 |
+| G2 评测 | 未过 | B 指标定义待冻结；v1.2.0 仅 `design_draft`，未激活、未跑 Judge |
 | G3 稳定性 | 基础 | Run/重试/取消/恢复已有；未做 v1.2.0 压测 |
 | G4 产品 | 断点 | M2 前端为 0 |
 | G5 安全 | 部分 | 认证/RBAC/加密有；租户隔离无 |
@@ -107,6 +107,8 @@
 | `docs/repair/19-m1b-003-freeze-draft.validation.json` | 33/33 | `static_validation` | r1 4 项 + 术语统一 + r2 2 项 |
 | `docs/repair/20-m1b-003-revision-record.md` | M1-B-003-r1 | 历史记录 | r1 4 项逐项关闭证明 |
 | `docs/repair/21-m1b-003-r2-revision-record.md` | M1-B-003-r2 | `revision_record` | r2 2 项收尾证明、剩余未决 |
+| `backend/app/prompts/rag_judge/v1.2.0/` | F `b6377758…` / C `a50520de…` / R `a5386070…`；MANIFEST `5a98be00…` | `design_draft` / `active=false` | v1.2.0 Prompt、MANIFEST、version.txt；默认仍 v1.0.0 |
+| `docs/repair/phase3e/m1d-prompt-v1.2.0-validation.json` | `907886bd…` | `static_validation` 22/22 | v1.2.0 资产 SHA/字段/默认隔离/旧 Prompt 完整性 |
 
 ### 3.2 决策时间线
 
@@ -123,6 +125,7 @@
 | 2026-11-19 | `approve_with_changes`；r1 修订 4 项 + 术语统一 | `freeze_draft_pending_human` |
 | 2026-11-19 | r2 契约收尾：Item 计数 + invalid 持久化 | `freeze_draft_pending_human` |
 | 2026-11-19 | M2 API 审计完成 | `audit_complete` |
+| 2026-11-20 | M1-D-0 批准执行；v1.2.0 Prompt `design_draft` 交付 | `design_draft` / 待审核 |
 
 ---
 
@@ -202,18 +205,18 @@
 | Item 计数语义 | 冻结草案 §4.4.3、§4.4.4 | `completed_items=evaluated_items`；四类 + unprocessed 守恒；3 items/6 rows/3 cases |
 | invalid 持久化 | 冻结草案 §4.7 | 独立 invalid / `failed+invalid_reason` 共同语义；不进均值；不算执行失败 |
 
-**下一步（等待人工最终审核）**：
+**当前下一步（M1-D-0）**：
 
 | 顺序 | 任务 | 产物 | 完成标志 |
 |---|---|---|---|
-| 1 | 审核 r2 + 目标 revision v1.0.2 | 审核意见 | 用户明确“接受/改条款/退回” |
-| 2 | 若接受，记录 M1-B `accepted` | 更新本 README + 决策记录 | 人工签字，不由 Agent 自动标 |
-| 3 | 单独批准启动 M1-C | M1-C 启动记录 | 用户明确批准 |
-| 4 | 若启动 M1-C，按 §5.2 执行 | 实现/测试 | 见 M1-C 验收 |
+| 1 | 人工审核 v1.2.0 `design_draft` Prompt 与冻结提案 | 审核意见 | 用户明确“通过/退回/暂缓” |
+| 2 | 若通过，另开 freeze record | 冻结记录 | 人工签字；不由 Agent 自动标 `frozen` |
+| 3 | 单独批准 10 条 Judge | Judge 运行记录 | 用户明确批准；40 条更后 |
+| 4 | 10 条通过后申请 40 条 | 分层报告 | 仍需单独批准 |
 
-**在 1–3 完成前，不启动 M1-C。**
+**M1-B r2 仍待人工最终审核；M1-C 已于 2026-11-19 单独批准启动，C1–C4 已实现/验证但未 `accepted`。10/40 Judge 均未批准。**
 
-### 5.2 M1-C（冻结后）
+### 5.2 M1-C（已实现/验证，未 accepted）
 
 > C3 阶段验收通过。C4 静态目标回归/40 条盘点/报告模板已完成并本地验证，**待审核**；10/40 Judge 未运行。
 >
@@ -235,12 +238,21 @@
 
 ### 5.3 M1-D / M1-E（实现后）
 
-1. 补 6 条 v1.0.0 baseline（Q33/Q34/Q37–Q40）；
-2. 单案例 Q17/Q21/Q30/Q32/Q36（观察，不写 PASS）；
-3. 10 条闸门；
-4. 40 条分层报告（HG 13 / provisional 27 分开）；
-5. 四组报告 + 已知问题接受/修复/延期 + SHA 追溯；
-6. M1-E 验收。
+**M1-D-0（2026-11-20，已完成 `design_draft`）**：
+
+1. 修订 v1.2.0 Prompt 设计；
+2. 创建 3 个 Prompt + MANIFEST + version.txt；
+3. 补 loader / Schema v3 / 默认隔离 / v1-v2 回归测试；
+4. 输出 SHA、validation 与冻结提案；
+5. **不跑 Judge、不激活 v1.2.0**；等人工审核。
+
+**后续（未批准）**：
+
+1. 10 条闸门 Judge（需单独批准）；
+2. 40 条分层报告（HG 13 / provisional 27 分开）；
+3. 6 条缺失 baseline 按方案 A 标 `baseline_delta: unavailable`，不跑 Judge 补齐；
+4. 四组报告 + 已知问题接受/修复/延期 + SHA 追溯；
+5. M1-E 验收。
 
 ### 5.4 并行线
 
