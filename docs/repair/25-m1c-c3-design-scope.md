@@ -1,7 +1,7 @@
 # M1-C C3：Service 双指标 / invalid / 聚合 / retry 设计与变更范围
 
 > 状态：C3 设计/范围报告，待人工审核；**不写代码、不改 Service、不跑 Judge、不创建/激活 v1.2.0**。
-> 版本：C3 设计 rev2（2026-11-20，补 AgentResult.error_type、v1.2.0 create 拒绝、snapshot strict、aggregate insufficient、Item 级 retry）。
+> 版本：C3 设计 rev2.1（2026-11-20，补 credential 异常边界与 failure_kind 枚举）。
 > 依据：`19-m1b-003-freeze-draft.md`（r2）、`22-m1c-stage0-gap-list.md`（rev2.1）、`23-m1c-stage1-test-list.md`（rev2.1）、`12-judge-semantic-spec.md`、`15-phase3e-v1.2.0-schema-service-design.md` §2.1。
 > 范围：**仅 C3**（Service 双指标、invalid、Item 聚合、retry、聚合/API 映射）。C2 migration 022 已完成；C4 目标回归不在本轮。
 
@@ -22,6 +22,7 @@
 | P1-2 | `config_snapshot` 未记录 strict | 写入 `derived_metrics=[faithfulness_strict]` 与 `metric_versions[faithfulness_strict]=v3` |
 | P1-3 | 聚合缺 insufficient 口径 | `build_aggregate`/`MetricAggregate` 增加 `insufficient_count`、`insufficient_ratio`、`all_insufficient_count` |
 | P1-4 | retry 只按 metric 选，可能重跑 invalid F | 改为 **Item 级**：任一 invalid（A/B）→ 整个 Item 不 retry；strict-only → retry 但 Judge 调用 0 |
+| P1-5 | credential 异常不经过 AgentResult | `judge_trace` 边界单独 catch `LLMCredentialNotConfiguredError` / `LLMCredentialInvalidError`，生成 failed outcome，不冒泡 500 |
 
 ## 1. 当前代码基线
 
@@ -118,20 +119,64 @@ status == "failed" and invalid_reason is not None  # 聚合层归 invalid
 - `BaseAgent.run` 失败返回时写入 `error_type=type(exc).__name__`，成功为 `None`；
 - `JudgeOutcome.status` 增加 `"invalid"`；
 - `JudgeOutcome` 增加 `invalid_reason: str | None` 与 `error_type: str | None`；
-- `judge_trace` 只按 `error_type` 分类，不解析 `errors` 字符串：
+- `judge_trace` 只按 `error_type` 分类，不解析 `errors` 字符串；下表同时列出 `AgentResult.error_type` 与 `judge_trace` 边界捕获的 credential 异常类型（后两行不经过 AgentResult）：
 
-| `error_type` | 映射 | 持久化 |
-|---|---|---|
-| `AgentOutputError` | `invalid` | `status=invalid`, `invalid_reason=contract_violation` |
-| `StructuredOutputError` | `invalid` | 同上 |
-| `AgentInputError` | `failed` + `failure_kind=input_error` | 不写 invalid_reason；details 记录 `failure_kind`/`agent_error_type` |
-| `AgentTimeoutError` | `failed` | `failure_kind=execution` |
-| `AgentExecutionError` / `AgentDegradedError` | `failed` | `failure_kind=execution` |
-| `LLMCredentialInvalidError` | `failed` | `failure_kind=credential` |
-| 其它/未知 | `failed` | `failure_kind=unknown`；不静默归 invalid |
+| `error_type` | status | `failure_kind` | `invalid_reason` |
+|---|---|---|---|
+| `AgentOutputError` | `invalid` | `contract` | `contract_violation` |
+| `StructuredOutputError` | `invalid` | `contract` | `contract_violation` |
+| `AgentInputError` | `failed` | `input_error` | `None` |
+| `AgentTimeoutError` | `failed` | `timeout` | `None` |
+| `AgentExecutionError` / `AgentDegradedError` | `failed` | `execution` | `None` |
+| `LLMCredentialNotConfiguredError` | `failed` | `credential` | `None` |
+| `LLMCredentialInvalidError` | `failed` | `credential` | `None` |
+| 其它/未知 | `failed` | `unknown` | `None` |
+
+**`failure_kind` 固定枚举**：`contract` / `execution` / `timeout` / `input_error` / `credential` / `unknown`。
+
+**`AgentInputError` 说明**：输入错误不是输出契约违约，因此归 `failed + input_error`，不归 `invalid`；必须在 details 明确记录，不能静默当普通 execution failed。
+
+#### credential 异常边界
+
+`LLMCredentialNotConfiguredError` 与 `LLMCredentialInvalidError` **不会**经过 `AgentResult`：
+
+- `LLMCredentialNotConfiguredError` 在 `BaseAgent.run` 的 try 之前抛出；
+- `LLMCredentialInvalidError` 在 BYOK 异常分支 mark_invalid 后直接 re-raise。
+
+因此 C3 必须在 `judge_trace` 调用 Agent 的边界单独 catch：
+
+```python
+judge_config = _judge_config(agent, model=None)  # agent 已构造；不依赖 LLM 调用
+try:
+    result = await agent.judge(...)
+except (LLMCredentialNotConfiguredError, LLMCredentialInvalidError) as exc:
+    outcomes.append(
+        JudgeOutcome(
+            metric_name=metric,
+            metric_version=agent.metric_version,
+            status="failed",
+            error_type=type(exc).__name__,
+            details={
+                "failure_kind": "credential",
+                "agent_error_type": type(exc).__name__,
+            },
+            judge_config=judge_config,
+            error_message=str(exc)[:2000],
+        )
+    )
+    continue
+```
+
+规则：
+
+- 两种 credential 异常都归 `failed(execution)`，**不是 invalid**；
+- 不抛 500/不让任务直接崩；生成 failed outcome，后续 Item/Run 按 failed 计数；
+- `failure_kind=credential`、`agent_error_type` 写 result details；
+- 不新增 DB 列；
+- 测试必须覆盖“未配置 Key”和“Key 失效”两条路径。
 
 - `_invalid_row` 写 `status=invalid` + reason；
-- `_failed_row` 只写 execution/input/credential failed，不带 invalid_reason；
+- `_failed_row` 只写 execution/timeout/input/credential/unknown failed，不带 invalid_reason；
 - `RagEvaluationResult.details` 记录 `failure_kind` 与 `agent_error_type`，不新增 DB 列；
 - 聚合/API 识别 A+B，均归 `invalid_items`，不归 `failed_items`。
 
@@ -372,7 +417,9 @@ unprocessed = 没有任何 row
 | C3-13 | retry failed+invalid 同 Item | 不选中，不重跑 invalid F |
 | C3-14 | 显式换配置 | 走新建 Run；retry 不换口径 |
 | C3-15 | create 显式 v1.2.0 | MANIFEST 缺失 → 400/409，不创建 Run/Task |
-| C3-16 | AgentResult.error_type | Output/Structured → invalid；Timeout/Execution/Degraded → failed；Input → explicit input_error；未知 → failed+unknown |
+| C3-16 | AgentResult.error_type | Output/Structured → invalid+contract；Timeout → failed+timeout；Execution/Degraded → failed+execution；Input → failed+input_error；未知 → failed+unknown |
+| C3-16a | credential 未配置 | `LLMCredentialNotConfiguredError` 在 judge_trace 边界转 failed outcome；不抛 500；details.failure_kind=credential |
+| C3-16b | credential 失效 | `LLMCredentialInvalidError` 同上；不归 invalid；`agent_error_type` 可查 |
 | C3-17 | strict 不当 LLM metric | runner 的 judge_metrics 不含 strict；Judge 调用次数不增加 |
 | C3-18 | Run 全 invalid | `partial_failed`；全 execution failed 才 `failed` |
 | C3-19 | v1/v2 回归 | 原有 v2 scoring/聚合测试原样通过 |
@@ -392,6 +439,7 @@ unprocessed = 没有任何 row
 | 风险 | 缓解 |
 |---|---|
 | 失败类型仍靠字符串解析 | `AgentResult.error_type` 结构化；Service 只按类型映射 |
+| credential 异常绕过 AgentResult | `judge_trace` 边界 catch 两类 credential 异常，转 failed outcome |
 | `StructuredOutputError` 不是 AgentError 子类 | `error_type=StructuredOutputError` 白名单单独映射 invalid |
 | create 显式 v1.2.0 触发 500 | create 前置 MANIFEST/Prompt 校验；失败转 400/409，不建 Run |
 | snapshot 漏 strict 版本 | 创建时写 `derived_metrics` + `metric_versions[strict]`；测试断言 |
@@ -410,7 +458,7 @@ C3 完成时必须提交：
 
 1. 文件清单与 diff stat；
 2. L01–L12 + F/T + C3 补充测试结果；
-3. `AgentResult.error_type` 映射测试（Output/Structured → invalid；Execution/Timeout/Degraded → failed；Input → failed+input_error）；
+3. `AgentResult.error_type` 映射测试（Output/Structured → invalid；Execution/Timeout/Degraded → failed；Input → failed+input_error）；credential 未配置/失效边界测试（failed+credential，不 500）；
 4. v2 scoring / schema loader / 聚合测试原样通过；
 4. `pytest -m "not prompt"`、`black`、`flake8`、`mypy app`、`lint-imports`、CI 全绿；
 5. 明确声明：未改 Judge Prompt、未跑 Judge、未激活 v1.2.0、未改 C2 migration；
@@ -421,11 +469,12 @@ C3 完成时必须提交：
 | # | 选择 | 建议 |
 |---|---|---|
 | 1 | `AgentResult` 失败类型 | 新增 `error_type`，写入 `type(exc).__name__`；不解析 errors 字符串 |
-| 2 | `AgentInputError` 归类 | `failed` + `failure_kind=input_error`，details 记录；不归 invalid |
+| 2 | `AgentInputError` 归类 | `failed` + `failure_kind=input_error`，details 记录；不归 invalid（输入错误不是输出契约违约） |
 | 3 | `StructuredOutputError` 归类 | 单独按 `error_type` 映射 invalid；不依赖 AgentError 继承 |
-| 4 | 显式换配置入口 | `RagEvaluationCreate.judge_prompt_version`；create 前置校验 MANIFEST，缺失 400/409 |
-| 5 | strict 记录 | `config_snapshot.derived_metrics` + `metric_versions[faithfulness_strict]` |
-| 6 | insufficient 聚合 | `MetricAggregate` 增加 count/ratio/all_insufficient_count |
-| 7 | invalid 是否重试 | Item 级排除：任一 invalid → 整个 Item 不 retry |
-| 8 | Run 状态遇到 invalid | `partial_failed`；全 execution failed 才 `failed` |
-| 9 | P2 小修（CHECK 行为测试、downgrade 文案） | C3 不改；另开测试/文案小修 |
+| 4 | credential 异常 | `judge_trace` 边界 catch 两类 credential 异常 → failed + `failure_kind=credential`；不 500、不归 invalid |
+| 5 | 显式换配置入口 | `RagEvaluationCreate.judge_prompt_version`；create 前置校验 MANIFEST，缺失 400/409 |
+| 6 | strict 记录 | `config_snapshot.derived_metrics` + `metric_versions[faithfulness_strict]` |
+| 7 | insufficient 聚合 | `MetricAggregate` 增加 count/ratio/all_insufficient_count |
+| 8 | invalid 是否重试 | Item 级排除：任一 invalid → 整个 Item 不 retry |
+| 9 | Run 状态遇到 invalid | `partial_failed`；全 execution failed 才 `failed` |
+| 10 | P2 小修（CHECK 行为测试、downgrade 文案） | C3 不改；另开测试/文案小修 |
