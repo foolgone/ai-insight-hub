@@ -1215,3 +1215,11 @@ alembic check   : No new upgrade operations detected
 - Summary 去重：`list_runs_for_summary` 只取 `parent_run_id IS NULL` 的 root Run；retry 子 Run 只在详情展示，不重复计入 run_count/total_items/metrics。
 - C3 已知 P2（未阻塞，C4 前记录）：`expected_metrics` 对 `judge_metrics=null` 的防御、strict 缺失的 missing_expected_metrics 诊断、summary 分组 key 加 prompt/schema。本轮未改。
 - 边界：未改 Judge Prompt、未创建/激活 v1.2.0、未跑 Judge、未改 C2 migration、未上生产；C3 状态 `implemented/verified`，未 accepted；C4 未启动。
+- 复审（2026-11-20）：summary 父子 Run 重复计数修复；C3 **阶段验收通过**；C4 批准设计/范围。
+
+### M1-C C4 设计与范围（2026-11-20，只设计，未跑 Judge）
+- C4 报告：`docs/repair/26-m1c-c4-design-scope.md`；范围：静态目标回归 Q11/Q17/Q21/Q23/Q32、10 条闸门准备、40 条完整性盘点、报告模板。
+- 关键口径：Q17/Q32 只写 v1.2.0 预期标签；HG 13 / provisional 27 分开；invalid/skipped/failed/unprocessed、insufficient_count/ratio、prompt/schema/metric SHA 单列。
+- 40 条盘点：6 条 missing baseline（Q33/Q34/Q37/Q38/Q39/Q40）标记 baseline_missing；Q14/Q33 context_unavailable 单列；C1-only 6 条（Q22/Q26/Q27/Q34/Q37/Q40）单列；Q35/Q36 仅用 old run 参考。
+- 待确认：missing baseline 方案 A/B、Q35/Q36 是否后续单独批准、summary 保持 root-only、P2 三项单独小修。
+- 边界：未写 C4 脚本、未跑 10/40 Judge、未改 Prompt、未激活 v1.2.0、未启动 M2/M3。
