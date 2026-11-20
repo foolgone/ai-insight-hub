@@ -1197,8 +1197,8 @@ alembic check   : No new upgrade operations detected
 - 边界：未创建 v1.2.0 Prompt，未写 migration 022，未改 model/repo/API，未跑 Judge；C1 状态 `implemented/verified`，未 accepted；C2 未启动。
 
 ### M1-C C2 migration 022 + model/repo 字段（2026-11-19，已实现/本地验证）
-- 迁移：`backend/migrations/versions/20261119_1800_f3a9c2d7e1b4_022_m1c_dual_faithfulness.py`；result 增加 `invalid` status、`invalid_reason`、`derived_from_result_id`；run 增加 `evaluated_items`/`invalid_items`/`unprocessed_items`；回填按 `failed > invalid > evaluated > skipped`，partial item 归 skipped，`unprocessed = total - distinct_items`；`completed_items = evaluated_items`，旧值进 `rag_evaluation_runs_022_completed_backup`，downgrade 恢复。
+- 迁移：`backend/migrations/versions/20261119_1800_f3a9c2d7e1b4_022_m1c_dual_faithfulness.py`；result 增加 `invalid` status、`invalid_reason`、`derived_from_result_id`；run 增加 `evaluated_items`/`invalid_items`/`unprocessed_items`；回填按 `failed > invalid > evaluated > skipped`，A/B invalid 都归 invalid，只有 execution failed 才归 failed；partial item 归 skipped，`unprocessed = total - distinct_items`；`completed_items = evaluated_items`，旧值进 `rag_evaluation_runs_022_completed_backup`，downgrade 恢复。
 - 模型：`app/models/rag_evaluation.py` 新字段与 CHECK；`app/repositories/rag_evaluation.py` 批量写入新字段；`app/schemas/rag_evaluation.py` + `app/api/v1/rag_evaluations.py` 透出 response 字段。
 - 迁移支持：`migrations/env.py` 忽略内部备份表，`alembic check` 无漂移。
-- 验证：新增 `tests/integration/test_migration_022.py`；`alembic upgrade/downgrade` 往返、回填、backup 恢复、invalid reason 约束通过；全量 `pytest -m "not prompt"` passed；mypy/lint-imports/black/flake8 通过；`alembic check` No new upgrade operations。
+- 验证：`tests/integration/test_migration_022.py` 6 tests；覆盖 A/B invalid、execution failed、invalid/evaluated 同 Item、failed/invalid 同 Item、partial skipped、无 row unprocessed、5 类守恒、无 result Run、backup 恢复、downgrade 拒绝 A/B/strict、derived CASCADE、v1/v2 版本不变；全量 `pytest -m "not prompt"` passed；mypy/lint-imports/black/flake8 通过；`alembic check` No new upgrade operations。
 - 边界：未实现 Service 双指标/invalid/聚合/retry；未跑 Judge；未在生产执行 migration；未创建/激活 v1.2.0；C2 状态 `implemented/verified`，未 accepted；C3 未启动。

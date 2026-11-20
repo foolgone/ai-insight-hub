@@ -17,6 +17,7 @@ from typing import Sequence, Union
 import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
+from sqlalchemy.engine import Connection
 
 revision: str = "f3a9c2d7e1b4"
 down_revision: Union[str, None] = "d4e8b1c6f902"
@@ -26,6 +27,78 @@ depends_on: Union[str, Sequence[str], None] = None
 _BACKUP_TABLE = "rag_evaluation_runs_022_completed_backup"
 _RESULT_TABLE = "rag_evaluation_results"
 _RUN_TABLE = "rag_evaluation_runs"
+
+# Item 优先级：failed > invalid > evaluated > skipped；
+# unprocessed 只统计没有任何 result row 的 Item。
+_BACKFILL_ITEM_SQL = """
+WITH item_state AS (
+    SELECT
+        r.run_id,
+        r.dataset_item_id,
+        bool_or(
+            r.status = 'failed' AND r.invalid_reason IS NULL
+        ) AS has_failed,
+        bool_or(
+            r.status = 'invalid'
+            OR (r.status = 'failed' AND r.invalid_reason IS NOT NULL)
+        ) AS has_invalid,
+        bool_or(r.status = 'evaluated') AS has_evaluated
+    FROM rag_evaluation_results AS r
+    GROUP BY r.run_id, r.dataset_item_id
+),
+item_bucket AS (
+    SELECT
+        run_id,
+        CASE
+            WHEN has_failed THEN 'failed'
+            WHEN has_invalid THEN 'invalid'
+            WHEN has_evaluated THEN 'evaluated'
+            ELSE 'skipped'
+        END AS bucket
+    FROM item_state
+),
+run_counts AS (
+    SELECT
+        run_id,
+        count(*) FILTER (WHERE bucket = 'evaluated') AS evaluated_items,
+        count(*) FILTER (WHERE bucket = 'invalid')   AS invalid_items,
+        count(*) FILTER (WHERE bucket = 'failed')    AS failed_items,
+        count(*) FILTER (WHERE bucket = 'skipped')   AS skipped_items,
+        count(*) AS distinct_items
+    FROM item_bucket
+    GROUP BY run_id
+)
+UPDATE rag_evaluation_runs AS run
+SET evaluated_items   = COALESCE(c.evaluated_items, 0),
+    invalid_items     = COALESCE(c.invalid_items, 0),
+    failed_items      = COALESCE(c.failed_items, 0),
+    skipped_items     = COALESCE(c.skipped_items, 0),
+    unprocessed_items = GREATEST(
+        run.total_items - COALESCE(c.distinct_items, 0), 0
+    ),
+    completed_items   = COALESCE(c.evaluated_items, 0)
+FROM run_counts AS c
+WHERE c.run_id = run.id
+"""
+
+_BACKFILL_NO_RESULT_SQL = f"""
+UPDATE {_RUN_TABLE} AS run
+SET evaluated_items   = 0,
+    invalid_items     = 0,
+    failed_items      = 0,
+    skipped_items     = 0,
+    unprocessed_items = run.total_items,
+    completed_items   = 0
+WHERE NOT EXISTS (
+    SELECT 1 FROM {_RESULT_TABLE} AS r WHERE r.run_id = run.id
+)
+"""
+
+
+def _backfill(bind: Connection) -> None:
+    """按 Item 优先级回填 run 计数；测试可直接调用。"""
+    bind.execute(sa.text(_BACKFILL_ITEM_SQL))
+    bind.execute(sa.text(_BACKFILL_NO_RESULT_SQL))
 
 
 def _drop_result_status_constraints() -> None:
@@ -117,74 +190,7 @@ def upgrade() -> None:
             """
         )
     )
-
-    # Item 优先级：failed > invalid > evaluated > skipped；
-    # unprocessed 只统计没有任何 result row 的 Item。
-    op.execute(
-        sa.text(
-            """
-            WITH item_state AS (
-                SELECT
-                    r.run_id,
-                    r.dataset_item_id,
-                    bool_or(r.status = 'failed')    AS has_failed,
-                    bool_or(r.status = 'invalid')   AS has_invalid,
-                    bool_or(r.status = 'evaluated') AS has_evaluated
-                FROM rag_evaluation_results AS r
-                GROUP BY r.run_id, r.dataset_item_id
-            ),
-            item_bucket AS (
-                SELECT
-                    run_id,
-                    CASE
-                        WHEN has_failed THEN 'failed'
-                        WHEN has_invalid THEN 'invalid'
-                        WHEN has_evaluated THEN 'evaluated'
-                        ELSE 'skipped'
-                    END AS bucket
-                FROM item_state
-            ),
-            run_counts AS (
-                SELECT
-                    run_id,
-                    count(*) FILTER (WHERE bucket = 'evaluated') AS evaluated_items,
-                    count(*) FILTER (WHERE bucket = 'invalid')   AS invalid_items,
-                    count(*) FILTER (WHERE bucket = 'failed')    AS failed_items,
-                    count(*) FILTER (WHERE bucket = 'skipped')   AS skipped_items,
-                    count(*) AS distinct_items
-                FROM item_bucket
-                GROUP BY run_id
-            )
-            UPDATE rag_evaluation_runs AS run
-            SET evaluated_items   = COALESCE(c.evaluated_items, 0),
-                invalid_items     = COALESCE(c.invalid_items, 0),
-                failed_items      = COALESCE(c.failed_items, 0),
-                skipped_items     = COALESCE(c.skipped_items, 0),
-                unprocessed_items = GREATEST(
-                    run.total_items - COALESCE(c.distinct_items, 0), 0
-                ),
-                completed_items   = COALESCE(c.evaluated_items, 0)
-            FROM run_counts AS c
-            WHERE c.run_id = run.id
-            """
-        )
-    )
-    op.execute(
-        sa.text(
-            f"""
-            UPDATE {_RUN_TABLE} AS run
-            SET evaluated_items   = 0,
-                invalid_items     = 0,
-                failed_items      = 0,
-                skipped_items     = 0,
-                unprocessed_items = run.total_items,
-                completed_items   = 0
-            WHERE NOT EXISTS (
-                SELECT 1 FROM {_RESULT_TABLE} AS r WHERE r.run_id = run.id
-            )
-            """
-        )
-    )
+    _backfill(op.get_bind())
 
 
 def downgrade() -> None:
@@ -193,7 +199,9 @@ def downgrade() -> None:
         sa.text(
             f"""
             SELECT count(*) FROM {_RESULT_TABLE}
-            WHERE status = 'invalid' OR metric_name = 'faithfulness_strict'
+            WHERE status = 'invalid'
+               OR invalid_reason IS NOT NULL
+               OR metric_name = 'faithfulness_strict'
             """
         )
     ).scalar_one()
