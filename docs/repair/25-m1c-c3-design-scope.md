@@ -1,6 +1,7 @@
 # M1-C C3：Service 双指标 / invalid / 聚合 / retry 设计与变更范围
 
 > 状态：C3 设计/范围报告，待人工审核；**不写代码、不改 Service、不跑 Judge、不创建/激活 v1.2.0**。
+> 版本：C3 设计 rev2（2026-11-20，补 AgentResult.error_type、v1.2.0 create 拒绝、snapshot strict、aggregate insufficient、Item 级 retry）。
 > 依据：`19-m1b-003-freeze-draft.md`（r2）、`22-m1c-stage0-gap-list.md`（rev2.1）、`23-m1c-stage1-test-list.md`（rev2.1）、`12-judge-semantic-spec.md`、`15-phase3e-v1.2.0-schema-service-design.md` §2.1。
 > 范围：**仅 C3**（Service 双指标、invalid、Item 聚合、retry、聚合/API 映射）。C2 migration 022 已完成；C4 目标回归不在本轮。
 
@@ -11,6 +12,16 @@
 3. C3 实现 Item 级聚合：`failed > invalid > evaluated > skipped`，`unprocessed` 只算无任何 row，`completed=evaluated`，五类守恒。
 4. C3 实现 retry：复制父 Run 快照；默认 Prompt/Schema 漂移不拒绝；显式换配置或父快照不可用 → 拒绝 retry、新建 Run。
 5. C3 不改 Judge Prompt、不创建/激活 v1.2.0、不跑 Judge、不改 C2 migration。
+
+### 0.1 本轮 P0/P1 关闭
+
+| # | 问题 | 处理 |
+|---|---|---|
+| P0 | invalid/failed 只能解析 errors 字符串 | `AgentResult` 新增 `error_type: str \| None`；`BaseAgent.run` 失败时写入 `type(exc).__name__`；Service 按类型映射 invalid/failed，不再解析字符串 |
+| P1-1 | 显式 `judge_prompt_version=v1.2.0` 在 C3 不可运行 | create 时先校验 MANIFEST/Prompt；缺失 → 400/409，不创建 Run；C3 测试只用 tmp fixture/mock |
+| P1-2 | `config_snapshot` 未记录 strict | 写入 `derived_metrics=[faithfulness_strict]` 与 `metric_versions[faithfulness_strict]=v3` |
+| P1-3 | 聚合缺 insufficient 口径 | `build_aggregate`/`MetricAggregate` 增加 `insufficient_count`、`insufficient_ratio`、`all_insufficient_count` |
+| P1-4 | retry 只按 metric 选，可能重跑 invalid F | 改为 **Item 级**：任一 invalid（A/B）→ 整个 Item 不 retry；strict-only → retry 但 Judge 调用 0 |
 
 ## 1. 当前代码基线
 
@@ -26,6 +37,8 @@
 | `app/services/rag_evaluation_runner.py:335-454` | 父结果复用按 metric；strict 没有派生逻辑 |
 | `app/schemas/rag_evaluation.py:155-163` | `MetricAggregate` 无 invalid |
 | `app/api/v1/rag_evaluations.py` | Run/Result 新字段已透出（C2）；MetricAggregate 未加 invalid |
+| `app/agents/base.py:132-148` | `AgentResult` 无 `error_type`；失败只写 `errors=[type: msg]` |
+| `app/agents/base.py:414-430` | 所有异常统一收敛为 `AgentResult(success=False)`，无结构化失败类型 |
 
 ## 2. C3 设计
 
@@ -101,13 +114,25 @@ status == "failed" and invalid_reason is not None  # 聚合层归 invalid
 
 实现要点：
 
+- `AgentResult` 新增 `error_type: str | None`；
+- `BaseAgent.run` 失败返回时写入 `error_type=type(exc).__name__`，成功为 `None`；
 - `JudgeOutcome.status` 增加 `"invalid"`；
-- `JudgeOutcome` 增加 `invalid_reason: str | None`；
-- `judge_trace` 对 Agent 失败分类：
-  - `AgentOutputError` / `StructuredOutputError` / Schema 校验失败 → `invalid(contract_violation)`；
-  - `AgentExecutionError` / `AgentTimeoutError` / 其它执行异常 → `failed(execution)`；
+- `JudgeOutcome` 增加 `invalid_reason: str | None` 与 `error_type: str | None`；
+- `judge_trace` 只按 `error_type` 分类，不解析 `errors` 字符串：
+
+| `error_type` | 映射 | 持久化 |
+|---|---|---|
+| `AgentOutputError` | `invalid` | `status=invalid`, `invalid_reason=contract_violation` |
+| `StructuredOutputError` | `invalid` | 同上 |
+| `AgentInputError` | `failed` + `failure_kind=input_error` | 不写 invalid_reason；details 记录 `failure_kind`/`agent_error_type` |
+| `AgentTimeoutError` | `failed` | `failure_kind=execution` |
+| `AgentExecutionError` / `AgentDegradedError` | `failed` | `failure_kind=execution` |
+| `LLMCredentialInvalidError` | `failed` | `failure_kind=credential` |
+| 其它/未知 | `failed` | `failure_kind=unknown`；不静默归 invalid |
+
 - `_invalid_row` 写 `status=invalid` + reason；
-- `_failed_row` 只写 execution failed，不带 invalid_reason；
+- `_failed_row` 只写 execution/input/credential failed，不带 invalid_reason；
+- `RagEvaluationResult.details` 记录 `failure_kind` 与 `agent_error_type`，不新增 DB 列；
 - 聚合/API 识别 A+B，均归 `invalid_items`，不归 `failed_items`。
 
 ### 2.4 双指标写入顺序与 derived_from_result_id
@@ -132,11 +157,13 @@ status == "failed" and invalid_reason is not None  # 聚合层归 invalid
 Runner 落库方案（推荐）：
 
 - `judge_trace` 返回 coverage + strict 两个 `JudgeOutcome`；
+- **runner 的 `judge_metrics` 循环只传 F/C/R**，strict 不进入 `judge_trace` 的 metrics；
 - runner 先批量写非 strict 行（含 coverage），flush；
 - 按 `(run_id, item, 'faithfulness', metric_version)` 查 coverage id；
 - 构造 strict row，设置 `derived_from_result_id`，再批量写 strict；
 - 幂等：唯一键 + `ON CONFLICT DO NOTHING`；
-- 只缺 strict 时：从当前 coverage 派生 strict，不调用 Judge。
+- 只缺 strict 时：从当前 coverage 派生 strict，不调用 Judge；
+- 测试必须断言 strict 不会作为 LLM metric 重复写、Judge 调用次数不增加。
 
 ### 2.5 expected_metrics 包含 strict
 
@@ -145,17 +172,25 @@ Run 创建时写：
 ```json
 {
   "judge_metrics": ["faithfulness", "answer_correctness", "answer_relevancy"],
-  "derived_metrics": ["faithfulness_strict"]
+  "derived_metrics": ["faithfulness_strict"],
+  "metric_versions": {
+    "faithfulness": "v3",
+    "faithfulness_strict": "v3",
+    "answer_correctness": "v3",
+    "answer_relevancy": "v3"
+  }
 }
 ```
 
 规则：
 
 - 仅当 `schema_version=v3` 且 `faithfulness` 在 `judge_metrics` 中，才加入 `faithfulness_strict`；
+- `derived_metrics` 与 `metric_versions[faithfulness_strict]` **必须写入 config_snapshot**，供 summary/报告/retry 追溯；
 - `expected_metrics(run)` = `metrics + judge_metrics + derived_metrics`；
 - 兼容旧 v3 快照：如果没有 `derived_metrics`，但 v3 + F，则运行时补 strict；
 - `faithfulness_strict` **不写入** `judge_metrics`，避免被当成 LLM 指标；
-- `retry_run` / `finalize_run` / `build_aggregate` 全部使用同一 `expected_metrics`。
+- `retry_run` / `finalize_run` / `build_aggregate` 全部使用同一 `expected_metrics`；
+- 测试必须断言 `config_snapshot.derived_metrics` 和 `metric_versions["faithfulness_strict"]`。
 
 ### 2.6 Item 聚合与 Run 计数
 
@@ -199,13 +234,19 @@ unprocessed = 没有任何 row
 - 每个 metric 行分 evaluated / skipped / invalid / failed；
 - mean 只取 `status=evaluated` 且 score 非空；
 - 增加 `invalid` 计数；
+- F_coverage 额外增加：
+  - `supported_count` / `unsupported_count` / `insufficient_count`（所有 evaluated coverage 行的计数之和）；
+  - `insufficient_ratio` = `insufficient_count / (supported_count + unsupported_count + insufficient_count)`；分母为 0 → `null`；
+  - `all_insufficient_count` = `all_insufficient=true` 的 evaluated 行数；
 - `coverage = evaluated / total_items`；
 - `items` 增加 `evaluated/invalid/unprocessed/processed/completion_rate/success_rate`；
-- B 行在聚合层归 invalid。
+- B 行在聚合层归 invalid；
+- 测试：S=3/U=0/I=2 的单 Item → `insufficient_count=2`、`insufficient_ratio=0.4`、mean 只算 evaluated。
 
 `summary`：
 
-- 每个 metric slot 增加 `invalid`；
+- 每个 metric slot 增加 `invalid`、`insufficient_count`、`insufficient_ratio`、`all_insufficient_count`；
+- 同时累计 `supported_count` / `unsupported_count` / `insufficient_count`；ratio 用累计值重算，不平均各 Run 的 ratio；
 - weighted_sum 只累计 evaluated；
 - strict 与 coverage 分开聚合，不混版本。
 
@@ -219,23 +260,34 @@ unprocessed = 没有任何 row
 - 校验父 Prompt MANIFEST 仍可加载、`schema_version` / `metric_version` 与父快照一致；
 - 不可用 → `RagEvaluationConflictError("父快照不可用，必须新建 Run")`。
 
-候选选择：
+候选选择（**Item 级**，不是单纯 metric 级）：
 
-- 缺 coverage / 缺 strict / execution failed / metric_version 过期 → 候选；
-- A/B invalid → **不重试**（同配置会重复违约，应新建 Run 修 Prompt）；
+- 对每个 Item 先看全部 expected metric 的结果；
+- 任一 expected metric 为 A/B invalid → **整个 Item 不进入 retry**（同配置会重复违约，应新建 Run 修 Prompt）；
+- 无 invalid 时，满足任一条件才进入：
+  - 缺 coverage / 缺 strict；
+  - execution failed（`status=failed` 且 `invalid_reason IS NULL`）；
+  - metric_version 过期；
+  - 只缺 strict 且 coverage current；
 - skipped → 不重试；
-- 只缺 strict 且 coverage current → 候选；子 Run 复制 coverage 后派生 strict，**不调用 Judge**。
+- 只缺 strict：子 Run 复制 coverage 后派生 strict，**不调用 Judge**，不复制父 strict。
 
 显式换配置入口：
 
 - 推荐在 `RagEvaluationCreate` 增加可选 `judge_prompt_version`；
 - `create_run` 用该字段构建 `judge_config`，走“新建 Run”路径；
+- **create 时必须先校验该 Prompt 的 MANIFEST/Prompt 可加载**；缺失/版本不一致 → 400/409，不创建 Run/Task；
+- C3 不改 Prompt、不创建 v1.2.0；C3 的 v3 测试只能用 tmp fixture/mock Judge，不得创建 v1.2.0 Run；
 - retry API 不提供 Prompt/Schema/模型覆盖参数；调用方要换配置就新建 Run；
-- 若人工审核不希望加 API 字段，则退化为“当前默认配置 = 新建 Run 的配置”，retry 仍只复制父快照。
+- 若人工审核不希望加 API 字段，则退化为“当前默认配置 = 新建 Run 的配置”，retry 仍只复制父快照；但 create 的前置校验仍必须做。
 
 ### 2.8 API / Schema
 
-- `MetricAggregate` 增加 `invalid: int = 0`；
+- `MetricAggregate` 增加：
+  - `invalid: int = 0`；
+  - `insufficient_count: int = 0`；
+  - `insufficient_ratio: float | None = None`；
+  - `all_insufficient_count: int = 0`；
 - `RagEvaluationResultRead` 已有 `invalid_reason` / `derived_from_result_id`（C2）；
 - `RagEvaluationRunRead` / `RagEvaluationRunListItem` 已有 `evaluated/invalid/unprocessed_items`（C2）；
 - 如批准显式换配置：`RagEvaluationCreate` 增加 `judge_prompt_version: str | None`；
@@ -248,6 +300,7 @@ unprocessed = 没有任何 row
 
 | 文件 | 改动 |
 |---|---|
+| `backend/app/agents/base.py` | `AgentResult.error_type`；失败返回写入 `type(exc).__name__` |
 | `backend/app/schemas/agents/rag_judge.py` | strict metric 常量、v3 metric version、metric_version_for_prompt 识别 strict |
 | `backend/app/services/rag_judge_service.py` | v3 coverage/strict 计分、invalid 分类、移除 C1 v3 guard、双 outcome |
 | `backend/app/services/rag_evaluation_service.py` | expected_metrics/derived_metrics、finalize/aggregate/summary、retry 快照复制、create_run prompt_version |
@@ -257,6 +310,7 @@ unprocessed = 没有任何 row
 | `backend/app/api/v1/rag_evaluations.py` | MetricAggregate invalid 映射；可选 create 字段 |
 | `backend/tests/unit/test_rag_judge_v3_scoring.py` | 新增 v3 计分/无效契约 |
 | `backend/tests/unit/test_rag_evaluation_v3_rules.py` | 新增 Item 聚合/expected_metrics/retry 规则 |
+| `backend/tests/unit/test_agent_result_error_type.py` | 新增 AgentResult.error_type 映射测试 |
 | `backend/tests/integration/test_rag_evaluation_v3.py` | 新增双行写入/聚合/API/retry 集成 |
 | 现有 v2 测试 | 原样通过；只补 v3 用例 |
 
@@ -303,7 +357,7 @@ unprocessed = 没有任何 row
 
 | # | 测试 | 预期 |
 |---|---|---|
-| C3-01 | `expected_metrics` v3 + F | 包含 `faithfulness_strict`；不写入 judge_metrics |
+| C3-01 | `expected_metrics`/snapshot v3 + F | 包含 `derived_metrics=[faithfulness_strict]`、`metric_versions[faithfulness_strict]=v3`；不写入 judge_metrics |
 | C3-02 | v3 只选 C/R | 不产生 strict |
 | C3-03 | 双行写入 | coverage id 存在；strict derived id 正确；同 run/item/version |
 | C3-04 | coverage invalid/failed | strict 同状态，不 evaluated |
@@ -311,11 +365,17 @@ unprocessed = 没有任何 row
 | C3-06 | invalid A/B 聚合 | B 归 invalid_items，不进 failed_items |
 | C3-07 | finalize 五类 | completed=evaluated；completion/success 分开 |
 | C3-08 | aggregate invalid | mean 排除 invalid；invalid 计数独立 |
-| C3-09 | summary strict | coverage/strict 分开聚合，不混版本 |
-| C3-10 | API 响应 | result 有 invalid_reason/derived_from；run 有 counters；aggregate 有 invalid |
-| C3-11 | retry invalid | invalid 不作为 retry 候选 |
-| C3-12 | 显式换配置 | 走新建 Run；retry 不换口径 |
-| C3-13 | v1/v2 回归 | 原有 v2 scoring/聚合测试原样通过 |
+| C3-09 | aggregate insufficient | S=3/U=0/I=2 → insufficient_count=2、ratio=0.4、mean 只算 evaluated |
+| C3-10 | summary strict | coverage/strict 分开聚合，不混版本 |
+| C3-11 | API 响应 | result 有 invalid_reason/derived_from；run 有 counters；aggregate 有 invalid/insufficient |
+| C3-12 | retry invalid（Item 级） | 任一 invalid → 整个 Item 不 retry |
+| C3-13 | retry failed+invalid 同 Item | 不选中，不重跑 invalid F |
+| C3-14 | 显式换配置 | 走新建 Run；retry 不换口径 |
+| C3-15 | create 显式 v1.2.0 | MANIFEST 缺失 → 400/409，不创建 Run/Task |
+| C3-16 | AgentResult.error_type | Output/Structured → invalid；Timeout/Execution/Degraded → failed；Input → explicit input_error；未知 → failed+unknown |
+| C3-17 | strict 不当 LLM metric | runner 的 judge_metrics 不含 strict；Judge 调用次数不增加 |
+| C3-18 | Run 全 invalid | `partial_failed`；全 execution failed 才 `failed` |
+| C3-19 | v1/v2 回归 | 原有 v2 scoring/聚合测试原样通过 |
 
 ## 5. 非目标
 
@@ -331,12 +391,17 @@ unprocessed = 没有任何 row
 
 | 风险 | 缓解 |
 |---|---|
+| 失败类型仍靠字符串解析 | `AgentResult.error_type` 结构化；Service 只按类型映射 |
+| `StructuredOutputError` 不是 AgentError 子类 | `error_type=StructuredOutputError` 白名单单独映射 invalid |
+| create 显式 v1.2.0 触发 500 | create 前置 MANIFEST/Prompt 校验；失败转 400/409，不建 Run |
+| snapshot 漏 strict 版本 | 创建时写 `derived_metrics` + `metric_versions[strict]`；测试断言 |
+| C4 报告缺 insufficient 解释 | aggregate/API 增加 insufficient_count/ratio/all_insufficient_count |
+| retry 重跑 invalid F | Item 级排除：任一 invalid → 整个 Item 不 retry |
 | v3 双指标改变 v2 行为 | 全部逻辑按 `schema_version=v3` 分支；v2 路径原样 |
 | coverage 先写/取 id 破坏幂等 | 唯一键 + ON CONFLICT；coverage 查询按 run/item/metric/version |
 | strict-only retry 误调 Judge | runner 将 strict 从 `judge_metrics` 分离；单测断言调用次数 0 |
-| invalid 被重试 | 候选筛选只认 execution failed；invalid 明确排除 |
+| strict 被当 LLM metric 重复写 | runner 只在 strict 派生阶段写；judge_metrics 循环显式排除 |
 | B 行在聚合/重试中混入 failed | 统一 helper `is_invalid_result(row)` / `is_execution_failed(row)` |
-| retry 复制父快照但父 Prompt 已删 | 加载 MANIFEST 校验；失败拒绝 retry |
 | 旧 v3 快照无 derived_metrics | `expected_metrics` 运行时回退补 strict |
 
 ## 7. 验收与退出
@@ -345,7 +410,8 @@ C3 完成时必须提交：
 
 1. 文件清单与 diff stat；
 2. L01–L12 + F/T + C3 补充测试结果；
-3. v2 scoring / schema loader / 聚合测试原样通过；
+3. `AgentResult.error_type` 映射测试（Output/Structured → invalid；Execution/Timeout/Degraded → failed；Input → failed+input_error）；
+4. v2 scoring / schema loader / 聚合测试原样通过；
 4. `pytest -m "not prompt"`、`black`、`flake8`、`mypy app`、`lint-imports`、CI 全绿；
 5. 明确声明：未改 Judge Prompt、未跑 Judge、未激活 v1.2.0、未改 C2 migration；
 6. 状态只能写 `implemented/verified`，不能写 `accepted`。
@@ -354,8 +420,12 @@ C3 完成时必须提交：
 
 | # | 选择 | 建议 |
 |---|---|---|
-| 1 | 显式换配置入口 | 在 `RagEvaluationCreate` 加 `judge_prompt_version`；retry 不接受覆盖 |
-| 2 | strict 是否加入 `expected_metrics` 的 `derived_metrics` | 是；`judge_metrics` 保持 F/C/R |
-| 3 | invalid 是否重试 | 否；invalid 需新建 Run/修 Prompt |
-| 4 | Run 状态遇到 invalid | `partial_failed`；全部 execution failed 才 `failed` |
-| 5 | P2 小修（CHECK 行为测试、downgrade 文案） | C3 不改；另开测试/文案小修 |
+| 1 | `AgentResult` 失败类型 | 新增 `error_type`，写入 `type(exc).__name__`；不解析 errors 字符串 |
+| 2 | `AgentInputError` 归类 | `failed` + `failure_kind=input_error`，details 记录；不归 invalid |
+| 3 | `StructuredOutputError` 归类 | 单独按 `error_type` 映射 invalid；不依赖 AgentError 继承 |
+| 4 | 显式换配置入口 | `RagEvaluationCreate.judge_prompt_version`；create 前置校验 MANIFEST，缺失 400/409 |
+| 5 | strict 记录 | `config_snapshot.derived_metrics` + `metric_versions[faithfulness_strict]` |
+| 6 | insufficient 聚合 | `MetricAggregate` 增加 count/ratio/all_insufficient_count |
+| 7 | invalid 是否重试 | Item 级排除：任一 invalid → 整个 Item 不 retry |
+| 8 | Run 状态遇到 invalid | `partial_failed`；全 execution failed 才 `failed` |
+| 9 | P2 小修（CHECK 行为测试、downgrade 文案） | C3 不改；另开测试/文案小修 |

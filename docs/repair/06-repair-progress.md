@@ -1203,8 +1203,9 @@ alembic check   : No new upgrade operations detected
 - 验证：`tests/integration/test_migration_022.py` 6 tests；覆盖 A/B invalid、execution failed、invalid/evaluated 同 Item、failed/invalid 同 Item、partial skipped、无 row unprocessed、5 类守恒、无 result Run、backup 恢复、downgrade 拒绝 A/B/strict、derived CASCADE、v1/v2 版本不变；全量 `pytest -m "not prompt"` passed；mypy/lint-imports/black/flake8 通过；`alembic check` No new upgrade operations。
 - 边界：未实现 Service 双指标/invalid/聚合/retry；未跑 Judge；未在生产执行 migration；未创建/激活 v1.2.0；C2 状态 `implemented/verified`，未 accepted；C3 未启动。
 
-### M1-C C3 设计与变更范围（2026-11-20，只设计）
+### M1-C C3 设计与变更范围（2026-11-20，只设计，rev2）
 - C3 报告：`docs/repair/25-m1c-c3-design-scope.md`；范围：Service 双指标、invalid A/B、Item 聚合、retry、aggregate/API 映射。
-- 设计要点：coverage/strict 同 claims 派生；coverage 先写、strict 带 `derived_from_result_id`；`expected_metrics` 增加 `derived_metrics=[faithfulness_strict]`；invalid A 新写、B 兼容读取；Item 优先级 `failed > invalid > evaluated > skipped`；`completed=evaluated`；retry 复制父快照，invalid 不重试，strict-only 不调 Judge。
-- 待确认：显式换配置入口是否用 `RagEvaluationCreate.judge_prompt_version`；Run 遇 invalid 是否 `partial_failed`。
+- 设计要点：coverage/strict 同 claims 派生；coverage 先写、strict 带 `derived_from_result_id`；`expected_metrics`/snapshot 增加 `derived_metrics=[faithfulness_strict]` 与 strict metric_version；invalid A 新写、B 兼容读取；Item 优先级 `failed > invalid > evaluated > skipped`；`completed=evaluated`；retry 复制父快照，invalid 按 Item 级排除，strict-only 不调 Judge。
+- P0/P1 关闭：`AgentResult.error_type` + BaseAgent 写入；create 显式 v1.2.0 前置校验拒绝；snapshot `derived_metrics`/strict version；aggregate `insufficient_count/ratio/all_insufficient_count`；retry Item 级 invalid 排除。
+- 待确认：显式换配置入口是否用 `RagEvaluationCreate.judge_prompt_version`；AgentInputError 归 `failed+input_error`；Run 遇 invalid 用 `partial_failed`。
 - 边界：未改 Service/Prompt/migration；未跑 Judge；未创建/激活 v1.2.0；C3 代码未开始。
