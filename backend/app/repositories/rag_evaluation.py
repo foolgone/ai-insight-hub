@@ -109,7 +109,10 @@ async def list_runs_for_summary(
     """跨 Run 汇总用：只取已结束且已生成 aggregate 的 Run（最新优先）。"""
     stmt = (
         select(RagEvaluationRun)
-        .where(RagEvaluationRun.aggregate.is_not(None))
+        .where(
+            RagEvaluationRun.aggregate.is_not(None),
+            RagEvaluationRun.parent_run_id.is_(None),
+        )
         .order_by(RagEvaluationRun.created_at.desc())
         .limit(limit)
     )

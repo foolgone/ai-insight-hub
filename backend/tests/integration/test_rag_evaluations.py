@@ -997,3 +997,86 @@ async def test_v3_invalid_rows_persist_and_count(
     for row in rows:
         assert row["status"] == "invalid"
         assert row["invalid_reason"] == "contract_violation"
+
+
+async def test_summary_excludes_retry_child_runs(
+    client, auth_headers, test_user, db_session
+) -> None:
+    """summary 只统计 root Run，retry 子 Run 不重复计入。"""
+    dataset, version, _ = await _seed(
+        db_session, test_user, queries=["q1", "q2"], evidence=[_evidence_doc(), None]
+    )
+    parent = RagEvaluationRun(
+        user_id=test_user.id,
+        dataset_id=dataset.id,
+        dataset_name=dataset.name,
+        dataset_version_id=version.id,
+        execution_mode="query",
+        adapter="mock",
+        total_items=2,
+        status="completed",
+        aggregate={
+            "metrics": {
+                "faithfulness": {
+                    "metric_version": "v3",
+                    "mean": 0.5,
+                    "evaluated": 2,
+                    "skipped": 0,
+                    "invalid": 0,
+                    "failed": 0,
+                    "coverage": 1.0,
+                    "insufficient_count": 1,
+                    "insufficient_ratio": 0.5,
+                    "all_insufficient_count": 0,
+                    "skip_reasons": {},
+                }
+            },
+            "items": {"total": 2},
+        },
+    )
+    await persist(db_session, parent)
+    child = RagEvaluationRun(
+        user_id=test_user.id,
+        dataset_id=dataset.id,
+        dataset_name=dataset.name,
+        dataset_version_id=version.id,
+        parent_run_id=parent.id,
+        attempt=2,
+        retry_scope="failed_only",
+        execution_mode="query",
+        adapter="mock",
+        total_items=1,
+        status="completed",
+        aggregate={
+            "metrics": {
+                "faithfulness": {
+                    "metric_version": "v3",
+                    "mean": 0.8,
+                    "evaluated": 1,
+                    "skipped": 0,
+                    "invalid": 0,
+                    "failed": 0,
+                    "coverage": 1.0,
+                    "insufficient_count": 0,
+                    "insufficient_ratio": 0.0,
+                    "all_insufficient_count": 0,
+                    "skip_reasons": {},
+                }
+            },
+            "items": {"total": 1},
+        },
+    )
+    await persist(db_session, child)
+
+    response = await client.get(
+        f"{BASE}/summary",
+        headers=auth_headers,
+        params={"dataset_id": str(dataset.id)},
+    )
+    assert response.status_code == 200, response.text
+    groups = response.json()["groups"]
+    assert len(groups) == 1
+    group = groups[0]
+    assert group["run_count"] == 1
+    assert group["total_items"] == 2
+    assert group["metrics"][0]["evaluated"] == 2

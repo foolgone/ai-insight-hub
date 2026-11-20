@@ -1211,5 +1211,7 @@ alembic check   : No new upgrade operations detected
 - invalid：A 新写入 `status=invalid + invalid_reason`；B `failed+invalid_reason` 聚合归 invalid；`AgentResult.error_type` 区分 Output/Structured（invalid）与 Execution/Timeout/Input/unknown（failed）；credential 两类异常在 `judge_trace` 边界转 failed+credential。
 - 聚合：Item 优先级 `failed > invalid > evaluated > skipped`；unprocessed 只算无 row；`completed=evaluated`；aggregate/summary 增加 invalid 与 insufficient_count/ratio/all_insufficient_count。
 - retry：复制父 `judge_config/config_snapshot/retrieval_config`；默认漂移不拒绝；父快照不可用拒绝；invalid 按 Item 级排除；strict-only 从 child coverage 派生，不调 Judge。
-- 验证：新增 `tests/unit/test_rag_evaluation_v3_rules.py`（17 tests）、v3 双行/无效行集成测试；更新 retry snapshot/base agent 断言；全量 `pytest -m "not prompt"` passed；black/flake8/mypy/lint-imports 通过。
+- 验证：新增 `tests/unit/test_rag_evaluation_v3_rules.py`（17 tests）、v3 双行/无效行集成测试、summary parent+child 去重测试；更新 retry snapshot/base agent 断言；全量 `pytest -m "not prompt"` passed；black/flake8/mypy/lint-imports 通过。
+- Summary 去重：`list_runs_for_summary` 只取 `parent_run_id IS NULL` 的 root Run；retry 子 Run 只在详情展示，不重复计入 run_count/total_items/metrics。
+- C3 已知 P2（未阻塞，C4 前记录）：`expected_metrics` 对 `judge_metrics=null` 的防御、strict 缺失的 missing_expected_metrics 诊断、summary 分组 key 加 prompt/schema。本轮未改。
 - 边界：未改 Judge Prompt、未创建/激活 v1.2.0、未跑 Judge、未改 C2 migration、未上生产；C3 状态 `implemented/verified`，未 accepted；C4 未启动。
