@@ -1,12 +1,12 @@
-# M1-D-1 10 条 Judge 申请材料（r2，Judge-only）
+# M1-D-1 10 条 Judge 申请材料（r3，Judge-only Production Service replay）
 
-> 状态：`pending_approval`（r2，退回补充后重提）。**仅申请材料，未运行 Judge、未创建 Run、未激活 v1.2.0。**
+> 状态：`pending_approval`（r3，退回补充后重提）。**仅申请材料，未运行 Judge、未创建 Run、未激活 v1.2.0。**
 > 日期：2026-11-21；frozen 提交：`df036a8`；freeze record：`docs/repair/27-m1d0-prompt-freeze-record.md`
 > Prompt：`v1.2.0` / `frozen` / schema `rag_judge_schema_v3` / metric `v3`
 > MANIFEST SHA256：`ee1c25be8767bf66069f92e769fd8dd1d986cb950d9e96d3f550af587c35f778`
 > fixture SHA256：`dc7be14b6026b579c15dea1a13d498b7479e14081aa17419ef2bfa525ae9be70`
-> 申请 JSON SHA256：`c76e8dbc166c4fad8484930f2515d3b95cc9e95fc924cb1220885153248d1d1d`
-> validation SHA256：`fb601a9b811cb82a3bbda485494914ece8101935551b0a69a15a5cc6740f1c8b`
+> 申请 JSON SHA256：`7378d368adf13b7d55e58904af200310fa20f47cf51ccc67967f13e7e437e2ad`
+> validation SHA256：`bb2e16023315e6573f90c47cb217a98e9c766754310155c332af36ce2899330d`
 
 ## 1. 申请结论
 
@@ -15,9 +15,10 @@
 本文件只申请 **10 条** Judge：Q01/Q04/Q11/Q17/Q21/Q23/Q29/Q31/Q35/Q36。
 10 条通过后才允许单独申请 40 条；本申请不包含 40 条、不激活 v1.2.0、不改默认版本。
 
-| 退回项 | r2 处理 |
+| 退回项 | r3 处理 |
 |---|---|
-| P1-1 端到端与固定目标混用 | 改为 Judge-only fixture；adapter/top_k 不适用；目标用于 Judge 语义判定 |
+| P0 执行载体绕过 Service | 改为 `judge_trace` production Service replay；synthetic RagTrace；driver 只汇总 JudgeOutcome |
+| P1-1 端到端与固定目标混用 | 方法 A：Judge-only fixture；adapter/top_k 不适用；目标用于 Judge 语义判定 |
 | P1-2 Q36 base/variant | C 同时报 base 与 variant，只作诊断，不参与 PASS/FAIL；F/R 仍判定 |
 | P1-3 HG 重复 | Q23/Q35/Q36 固定 3 次；触发/合成规则预注册；51 次上限（48 planned + 3 retry reserve） |
 | P1-4 成本不可复算 | 增加 per-metric token 表、单价来源、51 次计算与 CNY 1.00 硬停止 |
@@ -70,7 +71,11 @@
 | 项 | 值 |
 |---|---|
 | execution_mode | `judge_only_fixture` |
-| execution_vehicle | read-only Judge replay driver; direct RagJudgeAgent per case/metric with session=None; no RagEvaluationRun; report JSON only |
+| execution_vehicle | production Service replay: rag_judge_service.judge_trace(session=None, trace=synthetic RagTrace, item=synthetic item, prompt_version='v1.2.0'); driver only aggregates JudgeOutcome; no reimplementation of F scoring |
+| Service entrypoint | `rag_judge_service.judge_trace` |
+| session / DB | `None` / 不写 DB |
+| scoring | C3 Service；driver 不重新实现计分 |
+| outputs | faithfulness, faithfulness_strict, answer_correctness, answer_relevancy |
 | adapter | 不适用（`None`；不调用 WeKnora/检索） |
 | top_k | 不适用（`None`；contexts 固定来自 fixture） |
 | end_to_end | `false` |
@@ -84,7 +89,21 @@
 | max_tokens | `8192` |
 | schema / metric | `rag_judge_schema_v3` / `v3` |
 
-关键环境变量（不包含密钥）：
+### 4.1 Synthetic RagTrace
+
+| 字段 | 值 |
+|---|---|
+| `id` | stable UUID per case |
+| `user_id` | fixed UUID for all 10 cases |
+| `task_id` / `dataset_item_id` | `None` / `None` |
+| `adapter` / `mode` | `fixture` / `query` |
+| `context_source` | `agent_chat`（F 的 `_skip_reason` 要求） |
+| `query` / `answer` | fixture `question` / `answer` |
+| `retrieved_contexts` | `[{"content": "fixture contexts[].content"}]` |
+| `status` | `success` |
+| item | `{"gold_answer": "fixture gold_answer"}` |
+
+### 4.2 关键环境变量（不包含密钥）
 
 ```text
 DEFAULT_LLM_MODEL=qwen-max
@@ -96,12 +115,13 @@ RAG_JUDGE_PROMPT_VERSION=v1.0.0
 - Judge endpoint：existing DashScope-compatible endpoint used by prior qwen-max gates; no key in repo；
 - 凭证：existing runtime LLM credential (BYOK or server-key fallback); preflight must verify; no key in repo；
 - 环境作用域：process-local for this Judge-only replay only; do not write to repo/.env; restore after replay；
-- 不创建 `RagEvaluationRun`；直接对 fixture 的 10 个 case 调用 Judge，结果写报告。
+- 不创建 `RagEvaluationRun`；通过 `judge_trace` 走 C3 Service，driver 只汇总 JudgeOutcome。
 
 ## 5. 方法与解释边界
 
 - 方法 A：固定 pilot answer/contexts/gold，只切换 Judge Prompt 到 v1.2.0；
-- 目标值来自固定 pilot 输入，因此可用于 Judge 语义/目标判定；
+- 执行载体：`rag_judge_service.judge_trace(session=None, ...)`，真实走 `_faithfulness_score_v3`、strict 派生、invalid/failed/credential 分类与 metric v3；
+- driver 只把 JudgeOutcome 汇总成报告，不重新实现 F 计分，不写 DB，不创建 Run；
 - 不调用 WeKnora、不做检索、不生成新答案，adapter/top_k 不参与；
 - Q35/Q36 的 fixture 输入来自旧 run；本次只评 Judge 输出，不宣称端到端效果；
 - 报告不得把 v1.1.5 旧值写成 v1.2.0 实测，也不得把 Q17/Q32 的预期标签写成实测。

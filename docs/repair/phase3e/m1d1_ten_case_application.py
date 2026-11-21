@@ -42,9 +42,51 @@ FIXTURE_SHA = "dc7be14b6026b579c15dea1a13d498b7479e14081aa17419ef2bfa525ae9be70"
 RUN_CONFIG: dict[str, Any] = {
     "execution_mode": "judge_only_fixture",
     "execution_vehicle": (
-        "read-only Judge replay driver; direct RagJudgeAgent per case/metric with "
-        "session=None; no RagEvaluationRun; report JSON only"
+        "production Service replay: rag_judge_service.judge_trace(session=None, "
+        "trace=synthetic RagTrace, item=synthetic item, prompt_version='v1.2.0'); "
+        "driver only aggregates JudgeOutcome; no reimplementation of F scoring"
     ),
+    "service_path": {
+        "entrypoint": "rag_judge_service.judge_trace",
+        "session": None,
+        "creates_run": False,
+        "writes_db": False,
+        "uses_c3_scoring": True,
+        "driver_reimplements_scoring": False,
+        "outputs": [
+            "faithfulness",
+            "faithfulness_strict",
+            "answer_correctness",
+            "answer_relevancy",
+        ],
+        "service_components": [
+            "_faithfulness_score_v3",
+            "_strict_from_outcome",
+            "_failure_fields",
+            "metric_version_for_prompt",
+        ],
+    },
+    "synthetic_trace": {
+        "object": "RagTrace-compatible in-memory object",
+        "fields": {
+            "id": "stable UUID per case",
+            "user_id": "fixed UUID for all 10 cases",
+            "task_id": None,
+            "dataset_item_id": None,
+            "adapter": "fixture",
+            "mode": "query",
+            "context_source": "agent_chat",
+            "query": "fixture question",
+            "answer": "fixture answer",
+            "retrieved_contexts": [{"content": "fixture contexts[].content"}],
+            "status": "success",
+        },
+        "item": {"gold_answer": "fixture gold_answer"},
+        "note": (
+            "context_source=agent_chat is required by _skip_reason for F; "
+            "no RAG adapter call; no RagEvaluationRun"
+        ),
+    },
     "adapter": None,
     "top_k": None,
     "end_to_end": False,
@@ -343,10 +385,14 @@ def build_application() -> dict[str, Any]:
         "meta": {
             "name": "m1d1-ten-case-judge-application",
             "status": "pending_approval",
-            "revision": "r2",
-            "previous_review": "returned_for_revision",
+            "revision": "r3",
+            "previous_review": "returned_for_revision_r2",
             "revision_notes": [
-                "P1-1：改方法 A，Judge-only 固定 pilot answer/contexts/gold；不做端到端 query Run",
+                "P0：执行载体改为 rag_judge_service.judge_trace 的 production Service replay；"
+                "不再直接调 RagJudgeAgent",
+                "P0：构造 synthetic RagTrace（adapter=fixture、mode=query、"
+                "context_source=agent_chat、status=success），driver 只汇总 JudgeOutcome",
+                "P1-1：方法 A Judge-only 固定 pilot answer/contexts/gold；不做端到端 query Run",
                 "P1-2：Q36 C 同时报 base/variant，只作诊断，不参与 PASS/FAIL",
                 "P1-3：Q23/Q35/Q36 固定 3 次，触发/合成规则预注册",
                 "P1-4：补充可复算 token/成本表、单价来源、51 次上限（48 planned + 3 reserve）与 ceiling 硬停止",
@@ -498,8 +544,33 @@ def build_validation(application: dict[str, Any], application_sha: str) -> dict[
         },
         {
             "check": "execution_vehicle",
-            "ok": "RagJudgeAgent" in application["run_config"]["execution_vehicle"]
-            and "session=None" in application["run_config"]["execution_vehicle"],
+            "ok": "judge_trace" in application["run_config"]["execution_vehicle"]
+            and "session=None" in application["run_config"]["execution_vehicle"]
+            and "direct RagJudgeAgent" not in application["run_config"]["execution_vehicle"],
+        },
+        {
+            "check": "service_path",
+            "ok": application["run_config"]["service_path"]["entrypoint"]
+            == "rag_judge_service.judge_trace"
+            and application["run_config"]["service_path"]["uses_c3_scoring"] is True
+            and application["run_config"]["service_path"]["driver_reimplements_scoring"] is False
+            and application["run_config"]["service_path"]["creates_run"] is False
+            and application["run_config"]["service_path"]["writes_db"] is False
+            and "faithfulness_strict" in application["run_config"]["service_path"]["outputs"]
+            and {"_faithfulness_score_v3", "_strict_from_outcome"}
+            <= set(application["run_config"]["service_path"]["service_components"]),
+        },
+        {
+            "check": "synthetic_trace",
+            "ok": application["run_config"]["synthetic_trace"]["fields"]["adapter"] == "fixture"
+            and application["run_config"]["synthetic_trace"]["fields"]["mode"] == "query"
+            and application["run_config"]["synthetic_trace"]["fields"]["context_source"]
+            == "agent_chat"
+            and application["run_config"]["synthetic_trace"]["fields"]["status"] == "success"
+            and "id" in application["run_config"]["synthetic_trace"]["fields"]
+            and "user_id" in application["run_config"]["synthetic_trace"]["fields"]
+            and "task_id" in application["run_config"]["synthetic_trace"]["fields"]
+            and application["run_config"]["synthetic_trace"]["fields"]["retrieved_contexts"],
         },
         {
             "check": "no_adapter_or_top_k",
@@ -637,9 +708,9 @@ def build_markdown(application: dict[str, Any], application_sha: str, validation
     config = application["run_config"]
     budget = application["budget"]
     lines = [
-        "# M1-D-1 10 条 Judge 申请材料（r2，Judge-only）",
+        "# M1-D-1 10 条 Judge 申请材料（r3，Judge-only Production Service replay）",
         "",
-        "> 状态：`pending_approval`（r2，退回补充后重提）。**仅申请材料，未运行 Judge、未创建 Run、未激活 v1.2.0。**",
+        "> 状态：`pending_approval`（r3，退回补充后重提）。**仅申请材料，未运行 Judge、未创建 Run、未激活 v1.2.0。**",
         f"> 日期：2026-11-21；frozen 提交：`{meta['freeze_commit']}`；"
         f"freeze record：`{meta['freeze_record']}`",
         f"> Prompt：`{meta['prompt_version']}` / `{meta['prompt_status']}` / "
@@ -657,9 +728,11 @@ def build_markdown(application: dict[str, Any], application_sha: str, validation
         "本文件只申请 **10 条** Judge：Q01/Q04/Q11/Q17/Q21/Q23/Q29/Q31/Q35/Q36。",
         "10 条通过后才允许单独申请 40 条；本申请不包含 40 条、不激活 v1.2.0、不改默认版本。",
         "",
-        "| 退回项 | r2 处理 |",
+        "| 退回项 | r3 处理 |",
         "|---|---|",
-        "| P1-1 端到端与固定目标混用 | 改为 Judge-only fixture；adapter/top_k 不适用；目标用于 Judge 语义判定 |",
+        "| P0 执行载体绕过 Service | 改为 `judge_trace` production Service replay；"
+        "synthetic RagTrace；driver 只汇总 JudgeOutcome |",
+        "| P1-1 端到端与固定目标混用 | 方法 A：Judge-only fixture；adapter/top_k 不适用；目标用于 Judge 语义判定 |",
         "| P1-2 Q36 base/variant | C 同时报 base 与 variant，只作诊断，不参与 PASS/FAIL；F/R 仍判定 |",
         "| P1-3 HG 重复 | Q23/Q35/Q36 固定 3 次；触发/合成规则预注册；51 次上限（48 planned + 3 retry reserve） |",
         "| P1-4 成本不可复算 | 增加 per-metric token 表、单价来源、51 次计算与 CNY 1.00 硬停止 |",
@@ -719,6 +792,10 @@ def build_markdown(application: dict[str, Any], application_sha: str, validation
             "|---|---|",
             f"| execution_mode | `{config['execution_mode']}` |",
             f"| execution_vehicle | {config['execution_vehicle']} |",
+            f"| Service entrypoint | `{config['service_path']['entrypoint']}` |",
+            "| session / DB | `None` / 不写 DB |",
+            "| scoring | C3 Service；driver 不重新实现计分 |",
+            f"| outputs | {', '.join(config['service_path']['outputs'])} |",
             "| adapter | 不适用（`None`；不调用 WeKnora/检索） |",
             "| top_k | 不适用（`None`；contexts 固定来自 fixture） |",
             "| end_to_end | `false` |",
@@ -732,7 +809,21 @@ def build_markdown(application: dict[str, Any], application_sha: str, validation
             f"| max_tokens | `{config['max_tokens']}` |",
             f"| schema / metric | `{config['schema_version']}` / `{config['metric_version']}` |",
             "",
-            "关键环境变量（不包含密钥）：",
+            "### 4.1 Synthetic RagTrace",
+            "",
+            "| 字段 | 值 |",
+            "|---|---|",
+            "| `id` | stable UUID per case |",
+            "| `user_id` | fixed UUID for all 10 cases |",
+            "| `task_id` / `dataset_item_id` | `None` / `None` |",
+            "| `adapter` / `mode` | `fixture` / `query` |",
+            "| `context_source` | `agent_chat`（F 的 `_skip_reason` 要求） |",
+            "| `query` / `answer` | fixture `question` / `answer` |",
+            '| `retrieved_contexts` | `[{"content": "fixture contexts[].content"}]` |',
+            "| `status` | `success` |",
+            '| item | `{"gold_answer": "fixture gold_answer"}` |',
+            "",
+            "### 4.2 关键环境变量（不包含密钥）",
             "",
             "```text",
             *[f"{key}={value}" for key, value in config["env"].items()],
@@ -741,12 +832,14 @@ def build_markdown(application: dict[str, Any], application_sha: str, validation
             f"- Judge endpoint：{config['llm_endpoint']}；",
             f"- 凭证：{config['credential_scope']}；",
             f"- 环境作用域：{config['env_scope']}；",
-            "- 不创建 `RagEvaluationRun`；直接对 fixture 的 10 个 case 调用 Judge，结果写报告。",
+            "- 不创建 `RagEvaluationRun`；通过 `judge_trace` 走 C3 Service，driver 只汇总 JudgeOutcome。",
             "",
             "## 5. 方法与解释边界",
             "",
             "- 方法 A：固定 pilot answer/contexts/gold，只切换 Judge Prompt 到 v1.2.0；",
-            "- 目标值来自固定 pilot 输入，因此可用于 Judge 语义/目标判定；",
+            "- 执行载体：`rag_judge_service.judge_trace(session=None, ...)`，真实走 "
+            "`_faithfulness_score_v3`、strict 派生、invalid/failed/credential 分类与 metric v3；",
+            "- driver 只把 JudgeOutcome 汇总成报告，不重新实现 F 计分，不写 DB，不创建 Run；",
             "- 不调用 WeKnora、不做检索、不生成新答案，adapter/top_k 不参与；",
             "- Q35/Q36 的 fixture 输入来自旧 run；本次只评 Judge 输出，不宣称端到端效果；",
             "- 报告不得把 v1.1.5 旧值写成 v1.2.0 实测，也不得把 Q17/Q32 的预期标签写成实测。",

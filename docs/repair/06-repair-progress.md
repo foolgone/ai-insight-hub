@@ -1236,9 +1236,10 @@ alembic check   : No new upgrade operations detected
 - Freeze record：`docs/repair/27-m1d0-prompt-freeze-record.md`；记录 `071c3b6`、旧/新 MANIFEST SHA、Prompt SHA、validation、批准人/日期与 activation requirements。
 - 边界：未跑 Judge（单/10/40）、未激活 v1.2.0、未修改 v1.0.0/v1.1.x Prompt、未改 Schema v2、未改 r2/目标 v1.0.2/Human Gold/provisional、未改 migration 022、未启动 M2/M3、未混入 C3 P2；状态 `frozen` / `active=false`，未 accepted；10/40 Judge 仍未批准。
 
-### M1-D-1 10 条 Judge 申请材料 r2（2026-11-21，pending_approval，未运行）
-- 申请：`docs/repair/28-m1d1-ten-case-judge-application.md`；机器可读 `docs/repair/phase3e/m1d1-ten-case-application.json`；application SHA `c76e8dbc…`，validation SHA `fb601a9b…`，48/48 pass。
-- P1-1：改为方法 A `judge_only_fixture`，固定 `pilot-10-v1.1.5-gate.json`（SHA `dc7be14b…`）的 answer/contexts/gold；不创建平台 Run、不调用 WeKnora、不检索、不生成新答案。
+### M1-D-1 10 条 Judge 申请材料 r3（2026-11-21，pending_approval，未运行）
+- 申请：`docs/repair/28-m1d1-ten-case-judge-application.md`；机器可读 `docs/repair/phase3e/m1d1-ten-case-application.json`；application SHA `7378d368…`，validation SHA `bb2e1602…`，50/50 pass。
+- P0：执行载体改为 `rag_judge_service.judge_trace(session=None, ...)` production Service replay；构造 synthetic RagTrace（`adapter=fixture`、`mode=query`、`context_source=agent_chat`、`status=success`）；driver 只汇总 JudgeOutcome，不重新实现 F 计分、不写 DB、不创建 Run。
+- P1-1：方法 A `judge_only_fixture`，固定 `pilot-10-v1.1.5-gate.json`（SHA `dc7be14b…`）的 answer/contexts/gold；不创建平台 Run、不调用 WeKnora、不检索、不生成新答案。
 - P1-2：Q36 C 同时报 base `0.5–0.6` 与 variant `0.9–1.0`，只作诊断，不参与 10 条 PASS/FAIL；F/R 仍按目标。
 - P1-3：Q23/Q35/Q36 固定 3 次；Q23 需 3/3、Q35/Q36 需至少 2/3；报告全部 3 次与 median/min/max；51 次上限 = 48 planned + 3 retry reserve。
 - P1-4：可复算 token/成本：10 cases 117,000 input / 17,300 output；17 case-runs 198,900 / 29,410；预计 CNY 0.45，上限 0.760，ceiling CNY 1.00；超限硬停止。

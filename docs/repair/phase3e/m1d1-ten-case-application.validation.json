@@ -108,6 +108,18 @@
    "ok": true
   },
   {
+   "check": "service_path",
+   "ok": true
+  },
+  {
+   "check": "synthetic_trace",
+   "ok": [
+    {
+     "content": "fixture contexts[].content"
+    }
+   ]
+  },
+  {
    "check": "no_adapter_or_top_k",
    "ok": true
   },
@@ -196,7 +208,7 @@
    "ok": true
   }
  ],
- "application_sha256": "c76e8dbc166c4fad8484930f2515d3b95cc9e95fc924cb1220885153248d1d1d",
+ "application_sha256": "7378d368adf13b7d55e58904af200310fa20f47cf51ccc67967f13e7e437e2ad",
  "judge_run": false,
  "runtime_activated": false
 }

@@ -2,10 +2,12 @@
  "meta": {
   "name": "m1d1-ten-case-judge-application",
   "status": "pending_approval",
-  "revision": "r2",
-  "previous_review": "returned_for_revision",
+  "revision": "r3",
+  "previous_review": "returned_for_revision_r2",
   "revision_notes": [
-   "P1-1：改方法 A，Judge-only 固定 pilot answer/contexts/gold；不做端到端 query Run",
+   "P0：执行载体改为 rag_judge_service.judge_trace 的 production Service replay；不再直接调 RagJudgeAgent",
+   "P0：构造 synthetic RagTrace（adapter=fixture、mode=query、context_source=agent_chat、status=success），driver 只汇总 JudgeOutcome",
+   "P1-1：方法 A Judge-only 固定 pilot answer/contexts/gold；不做端到端 query Run",
    "P1-2：Q36 C 同时报 base/variant，只作诊断，不参与 PASS/FAIL",
    "P1-3：Q23/Q35/Q36 固定 3 次，触发/合成规则预注册",
    "P1-4：补充可复算 token/成本表、单价来源、51 次上限（48 planned + 3 reserve）与 ceiling 硬停止"
@@ -39,7 +41,51 @@
  },
  "run_config": {
   "execution_mode": "judge_only_fixture",
-  "execution_vehicle": "read-only Judge replay driver; direct RagJudgeAgent per case/metric with session=None; no RagEvaluationRun; report JSON only",
+  "execution_vehicle": "production Service replay: rag_judge_service.judge_trace(session=None, trace=synthetic RagTrace, item=synthetic item, prompt_version='v1.2.0'); driver only aggregates JudgeOutcome; no reimplementation of F scoring",
+  "service_path": {
+   "entrypoint": "rag_judge_service.judge_trace",
+   "session": null,
+   "creates_run": false,
+   "writes_db": false,
+   "uses_c3_scoring": true,
+   "driver_reimplements_scoring": false,
+   "outputs": [
+    "faithfulness",
+    "faithfulness_strict",
+    "answer_correctness",
+    "answer_relevancy"
+   ],
+   "service_components": [
+    "_faithfulness_score_v3",
+    "_strict_from_outcome",
+    "_failure_fields",
+    "metric_version_for_prompt"
+   ]
+  },
+  "synthetic_trace": {
+   "object": "RagTrace-compatible in-memory object",
+   "fields": {
+    "id": "stable UUID per case",
+    "user_id": "fixed UUID for all 10 cases",
+    "task_id": null,
+    "dataset_item_id": null,
+    "adapter": "fixture",
+    "mode": "query",
+    "context_source": "agent_chat",
+    "query": "fixture question",
+    "answer": "fixture answer",
+    "retrieved_contexts": [
+     {
+      "content": "fixture contexts[].content"
+     }
+    ],
+    "status": "success"
+   },
+   "item": {
+    "gold_answer": "fixture gold_answer"
+   },
+   "note": "context_source=agent_chat is required by _skip_reason for F; no RAG adapter call; no RagEvaluationRun"
+  },
   "adapter": null,
   "top_k": null,
   "end_to_end": false,
