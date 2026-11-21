@@ -1,0 +1,214 @@
+{
+ "name": "m1d1-ten-case-application-validation",
+ "kind": "static_application_validation_not_judge_run",
+ "status": "pass",
+ "checks": [
+  {
+   "check": "application_status",
+   "ok": true
+  },
+  {
+   "check": "not_approved",
+   "ok": true
+  },
+  {
+   "check": "judge_not_run",
+   "ok": true
+  },
+  {
+   "check": "not_activated",
+   "ok": true
+  },
+  {
+   "check": "case_count",
+   "ok": true
+  },
+  {
+   "check": "case_ids",
+   "ok": true
+  },
+  {
+   "check": "case_ids_exist",
+   "ok": true
+  },
+  {
+   "check": "group_counts",
+   "ok": true
+  },
+  {
+   "check": "evaluated_expected",
+   "ok": true
+  },
+  {
+   "check": "skipped_expected",
+   "ok": true
+  },
+  {
+   "check": "q29_expected_skip",
+   "ok": true
+  },
+  {
+   "check": "q35_q36_old_run_only",
+   "ok": true
+  },
+  {
+   "check": "q36_variant_target",
+   "ok": true
+  },
+  {
+   "check": "targets_match",
+   "ok": true
+  },
+  {
+   "check": "labels_match",
+   "ok": true
+  },
+  {
+   "check": "target_sha256",
+   "ok": true
+  },
+  {
+   "check": "labels_sha256",
+   "ok": true
+  },
+  {
+   "check": "manifest_sha256",
+   "ok": true
+  },
+  {
+   "check": "prompt_sha256",
+   "ok": true
+  },
+  {
+   "check": "manifest_frozen",
+   "ok": true
+  },
+  {
+   "check": "manifest_inactive",
+   "ok": true
+  },
+  {
+   "check": "schema_v3",
+   "ok": true
+  },
+  {
+   "check": "metric_v3",
+   "ok": true
+  },
+  {
+   "check": "default_v100",
+   "ok": true
+  },
+  {
+   "check": "judge_only_fixture",
+   "ok": true
+  },
+  {
+   "check": "execution_vehicle",
+   "ok": true
+  },
+  {
+   "check": "service_path",
+   "ok": true
+  },
+  {
+   "check": "synthetic_trace",
+   "ok": [
+    {
+     "content": "fixture contexts[].content"
+    }
+   ]
+  },
+  {
+   "check": "no_adapter_or_top_k",
+   "ok": true
+  },
+  {
+   "check": "fixture_sha256",
+   "ok": true
+  },
+  {
+   "check": "fixture_cases",
+   "ok": true
+  },
+  {
+   "check": "fixture_inputs",
+   "ok": true
+  },
+  {
+   "check": "no_rag_call",
+   "ok": true
+  },
+  {
+   "check": "model",
+   "ok": true
+  },
+  {
+   "check": "temperature",
+   "ok": true
+  },
+  {
+   "check": "max_tokens",
+   "ok": true
+  },
+  {
+   "check": "env_scope",
+   "ok": true
+  },
+  {
+   "check": "credential_scope",
+   "ok": true
+  },
+  {
+   "check": "judge_metrics",
+   "ok": true
+  },
+  {
+   "check": "strict_not_judge_metric",
+   "ok": true
+  },
+  {
+   "check": "strict_derived",
+   "ok": true
+  },
+  {
+   "check": "repeat_policy",
+   "ok": true
+  },
+  {
+   "check": "q36_c_dual_report",
+   "ok": true
+  },
+  {
+   "check": "budget_calls",
+   "ok": true
+  },
+  {
+   "check": "budget_token_math",
+   "ok": true
+  },
+  {
+   "check": "budget_cost_math",
+   "ok": true
+  },
+  {
+   "check": "budget_ceiling",
+   "ok": true
+  },
+  {
+   "check": "stop_conditions",
+   "ok": true
+  },
+  {
+   "check": "boundaries",
+   "ok": true
+  },
+  {
+   "check": "application_sha256",
+   "ok": true
+  }
+ ],
+ "application_sha256": "7378d368adf13b7d55e58904af200310fa20f47cf51ccc67967f13e7e437e2ad",
+ "judge_run": false,
+ "runtime_activated": false
+}

@@ -1,0 +1,1490 @@
+{
+  "meta": {
+    "reviewer_type": "ai_subagent",
+    "human_gold": false,
+    "note": "Independent AI review only; not Human Gold and not a substitute for human sign-off.",
+    "sources": [
+      "docs/repair/09-phase3e-prompt-v1.1-design.md",
+      "docs/repair/phase3e/candidates.json",
+      "docs/repair/phase3e/pilot-claims-review.csv",
+      "docs/repair/phase3e/pilot-judge-results.json"
+    ]
+  },
+  "prompt": {
+    "reviewer_type": "ai_subagent",
+    "version": "v1.1.0",
+    "verdict": "approve_with_changes",
+    "metric_reviews": {
+      "faithfulness": {
+        "verdict": "approve_with_changes",
+        "fixes_known_cases": false,
+        "risks": [
+          "Q21 is still unfixed: v1.0.0 scored the inference “质量问题不受7天无理由限制” supported=true using warranty and return-freight evidence; the v1.1.0 rule 3 is unchanged and has no “absence of a prohibition is not evidence” guard, so the same non-sequitur can still produce 1.0. The AI draft labels this claim insufficient_evidence.",
+          "Q23 is not deterministic: the conclusion “是的，可以按政策反馈” can be labeled non_factual as a recommendation and removed from the denominator; claim_type gives no precedence between non_factual and contradictory, so the exact claim the fix targets can be excluded from scoring.",
+          "Rule 2 is self-contradictory: it simultaneously requires “claims 按回答中的出现顺序排列” and “结论句必须作为第一条”. A model cannot satisfy both when the conclusion is not first in the answer.",
+          "Atomicity regressed: v1.0.0 said “不要合并多条事实”, but v1.1.0 deletes that clause while requiring a conclusion-first claim that is often composite. Q11/Q21 claim granularity can get worse, not better.",
+          "supported=true with evidence=[] is still possible: Q23 claim 7 and Q35's “物流时效未在文档中明确说明” both had supported=true and empty evidence in the pilot, while annotation-spec §3/§5 requires evidence for supported claims.",
+          "Excluding non_factual shrinks denominators: scores become discrete (1/1, 2/2), variance rises, and the judge can game the metric by labeling hard claims non_factual. No minimum denominator or non_factual-rate guard is specified.",
+          "The Q35 fix is directionally correct (three advice claims excluded, 9/12 to 9/9), but without a denominator the score hides that the answer had 12 claims; 9/9 and 12/12 look identical.",
+          "Zero-denominator is undefined: an answer made only of greetings, advice, or meta claims (plausible for Q29) has non-empty claims but zero scorable claims; current _faithfulness_score divides by len(claims), and the design adds no no_scorable_claims reason.",
+          "Contradiction is diagnostic only: if both conflicting sides are individually grounded, Faithfulness can be 1.0 on a self-contradictory answer; no cap or gate is used in acceptance, so Q23 depends on Correctness alone.",
+          "No few-shot examples despite pilot F1.4 recommending two (Q23 contradiction and advice exclusion); the new classification remains model-dependent.",
+          "An invalid claim_type value (for example “factual” or “non-factual”) fails the Pydantic Literal and the whole metric; no normalization or fallback is specified."
+        ],
+        "suggested_edits": [
+          "Make claim_type orthogonal: claim_type = factual_claim|non_factual plus is_contradictory/contradiction_with, or define precedence contradictory > factual_claim > non_factual and state that contradictory claims always enter the denominator.",
+          "Add insufficient_evidence (or an evidence_status enum) and map it explicitly to scoring and to the human labels; Q21 cannot be represented otherwise.",
+          "Add a rule: supported=true requires at least one verbatim evidence item; “the context does not prohibit X” or “not mentioned” is not support. Add Q21 as a negative example.",
+          "Restore “one atomic fact per claim; do not merge” and define the conclusion as one or more atomic claims; split ordering into “conclusion claims first, then remaining claims in appearance order”.",
+          "Define zero-denominator behavior (skipped(no_scorable_claims) or an explicit 1.0 policy for pure refusals) and add denominator/scorable_claim_count to details with tests.",
+          "Add two few-shots: Q23 (positive conclusion contradicts a later condition; contradictory + unsupported) and Q11/Q35 (non_factual advice versus a factual process requirement).",
+          "Define deontic language: “需/必须/应当提供凭证” is a factual policy requirement unless it is a pure user-action suggestion; otherwise Q11 remains ambiguous.",
+          "Add claim_id and make contradiction_with reference it; define null/self; decide whether contradiction affects the score or is only a flag.",
+          "Normalize or coerce unknown claim_type values to factual_claim and record unknown/missing counts; never fail the whole metric for one bad claim.",
+          "Use contradiction_count as a gate in acceptance or cap the score when it is non-zero; at minimum document that Faithfulness is not a contradiction detector."
+        ]
+      },
+      "answer_correctness": {
+        "verdict": "approve_with_changes",
+        "fixes_known_cases": true,
+        "risks": [
+          "Q35/Q36 rubric says “与金标一致的条件分支”, but both gold answers are “信息不足：需要...” with no branches. Literal application can still yield 0.4-0.6, so the known 0.3/0.2 failures are not guaranteed to be fixed.",
+          "Score bands overlap without precedence: 0.8-1.0 versus 0.6-0.9; 0.4-0.6 versus 0.3-0.5; ≤0.3 versus 0.3-0.5; 0.0-0.2 versus ≤0.3. The judge can choose any value in the overlap, so exact-score tests are not deterministic.",
+          "The no-answer rubric can be misapplied to answerable questions: “文档未提及 → 1.0” even when gold has a substantive answer. There is no “only when gold itself is no-answer/insufficient” guard.",
+          "The prompt drops v1.0.0 rule 6 “不要因为措辞不同扣分；只看事实是否一致、关键点是否覆盖”; “表述不精确” can now penalize paraphrase, a new harshness bias.",
+          "The prompt drops the general definitions of missing_points (“gold has, answer lacks”) and wrong_facts (“contradicts or fabricates”); only “max 5” remains, so Q23 wrong_facts behavior and diagnostics are underspecified.",
+          "The contradiction cap is ≤0.3, a 0.3-wide band overlapping 0.0-0.2; a substantive but contradictory Q23 answer can get 0.0 (same as fabrication) or 0.3 with no rule.",
+          "“同时给出可以/不可以两种结论” does not literally match Q23 (a positive conclusion plus “不符合受理条件”), and the rule is framed as internal consistency rather than conclusion-versus-gold; clarify both.",
+          "“只给泛泛政策 → 0.4-0.6” can penalize a correct concise answer that does not enumerate missing information; “泛泛” is undefined and no example is given.",
+          "No few-shot examples; the Q23, Q35, and Q36 boundaries remain model-dependent.",
+          "Correctness may still count missing advice as missing_points while Faithfulness excludes advice; the same advice is out of scope in one metric and penalized in the other.",
+          "Awarding 1.0 for a correct refusal can inflate unanswerable items; there is no over-refusal guard or distribution check."
+        ],
+        "suggested_edits": [
+          "Rewrite the ambiguous rule as “条件分支与文档事实一致且不与金标冲突；金标为信息不足时，给出条件分支并明确缺失信息即可”.",
+          "Define disjoint bands and precedence (scenario rules override general rules; use anchored intervals such as 0.0-0.2, 0.3, 0.4-0.5, 0.6-0.7, 0.8-0.9, 1.0).",
+          "Apply the no-answer rubric only when gold_answer itself says 未提及/无法确认/信息不足; otherwise a refusal is a wrong answer at 0.0-0.2.",
+          "Restore “do not penalize paraphrase; compare key facts and coverage”.",
+          "Restore the definitions of missing_points and wrong_facts; require the Q23 conflict in wrong_facts.",
+          "Clarify contradiction: a positive conclusion followed by a negative condition or unqualified rejection counts; a conclusion that contradicts the gold is ≤0.3 even if the policy details are correct; cap substantive answers at 0.2-0.3 and fabricated answers at 0.0-0.1.",
+          "Add two few-shots: Q23 contradiction and Q35/Q36 conditional answer plus explicit missing-information request.",
+          "Pass an explicit answerability/category hint to the judge; otherwise rubric selection is inferred from the gold answer.",
+          "Define the 0.9 versus 1.0 boundary (all key facts plus secondary points versus a minor omission) to reduce boundary noise.",
+          "State that advice is not a missing_point unless the gold explicitly marks it required, aligning with Faithfulness."
+        ]
+      },
+      "answer_relevancy": {
+        "verdict": "approve_with_changes",
+        "fixes_known_cases": true,
+        "risks": [
+          "Three conflicting signals for Q29: rule 1 says a reasonable refusal is 1.0; the no-answer section says 0.8-1.0; “合理拒答不等于自动满分” implies below 1.0. No rule selects among them.",
+          "A “文档未提及/无法确认” answer with a next step can get 0.8-1.0 without contexts or gold; a hallucinated refusal on an answerable question is rewarded by Relevancy (Correctness may be 0.2), so averages can mask wrong refusals.",
+          "Bands overlap: “0.0-0.2 空泛” versus “泛泛政策 ≤0.5”; 0.3-0.5 versus ≤0.5; 0.8-1.0 versus 1.0. The same response can map to 0.2 or 0.5.",
+          "“合理拒答” requires judging whether the refusal is justified, which is a fact/context judgment and contradicts “不判断事实、是否有上下文依据”; the handoff to Correctness is not operationally clean.",
+          "Rule 1 treats “条件式回答” as 1.0 while rule 2 says missing necessary details = 0.6-0.9; a conditional answer with only some branches is ambiguous.",
+          "No few-shot examples despite pilot F3.3; Q29, Q35, and Q36 distinctions remain unanchored.",
+          "Replacing “真正回应” with “围绕问题展开” is directionally good, but “围绕” is undefined; a topically related policy dump can still pass.",
+          "The prompt says not to penalize length or references, but gives no guidance on repetitive or irrelevant padding; Q23/Q11 may still receive 0.9.",
+          "No explicit multi-part question handling; a partial answer to one part can get 1.0.",
+          "The input lacks gold, context, and category; ambiguous/unanswerable rubric selection is inferred."
+        ],
+        "suggested_edits": [
+          "Resolve the 1.0 versus 0.8-1.0 conflict: make reasonable refusal 0.8-0.9 by default and 1.0 only when it fully addresses the question and gives a concrete next step; remove or qualify “不等于自动满分”.",
+          "State explicitly: do not judge whether the refusal is factually correct; any on-topic refusal with a next step gets 0.8-1.0; a wrong refusal is punished only by Correctness, and acceptance must use per-metric floors.",
+          "Make bands disjoint and anchored (off-topic/empty 0.0-0.2; tangential 0.3-0.4; generic policy 0.5; partial 0.6-0.7; mostly responsive 0.8-0.9; fully responsive 1.0).",
+          "Replace “空泛” in the 0.0-0.2 band with “empty/off-topic” to avoid overlapping “泛泛政策 ≤0.5”.",
+          "Define multi-part completeness: all parts addressed versus some parts.",
+          "Add two few-shots: Q29 no-answer plus next step; Q35/Q36 conditional plus missing-information request.",
+          "Pass answerability/category to the judge.",
+          "Add an is_refusal categorical detail so cross-metric analysis can gate wrong refusals; do not rely on averages."
+        ]
+      }
+    },
+    "cross_metric_issues": [
+      "Q23: Correctness is capped at ≤0.3, but Faithfulness can be 0.6-0.75, or 1.0 if the conclusion is typed non_factual and excluded (and also 1.0 if both conflicting sides are individually grounded), while Relevancy may be 0.9-1.0. A mean hides the contradiction; use a flag/gate and per-metric floors.",
+      "Q21: no metric catches the unsupported “质量问题不受7天限制” inference. v1.0.0 gave Correctness 0.9, Faithfulness 1.0, and Relevancy 1.0; without an absent-evidence guard in Faithfulness, Q21 remains a blind spot.",
+      "Advice treatment is inconsistent: Faithfulness excludes non_factual advice, Correctness missing_points can still penalize missing advice, and Relevancy rewards next-step advice. Define one cross-metric policy for advice.",
+      "Refusals: Correctness gives a correct refusal 1.0, Relevancy gives 0.8-1.0, and no metric except Correctness penalizes over-refusal on answerable questions. A wrong refusal can average around 0.73; use per-category metrics and floors, not a simple mean.",
+      "Faithfulness's denominator changes but metric_version stays v1. v1.0.0 and v1.1.0 results will mix in cross-run aggregation, contrary to 04-evaluation-design §4.6 (“不同 metric_version 不混合”).",
+      "Correctness's ambiguous rubric requires gold-consistent branches while Faithfulness uses context evidence. Q35/Q36 gold has no branches, so Correctness can be 0.4-0.6 while Faithfulness is 1.0; align the gold/answerability contract.",
+      "Relevancy delegates correct versus wrong refusal to Correctness but must still decide “合理拒答” to apply its high band; the boundary is undefined.",
+      "No cross-metric acceptance matrix: the design names Q23, Q35, Q36, Q29, Q11, and Q21 but gives no expected score vector, tolerance, or no-regression threshold per case.",
+      "A wrong refusal can score Faithfulness 1.0, Relevancy 0.9-1.0, and Correctness 0.0-0.2. If any dashboard aggregates by mean, it looks acceptable; add a correctness floor or refusal flag.",
+      "Q29-style all-non_factual answers may be skipped by Faithfulness while Correctness and Relevancy score them; coverage may drop from 10/10 to 8/10 or less, which the pilot comparison must report rather than hide."
+    ],
+    "schema_scoring_review": {
+      "sufficient": false,
+      "issues": [
+        "claim_type is not a partition: contradictory is orthogonal to factual_claim/non_factual. A contradictory claim can also be a recommendation, so counting “factual_claim + contradictory” is ambiguous. Use two fields or explicit precedence.",
+        "No insufficient_evidence value. annotation-spec §3 defines supported/unsupported/insufficient_evidence/needs_recheck, and Q21's AI draft uses insufficient_evidence; the Judge's supported: bool conflates contradiction, absence, and insufficiency, so claim-level comparison is not isomorphic.",
+        "Zero-denominator is undefined. _faithfulness_score currently divides by len(claims); filtering non_factual can yield zero scorable claims for Q29-style answers. Add skipped(no_scorable_claims) or an explicit policy, with a unit test.",
+        "claim_count/supported_count semantics after filtering are undefined. Existing tests and stored v1.0.0 results use total claims. Keep claim_count as total and add denominator/scorable_claim_count; define supported_count as scorable supported.",
+        "An invalid claim_type fails the Pydantic Literal and the whole metric. Add a validator/coercion to factual_claim plus unknown_claim_type_count, and never fail a sample because one claim used a near-synonym.",
+        "contradiction_with is a free string with no claim ID, so it cannot be validated or linked. Add claim_id/index and define null/self; decide whether contradiction affects the score or only a flag.",
+        "The loader default is not wired: RagJudgeAgent currently sets version=load_prompt_version(PROMPT_DIR). The design's RAG_JUDGE_PROMPT_VERSION must set both AgentConfig.version and the file path, or judge_config.prompt_version can report v1.0.0 while prompt_sha256 is from v1.1.0. A global env setting also prevents side-by-side v1.0.0/v1.1.0 runs; pass the version per run/judge call or record it in the Run config.",
+        "Root version.txt contains “2026-11-14.1” (with a BOM), and load_prompt_version only matches vX.Y.Z; the current v1.0.0 is a fallback, not a read value. Normalize version.txt and document the precedence: explicit setting > version.txt > default.",
+        "Silent fallback to root is dangerous: a missing v1.1.0 file loads v1.0.0 but reports v1.1.0. Fail fast for an explicitly selected version, or record prompt_fallback and prompt_path per metric.",
+        "Source-of-truth conflict: MANIFEST says root is active and v1.0.0 is a read-only archive, but the new loader prefers rag_judge/v1.0.0/ even for the default. Root hotfixes would be ignored; choose one canonical source and update docs/tests.",
+        "metric_version stays v1 while the Faithfulness denominator changes from all claims to factual_claim + contradictory. This is a metric-definition change, not just prompt wording; 04-evaluation-design §4.6 requires not mixing metric versions. Bump Faithfulness to v2 or add a rubric_version and include it in aggregation.",
+        "RagJudgeInput lacks answerability/category, while the new prompts branch on ambiguous/unanswerable questions. The judge must infer the category from the question/gold; add an optional answerability field and pass it from QaDatasetItem/metadata.",
+        "Backward compatibility is fine for claim_type default and v1.0.0 scores only if scoring consumes the validated model_dump and keeps claim_count as total. State this explicitly and add a regression test with a real v1.0.0 payload.",
+        "Additive details keys are JSONB-safe and need no migration, but API/summary tests and consumers should tolerate them; audit for exact-dict assertions, especially in the 24 Judge tests."
+      ]
+    },
+    "blocking_issues": [
+      "Faithfulness taxonomy and precedence: claim_type is not a partition, contradictory can be excluded as non_factual, and insufficient_evidence is not representable. Q23's conclusion and Q21's inference have no deterministic scoring path. Fix the schema/rules before coding.",
+      "Zero-denominator and filtered-count semantics: all-non_factual answers (plausible for Q29) can yield zero scorable claims; current code divides by len(claims), and the design specifies neither no_scorable_claims nor denominator/scorable_claim_count. This risks a ZeroDivisionError or an undefined silent skip.",
+      "Q21 remains unfixed: v1.1.0 has no “absence of a prohibition/evidence is not support” rule, so the v1.0.0 Q21 1.0 will likely repeat. A known failure cannot be left unaddressed.",
+      "Q11 remains ambiguous: “需提供照片/视频凭证并由商家审核” is a deontic process claim; the prompt's “含事实承诺” examples do not cover it, so it may still be scored unsupported. Define factual versus advice for deontic statements.",
+      "Prompt self-contradiction and regression: rule 2 requires both appearance order and conclusion-first, and v1.1.0 deletes “不要合并多条事实”. Restore atomicity and split the ordering rule before this is used for Q11/Q21.",
+      "supported=true with empty evidence is still allowed (Q23 claim 7, Q35 meta claim), while annotation-spec requires evidence. Add the rule; otherwise unsupported claims can be scored as supported.",
+      "Correctness Q35/Q36 rubric says “条件分支与金标一致”, but their gold answers are “信息不足” with no branches. Fix the wording or pass answerability, otherwise the known 0.3/0.2 failures may persist.",
+      "Score bands overlap and lack precedence across all three metrics: Correctness 0.8-1.0 versus 0.6-0.9, 0.4-0.6 versus 0.3-0.5, ≤0.3 versus 0.3-0.5, 0.0-0.2 versus ≤0.3; Relevancy 1.0 versus 0.8-1.0 versus “not automatic”. Without disjoint bands, acceptance tests are not deterministic.",
+      "No per-case expected score vector or pass criteria. The design says to check Q23/Q35/Q36/Q29/Q11/Q21 but does not define target values, tolerances, distribution checks, skip-rate checks, or no-regression thresholds. The plan is not testable as written.",
+      "Version/provenance loader is underspecified: the setting is not wired to AgentConfig.version, fallback is silent, root version.txt is not parseable as vX.Y.Z, and judge_config.prompt_version can misreport while prompt_sha256 is from another version. This breaks the Phase 3E traceability acceptance criterion.",
+      "metric_version remains v1 despite the changed Faithfulness denominator; v1.0.0 and v1.1.0 results will mix in aggregation, violating 04-evaluation-design §4.6. Bump the metric version or add an explicit rubric version to grouping.",
+      "Human Gold taxonomy mismatch: annotation-spec has insufficient_evidence/needs_recheck, the Judge has supported: bool, and the Q29 AI draft labels advice as unsupported while the spec says non_factual. Claim-level comparison and acceptance are undefined until these are reconciled.",
+      "No few-shot examples despite F1.4/F3.3; the high-risk classifications (Q23 contradiction, Q11/Q35 non_factual) have no anchor. Add them before the 10-case re-run, otherwise the claim that v1.1.0 fixes the known cases is not credible.",
+      "Test strategy is vague: section 4.4 lists prompt-semantic expectations (0.8, ≤0.3, 1.0) that stub-based unit tests cannot verify. Define deterministic schema/scoring/loader unit tests plus a separate real-LLM eval harness with accepted ranges."
+    ],
+    "ready_for_implementation": false
+  },
+  "pilot_basic": {
+    "count": 10,
+    "status_counts": {
+      "ai_reviewed": 8,
+      "needs_recheck": 2
+    },
+    "items": [
+      {
+        "id": "Q01",
+        "question_ok": true,
+        "question_issue": "",
+        "reference_answer_ok": true,
+        "review_reference_answer": "订单签收后 7 天内可申请无理由退款。",
+        "gold_evidence_ok": true,
+        "review_gold_evidence": [
+          {
+            "section": "1. 退款时效",
+            "quote": "订单签收后 7 天内可申请无理由退款。审核通过后，款项将在 1-3 个工作日内原路退回。\n定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。"
+          }
+        ],
+        "key_facts_ok": true,
+        "review_key_facts": [
+          "签收后 7 天内"
+        ],
+        "answerability": "answerable",
+        "review_status": "ai_reviewed",
+        "notes": "答案与文档一致。题干「退款申请期限」略宽，答案已限定为「无理由退款」，不会误导；建议题干改为「无理由退款申请期限是多久」以更精确。原证据为同节连续两行，已补回换行，逐字内容一致。"
+      },
+      {
+        "id": "Q04",
+        "question_ok": true,
+        "question_issue": "",
+        "reference_answer_ok": true,
+        "review_reference_answer": "仅支持电子发票。",
+        "gold_evidence_ok": true,
+        "review_gold_evidence": [
+          {
+            "section": "4. 发票说明",
+            "quote": "仅支持电子发票，提交申请后 24 小时内发送至下单邮箱。\n发票抬头可在开具前修改；已开具的发票需先申请红冲，再重新开具。\n暂不支持纸质发票和增值税专用发票。"
+          }
+        ],
+        "key_facts_ok": true,
+        "review_key_facts": [
+          "仅电子发票"
+        ],
+        "answerability": "answerable",
+        "review_status": "ai_reviewed",
+        "notes": "答案正确。可补充「暂不支持纸质发票和增值税专用发票」，但题目只问支持哪种，非必答。"
+      },
+      {
+        "id": "Q11",
+        "question_ok": true,
+        "question_issue": "",
+        "reference_answer_ok": true,
+        "review_reference_answer": "不可以。定制商品不支持无理由退款。",
+        "gold_evidence_ok": true,
+        "review_gold_evidence": [
+          {
+            "section": "1. 退款时效",
+            "quote": "订单签收后 7 天内可申请无理由退款。审核通过后，款项将在 1-3 个工作日内原路退回。\n定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。"
+          },
+          {
+            "section": "12. 特殊商品",
+            "quote": "生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。\n虚拟商品（充值、会员、课程）一经售出不支持退款。\n定制商品支持质量问题退换，不支持无理由退换。"
+          }
+        ],
+        "key_facts_ok": true,
+        "review_key_facts": [
+          "签收 5 天仍在 7 天内",
+          "定制商品排除无理由退款"
+        ],
+        "answerability": "answerable",
+        "review_status": "ai_reviewed",
+        "notes": "答案正确；定制商品虽在 7 天内，但属于明确排除无理由退款的品类。"
+      },
+      {
+        "id": "Q17",
+        "question_ok": true,
+        "question_issue": "",
+        "reference_answer_ok": true,
+        "review_reference_answer": "因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。",
+        "gold_evidence_ok": true,
+        "review_gold_evidence": [
+          {
+            "section": "7. 运费规则",
+            "quote": "单笔订单实付满 99 元包邮；未满 99 元收取 10 元运费。\n新疆、西藏、内蒙古等偏远地区运费为 20 元，不参与包邮活动。\n因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。"
+          }
+        ],
+        "key_facts_ok": true,
+        "review_key_facts": [
+          "质量问题商家承担",
+          "非质量问题买家承担"
+        ],
+        "answerability": "answerable",
+        "review_status": "ai_reviewed",
+        "notes": "答案正确。题干把「实付满 99 元」简写为「订单满 99 元」，且未点明包邮只适用于发货环节；建议在题干或答案中补充「包邮门槛不改变退货运费责任」，避免把包邮误解为免费退货。"
+      },
+      {
+        "id": "Q21",
+        "question_ok": true,
+        "question_issue": "",
+        "reference_answer_ok": true,
+        "review_reference_answer": "不能。无理由退款期限是签收后 7 天内。",
+        "gold_evidence_ok": true,
+        "review_gold_evidence": [
+          {
+            "section": "1. 退款时效",
+            "quote": "订单签收后 7 天内可申请无理由退款。审核通过后，款项将在 1-3 个工作日内原路退回。\n定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。"
+          }
+        ],
+        "key_facts_ok": true,
+        "review_key_facts": [
+          "第 10 天超过 7 天",
+          "不能无理由退款"
+        ],
+        "answerability": "answerable",
+        "review_status": "ai_reviewed",
+        "notes": "答案正确；「普通商品」非文档原词，但用于区别于定制/生鲜/虚拟商品，含义清楚。"
+      },
+      {
+        "id": "Q23",
+        "question_ok": true,
+        "question_issue": "",
+        "reference_answer_ok": true,
+        "review_reference_answer": "不能按该条款反馈。生鲜质量问题需在签收后 24 小时内拍照反馈，第 2 天已超过时限。",
+        "gold_evidence_ok": true,
+        "review_gold_evidence": [
+          {
+            "section": "12. 特殊商品",
+            "quote": "生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。\n虚拟商品（充值、会员、课程）一经售出不支持退款。\n定制商品支持质量问题退换，不支持无理由退换。"
+          }
+        ],
+        "key_facts_ok": true,
+        "review_key_facts": [
+          "生鲜质量问题 24 小时内",
+          "第 2 天超时"
+        ],
+        "answerability": "answerable",
+        "review_status": "needs_recheck",
+        "notes": "按「签收后第 2 天」的通常理解（已超过 24 小时）答案正确；但若签收时间较晚，「第 2 天」跨午夜时可能仍未满 24 小时，存在边界歧义。建议题干改为「签收后超过 24 小时（如第 2 天）」或明确具体小时数后再定稿。"
+      },
+      {
+        "id": "Q29",
+        "question_ok": true,
+        "question_issue": "",
+        "reference_answer_ok": true,
+        "review_reference_answer": "文档未说明是否支持货到付款，无法确认。",
+        "gold_evidence_ok": true,
+        "review_gold_evidence": [],
+        "key_facts_ok": true,
+        "review_key_facts": [
+          "文档未提及货到付款"
+        ],
+        "answerability": "unanswerable",
+        "review_status": "ai_reviewed",
+        "notes": "文档通篇未提支付方式；按 unanswerable 规则空证据可接受。"
+      },
+      {
+        "id": "Q31",
+        "question_ok": true,
+        "question_issue": "",
+        "reference_answer_ok": true,
+        "review_reference_answer": "文档只说明换货需寄回原商品，未说明是否支持上门取件。",
+        "gold_evidence_ok": true,
+        "review_gold_evidence": [
+          {
+            "section": "3. 换货政策",
+            "quote": "换货需先寄回原商品，商家收到并验收后 48 小时内寄出新品；运费由责任方承担。"
+          }
+        ],
+        "key_facts_ok": true,
+        "review_key_facts": [
+          "文档未提及上门取件"
+        ],
+        "answerability": "unanswerable",
+        "review_status": "ai_reviewed",
+        "notes": "文档未规定退货取件方式；「换货需先寄回原商品」只能说明换货寄回，不能推出退货上门取件。原草稿证据为空，按规则可接受；此处补入答案所引用的换货条款作为辅助证据。"
+      },
+      {
+        "id": "Q35",
+        "question_ok": true,
+        "question_issue": "",
+        "reference_answer_ok": false,
+        "review_reference_answer": "需要区分「发货」和「到货」：文档只规定发货时效——现货商品付款后 48 小时内发出，预售商品以商品页标注时间为准，大件商品 5 个工作日内发出且配送前电话预约；文档未说明快递运输/送达需要多久。发货后可在「我的订单」查看物流轨迹，超过 24 小时未更新可联系客服。若问的是到货时间，仅凭文档无法给出具体时间。",
+        "gold_evidence_ok": true,
+        "review_gold_evidence": [
+          {
+            "section": "5. 发货时效",
+            "quote": "现货商品在付款后 48 小时内发出；预售商品以商品页标注的发货时间为准。\n大件商品（家具、家电）发货时间为 5 个工作日内，配送前会电话预约。"
+          },
+          {
+            "section": "6. 物流查询",
+            "quote": "订单发货后可在「我的订单」查看物流单号与实时轨迹。\n物流信息超过 24 小时未更新时，可联系客服协助核查。"
+          }
+        ],
+        "key_facts_ok": false,
+        "review_key_facts": [
+          "现货商品付款后 48 小时内发出",
+          "预售商品以商品页标注的发货时间为准",
+          "大件商品 5 个工作日内发出",
+          "大件商品配送前会电话预约",
+          "文档未说明运输/送达时长",
+          "发货后可查看物流单号与实时轨迹",
+          "物流超过 24 小时未更新可联系客服"
+        ],
+        "answerability": "ambiguous",
+        "review_status": "ai_reviewed",
+        "notes": "原答案错误：文档没有「收货地区」影响到达时间的规则（偏远地区只影响运费），且即使知道商品类型、发货状态和地区，文档也没有运输时长，无法判断「多久能到」。已改为区分发货时效与到货时间；现有证据逐字正确，但只能支持发货时效和查询方式，不能支持原答案的「地区」缺项。"
+      },
+      {
+        "id": "Q36",
+        "question_ok": true,
+        "question_issue": "",
+        "reference_answer_ok": false,
+        "review_reference_answer": "需要确认商品类型、签收时间、是否已激活、是否存在质量问题。按文档：普通商品签收后 7 天内可申请无理由退款；定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款；生鲜食品质量问题需在签收后 24 小时内拍照反馈；虚拟商品（充值、会员、课程）一经售出不支持退款；定制商品支持质量问题退换，不支持无理由退换。注意：第 1 条对虚拟商品的限定是「已激活」，第 12 条则称虚拟商品一经售出不支持退款，两处范围不完全一致，具体商品需以对应条款/客服确认为准。",
+        "gold_evidence_ok": true,
+        "review_gold_evidence": [
+          {
+            "section": "1. 退款时效",
+            "quote": "订单签收后 7 天内可申请无理由退款。审核通过后，款项将在 1-3 个工作日内原路退回。\n定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。"
+          },
+          {
+            "section": "12. 特殊商品",
+            "quote": "生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。\n虚拟商品（充值、会员、课程）一经售出不支持退款。\n定制商品支持质量问题退换，不支持无理由退换。"
+          }
+        ],
+        "key_facts_ok": false,
+        "review_key_facts": [
+          "普通商品签收后 7 天内可无理由退款",
+          "定制类商品不支持无理由退款",
+          "生鲜食品不支持无理由退货",
+          "已激活的虚拟商品不支持无理由退款",
+          "生鲜食品质量问题需在签收后 24 小时内拍照反馈",
+          "虚拟商品（充值、会员、课程）一经售出不支持退款",
+          "定制商品支持质量问题退换，不支持无理由退换",
+          "第 1 条与第 12 条对虚拟商品的表述不完全一致"
+        ],
+        "answerability": "ambiguous",
+        "review_status": "needs_recheck",
+        "notes": "原答案只说「信息不足」，未给出任何条件分支，且「是否定制/生鲜/虚拟商品」与「商品类型」重复，漏掉「是否已激活」和「是否存在质量问题」。已补全条件分支。另文档自身对虚拟商品的口径不一致（第 1 条「已激活」vs 第 12 条「一经售出」），建议人工确认 canonical 口径后再定稿。"
+      }
+    ]
+  },
+  "claims": {
+    "count": 35,
+    "label_counts": {
+      "supported": 32,
+      "unsupported": 1,
+      "insufficient_evidence": 2,
+      "needs_recheck": 0
+    },
+    "items": [
+      {
+        "id": "Q01",
+        "claim_index": 1,
+        "claim": "订单签收后 7 天内可申请无理由退款",
+        "claim_type": "factual_claim",
+        "label": "supported",
+        "evidence_reference": "c65abc80-f589-49de-9a1f-77ad2689bdb9",
+        "reason": "上下文第 1 节原文即“订单签收后 7 天内可申请无理由退款”，逐字一致。",
+        "contradiction_with": null,
+        "review_status": "ai_reviewed",
+        "notes": ""
+      },
+      {
+        "id": "Q01",
+        "claim_index": 2,
+        "claim": "定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款",
+        "claim_type": "factual_claim",
+        "label": "supported",
+        "evidence_reference": "c65abc80-f589-49de-9a1f-77ad2689bdb9",
+        "reason": "上下文第 1 节原文完整列举了这三类不支持无理由退款的商品。",
+        "contradiction_with": null,
+        "review_status": "ai_reviewed",
+        "notes": ""
+      },
+      {
+        "id": "Q01",
+        "claim_index": 3,
+        "claim": "生鲜食品质量问题需在签收后 24 小时内拍照反馈",
+        "claim_type": "factual_claim",
+        "label": "supported",
+        "evidence_reference": "c65abc80-f589-49de-9a1f-77ad2689bdb9",
+        "reason": "上下文第 12 节原文为“质量问题需在签收后 24 小时内拍照反馈”。",
+        "contradiction_with": null,
+        "review_status": "ai_reviewed",
+        "notes": ""
+      },
+      {
+        "id": "Q01",
+        "claim_index": 4,
+        "claim": "虚拟商品一经售出不支持退款",
+        "claim_type": "factual_claim",
+        "label": "supported",
+        "evidence_reference": "c65abc80-f589-49de-9a1f-77ad2689bdb9",
+        "reason": "上下文第 12 节原文为“虚拟商品（充值、会员、课程）一经售出不支持退款”。",
+        "contradiction_with": null,
+        "review_status": "ai_reviewed",
+        "notes": ""
+      },
+      {
+        "id": "Q01",
+        "claim_index": 5,
+        "claim": "定制商品仅支持质量问题退换，不支持无理由退换",
+        "claim_type": "factual_claim",
+        "label": "supported",
+        "evidence_reference": "c65abc80-f589-49de-9a1f-77ad2689bdb9",
+        "reason": "上下文第 12 节写明“定制商品支持质量问题退换，不支持无理由退换”，排除无理由后“仅”字成立。",
+        "contradiction_with": null,
+        "review_status": "ai_reviewed",
+        "notes": "“仅”是对排除项的收束，非原文逐字，但语义一致。"
+      },
+      {
+        "id": "Q04",
+        "claim_index": 1,
+        "claim": "目前仅支持电子发票",
+        "claim_type": "factual_claim",
+        "label": "supported",
+        "evidence_reference": "c65abc80-f589-49de-9a1f-77ad2689bdb9",
+        "reason": "上下文第 4 节原文为“仅支持电子发票”。",
+        "contradiction_with": null,
+        "review_status": "ai_reviewed",
+        "notes": ""
+      },
+      {
+        "id": "Q04",
+        "claim_index": 2,
+        "claim": "电子发票在提交申请后 24 小时内发送至下单邮箱",
+        "claim_type": "factual_claim",
+        "label": "supported",
+        "evidence_reference": "c65abc80-f589-49de-9a1f-77ad2689bdb9",
+        "reason": "上下文第 4 节原文为“提交申请后 24 小时内发送至下单邮箱”。",
+        "contradiction_with": null,
+        "review_status": "ai_reviewed",
+        "notes": ""
+      },
+      {
+        "id": "Q04",
+        "claim_index": 3,
+        "claim": "发票抬头可在开具前修改",
+        "claim_type": "factual_claim",
+        "label": "supported",
+        "evidence_reference": "c65abc80-f589-49de-9a1f-77ad2689bdb9",
+        "reason": "上下文第 4 节原文即“发票抬头可在开具前修改”。",
+        "contradiction_with": null,
+        "review_status": "ai_reviewed",
+        "notes": ""
+      },
+      {
+        "id": "Q04",
+        "claim_index": 4,
+        "claim": "已开具发票需先申请红冲再重新开具",
+        "claim_type": "factual_claim",
+        "label": "supported",
+        "evidence_reference": "c65abc80-f589-49de-9a1f-77ad2689bdb9",
+        "reason": "上下文第 4 节原文为“已开具的发票需先申请红冲，再重新开具”。",
+        "contradiction_with": null,
+        "review_status": "ai_reviewed",
+        "notes": ""
+      },
+      {
+        "id": "Q04",
+        "claim_index": 5,
+        "claim": "不支持纸质发票和增值税专用发票",
+        "claim_type": "factual_claim",
+        "label": "supported",
+        "evidence_reference": "c65abc80-f589-49de-9a1f-77ad2689bdb9",
+        "reason": "上下文第 4 节原文为“暂不支持纸质发票和增值税专用发票”，与“目前”口径一致。",
+        "contradiction_with": null,
+        "review_status": "ai_reviewed",
+        "notes": ""
+      },
+      {
+        "id": "Q11",
+        "claim_index": 1,
+        "claim": "定制类商品不支持无理由退款",
+        "claim_type": "factual_claim",
+        "label": "supported",
+        "evidence_reference": "c65abc80-f589-49de-9a1f-77ad2689bdb9",
+        "reason": "上下文第 1 节明确将定制类商品排除在无理由退款范围之外。",
+        "contradiction_with": null,
+        "review_status": "ai_reviewed",
+        "notes": ""
+      },
+      {
+        "id": "Q11",
+        "claim_index": 2,
+        "claim": "签收第 5 天仍在 7 天内，但定制商品不能无理由退款",
+        "claim_type": "factual_claim",
+        "label": "supported",
+        "evidence_reference": "c65abc80-f589-49de-9a1f-77ad2689bdb9",
+        "reason": "第 1 节的 7 天期限与定制类排除条款可直接推出该结论，5<7 亦成立。",
+        "contradiction_with": null,
+        "review_status": "ai_reviewed",
+        "notes": "“第 5 天”前提来自用户问题而非上下文，规则部分有原文支持。"
+      },
+      {
+        "id": "Q11",
+        "claim_index": 3,
+        "claim": "定制商品支持质量问题退换",
+        "claim_type": "factual_claim",
+        "label": "supported",
+        "evidence_reference": "c65abc80-f589-49de-9a1f-77ad2689bdb9",
+        "reason": "上下文第 12 节原文为“定制商品支持质量问题退换”。",
+        "contradiction_with": null,
+        "review_status": "ai_reviewed",
+        "notes": ""
+      },
+      {
+        "id": "Q17",
+        "claim_index": 1,
+        "claim": "质量问题退换货运费由商家承担",
+        "claim_type": "factual_claim",
+        "label": "supported",
+        "evidence_reference": "c65abc80-f589-49de-9a1f-77ad2689bdb9",
+        "reason": "上下文第 7 节原文为“因质量问题产生的退换货运费由商家承担”。",
+        "contradiction_with": null,
+        "review_status": "ai_reviewed",
+        "notes": ""
+      },
+      {
+        "id": "Q17",
+        "claim_index": 2,
+        "claim": "非质量问题退货运费由买家承担",
+        "claim_type": "factual_claim",
+        "label": "supported",
+        "evidence_reference": "c65abc80-f589-49de-9a1f-77ad2689bdb9",
+        "reason": "上下文第 7 节原文为“非质量问题的退货运费由买家承担”。",
+        "contradiction_with": null,
+        "review_status": "ai_reviewed",
+        "notes": ""
+      },
+      {
+        "id": "Q17",
+        "claim_index": 3,
+        "claim": "退货运费责任与订单是否满 99 元无关",
+        "claim_type": "factual_claim",
+        "label": "supported",
+        "evidence_reference": "c65abc80-f589-49de-9a1f-77ad2689bdb9",
+        "reason": "第 7 节把 99 元限定为包邮（正向运费），退货运费仅按原因划分且未附金额条件，可直接推出。",
+        "contradiction_with": null,
+        "review_status": "ai_reviewed",
+        "notes": "属结构性推断而非逐字表述；因 chunk 含完整第 7 节，判定为可支持的唯一合理读法。"
+      },
+      {
+        "id": "Q21",
+        "claim_index": 1,
+        "claim": "无理由退款仅限签收后 7 天内",
+        "claim_type": "factual_claim",
+        "label": "supported",
+        "evidence_reference": "c65abc80-f589-49de-9a1f-77ad2689bdb9",
+        "reason": "上下文第 1 节原文为“订单签收后 7 天内可申请无理由退款”。",
+        "contradiction_with": null,
+        "review_status": "ai_reviewed",
+        "notes": ""
+      },
+      {
+        "id": "Q21",
+        "claim_index": 2,
+        "claim": "签收第 10 天已超期，不能无理由退款",
+        "claim_type": "factual_claim",
+        "label": "supported",
+        "evidence_reference": "c65abc80-f589-49de-9a1f-77ad2689bdb9",
+        "reason": "第 1 节 7 天期限的直接算术推论，第 10 天已超出窗口。",
+        "contradiction_with": null,
+        "review_status": "ai_reviewed",
+        "notes": ""
+      },
+      {
+        "id": "Q21",
+        "claim_index": 3,
+        "claim": "质量问题不受 7 天无理由限制",
+        "claim_type": "factual_claim",
+        "label": "insufficient_evidence",
+        "evidence_reference": null,
+        "reason": "上下文只把 7 天限定在“无理由退款”，未规定普通商品质量问题退换的期限；第 3 节换货仍写 7 天，无法确认“不受限制”。",
+        "contradiction_with": null,
+        "review_status": "needs_recheck",
+        "notes": "属范围推断：按“7 天条款仅约束无理由退款”的字面范围可判 supported；但作为给用户的可用性承诺证据不足，建议人工复核。"
+      },
+      {
+        "id": "Q23",
+        "claim_index": 1,
+        "claim": "生鲜食品质量问题需在签收后 24 小时内拍照反馈",
+        "claim_type": "factual_claim",
+        "label": "supported",
+        "evidence_reference": "c65abc80-f589-49de-9a1f-77ad2689bdb9",
+        "reason": "上下文第 12 节原文即“质量问题需在签收后 24 小时内拍照反馈”。",
+        "contradiction_with": null,
+        "review_status": "ai_reviewed",
+        "notes": ""
+      },
+      {
+        "id": "Q23",
+        "claim_index": 2,
+        "claim": "第 2 天反馈已超过 24 小时，原则上不符合受理条件",
+        "claim_type": "factual_claim",
+        "label": "supported",
+        "evidence_reference": "c65abc80-f589-49de-9a1f-77ad2689bdb9",
+        "reason": "第 12 节的 24 小时时限可直接推出第 2 天已超时，“原则上不符合受理条件”与原文要求一致。",
+        "contradiction_with": null,
+        "review_status": "ai_reviewed",
+        "notes": ""
+      },
+      {
+        "id": "Q23",
+        "claim_index": 3,
+        "claim": "可以按政策反馈",
+        "claim_type": "contradictory",
+        "label": "unsupported",
+        "evidence_reference": "c65abc80-f589-49de-9a1f-77ad2689bdb9",
+        "reason": "与第 12 节 24 小时时限及本回答下一句“已超出政策规定的反馈时效，原则上不符合质量反馈受理条件”直接冲突。",
+        "contradiction_with": "Q23 claim 2：第 2 天反馈已超过 24 小时，原则上不符合受理条件",
+        "review_status": "ai_reviewed",
+        "notes": "回答首句与后文自相矛盾，属本批最需修正项；建议改为“已超时，原则上不符合受理条件，可尝试联系客服说明情况”。"
+      },
+      {
+        "id": "Q29",
+        "claim_index": 1,
+        "claim": "文档未提及货到付款",
+        "claim_type": "factual_claim",
+        "label": "supported",
+        "evidence_reference": "c65abc80-f589-49de-9a1f-77ad2689bdb9",
+        "reason": "该 chunk 含完整文档 13 节，全文未出现“货到付款”或任何支付方式说明。",
+        "contradiction_with": null,
+        "review_status": "ai_reviewed",
+        "notes": "负向断言，已核对完整文档 chunk；非因“检索片段没命中”而误判。"
+      },
+      {
+        "id": "Q29",
+        "claim_index": 2,
+        "claim": "建议查阅网站结算页的支付选项",
+        "claim_type": "non_factual",
+        "label": "insufficient_evidence",
+        "evidence_reference": null,
+        "reason": "这是操作建议而非事实陈述，上下文未提及网站结算页，无法用文档证据判定真伪。",
+        "contradiction_with": null,
+        "review_status": "ai_reviewed",
+        "notes": "建议类内容应从事实支持率统计中剔除；本身不与上下文冲突，不宜按幻觉计入。"
+      },
+      {
+        "id": "Q31",
+        "claim_index": 1,
+        "claim": "文档未提及上门取件服务",
+        "claim_type": "factual_claim",
+        "label": "supported",
+        "evidence_reference": "c65abc80-f589-49de-9a1f-77ad2689bdb9",
+        "reason": "该 chunk 含完整文档 13 节，全文未出现“上门取件”。",
+        "contradiction_with": null,
+        "review_status": "ai_reviewed",
+        "notes": "负向断言，基于完整文档核验；回答同时说明“未禁止”，措辞谨慎。"
+      },
+      {
+        "id": "Q31",
+        "claim_index": 2,
+        "claim": "换货需先寄回原商品，验收后 48 小时内寄出新品",
+        "claim_type": "factual_claim",
+        "label": "supported",
+        "evidence_reference": "c65abc80-f589-49de-9a1f-77ad2689bdb9",
+        "reason": "上下文第 3 节原文为“换货需先寄回原商品，商家收到并验收后 48 小时内寄出新品”。",
+        "contradiction_with": null,
+        "review_status": "ai_reviewed",
+        "notes": ""
+      },
+      {
+        "id": "Q31",
+        "claim_index": 3,
+        "claim": "客服热线 400-800-1234，服务时间 9:00-21:00",
+        "claim_type": "factual_claim",
+        "label": "supported",
+        "evidence_reference": "c65abc80-f589-49de-9a1f-77ad2689bdb9",
+        "reason": "第 11 节给出热线号码，并注明其服务时间同在线客服 9:00-21:00。",
+        "contradiction_with": null,
+        "review_status": "ai_reviewed",
+        "notes": ""
+      },
+      {
+        "id": "Q35",
+        "claim_index": 1,
+        "claim": "现货商品付款后 48 小时内发出",
+        "claim_type": "factual_claim",
+        "label": "supported",
+        "evidence_reference": "c65abc80-f589-49de-9a1f-77ad2689bdb9",
+        "reason": "上下文第 5 节原文为“现货商品在付款后 48 小时内发出”。",
+        "contradiction_with": null,
+        "review_status": "ai_reviewed",
+        "notes": ""
+      },
+      {
+        "id": "Q35",
+        "claim_index": 2,
+        "claim": "预售商品以商品页标注的发货时间为准",
+        "claim_type": "factual_claim",
+        "label": "supported",
+        "evidence_reference": "c65abc80-f589-49de-9a1f-77ad2689bdb9",
+        "reason": "上下文第 5 节原文为“预售商品以商品页标注的发货时间为准”。",
+        "contradiction_with": null,
+        "review_status": "ai_reviewed",
+        "notes": ""
+      },
+      {
+        "id": "Q35",
+        "claim_index": 3,
+        "claim": "大件商品 5 个工作日内发货且配送前电话预约",
+        "claim_type": "factual_claim",
+        "label": "supported",
+        "evidence_reference": "c65abc80-f589-49de-9a1f-77ad2689bdb9",
+        "reason": "上下文第 5 节原文为“大件商品发货时间为 5 个工作日内，配送前会电话预约”。",
+        "contradiction_with": null,
+        "review_status": "ai_reviewed",
+        "notes": ""
+      },
+      {
+        "id": "Q35",
+        "claim_index": 4,
+        "claim": "物流超过 24 小时未更新可联系客服核查",
+        "claim_type": "factual_claim",
+        "label": "supported",
+        "evidence_reference": "c65abc80-f589-49de-9a1f-77ad2689bdb9",
+        "reason": "上下文第 6 节原文为“物流信息超过 24 小时未更新时，可联系客服协助核查”。",
+        "contradiction_with": null,
+        "review_status": "ai_reviewed",
+        "notes": ""
+      },
+      {
+        "id": "Q36",
+        "claim_index": 1,
+        "claim": "普通商品签收后 7 天内可申请无理由退款",
+        "claim_type": "factual_claim",
+        "label": "supported",
+        "evidence_reference": "c65abc80-f589-49de-9a1f-77ad2689bdb9",
+        "reason": "第 1 节给出 7 天无理由退款规则并以三类商品为例外，“普通商品”系按例外反推的限定语。",
+        "contradiction_with": null,
+        "review_status": "ai_reviewed",
+        "notes": "“普通商品”为反推限定语，规则本身与原文一致。"
+      },
+      {
+        "id": "Q36",
+        "claim_index": 2,
+        "claim": "定制类、生鲜食品、已激活虚拟商品不支持无理由退款",
+        "claim_type": "factual_claim",
+        "label": "supported",
+        "evidence_reference": "c65abc80-f589-49de-9a1f-77ad2689bdb9",
+        "reason": "上下文第 1 节原文完整列出这三类商品不支持无理由退款。",
+        "contradiction_with": null,
+        "review_status": "ai_reviewed",
+        "notes": ""
+      },
+      {
+        "id": "Q36",
+        "claim_index": 3,
+        "claim": "生鲜食品质量问题需 24 小时内拍照反馈",
+        "claim_type": "factual_claim",
+        "label": "supported",
+        "evidence_reference": "c65abc80-f589-49de-9a1f-77ad2689bdb9",
+        "reason": "上下文第 12 节原文为“质量问题需在签收后 24 小时内拍照反馈”。",
+        "contradiction_with": null,
+        "review_status": "ai_reviewed",
+        "notes": ""
+      },
+      {
+        "id": "Q36",
+        "claim_index": 4,
+        "claim": "质量问题退货运费商家承担，非质量问题买家承担",
+        "claim_type": "factual_claim",
+        "label": "supported",
+        "evidence_reference": "c65abc80-f589-49de-9a1f-77ad2689bdb9",
+        "reason": "上下文第 7 节原文为“因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担”。",
+        "contradiction_with": null,
+        "review_status": "ai_reviewed",
+        "notes": ""
+      }
+    ]
+  },
+  "remaining_basic": {
+    "count": 30,
+    "status_counts": {
+      "ai_reviewed": 24,
+      "needs_recheck": 6
+    },
+    "items": [
+      {
+        "id": "Q02",
+        "question_ok": true,
+        "question_issue": "",
+        "reference_answer_ok": true,
+        "review_reference_answer": "款项将在 1-3 个工作日内原路退回。",
+        "gold_evidence_ok": true,
+        "review_gold_evidence": [
+          {
+            "section": "1. 退款时效",
+            "quote": "订单签收后 7 天内可申请无理由退款。审核通过后，款项将在 1-3 个工作日内原路退回。定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。"
+          },
+          {
+            "section": "2. 退款流程",
+            "quote": "在「我的订单」中选择退款，填写原因并上传凭证，商家会在 48 小时内审核。审核通过后按原支付渠道退回；审核驳回会显示原因，可补充材料后重新提交。"
+          }
+        ],
+        "key_facts_ok": true,
+        "review_key_facts": [
+          "审核通过后 1-3 个工作日内到账",
+          "款项原路退回"
+        ],
+        "answerability": "answerable",
+        "review_status": "ai_reviewed",
+        "notes": "第 1 节明确审核通过后 1-3 个工作日内原路退回，第 2 节补充原支付渠道；两条证据均逐字匹配。answerable：问句只问时效，答案唯一。与 Q12 部分重叠（Q12 也问时效），但 Q02 是单跳、Q12 是渠道+时效综合，暂不判重复。"
+      },
+      {
+        "id": "Q03",
+        "question_ok": true,
+        "question_issue": "",
+        "reference_answer_ok": true,
+        "review_reference_answer": "同一订单仅支持一次换货。",
+        "gold_evidence_ok": true,
+        "review_gold_evidence": [
+          {
+            "section": "3. 换货政策",
+            "quote": "签收后 7 天内，商品未使用且包装完整可申请换货，同一订单仅支持一次换货。换货需先寄回原商品，商家收到并验收后 48 小时内寄出新品；运费由责任方承担。"
+          }
+        ],
+        "key_facts_ok": true,
+        "review_key_facts": [
+          "同一订单仅支持一次换货"
+        ],
+        "answerability": "answerable",
+        "review_status": "ai_reviewed",
+        "notes": "第 3 节明确同一订单仅支持一次换货；answerable。"
+      },
+      {
+        "id": "Q05",
+        "question_ok": true,
+        "question_issue": "",
+        "reference_answer_ok": true,
+        "review_reference_answer": "提交申请后 24 小时内发送至下单邮箱。",
+        "gold_evidence_ok": true,
+        "review_gold_evidence": [
+          {
+            "section": "4. 发票说明",
+            "quote": "仅支持电子发票，提交申请后 24 小时内发送至下单邮箱。发票抬头可在开具前修改；已开具的发票需先申请红冲，再重新开具。暂不支持纸质发票和增值税专用发票。"
+          }
+        ],
+        "key_facts_ok": true,
+        "review_key_facts": [
+          "提交申请后 24 小时内发送",
+          "发送至下单邮箱"
+        ],
+        "answerability": "answerable",
+        "review_status": "ai_reviewed",
+        "notes": "第 4 节明确提交申请后 24 小时内发送至下单邮箱；answerable。"
+      },
+      {
+        "id": "Q06",
+        "question_ok": true,
+        "question_issue": "",
+        "reference_answer_ok": true,
+        "review_reference_answer": "现货商品在付款后 48 小时内发出。",
+        "gold_evidence_ok": true,
+        "review_gold_evidence": [
+          {
+            "section": "5. 发货时效",
+            "quote": "现货商品在付款后 48 小时内发出；预售商品以商品页标注的发货时间为准。大件商品（家具、家电）发货时间为 5 个工作日内，配送前会电话预约。"
+          }
+        ],
+        "key_facts_ok": true,
+        "review_key_facts": [
+          "现货商品付款后 48 小时内发出"
+        ],
+        "answerability": "answerable",
+        "review_status": "ai_reviewed",
+        "notes": "第 5 节明确现货商品付款后 48 小时内发出；answerable。"
+      },
+      {
+        "id": "Q07",
+        "question_ok": true,
+        "question_issue": "",
+        "reference_answer_ok": true,
+        "review_reference_answer": "大件商品发货时间为 5 个工作日内，配送前会电话预约。",
+        "gold_evidence_ok": true,
+        "review_gold_evidence": [
+          {
+            "section": "5. 发货时效",
+            "quote": "现货商品在付款后 48 小时内发出；预售商品以商品页标注的发货时间为准。大件商品（家具、家电）发货时间为 5 个工作日内，配送前会电话预约。"
+          }
+        ],
+        "key_facts_ok": true,
+        "review_key_facts": [
+          "大件商品发货时间为 5 个工作日内",
+          "配送前会电话预约"
+        ],
+        "answerability": "answerable",
+        "review_status": "ai_reviewed",
+        "notes": "第 5 节明确大件商品发货时间为 5 个工作日内、配送前会电话预约；答案含预约信息，超出“发货时间”但仍属同段文档事实。answerable。"
+      },
+      {
+        "id": "Q08",
+        "question_ok": true,
+        "question_issue": "",
+        "reference_answer_ok": true,
+        "review_reference_answer": "单笔订单实付满 99 元包邮。",
+        "gold_evidence_ok": true,
+        "review_gold_evidence": [
+          {
+            "section": "7. 运费规则",
+            "quote": "单笔订单实付满 99 元包邮；未满 99 元收取 10 元运费。新疆、西藏、内蒙古等偏远地区运费为 20 元，不参与包邮活动。因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。"
+          }
+        ],
+        "key_facts_ok": false,
+        "review_key_facts": [
+          "单笔订单实付满 99 元包邮"
+        ],
+        "answerability": "answerable",
+        "review_status": "ai_reviewed",
+        "notes": "第 7 节首句为“单笔订单实付满 99 元包邮”，参考答案与之一致；key_fact 原写“满 99 元”漏掉“实付”限定，已改为“单笔订单实付满 99 元包邮”。第 7 节还规定新疆、西藏、内蒙古等偏远地区不参与包邮，参考答案未展开；作为“满多少元”的阈值问题可接受，若要求完整政策可补充该例外。answerable：问句问包邮门槛，99 元为唯一门槛。"
+      },
+      {
+        "id": "Q09",
+        "question_ok": true,
+        "question_issue": "",
+        "reference_answer_ok": true,
+        "review_reference_answer": "电子产品自签收之日起保修 12 个月，配件保修 3 个月。",
+        "gold_evidence_ok": true,
+        "review_gold_evidence": [
+          {
+            "section": "8. 保修政策",
+            "quote": "电子产品自签收之日起保修 12 个月，配件保修 3 个月。人为损坏、进水、私自拆修不在保修范围内。保修期内维修免费；保修期外维修需收取材料费和人工费。"
+          }
+        ],
+        "key_facts_ok": true,
+        "review_key_facts": [
+          "电子产品自签收之日起保修 12 个月",
+          "配件保修 3 个月"
+        ],
+        "answerability": "answerable",
+        "review_status": "ai_reviewed",
+        "notes": "第 8 节明确电子产品自签收之日起保修 12 个月、配件保修 3 个月；答案含配件信息，超出问句“电子产品”范围但属同段文档事实，不构成外部知识。answerable：问句已限定电子产品，答案唯一。"
+      },
+      {
+        "id": "Q10",
+        "question_ok": true,
+        "question_issue": "",
+        "reference_answer_ok": true,
+        "review_reference_answer": "优惠券自领取之日起 30 天内有效。",
+        "gold_evidence_ok": true,
+        "review_gold_evidence": [
+          {
+            "section": "9. 优惠券规则",
+            "quote": "优惠券自领取之日起 30 天内有效，逾期自动失效。同一订单只能使用一张优惠券，不能与会员折扣叠加。退款时优惠券若仍在有效期内会退回账户，已过期则不退回。"
+          }
+        ],
+        "key_facts_ok": true,
+        "review_key_facts": [
+          "优惠券自领取之日起 30 天内有效"
+        ],
+        "answerability": "answerable",
+        "review_status": "ai_reviewed",
+        "notes": "第 9 节明确优惠券自领取之日起 30 天内有效；answerable。"
+      },
+      {
+        "id": "Q12",
+        "question_ok": true,
+        "question_issue": "",
+        "reference_answer_ok": true,
+        "review_reference_answer": "按原支付渠道退回，1-3 个工作日内到账。",
+        "gold_evidence_ok": true,
+        "review_gold_evidence": [
+          {
+            "section": "2. 退款流程",
+            "quote": "在「我的订单」中选择退款，填写原因并上传凭证，商家会在 48 小时内审核。审核通过后按原支付渠道退回；审核驳回会显示原因，可补充材料后重新提交。"
+          },
+          {
+            "section": "1. 退款时效",
+            "quote": "订单签收后 7 天内可申请无理由退款。审核通过后，款项将在 1-3 个工作日内原路退回。定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。"
+          }
+        ],
+        "key_facts_ok": true,
+        "review_key_facts": [
+          "审核通过后按原支付渠道退回",
+          "1-3 个工作日内到账"
+        ],
+        "answerability": "answerable",
+        "review_status": "ai_reviewed",
+        "notes": "第 2 节给“原支付渠道”，第 1 节给“1-3 个工作日”，两条证据逐字匹配；multi 的两个子问题均有直接答案。与 Q02 共享时效事实，但本条是多段综合，保留。"
+      },
+      {
+        "id": "Q13",
+        "question_ok": true,
+        "question_issue": "",
+        "reference_answer_ok": true,
+        "review_reference_answer": "需要先寄回原商品；商家收到并验收后 48 小时内寄出新品。",
+        "gold_evidence_ok": true,
+        "review_gold_evidence": [
+          {
+            "section": "3. 换货政策",
+            "quote": "签收后 7 天内，商品未使用且包装完整可申请换货，同一订单仅支持一次换货。换货需先寄回原商品，商家收到并验收后 48 小时内寄出新品；运费由责任方承担。"
+          }
+        ],
+        "key_facts_ok": true,
+        "review_key_facts": [
+          "换货需先寄回原商品",
+          "商家收到并验收后 48 小时内寄出新品"
+        ],
+        "answerability": "answerable",
+        "review_status": "ai_reviewed",
+        "notes": "第 3 节明确换货需先寄回原商品、商家收到并验收后 48 小时内寄出新品；multi 的两个子问题均有直接答案。"
+      },
+      {
+        "id": "Q14",
+        "question_ok": true,
+        "question_issue": "",
+        "reference_answer_ok": true,
+        "review_reference_answer": "未开具前可以修改；已开具的发票需先申请红冲，再重新开具。",
+        "gold_evidence_ok": true,
+        "review_gold_evidence": [
+          {
+            "section": "4. 发票说明",
+            "quote": "仅支持电子发票，提交申请后 24 小时内发送至下单邮箱。发票抬头可在开具前修改；已开具的发票需先申请红冲，再重新开具。暂不支持纸质发票和增值税专用发票。"
+          }
+        ],
+        "key_facts_ok": true,
+        "review_key_facts": [
+          "发票抬头可在开具前修改",
+          "已开具的发票需先申请红冲，再重新开具"
+        ],
+        "answerability": "ambiguous",
+        "review_status": "needs_recheck",
+        "notes": "参考答案准确覆盖第 4 节的两个分支（开具前可改；已开具先红冲再重开），gold evidence 逐字匹配。但问句未说明发票是否已开具，无法给出单一 yes/no，按 annotation-spec 的 ambiguous 定义（缺少必要信息、需条件分支）应标 ambiguous 而非 answerable；参考答案已给条件分支，符合 ambiguous 的答案要求。category=multi 可保留为两分支题，建议人工确认 answerability。"
+      },
+      {
+        "id": "Q15",
+        "question_ok": false,
+        "question_issue": "问题清晰、可独立理解；但 category=multi（多段综合）不准确：本条只问“大件商品配送前是否联系买家”，第 5 节一句话即可回答，属单事实 direct，建议改 category 为 direct。",
+        "reference_answer_ok": true,
+        "review_reference_answer": "会，配送前会电话预约。",
+        "gold_evidence_ok": true,
+        "review_gold_evidence": [
+          {
+            "section": "5. 发货时效",
+            "quote": "现货商品在付款后 48 小时内发出；预售商品以商品页标注的发货时间为准。大件商品（家具、家电）发货时间为 5 个工作日内，配送前会电话预约。"
+          }
+        ],
+        "key_facts_ok": true,
+        "review_key_facts": [
+          "大件商品配送前会电话预约"
+        ],
+        "answerability": "answerable",
+        "review_status": "needs_recheck",
+        "notes": "答案“会，配送前会电话预约”由第 5 节直接支持（原文“配送前会电话预约”），answerable。问题本身清晰；仅 category=multi 不合适，建议改 direct。与 Q07 共享电话预约事实，但 Q07 问发货时长，本条问是否联系，问句不同。"
+      },
+      {
+        "id": "Q16",
+        "question_ok": false,
+        "question_issue": "问题清晰、可独立理解；但 category=multi（多段综合）不准确：第 6 节一句话即可回答“超过 24 小时未更新→联系客服”，属单条件 direct（或 constraint），不需要多段综合，建议改 category。",
+        "reference_answer_ok": true,
+        "review_reference_answer": "可联系客服协助核查。",
+        "gold_evidence_ok": true,
+        "review_gold_evidence": [
+          {
+            "section": "6. 物流查询",
+            "quote": "订单发货后可在「我的订单」查看物流单号与实时轨迹。物流信息超过 24 小时未更新时，可联系客服协助核查。"
+          }
+        ],
+        "key_facts_ok": true,
+        "review_key_facts": [
+          "物流信息超过 24 小时未更新",
+          "可联系客服协助核查"
+        ],
+        "answerability": "answerable",
+        "review_status": "needs_recheck",
+        "notes": "答案“可联系客服协助核查”由第 6 节直接支持，条件“超过 24 小时未更新”已在问句中给出，answerable。问题本身清晰；仅 category=multi 不合适，建议改 direct 或 constraint。"
+      },
+      {
+        "id": "Q18",
+        "question_ok": true,
+        "question_issue": "",
+        "reference_answer_ok": true,
+        "review_reference_answer": "保修期内维修免费；保修期外维修需收取材料费和人工费。",
+        "gold_evidence_ok": true,
+        "review_gold_evidence": [
+          {
+            "section": "8. 保修政策",
+            "quote": "电子产品自签收之日起保修 12 个月，配件保修 3 个月。人为损坏、进水、私自拆修不在保修范围内。保修期内维修免费；保修期外维修需收取材料费和人工费。"
+          }
+        ],
+        "key_facts_ok": true,
+        "review_key_facts": [
+          "保修期内维修免费",
+          "保修期外维修收取材料费和人工费"
+        ],
+        "answerability": "answerable",
+        "review_status": "ai_reviewed",
+        "notes": "第 8 节明确保修期内维修免费、保修期外维修收取材料费和人工费；问句已要求分别说明两个分支，answerable。"
+      },
+      {
+        "id": "Q19",
+        "question_ok": true,
+        "question_issue": "",
+        "reference_answer_ok": true,
+        "review_reference_answer": "优惠券若仍在有效期内会退回账户，已过期则不退回。",
+        "gold_evidence_ok": true,
+        "review_gold_evidence": [
+          {
+            "section": "9. 优惠券规则",
+            "quote": "优惠券自领取之日起 30 天内有效，逾期自动失效。同一订单只能使用一张优惠券，不能与会员折扣叠加。退款时优惠券若仍在有效期内会退回账户，已过期则不退回。"
+          }
+        ],
+        "key_facts_ok": true,
+        "review_key_facts": [
+          "退款时优惠券仍在有效期内会退回账户",
+          "已过期的优惠券不退回"
+        ],
+        "answerability": "ambiguous",
+        "review_status": "needs_recheck",
+        "notes": "参考答案准确覆盖第 9 节的两个分支（有效期内退回账户；已过期不退），gold evidence 逐字匹配。但问句未说明优惠券是否仍在有效期，无法给出单一 yes/no，按 annotation-spec 的 ambiguous 定义（缺少必要信息、需条件分支）应标 ambiguous 而非 answerable；参考答案已给条件分支，符合 ambiguous 的答案要求。category=multi 可保留为两分支题，建议人工确认 answerability。"
+      },
+      {
+        "id": "Q20",
+        "question_ok": true,
+        "question_issue": "",
+        "reference_answer_ok": true,
+        "review_reference_answer": "消费 1 元积 1 分，100 积分可抵扣 1 元；积分自获得之日起 12 个月内有效。",
+        "gold_evidence_ok": true,
+        "review_gold_evidence": [
+          {
+            "section": "10. 会员积分",
+            "quote": "消费 1 元积 1 分，100 积分可抵扣 1 元。积分自获得之日起 12 个月内有效，逾期清零。积分不可转让、不可提现，仅限本账户使用。"
+          }
+        ],
+        "key_facts_ok": true,
+        "review_key_facts": [
+          "消费 1 元积 1 分",
+          "100 积分可抵扣 1 元",
+          "积分有效期 12 个月（逾期清零）"
+        ],
+        "answerability": "answerable",
+        "review_status": "ai_reviewed",
+        "notes": "三个子问题均由第 10 节直接回答，multi 分类合适。与 Q40 主题部分重叠，建议保留本条并调整或删除 Q40。"
+      },
+      {
+        "id": "Q22",
+        "question_ok": true,
+        "question_issue": "",
+        "reference_answer_ok": true,
+        "review_reference_answer": "20 元。新疆属于偏远地区，运费 20 元且不参与包邮。",
+        "gold_evidence_ok": true,
+        "review_gold_evidence": [
+          {
+            "section": "7. 运费规则",
+            "quote": "单笔订单实付满 99 元包邮；未满 99 元收取 10 元运费。新疆、西藏、内蒙古等偏远地区运费为 20 元，不参与包邮活动。因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。"
+          }
+        ],
+        "key_facts_ok": true,
+        "review_key_facts": [
+          "未满 99 元收取 10 元运费",
+          "新疆等偏远地区运费 20 元",
+          "偏远地区不参与包邮"
+        ],
+        "answerability": "answerable",
+        "review_status": "ai_reviewed",
+        "notes": "89 元未达包邮门槛，且新疆属文档列明的偏远地区，按 20 元且不包邮；结论可由第 7 节直接推出。"
+      },
+      {
+        "id": "Q24",
+        "question_ok": true,
+        "question_issue": "",
+        "reference_answer_ok": true,
+        "review_reference_answer": "不能修改地址，可联系快递拦截或申请改派。",
+        "gold_evidence_ok": true,
+        "review_gold_evidence": [
+          {
+            "section": "13. 收货信息修改",
+            "quote": "订单发货前可在「我的订单」修改收货地址和联系电话。已发货订单无法修改地址，可联系快递拦截或申请改派。"
+          }
+        ],
+        "key_facts_ok": true,
+        "review_key_facts": [
+          "已发货订单无法修改地址",
+          "可联系快递拦截或申请改派"
+        ],
+        "answerability": "answerable",
+        "review_status": "ai_reviewed",
+        "notes": "问句与答案同第 13 节一致。"
+      },
+      {
+        "id": "Q25",
+        "question_ok": true,
+        "question_issue": "",
+        "reference_answer_ok": true,
+        "review_reference_answer": "不能，同一订单只能使用一张优惠券。",
+        "gold_evidence_ok": true,
+        "review_gold_evidence": [
+          {
+            "section": "9. 优惠券规则",
+            "quote": "优惠券自领取之日起 30 天内有效，逾期自动失效。同一订单只能使用一张优惠券，不能与会员折扣叠加。退款时优惠券若仍在有效期内会退回账户，已过期则不退回。"
+          }
+        ],
+        "key_facts_ok": true,
+        "review_key_facts": [
+          "同一订单只能使用一张优惠券"
+        ],
+        "answerability": "answerable",
+        "review_status": "ai_reviewed",
+        "notes": "与 Q26 同源但约束点不同（张数限制 vs 与会员折扣叠加），不构成重复。"
+      },
+      {
+        "id": "Q26",
+        "question_ok": true,
+        "question_issue": "",
+        "reference_answer_ok": true,
+        "review_reference_answer": "不能，优惠券不能与会员折扣叠加。",
+        "gold_evidence_ok": true,
+        "review_gold_evidence": [
+          {
+            "section": "9. 优惠券规则",
+            "quote": "优惠券自领取之日起 30 天内有效，逾期自动失效。同一订单只能使用一张优惠券，不能与会员折扣叠加。退款时优惠券若仍在有效期内会退回账户，已过期则不退回。"
+          }
+        ],
+        "key_facts_ok": true,
+        "review_key_facts": [
+          "优惠券不能与会员折扣叠加"
+        ],
+        "answerability": "answerable",
+        "review_status": "ai_reviewed",
+        "notes": "文档明确写的是优惠券不能与会员折扣叠加，答案主语与文档一致。"
+      },
+      {
+        "id": "Q27",
+        "question_ok": true,
+        "question_issue": "",
+        "reference_answer_ok": true,
+        "review_reference_answer": "不能。人为损坏、进水不在保修范围内。",
+        "gold_evidence_ok": true,
+        "review_gold_evidence": [
+          {
+            "section": "8. 保修政策",
+            "quote": "电子产品自签收之日起保修 12 个月，配件保修 3 个月。人为损坏、进水、私自拆修不在保修范围内。保修期内维修免费；保修期外维修需收取材料费和人工费。"
+          }
+        ],
+        "key_facts_ok": true,
+        "review_key_facts": [
+          "人为损坏不在保修范围",
+          "进水不在保修范围",
+          "私自拆修不在保修范围"
+        ],
+        "answerability": "answerable",
+        "review_status": "ai_reviewed",
+        "notes": "“不能免费维修”是由“进水不在保修范围”与“保修期内维修免费”共同推出的文档内结论，未引入外部知识。"
+      },
+      {
+        "id": "Q28",
+        "question_ok": true,
+        "question_issue": "",
+        "reference_answer_ok": true,
+        "review_reference_answer": "不能仅按 48 小时判断；预售商品以商品页标注的发货时间为准。",
+        "gold_evidence_ok": true,
+        "review_gold_evidence": [
+          {
+            "section": "5. 发货时效",
+            "quote": "现货商品在付款后 48 小时内发出；预售商品以商品页标注的发货时间为准。大件商品（家具、家电）发货时间为 5 个工作日内，配送前会电话预约。"
+          }
+        ],
+        "key_facts_ok": true,
+        "review_key_facts": [
+          "现货商品付款后 48 小时内发出",
+          "预售商品以商品页标注的发货时间为准"
+        ],
+        "answerability": "answerable",
+        "review_status": "ai_reviewed",
+        "notes": "是否构成延迟取决于商品页标注时间，文档未给出该时间；答案已正确表达为条件判断，规则本身可回答。"
+      },
+      {
+        "id": "Q30",
+        "question_ok": true,
+        "question_issue": "",
+        "reference_answer_ok": true,
+        "review_reference_answer": "文档未说明是否支持海外配送，无法确认。",
+        "gold_evidence_ok": true,
+        "review_gold_evidence": [],
+        "key_facts_ok": true,
+        "review_key_facts": [
+          "文档未提及海外配送"
+        ],
+        "answerability": "unanswerable",
+        "review_status": "ai_reviewed",
+        "notes": "文档 13 节均无海外配送相关表述，空证据符合 unanswerable 要求。"
+      },
+      {
+        "id": "Q32",
+        "question_ok": true,
+        "question_issue": "",
+        "reference_answer_ok": true,
+        "review_reference_answer": "文档只说明积分可抵扣现金，未说明可以兑换礼品。",
+        "gold_evidence_ok": true,
+        "review_gold_evidence": [
+          {
+            "section": "10. 会员积分",
+            "quote": "消费 1 元积 1 分，100 积分可抵扣 1 元。积分自获得之日起 12 个月内有效，逾期清零。积分不可转让、不可提现，仅限本账户使用。"
+          }
+        ],
+        "key_facts_ok": true,
+        "review_key_facts": [
+          "100 积分可抵扣 1 元",
+          "积分不可转让",
+          "积分不可提现",
+          "文档未提及兑换礼品"
+        ],
+        "answerability": "unanswerable",
+        "review_status": "ai_reviewed",
+        "notes": "所附证据只支撑文档已知的积分用途和使用限制，未涉及礼品；对“能否兑换礼品”保持不可回答。"
+      },
+      {
+        "id": "Q33",
+        "question_ok": true,
+        "question_issue": "",
+        "reference_answer_ok": true,
+        "review_reference_answer": "文档未说明生日双倍积分活动，无法确认。",
+        "gold_evidence_ok": true,
+        "review_gold_evidence": [],
+        "key_facts_ok": true,
+        "review_key_facts": [
+          "文档未提及生日双倍积分"
+        ],
+        "answerability": "unanswerable",
+        "review_status": "ai_reviewed",
+        "notes": "全文无生日、双倍积分相关表述。"
+      },
+      {
+        "id": "Q34",
+        "question_ok": true,
+        "question_issue": "",
+        "reference_answer_ok": true,
+        "review_reference_answer": "文档未说明是否可以指定快递公司。",
+        "gold_evidence_ok": true,
+        "review_gold_evidence": [],
+        "key_facts_ok": true,
+        "review_key_facts": [
+          "文档未提及指定快递公司"
+        ],
+        "answerability": "unanswerable",
+        "review_status": "ai_reviewed",
+        "notes": "全文无指定快递公司的表述；第 13 节仅提到快递拦截或申请改派，不能推出可指定快递。"
+      },
+      {
+        "id": "Q37",
+        "question_ok": true,
+        "question_issue": "",
+        "reference_answer_ok": false,
+        "review_reference_answer": "信息不足：需明确是申请开票、修改抬头还是红冲重开。文档说明仅支持电子发票，提交申请后 24 小时内发送至下单邮箱；发票抬头可在开具前修改，已开具的发票需先申请红冲，再重新开具；暂不支持纸质发票和增值税专用发票。",
+        "gold_evidence_ok": true,
+        "review_gold_evidence": [
+          {
+            "section": "4. 发票说明",
+            "quote": "仅支持电子发票，提交申请后 24 小时内发送至下单邮箱。发票抬头可在开具前修改；已开具的发票需先申请红冲，再重新开具。暂不支持纸质发票和增值税专用发票。"
+          }
+        ],
+        "key_facts_ok": false,
+        "review_key_facts": [
+          "仅支持电子发票",
+          "提交申请后 24 小时内发送至下单邮箱",
+          "发票抬头可在开具前修改",
+          "已开具的发票需先申请红冲，再重新开具",
+          "不支持纸质发票和增值税专用发票",
+          "文档未说明具体申请入口和抬头填写步骤"
+        ],
+        "answerability": "ambiguous",
+        "review_status": "needs_recheck",
+        "notes": "原文“一般流程是在订单中申请电子发票并填写抬头”属文档外知识：文档只说明仅支持电子发票、24 小时内发送至下单邮箱、抬头可在开具前修改，未写申请入口和填写抬头步骤。已改为仅使用文档事实，并按申请开票/修改抬头/红冲重开给出分支澄清。"
+      },
+      {
+        "id": "Q38",
+        "question_ok": true,
+        "question_issue": "",
+        "reference_answer_ok": true,
+        "review_reference_answer": "信息不足：需要订单实付金额和收货地区；满 99 元包邮，未满 99 元 10 元，偏远地区 20 元。",
+        "gold_evidence_ok": true,
+        "review_gold_evidence": [
+          {
+            "section": "7. 运费规则",
+            "quote": "单笔订单实付满 99 元包邮；未满 99 元收取 10 元运费。新疆、西藏、内蒙古等偏远地区运费为 20 元，不参与包邮活动。因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。"
+          }
+        ],
+        "key_facts_ok": true,
+        "review_key_facts": [
+          "单笔订单实付满 99 元包邮",
+          "未满 99 元收取 10 元运费",
+          "新疆、西藏、内蒙古等偏远地区运费 20 元且不参与包邮"
+        ],
+        "answerability": "ambiguous",
+        "review_status": "ai_reviewed",
+        "notes": "金额和地区两个条件缺失，答案列出对应分支，符合 ambiguous 要求。"
+      },
+      {
+        "id": "Q39",
+        "question_ok": true,
+        "question_issue": "",
+        "reference_answer_ok": true,
+        "review_reference_answer": "信息不足：需要确认是电子产品还是配件；电子产品 12 个月，配件 3 个月。",
+        "gold_evidence_ok": true,
+        "review_gold_evidence": [
+          {
+            "section": "8. 保修政策",
+            "quote": "电子产品自签收之日起保修 12 个月，配件保修 3 个月。人为损坏、进水、私自拆修不在保修范围内。保修期内维修免费；保修期外维修需收取材料费和人工费。"
+          }
+        ],
+        "key_facts_ok": true,
+        "review_key_facts": [
+          "电子产品自签收之日起保修 12 个月",
+          "配件保修 3 个月"
+        ],
+        "answerability": "ambiguous",
+        "review_status": "ai_reviewed",
+        "notes": "商品类型缺失，电子产品与配件两个分支均由第 8 节支持。"
+      },
+      {
+        "id": "Q40",
+        "question_ok": false,
+        "question_issue": "与 Q20 高度重复：Q20 已问积分获取、抵扣和有效期，本条“积分怎么用”覆盖同一抵扣用途；且文档已直接说明积分用途，“信息不足”的 ambiguous 依据偏弱。",
+        "reference_answer_ok": true,
+        "review_reference_answer": "信息不足：需要账户和订单场景；积分 100 分可抵扣 1 元，仅限本账户使用。",
+        "gold_evidence_ok": true,
+        "review_gold_evidence": [
+          {
+            "section": "10. 会员积分",
+            "quote": "消费 1 元积 1 分，100 积分可抵扣 1 元。积分自获得之日起 12 个月内有效，逾期清零。积分不可转让、不可提现，仅限本账户使用。"
+          }
+        ],
+        "key_facts_ok": true,
+        "review_key_facts": [
+          "100 积分可抵扣 1 元",
+          "积分不可转让",
+          "积分不可提现",
+          "积分仅限本账户使用"
+        ],
+        "answerability": "ambiguous",
+        "review_status": "needs_recheck",
+        "notes": "答案事实部分可由第 10 节支持，但问句与 Q20 重复，且“需要账户和订单场景”的缺失信息说明较弱；建议删除本条，或改成真正需要澄清的具体问题（如积分能否转赠/提现）。"
+      }
+    ]
+  }
+}

@@ -1,0 +1,304 @@
+{
+  "items": [
+    {
+      "item_key": "DOC-SAMPLE-001",
+      "query": "退款申请提交后多久到账？",
+      "gold_answer": "退款审核通过后 1-3 个工作日退回原支付渠道。",
+      "gold_evidence": [
+        {
+          "document_id": "sample-doc-after-sale",
+          "chunk_id": "sample-chunk-01",
+          "evidence_text": "退款将在审核通过后 1-3 个工作日内退回原支付渠道，具体到账时间以银行或支付平台为准。",
+          "page_number": 3,
+          "metadata": {"section": "售后-退款"}
+        }
+      ],
+      "category": "售后",
+      "difficulty": "easy",
+      "source": "doc:robot-backend",
+      "split": "test",
+      "metadata": {"synthetic": true}
+    },
+    {
+      "item_key": "DOC-SAMPLE-002",
+      "query": "电子发票可以开公司抬头吗？",
+      "gold_answer": "可以，开票时填写公司名称与税号即可。",
+      "gold_evidence": [
+        {
+          "document_id": "sample-doc-invoice",
+          "chunk_id": "sample-chunk-02",
+          "evidence_text": "支持开具企业电子发票：在开票信息中填写公司名称、纳税人识别号与接收邮箱即可。",
+          "page_number": 5,
+          "metadata": {"section": "发票"}
+        }
+      ],
+      "category": "发票",
+      "difficulty": "easy",
+      "source": "doc:robot-backend",
+      "split": "test",
+      "metadata": {"synthetic": true}
+    },
+    {
+      "item_key": "DOC-SAMPLE-003",
+      "query": "修改收货地址后运费会变吗？",
+      "gold_answer": "地址变更可能影响运费，系统会重新计算差额。",
+      "gold_evidence": [
+        {
+          "document_id": "sample-doc-logistics",
+          "chunk_id": "sample-chunk-03",
+          "evidence_text": "发货前修改收货地址，系统将按新地址重新计算运费，产生差额时需补缴或原路退还。",
+          "page_number": 7,
+          "metadata": {"section": "物流"}
+        }
+      ],
+      "category": "物流",
+      "difficulty": "medium",
+      "source": "doc:robot-backend",
+      "split": "valid",
+      "metadata": {"synthetic": true}
+    },
+    {
+      "item_key": "DOC-SAMPLE-004",
+      "query": "会员积分可以抵扣现金吗？",
+      "gold_answer": "100 积分可抵扣 1 元，单笔最多抵扣订单金额的 30%。",
+      "gold_evidence": [
+        {
+          "document_id": "sample-doc-member",
+          "chunk_id": "sample-chunk-04",
+          "evidence_text": "积分兑换比例为 100 积分抵 1 元，单笔订单最高抵扣金额为订单金额的 30%。",
+          "page_number": 11,
+          "metadata": {"section": "会员"}
+        }
+      ],
+      "category": "会员",
+      "difficulty": "medium",
+      "source": "doc:robot-backend",
+      "split": "test",
+      "metadata": {"synthetic": true}
+    },
+    {
+      "item_key": "DOC-SAMPLE-005",
+      "query": "商品支持价保吗？",
+      "gold_answer": "支持 7 天价保，需订单未申请过其他补偿。",
+      "gold_evidence": [
+        {
+          "document_id": "sample-doc-price-protect",
+          "chunk_id": "sample-chunk-05",
+          "evidence_text": "签收后 7 天内同商品降价可申请价保，同一订单仅可申请一次且不能与其它补偿叠加。",
+          "page_number": 2,
+          "metadata": {"section": "价保"}
+        }
+      ],
+      "category": "售后",
+      "difficulty": "medium",
+      "source": "doc:robot-backend",
+      "split": "test",
+      "metadata": {"synthetic": true}
+    },
+    {
+      "item_key": "DOC-SAMPLE-006",
+      "query": "批量导入商品失败怎么排查？",
+      "gold_answer": "先检查模板列名与必填项，再查看失败原因文件。",
+      "gold_evidence": [
+        {
+          "document_id": "sample-doc-import",
+          "chunk_id": "sample-chunk-06",
+          "evidence_text": "批量导入失败时下载失败明细，逐行核对模板列名、必填字段与编码格式（UTF-8）。",
+          "page_number": 9,
+          "metadata": {"section": "商品导入"}
+        }
+      ],
+      "category": "操作",
+      "difficulty": "hard",
+      "source": "doc:robot-backend",
+      "split": "train",
+      "metadata": {"synthetic": true}
+    },
+    {
+      "item_key": "DOC-SAMPLE-007",
+      "query": "客服账号如何开通子账号？",
+      "gold_answer": "主账号在成员管理里邀请成员并分配角色。",
+      "gold_evidence": [
+        {
+          "document_id": "sample-doc-account",
+          "chunk_id": "sample-chunk-07",
+          "evidence_text": "主账号进入成员管理，点击邀请成员，填写手机号后为其分配客服角色与数据权限。",
+          "page_number": 4,
+          "metadata": {"section": "账号"}
+        }
+      ],
+      "category": "账号",
+      "difficulty": "easy",
+      "source": "doc:robot-backend",
+      "split": "test",
+      "metadata": {"synthetic": true}
+    },
+    {
+      "item_key": "DOC-SAMPLE-008",
+      "query": "会话记录能保存多久？",
+      "gold_answer": "默认保存 12 个月，可申请延长归档。",
+      "gold_evidence": [
+        {
+          "document_id": "sample-doc-retention",
+          "chunk_id": "sample-chunk-08",
+          "evidence_text": "聊天记录默认保留 12 个月，超过期限自动清理；如需长期留存可申请归档存储。",
+          "page_number": 6,
+          "metadata": {"section": "数据"}
+        }
+      ],
+      "category": "数据",
+      "difficulty": "medium",
+      "source": "doc:robot-backend",
+      "split": "test",
+      "metadata": {"synthetic": true}
+    },
+    {
+      "item_key": "DOC-SAMPLE-009",
+      "query": "快捷回复支持变量吗？",
+      "gold_answer": "支持客户昵称、订单号等变量。",
+      "gold_evidence": [
+        {
+          "document_id": "sample-doc-quick-reply",
+          "chunk_id": "sample-chunk-09",
+          "evidence_text": "快捷回复模板支持插入变量，例如 {{客户昵称}}、{{订单号}}，发送时自动替换。",
+          "page_number": 8,
+          "metadata": {"section": "话术"}
+        }
+      ],
+      "category": "话术",
+      "difficulty": "easy",
+      "source": "doc:robot-backend",
+      "split": "train",
+      "metadata": {"synthetic": true}
+    },
+    {
+      "item_key": "DOC-SAMPLE-010",
+      "query": "机器人拒答后如何转人工？",
+      "gold_answer": "在拒答规则中配置转人工动作并设置接待分组。",
+      "gold_evidence": [
+        {
+          "document_id": "sample-doc-handoff",
+          "chunk_id": "sample-chunk-10",
+          "evidence_text": "拒答规则支持配置动作：结束会话、转人工或转指定技能组；转人工需选择接待分组与超时时间。",
+          "page_number": 12,
+          "metadata": {"section": "转人工"}
+        }
+      ],
+      "category": "机器人",
+      "difficulty": "hard",
+      "source": "doc:robot-backend",
+      "split": "test",
+      "metadata": {"synthetic": true}
+    },
+    {
+      "item_key": "CONV-SAMPLE-001",
+      "query": "为什么设置了关键词但没有触发回复？",
+      "gold_answer": "关键词需要绑定到具体场景与回复动作，并且要检查优先级是否被更高规则拦截。",
+      "gold_evidence": [],
+      "category": "关键词/话术配置",
+      "difficulty": "medium",
+      "source": "conv:knowledge",
+      "split": "test",
+      "metadata": {"synthetic": true, "session_id": "sample-001"}
+    },
+    {
+      "item_key": "CONV-SAMPLE-002",
+      "query": "关闭自动回复后为什么还在回复？",
+      "gold_answer": "需要同时检查总开关、场景开关与跟单消息，三者任一开启都会产生回复。",
+      "gold_evidence": [],
+      "category": "开关配置",
+      "difficulty": "medium",
+      "source": "conv:knowledge",
+      "split": "test",
+      "metadata": {"synthetic": true, "session_id": "sample-002"}
+    },
+    {
+      "item_key": "CONV-SAMPLE-003",
+      "query": "商品知识没有自动更新，是什么原因？",
+      "gold_answer": "只有商品主图或详情变更才会触发同步，可手动点击同步商品。",
+      "gold_evidence": [],
+      "category": "知识更新",
+      "difficulty": "easy",
+      "source": "conv:knowledge",
+      "split": "test",
+      "metadata": {"synthetic": true, "session_id": "sample-003"}
+    },
+    {
+      "item_key": "CONV-SAMPLE-004",
+      "query": "客户问尺码，机器人推荐不准怎么办？",
+      "gold_answer": "检查尺码表是否完整，并为超出范围的尺码配置兜底话术。",
+      "gold_evidence": [],
+      "category": "尺码推荐",
+      "difficulty": "hard",
+      "source": "conv:knowledge",
+      "split": "valid",
+      "metadata": {"synthetic": true, "session_id": "sample-004"}
+    },
+    {
+      "item_key": "CONV-SAMPLE-005",
+      "query": "同一个问题有两个答案，机器人会选哪个？",
+      "gold_answer": "按知识优先级与场景匹配度排序，优先级高的先命中。",
+      "gold_evidence": [],
+      "category": "知识优先级",
+      "difficulty": "medium",
+      "source": "conv:knowledge",
+      "split": "test",
+      "metadata": {"synthetic": true, "session_id": "sample-005"}
+    },
+    {
+      "item_key": "CONV-SAMPLE-006",
+      "query": "客户发图片能识别吗？",
+      "gold_answer": "需要开启图片理解能力，并在场景中配置可识别的图片类型。",
+      "gold_evidence": [],
+      "category": "图片理解",
+      "difficulty": "medium",
+      "source": "conv:knowledge",
+      "split": "test",
+      "metadata": {"synthetic": true, "session_id": "sample-006"}
+    },
+    {
+      "item_key": "CONV-SAMPLE-007",
+      "query": "转人工后客户还在收到机器人消息？",
+      "gold_answer": "检查转人工动作是否结束机器人会话，以及是否有跟单任务在并行发送。",
+      "gold_evidence": [],
+      "category": "转人工",
+      "difficulty": "hard",
+      "source": "conv:knowledge",
+      "split": "test",
+      "metadata": {"synthetic": true, "session_id": "sample-007"}
+    },
+    {
+      "item_key": "CONV-SAMPLE-008",
+      "query": "知识库导入的文件去哪了？",
+      "gold_answer": "在知识库文档列表查看解析状态，失败会给出失败原因。",
+      "gold_evidence": [],
+      "category": "知识库",
+      "difficulty": "easy",
+      "source": "conv:knowledge",
+      "split": "train",
+      "metadata": {"synthetic": true, "session_id": "sample-008"}
+    },
+    {
+      "item_key": "CONV-SAMPLE-009",
+      "query": "为什么机器人答非所问？",
+      "gold_answer": "优先检查召回知识是否与问题同场景，再看回复模板是否引用了错误变量。",
+      "gold_evidence": [],
+      "category": "回复质量",
+      "difficulty": "hard",
+      "source": "conv:knowledge",
+      "split": "test",
+      "metadata": {"synthetic": true, "session_id": "sample-009"}
+    },
+    {
+      "item_key": "CONV-SAMPLE-010",
+      "query": "数据看板的指标口径在哪里看？",
+      "gold_answer": "看板每个指标都有口径说明，可在指标卡片右上角查看。",
+      "gold_evidence": [],
+      "category": "数据看板",
+      "difficulty": "easy",
+      "source": "conv:knowledge",
+      "split": "test",
+      "metadata": {"synthetic": true, "session_id": "sample-010"}
+    }
+  ]
+}

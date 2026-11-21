@@ -1,0 +1,352 @@
+{
+  "file": "pilot-40-targets-v1.2.0.json",
+  "sha256": "34357b34c3d0fc85e78f90eeebb353b25a148926e3a55b19f17cc23b08b2b5eb",
+  "sha256_file": "pilot-40-targets-v1.2.0.sha256",
+  "row_count": 40,
+  "status": "frozen",
+  "target_source_counts": {
+    "pilot10": 5,
+    "none": 22,
+    "matrix": 5,
+    "additional": 8
+  },
+  "target_status_counts": {
+    "unchanged": 31,
+    "known_non_pass_reapproval": 1,
+    "reapproval_required": 2,
+    "new_target_proposed": 2,
+    "unchanged_rebaseline": 3,
+    "reapproval_with_variant": 1
+  },
+  "checks": [
+    {
+      "name": "row_count_40",
+      "ok": true,
+      "detail": 40
+    },
+    {
+      "name": "unique_ids",
+      "ok": true,
+      "detail": [
+        "Q01",
+        "Q02",
+        "Q03",
+        "Q04",
+        "Q05",
+        "Q06",
+        "Q07",
+        "Q08",
+        "Q09",
+        "Q10",
+        "Q11",
+        "Q12",
+        "Q13",
+        "Q14",
+        "Q15",
+        "Q16",
+        "Q17",
+        "Q18",
+        "Q19",
+        "Q20",
+        "Q21",
+        "Q22",
+        "Q23",
+        "Q24",
+        "Q25",
+        "Q26",
+        "Q27",
+        "Q28",
+        "Q29",
+        "Q30",
+        "Q31",
+        "Q32",
+        "Q33",
+        "Q34",
+        "Q35",
+        "Q36",
+        "Q37",
+        "Q38",
+        "Q39",
+        "Q40"
+      ]
+    },
+    {
+      "name": "sha_sidecar",
+      "ok": true,
+      "detail": {
+        "actual": "34357b34c3d0fc85e78f90eeebb353b25a148926e3a55b19f17cc23b08b2b5eb",
+        "sidecar": "34357b34c3d0fc85e78f90eeebb353b25a148926e3a55b19f17cc23b08b2b5eb"
+      }
+    },
+    {
+      "name": "final_labels_sha",
+      "ok": true,
+      "detail": "f139623fef80b55716fce0c773e776d284a5167683eb91559b23e49cabd000eb"
+    },
+    {
+      "name": "old_targets_sha",
+      "ok": true,
+      "detail": "8ae37ac4ee73f9378000874eb173cbf5b1fee28ec6fabebac83e7900a4832b71"
+    },
+    {
+      "name": "old_targets_read_only",
+      "ok": true,
+      "detail": "read_only"
+    },
+    {
+      "name": "runtime_inactive",
+      "ok": true,
+      "detail": false
+    },
+    {
+      "name": "q32_precondition",
+      "ok": true,
+      "detail": "Q32 F 0.9-1.0 assumes the 3 factual points (1 yuan=1 point, 12-month validity, non-transferable) remain factual. If v1.2.0 classifies them as uncertainty/absence and F becomes skipped, it is a target miss; no skipped fallback."
+    },
+    {
+      "name": "target_source_note",
+      "ok": true,
+      "detail": "final_labels target_source reflects pre-reapproval; pilot-40-targets-v1.2.0.json is authoritative for targets."
+    },
+    {
+      "name": "q17_target",
+      "ok": true,
+      "detail": {
+        "F": [
+          0.7,
+          0.9
+        ],
+        "C": [
+          0.8,
+          1.0
+        ],
+        "R": [
+          0.8,
+          1.0
+        ]
+      }
+    },
+    {
+      "name": "q30_target",
+      "ok": true,
+      "detail": {
+        "F": [
+          0.4,
+          1.0
+        ],
+        "C": [
+          0.8,
+          1.0
+        ],
+        "R": [
+          0.8,
+          1.0
+        ]
+      }
+    },
+    {
+      "name": "q32_target",
+      "ok": true,
+      "detail": {
+        "F": [
+          0.9,
+          1.0
+        ],
+        "C": [
+          0.8,
+          1.0
+        ],
+        "R": [
+          0.8,
+          1.0
+        ]
+      }
+    },
+    {
+      "name": "q19_target",
+      "ok": true,
+      "detail": {
+        "F": [
+          0.6,
+          1.0
+        ],
+        "C": [
+          0.8,
+          1.0
+        ],
+        "R": [
+          0.8,
+          1.0
+        ]
+      }
+    },
+    {
+      "name": "q20_target",
+      "ok": true,
+      "detail": {
+        "F": [
+          0.6,
+          1.0
+        ],
+        "C": [
+          0.8,
+          1.0
+        ],
+        "R": [
+          0.8,
+          1.0
+        ]
+      }
+    },
+    {
+      "name": "q31_target",
+      "ok": true,
+      "detail": {
+        "F": [
+          0.6,
+          1.0
+        ],
+        "C": [
+          0.8,
+          1.0
+        ],
+        "R": [
+          0.8,
+          1.0
+        ]
+      }
+    },
+    {
+      "name": "q35_target",
+      "ok": true,
+      "detail": {
+        "F": [
+          0.8,
+          1.0
+        ],
+        "C": [
+          0.7,
+          1.0
+        ],
+        "R": [
+          0.8,
+          1.0
+        ]
+      }
+    },
+    {
+      "name": "q36_target",
+      "ok": true,
+      "detail": {
+        "case_id": "Q36",
+        "group": "human_gold",
+        "final_category": "ambiguous",
+        "target_source": "matrix",
+        "targets": {
+          "F": [
+            0.8,
+            1.0
+          ],
+          "C": [
+            0.5,
+            0.6
+          ],
+          "R": [
+            0.8,
+            1.0
+          ]
+        },
+        "target_status": "reapproval_with_variant",
+        "semantic_reason": "condition sentence factual; F 0.8-1.0; C base 0.5-0.6, variant 0.9-1.0",
+        "known_non_pass": false,
+        "variant_targets": {
+          "C": [
+            0.9,
+            1.0
+          ]
+        },
+        "variant_note": "base C 0.5-0.6; disclosure variant C 0.9-1.0"
+      }
+    },
+    {
+      "name": "q14_target",
+      "ok": true,
+      "detail": {
+        "case_id": "Q14",
+        "group": "human_gold",
+        "final_category": "multi",
+        "target_source": "additional",
+        "targets": {
+          "F": "unavailable",
+          "C": [
+            0.8,
+            1.0
+          ],
+          "R": [
+            0.8,
+            1.0
+          ]
+        },
+        "target_status": "known_non_pass_reapproval",
+        "semantic_reason": "F unavailable; C/R 0.8-1.0; C 0.7 variance retained; known non-pass",
+        "known_non_pass": true
+      }
+    },
+    {
+      "name": "target_source_counts",
+      "ok": true,
+      "detail": {
+        "pilot10": 5,
+        "none": 22,
+        "matrix": 5,
+        "additional": 8
+      }
+    },
+    {
+      "name": "target_status_counts",
+      "ok": true,
+      "detail": {
+        "unchanged": 31,
+        "known_non_pass_reapproval": 1,
+        "reapproval_required": 2,
+        "new_target_proposed": 2,
+        "unchanged_rebaseline": 3,
+        "reapproval_with_variant": 1
+      }
+    },
+    {
+      "name": "all_40_have_targets_key",
+      "ok": true,
+      "detail": "all"
+    },
+    {
+      "name": "q32_not_skipped",
+      "ok": true,
+      "detail": {
+        "F": [
+          0.9,
+          1.0
+        ],
+        "C": [
+          0.8,
+          1.0
+        ],
+        "R": [
+          0.8,
+          1.0
+        ]
+      }
+    },
+    {
+      "name": "target_status_note",
+      "ok": true,
+      "detail": "target_status records pre-freeze change provenance; all rows are approved in this frozen table. reapproval_required/new_target_proposed are historical change types, not pending approvals."
+    },
+    {
+      "name": "revision_note",
+      "ok": true,
+      "detail": "v1.0.1"
+    }
+  ],
+  "all_pass": true
+}

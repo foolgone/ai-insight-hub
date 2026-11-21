@@ -1,0 +1,42 @@
+{
+  "case_id": "Q16",
+  "prompt_version": "v1.1.3",
+  "runs": [
+    {
+      "repeat": 1,
+      "status": "evaluated",
+      "score": 0.9,
+      "details": {
+        "reason": "回答直接完整回应了问题，建议联系客服协助核查。"
+      },
+      "token_usage": {
+        "input": 1305,
+        "output": 30
+      }
+    },
+    {
+      "repeat": 2,
+      "status": "evaluated",
+      "score": 0.9,
+      "details": {
+        "reason": "回答直接完整回应了问题，建议联系客服协助核查。"
+      },
+      "token_usage": {
+        "input": 1305,
+        "output": 30
+      }
+    },
+    {
+      "repeat": 3,
+      "status": "evaluated",
+      "score": 1.0,
+      "details": {
+        "reason": "回答直接完整地回应了问题，明确建议联系客服协助核查。"
+      },
+      "token_usage": {
+        "input": 1305,
+        "output": 32
+      }
+    }
+  ]
+}

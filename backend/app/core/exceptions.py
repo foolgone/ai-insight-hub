@@ -227,6 +227,62 @@ class DataSourceTypeInUseError(AIInsightHubException):
     default_message = "该类型仍被数据源使用，无法删除"
 
 
+class QaDatasetNotFoundError(AIInsightHubException):
+    """数据集 / 版本 / 条目不存在或无权访问（404）。"""
+
+    code = ErrorCode.QA_DATASET_NOT_FOUND
+    default_message = "数据集不存在"
+
+
+class RagTraceNotFoundError(AIInsightHubException):
+    """RAG trace 不存在（404）。"""
+
+    code = ErrorCode.RAG_TRACE_NOT_FOUND
+    default_message = "RAG Trace 不存在"
+
+
+class RagEvaluationNotFoundError(AIInsightHubException):
+    """评测 Run / 结果不存在（404）。"""
+
+    code = ErrorCode.RAG_EVALUATION_NOT_FOUND
+    default_message = "评测任务不存在"
+
+
+class RagEvaluationInvalidError(AIInsightHubException):
+    """评测请求不合法（400）：版本未发布/空数据集/指标不匹配等。"""
+
+    code = ErrorCode.RAG_EVALUATION_INVALID
+    default_message = "评测请求不合法"
+
+
+class RagEvaluationConflictError(AIInsightHubException):
+    """评测冲突（409）：已有子 Run、重复提交等。"""
+
+    code = ErrorCode.RAG_EVALUATION_CONFLICT
+    default_message = "评测冲突"
+
+
+class QaDatasetImmutableError(AIInsightHubException):
+    """已发布版本不可修改（409）。"""
+
+    code = ErrorCode.QA_DATASET_IMMUTABLE
+    default_message = "已发布的数据集版本不可修改，请创建新版本"
+
+
+class QaDatasetImportInvalidError(AIInsightHubException):
+    """导入校验失败（400），``details`` 携带逐行错误。"""
+
+    code = ErrorCode.QA_DATASET_IMPORT_INVALID
+    default_message = "导入数据校验失败"
+
+
+class QaDatasetNameExistsError(AIInsightHubException):
+    """同一用户下数据集重名（409）。"""
+
+    code = ErrorCode.QA_DATASET_NAME_EXISTS
+    default_message = "同名数据集已存在"
+
+
 # --------------------------------------------------------------------------- 内部错误
 class InternalError(AIInsightHubException):
     code = ErrorCode.INTERNAL_ERROR
@@ -257,6 +313,14 @@ __all__ = [
     "LLMCredentialInvalidError",
     "LLMCredentialNotConfiguredError",
     "PermissionDeniedError",
+    "QaDatasetImmutableError",
+    "QaDatasetImportInvalidError",
+    "QaDatasetNameExistsError",
+    "QaDatasetNotFoundError",
+    "RagEvaluationConflictError",
+    "RagEvaluationInvalidError",
+    "RagEvaluationNotFoundError",
+    "RagTraceNotFoundError",
     "RateLimitExceededError",
     "RefreshTokenInvalidError",
     "ReportFormatInvalidError",

@@ -30,6 +30,8 @@ target_metadata = Base.metadata
 
 # 手工维护的表达式索引（pg_trgm）：见迁移 002
 _MANUAL_INDEXES = {"idx_cleaned_data_search", "idx_kb_search"}
+# 迁移 022 的内部备份表：只用于 completed_items 回滚，不进入 ORM metadata。
+_MIGRATION_INTERNAL_TABLES = {"rag_evaluation_runs_022_completed_backup"}
 
 
 def _included_tables() -> set[str] | None:
@@ -48,6 +50,9 @@ def include_object(obj, name, type_, reflected, compare_to) -> bool:  # noqa: AN
     tables = _included_tables()
     if tables is not None and type_ == "table":
         return name in tables
+    # 迁移 022 的内部备份表：不参与模型/库漂移比较。
+    if type_ == "table" and name in _MIGRATION_INTERNAL_TABLES:
+        return False
     # 表达式 GIN(pg_trgm) 索引由迁移 002 手工创建，SQLAlchemy metadata 无法表达，
     # 在 autogenerate 比较中忽略，避免被误判为「待删除」。
     if type_ == "index" and name in _MANUAL_INDEXES:

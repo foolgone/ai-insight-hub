@@ -1,0 +1,65 @@
+{
+  "version": "v1.1.5",
+  "status": "design_draft",
+  "active": false,
+  "date": "2026-11-18",
+  "note": "v1.1.5：F 增加规则关系/独立性推断归 meta、Q17 few-shot；R/C 继承 v1.1.4；默认仍 v1.0.0。",
+  "schema_version": "rag_judge_schema_v2",
+  "rubric_version": "v1.1.5",
+  "metric_version_mapping": {
+    "faithfulness": "v2",
+    "answer_correctness": "v2",
+    "answer_relevancy": "v2",
+    "retrieval_metrics": "v1"
+  },
+  "prompts": {
+    "faithfulness.txt": "6d45fa102c6efcf6897e8e84f1a1b417b5720dfa78d617e206a6a0f3db49791c",
+    "answer_correctness.txt": "2ab6eac2abe57dcfd647df328244ac3e5681fc93222938d6614e71037d49ae77",
+    "answer_relevancy.txt": "394cd30c1453f0474ec6d25cf0305d8e3fb066151ac0f85e004b16117906891b"
+  },
+  "changes": {
+    "faithfulness": [
+      "继承 v1.1.4 全部规则",
+      "规则之间的关系/独立性/适用范围推断 -> non_factual/meta，不建 factual claim",
+      "混合句拆分：事实部分 factual，关系/范围部分 meta；不得整句 factual/insufficient",
+      "Q17 few-shot：cl1–cl4 supported、cl5 meta、cl6 advice，F=4/4=1.0"
+    ],
+    "answer_correctness": [
+      "继承 v1.1.4（C 正文不变）"
+    ],
+    "answer_relevancy": [
+      "继承 v1.1.4（R 正文不变）"
+    ]
+  },
+  "activation_requirements": [
+    "人工审核通过 v1.1.5 设计",
+    "Q17 F 重跑 3 次均 0.9-1.0，cl5 必须 meta",
+    "Q30 F 重跑 3 次均 1.0",
+    "10 条闸门 v1.1.5 通过",
+    "40 条 v1.1.5 规模/回归完成；不是 40 条 Human Gold 验收"
+  ],
+  "open_issues": [
+    "Q17 F 已验证 3/3=1.0，cl5 归 meta；Q30 F 已验证 3/3=1.0",
+    "10 条闸门 v1.1.5：10/10 通过",
+    "40 条规模/回归：32/40 停在 Q32 F=0.75（v1.0.0 1.0；重跑 3 次均 0.75）",
+    "Q32 cl1“无法确认积分支持礼品兑换功能”被标 factual/insufficient；应为 non_factual/meta；Q32 是 provisional，无显式目标",
+    "Q33-Q40 未跑；Q14 F=unavailable，C=0.9 本次 pass、历史 C 0.7/0.7/0.9 方差",
+    "Q28 provisional F 0.8-1.0 已注册；Q30 F 0.4-1.0 已注册",
+    "v1.1.4 的 10 条结果作废，不能与 v1.1.5 混用",
+    "Q10 evidence typo 字形规则留待后续评估",
+    "Q36 canonical 冲突口径未业务确认"
+  ],
+  "design_revision": "2026-11-18-v115",
+  "acceptance_matrix": "docs/repair/phase3e/prompt-v1.1.1-acceptance-matrix.json",
+  "fixtures": "docs/repair/phase3e/prompt-v1.1.1-fixtures.json",
+  "human_gold_coverage": {
+    "Q23": "human_gold",
+    "Q35": "human_gold",
+    "Q36": "human_gold",
+    "Q21#3": "human_gold_claim_only",
+    "Q11": "ai_draft_pending_human",
+    "Q29": "ai_draft_pending_human"
+  },
+  "implementation_status": "implemented_default_off",
+  "default_prompt_version": "v1.0.0"
+}

@@ -1,0 +1,52 @@
+{
+  "case_id": "Q14",
+  "prompt_version": "v1.1.2",
+  "runs": [
+    {
+      "repeat": 1,
+      "status": "evaluated",
+      "score": 0.7,
+      "details": {
+        "missing_points": [
+          "未开具前可以修改"
+        ],
+        "wrong_facts": [],
+        "reason": "回答核心正确，但缺少未开具前可以修改这一关键信息。"
+      },
+      "token_usage": {
+        "input": 1972,
+        "output": 51
+      }
+    },
+    {
+      "repeat": 2,
+      "status": "evaluated",
+      "score": 0.7,
+      "details": {
+        "missing_points": [
+          "未开具前可以修改"
+        ],
+        "wrong_facts": [],
+        "reason": "回答基本正确，但缺少了未开具前可以修改这一关键信息。"
+      },
+      "token_usage": {
+        "input": 1972,
+        "output": 52
+      }
+    },
+    {
+      "repeat": 3,
+      "status": "evaluated",
+      "score": 0.9,
+      "details": {
+        "missing_points": [],
+        "wrong_facts": [],
+        "reason": "回答详细且准确地覆盖了金标中的所有关键信息，并补充了相关操作流程和注意事项，没有矛盾或错误。"
+      },
+      "token_usage": {
+        "input": 1972,
+        "output": 57
+      }
+    }
+  ]
+}

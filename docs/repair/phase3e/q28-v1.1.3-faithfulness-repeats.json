@@ -1,0 +1,465 @@
+{
+  "case_id": "Q28",
+  "prompt_version": "v1.1.3",
+  "runs": [
+    {
+      "repeat": 1,
+      "status": "evaluated",
+      "score": 0.875,
+      "counts": {
+        "scorable_claim_count": 8,
+        "supported_claim_count": 7,
+        "insufficient_evidence_count": 1,
+        "non_factual_count": 0
+      },
+      "validation_errors": [],
+      "claims": [
+        {
+          "claim": "预售商品付款后 48 小时未发货，不视为延迟",
+          "supported": null,
+          "evidence": [],
+          "reason": "依据上下文明确说明",
+          "claim_id": "cl1",
+          "claim_type": "factual_claim",
+          "claim_subtype": "policy",
+          "support_status": "supported",
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_refs": [
+            {
+              "context_id": "C1",
+              "quote": "预售商品以商品页标注的发货时间为准"
+            }
+          ]
+        },
+        {
+          "claim": "现货商品在付款后 48 小时内发出",
+          "supported": null,
+          "evidence": [],
+          "reason": "C1 单句原文",
+          "claim_id": "cl2",
+          "claim_type": "factual_claim",
+          "claim_subtype": "policy",
+          "support_status": "supported",
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_refs": [
+            {
+              "context_id": "C1",
+              "quote": "现货商品在付款后 48 小时内发出"
+            }
+          ]
+        },
+        {
+          "claim": "预售商品以商品页标注的发货时间为准",
+          "supported": null,
+          "evidence": [],
+          "reason": "C1 单句原文",
+          "claim_id": "cl3",
+          "claim_type": "factual_claim",
+          "claim_subtype": "policy",
+          "support_status": "supported",
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_refs": [
+            {
+              "context_id": "C1",
+              "quote": "预售商品以商品页标注的发货时间为准"
+            }
+          ]
+        },
+        {
+          "claim": "48 小时发货承诺仅适用于现货商品",
+          "supported": null,
+          "evidence": [],
+          "reason": "结合上下文推断",
+          "claim_id": "cl4",
+          "claim_type": "factual_claim",
+          "claim_subtype": "policy",
+          "support_status": "supported",
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_refs": [
+            {
+              "context_id": "C1",
+              "quote": "现货商品在付款后 48 小时内发出"
+            }
+          ]
+        },
+        {
+          "claim": "预售商品的发货时限不由该通用条款约束",
+          "supported": null,
+          "evidence": [],
+          "reason": "C1 单句原文",
+          "claim_id": "cl5",
+          "claim_type": "factual_claim",
+          "claim_subtype": "policy",
+          "support_status": "supported",
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_refs": [
+            {
+              "context_id": "C1",
+              "quote": "预售商品以商品页标注的发货时间为准"
+            }
+          ]
+        },
+        {
+          "claim": "预售商品应以商品详情页上公示的具体发货时间为唯一判定标准",
+          "supported": null,
+          "evidence": [],
+          "reason": "C1 单句原文",
+          "claim_id": "cl6",
+          "claim_type": "factual_claim",
+          "claim_subtype": "policy",
+          "support_status": "supported",
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_refs": [
+            {
+              "context_id": "C1",
+              "quote": "预售商品以商品页标注的发货时间为准"
+            }
+          ]
+        },
+        {
+          "claim": "若预售商品未在商品页所标注的时间内发货，才构成发货延迟",
+          "supported": null,
+          "evidence": [],
+          "reason": "结合上下文推断",
+          "claim_id": "cl7",
+          "claim_type": "factual_claim",
+          "claim_subtype": "policy",
+          "support_status": "supported",
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_refs": [
+            {
+              "context_id": "C1",
+              "quote": "预售商品以商品页标注的发货时间为准"
+            }
+          ]
+        },
+        {
+          "claim": "用户可据此联系客服或申请相应权益（如催促、补偿或取消订单等）",
+          "supported": null,
+          "evidence": [],
+          "reason": "具体补救措施需参考未提供条款或平台另行公示规则",
+          "claim_id": "cl8",
+          "claim_type": "factual_claim",
+          "claim_subtype": "policy",
+          "support_status": "insufficient_evidence",
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_refs": []
+        }
+      ]
+    },
+    {
+      "repeat": 2,
+      "status": "evaluated",
+      "score": 0.875,
+      "counts": {
+        "scorable_claim_count": 8,
+        "supported_claim_count": 7,
+        "insufficient_evidence_count": 1,
+        "non_factual_count": 0
+      },
+      "validation_errors": [],
+      "claims": [
+        {
+          "claim": "预售商品付款后 48 小时未发货，不视为延迟",
+          "supported": null,
+          "evidence": [],
+          "reason": "依据 C1 原文",
+          "claim_id": "cl1",
+          "claim_type": "factual_claim",
+          "claim_subtype": "policy",
+          "support_status": "supported",
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_refs": [
+            {
+              "context_id": "C1",
+              "quote": "预售商品以商品页标注的发货时间为准"
+            }
+          ]
+        },
+        {
+          "claim": "现货商品在付款后 48 小时内发出",
+          "supported": null,
+          "evidence": [],
+          "reason": "C1 单句原文",
+          "claim_id": "cl2",
+          "claim_type": "factual_claim",
+          "claim_subtype": "policy",
+          "support_status": "supported",
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_refs": [
+            {
+              "context_id": "C1",
+              "quote": "现货商品在付款后 48 小时内发出"
+            }
+          ]
+        },
+        {
+          "claim": "预售商品以商品页标注的发货时间为准",
+          "supported": null,
+          "evidence": [],
+          "reason": "C1 单句原文",
+          "claim_id": "cl3",
+          "claim_type": "factual_claim",
+          "claim_subtype": "policy",
+          "support_status": "supported",
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_refs": [
+            {
+              "context_id": "C1",
+              "quote": "预售商品以商品页标注的发货时间为准"
+            }
+          ]
+        },
+        {
+          "claim": "48 小时发货承诺仅适用于现货商品",
+          "supported": null,
+          "evidence": [],
+          "reason": "C1 单句原文",
+          "claim_id": "cl4",
+          "claim_type": "factual_claim",
+          "claim_subtype": "policy",
+          "support_status": "supported",
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_refs": [
+            {
+              "context_id": "C1",
+              "quote": "现货商品在付款后 48 小时内发出"
+            }
+          ]
+        },
+        {
+          "claim": "预售商品的发货时限不由该通用条款约束",
+          "supported": null,
+          "evidence": [],
+          "reason": "C1 单句原文",
+          "claim_id": "cl5",
+          "claim_type": "factual_claim",
+          "claim_subtype": "policy",
+          "support_status": "supported",
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_refs": [
+            {
+              "context_id": "C1",
+              "quote": "预售商品以商品页标注的发货时间为准"
+            }
+          ]
+        },
+        {
+          "claim": "若预售商品未在商品页所标注的时间内发货，才构成发货延迟",
+          "supported": null,
+          "evidence": [],
+          "reason": "C1 单句原文",
+          "claim_id": "cl6",
+          "claim_type": "factual_claim",
+          "claim_subtype": "policy",
+          "support_status": "supported",
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_refs": [
+            {
+              "context_id": "C1",
+              "quote": "预售商品以商品页标注的发货时间为准"
+            }
+          ]
+        },
+        {
+          "claim": "用户可据此联系客服或申请相应权益（如催促、补偿或取消订单等）",
+          "supported": null,
+          "evidence": [],
+          "reason": "上下文未提及具体补救措施",
+          "claim_id": "cl7",
+          "claim_type": "factual_claim",
+          "claim_subtype": "policy",
+          "support_status": "insufficient_evidence",
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_refs": []
+        },
+        {
+          "claim": "须核对商品页标注的约定发货时间",
+          "supported": null,
+          "evidence": [],
+          "reason": "C1 单句原文",
+          "claim_id": "cl8",
+          "claim_type": "factual_claim",
+          "claim_subtype": "policy",
+          "support_status": "supported",
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_refs": [
+            {
+              "context_id": "C1",
+              "quote": "预售商品以商品页标注的发货时间为准"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "repeat": 3,
+      "status": "evaluated",
+      "score": 0.875,
+      "counts": {
+        "scorable_claim_count": 8,
+        "supported_claim_count": 7,
+        "insufficient_evidence_count": 1,
+        "non_factual_count": 0
+      },
+      "validation_errors": [],
+      "claims": [
+        {
+          "claim": "预售商品付款后 48 小时未发货，不视为延迟",
+          "supported": null,
+          "evidence": [],
+          "reason": "C1 单句原文",
+          "claim_id": "cl1",
+          "claim_type": "factual_claim",
+          "claim_subtype": "policy",
+          "support_status": "supported",
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_refs": [
+            {
+              "context_id": "C1",
+              "quote": "预售商品以商品页标注的发货时间为准。"
+            }
+          ]
+        },
+        {
+          "claim": "现货商品在付款后 48 小时内发出",
+          "supported": null,
+          "evidence": [],
+          "reason": "C1 单句原文",
+          "claim_id": "cl2",
+          "claim_type": "factual_claim",
+          "claim_subtype": "policy",
+          "support_status": "supported",
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_refs": [
+            {
+              "context_id": "C1",
+              "quote": "现货商品在付款后 48 小时内发出"
+            }
+          ]
+        },
+        {
+          "claim": "预售商品以商品页标注的发货时间为准",
+          "supported": null,
+          "evidence": [],
+          "reason": "C1 单句原文",
+          "claim_id": "cl3",
+          "claim_type": "factual_claim",
+          "claim_subtype": "policy",
+          "support_status": "supported",
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_refs": [
+            {
+              "context_id": "C1",
+              "quote": "预售商品以商品页标注的发货时间为准。"
+            }
+          ]
+        },
+        {
+          "claim": "48 小时发货承诺仅适用于现货商品",
+          "supported": null,
+          "evidence": [],
+          "reason": "C1 单句原文",
+          "claim_id": "cl4",
+          "claim_type": "factual_claim",
+          "claim_subtype": "policy",
+          "support_status": "supported",
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_refs": [
+            {
+              "context_id": "C1",
+              "quote": "现货商品在付款后 48 小时内发出"
+            }
+          ]
+        },
+        {
+          "claim": "预售商品的发货时限不由该通用条款约束",
+          "supported": null,
+          "evidence": [],
+          "reason": "C1 单句原文",
+          "claim_id": "cl5",
+          "claim_type": "factual_claim",
+          "claim_subtype": "policy",
+          "support_status": "supported",
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_refs": [
+            {
+              "context_id": "C1",
+              "quote": "预售商品以商品页标注的发货时间为准。"
+            }
+          ]
+        },
+        {
+          "claim": "预售商品未在商品页所标注的时间内发货，才构成发货延迟",
+          "supported": null,
+          "evidence": [],
+          "reason": "C1 单句原文",
+          "claim_id": "cl6",
+          "claim_type": "factual_claim",
+          "claim_subtype": "policy",
+          "support_status": "supported",
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_refs": [
+            {
+              "context_id": "C1",
+              "quote": "预售商品以商品页标注的发货时间为准。"
+            }
+          ]
+        },
+        {
+          "claim": "用户可据此联系客服或申请相应权益（如催促、补偿或取消订单等）",
+          "supported": null,
+          "evidence": [],
+          "reason": "上下文未提及具体补救措施",
+          "claim_id": "cl7",
+          "claim_type": "factual_claim",
+          "claim_subtype": "policy",
+          "support_status": "insufficient_evidence",
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_refs": []
+        },
+        {
+          "claim": "须核对商品页标注的约定发货时间",
+          "supported": null,
+          "evidence": [],
+          "reason": "C1 单句原文",
+          "claim_id": "cl8",
+          "claim_type": "factual_claim",
+          "claim_subtype": "policy",
+          "support_status": "supported",
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_refs": [
+            {
+              "context_id": "C1",
+              "quote": "预售商品以商品页标注的发货时间为准。"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

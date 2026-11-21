@@ -23,10 +23,13 @@ from app.core.degradation import level_for_ratio
 from app.models import LlmCall
 
 
-async def _collect(session: AsyncSession) -> dict[str, Any]:
-    start = datetime.now(timezone.utc).replace(
-        hour=0, minute=0, second=0, microsecond=0, tzinfo=None
-    )
+async def _collect(session: AsyncSession, *, now: datetime | None = None) -> dict[str, Any]:
+    """汇总当日成本。
+
+    ``now`` 仅供测试注入（宿主与数据库时钟可能不一致；生产走系统 UTC 时间）。
+    """
+    current = now or datetime.now(timezone.utc)
+    start = current.replace(hour=0, minute=0, second=0, microsecond=0, tzinfo=None)
     total = (
         await session.scalar(
             select(func.coalesce(func.sum(LlmCall.total_cost), 0)).where(
@@ -69,15 +72,17 @@ async def _collect(session: AsyncSession) -> dict[str, Any]:
 
 async def run_cost_monitor(
     session: AsyncSession | None = None,
+    *,
+    now: datetime | None = None,
 ) -> dict[str, Any]:
     """执行一次成本对账（可注入 session 便于测试）。"""
     if session is not None:
-        return await _collect(session)
+        return await _collect(session, now=now)
 
     from app.core.database import SessionLocal
 
     async with SessionLocal() as db:
-        return await _collect(db)
+        return await _collect(db, now=now)
 
 
 @celery_app.task(name="tasks.monitor_cost")

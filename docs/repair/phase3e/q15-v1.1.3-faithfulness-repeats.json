@@ -1,0 +1,195 @@
+{
+  "case_id": "Q15",
+  "prompt_version": "v1.1.3",
+  "runs": [
+    {
+      "repeat": 1,
+      "status": "evaluated",
+      "score": 0.666667,
+      "counts": {
+        "scorable_claim_count": 3,
+        "supported_claim_count": 2,
+        "insufficient_evidence_count": 1,
+        "non_factual_count": 0
+      },
+      "validation_errors": [],
+      "claims": [
+        {
+          "claim": "大件商品（如家具、家电）在配送前会联系买家",
+          "supported": null,
+          "evidence": [],
+          "reason": "C1 单句原文",
+          "claim_id": "cl1",
+          "claim_type": "factual_claim",
+          "claim_subtype": "policy",
+          "support_status": "supported",
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_refs": [
+            {
+              "context_id": "C1",
+              "quote": "大件商品（家具、家电）发货时间为 5 个工作日内，配送前会电话预约。"
+            }
+          ]
+        },
+        {
+          "claim": "商家或物流方会在实际配送前主动通过电话与买家联系",
+          "supported": null,
+          "evidence": [],
+          "reason": "C1 单句原文",
+          "claim_id": "cl2",
+          "claim_type": "factual_claim",
+          "claim_subtype": "policy",
+          "support_status": "supported",
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_refs": [
+            {
+              "context_id": "C1",
+              "quote": "大件商品（家具、家电）发货时间为 5 个工作日内，配送前会电话预约。"
+            }
+          ]
+        },
+        {
+          "claim": "电话联系的目的是确认收货时间及安排上门事宜",
+          "supported": null,
+          "evidence": [],
+          "reason": "上下文未明确说明电话联系的具体目的",
+          "claim_id": "cl3",
+          "claim_type": "factual_claim",
+          "claim_subtype": "policy",
+          "support_status": "insufficient_evidence",
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_refs": []
+        }
+      ]
+    },
+    {
+      "repeat": 2,
+      "status": "evaluated",
+      "score": 0.666667,
+      "counts": {
+        "scorable_claim_count": 3,
+        "supported_claim_count": 2,
+        "insufficient_evidence_count": 1,
+        "non_factual_count": 0
+      },
+      "validation_errors": [],
+      "claims": [
+        {
+          "claim": "大件商品（如家具、家电）在配送前会联系买家",
+          "supported": null,
+          "evidence": [],
+          "reason": "C1 单句原文",
+          "claim_id": "cl1",
+          "claim_type": "factual_claim",
+          "claim_subtype": "policy",
+          "support_status": "supported",
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_refs": [
+            {
+              "context_id": "C1",
+              "quote": "大件商品（家具、家电）发货时间为 5 个工作日内，配送前会电话预约。"
+            }
+          ]
+        },
+        {
+          "claim": "商家或物流方会在实际配送前主动通过电话与买家联系",
+          "supported": null,
+          "evidence": [],
+          "reason": "C1 单句原文",
+          "claim_id": "cl2",
+          "claim_type": "factual_claim",
+          "claim_subtype": "policy",
+          "support_status": "supported",
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_refs": [
+            {
+              "context_id": "C1",
+              "quote": "大件商品（家具、家电）发货时间为 5 个工作日内，配送前会电话预约。"
+            }
+          ]
+        },
+        {
+          "claim": "电话联系的目的是确认收货时间及安排上门事宜",
+          "supported": null,
+          "evidence": [],
+          "reason": "上下文未明确说明电话联系的具体目的",
+          "claim_id": "cl3",
+          "claim_type": "factual_claim",
+          "claim_subtype": "policy",
+          "support_status": "insufficient_evidence",
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_refs": []
+        }
+      ]
+    },
+    {
+      "repeat": 3,
+      "status": "evaluated",
+      "score": 0.666667,
+      "counts": {
+        "scorable_claim_count": 3,
+        "supported_claim_count": 2,
+        "insufficient_evidence_count": 1,
+        "non_factual_count": 0
+      },
+      "validation_errors": [],
+      "claims": [
+        {
+          "claim": "大件商品（如家具、家电）在配送前会联系买家",
+          "supported": null,
+          "evidence": [],
+          "reason": "C1 单句原文",
+          "claim_id": "cl1",
+          "claim_type": "factual_claim",
+          "claim_subtype": "policy",
+          "support_status": "supported",
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_refs": [
+            {
+              "context_id": "C1",
+              "quote": "大件商品（家具、家电）发货时间为 5 个工作日内，配送前会电话预约。"
+            }
+          ]
+        },
+        {
+          "claim": "商家或物流方会在实际配送前主动通过电话与买家联系",
+          "supported": null,
+          "evidence": [],
+          "reason": "C1 单句原文",
+          "claim_id": "cl2",
+          "claim_type": "factual_claim",
+          "claim_subtype": "policy",
+          "support_status": "supported",
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_refs": [
+            {
+              "context_id": "C1",
+              "quote": "大件商品（家具、家电）发货时间为 5 个工作日内，配送前会电话预约。"
+            }
+          ]
+        },
+        {
+          "claim": "联系目的是确认收货时间及安排上门事宜",
+          "supported": null,
+          "evidence": [],
+          "reason": "上下文未明确说明电话联系的具体目的",
+          "claim_id": "cl3",
+          "claim_type": "factual_claim",
+          "claim_subtype": "policy",
+          "support_status": "insufficient_evidence",
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_refs": []
+        }
+      ]
+    }
+  ]
+}

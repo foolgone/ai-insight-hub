@@ -21,11 +21,9 @@ from app.ports.llm import LLMPort
 TModel = TypeVar("TModel", bound=BaseModel)
 
 _REPAIR_SYSTEM_PROMPT = """你是结构化输出修复器。
-用户会给出模型的原始输出与校验错误，请**只输出**符合下列 JSON Schema 的合法 JSON，
-不要输出解释、Markdown 代码块或多余文本。
-
-JSON Schema:
-{schema}
+只输出合法 JSON，不要输出解释、Markdown 代码块或多余文本。
+必须保留原输出表达的含义；字段名、层级和类型必须与示例/JSON Schema 一致。
+{example}
 """
 
 
@@ -38,10 +36,13 @@ class StructuredOutputError(Exception):
         self,
         message: str,
         *,
+        original_output: str | None = None,
         raw_output: str | None = None,
         validation_errors: str | None = None,
     ) -> None:
         super().__init__(message)
+        # 首次输出与最后一次（修复轮）输出分开保留，便于定位非法点。
+        self.original_output = original_output
         self.raw_output = raw_output
         self.validation_errors = validation_errors
 
@@ -74,13 +75,23 @@ async def parse_with_repair(
     max_attempts: int = 2,
     usage_collector: list[LLMUsage] | None = None,
     validator: Callable[[TModel], None] | None = None,
+    raw_sink: list[str] | None = None,
+    repair_example: str | None = None,
 ) -> TModel:
     """解析结构化输出；失败时调用模型修复一次。
 
     ``validator`` 用于**业务校验**（schema 合法但内容不可用，例如
     ``structure=summary`` 却 ``summary`` 为空）。这类错误同样会进入修复轮，
     否则模型返回一个「最小合法但空」的对象就能让整条链路静默降级。
+
+    ``raw_sink`` 用于记录**最终实际用于解析**的原文（可能是修复轮的输出），
+    供评测链路保存 Judge 原始响应；不传则行为不变。
+
+    ``repair_example`` 是一条完整合法 JSON 示例；提供时修复 Prompt 不再 dump
+    完整 JSON Schema，避免长 schema + 长原文导致模型输出半截 JSON。未提供时
+    fallback 到 ``json.dumps(schema.model_json_schema())``，保持其它 Agent 的修复能力。
     """
+    original_output = text
     raw_output = text
     last_error: Exception | None = None
 
@@ -89,26 +100,33 @@ async def parse_with_repair(
             model = schema.model_validate_json(extract_json_text(raw_output))
             if validator is not None:
                 validator(model)
+            if raw_sink is not None:
+                raw_sink.append(raw_output)
             return model
         except (ValidationError, ValueError) as exc:
             last_error = exc
             if attempt + 1 >= max_attempts:
                 break
 
-            schema_text = json.dumps(schema.model_json_schema(), ensure_ascii=False)
+            example_block = (
+                f"合法 JSON 示例：\n{repair_example}\n"
+                if repair_example
+                else "参考以下 JSON Schema：\n"
+                + json.dumps(schema.model_json_schema(), ensure_ascii=False)
+                + "\n"
+            )
             repair_messages = [
                 {
                     "role": "system",
-                    "content": _REPAIR_SYSTEM_PROMPT.format(schema=schema_text),
+                    "content": _REPAIR_SYSTEM_PROMPT.format(example=example_block),
                 },
                 {
                     "role": "user",
                     "content": (
                         f"原始输出：\n{raw_output}\n\n"
                         f"校验错误：{exc}\n\n"
-                        "请返回修复后的 JSON。若错误指出某个字段为空（如 summary / qa / knowledge），"
-                        "必须用原文中的真实内容补全，不得返回空字符串或空数组；"
-                        "如果确实没有该形态的内容，请改选与实际内容匹配的 structure。"
+                        "请返回修复后的 JSON。若错误指出字段为空/缺失，"
+                        "必须用原文中的真实内容补全，不得返回空字符串或空数组，不得编造。"
                     ),
                 },
             ]
@@ -123,6 +141,7 @@ async def parse_with_repair(
 
     raise StructuredOutputError(
         "structured output is still invalid after repair",
+        original_output=original_output,
         raw_output=raw_output,
         validation_errors=str(last_error),
     )

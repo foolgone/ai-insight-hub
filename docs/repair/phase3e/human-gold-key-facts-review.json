@@ -1,0 +1,1214 @@
+{
+ "meta": {
+  "review_target": "key_facts",
+  "source_document": "docs/repair/phase3e/source/phase3d_doc.md",
+  "source_sha256": "737f6bd3ef412d41d14ada4d2000bd01e851355f0d95cd0d321ac84416f9002d",
+  "human_gold_changed": false,
+  "note": "AI proposed key facts reviewed by human; 4 deleted, 3 rewritten, 41 final facts. Not written into human-gold.json.",
+  "fact_count": 45,
+  "human_review_status": "human_reviewed",
+  "human_reviewer": "江晚",
+  "fact_count_proposed": 45,
+  "fact_count_final": 41,
+  "final_status_counts": {
+   "supported": 38,
+   "evidence_insufficient": 2,
+   "ambiguous": 1
+  }
+ },
+ "items": [
+  {
+   "item_id": "Q23",
+   "gold_answer": "不能按该条款反馈。生鲜食品质量问题需在签收后 24 小时内拍照反馈，超过 24 小时反馈不符合该条款。",
+   "proposed_key_facts": [
+    {
+     "fact_id": "Q23-F1",
+     "fact": "生鲜食品的质量问题需在签收后 24 小时内反馈",
+     "evidence_excerpt": "生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。",
+     "evidence_location": "phase3d_doc.md §12 特殊商品",
+     "evidence_status": "supported",
+     "ai_reason": "原文直接规定 24 小时时限",
+     "verbatim_in_source": true,
+     "human_decision": "accept",
+     "human_corrected_key_fact": "生鲜食品的质量问题需在签收后 24 小时内反馈",
+     "human_reason": "接受：§12 原文“质量问题需在签收后 24 小时内拍照反馈”直接支持；属 gold answer 的必要事实点。",
+     "review_status": "human_reviewed"
+    },
+    {
+     "fact_id": "Q23-F2",
+     "fact": "反馈方式为拍照反馈",
+     "evidence_excerpt": "生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。",
+     "evidence_location": "phase3d_doc.md §12 特殊商品",
+     "evidence_status": "supported",
+     "ai_reason": "原文明确“拍照反馈”",
+     "verbatim_in_source": true,
+     "human_decision": "modify",
+     "human_corrected_key_fact": "质量问题需以拍照方式反馈",
+     "human_reason": "改写：原句“反馈方式为拍照反馈”同义反复；改为“质量问题需以拍照方式反馈”，仍由 §12 原文直接支持。",
+     "review_status": "human_reviewed"
+    },
+    {
+     "fact_id": "Q23-F3",
+     "fact": "超过 24 小时反馈不符合该条款",
+     "evidence_excerpt": "生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。",
+     "evidence_location": "phase3d_doc.md §12 特殊商品",
+     "evidence_status": "supported",
+     "ai_reason": "由“需在 24 小时内”直接推出；属条件否定",
+     "verbatim_in_source": true,
+     "human_decision": "accept",
+     "human_corrected_key_fact": "超过 24 小时反馈不符合该条款",
+     "human_reason": "接受：由“需在 24 小时内”必然推出，属条件否定/条款适用结论，不是外部知识；保留为 supported。",
+     "review_status": "human_reviewed"
+    },
+    {
+     "fact_id": "Q23-F4",
+     "fact": "该 24 小时时限适用于生鲜食品的质量问题",
+     "evidence_excerpt": "生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。",
+     "evidence_location": "phase3d_doc.md §12 特殊商品",
+     "evidence_status": "supported",
+     "ai_reason": "原文把时限限定在生鲜食品质量问题",
+     "verbatim_in_source": true,
+     "human_decision": "delete",
+     "human_corrected_key_fact": "",
+     "human_reason": "删除：与 F1 重复（F1 已限定“生鲜食品的质量问题”），不是独立可判定事实。",
+     "review_status": "human_reviewed"
+    }
+   ],
+   "evidence_excerpt": [
+    "生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。",
+    "生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。",
+    "生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。",
+    "生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。"
+   ],
+   "evidence_location": [
+    "phase3d_doc.md §12 特殊商品"
+   ],
+   "evidence_status": "supported",
+   "ai_reason": "F3 是条款条件的直接否定，不是外部推断；未引入“第 2 天必满 24 小时”的旧假设。",
+   "human_decision": "modify",
+   "human_corrected_key_facts": [
+    {
+     "fact_id": "Q23-F1",
+     "fact": "生鲜食品的质量问题需在签收后 24 小时内反馈",
+     "evidence_excerpt": "生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。",
+     "evidence_location": "phase3d_doc.md §12 特殊商品",
+     "evidence_status": "supported",
+     "verbatim_in_source": true
+    },
+    {
+     "fact_id": "Q23-F2",
+     "fact": "质量问题需以拍照方式反馈",
+     "evidence_excerpt": "生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。",
+     "evidence_location": "phase3d_doc.md §12 特殊商品",
+     "evidence_status": "supported",
+     "verbatim_in_source": true
+    },
+    {
+     "fact_id": "Q23-F3",
+     "fact": "超过 24 小时反馈不符合该条款",
+     "evidence_excerpt": "生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。",
+     "evidence_location": "phase3d_doc.md §12 特殊商品",
+     "evidence_status": "supported",
+     "verbatim_in_source": true
+    }
+   ],
+   "human_reason": "删除 F4（与 F1 重复的适用范围表述）；F2 改写为“质量问题需以拍照方式反馈”。最终 3 条：24 小时时限、拍照反馈、超时不符合条款。F3 的条件否定推导予以接受。",
+   "review_status": "human_reviewed"
+  },
+  {
+   "item_id": "Q36",
+   "gold_answer": "需要确认商品类型、签收时间、是否已激活、是否存在质量问题。按文档：普通商品签收后 7 天内可申请无理由退款；定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款；生鲜食品质量问题需在签收后 24 小时内拍照反馈；虚拟商品（充值、会员、课程）一经售出不支持退款；定制商品支持质量问题退换，不支持无理由退换。注意：第 1 条对虚拟商品的限定是「已激活」，第 12 条则称虚拟商品一经售出不支持退款，两处范围不完全一致，具体商品需以对应条款/客服确认为准。",
+   "proposed_key_facts": [
+    {
+     "fact_id": "Q36-F1",
+     "fact": "普通商品签收后 7 天内可申请无理由退款",
+     "evidence_excerpt": "订单签收后 7 天内可申请无理由退款。审核通过后，款项将在 1-3 个工作日内原路退回。",
+     "evidence_location": "phase3d_doc.md §1 退款时效",
+     "evidence_status": "supported",
+     "ai_reason": "原文直接支持",
+     "verbatim_in_source": true,
+     "human_decision": "accept",
+     "human_corrected_key_fact": "普通商品签收后 7 天内可申请无理由退款",
+     "human_reason": "接受：§1 退款时效 原文直接支持，且为 gold answer 的必要事实点。",
+     "review_status": "human_reviewed"
+    },
+    {
+     "fact_id": "Q36-F2",
+     "fact": "定制类商品不支持无理由退款",
+     "evidence_excerpt": "定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。",
+     "evidence_location": "phase3d_doc.md §1 退款时效",
+     "evidence_status": "supported",
+     "ai_reason": "原文直接支持",
+     "verbatim_in_source": true,
+     "human_decision": "accept",
+     "human_corrected_key_fact": "定制类商品不支持无理由退款",
+     "human_reason": "接受：§1 退款时效 原文直接支持，且为 gold answer 的必要事实点。",
+     "review_status": "human_reviewed"
+    },
+    {
+     "fact_id": "Q36-F3",
+     "fact": "生鲜食品不支持无理由退款",
+     "evidence_excerpt": "定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。",
+     "evidence_location": "phase3d_doc.md §1 退款时效",
+     "evidence_status": "supported",
+     "ai_reason": "原文直接支持",
+     "verbatim_in_source": true,
+     "human_decision": "modify",
+     "human_corrected_key_fact": "生鲜食品不支持无理由退款",
+     "human_reason": "改写：原文 §1 为“不支持无理由退款”，原事实写成“退货”与证据不一致；改为“退款”，与 gold answer 对齐。",
+     "review_status": "human_reviewed"
+    },
+    {
+     "fact_id": "Q36-F4",
+     "fact": "已激活的虚拟商品不支持无理由退款",
+     "evidence_excerpt": "定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。",
+     "evidence_location": "phase3d_doc.md §1 退款时效",
+     "evidence_status": "supported",
+     "ai_reason": "原文直接支持，限定词是“已激活”",
+     "verbatim_in_source": true,
+     "human_decision": "accept",
+     "human_corrected_key_fact": "已激活的虚拟商品不支持无理由退款",
+     "human_reason": "接受：§1 退款时效 原文直接支持，且为 gold answer 的必要事实点。",
+     "review_status": "human_reviewed"
+    },
+    {
+     "fact_id": "Q36-F5",
+     "fact": "生鲜食品质量问题需在签收后 24 小时内拍照反馈",
+     "evidence_excerpt": "生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。",
+     "evidence_location": "phase3d_doc.md §12 特殊商品",
+     "evidence_status": "supported",
+     "ai_reason": "原文直接支持",
+     "verbatim_in_source": true,
+     "human_decision": "accept",
+     "human_corrected_key_fact": "生鲜食品质量问题需在签收后 24 小时内拍照反馈",
+     "human_reason": "接受：§12 特殊商品 原文直接支持，且为 gold answer 的必要事实点。",
+     "review_status": "human_reviewed"
+    },
+    {
+     "fact_id": "Q36-F6",
+     "fact": "虚拟商品（充值、会员、课程）一经售出不支持退款",
+     "evidence_excerpt": "虚拟商品（充值、会员、课程）一经售出不支持退款。",
+     "evidence_location": "phase3d_doc.md §12 特殊商品",
+     "evidence_status": "supported",
+     "ai_reason": "原文直接支持，未限定“已激活”",
+     "verbatim_in_source": true,
+     "human_decision": "accept",
+     "human_corrected_key_fact": "虚拟商品（充值、会员、课程）一经售出不支持退款",
+     "human_reason": "接受：§12 特殊商品 原文直接支持，且为 gold answer 的必要事实点。",
+     "review_status": "human_reviewed"
+    },
+    {
+     "fact_id": "Q36-F7",
+     "fact": "定制商品支持质量问题退换，不支持无理由退换",
+     "evidence_excerpt": "定制商品支持质量问题退换，不支持无理由退换。",
+     "evidence_location": "phase3d_doc.md §12 特殊商品",
+     "evidence_status": "supported",
+     "ai_reason": "原文直接支持",
+     "verbatim_in_source": true,
+     "human_decision": "accept",
+     "human_corrected_key_fact": "定制商品支持质量问题退换，不支持无理由退换",
+     "human_reason": "接受：§12 特殊商品 原文直接支持，且为 gold answer 的必要事实点。",
+     "review_status": "human_reviewed"
+    },
+    {
+     "fact_id": "Q36-F8",
+     "fact": "§1 与 §12 对虚拟商品范围的表述不一致：§1 限定“已激活”，§12 称“一经售出”",
+     "evidence_excerpt": "定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。",
+     "evidence_location": "phase3d_doc.md §1；§12 原文见 ai_reason",
+     "evidence_status": "ambiguous",
+     "ai_reason": "§1 原文为“定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。”；§12 原文为“虚拟商品（充值、会员、课程）一经售出不支持退款。”；两处范围不一致，需业务确认 canonical 口径",
+     "verbatim_in_source": true,
+     "human_decision": "accept",
+     "human_corrected_key_fact": "§1 与 §12 对虚拟商品范围的表述不一致：§1 限定“已激活”，§12 称“一经售出”",
+     "human_reason": "保留为 meta/conflict fact：§1 限“已激活”，§12 称“一经售出”，gold answer 明确要求披露该冲突；不作为政策事实，不进入 supported 分母；业务口径仍待确认。",
+     "review_status": "human_reviewed"
+    }
+   ],
+   "evidence_excerpt": [
+    "订单签收后 7 天内可申请无理由退款。审核通过后，款项将在 1-3 个工作日内原路退回。",
+    "定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。",
+    "定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。",
+    "定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。",
+    "生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。",
+    "虚拟商品（充值、会员、课程）一经售出不支持退款。",
+    "定制商品支持质量问题退换，不支持无理由退换。",
+    "定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。"
+   ],
+   "evidence_location": [
+    "phase3d_doc.md §1 退款时效",
+    "phase3d_doc.md §12 特殊商品",
+    "phase3d_doc.md §1；§12 原文见 ai_reason"
+   ],
+   "evidence_status": "mixed",
+   "ai_reason": "前 7 条事实分别有原文；F8 是文档冲突标记，不是政策结论，标 ambiguous。",
+   "human_decision": "modify",
+   "human_corrected_key_facts": [
+    {
+     "fact_id": "Q36-F1",
+     "fact": "普通商品签收后 7 天内可申请无理由退款",
+     "evidence_excerpt": "订单签收后 7 天内可申请无理由退款。审核通过后，款项将在 1-3 个工作日内原路退回。",
+     "evidence_location": "phase3d_doc.md §1 退款时效",
+     "evidence_status": "supported",
+     "verbatim_in_source": true
+    },
+    {
+     "fact_id": "Q36-F2",
+     "fact": "定制类商品不支持无理由退款",
+     "evidence_excerpt": "定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。",
+     "evidence_location": "phase3d_doc.md §1 退款时效",
+     "evidence_status": "supported",
+     "verbatim_in_source": true
+    },
+    {
+     "fact_id": "Q36-F3",
+     "fact": "生鲜食品不支持无理由退款",
+     "evidence_excerpt": "定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。",
+     "evidence_location": "phase3d_doc.md §1 退款时效",
+     "evidence_status": "supported",
+     "verbatim_in_source": true
+    },
+    {
+     "fact_id": "Q36-F4",
+     "fact": "已激活的虚拟商品不支持无理由退款",
+     "evidence_excerpt": "定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。",
+     "evidence_location": "phase3d_doc.md §1 退款时效",
+     "evidence_status": "supported",
+     "verbatim_in_source": true
+    },
+    {
+     "fact_id": "Q36-F5",
+     "fact": "生鲜食品质量问题需在签收后 24 小时内拍照反馈",
+     "evidence_excerpt": "生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。",
+     "evidence_location": "phase3d_doc.md §12 特殊商品",
+     "evidence_status": "supported",
+     "verbatim_in_source": true
+    },
+    {
+     "fact_id": "Q36-F6",
+     "fact": "虚拟商品（充值、会员、课程）一经售出不支持退款",
+     "evidence_excerpt": "虚拟商品（充值、会员、课程）一经售出不支持退款。",
+     "evidence_location": "phase3d_doc.md §12 特殊商品",
+     "evidence_status": "supported",
+     "verbatim_in_source": true
+    },
+    {
+     "fact_id": "Q36-F7",
+     "fact": "定制商品支持质量问题退换，不支持无理由退换",
+     "evidence_excerpt": "定制商品支持质量问题退换，不支持无理由退换。",
+     "evidence_location": "phase3d_doc.md §12 特殊商品",
+     "evidence_status": "supported",
+     "verbatim_in_source": true
+    },
+    {
+     "fact_id": "Q36-F8",
+     "fact": "§1 与 §12 对虚拟商品范围的表述不一致：§1 限定“已激活”，§12 称“一经售出”",
+     "evidence_excerpt": "定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。",
+     "evidence_location": "phase3d_doc.md §1；§12 原文见 ai_reason",
+     "evidence_status": "ambiguous",
+     "verbatim_in_source": true
+    }
+   ],
+   "human_reason": "F3 由“退货”改为“退款”，与 §1 及 gold answer 对齐；F8 保留为 meta/conflict fact（ambiguous），不进入 supported 分母。最终 8 条。",
+   "review_status": "human_reviewed"
+  },
+  {
+   "item_id": "Q14",
+   "gold_answer": "未开具前可以修改；已开具的发票需先申请红冲，再重新开具。",
+   "proposed_key_facts": [
+    {
+     "fact_id": "Q14-F1",
+     "fact": "发票抬头可在开具前修改",
+     "evidence_excerpt": "发票抬头可在开具前修改；已开具的发票需先申请红冲，再重新开具。",
+     "evidence_location": "phase3d_doc.md §4 发票说明",
+     "evidence_status": "supported",
+     "ai_reason": "原文直接支持",
+     "verbatim_in_source": true,
+     "human_decision": "accept",
+     "human_corrected_key_fact": "发票抬头可在开具前修改",
+     "human_reason": "接受：§4 发票说明 原文直接支持，且为 gold answer 的必要事实点。",
+     "review_status": "human_reviewed"
+    },
+    {
+     "fact_id": "Q14-F2",
+     "fact": "已开具的发票需先申请红冲，再重新开具",
+     "evidence_excerpt": "发票抬头可在开具前修改；已开具的发票需先申请红冲，再重新开具。",
+     "evidence_location": "phase3d_doc.md §4 发票说明",
+     "evidence_status": "supported",
+     "ai_reason": "原文直接支持",
+     "verbatim_in_source": true,
+     "human_decision": "accept",
+     "human_corrected_key_fact": "已开具的发票需先申请红冲，再重新开具",
+     "human_reason": "接受：§4 发票说明 原文直接支持，且为 gold answer 的必要事实点。",
+     "review_status": "human_reviewed"
+    }
+   ],
+   "evidence_excerpt": [
+    "发票抬头可在开具前修改；已开具的发票需先申请红冲，再重新开具。",
+    "发票抬头可在开具前修改；已开具的发票需先申请红冲，再重新开具。"
+   ],
+   "evidence_location": [
+    "phase3d_doc.md §4 发票说明"
+   ],
+   "evidence_status": "supported",
+   "ai_reason": "两条事实分别对应“未开具/已开具”两种条件；答案本身已含分支。",
+   "human_decision": "accept",
+   "human_corrected_key_facts": [
+    {
+     "fact_id": "Q14-F1",
+     "fact": "发票抬头可在开具前修改",
+     "evidence_excerpt": "发票抬头可在开具前修改；已开具的发票需先申请红冲，再重新开具。",
+     "evidence_location": "phase3d_doc.md §4 发票说明",
+     "evidence_status": "supported",
+     "verbatim_in_source": true
+    },
+    {
+     "fact_id": "Q14-F2",
+     "fact": "已开具的发票需先申请红冲，再重新开具",
+     "evidence_excerpt": "发票抬头可在开具前修改；已开具的发票需先申请红冲，再重新开具。",
+     "evidence_location": "phase3d_doc.md §4 发票说明",
+     "evidence_status": "supported",
+     "verbatim_in_source": true
+    }
+   ],
+   "human_reason": "两条均与 §4 原文一致，且为 gold answer 的两个分支；接受。",
+   "review_status": "human_reviewed"
+  },
+  {
+   "item_id": "Q15",
+   "gold_answer": "会，配送前会电话预约。",
+   "proposed_key_facts": [
+    {
+     "fact_id": "Q15-F1",
+     "fact": "大件商品包括家具、家电",
+     "evidence_excerpt": "大件商品（家具、家电）发货时间为 5 个工作日内，配送前会电话预约。",
+     "evidence_location": "phase3d_doc.md §5 发货时效",
+     "evidence_status": "supported",
+     "ai_reason": "原文括号内列出家具、家电",
+     "verbatim_in_source": true,
+     "human_decision": "delete",
+     "human_corrected_key_fact": "",
+     "human_reason": "删除：家具/家电是定义性上下文，gold answer 未要求；保留会迫使简洁正确答案补举例子。",
+     "review_status": "human_reviewed"
+    },
+    {
+     "fact_id": "Q15-F2",
+     "fact": "大件商品配送前会电话预约",
+     "evidence_excerpt": "大件商品（家具、家电）发货时间为 5 个工作日内，配送前会电话预约。",
+     "evidence_location": "phase3d_doc.md §5 发货时效",
+     "evidence_status": "supported",
+     "ai_reason": "原文直接支持",
+     "verbatim_in_source": true,
+     "human_decision": "accept",
+     "human_corrected_key_fact": "大件商品配送前会电话预约",
+     "human_reason": "接受：§5 发货时效 原文直接支持，且为 gold answer 的必要事实点。",
+     "review_status": "human_reviewed"
+    }
+   ],
+   "evidence_excerpt": [
+    "大件商品（家具、家电）发货时间为 5 个工作日内，配送前会电话预约。",
+    "大件商品（家具、家电）发货时间为 5 个工作日内，配送前会电话预约。"
+   ],
+   "evidence_location": [
+    "phase3d_doc.md §5 发货时效"
+   ],
+   "evidence_status": "supported",
+   "ai_reason": "只保留问句所需的“配送前联系”事实，不把 5 个工作日发货时效混入本条。",
+   "human_decision": "modify",
+   "human_corrected_key_facts": [
+    {
+     "fact_id": "Q15-F2",
+     "fact": "大件商品配送前会电话预约",
+     "evidence_excerpt": "大件商品（家具、家电）发货时间为 5 个工作日内，配送前会电话预约。",
+     "evidence_location": "phase3d_doc.md §5 发货时效",
+     "evidence_status": "supported",
+     "verbatim_in_source": true
+    }
+   ],
+   "human_reason": "删除 F1（家具/家电是定义性上下文，gold answer 未要求）；保留 F2。最终 1 条。",
+   "review_status": "human_reviewed"
+  },
+  {
+   "item_id": "Q16",
+   "gold_answer": "可联系客服协助核查。",
+   "proposed_key_facts": [
+    {
+     "fact_id": "Q16-F1",
+     "fact": "物流信息超过 24 小时未更新是联系客服核查的触发条件",
+     "evidence_excerpt": "物流信息超过 24 小时未更新时，可联系客服协助核查。",
+     "evidence_location": "phase3d_doc.md §6 物流查询",
+     "evidence_status": "supported",
+     "ai_reason": "原文直接规定条件",
+     "verbatim_in_source": true,
+     "human_decision": "delete",
+     "human_corrected_key_fact": "",
+     "human_reason": "删除：条件已在问句中，且与 F2 重复；条件与动作不拆成两条（条件式规则算一条）。",
+     "review_status": "human_reviewed"
+    },
+    {
+     "fact_id": "Q16-F2",
+     "fact": "触发后可联系客服协助核查",
+     "evidence_excerpt": "物流信息超过 24 小时未更新时，可联系客服协助核查。",
+     "evidence_location": "phase3d_doc.md §6 物流查询",
+     "evidence_status": "supported",
+     "ai_reason": "原文直接支持",
+     "verbatim_in_source": true,
+     "human_decision": "modify",
+     "human_corrected_key_fact": "物流信息超过 24 小时未更新时，可联系客服协助核查",
+     "human_reason": "改写：原句“触发后”脱离 F1 后指代不明；改为完整条件句，逐字对应 §6。",
+     "review_status": "human_reviewed"
+    }
+   ],
+   "evidence_excerpt": [
+    "物流信息超过 24 小时未更新时，可联系客服协助核查。",
+    "物流信息超过 24 小时未更新时，可联系客服协助核查。"
+   ],
+   "evidence_location": [
+    "phase3d_doc.md §6 物流查询"
+   ],
+   "evidence_status": "supported",
+   "ai_reason": "条件与动作拆成两条；未加入“我的订单查看轨迹”等无关事实。",
+   "human_decision": "modify",
+   "human_corrected_key_facts": [
+    {
+     "fact_id": "Q16-F2",
+     "fact": "物流信息超过 24 小时未更新时，可联系客服协助核查",
+     "evidence_excerpt": "物流信息超过 24 小时未更新时，可联系客服协助核查。",
+     "evidence_location": "phase3d_doc.md §6 物流查询",
+     "evidence_status": "supported",
+     "verbatim_in_source": true
+    }
+   ],
+   "human_reason": "删除 F1（条件来自问句，与动作重复）；F2 改为完整条件句。最终 1 条。",
+   "review_status": "human_reviewed"
+  },
+  {
+   "item_id": "Q19",
+   "gold_answer": "优惠券若仍在有效期内会退回账户，已过期则不退回。",
+   "proposed_key_facts": [
+    {
+     "fact_id": "Q19-F1",
+     "fact": "退款时优惠券仍在有效期内会退回账户",
+     "evidence_excerpt": "退款时优惠券若仍在有效期内会退回账户，已过期则不退回。",
+     "evidence_location": "phase3d_doc.md §9 优惠券规则",
+     "evidence_status": "supported",
+     "ai_reason": "原文直接支持",
+     "verbatim_in_source": true,
+     "human_decision": "accept",
+     "human_corrected_key_fact": "退款时优惠券仍在有效期内会退回账户",
+     "human_reason": "接受：§9 优惠券规则 原文直接支持，且为 gold answer 的必要事实点。",
+     "review_status": "human_reviewed"
+    },
+    {
+     "fact_id": "Q19-F2",
+     "fact": "退款时优惠券已过期则不退回",
+     "evidence_excerpt": "退款时优惠券若仍在有效期内会退回账户，已过期则不退回。",
+     "evidence_location": "phase3d_doc.md §9 优惠券规则",
+     "evidence_status": "supported",
+     "ai_reason": "原文直接支持",
+     "verbatim_in_source": true,
+     "human_decision": "accept",
+     "human_corrected_key_fact": "退款时优惠券已过期则不退回",
+     "human_reason": "接受：§9 优惠券规则 原文直接支持，且为 gold answer 的必要事实点。",
+     "review_status": "human_reviewed"
+    }
+   ],
+   "evidence_excerpt": [
+    "退款时优惠券若仍在有效期内会退回账户，已过期则不退回。",
+    "退款时优惠券若仍在有效期内会退回账户，已过期则不退回。"
+   ],
+   "evidence_location": [
+    "phase3d_doc.md §9 优惠券规则"
+   ],
+   "evidence_status": "supported",
+   "ai_reason": "两条事实分别对应“有效期内/已过期”两个条件。",
+   "human_decision": "accept",
+   "human_corrected_key_facts": [
+    {
+     "fact_id": "Q19-F1",
+     "fact": "退款时优惠券仍在有效期内会退回账户",
+     "evidence_excerpt": "退款时优惠券若仍在有效期内会退回账户，已过期则不退回。",
+     "evidence_location": "phase3d_doc.md §9 优惠券规则",
+     "evidence_status": "supported",
+     "verbatim_in_source": true
+    },
+    {
+     "fact_id": "Q19-F2",
+     "fact": "退款时优惠券已过期则不退回",
+     "evidence_excerpt": "退款时优惠券若仍在有效期内会退回账户，已过期则不退回。",
+     "evidence_location": "phase3d_doc.md §9 优惠券规则",
+     "evidence_status": "supported",
+     "verbatim_in_source": true
+    }
+   ],
+   "human_reason": "两条分别对应有效期内/已过期，均为 gold answer 的必要分支；接受。",
+   "review_status": "human_reviewed"
+  },
+  {
+   "item_id": "Q37",
+   "gold_answer": "信息不足：需明确是申请开票、修改抬头还是红冲重开。文档说明仅支持电子发票，提交申请后 24 小时内发送至下单邮箱；发票抬头可在开具前修改，已开具的发票需先申请红冲，再重新开具；暂不支持纸质发票和增值税专用发票。",
+   "proposed_key_facts": [
+    {
+     "fact_id": "Q37-F1",
+     "fact": "仅支持电子发票",
+     "evidence_excerpt": "仅支持电子发票，提交申请后 24 小时内发送至下单邮箱。",
+     "evidence_location": "phase3d_doc.md §4 发票说明",
+     "evidence_status": "supported",
+     "ai_reason": "原文直接支持",
+     "verbatim_in_source": true,
+     "human_decision": "accept",
+     "human_corrected_key_fact": "仅支持电子发票",
+     "human_reason": "接受：§4 发票说明 原文直接支持，且为 gold answer 的必要事实点。",
+     "review_status": "human_reviewed"
+    },
+    {
+     "fact_id": "Q37-F2",
+     "fact": "提交申请后 24 小时内发送至下单邮箱",
+     "evidence_excerpt": "仅支持电子发票，提交申请后 24 小时内发送至下单邮箱。",
+     "evidence_location": "phase3d_doc.md §4 发票说明",
+     "evidence_status": "supported",
+     "ai_reason": "原文直接支持",
+     "verbatim_in_source": true,
+     "human_decision": "accept",
+     "human_corrected_key_fact": "提交申请后 24 小时内发送至下单邮箱",
+     "human_reason": "接受：§4 发票说明 原文直接支持，且为 gold answer 的必要事实点。",
+     "review_status": "human_reviewed"
+    },
+    {
+     "fact_id": "Q37-F3",
+     "fact": "发票抬头可在开具前修改",
+     "evidence_excerpt": "发票抬头可在开具前修改；已开具的发票需先申请红冲，再重新开具。",
+     "evidence_location": "phase3d_doc.md §4 发票说明",
+     "evidence_status": "supported",
+     "ai_reason": "原文直接支持",
+     "verbatim_in_source": true,
+     "human_decision": "accept",
+     "human_corrected_key_fact": "发票抬头可在开具前修改",
+     "human_reason": "接受：§4 发票说明 原文直接支持，且为 gold answer 的必要事实点。",
+     "review_status": "human_reviewed"
+    },
+    {
+     "fact_id": "Q37-F4",
+     "fact": "已开具的发票需先申请红冲，再重新开具",
+     "evidence_excerpt": "发票抬头可在开具前修改；已开具的发票需先申请红冲，再重新开具。",
+     "evidence_location": "phase3d_doc.md §4 发票说明",
+     "evidence_status": "supported",
+     "ai_reason": "原文直接支持",
+     "verbatim_in_source": true,
+     "human_decision": "accept",
+     "human_corrected_key_fact": "已开具的发票需先申请红冲，再重新开具",
+     "human_reason": "接受：§4 发票说明 原文直接支持，且为 gold answer 的必要事实点。",
+     "review_status": "human_reviewed"
+    },
+    {
+     "fact_id": "Q37-F5",
+     "fact": "不支持纸质发票和增值税专用发票",
+     "evidence_excerpt": "暂不支持纸质发票和增值税专用发票。",
+     "evidence_location": "phase3d_doc.md §4 发票说明",
+     "evidence_status": "supported",
+     "ai_reason": "原文直接支持",
+     "verbatim_in_source": true,
+     "human_decision": "accept",
+     "human_corrected_key_fact": "不支持纸质发票和增值税专用发票",
+     "human_reason": "接受：§4 发票说明 原文直接支持，且为 gold answer 的必要事实点。",
+     "review_status": "human_reviewed"
+    }
+   ],
+   "evidence_excerpt": [
+    "仅支持电子发票，提交申请后 24 小时内发送至下单邮箱。",
+    "仅支持电子发票，提交申请后 24 小时内发送至下单邮箱。",
+    "发票抬头可在开具前修改；已开具的发票需先申请红冲，再重新开具。",
+    "发票抬头可在开具前修改；已开具的发票需先申请红冲，再重新开具。",
+    "暂不支持纸质发票和增值税专用发票。"
+   ],
+   "evidence_location": [
+    "phase3d_doc.md §4 发票说明"
+   ],
+   "evidence_status": "supported",
+   "ai_reason": "只保留 §4 的五条政策事实；“申请入口/填写抬头步骤”文档未写，未作为事实列入。",
+   "human_decision": "accept",
+   "human_corrected_key_facts": [
+    {
+     "fact_id": "Q37-F1",
+     "fact": "仅支持电子发票",
+     "evidence_excerpt": "仅支持电子发票，提交申请后 24 小时内发送至下单邮箱。",
+     "evidence_location": "phase3d_doc.md §4 发票说明",
+     "evidence_status": "supported",
+     "verbatim_in_source": true
+    },
+    {
+     "fact_id": "Q37-F2",
+     "fact": "提交申请后 24 小时内发送至下单邮箱",
+     "evidence_excerpt": "仅支持电子发票，提交申请后 24 小时内发送至下单邮箱。",
+     "evidence_location": "phase3d_doc.md §4 发票说明",
+     "evidence_status": "supported",
+     "verbatim_in_source": true
+    },
+    {
+     "fact_id": "Q37-F3",
+     "fact": "发票抬头可在开具前修改",
+     "evidence_excerpt": "发票抬头可在开具前修改；已开具的发票需先申请红冲，再重新开具。",
+     "evidence_location": "phase3d_doc.md §4 发票说明",
+     "evidence_status": "supported",
+     "verbatim_in_source": true
+    },
+    {
+     "fact_id": "Q37-F4",
+     "fact": "已开具的发票需先申请红冲，再重新开具",
+     "evidence_excerpt": "发票抬头可在开具前修改；已开具的发票需先申请红冲，再重新开具。",
+     "evidence_location": "phase3d_doc.md §4 发票说明",
+     "evidence_status": "supported",
+     "verbatim_in_source": true
+    },
+    {
+     "fact_id": "Q37-F5",
+     "fact": "不支持纸质发票和增值税专用发票",
+     "evidence_excerpt": "暂不支持纸质发票和增值税专用发票。",
+     "evidence_location": "phase3d_doc.md §4 发票说明",
+     "evidence_status": "supported",
+     "verbatim_in_source": true
+    }
+   ],
+   "human_reason": "五条均为 §4 原文且出现在 gold answer 中；不新增“文档未写申请入口/步骤”的 absence fact（gold answer 未断言）。",
+   "review_status": "human_reviewed"
+  },
+  {
+   "item_id": "Q40",
+   "gold_answer": "不可以。积分不可转让、不可提现，仅限本账户使用。",
+   "proposed_key_facts": [
+    {
+     "fact_id": "Q40-F1",
+     "fact": "积分不可转让",
+     "evidence_excerpt": "积分不可转让、不可提现，仅限本账户使用。",
+     "evidence_location": "phase3d_doc.md §10 会员积分",
+     "evidence_status": "supported",
+     "ai_reason": "原文直接支持",
+     "verbatim_in_source": true,
+     "human_decision": "accept",
+     "human_corrected_key_fact": "积分不可转让",
+     "human_reason": "接受：§10 会员积分 原文直接支持，且为 gold answer 的必要事实点。",
+     "review_status": "human_reviewed"
+    },
+    {
+     "fact_id": "Q40-F2",
+     "fact": "积分不可提现",
+     "evidence_excerpt": "积分不可转让、不可提现，仅限本账户使用。",
+     "evidence_location": "phase3d_doc.md §10 会员积分",
+     "evidence_status": "supported",
+     "ai_reason": "原文直接支持",
+     "verbatim_in_source": true,
+     "human_decision": "accept",
+     "human_corrected_key_fact": "积分不可提现",
+     "human_reason": "接受：§10 会员积分 原文直接支持，且为 gold answer 的必要事实点。",
+     "review_status": "human_reviewed"
+    },
+    {
+     "fact_id": "Q40-F3",
+     "fact": "积分仅限本账户使用",
+     "evidence_excerpt": "积分不可转让、不可提现，仅限本账户使用。",
+     "evidence_location": "phase3d_doc.md §10 会员积分",
+     "evidence_status": "supported",
+     "ai_reason": "原文直接支持",
+     "verbatim_in_source": true,
+     "human_decision": "accept",
+     "human_corrected_key_fact": "积分仅限本账户使用",
+     "human_reason": "接受：§10 会员积分 原文直接支持，且为 gold answer 的必要事实点。",
+     "review_status": "human_reviewed"
+    }
+   ],
+   "evidence_excerpt": [
+    "积分不可转让、不可提现，仅限本账户使用。",
+    "积分不可转让、不可提现，仅限本账户使用。",
+    "积分不可转让、不可提现，仅限本账户使用。"
+   ],
+   "evidence_location": [
+    "phase3d_doc.md §10 会员积分"
+   ],
+   "evidence_status": "supported",
+   "ai_reason": "三个否定事实分别原子化；答案的“不可以”是这三条的组合结论。",
+   "human_decision": "accept",
+   "human_corrected_key_facts": [
+    {
+     "fact_id": "Q40-F1",
+     "fact": "积分不可转让",
+     "evidence_excerpt": "积分不可转让、不可提现，仅限本账户使用。",
+     "evidence_location": "phase3d_doc.md §10 会员积分",
+     "evidence_status": "supported",
+     "verbatim_in_source": true
+    },
+    {
+     "fact_id": "Q40-F2",
+     "fact": "积分不可提现",
+     "evidence_excerpt": "积分不可转让、不可提现，仅限本账户使用。",
+     "evidence_location": "phase3d_doc.md §10 会员积分",
+     "evidence_status": "supported",
+     "verbatim_in_source": true
+    },
+    {
+     "fact_id": "Q40-F3",
+     "fact": "积分仅限本账户使用",
+     "evidence_excerpt": "积分不可转让、不可提现，仅限本账户使用。",
+     "evidence_location": "phase3d_doc.md §10 会员积分",
+     "evidence_status": "supported",
+     "verbatim_in_source": true
+    }
+   ],
+   "human_reason": "三条否定事实分别原子化，均为 gold answer 的必要内容；接受。",
+   "review_status": "human_reviewed"
+  },
+  {
+   "item_id": "Q05",
+   "gold_answer": "提交申请后 24 小时内发送至下单邮箱。",
+   "proposed_key_facts": [
+    {
+     "fact_id": "Q05-F1",
+     "fact": "发票提交申请后 24 小时内发送",
+     "evidence_excerpt": "仅支持电子发票，提交申请后 24 小时内发送至下单邮箱。",
+     "evidence_location": "phase3d_doc.md §4 发票说明",
+     "evidence_status": "supported",
+     "ai_reason": "原文直接支持",
+     "verbatim_in_source": true,
+     "human_decision": "accept",
+     "human_corrected_key_fact": "发票提交申请后 24 小时内发送",
+     "human_reason": "接受：§4 发票说明 原文直接支持，且为 gold answer 的必要事实点。",
+     "review_status": "human_reviewed"
+    },
+    {
+     "fact_id": "Q05-F2",
+     "fact": "发票发送至下单邮箱",
+     "evidence_excerpt": "仅支持电子发票，提交申请后 24 小时内发送至下单邮箱。",
+     "evidence_location": "phase3d_doc.md §4 发票说明",
+     "evidence_status": "supported",
+     "ai_reason": "原文直接支持",
+     "verbatim_in_source": true,
+     "human_decision": "accept",
+     "human_corrected_key_fact": "发票发送至下单邮箱",
+     "human_reason": "接受：§4 发票说明 原文直接支持，且为 gold answer 的必要事实点。",
+     "review_status": "human_reviewed"
+    }
+   ],
+   "evidence_excerpt": [
+    "仅支持电子发票，提交申请后 24 小时内发送至下单邮箱。",
+    "仅支持电子发票，提交申请后 24 小时内发送至下单邮箱。"
+   ],
+   "evidence_location": [
+    "phase3d_doc.md §4 发票说明"
+   ],
+   "evidence_status": "supported",
+   "ai_reason": "把时间与发送目的地拆成两条，避免一条事实包含两个可判定点。",
+   "human_decision": "accept",
+   "human_corrected_key_facts": [
+    {
+     "fact_id": "Q05-F1",
+     "fact": "发票提交申请后 24 小时内发送",
+     "evidence_excerpt": "仅支持电子发票，提交申请后 24 小时内发送至下单邮箱。",
+     "evidence_location": "phase3d_doc.md §4 发票说明",
+     "evidence_status": "supported",
+     "verbatim_in_source": true
+    },
+    {
+     "fact_id": "Q05-F2",
+     "fact": "发票发送至下单邮箱",
+     "evidence_excerpt": "仅支持电子发票，提交申请后 24 小时内发送至下单邮箱。",
+     "evidence_location": "phase3d_doc.md §4 发票说明",
+     "evidence_status": "supported",
+     "verbatim_in_source": true
+    }
+   ],
+   "human_reason": "时间与目的地拆成两条，均为 gold answer 的必要内容；接受。",
+   "review_status": "human_reviewed"
+  },
+  {
+   "item_id": "Q13",
+   "gold_answer": "需要先寄回原商品；商家收到并验收后 48 小时内寄出新品。",
+   "proposed_key_facts": [
+    {
+     "fact_id": "Q13-F1",
+     "fact": "换货需先寄回原商品",
+     "evidence_excerpt": "换货需先寄回原商品，商家收到并验收后 48 小时内寄出新品；运费由责任方承担。",
+     "evidence_location": "phase3d_doc.md §3 换货政策",
+     "evidence_status": "supported",
+     "ai_reason": "原文直接支持",
+     "verbatim_in_source": true,
+     "human_decision": "accept",
+     "human_corrected_key_fact": "换货需先寄回原商品",
+     "human_reason": "接受：§3 换货政策 原文直接支持，且为 gold answer 的必要事实点。",
+     "review_status": "human_reviewed"
+    },
+    {
+     "fact_id": "Q13-F2",
+     "fact": "商家需收到并验收原商品",
+     "evidence_excerpt": "换货需先寄回原商品，商家收到并验收后 48 小时内寄出新品；运费由责任方承担。",
+     "evidence_location": "phase3d_doc.md §3 换货政策",
+     "evidence_status": "supported",
+     "ai_reason": "原文直接支持；是新品寄出的前提",
+     "verbatim_in_source": true,
+     "human_decision": "accept",
+     "human_corrected_key_fact": "商家需收到并验收原商品",
+     "human_reason": "接受：§3 换货政策 原文直接支持，且为 gold answer 的必要事实点。",
+     "review_status": "human_reviewed"
+    },
+    {
+     "fact_id": "Q13-F3",
+     "fact": "验收后 48 小时内寄出新品",
+     "evidence_excerpt": "换货需先寄回原商品，商家收到并验收后 48 小时内寄出新品；运费由责任方承担。",
+     "evidence_location": "phase3d_doc.md §3 换货政策",
+     "evidence_status": "supported",
+     "ai_reason": "原文直接支持",
+     "verbatim_in_source": true,
+     "human_decision": "accept",
+     "human_corrected_key_fact": "验收后 48 小时内寄出新品",
+     "human_reason": "接受：§3 换货政策 原文直接支持，且为 gold answer 的必要事实点。",
+     "review_status": "human_reviewed"
+    }
+   ],
+   "evidence_excerpt": [
+    "换货需先寄回原商品，商家收到并验收后 48 小时内寄出新品；运费由责任方承担。",
+    "换货需先寄回原商品，商家收到并验收后 48 小时内寄出新品；运费由责任方承担。",
+    "换货需先寄回原商品，商家收到并验收后 48 小时内寄出新品；运费由责任方承担。"
+   ],
+   "evidence_location": [
+    "phase3d_doc.md §3 换货政策"
+   ],
+   "evidence_status": "supported",
+   "ai_reason": "把“先寄回/收到验收/48 小时寄出”拆成三条，保留条件边界。",
+   "human_decision": "accept",
+   "human_corrected_key_facts": [
+    {
+     "fact_id": "Q13-F1",
+     "fact": "换货需先寄回原商品",
+     "evidence_excerpt": "换货需先寄回原商品，商家收到并验收后 48 小时内寄出新品；运费由责任方承担。",
+     "evidence_location": "phase3d_doc.md §3 换货政策",
+     "evidence_status": "supported",
+     "verbatim_in_source": true
+    },
+    {
+     "fact_id": "Q13-F2",
+     "fact": "商家需收到并验收原商品",
+     "evidence_excerpt": "换货需先寄回原商品，商家收到并验收后 48 小时内寄出新品；运费由责任方承担。",
+     "evidence_location": "phase3d_doc.md §3 换货政策",
+     "evidence_status": "supported",
+     "verbatim_in_source": true
+    },
+    {
+     "fact_id": "Q13-F3",
+     "fact": "验收后 48 小时内寄出新品",
+     "evidence_excerpt": "换货需先寄回原商品，商家收到并验收后 48 小时内寄出新品；运费由责任方承担。",
+     "evidence_location": "phase3d_doc.md §3 换货政策",
+     "evidence_status": "supported",
+     "verbatim_in_source": true
+    }
+   ],
+   "human_reason": "先寄回/收到验收/48 小时寄出三条，条件边界清楚；接受。",
+   "review_status": "human_reviewed"
+  },
+  {
+   "item_id": "Q22",
+   "gold_answer": "20 元。新疆属于偏远地区，运费 20 元且不参与包邮。",
+   "proposed_key_facts": [
+    {
+     "fact_id": "Q22-F1",
+     "fact": "新疆属于偏远地区",
+     "evidence_excerpt": "新疆、西藏、内蒙古等偏远地区运费为 20 元，不参与包邮活动。",
+     "evidence_location": "phase3d_doc.md §7 运费规则",
+     "evidence_status": "supported",
+     "ai_reason": "原文将新疆列入偏远地区",
+     "verbatim_in_source": true,
+     "human_decision": "accept",
+     "human_corrected_key_fact": "新疆属于偏远地区",
+     "human_reason": "接受：§7 运费规则 原文直接支持，且为 gold answer 的必要事实点。",
+     "review_status": "human_reviewed"
+    },
+    {
+     "fact_id": "Q22-F2",
+     "fact": "偏远地区运费为 20 元",
+     "evidence_excerpt": "新疆、西藏、内蒙古等偏远地区运费为 20 元，不参与包邮活动。",
+     "evidence_location": "phase3d_doc.md §7 运费规则",
+     "evidence_status": "supported",
+     "ai_reason": "原文直接支持",
+     "verbatim_in_source": true,
+     "human_decision": "accept",
+     "human_corrected_key_fact": "偏远地区运费为 20 元",
+     "human_reason": "接受：§7 运费规则 原文直接支持，且为 gold answer 的必要事实点。",
+     "review_status": "human_reviewed"
+    },
+    {
+     "fact_id": "Q22-F3",
+     "fact": "偏远地区不参与包邮活动",
+     "evidence_excerpt": "新疆、西藏、内蒙古等偏远地区运费为 20 元，不参与包邮活动。",
+     "evidence_location": "phase3d_doc.md §7 运费规则",
+     "evidence_status": "supported",
+     "ai_reason": "原文直接支持",
+     "verbatim_in_source": true,
+     "human_decision": "accept",
+     "human_corrected_key_fact": "偏远地区不参与包邮活动",
+     "human_reason": "接受：§7 运费规则 原文直接支持，且为 gold answer 的必要事实点。",
+     "review_status": "human_reviewed"
+    },
+    {
+     "fact_id": "Q22-F4",
+     "fact": "订单实付 89 元未满 99 元包邮门槛",
+     "evidence_excerpt": "单笔订单实付满 99 元包邮；未满 99 元收取 10 元运费。",
+     "evidence_location": "phase3d_doc.md §7 运费规则",
+     "evidence_status": "supported",
+     "ai_reason": "89 < 99，由包邮门槛直接推出；不是外部知识",
+     "verbatim_in_source": true,
+     "human_decision": "delete",
+     "human_corrected_key_fact": "",
+     "human_reason": "删除：89<99 的算术成立，但 gold answer 未要求；且偏远地区 20 元/不包邮不受包邮门槛影响，保留会误加“必答点”。",
+     "review_status": "human_reviewed"
+    }
+   ],
+   "evidence_excerpt": [
+    "新疆、西藏、内蒙古等偏远地区运费为 20 元，不参与包邮活动。",
+    "新疆、西藏、内蒙古等偏远地区运费为 20 元，不参与包邮活动。",
+    "新疆、西藏、内蒙古等偏远地区运费为 20 元，不参与包邮活动。",
+    "单笔订单实付满 99 元包邮；未满 99 元收取 10 元运费。"
+   ],
+   "evidence_location": [
+    "phase3d_doc.md §7 运费规则"
+   ],
+   "evidence_status": "supported",
+   "ai_reason": "F4 是算术比较，不是政策新增；保留以便判断包邮条件。",
+   "human_decision": "modify",
+   "human_corrected_key_facts": [
+    {
+     "fact_id": "Q22-F1",
+     "fact": "新疆属于偏远地区",
+     "evidence_excerpt": "新疆、西藏、内蒙古等偏远地区运费为 20 元，不参与包邮活动。",
+     "evidence_location": "phase3d_doc.md §7 运费规则",
+     "evidence_status": "supported",
+     "verbatim_in_source": true
+    },
+    {
+     "fact_id": "Q22-F2",
+     "fact": "偏远地区运费为 20 元",
+     "evidence_excerpt": "新疆、西藏、内蒙古等偏远地区运费为 20 元，不参与包邮活动。",
+     "evidence_location": "phase3d_doc.md §7 运费规则",
+     "evidence_status": "supported",
+     "verbatim_in_source": true
+    },
+    {
+     "fact_id": "Q22-F3",
+     "fact": "偏远地区不参与包邮活动",
+     "evidence_excerpt": "新疆、西藏、内蒙古等偏远地区运费为 20 元，不参与包邮活动。",
+     "evidence_location": "phase3d_doc.md §7 运费规则",
+     "evidence_status": "supported",
+     "verbatim_in_source": true
+    }
+   ],
+   "human_reason": "删除 F4（89<99 是正确算术，但 gold answer 未要求，且偏远地区规则不受包邮门槛影响）；F1–F3 保留。",
+   "review_status": "human_reviewed"
+  },
+  {
+   "item_id": "Q30",
+   "gold_answer": "文档未说明是否支持海外配送，无法确认。",
+   "proposed_key_facts": [
+    {
+     "fact_id": "Q30-F1",
+     "fact": "文档未说明是否支持海外配送",
+     "evidence_excerpt": "",
+     "evidence_location": "phase3d_doc.md 全文 §1–§13",
+     "evidence_status": "evidence_insufficient",
+     "ai_reason": "全文没有海外/跨境配送表述；这是 absence 事实，无法提供肯定证据；按 unanswerable 处理",
+     "verbatim_in_source": null,
+     "human_decision": "accept",
+     "human_corrected_key_fact": "文档未说明是否支持海外配送",
+     "human_reason": "保留：unanswerable 题的唯一预期内容是“文档未说明”；标 absence/evidence_insufficient，不进入 supported 分母。",
+     "review_status": "human_reviewed"
+    }
+   ],
+   "evidence_excerpt": [],
+   "evidence_location": [
+    "phase3d_doc.md 全文 §1–§13"
+   ],
+   "evidence_status": "evidence_insufficient",
+   "ai_reason": "唯一候选是“文档未说明”，只能标 evidence_insufficient；不得补造“支持/不支持”。",
+   "human_decision": "accept",
+   "human_corrected_key_facts": [
+    {
+     "fact_id": "Q30-F1",
+     "fact": "文档未说明是否支持海外配送",
+     "evidence_excerpt": "",
+     "evidence_location": "phase3d_doc.md 全文 §1–§13",
+     "evidence_status": "evidence_insufficient",
+     "verbatim_in_source": false
+    }
+   ],
+   "human_reason": "保留唯一 absence fact（evidence_insufficient），用于约束“文档未说明”，不进入 supported 分母。",
+   "review_status": "human_reviewed"
+  },
+  {
+   "item_id": "Q35",
+   "gold_answer": "需要区分「发货」和「到货」：文档只规定发货时效——现货商品付款后 48 小时内发出，预售商品以商品页标注时间为准，大件商品 5 个工作日内发出且配送前电话预约；文档未说明快递运输/送达需要多久。发货后可在「我的订单」查看物流轨迹，超过 24 小时未更新可联系客服。若问的是到货时间，仅凭文档无法给出具体时间。",
+   "proposed_key_facts": [
+    {
+     "fact_id": "Q35-F1",
+     "fact": "现货商品付款后 48 小时内发出",
+     "evidence_excerpt": "现货商品在付款后 48 小时内发出；预售商品以商品页标注的发货时间为准。",
+     "evidence_location": "phase3d_doc.md §5 发货时效",
+     "evidence_status": "supported",
+     "ai_reason": "原文直接支持",
+     "verbatim_in_source": true,
+     "human_decision": "accept",
+     "human_corrected_key_fact": "现货商品付款后 48 小时内发出",
+     "human_reason": "接受：§5 发货时效 原文直接支持，且为 gold answer 的必要事实点。",
+     "review_status": "human_reviewed"
+    },
+    {
+     "fact_id": "Q35-F2",
+     "fact": "预售商品以商品页标注的发货时间为准",
+     "evidence_excerpt": "现货商品在付款后 48 小时内发出；预售商品以商品页标注的发货时间为准。",
+     "evidence_location": "phase3d_doc.md §5 发货时效",
+     "evidence_status": "supported",
+     "ai_reason": "原文直接支持",
+     "verbatim_in_source": true,
+     "human_decision": "accept",
+     "human_corrected_key_fact": "预售商品以商品页标注的发货时间为准",
+     "human_reason": "接受：§5 发货时效 原文直接支持，且为 gold answer 的必要事实点。",
+     "review_status": "human_reviewed"
+    },
+    {
+     "fact_id": "Q35-F3",
+     "fact": "大件商品发货时间为 5 个工作日内",
+     "evidence_excerpt": "大件商品（家具、家电）发货时间为 5 个工作日内，配送前会电话预约。",
+     "evidence_location": "phase3d_doc.md §5 发货时效",
+     "evidence_status": "supported",
+     "ai_reason": "原文直接支持",
+     "verbatim_in_source": true,
+     "human_decision": "accept",
+     "human_corrected_key_fact": "大件商品发货时间为 5 个工作日内",
+     "human_reason": "接受：§5 发货时效 原文直接支持，且为 gold answer 的必要事实点。",
+     "review_status": "human_reviewed"
+    },
+    {
+     "fact_id": "Q35-F4",
+     "fact": "大件商品配送前电话预约",
+     "evidence_excerpt": "大件商品（家具、家电）发货时间为 5 个工作日内，配送前会电话预约。",
+     "evidence_location": "phase3d_doc.md §5 发货时效",
+     "evidence_status": "supported",
+     "ai_reason": "原文直接支持",
+     "verbatim_in_source": true,
+     "human_decision": "accept",
+     "human_corrected_key_fact": "大件商品配送前电话预约",
+     "human_reason": "接受：§5 发货时效 原文直接支持，且为 gold answer 的必要事实点。",
+     "review_status": "human_reviewed"
+    },
+    {
+     "fact_id": "Q35-F5",
+     "fact": "文档未说明快递运输/送达需要多久",
+     "evidence_excerpt": "",
+     "evidence_location": "phase3d_doc.md 全文（§5 只有发货时效，§6 只有查询方式）",
+     "evidence_status": "evidence_insufficient",
+     "ai_reason": "absence 事实；不能把“发货时效”当成“到货时效”",
+     "verbatim_in_source": null,
+     "human_decision": "accept",
+     "human_corrected_key_fact": "文档未说明快递运输/送达需要多久",
+     "human_reason": "保留：承载“发货≠到货”的核心结论；absence/evidence_insufficient，不进入 supported 分母。",
+     "review_status": "human_reviewed"
+    },
+    {
+     "fact_id": "Q35-F6",
+     "fact": "发货后可在「我的订单」查看物流单号与实时轨迹",
+     "evidence_excerpt": "订单发货后可在「我的订单」查看物流单号与实时轨迹。",
+     "evidence_location": "phase3d_doc.md §6 物流查询",
+     "evidence_status": "supported",
+     "ai_reason": "原文直接支持",
+     "verbatim_in_source": true,
+     "human_decision": "accept",
+     "human_corrected_key_fact": "发货后可在「我的订单」查看物流单号与实时轨迹",
+     "human_reason": "接受：§6 物流查询 原文直接支持，且为 gold answer 的必要事实点。",
+     "review_status": "human_reviewed"
+    },
+    {
+     "fact_id": "Q35-F7",
+     "fact": "物流信息超过 24 小时未更新可联系客服核查",
+     "evidence_excerpt": "物流信息超过 24 小时未更新时，可联系客服协助核查。",
+     "evidence_location": "phase3d_doc.md §6 物流查询",
+     "evidence_status": "supported",
+     "ai_reason": "原文直接支持",
+     "verbatim_in_source": true,
+     "human_decision": "accept",
+     "human_corrected_key_fact": "物流信息超过 24 小时未更新可联系客服核查",
+     "human_reason": "接受：§6 物流查询 原文直接支持，且为 gold answer 的必要事实点。",
+     "review_status": "human_reviewed"
+    }
+   ],
+   "evidence_excerpt": [
+    "现货商品在付款后 48 小时内发出；预售商品以商品页标注的发货时间为准。",
+    "现货商品在付款后 48 小时内发出；预售商品以商品页标注的发货时间为准。",
+    "大件商品（家具、家电）发货时间为 5 个工作日内，配送前会电话预约。",
+    "大件商品（家具、家电）发货时间为 5 个工作日内，配送前会电话预约。",
+    "订单发货后可在「我的订单」查看物流单号与实时轨迹。",
+    "物流信息超过 24 小时未更新时，可联系客服协助核查。"
+   ],
+   "evidence_location": [
+    "phase3d_doc.md §5 发货时效",
+    "phase3d_doc.md §6 物流查询",
+    "phase3d_doc.md 全文（§5 只有发货时效，§6 只有查询方式）"
+   ],
+   "evidence_status": "mixed",
+   "ai_reason": "F1–F4/F6–F7 是发货/查询事实；F5 是文档未说明运输时长的 absence 事实，标 evidence_insufficient。",
+   "human_decision": "accept",
+   "human_corrected_key_facts": [
+    {
+     "fact_id": "Q35-F1",
+     "fact": "现货商品付款后 48 小时内发出",
+     "evidence_excerpt": "现货商品在付款后 48 小时内发出；预售商品以商品页标注的发货时间为准。",
+     "evidence_location": "phase3d_doc.md §5 发货时效",
+     "evidence_status": "supported",
+     "verbatim_in_source": true
+    },
+    {
+     "fact_id": "Q35-F2",
+     "fact": "预售商品以商品页标注的发货时间为准",
+     "evidence_excerpt": "现货商品在付款后 48 小时内发出；预售商品以商品页标注的发货时间为准。",
+     "evidence_location": "phase3d_doc.md §5 发货时效",
+     "evidence_status": "supported",
+     "verbatim_in_source": true
+    },
+    {
+     "fact_id": "Q35-F3",
+     "fact": "大件商品发货时间为 5 个工作日内",
+     "evidence_excerpt": "大件商品（家具、家电）发货时间为 5 个工作日内，配送前会电话预约。",
+     "evidence_location": "phase3d_doc.md §5 发货时效",
+     "evidence_status": "supported",
+     "verbatim_in_source": true
+    },
+    {
+     "fact_id": "Q35-F4",
+     "fact": "大件商品配送前电话预约",
+     "evidence_excerpt": "大件商品（家具、家电）发货时间为 5 个工作日内，配送前会电话预约。",
+     "evidence_location": "phase3d_doc.md §5 发货时效",
+     "evidence_status": "supported",
+     "verbatim_in_source": true
+    },
+    {
+     "fact_id": "Q35-F5",
+     "fact": "文档未说明快递运输/送达需要多久",
+     "evidence_excerpt": "",
+     "evidence_location": "phase3d_doc.md 全文（§5 只有发货时效，§6 只有查询方式）",
+     "evidence_status": "evidence_insufficient",
+     "verbatim_in_source": false
+    },
+    {
+     "fact_id": "Q35-F6",
+     "fact": "发货后可在「我的订单」查看物流单号与实时轨迹",
+     "evidence_excerpt": "订单发货后可在「我的订单」查看物流单号与实时轨迹。",
+     "evidence_location": "phase3d_doc.md §6 物流查询",
+     "evidence_status": "supported",
+     "verbatim_in_source": true
+    },
+    {
+     "fact_id": "Q35-F7",
+     "fact": "物流信息超过 24 小时未更新可联系客服核查",
+     "evidence_excerpt": "物流信息超过 24 小时未更新时，可联系客服协助核查。",
+     "evidence_location": "phase3d_doc.md §6 物流查询",
+     "evidence_status": "supported",
+     "verbatim_in_source": true
+    }
+   ],
+   "human_reason": "七条均出现在 gold answer；F5 为 absence fact（evidence_insufficient），承载发货/到货区分；接受。",
+   "review_status": "human_reviewed"
+  }
+ ]
+}

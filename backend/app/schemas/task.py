@@ -7,7 +7,7 @@ from typing import Any, Literal
 
 from app.schemas.base import BaseSchema, ORMSchema
 
-TaskType = Literal["clean", "evaluate", "extract", "analyze", "report"]
+TaskType = Literal["clean", "structure", "evaluate", "extract", "analyze", "report", "rag_eval"]
 TaskStatus = Literal["pending", "running", "completed", "failed", "cancelled"]
 
 

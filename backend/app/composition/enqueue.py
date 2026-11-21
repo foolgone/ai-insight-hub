@@ -11,6 +11,7 @@ __all__ = [
     "enqueue_evaluation",
     "enqueue_extract",
     "enqueue_insight",
+    "enqueue_rag_evaluation",
     "enqueue_report",
     "enqueue_structure",
 ]
@@ -44,6 +45,13 @@ def enqueue_report(report_id: str) -> str:
     from app.tasks.report import generate_report_task
 
     return str(generate_report_task.delay(report_id).id)
+
+
+def enqueue_rag_evaluation(run_id: str) -> str:
+    """批量评测任务（按 Run 入队，重投递由 advisory lock + 唯一键兜底）。"""
+    from app.tasks.rag_evaluation import rag_evaluation
+
+    return str(rag_evaluation.delay(run_id).id)
 
 
 def enqueue_structure(task_id: str) -> str:

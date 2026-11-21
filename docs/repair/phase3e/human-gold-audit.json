@@ -1,0 +1,2153 @@
+{
+  "meta": {
+    "audit": "human-gold-v1-consistency",
+    "checked_at": "2026-11-16",
+    "human_gold": false,
+    "note": "Read-only audit; no prompt/code/db/judge changes.",
+    "source_sha256": "737f6bd3ef412d41d14ada4d2000bd01e851355f0d95cd0d321ac84416f9002d"
+  },
+  "summary": {
+    "checks": 424,
+    "passed": 424,
+    "failed": 0,
+    "warnings": 0
+  },
+  "checks": [
+    {
+      "name": "40 条候选唯一 ID",
+      "ok": true,
+      "detail": "got 40"
+    },
+    {
+      "name": "候选 ID 为 Q01..Q40",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Human Gold 基础数量=13",
+      "ok": true,
+      "detail": "got 13"
+    },
+    {
+      "name": "pending 基础数量=27",
+      "ok": true,
+      "detail": "got 27"
+    },
+    {
+      "name": "reviewed+pending=40 且无重复",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "reviewed 无未知 ID",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pending 无未知 ID",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "reviewed ID 与人工结论一致",
+      "ok": true,
+      "detail": "got []"
+    },
+    {
+      "name": "工作台基础行=13",
+      "ok": true,
+      "detail": "got 13"
+    },
+    {
+      "name": "工作台基础 ID 与 Gold 一致",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "工作台基础全部 human_reviewed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "工作台 Claim 行=1",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "工作台 Claim 状态 human_reviewed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q23 review_status",
+      "ok": true,
+      "detail": "human_reviewed"
+    },
+    {
+      "name": "Q23 reviewer",
+      "ok": true,
+      "detail": "empty"
+    },
+    {
+      "name": "Q23 reviewed_at",
+      "ok": true,
+      "detail": "2026-11-16"
+    },
+    {
+      "name": "Q23 category",
+      "ok": true,
+      "detail": "constraint != constraint"
+    },
+    {
+      "name": "Q23 answerability",
+      "ok": true,
+      "detail": "answerable != answerable"
+    },
+    {
+      "name": "Q23 reference_answer",
+      "ok": true,
+      "detail": "empty"
+    },
+    {
+      "name": "Q23 key_facts count",
+      "ok": true,
+      "detail": "3 != 3"
+    },
+    {
+      "name": "Q23 key_facts match reviewed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q23 key_facts human_reviewed",
+      "ok": true,
+      "detail": "human_reviewed"
+    },
+    {
+      "name": "Q23 key_fact_details count",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q23 key_facts reviewer",
+      "ok": true,
+      "detail": "江晚"
+    },
+    {
+      "name": "Q23 key_facts reviewed_at",
+      "ok": true,
+      "detail": "2026-11-16"
+    },
+    {
+      "name": "Q23 original_question",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q23 final_question changed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q23 evidence verbatim",
+      "ok": true,
+      "detail": "12. 特殊商品"
+    },
+    {
+      "name": "Q23 answerable evidence present",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q36 review_status",
+      "ok": true,
+      "detail": "human_reviewed"
+    },
+    {
+      "name": "Q36 reviewer",
+      "ok": true,
+      "detail": "empty"
+    },
+    {
+      "name": "Q36 reviewed_at",
+      "ok": true,
+      "detail": "2026-11-16"
+    },
+    {
+      "name": "Q36 category",
+      "ok": true,
+      "detail": "ambiguous != ambiguous"
+    },
+    {
+      "name": "Q36 answerability",
+      "ok": true,
+      "detail": "ambiguous != ambiguous"
+    },
+    {
+      "name": "Q36 reference_answer",
+      "ok": true,
+      "detail": "empty"
+    },
+    {
+      "name": "Q36 key_facts count",
+      "ok": true,
+      "detail": "8 != 8"
+    },
+    {
+      "name": "Q36 key_facts match reviewed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q36 key_facts human_reviewed",
+      "ok": true,
+      "detail": "human_reviewed"
+    },
+    {
+      "name": "Q36 key_fact_details count",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q36 key_facts reviewer",
+      "ok": true,
+      "detail": "江晚"
+    },
+    {
+      "name": "Q36 key_facts reviewed_at",
+      "ok": true,
+      "detail": "2026-11-16"
+    },
+    {
+      "name": "Q36 original_question",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q36 final_question unchanged",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q36 evidence verbatim",
+      "ok": true,
+      "detail": "1. 退款时效"
+    },
+    {
+      "name": "Q36 evidence verbatim",
+      "ok": true,
+      "detail": "12. 特殊商品"
+    },
+    {
+      "name": "Q36 answerable evidence present",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q14 review_status",
+      "ok": true,
+      "detail": "human_reviewed"
+    },
+    {
+      "name": "Q14 reviewer",
+      "ok": true,
+      "detail": "empty"
+    },
+    {
+      "name": "Q14 reviewed_at",
+      "ok": true,
+      "detail": "2026-11-16"
+    },
+    {
+      "name": "Q14 category",
+      "ok": true,
+      "detail": "multi != multi"
+    },
+    {
+      "name": "Q14 answerability",
+      "ok": true,
+      "detail": "ambiguous != ambiguous"
+    },
+    {
+      "name": "Q14 reference_answer",
+      "ok": true,
+      "detail": "empty"
+    },
+    {
+      "name": "Q14 key_facts count",
+      "ok": true,
+      "detail": "2 != 2"
+    },
+    {
+      "name": "Q14 key_facts match reviewed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q14 key_facts human_reviewed",
+      "ok": true,
+      "detail": "human_reviewed"
+    },
+    {
+      "name": "Q14 key_fact_details count",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q14 key_facts reviewer",
+      "ok": true,
+      "detail": "江晚"
+    },
+    {
+      "name": "Q14 key_facts reviewed_at",
+      "ok": true,
+      "detail": "2026-11-16"
+    },
+    {
+      "name": "Q14 original_question",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q14 final_question unchanged",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q14 evidence verbatim",
+      "ok": true,
+      "detail": "4. 发票说明"
+    },
+    {
+      "name": "Q14 answerable evidence present",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q15 review_status",
+      "ok": true,
+      "detail": "human_reviewed"
+    },
+    {
+      "name": "Q15 reviewer",
+      "ok": true,
+      "detail": "empty"
+    },
+    {
+      "name": "Q15 reviewed_at",
+      "ok": true,
+      "detail": "2026-11-16"
+    },
+    {
+      "name": "Q15 category",
+      "ok": true,
+      "detail": "direct != direct"
+    },
+    {
+      "name": "Q15 answerability",
+      "ok": true,
+      "detail": "answerable != answerable"
+    },
+    {
+      "name": "Q15 reference_answer",
+      "ok": true,
+      "detail": "empty"
+    },
+    {
+      "name": "Q15 key_facts count",
+      "ok": true,
+      "detail": "1 != 1"
+    },
+    {
+      "name": "Q15 key_facts match reviewed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q15 key_facts human_reviewed",
+      "ok": true,
+      "detail": "human_reviewed"
+    },
+    {
+      "name": "Q15 key_fact_details count",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q15 key_facts reviewer",
+      "ok": true,
+      "detail": "江晚"
+    },
+    {
+      "name": "Q15 key_facts reviewed_at",
+      "ok": true,
+      "detail": "2026-11-16"
+    },
+    {
+      "name": "Q15 original_question",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q15 final_question unchanged",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q15 evidence verbatim",
+      "ok": true,
+      "detail": "5. 发货时效"
+    },
+    {
+      "name": "Q15 answerable evidence present",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q16 review_status",
+      "ok": true,
+      "detail": "human_reviewed"
+    },
+    {
+      "name": "Q16 reviewer",
+      "ok": true,
+      "detail": "empty"
+    },
+    {
+      "name": "Q16 reviewed_at",
+      "ok": true,
+      "detail": "2026-11-16"
+    },
+    {
+      "name": "Q16 category",
+      "ok": true,
+      "detail": "constraint != constraint"
+    },
+    {
+      "name": "Q16 answerability",
+      "ok": true,
+      "detail": "answerable != answerable"
+    },
+    {
+      "name": "Q16 reference_answer",
+      "ok": true,
+      "detail": "empty"
+    },
+    {
+      "name": "Q16 key_facts count",
+      "ok": true,
+      "detail": "1 != 1"
+    },
+    {
+      "name": "Q16 key_facts match reviewed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q16 key_facts human_reviewed",
+      "ok": true,
+      "detail": "human_reviewed"
+    },
+    {
+      "name": "Q16 key_fact_details count",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q16 key_facts reviewer",
+      "ok": true,
+      "detail": "江晚"
+    },
+    {
+      "name": "Q16 key_facts reviewed_at",
+      "ok": true,
+      "detail": "2026-11-16"
+    },
+    {
+      "name": "Q16 original_question",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q16 final_question unchanged",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q16 evidence verbatim",
+      "ok": true,
+      "detail": "6. 物流查询"
+    },
+    {
+      "name": "Q16 answerable evidence present",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q19 review_status",
+      "ok": true,
+      "detail": "human_reviewed"
+    },
+    {
+      "name": "Q19 reviewer",
+      "ok": true,
+      "detail": "empty"
+    },
+    {
+      "name": "Q19 reviewed_at",
+      "ok": true,
+      "detail": "2026-11-16"
+    },
+    {
+      "name": "Q19 category",
+      "ok": true,
+      "detail": "multi != multi"
+    },
+    {
+      "name": "Q19 answerability",
+      "ok": true,
+      "detail": "ambiguous != ambiguous"
+    },
+    {
+      "name": "Q19 reference_answer",
+      "ok": true,
+      "detail": "empty"
+    },
+    {
+      "name": "Q19 key_facts count",
+      "ok": true,
+      "detail": "2 != 2"
+    },
+    {
+      "name": "Q19 key_facts match reviewed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q19 key_facts human_reviewed",
+      "ok": true,
+      "detail": "human_reviewed"
+    },
+    {
+      "name": "Q19 key_fact_details count",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q19 key_facts reviewer",
+      "ok": true,
+      "detail": "江晚"
+    },
+    {
+      "name": "Q19 key_facts reviewed_at",
+      "ok": true,
+      "detail": "2026-11-16"
+    },
+    {
+      "name": "Q19 original_question",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q19 final_question unchanged",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q19 evidence verbatim",
+      "ok": true,
+      "detail": "9. 优惠券规则"
+    },
+    {
+      "name": "Q19 answerable evidence present",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q37 review_status",
+      "ok": true,
+      "detail": "human_reviewed"
+    },
+    {
+      "name": "Q37 reviewer",
+      "ok": true,
+      "detail": "empty"
+    },
+    {
+      "name": "Q37 reviewed_at",
+      "ok": true,
+      "detail": "2026-11-16"
+    },
+    {
+      "name": "Q37 category",
+      "ok": true,
+      "detail": "ambiguous != ambiguous"
+    },
+    {
+      "name": "Q37 answerability",
+      "ok": true,
+      "detail": "ambiguous != ambiguous"
+    },
+    {
+      "name": "Q37 reference_answer",
+      "ok": true,
+      "detail": "empty"
+    },
+    {
+      "name": "Q37 key_facts count",
+      "ok": true,
+      "detail": "5 != 5"
+    },
+    {
+      "name": "Q37 key_facts match reviewed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q37 key_facts human_reviewed",
+      "ok": true,
+      "detail": "human_reviewed"
+    },
+    {
+      "name": "Q37 key_fact_details count",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q37 key_facts reviewer",
+      "ok": true,
+      "detail": "江晚"
+    },
+    {
+      "name": "Q37 key_facts reviewed_at",
+      "ok": true,
+      "detail": "2026-11-16"
+    },
+    {
+      "name": "Q37 original_question",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q37 final_question unchanged",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q37 evidence verbatim",
+      "ok": true,
+      "detail": "4. 发票说明"
+    },
+    {
+      "name": "Q37 answerable evidence present",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q40 review_status",
+      "ok": true,
+      "detail": "human_reviewed"
+    },
+    {
+      "name": "Q40 reviewer",
+      "ok": true,
+      "detail": "empty"
+    },
+    {
+      "name": "Q40 reviewed_at",
+      "ok": true,
+      "detail": "2026-11-16"
+    },
+    {
+      "name": "Q40 category",
+      "ok": true,
+      "detail": "direct != direct"
+    },
+    {
+      "name": "Q40 answerability",
+      "ok": true,
+      "detail": "answerable != answerable"
+    },
+    {
+      "name": "Q40 reference_answer",
+      "ok": true,
+      "detail": "empty"
+    },
+    {
+      "name": "Q40 key_facts count",
+      "ok": true,
+      "detail": "3 != 3"
+    },
+    {
+      "name": "Q40 key_facts match reviewed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q40 key_facts human_reviewed",
+      "ok": true,
+      "detail": "human_reviewed"
+    },
+    {
+      "name": "Q40 key_fact_details count",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q40 key_facts reviewer",
+      "ok": true,
+      "detail": "江晚"
+    },
+    {
+      "name": "Q40 key_facts reviewed_at",
+      "ok": true,
+      "detail": "2026-11-16"
+    },
+    {
+      "name": "Q40 original_question",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q40 final_question changed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q40 evidence verbatim",
+      "ok": true,
+      "detail": "10. 会员积分"
+    },
+    {
+      "name": "Q40 answerable evidence present",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q05 review_status",
+      "ok": true,
+      "detail": "human_reviewed"
+    },
+    {
+      "name": "Q05 reviewer",
+      "ok": true,
+      "detail": "empty"
+    },
+    {
+      "name": "Q05 reviewed_at",
+      "ok": true,
+      "detail": "2026-11-16"
+    },
+    {
+      "name": "Q05 category",
+      "ok": true,
+      "detail": "direct != direct"
+    },
+    {
+      "name": "Q05 answerability",
+      "ok": true,
+      "detail": "answerable != answerable"
+    },
+    {
+      "name": "Q05 reference_answer",
+      "ok": true,
+      "detail": "empty"
+    },
+    {
+      "name": "Q05 key_facts count",
+      "ok": true,
+      "detail": "2 != 2"
+    },
+    {
+      "name": "Q05 key_facts match reviewed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q05 key_facts human_reviewed",
+      "ok": true,
+      "detail": "human_reviewed"
+    },
+    {
+      "name": "Q05 key_fact_details count",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q05 key_facts reviewer",
+      "ok": true,
+      "detail": "江晚"
+    },
+    {
+      "name": "Q05 key_facts reviewed_at",
+      "ok": true,
+      "detail": "2026-11-16"
+    },
+    {
+      "name": "Q05 original_question",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q05 final_question unchanged",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q05 evidence verbatim",
+      "ok": true,
+      "detail": "4. 发票说明"
+    },
+    {
+      "name": "Q05 answerable evidence present",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q13 review_status",
+      "ok": true,
+      "detail": "human_reviewed"
+    },
+    {
+      "name": "Q13 reviewer",
+      "ok": true,
+      "detail": "empty"
+    },
+    {
+      "name": "Q13 reviewed_at",
+      "ok": true,
+      "detail": "2026-11-16"
+    },
+    {
+      "name": "Q13 category",
+      "ok": true,
+      "detail": "multi != multi"
+    },
+    {
+      "name": "Q13 answerability",
+      "ok": true,
+      "detail": "answerable != answerable"
+    },
+    {
+      "name": "Q13 reference_answer",
+      "ok": true,
+      "detail": "empty"
+    },
+    {
+      "name": "Q13 key_facts count",
+      "ok": true,
+      "detail": "3 != 3"
+    },
+    {
+      "name": "Q13 key_facts match reviewed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q13 key_facts human_reviewed",
+      "ok": true,
+      "detail": "human_reviewed"
+    },
+    {
+      "name": "Q13 key_fact_details count",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q13 key_facts reviewer",
+      "ok": true,
+      "detail": "江晚"
+    },
+    {
+      "name": "Q13 key_facts reviewed_at",
+      "ok": true,
+      "detail": "2026-11-16"
+    },
+    {
+      "name": "Q13 original_question",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q13 final_question unchanged",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q13 evidence verbatim",
+      "ok": true,
+      "detail": "3. 换货政策"
+    },
+    {
+      "name": "Q13 answerable evidence present",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q22 review_status",
+      "ok": true,
+      "detail": "human_reviewed"
+    },
+    {
+      "name": "Q22 reviewer",
+      "ok": true,
+      "detail": "empty"
+    },
+    {
+      "name": "Q22 reviewed_at",
+      "ok": true,
+      "detail": "2026-11-16"
+    },
+    {
+      "name": "Q22 category",
+      "ok": true,
+      "detail": "constraint != constraint"
+    },
+    {
+      "name": "Q22 answerability",
+      "ok": true,
+      "detail": "answerable != answerable"
+    },
+    {
+      "name": "Q22 reference_answer",
+      "ok": true,
+      "detail": "empty"
+    },
+    {
+      "name": "Q22 key_facts count",
+      "ok": true,
+      "detail": "3 != 3"
+    },
+    {
+      "name": "Q22 key_facts match reviewed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q22 key_facts human_reviewed",
+      "ok": true,
+      "detail": "human_reviewed"
+    },
+    {
+      "name": "Q22 key_fact_details count",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q22 key_facts reviewer",
+      "ok": true,
+      "detail": "江晚"
+    },
+    {
+      "name": "Q22 key_facts reviewed_at",
+      "ok": true,
+      "detail": "2026-11-16"
+    },
+    {
+      "name": "Q22 original_question",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q22 final_question unchanged",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q22 evidence verbatim",
+      "ok": true,
+      "detail": "7. 运费规则"
+    },
+    {
+      "name": "Q22 answerable evidence present",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q30 review_status",
+      "ok": true,
+      "detail": "human_reviewed"
+    },
+    {
+      "name": "Q30 reviewer",
+      "ok": true,
+      "detail": "empty"
+    },
+    {
+      "name": "Q30 reviewed_at",
+      "ok": true,
+      "detail": "2026-11-16"
+    },
+    {
+      "name": "Q30 category",
+      "ok": true,
+      "detail": "unanswerable != unanswerable"
+    },
+    {
+      "name": "Q30 answerability",
+      "ok": true,
+      "detail": "unanswerable != unanswerable"
+    },
+    {
+      "name": "Q30 reference_answer",
+      "ok": true,
+      "detail": "empty"
+    },
+    {
+      "name": "Q30 key_facts count",
+      "ok": true,
+      "detail": "1 != 1"
+    },
+    {
+      "name": "Q30 key_facts match reviewed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q30 key_facts human_reviewed",
+      "ok": true,
+      "detail": "human_reviewed"
+    },
+    {
+      "name": "Q30 key_fact_details count",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q30 key_facts reviewer",
+      "ok": true,
+      "detail": "江晚"
+    },
+    {
+      "name": "Q30 key_facts reviewed_at",
+      "ok": true,
+      "detail": "2026-11-16"
+    },
+    {
+      "name": "Q30 original_question",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q30 final_question unchanged",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q30 unanswerable evidence empty",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q35 review_status",
+      "ok": true,
+      "detail": "human_reviewed"
+    },
+    {
+      "name": "Q35 reviewer",
+      "ok": true,
+      "detail": "empty"
+    },
+    {
+      "name": "Q35 reviewed_at",
+      "ok": true,
+      "detail": "2026-11-16"
+    },
+    {
+      "name": "Q35 category",
+      "ok": true,
+      "detail": "ambiguous != ambiguous"
+    },
+    {
+      "name": "Q35 answerability",
+      "ok": true,
+      "detail": "ambiguous != ambiguous"
+    },
+    {
+      "name": "Q35 reference_answer",
+      "ok": true,
+      "detail": "empty"
+    },
+    {
+      "name": "Q35 key_facts count",
+      "ok": true,
+      "detail": "7 != 7"
+    },
+    {
+      "name": "Q35 key_facts match reviewed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q35 key_facts human_reviewed",
+      "ok": true,
+      "detail": "human_reviewed"
+    },
+    {
+      "name": "Q35 key_fact_details count",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q35 key_facts reviewer",
+      "ok": true,
+      "detail": "江晚"
+    },
+    {
+      "name": "Q35 key_facts reviewed_at",
+      "ok": true,
+      "detail": "2026-11-16"
+    },
+    {
+      "name": "Q35 original_question",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q35 final_question unchanged",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q35 evidence verbatim",
+      "ok": true,
+      "detail": "5. 发货时效"
+    },
+    {
+      "name": "Q35 evidence verbatim",
+      "ok": true,
+      "detail": "6. 物流查询"
+    },
+    {
+      "name": "Q35 answerable evidence present",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q23 final question",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q40 final question",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Human Gold Claim 数量=1",
+      "ok": true,
+      "detail": "got 1"
+    },
+    {
+      "name": "Claim 是 Q21#3",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Claim human_reviewed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Claim label insufficient_evidence",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Claim reviewer",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Claim reviewed_at",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Claim evidence_reference null",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Claim 原文在 pilot labels",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pending Claim 数量=34",
+      "ok": true,
+      "detail": "got 34"
+    },
+    {
+      "name": "Claim reviewed+pending=35",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pending Claim 全部 pending_human",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pending Claim human_label 全空",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q21 基础题在 pending",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pending Q01 status",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pending Q01 human null",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pending Q01 有 AI draft",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pending Q02 status",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pending Q02 human null",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pending Q02 有 AI draft",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pending Q03 status",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pending Q03 human null",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pending Q03 有 AI draft",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pending Q04 status",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pending Q04 human null",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pending Q04 有 AI draft",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pending Q06 status",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pending Q06 human null",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pending Q06 有 AI draft",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pending Q07 status",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pending Q07 human null",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pending Q07 有 AI draft",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pending Q08 status",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pending Q08 human null",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pending Q08 有 AI draft",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pending Q09 status",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pending Q09 human null",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pending Q09 有 AI draft",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pending Q10 status",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pending Q10 human null",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pending Q10 有 AI draft",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pending Q11 status",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pending Q11 human null",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pending Q11 有 AI draft",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pending Q12 status",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pending Q12 human null",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pending Q12 有 AI draft",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pending Q17 status",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pending Q17 human null",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pending Q17 有 AI draft",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pending Q18 status",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pending Q18 human null",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pending Q18 有 AI draft",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pending Q20 status",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pending Q20 human null",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pending Q20 有 AI draft",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pending Q21 status",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pending Q21 human null",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pending Q21 有 AI draft",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pending Q24 status",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pending Q24 human null",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pending Q24 有 AI draft",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pending Q25 status",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pending Q25 human null",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pending Q25 有 AI draft",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pending Q26 status",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pending Q26 human null",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pending Q26 有 AI draft",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pending Q27 status",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pending Q27 human null",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pending Q27 有 AI draft",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pending Q28 status",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pending Q28 human null",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pending Q28 有 AI draft",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pending Q29 status",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pending Q29 human null",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pending Q29 有 AI draft",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pending Q31 status",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pending Q31 human null",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pending Q31 有 AI draft",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pending Q32 status",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pending Q32 human null",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pending Q32 有 AI draft",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pending Q33 status",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pending Q33 human null",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pending Q33 有 AI draft",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pending Q34 status",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pending Q34 human null",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pending Q34 有 AI draft",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pending Q38 status",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pending Q38 human null",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pending Q38 有 AI draft",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pending Q39 status",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pending Q39 human null",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pending Q39 有 AI draft",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Gold provenance",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Gold version",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Gold reviewer",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Gold source sha",
+      "ok": true,
+      "detail": "737f6bd3ef412d41d14ada4d2000bd01e851355f0d95cd0d321ac84416f9002d != 737f6bd3ef412d41d14ada4d2000bd01e851355f0d95cd0d321ac84416f9002d"
+    },
+    {
+      "name": "meta 13/1/40/35",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "meta pending 27/34",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pending meta human_gold false",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pending claims meta human_gold false",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "全量分类覆盖 12/8/9/6/5",
+      "ok": true,
+      "detail": "{'direct': 12, 'multi': 8, 'constraint': 9, 'unanswerable': 6, 'ambiguous': 5} != {'direct': 12, 'multi': 8, 'constraint': 9, 'unanswerable': 6, 'ambiguous': 5}"
+    },
+    {
+      "name": "pending-review 40 行",
+      "ok": true,
+      "detail": "got 40"
+    },
+    {
+      "name": "pending-review Q15 human_reviewed",
+      "ok": true,
+      "detail": "human_reviewed"
+    },
+    {
+      "name": "pending-review Q23 human_reviewed",
+      "ok": true,
+      "detail": "human_reviewed（题干改写）"
+    },
+    {
+      "name": "pending-review Q35 human_reviewed",
+      "ok": true,
+      "detail": "human_reviewed"
+    },
+    {
+      "name": "pending-review Q36 human_reviewed",
+      "ok": true,
+      "detail": "human_reviewed"
+    },
+    {
+      "name": "pending-review Q22 human_reviewed",
+      "ok": true,
+      "detail": "human_reviewed"
+    },
+    {
+      "name": "pending-review Q40 human_reviewed",
+      "ok": true,
+      "detail": "human_reviewed（题干改写）"
+    },
+    {
+      "name": "pending-review Q30 human_reviewed",
+      "ok": true,
+      "detail": "human_reviewed"
+    },
+    {
+      "name": "pending-review Q13 human_reviewed",
+      "ok": true,
+      "detail": "human_reviewed"
+    },
+    {
+      "name": "pending-review Q19 human_reviewed",
+      "ok": true,
+      "detail": "human_reviewed"
+    },
+    {
+      "name": "pending-review Q37 human_reviewed",
+      "ok": true,
+      "detail": "human_reviewed"
+    },
+    {
+      "name": "pending-review Q05 human_reviewed",
+      "ok": true,
+      "detail": "human_reviewed"
+    },
+    {
+      "name": "pending-review Q14 human_reviewed",
+      "ok": true,
+      "detail": "human_reviewed"
+    },
+    {
+      "name": "pending-review Q16 human_reviewed",
+      "ok": true,
+      "detail": "human_reviewed"
+    },
+    {
+      "name": "pending-review Q21 claim note",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "status doc 13+1",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "status doc 27/34",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "status doc key_facts human_reviewed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "v1.1.0 未激活",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q23 workbench answer == Gold",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q23 workbench evidence == Gold",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q23 workbench reviewer == Gold",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q23 workbench decision == Gold",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q36 workbench answer == Gold",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q36 workbench evidence == Gold",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q36 workbench reviewer == Gold",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q36 workbench decision == Gold",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q14 workbench answer == Gold",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q14 workbench evidence == Gold",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q14 workbench reviewer == Gold",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q14 workbench decision == Gold",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q15 workbench answer == Gold",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q15 workbench evidence == Gold",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q15 workbench reviewer == Gold",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q15 workbench decision == Gold",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q16 workbench answer == Gold",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q16 workbench evidence == Gold",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q16 workbench reviewer == Gold",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q16 workbench decision == Gold",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q19 workbench answer == Gold",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q19 workbench evidence == Gold",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q19 workbench reviewer == Gold",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q19 workbench decision == Gold",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q37 workbench answer == Gold",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q37 workbench evidence == Gold",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q37 workbench reviewer == Gold",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q37 workbench decision == Gold",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q40 workbench answer == Gold",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q40 workbench evidence == Gold",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q40 workbench reviewer == Gold",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q40 workbench decision == Gold",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q05 workbench answer == Gold",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q05 workbench evidence == Gold",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q05 workbench reviewer == Gold",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q05 workbench decision == Gold",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q13 workbench answer == Gold",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q13 workbench evidence == Gold",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q13 workbench reviewer == Gold",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q13 workbench decision == Gold",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q22 workbench answer == Gold",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q22 workbench evidence == Gold",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q22 workbench reviewer == Gold",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q22 workbench decision == Gold",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q30 workbench answer == Gold",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q30 workbench evidence == Gold",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q30 workbench reviewer == Gold",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q30 workbench decision == Gold",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q35 workbench answer == Gold",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q35 workbench evidence == Gold",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q35 workbench reviewer == Gold",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q35 workbench decision == Gold",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q21#3 workbench label == Gold",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q21#3 workbench reason == Gold",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "human-review-pilot.csv 仍为空白模板",
+      "ok": true,
+      "detail": "human-review-pilot.csv"
+    },
+    {
+      "name": "human-review-remaining.csv 仍为空白模板",
+      "ok": true,
+      "detail": "human-review-remaining.csv"
+    },
+    {
+      "name": "pilot-claims-review 仍为空白模板",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "human-gold.template 未被填写",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "name": "Q36 披露 §1/§12 冲突",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q37 不含文档外申请流程",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "v1.0.0 归档 active",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "v1.1.0 未激活",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "human-gold-decisions.md 存在",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "human-gold-status.md 存在",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "key_facts 总数 41",
+      "ok": true,
+      "detail": "got 41"
+    },
+    {
+      "name": "key_facts 状态 38/2/1",
+      "ok": true,
+      "detail": "{'supported': 38, 'ambiguous': 1, 'evidence_insufficient': 2}"
+    },
+    {
+      "name": "已删除 Q23-F4 不在 Gold",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "已删除 Q15-F1 不在 Gold",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "已删除 Q16-F1 不在 Gold",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "已删除 Q22-F4 不在 Gold",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q23-F2 改写",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q36-F3 改写",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q16-F2 改写",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q30-F1 evidence_insufficient",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q35-F5 evidence_insufficient",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Q36-F8 ambiguous",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Gold meta key_facts 41/38/2/1",
+      "ok": true,
+      "detail": "{'version': 'phase3e-key-facts-v1', 'status': 'human_reviewed', 'reviewer': '江晚', 'reviewed_at': '2026-11-16', 'total': 41, 'supported': 38, 'evidence_insufficient': 2, 'ambiguous': 1, 'decisions_file': 'docs/repair/phase3e/human-gold-key-facts-decisions.md', 'review_file': 'docs/repair/phase3e/human-gold-key-facts-review.json', 'note': '41 条人工确认；Q30/Q35 absence 与 Q36 conflict 保留为 evidence_insufficient/ambiguous，不进入 supported 分母（未来启用时）。'}"
+    },
+    {
+      "name": "key_facts review 全部 human_reviewed",
+      "ok": true,
+      "detail": ""
+    }
+  ],
+  "errors": [],
+  "warnings": [],
+  "counts": {
+    "candidates": 40,
+    "reviewed_base": 13,
+    "pending_base": 27,
+    "reviewed_claims": 1,
+    "pending_claims": 34,
+    "category_coverage": {
+      "direct": 12,
+      "multi": 8,
+      "constraint": 9,
+      "unanswerable": 6,
+      "ambiguous": 5
+    }
+  }
+}

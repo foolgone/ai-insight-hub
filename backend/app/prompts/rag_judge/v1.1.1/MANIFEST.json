@@ -1,0 +1,86 @@
+{
+  "version": "v1.1.1",
+  "status": "design_draft",
+  "active": false,
+  "date": "2026-11-16",
+  "note": "仅设计稿；未接入运行时、未运行、未激活。v1.0.0 仍为默认 active。",
+  "schema_version": "rag_judge_schema_v2",
+  "rubric_version": "v1.1.1",
+  "metric_version_mapping": {
+    "faithfulness": "v2",
+    "answer_correctness": "v2",
+    "answer_relevancy": "v2",
+    "retrieval_metrics": "v1"
+  },
+  "prompts": {
+    "faithfulness.txt": "3519fd3b1bbbab9b117abd04f69304609146c2d2a05c39699483dea1740eda19",
+    "answer_correctness.txt": "2ab6eac2abe57dcfd647df328244ac3e5681fc93222938d6614e71037d49ae77",
+    "answer_relevancy.txt": "0f8576b7dbf2e7ea1a02752680b0afe8c66677fe2eda823f4bcd28371ae4da84"
+  },
+  "changes": {
+    "faithfulness": [
+      "claim_type 与 support_status 分离",
+      "support_status: supported/unsupported/insufficient_evidence",
+      "contradictory 改为 is_contradictory + contradiction_with 关系",
+      "supported 必须有逐字 evidence_refs；无 evidence 不得 supported",
+      "non_factual 不进分母；全 non_factual -> skipped(no_scorable_claims)",
+      "结论 claim 优先，其余按出现顺序；保持原子性",
+      "增加 Q23/Q21/Q11 few-shot",
+      "claim_id 使用 cl1..cln，context_id 保持 C1..Cn",
+      "claim_subtype: policy/absence/conflict/advice/meta；absence/advice/meta non_factual，conflict factual",
+      "absence 不提供肯定 evidence、不进分母；conflict 两处原文可给出时 supported",
+      "supported 必须有可验证 evidence_refs；无 evidence 降级 insufficient"
+    ],
+    "answer_correctness": [
+      "不重叠评分区间与严重度优先级",
+      "模糊问题必须覆盖金标全部分支，不因条件句自动高分",
+      "文档冲突披露不判错；只选一边不披露 -> 0.5-0.6",
+      "首句/后文矛盾 -> 0.0-0.2 + wrong_facts",
+      "正确拒答 vs 错误拒答按 gold_answer 区分",
+      "恢复“不因措辞扣分”；missing_points 只列金标事实",
+      "增加 Q23/Q35/Q36 few-shot",
+      "从 gold_answer 推断 answerability；unknown 只按一般事实覆盖评分",
+      "Q36 真实单边口径 vs 编造口径区分"
+    ],
+    "answer_relevancy": [
+      "不重叠评分区间与多部分优先级",
+      "合理拒答 0.9-1.0，但不自动满分",
+      "信息不足/要求补充条件可高分",
+      "下一步建议相关但不自动拉满",
+      "正确/错误拒答交给 Correctness；不重复扣分",
+      "增加 Q29/Q35/Q36 few-shot"
+    ]
+  },
+  "activation_requirements": [
+    "人工审核通过 v1.1.1 设计",
+    "Schema 增加 claim_id/claim_type/claim_subtype/support_status/is_contradictory/contradiction_with/evidence_refs",
+    "Service 过滤 non_factual、zero-denominator skipped、evidence 校验、claim_subtype 校验",
+    "版本加载器显式选择 v1.1.1（默认仍 v1.0.0）",
+    "metric_version 升到 v2，metric_version_for 接收 prompt_version/config",
+    "10 条对照实验通过验收矩阵后才考虑 40 条"
+  ],
+  "open_issues": [
+    "RagJudgeInput 无 answerability/category；v1.1.1 从 gold_answer 推断，unknown 兜底",
+    "contexts 为 list[str]；answer_contexts C1..Cn / retrieval_contexts R1..R4 需 Service 映射",
+    "Q36 §1/§12 canonical 口径未确认；设计只要求披露冲突",
+    "评分区间是设计假设，未经过人工验证；10 条实验检验",
+    "metric_version v2 需同步 metric_version_for(metric_name, prompt_version) 与聚合",
+    "key_facts 尚未进入 Correctness 输入契约",
+    "Q11/Q21 base/Q29 base 不是 Human Gold；只有 Q21#3 Claim 已人工确认",
+    "Q21 整条 0.8 依赖 5 个 claim 拆分；若不同则 0.7-0.9 + Q21#3 insufficient",
+    "v1.0.0 Pilot Judge 使用 answer_contexts（2 条）；retrieval 4 条不用于旧分数，改用需重跑基线"
+  ],
+  "design_revision": "2026-11-17-seventh",
+  "acceptance_matrix": "docs/repair/phase3e/prompt-v1.1.1-acceptance-matrix.json",
+  "fixtures": "docs/repair/phase3e/prompt-v1.1.1-fixtures.json",
+  "human_gold_coverage": {
+    "Q23": "human_gold",
+    "Q35": "human_gold",
+    "Q36": "human_gold",
+    "Q21#3": "human_gold_claim_only",
+    "Q11": "ai_draft_pending_human",
+    "Q29": "ai_draft_pending_human"
+  },
+  "implementation_status": "implemented_default_off",
+  "default_prompt_version": "v1.0.0"
+}
