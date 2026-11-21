@@ -8,9 +8,9 @@
 > 4. 未冻结的定义/目标，不得进入代码实现。
 >
 > 最后更新：2026-11-21
-> 当前阶段：**M1-D-1 r3 10 条 Judge-only Production Service replay 申请已提交，待批准；未运行 Judge**
-> 当前阻塞决策：**10 条 Judge-only Production Service replay 申请是否批准**
-> 当前不做：10/40 Judge 执行、端到端 query Run、v1.2.0 激活/上生产、M2/M3、生产 migration
+> 当前阶段：**M1-D-1 r3 10 条 Judge-only 执行在 Q11 F `invalid(contract_violation)` 处停止；未 verified**
+> 当前阻塞决策：**Q11 `quote_not_found` 契约问题如何处理；是否允许修复后重新申请**
+> 当前不做：重跑 10 条、跑 40 条、v1.2.0 激活/上生产、M2/M3、生产 migration
 
 ---
 
@@ -19,25 +19,25 @@
 | 项 | 状态 |
 |---|---|
 | 项目阶段 | 核心研发向产品化过渡 |
-| 主线 | M1 评测可信度；10 条 Judge-only Production Service replay 申请（r3）待批准 |
+| 主线 | M1 评测可信度；M1-D-1 执行停在 Q11 invalid |
 | 并行 A | M2 只读工作台；API 审计完成，前端未开始 |
 | 并行 B | M4-A 生产约束；未开始 |
 | M3 优化闭环 | 未开始；等 M1 可信、M2 可用 |
-| 当前可写代码？ | **否**；优先审 10 条 Judge-only 申请 |
-| 当前可跑 Judge？ | **否**；10 条未批准 |
+| 当前可写代码？ | **否**；先复审 Q11 invalid |
+| 当前可跑 Judge？ | **否**；已按停止条件停止，未批准重跑 |
 | v1.2.0 | `frozen`；`active=false`、`runtime_active=false`、未激活、未上生产 |
-| 最近一次决策 | 2026-11-21 r2 退回后补充 r3：`judge_trace` production Service replay、synthetic RagTrace、driver 只汇总 JudgeOutcome |
-| 下一个交付 | 人工批准/退回 10 条 Judge-only 申请 |
+| 最近一次决策 | 2026-11-21 r3 执行 3 个 case 后停在 Q11 F `quote_not_found` |
+| 下一个交付 | 人工复审 Q11 invalid 与下一步 |
 
 ### 现在只需要一个决定
 
-**10 条 Judge-only Production Service replay 申请（r3）已提交；批准后才执行，执行后停下报告。**
+**M1-D-1 r3 已停止；不重跑、不跑 40。**
 
 | 选项 | 含义 | 结果 |
 |---|---|---|
-| **批准 10 条** | 接受 Judge-only fixture、cases、frozen SHA、预算与停止条件 | 只执行 10 条；不得跑 40 |
-| **退回** | 方法/预算/规则需改 | 留在申请状态，不跑 Judge |
-| **暂缓** | 不批准 | 保持 frozen / active=false，不跑 Judge |
+| **接受 blocked** | 记录 Q11 invalid，不继续 | M1-D-1 保持 blocked，未 verified |
+| **授权修复后重新申请** | 针对 Q11 quote 契约修 Prompt/规则后重新走申请 | 需新申请与新批准；不得直接重跑 |
+| **暂缓** | 不处理 | 保持 frozen / blocked |
 
 ---
 
@@ -60,7 +60,7 @@
 | 里程碑 | 状态 | 已完成证据 | 当前阻塞/下一步 |
 |---|---|---|---|
 | **M0 评测基础设施** | `accepted`（冻结维护） | Dataset/Version/Item、RAG Adapter、Trace、检索指标、Judge、Run/Celery、持久化聚合、WeKnora 联调 | 只修缺陷/兼容，不再架构重构 |
-| **M1 评测可信度** | `in_progress` | M1-A 语义/Gold/target 已冻结；M1-B B 双指标草案（`19-…`）；M1-C C1–C4 已实现/验证；M1-D-0 Prompt `frozen`；M1-D-1 r3 Production Service replay 申请待批准 | **B 草案未冻结**；v1.2.0 未激活；10/40 Judge 未批准；M1-E 未开始 |
+| **M1 评测可信度** | `in_progress` | M1-A 语义/Gold/target 已冻结；M1-B B 双指标草案（`19-…`）；M1-C C1–C4 已实现/验证；M1-D-0 Prompt `frozen`；M1-D-1 r3 执行停在 Q11 invalid | **Q11 quote 契约问题**；v1.2.0 未激活；10/40 Judge 未通过；M1-E 未开始 |
 | **M2 评测工作台** | `audit_complete` / 实现 `not_started` | API 审计完成：Run/详情/结果/失败/Trace 可用；前端 0 页面 | 等 M1-B 冻结后再决定是否写 P0 前端 |
 | **M3 RAG 优化闭环** | `not_started` | 无 | 依赖 M1 可信 + M2 可用 |
 | **M4 生产交付** | 基础已有 / 约束 `not_started` | 认证、加密、限流、Prometheus/Grafana/Sentry、备份/恢复演练 | M4-A：租户、保留期、审计、告警、成本、数据权利 |
@@ -72,7 +72,7 @@
 | M1-A 语义规范 + Gold + 目标 | `accepted` | 语义规范冻结 2026-11-18；final_labels SHA `f139623f…`；target v1.0.2 SHA `3ee15dfc…`（`freeze_draft_pending_human`，旧 v1.0.1 只读） |
 | M1-B Schema/Service 定稿 | `implemented`，**未 `accepted`** | P1-1 关闭；P1-2 证据契约已定；B 双指标冻结草案 `19-…` 待审核 |
 | M1-C 实现与测试 | `implemented` / `verified`，**未 `accepted`** | C1 Schema v3、C2 migration 022、C3 Service 双指标/invalid/聚合/retry、C4 静态回归已完成；10/40 Judge 未运行 |
-| M1-D 有限实验 | `in_progress`（M1-D-0 / M1-D-1） | M1-D-0 Prompt `frozen`、未激活；M1-D-1 r3 Production Service replay 申请待批准；10/40 Judge 未运行 |
+| M1-D 有限实验 | `in_progress`（M1-D-0 / M1-D-1） | M1-D-0 Prompt `frozen`、未激活；M1-D-1 r3 执行 3 个 case 后停在 Q11 F invalid；未 verified |
 | M1-E 质量验收 | `not_started` | 四组报告（HG/provisional/40 条/系统质量）+ 已知问题决定 + SHA 追溯 |
 
 ### 2.2 门禁视角
@@ -110,8 +110,10 @@
 | `backend/app/prompts/rag_judge/v1.2.0/` | F `b6377758…` / C `a50520de…` / R `a5386070…`；MANIFEST `ee1c25be…` | `frozen` / `active=false` | v1.2.0 Prompt、MANIFEST、version.txt；默认仍 v1.0.0 |
 | `docs/repair/phase3e/m1d-prompt-v1.2.0-validation.json` | `21326f2c…` | `static_validation` 22/22 | v1.2.0 资产 SHA/字段/默认隔离/旧 Prompt 完整性 |
 | `docs/repair/27-m1d0-prompt-freeze-record.md` | freeze record | `frozen` | 记录 `071c3b6`、旧/新 MANIFEST SHA、Prompt SHA、validation、批准人与 activation requirements |
-| `docs/repair/28-m1d1-ten-case-judge-application.md` | application JSON `7378d368…`；validation `bb2e1602…` | `pending_approval`（r3） | Production Service replay、预注册规则、可复算预算；未运行 |
+| `docs/repair/28-m1d1-ten-case-judge-application.md` | application JSON `7378d368…`；validation `bb2e1602…` | `approved`（r3；执行 stopped） | Production Service replay、预注册规则、可复算预算 |
 | `docs/repair/phase3e/m1d1-ten-case-application.json` | `7378d368adf13b7d55e58904af200310fa20f47cf51ccc67967f13e7e437e2ad` | `static_application` | 机器可读 r3 申请；validation 50/50 pass |
+| `docs/repair/29-m1d1-judge-only-results.md` | raw `821bd7cc…`；summary `47f0979e…` | `stopped` / `blocked` | Q11 F invalid 后停止；3 attempted / 7 unprocessed |
+| `docs/repair/phase3e/m1d1-judge-only-results.json` | `821bd7ccbb5f842c34596f9f3b74f774b8e6318341a1d659f86c7ac473fe6472` | `raw_results` | 3 个 case 的原始 JudgeOutcome、token/cost、停止原因 |
 
 ### 3.2 决策时间线
 
@@ -131,6 +133,7 @@
 | 2026-11-20 | M1-D-0 批准执行；v1.2.0 Prompt `design_draft` 交付 | `design_draft` / 待审核 |
 | 2026-11-20 | 人工批准 metadata-only freeze | `frozen` / `active=false`；未激活 |
 | 2026-11-21 | M1-D-1 10 条申请 r2 退回；补充 r3 | `pending_approval`；Production Service replay；未运行 |
+| 2026-11-21 | M1-D-1 r3 执行 3 个 case 后停在 Q11 F invalid | `stopped` / `blocked`；未 verified |
 
 ---
 
@@ -210,16 +213,20 @@
 | Item 计数语义 | 冻结草案 §4.4.3、§4.4.4 | `completed_items=evaluated_items`；四类 + unprocessed 守恒；3 items/6 rows/3 cases |
 | invalid 持久化 | 冻结草案 §4.7 | 独立 invalid / `failed+invalid_reason` 共同语义；不进均值；不算执行失败 |
 
-**当前下一步（10 条 Judge-only Production Service replay 申请 r3）**：
+**M1-D-1 执行结果（stopped / blocked）**：
 
-| 顺序 | 任务 | 产物 | 完成标志 |
-|---|---|---|---|
-| 1 | 10 条 Production Service replay 申请 r3 | `28-m1d1-ten-case-judge-application.md` + JSON + validation | **已提交，待批准** |
-| 2 | 人工批准 10 条 Judge | Judge 运行批准 | 用户明确批准；40 条更后 |
-| 3 | 执行 10 条并停下报告 | 10 条逐条报告 | 不跑 40、不激活 |
-| 4 | 10 条通过后申请 40 条 | 分层报告 | 仍需单独批准 |
+| 项 | 结果 |
+|---|---|
+| attempted | Q01/Q04/Q11 |
+| PASS | Q01/Q04 |
+| invalid | Q11 F `quote_not_found`（`contract_violation`） |
+| unprocessed | Q17/Q21/Q23/Q29/Q31/Q35/Q36 |
+| calls | 9 / 51 |
+| tokens | 28,460 input / 2,245 output |
+| cost | CNY 0.089856 / 1.00 |
+| stop condition | 已触发；未重跑、未跑 40 |
 
-**M1-D-0 已 metadata-only `frozen`；M1-D-1 r3 Production Service replay 申请已提交、待批准。v1.2.0 未激活、默认仍 v1.0.0。M1-B r2 仍待人工最终审核；M1-C C1–C4 已实现/验证但未 `accepted`。10/40 Judge 均未批准。**
+**M1-D-0 已 metadata-only `frozen`；M1-D-1 r3 执行停在 Q11 invalid，未 verified。v1.2.0 未激活、默认仍 v1.0.0。M1-B r2 仍待人工最终审核；M1-C C1–C4 已实现/验证但未 `accepted`。10/40 Judge 均未通过。**
 
 ### 5.2 M1-C（已实现/验证，未 accepted）
 
@@ -250,11 +257,11 @@
 3. 补 loader / Schema v3 / 默认隔离 / v1-v2 回归测试；
 4. 输出 SHA、validation 与冻结提案；
 5. **不跑 Judge、不激活 v1.2.0**；冻结已完成，等 10 条 Judge 单独批准。
-6. M1-D-1 r3 Production Service replay 申请材料已提交（`28-m1d1-ten-case-judge-application.md`），未批准、未运行。
+6. M1-D-1 r3 Production Service replay 已执行 3 个 case，Q11 F invalid 后停止；结果见 `29-m1d1-judge-only-results.md`。
 
 **后续（未批准）**：
 
-1. 10 条闸门 Judge（r3 Production Service replay 申请已提交，待批准）；
+1. 人工复审 Q11 quote 契约问题；是否修复后重新申请由人工决定；
 2. 40 条分层报告（HG 13 / provisional 27 分开）；
 3. 6 条缺失 baseline 按方案 A 标 `baseline_delta: unavailable`，不跑 Judge 补齐；
 4. 四组报告 + 已知问题接受/修复/延期 + SHA 追溯；

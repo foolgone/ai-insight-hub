@@ -1246,3 +1246,12 @@ alembic check   : No new upgrade operations detected
 - Cases：Q01/Q04/Q11/Q17/Q21/Q23/Q29/Q31/Q35/Q36；HG 3（Q23/Q35/Q36）/ provisional 7；Q29 expected `skipped(no_scorable_claims)`。
 - 配置：`model=qwen-max`、`temperature=0.0`、`max_tokens=8192`、`judge_prompt_version=v1.2.0`、schema v3/metric v3；默认 `v1.0.0` 不变。
 - 边界：仅申请材料，未创建 Run、未调用模型、未跑 Judge、未激活 v1.2.0、未改 Prompt/默认版本；10/40 Judge 仍未批准；M1-C/M1-D 未 accepted。
+
+### M1-D-1 r3 执行（2026-11-21，stopped / blocked，未 verified）
+- 申请已批准；执行载体 `rag_judge_service.judge_trace(session=None, ...)`，未创建 Run、未写 DB、未调用 WeKnora。
+- 结果：`docs/repair/29-m1d1-judge-only-results.md`；raw `docs/repair/phase3e/m1d1-judge-only-results.json` SHA `821bd7cc…`；summary SHA `47f0979e…`。
+- attempted：Q01/Q04/Q11；Q01/Q04 PASS；Q11 F `invalid(contract_violation)`，`validation_errors` 为 `quote_not_found`（C1）。
+- 停止：按批准条件在 Q11 F invalid 后立即停止；未重跑、未改 Prompt、未跑剩余 7 条、未跑 40。
+- unprocessed：Q17/Q21/Q23/Q29/Q31/Q35/Q36；Q23/Q35/Q36 无三次结果、median/min/max、Q36 C base/variant。
+- 调用/成本：9 次 Judge 调用；input 28,460 / output 2,245 tokens；CNY 0.089856，低于 ceiling CNY 1.00。
+- 状态：M1-D-1 `blocked`，未 verified；未激活 v1.2.0；M1-C/M1-D 未 accepted；下一步由人工复审 Q11 quote 契约问题。
