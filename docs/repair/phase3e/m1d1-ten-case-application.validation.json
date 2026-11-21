@@ -100,15 +100,31 @@
    "ok": true
   },
   {
-   "check": "query_mode",
+   "check": "judge_only_fixture",
    "ok": true
   },
   {
-   "check": "adapter_weknora",
+   "check": "execution_vehicle",
    "ok": true
   },
   {
-   "check": "top_k",
+   "check": "no_adapter_or_top_k",
+   "ok": true
+  },
+  {
+   "check": "fixture_sha256",
+   "ok": true
+  },
+  {
+   "check": "fixture_cases",
+   "ok": true
+  },
+  {
+   "check": "fixture_inputs",
+   "ok": true
+  },
+  {
+   "check": "no_rag_call",
    "ok": true
   },
   {
@@ -128,6 +144,10 @@
    "ok": true
   },
   {
+   "check": "credential_scope",
+   "ok": true
+  },
+  {
    "check": "judge_metrics",
    "ok": true
   },
@@ -140,7 +160,23 @@
    "ok": true
   },
   {
+   "check": "repeat_policy",
+   "ok": true
+  },
+  {
+   "check": "q36_c_dual_report",
+   "ok": true
+  },
+  {
    "check": "budget_calls",
+   "ok": true
+  },
+  {
+   "check": "budget_token_math",
+   "ok": true
+  },
+  {
+   "check": "budget_cost_math",
    "ok": true
   },
   {
@@ -160,7 +196,7 @@
    "ok": true
   }
  ],
- "application_sha256": "a867a618dd70392f7f9de452c22b3752a6d7b2c506e2f533881badb635f47bbc",
+ "application_sha256": "c76e8dbc166c4fad8484930f2515d3b95cc9e95fc924cb1220885153248d1d1d",
  "judge_run": false,
  "runtime_activated": false
 }

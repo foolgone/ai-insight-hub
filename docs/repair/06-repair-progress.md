@@ -1236,10 +1236,12 @@ alembic check   : No new upgrade operations detected
 - Freeze record：`docs/repair/27-m1d0-prompt-freeze-record.md`；记录 `071c3b6`、旧/新 MANIFEST SHA、Prompt SHA、validation、批准人/日期与 activation requirements。
 - 边界：未跑 Judge（单/10/40）、未激活 v1.2.0、未修改 v1.0.0/v1.1.x Prompt、未改 Schema v2、未改 r2/目标 v1.0.2/Human Gold/provisional、未改 migration 022、未启动 M2/M3、未混入 C3 P2；状态 `frozen` / `active=false`，未 accepted；10/40 Judge 仍未批准。
 
-### M1-D-1 10 条 Judge 申请材料（2026-11-21，pending_approval，未运行）
-- 申请：`docs/repair/28-m1d1-ten-case-judge-application.md`；机器可读 `docs/repair/phase3e/m1d1-ten-case-application.json`；application SHA `a867a618…`，validation SHA `47ec811c…`，39/39 pass。
-- Cases：Q01/Q04/Q11/Q17/Q21/Q23/Q29/Q31/Q35/Q36；HG 3（Q23/Q35/Q36）/ provisional 7；Q29 expected `skipped(no_scorable_claims)`；Q35/Q36 old run only。
-- Run 配置：`execution_mode=query`、`adapter=weknora`、`top_k=5`、`model=qwen-max`、`temperature=0.0`、`max_tokens=8192`、`judge_prompt_version=v1.2.0`、schema v3/metric v3；默认 `v1.0.0` 不变。
-- 预算：主运行 30 次 Judge 调用；HG 条件重复最多 48 次；成本 ceiling CNY 0.80。
-- 停止条件：invalid/schema/evidence 违约、failed(execution)、HG supported quote invalid、Q29 未 skipped、未解释下降 >0.10、第二次 typo/数字改动、unprocessed、指纹/激活漂移。
+### M1-D-1 10 条 Judge 申请材料 r2（2026-11-21，pending_approval，未运行）
+- 申请：`docs/repair/28-m1d1-ten-case-judge-application.md`；机器可读 `docs/repair/phase3e/m1d1-ten-case-application.json`；application SHA `c76e8dbc…`，validation SHA `fb601a9b…`，48/48 pass。
+- P1-1：改为方法 A `judge_only_fixture`，固定 `pilot-10-v1.1.5-gate.json`（SHA `dc7be14b…`）的 answer/contexts/gold；不创建平台 Run、不调用 WeKnora、不检索、不生成新答案。
+- P1-2：Q36 C 同时报 base `0.5–0.6` 与 variant `0.9–1.0`，只作诊断，不参与 10 条 PASS/FAIL；F/R 仍按目标。
+- P1-3：Q23/Q35/Q36 固定 3 次；Q23 需 3/3、Q35/Q36 需至少 2/3；报告全部 3 次与 median/min/max；51 次上限 = 48 planned + 3 retry reserve。
+- P1-4：可复算 token/成本：10 cases 117,000 input / 17,300 output；17 case-runs 198,900 / 29,410；预计 CNY 0.45，上限 0.760，ceiling CNY 1.00；超限硬停止。
+- Cases：Q01/Q04/Q11/Q17/Q21/Q23/Q29/Q31/Q35/Q36；HG 3（Q23/Q35/Q36）/ provisional 7；Q29 expected `skipped(no_scorable_claims)`。
+- 配置：`model=qwen-max`、`temperature=0.0`、`max_tokens=8192`、`judge_prompt_version=v1.2.0`、schema v3/metric v3；默认 `v1.0.0` 不变。
 - 边界：仅申请材料，未创建 Run、未调用模型、未跑 Judge、未激活 v1.2.0、未改 Prompt/默认版本；10/40 Judge 仍未批准；M1-C/M1-D 未 accepted。

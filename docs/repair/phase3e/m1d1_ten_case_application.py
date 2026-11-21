@@ -36,17 +36,33 @@ CASE_IDS = ("Q01", "Q04", "Q11", "Q17", "Q21", "Q23", "Q29", "Q31", "Q35", "Q36"
 FROZEN_COMMIT = "df036a8"
 FREEZE_RECORD = "docs/repair/27-m1d0-prompt-freeze-record.md"
 REPORT_TEMPLATE = "docs/repair/phase3e/m1c-c4-report-template.md"
+FIXTURE_FILE = BASE / "docs/repair/phase3e/pilot-10-v1.1.5-gate.json"
+FIXTURE_SHA = "dc7be14b6026b579c15dea1a13d498b7479e14081aa17419ef2bfa525ae9be70"
 
 RUN_CONFIG: dict[str, Any] = {
-    "execution_mode": "query",
-    "adapter": "weknora",
-    "dataset": "pilot-40 frozen test split (same dataset version as v1.1.5 pilot)",
-    "dataset_version_id": "captured at run creation; item_ids resolved from item_key",
-    "dataset_checksum": "captured in run config_snapshot; report must include it",
-    "split": "test",
-    "limit": 10,
-    "top_k": 5,
-    "precision_mode": "at_k",
+    "execution_mode": "judge_only_fixture",
+    "execution_vehicle": (
+        "read-only Judge replay driver; direct RagJudgeAgent per case/metric with "
+        "session=None; no RagEvaluationRun; report JSON only"
+    ),
+    "adapter": None,
+    "top_k": None,
+    "end_to_end": False,
+    "no_rag_call": True,
+    "no_platform_run": True,
+    "fixture": {
+        "file": "docs/repair/phase3e/pilot-10-v1.1.5-gate.json",
+        "sha256": FIXTURE_SHA,
+        "case_ids": list(CASE_IDS),
+        "case_count": len(CASE_IDS),
+        "input_fields": ["question", "answer", "contexts[].content", "gold_answer"],
+        "fixed_inputs": True,
+        "note": (
+            "fixed v1.1.5 10-case gate answer/contexts/gold; no WeKnora, no retrieval, "
+            "no new answer generation; fixture target field is historical, "
+            "v1.0.2 target is authoritative"
+        ),
+    },
     "judge_metrics": ["faithfulness", "answer_correctness", "answer_relevancy"],
     "derived_metrics": ["faithfulness_strict"],
     "judge_prompt_version": "v1.2.0",
@@ -54,50 +70,91 @@ RUN_CONFIG: dict[str, Any] = {
     "model": "qwen-max",
     "temperature": 0.0,
     "max_tokens": 8192,
-    "soft_budget_seconds": 1500,
     "schema_version": "rag_judge_schema_v3",
     "metric_version": "v3",
-    "weknora": {
-        "knowledge_base_id": "4ae8e147-6f76-4330-93f1-d2b3fef3d9ba",
-        "agent_id": ("existing deployment value; snapshot at run; do not commit secrets"),
-        "tenant_id": ("existing deployment value; snapshot at run; do not commit secrets"),
-    },
     "llm_endpoint": (
         "existing DashScope-compatible endpoint used by prior qwen-max gates; " "no key in repo"
     ),
+    "credential_scope": (
+        "existing runtime LLM credential (BYOK or server-key fallback); "
+        "preflight must verify; no key in repo"
+    ),
     "env_scope": (
-        "process-local for this Run only; do not write to repo/.env; " "restore after Run"
+        "process-local for this Judge-only replay only; do not write to repo/.env; "
+        "restore after replay"
     ),
     "env": {
         "DEFAULT_LLM_MODEL": "qwen-max",
         "DEFAULT_TEMPERATURE": "0.0",
         "RAG_JUDGE_MAX_TOKENS": "8192",
-        "RAG_ADAPTER": "weknora",
         "RAG_JUDGE_PROMPT_VERSION": "v1.0.0",
     },
+    "top_k_note": "not applicable: contexts are fixed fixture inputs; no retrieval/adapter call",
 }
 
 BUDGET: dict[str, Any] = {
     "primary_case_runs": 10,
     "primary_judge_calls": 30,
-    "conditional_repeat_cases": ["Q23", "Q35", "Q36"],
-    "conditional_repeat_extra_case_runs": 6,
-    "max_case_runs": 16,
-    "max_judge_calls": 48,
-    "estimated_input_tokens": [70000, 160000],
-    "estimated_output_tokens": [9000, 26000],
-    "estimated_cost_cny": {
-        "expected": 0.35,
-        "upper": 0.60,
-        "ceiling": 0.80,
+    "repeat_policy": {
+        "cases": ["Q23", "Q35", "Q36"],
+        "runs_per_case": 3,
+        "trigger": "always scheduled; no first-run condition; no discretionary decision",
+        "decision_owner": "pre-registered by this application; no post-hoc choice",
+        "synthesis": {
+            "Q23": "PASS only if 3/3 in target and no invalid/HG quote violation",
+            "Q35": "PASS if >=2/3 in target and no invalid/HG quote violation",
+            "Q36": (
+                "PASS if >=2/3 in target for F/R and no invalid/HG quote violation; "
+                "C diagnostic only"
+            ),
+        },
+        "report": "all 3 runs; median/min/max; no best-only reporting",
     },
-    "price_basis": (
-        "qwen-max public price: input CNY 0.0024/1K, output CNY 0.0096/1K; "
-        "actual bill is authoritative"
+    "extra_case_runs": 6,
+    "retry_reserve_case_runs": 1,
+    "max_case_runs": 17,
+    "max_judge_calls": 51,
+    "token_estimate": {
+        "method": (
+            "conservative per-metric estimate: prompt tokens + fixed fixture payload "
+            "tokens + output tokens; Chinese text ~1 token per character; actual usage "
+            "from LLMUsage is authoritative"
+        ),
+        "per_case": {
+            "faithfulness": {"prompt": 3200, "fixture": 3500, "output": 1500},
+            "answer_correctness": {"prompt": 1000, "fixture": 1800, "output": 150},
+            "answer_relevancy": {"prompt": 700, "fixture": 1500, "output": 80},
+        },
+        "primary_input_tokens": 117000,
+        "primary_output_tokens": 17300,
+        "max_input_tokens": 198900,
+        "max_output_tokens": 29410,
+    },
+    "pricing": {
+        "input_cny_per_1k": 0.0024,
+        "output_cny_per_1k": 0.0096,
+        "source": (
+            "qwen-max public price used by prior project docs "
+            "(pilot-10-v1.0.0-vs-v1.1.1.md; pilot-10-v1.1.2-gate-final2.md); "
+            "actual DashScope bill is authoritative"
+        ),
+    },
+    "calculation": {
+        "formula": "input_tokens/1000*0.0024 + output_tokens/1000*0.0096",
+        "primary_cost_cny": 0.44688,
+        "max_cost_cny": 0.759696,
+        "buffer_ratio": 0.2,
+        "buffered_upper_cny": 0.9116352,
+        "ceiling_cny": 1.0,
+    },
+    "estimated_cost_cny": {"expected": 0.44688, "upper": 0.759696, "ceiling": 1.0},
+    "hard_stop": (
+        "After each case, read actual usage; if cumulative or projected cost exceeds "
+        "CNY 1.00, or calls exceed 51, stop immediately; no further calls"
     ),
     "note": (
-        "No 40-case spend; ceiling includes one execution retry and HG repeats, "
-        "not repeated prompt tuning"
+        "51 calls = 16 planned case-runs (10 primary + 6 HG repeats) + 1 execution-retry "
+        "reserve case-run; no 40-case spend; not repeated prompt tuning"
     ),
 }
 
@@ -105,10 +162,10 @@ STOP_CONDITIONS: list[dict[str, str]] = [
     {
         "code": "preflight_failure",
         "condition": (
-            "WeKnora 配置/健康检查、LLM endpoint/model、dataset version、"
-            "10 个 item_ids、Prompt/MANIFEST SHA 或 22/22 validation 任一不满足"
+            "fixture SHA、10 个 case/answer/contexts/gold、LLM endpoint/model/credential、"
+            "Prompt/MANIFEST SHA 或 22/22 validation 任一不满足"
         ),
-        "action": "拒绝创建 Run；不得跳过 preflight",
+        "action": "拒绝启动 Judge-only replay；不得跳过 preflight",
     },
     {
         "code": "invalid_contract",
@@ -144,17 +201,22 @@ STOP_CONDITIONS: list[dict[str, str]] = [
         "action": "立即停止",
     },
     {
-        "code": "unprocessed_items",
-        "condition": "finalize 后 unprocessed_items > 0，或 10 条未全部终态",
-        "action": "停止；不得把未处理 item 当 skipped",
+        "code": "missing_case_output",
+        "condition": "10 个 case 未全部产出 3 个指标结果，或任一 case 缺 F/C/R",
+        "action": "停止；不得把缺失 case 当 skipped",
+    },
+    {
+        "code": "budget_ceiling",
+        "condition": "累计或预估成本超过 CNY 1.00，或 Judge 调用超过 51 次",
+        "action": "立即停止；不得追加调用",
     },
     {
         "code": "fingerprint_mismatch",
         "condition": (
-            "prompt SHA / MANIFEST SHA / schema / metric / model / temperature / "
-            "max_tokens / top_k 与申请不一致"
+            "prompt SHA / MANIFEST SHA / fixture SHA / schema / metric / model / "
+            "temperature / max_tokens 与申请不一致"
         ),
-        "action": "拒绝运行或立即停止；不得静默换版本",
+        "action": "拒绝启动或立即停止；不得静默换版本",
     },
     {
         "code": "activation_drift",
@@ -165,9 +227,10 @@ STOP_CONDITIONS: list[dict[str, str]] = [
 
 FAILURE_HANDLING: dict[str, Any] = {
     "invalid": "不重试；保留 invalid_reason 与 validation_errors；停止并复审",
-    "failed_execution": "同配置最多重试一次；不得改 Prompt/Schema/model/top_k",
+    "failed_execution": "同配置最多重试一次；不得改 Prompt/Schema/model",
     "skipped": "按 case 语义单独记录；不得把 skipped 当 PASS",
-    "stop": "保留已完成结果与 run 快照；不启动 40；新 Run 需新批准",
+    "budget": "达到 CNY 1.00 或 51 次调用即停止；不得追加预算",
+    "stop": "保留已完成结果与配置快照；不启动 40；重新申请后才可继续",
     "no_prompt_tuning": "10 条期间不得改 Prompt、Schema、Service、目标或 stop conditions",
 }
 
@@ -179,20 +242,24 @@ REPORT_REQUIREMENTS: list[str] = [
     ),
     "逐条写 PASS/FAIL/BLOCKED；Q29 只能按 skipped 语义判定",
     "HG 3 条（Q23/Q35/Q36）与 provisional 7 条分开，不混算均值",
-    ("Q17 标 policy_relationship_target_reapproval；" "Q35/Q36 标 old run only，不冒充 v1.2.0 实测"),
+    ("Q17 标 policy_relationship_target_reapproval；" "Q35/Q36 标 old run only，不冒充端到端新答案"),
     (
-        "报告写 target v1.0.2 SHA、final_labels SHA、Prompt SHA、"
-        "MANIFEST SHA、schema/metric version、dataset checksum"
+        "报告写 fixture SHA、target v1.0.2 SHA、final_labels SHA、Prompt SHA、"
+        "MANIFEST SHA、schema/metric version"
     ),
-    "报告写 adapter/model/temperature/max_tokens/top_k 与 run config_snapshot",
+    "报告写 model/temperature/max_tokens 与 Judge-only fixture 方法；不写 adapter/top_k 为实测值",
+    "Q23/Q35/Q36 报告 3 次全部结果、median/min/max，不报最好一次",
+    "Q36 的 C 同时报 base 0.5–0.6 与 variant 0.9–1.0，只作诊断，不参与 PASS/FAIL",
     "结论只能写 implemented/verified/blocked；不得自行写 accepted",
 ]
 
 BOUNDARIES: list[str] = [
     "本文件是申请材料，不是 Judge 运行；未调用模型、未创建 Run",
+    "方法 A：Judge-only 固定 pilot answer/contexts/gold；不调用 WeKnora、不做检索、不生成新答案",
+    "adapter 与 top_k 不适用；不得把 Judge-only 结果解释为端到端 RAG 效果",
     "不激活 v1.2.0；active 保持 false、runtime_active 保持 false",
     "不修改默认 RAG_JUDGE_PROMPT_VERSION=v1.0.0",
-    "qwen-max / max_tokens / RAG_ADAPTER 只作本次 Run 的临时进程环境，不写入仓库或长期 .env，Run 后恢复",
+    "qwen-max / max_tokens 只作本次 Judge-only replay 的临时进程环境，不写入仓库或长期 .env",
     "不修改 Prompt、MANIFEST、Schema、Service、API、DB、migration 022",
     "不运行 40 条；10 条通过后才可单独申请 40 条",
     "不启动 M2/M3；不把 M1-C/M1-D 标 accepted",
@@ -200,10 +267,12 @@ BOUNDARIES: list[str] = [
 ]
 
 APPROVAL_ITEMS: list[str] = [
+    "确认方法 A：Judge-only 固定 pilot fixture，不使用端到端 query Run",
     "确认 10 个 cases 与顺序：Q01/Q04/Q11/Q17/Q21/Q23/Q29/Q31/Q35/Q36",
-    "确认 v1.2.0 frozen Prompt SHA、MANIFEST SHA、schema v3、metric v3",
-    "确认 run 配置：query / weknora / top_k=5 / qwen-max / temperature=0.0 / max_tokens=8192",
-    "确认预算上限 CNY 0.80 与最大 48 次 Judge 调用",
+    "确认 v1.2.0 frozen Prompt SHA、MANIFEST SHA、fixture SHA、schema v3、metric v3",
+    "确认 Judge 配置：qwen-max / temperature=0.0 / max_tokens=8192 / prompt v1.2.0",
+    "确认预算：主运行 30 次、最大 51 次（48 planned + 3 retry reserve）、ceiling CNY 1.00",
+    "确认 HG 重复规则与 Q36 C 双报诊断规则",
     "确认停止条件与失败处理",
     "确认不会激活 v1.2.0、不会改默认版本、不会跑 40",
     "批准后才执行 10 条；执行后停下报告",
@@ -274,6 +343,14 @@ def build_application() -> dict[str, Any]:
         "meta": {
             "name": "m1d1-ten-case-judge-application",
             "status": "pending_approval",
+            "revision": "r2",
+            "previous_review": "returned_for_revision",
+            "revision_notes": [
+                "P1-1：改方法 A，Judge-only 固定 pilot answer/contexts/gold；不做端到端 query Run",
+                "P1-2：Q36 C 同时报 base/variant，只作诊断，不参与 PASS/FAIL",
+                "P1-3：Q23/Q35/Q36 固定 3 次，触发/合成规则预注册",
+                "P1-4：补充可复算 token/成本表、单价来源、51 次上限（48 planned + 3 reserve）与 ceiling 硬停止",
+            ],
             "not_approved": True,
             "judge_run": False,
             "runtime_activated": False,
@@ -281,6 +358,8 @@ def build_application() -> dict[str, Any]:
             "design_commit": "071c3b6",
             "freeze_commit": FROZEN_COMMIT,
             "freeze_record": FREEZE_RECORD,
+            "fixture_file": RUN_CONFIG["fixture"]["file"],
+            "fixture_sha256": RUN_CONFIG["fixture"]["sha256"],
             "prompt_version": "v1.2.0",
             "prompt_status": manifest.get("status"),
             "prompt_active": manifest.get("active"),
@@ -311,6 +390,16 @@ def build_application() -> dict[str, Any]:
             "skipped_expected": sum(1 for case in cases if case["expected_status"] != "evaluated"),
         },
         "cases": cases,
+        "q36_c_policy": {
+            "mode": "dual_report_diagnostic",
+            "base": [0.5, 0.6],
+            "variant": [0.9, 1.0],
+            "pass_fail": (
+                "C not used for 10-case PASS/FAIL; report base and variant; "
+                "F/R still use targets"
+            ),
+            "no_post_hoc_selection": True,
+        },
         "budget": BUDGET,
         "stop_conditions": STOP_CONDITIONS,
         "failure_handling": FAILURE_HANDLING,
@@ -403,15 +492,60 @@ def build_validation(application: dict[str, Any], application_sha: str) -> dict[
             "check": "default_v100",
             "ok": application["run_config"]["default_prompt_version"] == "v1.0.0",
         },
-        {"check": "query_mode", "ok": application["run_config"]["execution_mode"] == "query"},
-        {"check": "adapter_weknora", "ok": application["run_config"]["adapter"] == "weknora"},
-        {"check": "top_k", "ok": application["run_config"]["top_k"] == 5},
+        {
+            "check": "judge_only_fixture",
+            "ok": application["run_config"]["execution_mode"] == "judge_only_fixture",
+        },
+        {
+            "check": "execution_vehicle",
+            "ok": "RagJudgeAgent" in application["run_config"]["execution_vehicle"]
+            and "session=None" in application["run_config"]["execution_vehicle"],
+        },
+        {
+            "check": "no_adapter_or_top_k",
+            "ok": application["run_config"]["adapter"] is None
+            and application["run_config"]["top_k"] is None,
+        },
+        {
+            "check": "fixture_sha256",
+            "ok": application["meta"]["fixture_sha256"] == FIXTURE_SHA,
+        },
+        {
+            "check": "fixture_cases",
+            "ok": application["run_config"]["fixture"]["case_ids"] == list(CASE_IDS)
+            and application["run_config"]["fixture"]["case_count"] == 10,
+        },
+        {
+            "check": "fixture_inputs",
+            "ok": len(
+                [case for case in load_json(FIXTURE_FILE)["cases"] if case.get("id") in CASE_IDS]
+            )
+            == 10
+            and all(
+                case.get("answer")
+                and case.get("gold_answer")
+                and case.get("contexts")
+                and all(ctx.get("content") for ctx in case["contexts"])
+                for case in load_json(FIXTURE_FILE)["cases"]
+                if case.get("id") in CASE_IDS
+            ),
+        },
+        {
+            "check": "no_rag_call",
+            "ok": application["run_config"]["no_rag_call"] is True
+            and application["run_config"]["no_platform_run"] is True
+            and application["run_config"]["end_to_end"] is False,
+        },
         {"check": "model", "ok": application["run_config"]["model"] == "qwen-max"},
         {"check": "temperature", "ok": application["run_config"]["temperature"] == 0.0},
         {"check": "max_tokens", "ok": application["run_config"]["max_tokens"] == 8192},
         {
             "check": "env_scope",
             "ok": "process-local" in application["run_config"]["env_scope"],
+        },
+        {
+            "check": "credential_scope",
+            "ok": "credential" in application["run_config"]["credential_scope"],
         },
         {
             "check": "judge_metrics",
@@ -427,13 +561,37 @@ def build_validation(application: dict[str, Any], application_sha: str) -> dict[
             "ok": application["run_config"]["derived_metrics"] == ["faithfulness_strict"],
         },
         {
+            "check": "repeat_policy",
+            "ok": application["budget"]["repeat_policy"]["runs_per_case"] == 3
+            and application["budget"]["repeat_policy"]["cases"] == ["Q23", "Q35", "Q36"]
+            and "always" in application["budget"]["repeat_policy"]["trigger"],
+        },
+        {
+            "check": "q36_c_dual_report",
+            "ok": application["q36_c_policy"]["mode"] == "dual_report_diagnostic"
+            and application["q36_c_policy"]["no_post_hoc_selection"] is True,
+        },
+        {
             "check": "budget_calls",
             "ok": application["budget"]["primary_judge_calls"] == 30
-            and application["budget"]["max_judge_calls"] == 48,
+            and application["budget"]["max_judge_calls"] == 51,
+        },
+        {
+            "check": "budget_token_math",
+            "ok": application["budget"]["token_estimate"]["primary_input_tokens"] == 117000
+            and application["budget"]["token_estimate"]["primary_output_tokens"] == 17300
+            and application["budget"]["token_estimate"]["max_input_tokens"] == 198900
+            and application["budget"]["token_estimate"]["max_output_tokens"] == 29410,
+        },
+        {
+            "check": "budget_cost_math",
+            "ok": application["budget"]["calculation"]["primary_cost_cny"] == 0.44688
+            and application["budget"]["calculation"]["max_cost_cny"] == 0.759696
+            and application["budget"]["calculation"]["ceiling_cny"] == 1.0,
         },
         {
             "check": "budget_ceiling",
-            "ok": application["budget"]["estimated_cost_cny"]["ceiling"] == 0.80,
+            "ok": application["budget"]["estimated_cost_cny"]["ceiling"] == 1.0,
         },
         {
             "check": "stop_conditions",
@@ -445,6 +603,8 @@ def build_validation(application: dict[str, Any], application_sha: str) -> dict[
                 "hg_supported_quote_invalid",
                 "q29_not_skipped",
                 "unexplained_drop",
+                "missing_case_output",
+                "budget_ceiling",
             },
         },
         {
@@ -476,26 +636,35 @@ def build_markdown(application: dict[str, Any], application_sha: str, validation
     meta = application["meta"]
     config = application["run_config"]
     budget = application["budget"]
-    input_low, input_high = budget["estimated_input_tokens"]
-    output_low, output_high = budget["estimated_output_tokens"]
     lines = [
-        "# M1-D-1 10 条 Judge 申请材料",
+        "# M1-D-1 10 条 Judge 申请材料（r2，Judge-only）",
         "",
-        "> 状态：`pending_approval`。**仅申请材料，未运行 Judge、未创建 Run、未激活 v1.2.0。**",
+        "> 状态：`pending_approval`（r2，退回补充后重提）。**仅申请材料，未运行 Judge、未创建 Run、未激活 v1.2.0。**",
         f"> 日期：2026-11-21；frozen 提交：`{meta['freeze_commit']}`；"
         f"freeze record：`{meta['freeze_record']}`",
         f"> Prompt：`{meta['prompt_version']}` / `{meta['prompt_status']}` / "
         f"schema `{meta['schema_version']}` / metric `{meta['metric_version']}`",
         f"> MANIFEST SHA256：`{meta['manifest_sha256']}`",
+        f"> fixture SHA256：`{meta['fixture_sha256']}`",
         f"> 申请 JSON SHA256：`{application_sha}`",
         f"> validation SHA256：`{validation_sha}`",
         "",
         "## 1. 申请结论",
         "",
+        "方法 A：**Judge-only 固定 pilot answer/contexts/gold**，只切 v1.2.0 Prompt；"
+        "不创建平台 Run、不调用 WeKnora、不重新生成答案。",
+        "",
         "本文件只申请 **10 条** Judge：Q01/Q04/Q11/Q17/Q21/Q23/Q29/Q31/Q35/Q36。",
         "10 条通过后才允许单独申请 40 条；本申请不包含 40 条、不激活 v1.2.0、不改默认版本。",
         "",
-        "## 2. 冻结资产",
+        "| 退回项 | r2 处理 |",
+        "|---|---|",
+        "| P1-1 端到端与固定目标混用 | 改为 Judge-only fixture；adapter/top_k 不适用；目标用于 Judge 语义判定 |",
+        "| P1-2 Q36 base/variant | C 同时报 base 与 variant，只作诊断，不参与 PASS/FAIL；F/R 仍判定 |",
+        "| P1-3 HG 重复 | Q23/Q35/Q36 固定 3 次；触发/合成规则预注册；51 次上限（48 planned + 3 retry reserve） |",
+        "| P1-4 成本不可复算 | 增加 per-metric token 表、单价来源、51 次计算与 CNY 1.00 硬停止 |",
+        "",
+        "## 2. 冻结资产与固定输入",
         "",
         "| 项 | 值 |",
         "|---|---|",
@@ -506,9 +675,14 @@ def build_markdown(application: dict[str, Any], application_sha: str, validation
         f"| `answer_correctness.txt` | `{meta['prompt_sha256']['answer_correctness.txt']}` |",
         f"| `answer_relevancy.txt` | `{meta['prompt_sha256']['answer_relevancy.txt']}` |",
         f"| Schema / Metric | `{meta['schema_version']}` / `{meta['metric_version']}` |",
+        f"| fixture | `{meta['fixture_file']}`（`{meta['fixture_sha256']}`） |",
         f"| target | `{meta['target_file']}`（`{meta['target_sha256']}`） |",
         f"| final labels | `{meta['labels_file']}`（`{meta['labels_sha256']}`） |",
         "| 默认版本 | `v1.0.0`（保持不变） |",
+        "",
+        "固定输入字段：`question` / `answer` / `contexts[].content` / `gold_answer`；"
+        "10 个 case 从 fixture 读取，缺失或 SHA 不符即停止。fixture 内的 historical target 字段不读取，"
+        "目标只用 `pilot-40-targets-v1.2.0-v1.0.2.json`。",
         "",
         "## 3. 10 个 Cases",
         "",
@@ -530,28 +704,32 @@ def build_markdown(application: dict[str, Any], application_sha: str, validation
             "固定口径：",
             "",
             "- Q29 的 F 必须是 `skipped(no_scorable_claims)`；不得 0.0、不得用 skipped 兜底其它案例；",
-            "- Q35/Q36 只用 old run 参考，不把旧结果冒充 v1.2.0 实测；",
+            "- Q35/Q36 使用 fixture 中的固定旧 run answer/contexts；不生成新答案，不把旧结果冒充新端到端结果；",
             "- Q17 使用 v1.0.2 的 `0.7–0.9` 目标；旧 `0.9–1.0` 已被 reapproval 取代；",
             "- Q21 只有 F 目标；Q21#3 保持 `insufficient_evidence`；",
-            ("- Q36 base C 目标 `0.5–0.6`；若回答披露文档冲突，" "按 variant `0.9–1.0` 判定，报告必须写明用了哪一口径；"),
+            "- Q36 的 C 同时报 base `0.5–0.6` 与 variant `0.9–1.0`，只作诊断，"
+            "不参与 10 条 PASS/FAIL；F/R 仍按目标判定；",
+            "- Q23/Q35/Q36 固定 3 次：Q23 需 3/3 在目标内；"
+            "Q35/Q36 需至少 2/3 在目标内；均不得有 invalid/HG quote violation；",
             "- Q23/Q35/Q36 为 Human Gold；其余 7 条为 provisional，报告不得混算均值。",
             "",
-            "## 4. Run 配置",
+            "## 4. Judge-only 配置",
             "",
             "| 项 | 值 |",
             "|---|---|",
             f"| execution_mode | `{config['execution_mode']}` |",
-            f"| adapter | `{config['adapter']}` |",
-            f"| dataset | {config['dataset']} |",
-            f"| split / limit | `{config['split']}` / `{config['limit']}` |",
-            f"| top_k | `{config['top_k']}` |",
+            f"| execution_vehicle | {config['execution_vehicle']} |",
+            "| adapter | 不适用（`None`；不调用 WeKnora/检索） |",
+            "| top_k | 不适用（`None`；contexts 固定来自 fixture） |",
+            "| end_to_end | `false` |",
+            "| no_rag_call / no_platform_run | `true` / `true` |",
+            f"| fixture | `{config['fixture']['file']}`，10 cases，fixed inputs |",
             f"| judge_metrics | `{', '.join(config['judge_metrics'])}` |",
             f"| derived_metrics | `{', '.join(config['derived_metrics'])}` |",
             f"| judge_prompt_version | `{config['judge_prompt_version']}`（显式指定，不改默认） |",
             f"| model | `{config['model']}` |",
             f"| temperature | `{config['temperature']}` |",
             f"| max_tokens | `{config['max_tokens']}` |",
-            f"| soft budget | `{config['soft_budget_seconds']}s` |",
             f"| schema / metric | `{config['schema_version']}` / `{config['metric_version']}` |",
             "",
             "关键环境变量（不包含密钥）：",
@@ -560,36 +738,70 @@ def build_markdown(application: dict[str, Any], application_sha: str, validation
             *[f"{key}={value}" for key, value in config["env"].items()],
             "```",
             "",
-            f"- WeKnora KB：`{config['weknora']['knowledge_base_id']}`；"
-            "agent/tenant 使用现有部署值，并在 Run 快照中记录；",
             f"- Judge endpoint：{config['llm_endpoint']}；",
+            f"- 凭证：{config['credential_scope']}；",
             f"- 环境作用域：{config['env_scope']}；",
-            "- 选择 10 条：按 `item_key` 解析 `item_ids`；Run 快照必须记录实际 UUID 与 dataset checksum。",
+            "- 不创建 `RagEvaluationRun`；直接对 fixture 的 10 个 case 调用 Judge，结果写报告。",
             "",
             "## 5. 方法与解释边界",
             "",
-            "- 本次是平台 `query` Run 的端到端闸门：答案/contexts 由 WeKnora 重新生成；",
-            "- 10 条目标是 Judge 质量目标；Q35/Q36 的旧 run 只作参考，不作为固定输入复现；",
-            "- 若要求“固定同一批 answer/contexts，只切换 Judge Prompt”的 Judge-only 对比，本申请不适用，需另立方案；",
+            "- 方法 A：固定 pilot answer/contexts/gold，只切换 Judge Prompt 到 v1.2.0；",
+            "- 目标值来自固定 pilot 输入，因此可用于 Judge 语义/目标判定；",
+            "- 不调用 WeKnora、不做检索、不生成新答案，adapter/top_k 不参与；",
+            "- Q35/Q36 的 fixture 输入来自旧 run；本次只评 Judge 输出，不宣称端到端效果；",
             "- 报告不得把 v1.1.5 旧值写成 v1.2.0 实测，也不得把 Q17/Q32 的预期标签写成实测。",
             "",
-            "## 6. 预算与调用量",
+            "## 6. 预算与调用量（可复算）",
             "",
             "| 项 | 值 |",
             "|---|---:|",
             f"| 主运行 case 数 | {budget['primary_case_runs']} |",
             f"| 主运行 Judge 调用 | {budget['primary_judge_calls']}（10 × 3 指标） |",
-            f"| 条件重复 cases | {'/'.join(budget['conditional_repeat_cases'])} |",
-            f"| 条件重复额外 case-run | {budget['conditional_repeat_extra_case_runs']} |",
+            f"| HG 固定重复 | {'/'.join(budget['repeat_policy']['cases'])}，每条 3 次 |",
+            f"| HG 额外 case-run | {budget['extra_case_runs']} |",
+            f"| 执行重试 reserve case-run | {budget['retry_reserve_case_runs']} |",
             f"| 最大 case-run | {budget['max_case_runs']} |",
             f"| 最大 Judge 调用 | {budget['max_judge_calls']} |",
-            f"| 估算 input tokens | {input_low:,}–{input_high:,} |",
-            f"| 估算 output tokens | {output_low:,}–{output_high:,} |",
+            f"| 主运行 input tokens | {budget['token_estimate']['primary_input_tokens']:,} |",
+            f"| 主运行 output tokens | {budget['token_estimate']['primary_output_tokens']:,} |",
+            f"| 最大 input tokens | {budget['token_estimate']['max_input_tokens']:,} |",
+            f"| 最大 output tokens | {budget['token_estimate']['max_output_tokens']:,} |",
             f"| 预计成本 | CNY {budget['estimated_cost_cny']['expected']:.2f} |",
-            f"| 上限 | CNY {budget['estimated_cost_cny']['upper']:.2f} |",
+            f"| 上限 | CNY {budget['estimated_cost_cny']['upper']:.3f} |",
             f"| **批准 ceiling** | **CNY {budget['estimated_cost_cny']['ceiling']:.2f}** |",
             "",
-            f"计价口径：{budget['price_basis']}。{budget['note']}。",
+            "Token 估算（保守）：",
+            "",
+            "| 指标 | prompt tokens | fixture tokens | output tokens |",
+            "|---|---:|---:|---:|",
+            *[
+                (
+                    f"| {metric} | {values['prompt']:,} | "
+                    f"{values['fixture']:,} | {values['output']:,} |"
+                )
+                for metric, values in budget["token_estimate"]["per_case"].items()
+            ],
+            "",
+            "注：`faithfulness.txt` 为 9,198 bytes（约 3,000 汉字），3,200 tokens 是保守的 prompt 估算，"
+            "不是 16k tokens；实际以 LLMUsage 为准。",
+            "",
+            "计算过程：",
+            "",
+            "```text",
+            "per-case input  = (3200+3500) + (1000+1800) + (700+1500) = 11,700",
+            "per-case output = 1500 + 150 + 80 = 1,730",
+            "primary calls   = 10 cases * 3 metrics = 30",
+            "max calls       = 17 case-runs * 3 metrics = 51",
+            "                  (48 planned + 3 execution-retry reserve)",
+            "10 cases        = 117,000 input / 17,300 output",
+            "17 case-runs    = 198,900 input / 29,410 output",
+            "primary cost    = 117000/1000*0.0024 + 17300/1000*0.0096 = 0.44688",
+            "max cost        = 198900/1000*0.0024 + 29410/1000*0.0096 = 0.759696",
+            "buffered upper  = 0.759696 * 1.20 = 0.9116352 -> ceiling 1.00",
+            "```",
+            "",
+            f"单价来源：{budget['pricing']['source']}。",
+            f"硬停止：{budget['hard_stop']}。",
             "",
             "## 7. 停止条件与失败处理",
             "",
