@@ -1,0 +1,166 @@
+{
+ "name": "m1d1-ten-case-application-validation",
+ "kind": "static_application_validation_not_judge_run",
+ "status": "pass",
+ "checks": [
+  {
+   "check": "application_status",
+   "ok": true
+  },
+  {
+   "check": "not_approved",
+   "ok": true
+  },
+  {
+   "check": "judge_not_run",
+   "ok": true
+  },
+  {
+   "check": "not_activated",
+   "ok": true
+  },
+  {
+   "check": "case_count",
+   "ok": true
+  },
+  {
+   "check": "case_ids",
+   "ok": true
+  },
+  {
+   "check": "case_ids_exist",
+   "ok": true
+  },
+  {
+   "check": "group_counts",
+   "ok": true
+  },
+  {
+   "check": "evaluated_expected",
+   "ok": true
+  },
+  {
+   "check": "skipped_expected",
+   "ok": true
+  },
+  {
+   "check": "q29_expected_skip",
+   "ok": true
+  },
+  {
+   "check": "q35_q36_old_run_only",
+   "ok": true
+  },
+  {
+   "check": "q36_variant_target",
+   "ok": true
+  },
+  {
+   "check": "targets_match",
+   "ok": true
+  },
+  {
+   "check": "labels_match",
+   "ok": true
+  },
+  {
+   "check": "target_sha256",
+   "ok": true
+  },
+  {
+   "check": "labels_sha256",
+   "ok": true
+  },
+  {
+   "check": "manifest_sha256",
+   "ok": true
+  },
+  {
+   "check": "prompt_sha256",
+   "ok": true
+  },
+  {
+   "check": "manifest_frozen",
+   "ok": true
+  },
+  {
+   "check": "manifest_inactive",
+   "ok": true
+  },
+  {
+   "check": "schema_v3",
+   "ok": true
+  },
+  {
+   "check": "metric_v3",
+   "ok": true
+  },
+  {
+   "check": "default_v100",
+   "ok": true
+  },
+  {
+   "check": "query_mode",
+   "ok": true
+  },
+  {
+   "check": "adapter_weknora",
+   "ok": true
+  },
+  {
+   "check": "top_k",
+   "ok": true
+  },
+  {
+   "check": "model",
+   "ok": true
+  },
+  {
+   "check": "temperature",
+   "ok": true
+  },
+  {
+   "check": "max_tokens",
+   "ok": true
+  },
+  {
+   "check": "env_scope",
+   "ok": true
+  },
+  {
+   "check": "judge_metrics",
+   "ok": true
+  },
+  {
+   "check": "strict_not_judge_metric",
+   "ok": true
+  },
+  {
+   "check": "strict_derived",
+   "ok": true
+  },
+  {
+   "check": "budget_calls",
+   "ok": true
+  },
+  {
+   "check": "budget_ceiling",
+   "ok": true
+  },
+  {
+   "check": "stop_conditions",
+   "ok": true
+  },
+  {
+   "check": "boundaries",
+   "ok": true
+  },
+  {
+   "check": "application_sha256",
+   "ok": true
+  }
+ ],
+ "application_sha256": "a867a618dd70392f7f9de452c22b3752a6d7b2c506e2f533881badb635f47bbc",
+ "judge_run": false,
+ "runtime_activated": false
+}

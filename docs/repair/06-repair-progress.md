@@ -1235,3 +1235,11 @@ alembic check   : No new upgrade operations detected
 - 静态校验：冻结前 validation `907886bd…`（22/22），冻结后 `21326f2c…`（22/22）；校验 MANIFEST frozen/active、Prompt SHA、16 subtype、无案例 ID、strict 不进 judge_metrics、v1/v1.1.5 Prompt 完整性。
 - Freeze record：`docs/repair/27-m1d0-prompt-freeze-record.md`；记录 `071c3b6`、旧/新 MANIFEST SHA、Prompt SHA、validation、批准人/日期与 activation requirements。
 - 边界：未跑 Judge（单/10/40）、未激活 v1.2.0、未修改 v1.0.0/v1.1.x Prompt、未改 Schema v2、未改 r2/目标 v1.0.2/Human Gold/provisional、未改 migration 022、未启动 M2/M3、未混入 C3 P2；状态 `frozen` / `active=false`，未 accepted；10/40 Judge 仍未批准。
+
+### M1-D-1 10 条 Judge 申请材料（2026-11-21，pending_approval，未运行）
+- 申请：`docs/repair/28-m1d1-ten-case-judge-application.md`；机器可读 `docs/repair/phase3e/m1d1-ten-case-application.json`；application SHA `a867a618…`，validation SHA `47ec811c…`，39/39 pass。
+- Cases：Q01/Q04/Q11/Q17/Q21/Q23/Q29/Q31/Q35/Q36；HG 3（Q23/Q35/Q36）/ provisional 7；Q29 expected `skipped(no_scorable_claims)`；Q35/Q36 old run only。
+- Run 配置：`execution_mode=query`、`adapter=weknora`、`top_k=5`、`model=qwen-max`、`temperature=0.0`、`max_tokens=8192`、`judge_prompt_version=v1.2.0`、schema v3/metric v3；默认 `v1.0.0` 不变。
+- 预算：主运行 30 次 Judge 调用；HG 条件重复最多 48 次；成本 ceiling CNY 0.80。
+- 停止条件：invalid/schema/evidence 违约、failed(execution)、HG supported quote invalid、Q29 未 skipped、未解释下降 >0.10、第二次 typo/数字改动、unprocessed、指纹/激活漂移。
+- 边界：仅申请材料，未创建 Run、未调用模型、未跑 Judge、未激活 v1.2.0、未改 Prompt/默认版本；10/40 Judge 仍未批准；M1-C/M1-D 未 accepted。
