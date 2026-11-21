@@ -1255,3 +1255,11 @@ alembic check   : No new upgrade operations detected
 - unprocessed：Q17/Q21/Q23/Q29/Q31/Q35/Q36；Q23/Q35/Q36 无三次结果、median/min/max、Q36 C base/variant。
 - 调用/成本：9 次 Judge 调用；input 28,460 / output 2,245 tokens；CNY 0.089856，低于 ceiling CNY 1.00。
 - 状态：M1-D-1 `blocked`，未 verified；未激活 v1.2.0；M1-C/M1-D 未 accepted；下一步由人工复审 Q11 quote 契约问题。
+
+### M1-D-2 v1.2.1 Prompt patch 设计与范围（2026-11-21，design_scope_pending_review）
+- 文档：`docs/repair/30-m1d2-v1.2.1-prompt-patch-scope.md`；只准备设计与范围，未改 Prompt、未改代码、未跑 Judge。
+- 复核：Q11 C1 是连续文档；Judge 拼接两段不相邻句子，Service `quote_not_found` -> `invalid(contract_violation)`，strict 同步；判定正确，非 Service bug。
+- 范围：只改 v1.2.1 Faithfulness Prompt 的 evidence 连续性规则；C/R 继承 v1.2.0；Schema v3/Metric v3/r2/target 不变。
+- 计划：新增 v1.2.1 Prompt/MANIFEST/version；`JUDGE_V3_PROMPT_VERSIONS` 加 v1.2.1；新增 Q11 非连续 quote invalid / 连续 quote supported 回归测试。
+- 版本/冻结：v1.2.1 先 `design_draft`、`active=false`；人工审核后另开 freeze record；默认仍 v1.0.0。
+- 后续：冻结后重新提交 10 条 Judge 申请；40/M2/M3/v1.2.0 激活均不批准。
