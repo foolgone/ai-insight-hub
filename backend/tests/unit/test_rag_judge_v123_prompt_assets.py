@@ -25,7 +25,7 @@ pytestmark = pytest.mark.unit
 VERSION = "v1.2.3"
 BASE_VERSION = "v1.2.2"
 PROMPT_FILES = ("faithfulness.txt", "answer_correctness.txt", "answer_relevancy.txt")
-F_SHA = "4f3b9739b2f839f95de159542e2546ff9df96203b1a69fead227e9b8c399f0bf"
+F_SHA = "52f1b3cf3b92d6f9616e73ed7de26a0721d65c27763f48edd41b38f1e06a025d"
 OLD_REPAIR_SHA = "e391d9fac1d0be41b08502226997ca8f22d66a74d42a760f0f8ba64e3a895da3"
 V122_REPAIR_SHA = "7541fe3f4d079f2c173ae6347a247b9614de14f30f761d216c1267bc4a591869"
 Q23_FIXTURE_SENTENCE = "生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。"
@@ -65,11 +65,11 @@ def test_v123_prompt_sha_and_cr_inheritance() -> None:
     assert manifest["prompts"]["faithfulness.txt"] != base_manifest["prompts"]["faithfulness.txt"]
     assert (
         manifest["prompts"]["answer_correctness.txt"]
-        == base_manifest["prompts"]["answer_correctness.txt"]
+        != base_manifest["prompts"]["answer_correctness.txt"]
     )
     assert (
         manifest["prompts"]["answer_relevancy.txt"]
-        == base_manifest["prompts"]["answer_relevancy.txt"]
+        != base_manifest["prompts"]["answer_relevancy.txt"]
     )
 
 
@@ -98,15 +98,29 @@ def test_v123_prompt_has_evidence_source_rules() -> None:
     assert "不得跳过中间字符" in text
 
 
-def test_v123_prompt_and_repair_example_are_not_taught_on_q23() -> None:
-    text = load_judge_prompt(VERSION, "faithfulness")
+def test_v123_prompts_and_repair_example_are_not_taught_on_gate_cases() -> None:
     agent = RagJudgeAgent("faithfulness", llm=object(), prompt_version=VERSION)
     repair = agent._repair_example() or ""
+    bodies = [
+        load_judge_prompt(VERSION, "faithfulness"),
+        load_judge_prompt(VERSION, "answer_correctness"),
+        load_judge_prompt(VERSION, "answer_relevancy"),
+        repair,
+    ]
+    forbidden = (
+        "Q23",
+        "生鲜食品",
+        Q23_FIXTURE_SENTENCE,
+        "该时限是硬性要求",
+        "文档未提及例外情形",
+        "质量问题不受 7 天",
+        "因质量问题产生的退换货运费由商家承担",
+        "订单签收后 7 天内可申请无理由退款",
+    )
 
-    for body in (text, repair):
-        assert "Q23" not in body
-        assert "生鲜食品" not in body
-        assert Q23_FIXTURE_SENTENCE not in body
+    for body in bodies:
+        for snippet in forbidden:
+            assert snippet not in body
 
 
 def test_v123_repair_example_has_factual_and_absence() -> None:

@@ -47,24 +47,24 @@
 ### 2.1 factual_claim（进入 F 评价；共 9 种）
 | 子类型 | 定义 | 示例 |
 |---|---|---|
-| `policy` | 文档明确写出的政策、规则、数字、时限、费用 | “订单签收后 7 天内可申请无理由退款” |
-| `condition` | 文档明确写出的条件、例外、适用范围、前置条件 | “定制类商品不支持无理由退款” |
-| `normative_requirement` | 文档明确写出的“需/必须/应/须提供/保留/提交”要求 | “质量问题需在签收后 24 小时内拍照反馈” |
-| `fact` | 文档明确写出的非政策性事实（主体、时间、渠道、状态等） | “在线客服服务时间为每天 9:00-21:00” |
-| `process` | 文档明确写出的操作步骤或流程 | “在订单页选择退款，填写原因并上传凭证” |
-| `derived` | 由明确规则、条件或数字推导出的结论（算术、期限比较、条件组合） | “第 10 天已超出 7 天时限”；“实付 89 元且寄往新疆，适用 20 元运费” |
-| `policy_scope` | 政策在现实中的适用范围、对象、地域 | “该政策适用于所有订单”；“默认适用于中国大陆境内订单” |
-| `policy_relationship` | 两条政策或规则之间的关系、独立性、优先级 | “该规则与是否满 99 元无关”；“退货运费不依赖包邮资格” |
-| `conflict` | 回答披露文档两处规则不一致的 meta 陈述 | “文档对虚拟商品范围的表述不一致” |
+| `policy` | 文档明确写出的政策、规则、数字、时限、费用 | “延保卡需在购买后 30 天内激活” |
+| `condition` | 文档明确写出的条件、例外、适用范围、前置条件 | “延保卡仅适用于主机，不适用于赠品” |
+| `normative_requirement` | 文档明确写出的“需/必须/应/须提供/保留/提交”要求 | “申请延保时需提交购买凭证” |
+| `fact` | 文档明确写出的非政策性事实（主体、时间、渠道、状态等） | “保修申请在提交后 2 个工作日内受理” |
+| `process` | 文档明确写出的操作步骤或流程 | “在开票页选择抬头类型，填写信息并提交” |
+| `derived` | 由明确规则、条件或数字推导出的结论（算术、期限比较、条件组合） | “购买后第 40 天已超出 30 天激活期限” |
+| `policy_scope` | 政策在现实中的适用范围、对象、地域 | “延保卡适用于中国大陆境内销售的主机” |
+| `policy_relationship` | 两条政策或规则之间的关系、独立性、优先级 | “延保期限与是否购买配件无关” |
+| `conflict` | 回答披露文档两处规则不一致的 meta 陈述 | “文档对赠品是否享受延保的表述不一致” |
 
 ### 2.2 non_factual（不进入 F 评价；共 7 种）
 | 子类型 | 定义 | 示例 |
 |---|---|---|
-| `absence` | 文档未说明、未提及、未涉及某事实 | “文档未提及货到付款” |
-| `doc_scope` | 关于文档覆盖范围、章节归属的 meta 陈述 | “文档详细说明了退款、换货、发票等章节” |
+| `absence` | 文档未说明、未提及、未涉及某事实 | “文档未提及延保是否支持转让” |
+| `doc_scope` | 关于文档覆盖范围、章节归属的 meta 陈述 | “文档说明了发票、物流、延保等章节” |
 | `doc_relationship` | 关于文档章节、条款之间编排关系的 meta 陈述 | “这两条规则分属不同章节” |
-| `uncertainty` | 无法确认、无法判断、信息不足的结论句 | “无法确认积分是否支持礼品兑换” |
-| `meta` | 其它纯元信息、组织句、导航句、总起句 | “下面分三部分说明：退款、换货、发票” |
+| `uncertainty` | 无法确认、无法判断、信息不足的结论句 | “无法确认延保是否支持跨区转移” |
+| `meta` | 其它纯元信息、组织句、导航句、总起句 | “下面分三部分说明：发票、物流、延保” |
 | `advice` | 纯建议、下一步操作 | “建议联系客服核实” |
 | `greeting` | 问候、共情、礼貌语 | “您好，很高兴为您服务” |
 
@@ -81,8 +81,8 @@
 - `policy_scope`、`policy_relationship` 是 **factual_claim**，留在 F 评价中。
 - 文档没有明确写出适用范围、地域、对象、规则关系、独立性或优先级时，判 `insufficient_evidence`，不得判 `non_factual`，不得退出评价。
 - “文档有没有写/覆盖什么/章节怎么排”才是 `absence` / `doc_scope` / `doc_relationship` / `meta`。
-- “该政策适用于所有订单”“默认适用于中国大陆境内订单”“以国内履约场景为前提”“该规则与是否满 99 元无关”“不因包邮资格改变责任归属”都是 factual；没有明确依据时 insufficient。
-- “能否退款，取决于具体商品类型和签收时间”“是否支持取决于……”优先归 `condition`；如果是在断言政策适用于哪些订单、地区或对象，归 `policy_scope`。两类都是 factual，不得归 meta。
+- “延保卡适用于所有主机”“默认适用于中国大陆境内销售的主机”“以官方渠道购买为前提”“延保期限与是否购买配件无关”“不因赠品状态改变延保责任”都是 factual；没有明确依据时 insufficient。
+- “能否享受延保，取决于主机型号和购买渠道”“是否支持取决于……”优先归 `condition`；如果是在断言政策适用于哪些主机、地区或对象，归 `policy_scope`。两类都是 factual，不得归 meta。
 
 ### 3.3 全称、推断与边界
 - “所有/任何/一律/均/默认/不受……限制”等全称或排除性表述，必须有明确依据；否则 insufficient，不得 supported。
@@ -102,9 +102,9 @@
 - `absence` 的 `support_status` 必须是 `null`，`evidence_refs` 必须是 `[]`。
 - 禁止 `claim_type=factual_claim` + `claim_subtype=absence`；禁止给 absence 标 `supported`；禁止给 absence 附 evidence 来“证明未提及”。
 - 混合句必须拆分：事实部分 factual；absence/文档覆盖部分 non_factual。
-  例：“该时限是硬性要求，文档未提及例外情形或宽限期。”
-  - factual：该时限是硬性要求（有依据才 supported，否则 insufficient）；
-  - non_factual：文档未提及例外情形或宽限期（absence，null，[]）。
+  例：“该延保期限是固定要求，文档没有列出任何例外。”
+  - factual：该延保期限是固定要求（有依据才 supported，否则 insufficient）；
+  - non_factual：文档没有列出任何例外（absence，null，[]）。
 
 ## 4. 支持状态
 每条 factual_claim 必须标记 `support_status`：
@@ -146,7 +146,7 @@
 ### 5.2 证据必须直接支持 claim
 - 逐字连续只是必要条件；quote 还必须支持 claim 的谓词、条件或结论。
 - 只与 claim 主题相关、但不支持其谓词/条件的 quote，不算 supported。
-  反例：claim“质量问题不受 7 天无理由限制”，quote“因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。”——只支持运费承担，不支持 7 天限制；应 insufficient_evidence。
+  反例：claim“延保服务不受 30 天激活期限限制”，quote“延保卡激活后不支持退款；未激活的延保卡可在 30 天内申请退款。”——只支持退款，不支持激活期限豁免；应 insufficient_evidence。
 - `derived` claim 必须引用推导所依据的前提规则；不得引用邻近但无关的规则。
 - `condition` / `policy_scope` / `policy_relationship` 同样需要直接依据；只凭主题词或反推不够。
 - 找不到直接支持时判 `insufficient_evidence`，不要用相关 quote 硬撑 `supported`。
@@ -158,9 +158,9 @@
 - 找不到连续原文时判 `insufficient_evidence`，不得截断或改写。
 - 宁可选更短的连续片段，也不得跳过中间字符。
 - 通用反例（合成示例）：
-  - context：“商品在签收后 24 小时内出现质量问题的，需提交照片反馈。”
-  - answer 转述：“商品出现质量问题时可在 24 小时内反馈。”
-  - answer 省略了“在签收后……的，需提交照片反馈”等中间内容，不是 context 的连续子串；不能作为 quote。
+  - context：“延保卡在激活后 30 天内可申请转移，逾期需联系客服。”
+  - answer 转述：“延保卡可在 30 天内转移。”
+  - answer 省略了“激活后……可申请”等中间内容，不是 context 的连续子串；不能作为 quote。
   - 正确做法：复制 context 的完整连续句，或复制其中更短但连续的片段；无法连续复制时判 `insufficient_evidence`。
 
 **契约违约由 Service 判整条 metric `invalid(contract_violation)`，不降级、不 drop、不计分。** 以下任一情况属于违约：
@@ -204,20 +204,20 @@
   "claims": [
     {
       "claim_id": "cl1",
-      "claim": "订单签收后 7 天内可申请无理由退款",
+      "claim": "电子发票将在开具后两个工作日内发送至预留邮箱",
       "claim_type": "factual_claim",
       "claim_subtype": "policy",
       "support_status": "supported",
       "is_contradictory": false,
       "contradiction_with": [],
       "evidence_refs": [
-        {"context_id": "C1", "quote": "订单签收后 7 天内可申请无理由退款"}
+        {"context_id": "C1", "quote": "电子发票将在开具后两个工作日内发送至预留邮箱"}
       ],
       "reason": "C1 逐字原文"
     },
     {
       "claim_id": "cl2",
-      "claim": "建议联系客服核实",
+      "claim": "建议联系客服核实发票抬头",
       "claim_type": "non_factual",
       "claim_subtype": "advice",
       "support_status": null,
@@ -235,43 +235,42 @@
 
 ### 模式 A：政策 + 规范性要求 + 建议
 上下文 C1：
-“订单签收后 7 天内可申请无理由退款。质量问题需在签收后 24 小时内拍照反馈。”
+“延保卡需在购买后 30 天内激活。激活后不支持退款。电子发票将在开具后两个工作日内发送至预留邮箱。”
 
 回答：
-“签收后 7 天内可申请无理由退款；质量问题需在 24 小时内拍照反馈。建议联系客服提交凭证。”
+“延保卡需在购买后 30 天内激活；激活后不支持退款。电子发票会在两个工作日内发送。建议核对邮箱地址。”
 
 要点：
-- “签收后 7 天内可申请无理由退款” → factual / `policy` / supported，quote 用 C1 的最短连续子串。
-- “质量问题需在 24 小时内拍照反馈” → factual / `normative_requirement` / supported，quote 用 C1 的最短连续子串。
-- “建议联系客服提交凭证” → non_factual / `advice`，不进 F 评价。
+- “延保卡需在购买后 30 天内激活” → factual / `normative_requirement` / supported，quote 用 C1 的最短连续子串。
+- “激活后不支持退款” → factual / `condition` / supported，quote 用 C1 的最短连续子串。
+- “电子发票会在两个工作日内发送” → factual / `policy` / supported。
+- “建议核对邮箱地址” → non_factual / `advice`，不进 F 评价。
 - 不要把规范性要求判成 advice；不要把建议判成 factual。
 
 ### 模式 B：政策范围/关系 vs 文档覆盖/absence
 上下文 C1：
-“单笔订单实付满 99 元包邮；未满 99 元收取 10 元运费。因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。”
+“单笔订单实付满 199 元包邮；未满 199 元收取 12 元运费。偏远地区运费为 25 元。积分自获得之日起 12 个月内有效。”
 
 回答：
-“满 99 元包邮；退货运费按原因区分：质量问题由商家承担，非质量问题由买家承担。该退货运费规则与是否满 99 元无关。文档未说明会员等级是否免运费。”
+“满 199 元包邮；偏远地区运费 25 元。积分有效期 12 个月。积分规则与是否包邮无关。文档未说明积分能否转让。”
 
 要点：
-- “满 99 元包邮” → factual / `policy` / supported。
-- “质量问题由商家承担，非质量问题由买家承担” → 拆成两条 factual / `policy` / supported，各引对应最短子串。
-- “该退货运费规则与是否满 99 元无关” → factual / `policy_relationship`；文档没有明确写这层关系，判 insufficient，不得归 `doc_relationship` 或 `meta`。
-- “文档未说明会员等级是否免运费” → non_factual / `absence`，不进 F 评价。
+- “满 199 元包邮” → factual / `policy` / supported。
+- “偏远地区运费 25 元” → factual / `policy` / supported。
+- “积分规则与是否包邮无关” → factual / `policy_relationship`；文档没有明确写这层关系，判 insufficient，不得归 `doc_relationship` 或 `meta`。
+- “文档未说明积分能否转让” → non_factual / `absence`，不进 F 评价。
 
 ### 模式 C：条件 + 文档冲突 + 不确定
 上下文 C1：
-“普通商品签收后 7 天内可申请无理由退款。定制类商品不支持无理由退款。虚拟商品（充值、会员、课程）一经售出不支持退款。已激活的虚拟商品不支持无理由退款。”
+“电子发票在开具后 24 小时内发送。专用发票需联系客服。专用发票暂不支持。红冲发票需先申请。”
 
 回答：
-“能否退款取决于商品类型和签收时间：普通商品 7 天内可退，定制商品不支持无理由退款。文档对虚拟商品范围的表述不一致。无法确认未激活虚拟商品是否可退。”
+“电子发票 24 小时内发送。文档对专用发票是否支持表述不一致。无法确认红冲后多久重开。”
 
 要点：
-- “能否退款取决于商品类型和签收时间” → factual / `condition`；文档明确写了普通商品和定制商品规则，可 supported；不得归 meta。
-- “普通商品 7 天内可退” → factual / `policy` / supported。
-- “定制商品不支持无理由退款” → factual / `condition` / supported。
-- “文档对虚拟商品范围的表述不一致” → factual / `conflict` / supported；必须给两条互不为子串的 quote（“虚拟商品（充值、会员、课程）一经售出不支持退款”与“已激活的虚拟商品不支持无理由退款”），`is_contradictory=false`。
-- “无法确认未激活虚拟商品是否可退” → non_factual / `uncertainty`，不进 F 评价。
+- “电子发票 24 小时内发送” → factual / `policy` / supported。
+- “文档对专用发票是否支持表述不一致” → factual / `conflict` / supported；必须给两条互不为子串的 quote（“专用发票需联系客服”与“专用发票暂不支持”），`is_contradictory=false`。
+- “无法确认红冲后多久重开” → non_factual / `uncertainty`，不进 F 评价。
 
 ## 11. 最后检查
 - 每条 factual 都有 `support_status`，每条 non_factual 都是 `null`。

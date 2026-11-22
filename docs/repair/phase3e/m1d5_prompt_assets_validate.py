@@ -6,6 +6,11 @@ import json
 from pathlib import Path
 from typing import Any
 
+try:
+    from m1d5_prompt_leakage_audit import run_audit
+except ImportError:  # pragma: no cover - executed as a script from its directory
+    from docs.repair.phase3e.m1d5_prompt_leakage_audit import run_audit
+
 BASE = Path(__file__).resolve().parents[3]
 PROMPT_ROOT = BASE / "backend" / "app" / "prompts" / "rag_judge"
 VERSION = "v1.2.3"
@@ -17,9 +22,9 @@ OUT_SHA = Path(__file__).resolve().parent / "m1d5-prompt-v1.2.3-validation.sha25
 
 PROMPT_FILES = ("faithfulness.txt", "answer_correctness.txt", "answer_relevancy.txt")
 EXPECTED_SHA = {
-    "faithfulness.txt": "4f3b9739b2f839f95de159542e2546ff9df96203b1a69fead227e9b8c399f0bf",
-    "answer_correctness.txt": "a50520de0122216c9238d23c110967c3bbe259586ef24db100ee874a4ce35e95",
-    "answer_relevancy.txt": "a5386070407381098bcc14fc8c67a8853f94ebaa91d188e473ef92237dc58d88",
+    "faithfulness.txt": "52f1b3cf3b92d6f9616e73ed7de26a0721d65c27763f48edd41b38f1e06a025d",
+    "answer_correctness.txt": "a5f9e5b2d3d0e1bb80803f8a09e5ea7c980b5e8d1c7b9155e86266de92d493ef",
+    "answer_relevancy.txt": "f3efe431683ed26ba0a7338e6e2b5841d65d42dadde5cac30b8340e2ca95dfdc",
 }
 BASE_SHA = {
     "faithfulness.txt": "ed21979abd71dedd522ee97636b17509bae9d1b845d54fa114f4a1fbf8f01cf3",
@@ -77,6 +82,7 @@ def main() -> None:
     v122_repair = (
         RagJudgeAgent("faithfulness", llm=object(), prompt_version="v1.2.2")._repair_example() or ""
     )
+    leakage = run_audit()
 
     checks: list[dict[str, Any]] = [
         {"check": "manifest_version", "ok": manifest.get("version") == VERSION},
@@ -108,14 +114,14 @@ def main() -> None:
             "ok": prompt_sha["faithfulness.txt"] != BASE_SHA["faithfulness.txt"],
         },
         {
-            "check": "correctness_sha_unchanged",
-            "ok": prompts["answer_correctness.txt"] == base_prompts["answer_correctness.txt"]
-            and prompt_sha["answer_correctness.txt"] == BASE_SHA["answer_correctness.txt"],
+            "check": "correctness_decased",
+            "ok": prompts["answer_correctness.txt"] != base_prompts["answer_correctness.txt"]
+            and prompt_sha["answer_correctness.txt"] != BASE_SHA["answer_correctness.txt"],
         },
         {
-            "check": "relevancy_sha_unchanged",
-            "ok": prompts["answer_relevancy.txt"] == base_prompts["answer_relevancy.txt"]
-            and prompt_sha["answer_relevancy.txt"] == BASE_SHA["answer_relevancy.txt"],
+            "check": "relevancy_decased",
+            "ok": prompts["answer_relevancy.txt"] != base_prompts["answer_relevancy.txt"]
+            and prompt_sha["answer_relevancy.txt"] != BASE_SHA["answer_relevancy.txt"],
         },
         {
             "check": "evidence_source_rule",
@@ -175,6 +181,12 @@ def main() -> None:
         },
         {"check": "version_txt", "ok": schema_version == VERSION},
         {
+            "check": "prompt_leakage_zero",
+            "ok": leakage.get("status") == "pass"
+            and leakage.get("finding_count") == 0
+            and leakage.get("non_whitelisted_count") == 0,
+        },
+        {
             "check": "base_version_integrity",
             "ok": all(
                 sha256_text((PROMPT_ROOT / BASE_VERSION / filename).read_text(encoding="utf-8"))
@@ -197,6 +209,12 @@ def main() -> None:
         "default_prompt_version": manifest.get("default_prompt_version"),
         "contract_repair_version": manifest.get("contract_repair_version"),
         "quote_validator_sha256": manifest.get("quote_validator_sha256"),
+        "leakage_audit": {
+            "status": leakage.get("status"),
+            "finding_count": leakage.get("finding_count"),
+            "non_whitelisted_count": leakage.get("non_whitelisted_count"),
+            "min_chars": leakage.get("min_chars"),
+        },
         "prompt_sha256": prompt_sha,
         "base_prompt_sha256": BASE_SHA,
         "manifest_sha256": manifest_sha,
@@ -220,6 +238,8 @@ def main() -> None:
         f"> Schema / Metric：`{manifest.get('schema_version')}` / `v3`",
         f"> MANIFEST SHA256：`{manifest_sha}`",
         f"> quote validator SHA256：`{manifest.get('quote_validator_sha256')}`",
+        f"> leakage audit：findings={leakage.get('finding_count')}，"
+        f"non_whitelisted={leakage.get('non_whitelisted_count')}",
         f"> 校验输出 SHA256：`{output_sha}`",
         "",
         "## Prompt SHA256",

@@ -1,0 +1,42 @@
+{
+ "name": "m1d5-prompt-leakage-audit",
+ "version": "v1.2.3",
+ "min_chars": 12,
+ "initial_audit": {
+  "finding_count": 113,
+  "by_prompt": {
+   "faithfulness.txt": 69,
+   "answer_correctness.txt": 43,
+   "answer_relevancy.txt": 1
+  },
+  "by_case": {
+   "Q01": 27,
+   "Q11": 22,
+   "Q17": 12,
+   "Q21": 18,
+   "Q23": 26,
+   "Q31": 2,
+   "Q35": 1,
+   "Q36": 5
+  },
+  "note": "去案例化前的首轮审计；用于记录泄漏范围，不是当前 findings。"
+ },
+ "source_files": [
+  "docs\\repair\\phase3e\\pilot-10-v1.1.5-gate.json",
+  "docs\\repair\\phase3e\\m1d3-judge-only-results.json",
+  "docs\\repair\\phase3e\\m1d4-single-case-results.json"
+ ],
+ "prompt_assets": [
+  "faithfulness.txt",
+  "answer_correctness.txt",
+  "answer_relevancy.txt",
+  "repair_example.json"
+ ],
+ "source_count": 152,
+ "finding_count": 0,
+ "non_whitelisted_count": 0,
+ "by_prompt": {},
+ "by_case": {},
+ "findings": [],
+ "status": "pass"
+}

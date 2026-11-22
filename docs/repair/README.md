@@ -8,8 +8,8 @@
 > 4. 未冻结的定义/目标，不得进入代码实现。
 >
 > 最后更新：2026-11-22
-> 当前阶段：**M1-D-5 v1.2.3 已实现/验证，待 freeze 审核；未冻结、未激活、未跑 Judge**
-> 当前阻塞决策：**是否冻结 v1.2.3**
+> 当前阶段：**M1-D-5 v1.2.3 已实现/验证；F/C/R Prompt 已去案例化，gate case 泄漏审计 findings=0；待 freeze 重新审核**
+> 当前阻塞决策：**是否批准 v1.2.3 freeze（Prompt 泄漏已清零）**
 > 当前不做：跑 Judge、单案例/10/40、v1.2.3 激活、M2/M3、生产 migration
 
 ---
@@ -19,24 +19,24 @@
 | 项 | 状态 |
 |---|---|
 | 项目阶段 | 核心研发向产品化过渡 |
-| 主线 | M1 评测可信度；v1.2.2 `frozen` / M1-D-4 blocked；v1.2.3 implemented/verified 待 freeze |
+| 主线 | M1 评测可信度；v1.2.2 `frozen` / M1-D-4 blocked；v1.2.3 implemented/verified、泄漏审计 0，待 freeze |
 | 并行 A | M2 只读工作台；API 审计完成，前端未开始 |
 | 并行 B | M4-A 生产约束；未开始 |
 | M3 优化闭环 | 未开始；等 M1 可信、M2 可用 |
-| 当前可写代码？ | **否**；先审 v1.2.3 实现与 freeze |
+| 当前可写代码？ | **否**；先审 v1.2.3 freeze |
 | 当前可跑 Judge？ | **否**；单案例已停止，10/40 未批准 |
 | v1.2.1 / v1.2.2 / v1.2.3 | v1.2.1 / v1.2.2 `frozen`；v1.2.3 `design_draft`、`active=false`；默认仍 `v1.0.0` |
-| 最近一次决策 | 2026-11-22 v1.2.3 设计 approve_with_changes；实现/验证完成 |
-| 下一个交付 | 人工审核 v1.2.3 freeze proposal |
+| 最近一次决策 | 2026-11-22 v1.2.3 Prompt 去案例化；泄漏审计 113→0 |
+| 下一个交付 | 人工重新审核 v1.2.3 freeze proposal |
 
 ### 现在只需要一个决定
 
-**v1.2.3 已实现/验证；是否冻结。**
+**v1.2.3 已实现/验证，Prompt 泄漏已清零；是否批准 freeze。**
 
 | 选项 | 含义 | 结果 |
 |---|---|---|
-| **批准冻结** | 接受 Agent quote 预校验 + 定向 repair、共享校验、agent_contract、预算与边界 | 另开 freeze record；单案例仍需单独批准 |
-| **改实现** | 预校验/共享校验/报告/测试需调整 | 留在 design_draft |
+| **批准冻结** | 接受去案例化 Prompt、Agent 预校验 + 定向 repair、共享校验、agent_contract、预算与边界 | 另开 freeze record；单案例仍需单独批准 |
+| **改 Prompt/实现** | 仍有泄漏或实现需调整 | 留在 design_draft |
 | **暂缓** | 不冻结 | 保持 design_draft，M1-D-4 blocked |
 
 ---
@@ -60,7 +60,7 @@
 | 里程碑 | 状态 | 已完成证据 | 当前阻塞/下一步 |
 |---|---|---|---|
 | **M0 评测基础设施** | `accepted`（冻结维护） | Dataset/Version/Item、RAG Adapter、Trace、检索指标、Judge、Run/Celery、持久化聚合、WeKnora 联调 | 只修缺陷/兼容，不再架构重构 |
-| **M1 评测可信度** | `in_progress` | M1-A 语义/Gold/target 已冻结；M1-B B 双指标草案（`19-…`）；M1-C C1–C4 已实现/验证；M1-D-0 Prompt `frozen`；M1-D-1 blocked at Q11；M1-D-2 v1.2.1 `frozen`；M1-D-3 blocked at Q23；M1-D-4 v1.2.2 `frozen`、Q23 invalid -> blocked；M1-D-5 v1.2.3 implemented/verified，待 freeze | v1.2.x 未激活；v1.2.3 未冻结；10/40 Judge 未批准；M1-E 未开始 |
+| **M1 评测可信度** | `in_progress` | M1-A 语义/Gold/target 已冻结；M1-B B 双指标草案（`19-…`）；M1-C C1–C4 已实现/验证；M1-D-0 Prompt `frozen`；M1-D-1 blocked at Q11；M1-D-2 v1.2.1 `frozen`；M1-D-3 blocked at Q23；M1-D-4 v1.2.2 `frozen`、Q23 invalid -> blocked；M1-D-5 v1.2.3 implemented/verified、泄漏审计 0，待 freeze | v1.2.x 未激活；v1.2.3 未冻结；10/40 Judge 未批准；M1-E 未开始 |
 | **M2 评测工作台** | `audit_complete` / 实现 `not_started` | API 审计完成：Run/详情/结果/失败/Trace 可用；前端 0 页面 | 等 M1-B 冻结后再决定是否写 P0 前端 |
 | **M3 RAG 优化闭环** | `not_started` | 无 | 依赖 M1 可信 + M2 可用 |
 | **M4 生产交付** | 基础已有 / 约束 `not_started` | 认证、加密、限流、Prometheus/Grafana/Sentry、备份/恢复演练 | M4-A：租户、保留期、审计、告警、成本、数据权利 |
@@ -72,7 +72,7 @@
 | M1-A 语义规范 + Gold + 目标 | `accepted` | 语义规范冻结 2026-11-18；final_labels SHA `f139623f…`；target v1.0.2 SHA `3ee15dfc…`（`freeze_draft_pending_human`，旧 v1.0.1 只读） |
 | M1-B Schema/Service 定稿 | `implemented`，**未 `accepted`** | P1-1 关闭；P1-2 证据契约已定；B 双指标冻结草案 `19-…` 待审核 |
 | M1-C 实现与测试 | `implemented` / `verified`，**未 `accepted`** | C1 Schema v3、C2 migration 022、C3 Service 双指标/invalid/聚合/retry、C4 静态回归已完成；10/40 Judge 未运行 |
-| M1-D 有限实验 | `in_progress`（M1-D-0 … M1-D-5） | M1-D-0 Prompt `frozen`；M1-D-1 blocked at Q11；M1-D-2 v1.2.1 `frozen`；M1-D-3 blocked at Q23；M1-D-4 v1.2.2 `frozen`、Q23 invalid -> blocked；M1-D-5 v1.2.3 implemented/verified，待 freeze |
+| M1-D 有限实验 | `in_progress`（M1-D-0 … M1-D-5） | M1-D-0 Prompt `frozen`；M1-D-1 blocked at Q11；M1-D-2 v1.2.1 `frozen`；M1-D-3 blocked at Q23；M1-D-4 v1.2.2 `frozen`、Q23 invalid -> blocked；M1-D-5 v1.2.3 implemented/verified、泄漏审计 0，待 freeze |
 | M1-E 质量验收 | `not_started` | 四组报告（HG/provisional/40 条/系统质量）+ 已知问题决定 + SHA 追溯 |
 
 ### 2.2 门禁视角
@@ -135,8 +135,9 @@
 | `docs/repair/phase3e/m1d4-single-case-results.json` | `c2cae388…` | `raw_results` | Q23 原始 claims、quote 校验、3 calls / CNY 0.03726；无 repair |
 | `docs/repair/phase3e/m1d4_run_single_case.py` | runner | `executed` | 运行时指纹、显式 v1.2.2、预算/停止、repair 记录 |
 | `docs/repair/40-m1d5-v1.2.3-contract-repair-design.md` | design/scope r2 | `approved_with_changes`；实现见 `41-…` | Agent quote 预校验 + 定向 repair、共享校验、证据来源规则、混合句 A、预算/门禁 |
-| `backend/app/prompts/rag_judge/v1.2.3/` | F `4f3b9739…` / C `a50520de…` / R `a5386070…`；MANIFEST `2257b143…` | `design_draft` / `active=false` | Agent quote 预校验、证据来源规则、v1.2.3 repair example；C/R SHA 不变 |
-| `docs/repair/phase3e/m1d5-prompt-v1.2.3-validation.json` | `496b466c…` | `static_validation` 25/25 | v1.2.3 资产 SHA、quote validator、防教题、旧版本隔离 |
+| `backend/app/prompts/rag_judge/v1.2.3/` | F `52f1b3cf…` / C `a5f9e5b2…` / R `f3efe431…`；MANIFEST `b1194bcb…` | `design_draft` / `active=false` | Agent quote 预校验、去案例化 few-shot、v1.2.3 repair example；C/R SHA 因去案例化变化 |
+| `docs/repair/phase3e/m1d5-prompt-v1.2.3-validation.json` | `c14c92ba…` | `static_validation` 26/26 | v1.2.3 资产 SHA、quote validator、泄漏审计、旧版本隔离 |
+| `docs/repair/phase3e/m1d5-prompt-leakage-audit.json` | `d21cc41b…` | `leakage_audit` findings=0 | 10 个 gate case 的 answer/gold/claim/evidence ≥12 字符审计 |
 | `docs/repair/41-m1d5-v1.2.3-implementation.md` | implementation report | `implemented/verified`；未 frozen | 共享 validator、Agent 预校验、agent_contract、golden regression、测试 |
 
 ### 3.2 决策时间线
@@ -170,6 +171,7 @@
 | 2026-11-22 | 执行 v1.2.2 单案例：Q23 F invalid 后停止 | `stopped` / `blocked`；3 calls / CNY 0.03726；Q21/Q11 未运行 |
 | 2026-11-22 | 提交 v1.2.3 合同修复设计（Agent quote 预校验 + 定向 repair） | `design_draft_pending_review`；未实现 |
 | 2026-11-22 | v1.2.3 设计 approve_with_changes；实现/验证完成 | `design_draft` / `implemented/verified`；待 freeze |
+| 2026-11-22 | v1.2.3 freeze 退回：Prompt 仍含 gate case；去案例化 + 泄漏审计 113→0 | 重新待 freeze；未运行 Judge |
 
 ---
 
@@ -316,14 +318,13 @@
 
 **后续（未批准）**：
 
-1. 人工审核 v1.2.3 实现与 freeze proposal；本轮只批 freeze，不跑 Judge；
+1. 人工重新审核 v1.2.3 freeze proposal（Prompt 泄漏审计 findings=0）；本轮只批 freeze，不跑 Judge；
 2. freeze 通过后，单案例 Q23/Q21/Q11 必须三案例全跑并重新批准；
 3. 未通过前不跑单案例、10 条或 40 条；不得复用 v1.2.1 的 10 条批准；
-4. 未通过前不跑单案例、10 条或 40 条；不得复用 v1.2.1 的 10 条批准；
-5. 40 条分层报告（HG 13 / provisional 27 分开）；
-6. 6 条缺失 baseline 按方案 A 标 `baseline_delta: unavailable`，不跑 Judge 补齐；
-7. 四组报告 + 已知问题接受/修复/延期 + SHA 追溯；
-8. M1-E 验收。
+4. 40 条分层报告（HG 13 / provisional 27 分开）；
+5. 6 条缺失 baseline 按方案 A 标 `baseline_delta: unavailable`，不跑 Judge 补齐；
+6. 四组报告 + 已知问题接受/修复/延期 + SHA 追溯；
+7. M1-E 验收。
 
 ### 5.4 并行线
 
