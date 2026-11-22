@@ -1302,3 +1302,13 @@ alembic check   : No new upgrade operations detected
 - 调用/成本：3 calls（primary 3、repair 0、retry 0）；input 10,293 / output 1,308；CNY 0.037260，低于 0.30；preflight 9/8 tokens。
 - 结果：`docs/repair/39-m1d4-v1.2.2-single-case-diagnostic-results.md`（MD SHA `764a614b…`）；raw `m1d4-single-case-results.json`（SHA `c2cae388…`）。
 - 边界：未重跑、未改 Prompt/Agent/fixture、未建 Run、未写 DB、未调 WeKnora、未激活 v1.2.2、未跑 10/40；M1-D-4 blocked，M1-C/M1-D 未 accepted。
+
+### M1-D-5 v1.2.3 合同修复设计（2026-11-22，design_draft_pending_review）
+- 文档：`docs/repair/40-m1d5-v1.2.3-contract-repair-design.md`；只提交设计与范围，未改 Prompt/Agent、未冻结、未跑 Judge。
+- 根因：Q23 quote 来自 answer 加粗句而非 context；Service 计分时才判 `quote_not_found`，Agent repair 已结束，模型看不到错误。
+- P0：Agent `_validate_parsed` 用 `_active_input.contexts` 预校验 evidence quote；失败抛 `QuoteContractError(ValueError)`；复用 `parse_with_repair` 做 1 次定向 repair；Service 仍最终判定。
+- 共享校验：新增 `app/schemas/agents/rag_judge_evidence.py` 纯函数，Agent/Service 共用；parity tests；不改 Service invalid 契约、不做模糊匹配、不自动改写 quote。
+- P0 Prompt：quote 只能从 contexts 连续复制；不得复制 answer 加粗句/引号句/转述；找不到连续原文判 insufficient_evidence；repair example 同时含 factual + absence。
+- P1 混合句：supported 混合句强制 repair；insufficient 混合句 warning + 记录（选 A，避免把非契约问题升级成 invalid）；Q23 cl5 预计仍 warning，不强制拆分。
+- 版本/预算：version v1.2.3、rubric v1.2.0、schema/metric v3、target v1.0.2、default v1.0.0；单案例 9+3+2=14 / CNY 0.30；10 条 30+10+3=43 / CNY 1.00。
+- 门禁：本轮只批设计；实现、freeze、单案例 Q23/Q21/Q11、10、40 均需另行批准；未激活 v1.2.3。
