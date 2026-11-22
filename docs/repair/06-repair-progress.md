@@ -1275,3 +1275,11 @@ alembic check   : No new upgrade operations detected
 - 调用/成本：18 次；input 58,335 / output 5,039；CNY 0.188378，低于 ceiling 1.00。
 - Q11：bad 非连续 quote -> invalid+quote_not_found；good 连续 quote -> evaluated 1.0，Q11 F=0.8 目标通过。
 - 边界：M1-D-3 blocked，未 verified；M1-D-1 保持 blocked；M1-C/M1-D 未 accepted；未激活 v1.2.1。
+
+### M1-D-4 v1.2.2 Prompt patch 设计与范围（2026-11-22，design_scope_pending_review）
+- 文档：`docs/repair/35-m1d4-v1.2.2-prompt-patch-scope.md`；只准备设计与范围，未改 Prompt、未改代码、未跑 Judge。
+- Q23：factual+absence+supported+空 evidence → StructuredOutputError/invalid，判定正确；需 absence/mixed sentence 规则与 repair example。
+- Q21：F=1.0 来自“运费承担”quote 被用于支持“质量问题不受 7 天限制”，属 semantic support 错误；target 0.6–0.7 不因结果修改。
+- 范围：v1.2.2 只加 absence/mixed sentence 与 evidence 必须直接支持 claim 两条通用规则；C/R 继承 v1.2.1；rubric_version v1.2.0；target v1.0.2。
+- 计划：v1.2.2 Prompt/MANIFEST/version、`JUDGE_V3_PROMPT_VERSIONS` 加 v1.2.2、Agent repair example、Q23/Q21 回归测试。
+- 后续：冻结 v1.2.2 后先做 Q23/Q21/Q11 单案例诊断，不直接跑 10 条；10/40 未批准。
