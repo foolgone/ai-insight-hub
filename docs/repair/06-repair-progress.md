@@ -1312,3 +1312,14 @@ alembic check   : No new upgrade operations detected
 - P1 混合句：supported 混合句强制 repair；insufficient 混合句 warning + 记录（选 A，避免把非契约问题升级成 invalid）；Q23 cl5 预计仍 warning，不强制拆分。
 - 版本/预算：version v1.2.3、rubric v1.2.0、schema/metric v3、target v1.0.2、default v1.0.0；单案例 9+3+2=14 / CNY 0.30；10 条 30+10+3=43 / CNY 1.00。
 - 门禁：本轮只批设计；实现、freeze、单案例 Q23/Q21/Q11、10、40 均需另行批准；未激活 v1.2.3。
+
+### M1-D-5 v1.2.3 合同修复实现（2026-11-22，design_draft / implemented / verified，待 freeze）
+- 文档：`docs/repair/41-m1d5-v1.2.3-implementation.md`；设计 r2 审核 `approve_with_changes`。
+- 资产：`backend/app/prompts/rag_judge/v1.2.3/`；F `4f3b9739…`、C `a50520de…`、R `a5386070…`、MANIFEST `2257b143…`；status `design_draft`、active=false、schema v3、rubric v1.2.0、默认 v1.0.0。
+- 共享校验：新增 `app/schemas/agents/rag_judge_evidence.py`；Service `_v3_evidence_refs` 改用 `check_quote`；v2 路径未改；错误码/顺序/invalid 契约保持。
+- Agent：v1.2.3 + faithfulness 在 `_validate_parsed` 用 `_active_input.contexts` 预校验；失败抛 `QuoteContractError(ValueError)`；复用 `parse_with_repair` 1 次 repair；repair example 含 factual + absence；旧 repair SHA 不变。
+- 报告：`agent_contract` 覆盖成功/repair 成功/repair 失败/无 repair；invalid outcome 也带 final_errors；大小上限；`judge_config` 仅 v1.2.3 加 contract 字段。
+- 防教题：Prompt/repair example 不含 Q23/生鲜食品/fixture 原句；测试断言。
+- Golden：Q23 真实 raw output 仍 3× quote_not_found，claim_count=10/ supported=3/insufficient=3/non_factual=4，错误顺序 cl1/cl2/cl3。
+- 测试：全量 pytest 1083 条通过；black/flake8/mypy/lint-imports 通过；静态校验 25/25 pass，validation SHA `496b466c…`；quote validator SHA `153ab4a6…`。
+- 边界：未 frozen、未激活、未跑 Judge/10/40；未建 Run、未写 DB、未调 WeKnora；M1-D-4 blocked，M1-C/M1-D 未 accepted。

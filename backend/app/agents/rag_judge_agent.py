@@ -38,9 +38,19 @@ from app.schemas.agents.rag_judge import (
     metric_version_for_prompt,
     output_schema_for,
 )
+from app.schemas.agents.rag_judge_evidence import (
+    QuoteCheck,
+    QuoteContractError,
+    build_context_map,
+    check_claims_evidence,
+    detect_mixed_absence,
+    format_quote_contract_error,
+    quote_validator_sha256,
+)
 
 PROMPT_DIR = Path(__file__).resolve().parents[1] / "prompts" / "rag_judge"
 PROMPT_VERSION_PATTERN = re.compile(r"^v\d+\.\d+\.\d+$")
+CONTRACT_REPAIR_VERSION = "v1.2.3"
 
 
 class RagJudgePromptError(RuntimeError):
@@ -130,6 +140,23 @@ class RagJudgeAgent(BaseAgent):
         self.prompt_status = str(manifest.get("status") or "unknown")
         self.prompt_active = bool(manifest.get("active", False))
         self._active_input: RagJudgeInput | None = None
+        self._contract_validation_attempts = 0
+        self.contract_repair_version: str | None = None
+        self.quote_validator_sha256: str | None = None
+        self.contract_report: dict[str, Any] | None = None
+        if self.prompt_version == CONTRACT_REPAIR_VERSION and metric == "faithfulness":
+            self.contract_repair_version = CONTRACT_REPAIR_VERSION
+            self.quote_validator_sha256 = quote_validator_sha256()
+            self.contract_report = {
+                "contract_version": CONTRACT_REPAIR_VERSION,
+                "quote_validator_sha256": self.quote_validator_sha256,
+                "quote_precheck_errors": [],
+                "mixed_sentence_warnings": [],
+                "repair_triggered": False,
+                "repair_count": 0,
+                "passed_after_repair": None,
+                "final_errors": [],
+            }
         super().__init__(
             config
             or AgentConfig(
@@ -224,7 +251,10 @@ class RagJudgeAgent(BaseAgent):
         return parsed.model_dump(mode="json")
 
     def _validate_parsed(self, model: Any) -> None:
-        """业务校验：分数必须是有限且在 [0,1] 内（schema 之外再兜一层）。"""
+        """业务校验：分数合法；v1.2.3 额外做 evidence quote 合同预校验。"""
+        if self.contract_report is not None:
+            self._validate_quote_contract(model)
+
         score = getattr(model, "score", None)
         if score is None:
             return
@@ -232,9 +262,135 @@ class RagJudgeAgent(BaseAgent):
         if not math.isfinite(value) or value < 0 or value > 1:
             raise ValueError("score must be a finite number within [0, 1]")
 
+    def _validate_quote_contract(self, model: Any) -> None:
+        """v1.2.3-only：让 Agent 在 repair 前看到 quote 错误。"""
+        assert self.contract_report is not None
+        self._contract_validation_attempts += 1
+        attempt = self._contract_validation_attempts
+        claims = list(getattr(model, "claims", None) or [])
+
+        contexts = list(self._active_input.contexts) if self._active_input else []
+        context_map = build_context_map(contexts)
+        if not context_map:
+            self.contract_report["repair_triggered"] = True
+            self.contract_report["repair_count"] = 1
+            self.contract_report["final_errors"] = [
+                {"code": "contexts_unavailable", "message": "contexts required for quote precheck"}
+            ]
+            raise QuoteContractError(
+                "quote_contract_violation: contexts are unavailable; cannot verify "
+                "evidence quotes. Provide contexts or do not mark evidence as supported."
+            )
+        checks = check_claims_evidence(claims, context_map)
+        quote_errors = [check for check in checks if not check.ok]
+
+        mixed_errors: list[dict[str, Any]] = []
+        mixed_warnings: list[dict[str, Any]] = []
+        for index, claim in enumerate(claims, 1):
+            if getattr(claim, "claim_type", None) != "factual_claim":
+                continue
+            text = str(getattr(claim, "claim", "") or "")
+            if not detect_mixed_absence(text):
+                continue
+            entry = {
+                "claim_id": str(getattr(claim, "claim_id", None) or f"cl{index}"),
+                "claim": text,
+                "code": "mixed_sentence_factual_absence",
+            }
+            if getattr(claim, "support_status", None) == "supported":
+                mixed_errors.append(entry)
+            else:
+                mixed_warnings.append(entry)
+
+        self.contract_report["mixed_sentence_warnings"] = mixed_warnings[:5]
+        if attempt == 1:
+            self.contract_report["quote_precheck_errors"] = [
+                self._quote_check_payload(check, "quote_contract") for check in quote_errors[:5]
+            ] + mixed_errors[:5]
+            if quote_errors or mixed_errors:
+                self.contract_report["repair_triggered"] = True
+                self.contract_report["repair_count"] = 1
+        elif quote_errors or mixed_errors:
+            self.contract_report["final_errors"] = [
+                self._quote_check_payload(check, "quote_contract") for check in quote_errors[:5]
+            ] + mixed_errors[:5]
+            self.contract_report["passed_after_repair"] = False
+        else:
+            self.contract_report["passed_after_repair"] = True
+
+        if not quote_errors and not mixed_errors:
+            if attempt == 1:
+                self.contract_report["passed_after_repair"] = True
+            return
+
+        message = format_quote_contract_error(quote_errors)
+        if mixed_errors:
+            mixed_lines = [
+                f"- claim_id={entry['claim_id']} code=mixed_sentence_factual_absence "
+                f"claim={entry['claim']!r}"
+                for entry in mixed_errors[:5]
+            ]
+            message += (
+                "\nmixed_sentence_violation: factual_claim must not contain an "
+                "absence clause. Split it into one factual claim and one "
+                "non_factual/absence claim (support_status=null, evidence_refs=[]).\n"
+                + "\n".join(mixed_lines)
+            )
+        if len(message) > 2000:
+            message = message[:1999] + "…"
+        raise QuoteContractError(message)
+
+    @staticmethod
+    def _quote_check_payload(check: QuoteCheck, code: str) -> dict[str, Any]:
+        return {
+            "claim_id": check.claim_id,
+            "context_id": check.context_id,
+            "code": check.error or code,
+            "quote": (check.quote or "")[:300],
+            "context_excerpt": (check.context_excerpt or "")[:300] or None,
+        }
+
     def _repair_example(self) -> str | None:
         """给修复轮一条完整合法 JSON，避免长 schema 导致半截输出。"""
         if self.metric == "faithfulness":
+            if self.prompt_version == CONTRACT_REPAIR_VERSION:
+                # v1.2.3-only repair example: complete context quote + legal absence.
+                # Must not contain Q23/生鲜食品/fixture-specific sentences.
+                return json.dumps(
+                    {
+                        "claims": [
+                            {
+                                "claim_id": "cl1",
+                                "claim": "商品在签收后 24 小时内出现质量问题的，需提交照片反馈",
+                                "claim_type": "factual_claim",
+                                "claim_subtype": "policy",
+                                "support_status": "supported",
+                                "is_contradictory": False,
+                                "contradiction_with": [],
+                                "evidence_refs": [
+                                    {
+                                        "context_id": "C1",
+                                        "quote": ("商品在签收后 24 小时内出现质量问题的，" "需提交照片反馈。"),
+                                    }
+                                ],
+                                "reason": "quote 从 context 完整连续复制；answer 的截断句不是证据",
+                            },
+                            {
+                                "claim_id": "cl2",
+                                "claim": "文档未说明超时后的申诉渠道",
+                                "claim_type": "non_factual",
+                                "claim_subtype": "absence",
+                                "support_status": None,
+                                "is_contradictory": False,
+                                "contradiction_with": [],
+                                "evidence_refs": [],
+                                "reason": "absence 不需要证据",
+                            },
+                        ],
+                        "reason": "",
+                    },
+                    ensure_ascii=False,
+                )
             if self.prompt_version == "v1.2.2":
                 # v1.2.2-only repair example: legal non_factual absence.
                 # Do not change v1.2.0/v1.2.1 examples below.

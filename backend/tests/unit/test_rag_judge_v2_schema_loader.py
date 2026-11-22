@@ -141,6 +141,7 @@ def test_prompt_schema_and_metric_mapping() -> None:
     assert judge_schema_version("v1.2.0") == JUDGE_SCHEMA_V3
     assert judge_schema_version("v1.2.1") == JUDGE_SCHEMA_V3
     assert judge_schema_version("v1.2.2") == JUDGE_SCHEMA_V3
+    assert judge_schema_version("v1.2.3") == JUDGE_SCHEMA_V3
     assert metric_version_for_prompt("faithfulness", "v1.1.1") == "v2"
     assert metric_version_for_prompt("faithfulness", "v1.1.2") == "v2"
     assert metric_version_for_prompt("faithfulness", "v1.1.3") == "v2"
@@ -149,11 +150,13 @@ def test_prompt_schema_and_metric_mapping() -> None:
     assert metric_version_for_prompt("faithfulness", "v1.2.0") == "v3"
     assert metric_version_for_prompt("faithfulness", "v1.2.1") == "v3"
     assert metric_version_for_prompt("faithfulness", "v1.2.2") == "v3"
+    assert metric_version_for_prompt("faithfulness", "v1.2.3") == "v3"
     assert metric_version_for_prompt("faithfulness", "v1.0.0") == "v1"
     assert metric_version_for_prompt("answer_correctness", "v1.1.1") == "v2"
     assert metric_version_for_prompt("answer_correctness", "v1.2.0") == "v3"
     assert metric_version_for_prompt("answer_correctness", "v1.2.1") == "v3"
     assert metric_version_for_prompt("answer_correctness", "v1.2.2") == "v3"
+    assert metric_version_for_prompt("answer_correctness", "v1.2.3") == "v3"
 
 
 def test_missing_version_directory_raises() -> None:

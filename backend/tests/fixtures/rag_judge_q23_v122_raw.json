@@ -1,0 +1,130 @@
+{
+ "claims": [
+  {
+   "claim_id": "cl1",
+   "claim": "是的，可以按政策反馈。",
+   "claim_type": "factual_claim",
+   "claim_subtype": "policy",
+   "support_status": "supported",
+   "is_contradictory": false,
+   "contradiction_with": [],
+   "evidence_refs": [
+    {
+     "context_id": "C1",
+     "quote": "生鲜食品质量问题需在签收后 24 小时内拍照反馈。"
+    }
+   ],
+   "reason": "文档明确写出生鲜食品质量问题可以在签收后24小时内拍照反馈"
+  },
+  {
+   "claim_id": "cl2",
+   "claim": "生鲜食品质量问题需在签收后 24 小时内拍照反馈",
+   "claim_type": "factual_claim",
+   "claim_subtype": "normative_requirement",
+   "support_status": "supported",
+   "is_contradictory": false,
+   "contradiction_with": [],
+   "evidence_refs": [
+    {
+     "context_id": "C1",
+     "quote": "生鲜食品质量问题需在签收后 24 小时内拍照反馈。"
+    }
+   ],
+   "reason": "文档明确写出生鲜食品质量问题需要在24小时内拍照反馈"
+  },
+  {
+   "claim_id": "cl3",
+   "claim": "您是在签收后第 2 天（即超过 24 小时）才发现并反馈，已超出政策规定的反馈时效",
+   "claim_type": "factual_claim",
+   "claim_subtype": "derived",
+   "support_status": "supported",
+   "is_contradictory": false,
+   "contradiction_with": [],
+   "evidence_refs": [
+    {
+     "context_id": "C1",
+     "quote": "生鲜食品质量问题需在签收后 24 小时内拍照反馈。"
+    }
+   ],
+   "reason": "根据文档中的24小时要求推导出第2天已超出时限"
+  },
+  {
+   "claim_id": "cl4",
+   "claim": "因此原则上不符合质量反馈受理条件",
+   "claim_type": "factual_claim",
+   "claim_subtype": "condition",
+   "support_status": "insufficient_evidence",
+   "is_contradictory": false,
+   "contradiction_with": [],
+   "evidence_refs": [],
+   "reason": "文档没有明确说明超过24小时后的处理方式或例外情况"
+  },
+  {
+   "claim_id": "cl5",
+   "claim": "该时限是硬性要求，文档未提及例外情形或宽限期",
+   "claim_type": "factual_claim",
+   "claim_subtype": "policy_scope",
+   "support_status": "insufficient_evidence",
+   "is_contradictory": false,
+   "contradiction_with": [],
+   "evidence_refs": [],
+   "reason": "文档没有明确说明该时限是否为硬性要求或是否有例外情形"
+  },
+  {
+   "claim_id": "cl6",
+   "claim": "24 小时起算点为“签收完成时间”（非签收日零点），且须“拍照反馈”（需保留问题实物及包装证据）",
+   "claim_type": "factual_claim",
+   "claim_subtype": "process",
+   "support_status": "insufficient_evidence",
+   "is_contradictory": false,
+   "contradiction_with": [],
+   "evidence_refs": [],
+   "reason": "文档没有明确说明24小时的具体起算点和具体的反馈要求"
+  },
+  {
+   "claim_id": "cl7",
+   "claim": "建议操作：若尚未超时，立即通过订单页面或联系在线客服（9:00–21:00）提交带时间水印的照片凭证",
+   "claim_type": "non_factual",
+   "claim_subtype": "advice",
+   "support_status": null,
+   "is_contradictory": false,
+   "contradiction_with": [],
+   "evidence_refs": [],
+   "reason": "纯建议"
+  },
+  {
+   "claim_id": "cl8",
+   "claim": "若已超时，可尝试联系客服说明具体情况（如物流延误导致开箱延迟、问题明显且可验证等），但是否受理由商家个案判断，政策不保证支持",
+   "claim_type": "non_factual",
+   "claim_subtype": "advice",
+   "support_status": null,
+   "is_contradictory": false,
+   "contradiction_with": [],
+   "evidence_refs": [],
+   "reason": "纯建议"
+  },
+  {
+   "claim_id": "cl9",
+   "claim": "文档未说明超时后申诉渠道或人工复核机制",
+   "claim_type": "non_factual",
+   "claim_subtype": "absence",
+   "support_status": null,
+   "is_contradictory": false,
+   "contradiction_with": [],
+   "evidence_refs": [],
+   "reason": "文档未提及"
+  },
+  {
+   "claim_id": "cl10",
+   "claim": "如需进一步协助，可提供签收时间截图和问题照片，由客服评估是否特批处理",
+   "claim_type": "non_factual",
+   "claim_subtype": "advice",
+   "support_status": null,
+   "is_contradictory": false,
+   "contradiction_with": [],
+   "evidence_refs": [],
+   "reason": "纯建议"
+  }
+ ],
+ "reason": ""
+}

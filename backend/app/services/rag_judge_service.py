@@ -11,6 +11,7 @@
 """
 from __future__ import annotations
 
+import json
 import math
 import time
 from collections.abc import Callable, Sequence
@@ -35,6 +36,7 @@ from app.schemas.agents.rag_judge import (
     judge_schema_version,
     metric_version_for_prompt,
 )
+from app.schemas.agents.rag_judge_evidence import check_quote
 
 JudgeStatus = Literal["evaluated", "skipped", "invalid", "failed"]
 
@@ -128,7 +130,7 @@ def _skip_reason(
 
 
 def _judge_config(agent: RagJudgeAgent, *, model: str | None) -> dict[str, Any]:
-    return {
+    config = {
         "agent": agent.config.name,
         "model": model,
         "temperature": agent.config.temperature,
@@ -140,6 +142,11 @@ def _judge_config(agent: RagJudgeAgent, *, model: str | None) -> dict[str, Any]:
         "rubric_version": getattr(agent, "rubric_version", agent.config.version),
         "metric_version": agent.metric_version,
     }
+    contract_version = getattr(agent, "contract_repair_version", None)
+    if contract_version:
+        config["contract_repair_version"] = contract_version
+        config["quote_validator_sha256"] = getattr(agent, "quote_validator_sha256", None)
+    return config
 
 
 def _usage_details(result: Any) -> dict[str, Any]:
@@ -148,6 +155,44 @@ def _usage_details(result: Any) -> dict[str, Any]:
         "token_usage": dict(getattr(result, "token_usage", None) or {}),
         "cost": str(getattr(result, "cost", "") or "0"),
     }
+
+
+def _agent_contract_details(agent: Any) -> dict[str, Any]:
+    """v1.2.3-only Agent contract report; empty for older prompt versions."""
+    report = getattr(agent, "contract_report", None)
+    if not report:
+        return {}
+    try:
+        encoded = json.dumps(report, ensure_ascii=False)
+    except (TypeError, ValueError):
+        return {"agent_contract": {"contract_version": "v1.2.3", "error": "unserializable"}}
+    if len(encoded) <= 2000:
+        return {"agent_contract": report}
+    trimmed = json.loads(encoded)
+    for key in ("quote_precheck_errors", "mixed_sentence_warnings", "final_errors"):
+        items = trimmed.get(key)
+        if not isinstance(items, list):
+            continue
+        trimmed[key] = items[:2]
+        for item in trimmed[key]:
+            if not isinstance(item, dict):
+                continue
+            for field_name in ("claim", "quote", "context_excerpt"):
+                value = item.get(field_name)
+                if isinstance(value, str):
+                    item[field_name] = value[:160]
+    encoded = json.dumps(trimmed, ensure_ascii=False)
+    if len(encoded) > 2000:
+        for key in ("quote_precheck_errors", "mixed_sentence_warnings", "final_errors"):
+            if isinstance(trimmed.get(key), list):
+                trimmed[key] = trimmed[key][:1]
+        encoded = json.dumps(trimmed, ensure_ascii=False)
+    if len(encoded) > 2000:
+        trimmed = {
+            "contract_version": trimmed.get("contract_version", "v1.2.3"),
+            "truncated": True,
+        }
+    return {"agent_contract": trimmed}
 
 
 def _payload(
@@ -646,14 +691,14 @@ def _v3_evidence_refs(
         context_id = str(raw_ref.get("context_id") or "")
         quote = str(raw_ref.get("quote") or "")
         normalized.append({"context_id": context_id, "quote": quote})
-        ok = True
-        error = None
-        if not context_id or context_id not in context_map:
-            ok, error = False, "unknown_context_id"
-        elif not quote.strip():
-            ok, error = False, "empty_quote"
-        elif quote.strip() not in context_map[context_id].strip():
-            ok, error = False, "quote_not_found"
+        quote_check = check_quote(
+            quote=quote,
+            context_id=context_id,
+            context_map=context_map,
+            claim_id=claim_id,
+        )
+        ok = quote_check.ok
+        error = quote_check.error
         checks.append(
             {
                 "claim_id": claim_id,
@@ -959,6 +1004,7 @@ def _strict_details(details: dict[str, Any]) -> dict[str, Any]:
         "strict_gap",
         "failure_kind",
         "agent_error_type",
+        "agent_contract",
     )
     return {key: details[key] for key in keys if key in details}
 
@@ -1132,6 +1178,7 @@ async def judge_trace(
                     "original_raw_output": original_raw,
                     "original_raw_truncated": original_truncated,
                     **_usage_details(result),
+                    **_agent_contract_details(agent),
                 },
                 judge_config=config,
                 raw_output=raw_output,
@@ -1163,7 +1210,10 @@ async def judge_trace(
                         raw_output=raw_output,
                         raw_truncated=raw_truncated,
                         latency_ms=latency_ms,
-                        usage=_usage_details(result),
+                        usage={
+                            **_usage_details(result),
+                            **_agent_contract_details(agent),
+                        },
                     )
                 )
                 outcomes.append(
@@ -1177,6 +1227,7 @@ async def judge_trace(
                         raw_output=None,
                         raw_truncated=False,
                         latency_ms=0,
+                        usage=_agent_contract_details(agent),
                     )
                 )
                 continue
