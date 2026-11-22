@@ -1,0 +1,77 @@
+{
+  "version": "v1.2.1",
+  "status": "design_draft",
+  "active": false,
+  "frozen": false,
+  "runtime_active": false,
+  "date": "2026-11-22",
+  "note": "M1-D-2：v1.2.1 是 Faithfulness evidence 连续性 prompt-contract patch。rubric_version 保持 v1.2.0，不声称 rubric 变更；目标仍为 v1.0.2，未重算；active=false，默认仍 v1.0.0，未跑 Judge。",
+  "schema_version": "rag_judge_schema_v3",
+  "rubric_version": "v1.2.0",
+  "metric_version_mapping": {
+    "faithfulness": "v3",
+    "faithfulness_strict": "v3",
+    "answer_correctness": "v3",
+    "answer_relevancy": "v3",
+    "retrieval_metrics": "v1"
+  },
+  "judge_metrics": [
+    "faithfulness",
+    "answer_correctness",
+    "answer_relevancy"
+  ],
+  "derived_metrics": [
+    "faithfulness_strict"
+  ],
+  "faithfulness_strict": {
+    "source": "derived_from_faithfulness",
+    "prompt": null,
+    "role": "diagnostic",
+    "target": null
+  },
+  "prompts": {
+    "faithfulness.txt": "ff9a1b610d43e3cedbabf06352a9ace9443da9a7c65f3c76ee81b17aca9c63a9",
+    "answer_correctness.txt": "a50520de0122216c9238d23c110967c3bbe259586ef24db100ee874a4ce35e95",
+    "answer_relevancy.txt": "a5386070407381098bcc14fc8c67a8853f94ebaa91d188e473ef92237dc58d88"
+  },
+  "changes": {
+    "faithfulness": [
+      "只修 evidence 连续性规则：一条 evidence_ref 只能引用一个连续子串",
+      "禁止把两段不相邻原文拼成一条 quote；禁止跳过中间句/省略号/跨段拼接",
+      "需要两个片段时拆 claim，或只选能独立支持 claim 的最短连续片段",
+      "增加模式级连续性反例，不使用案例 ID",
+      "不改变 F/C/R 评分公式、目标 v1.0.2、invalid 契约"
+    ],
+    "answer_correctness": [
+      "与 v1.2.0 完全一致；Prompt SHA 不变"
+    ],
+    "answer_relevancy": [
+      "与 v1.2.0 完全一致；Prompt SHA 不变"
+    ]
+  },
+  "rubric_semantics": {
+    "rubric_version": "v1.2.0",
+    "prompt_contract_revision": "v1.2.1",
+    "target_revision": "v1.0.2",
+    "targets_recalculated": false,
+    "note": "只改 evidence 连续性 prompt 契约，不升级 rubric；报告必须同时写 version=v1.2.1 与 rubric_version=v1.2.0"
+  },
+  "activation_requirements": [
+    "人工审核 v1.2.1 Faithfulness evidence 连续性规则与 Q11 回归测试",
+    "人工审核 MANIFEST：version=v1.2.1、rubric_version=v1.2.0、schema v3、metric v3",
+    "确认 C/R Prompt SHA 与 v1.2.0 完全一致",
+    "另开 freeze record，人工批准后才允许 status=frozen",
+    "冻结后重新提交 10 条 Judge 申请；不得复用 v1.2.0 批准",
+    "默认 RAG_JUDGE_PROMPT_VERSION 仍为 v1.0.0；v1.2.1 只显式加载"
+  ],
+  "open_issues": [
+    "本版本为 design_draft，未冻结、未激活、未跑 Judge",
+    "Q11 非连续 quote 回归测试必须在 Service 契约层保持 invalid",
+    "Q11 目标 v1.0.2 仍为 0.6–0.9，未重算",
+    "C/R 语义不变，但报告仍需分别写 F/C/R Prompt SHA",
+    "40 条、M2/M3、v1.2.1 激活均未批准"
+  ],
+  "default_prompt_version": "v1.0.0",
+  "implementation_status": "design_draft_default_off",
+  "design_record": "docs/repair/30-m1d2-v1.2.1-prompt-patch-scope.md"
+}

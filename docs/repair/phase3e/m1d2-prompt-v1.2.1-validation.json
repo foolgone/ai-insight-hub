@@ -1,0 +1,117 @@
+{
+ "name": "m1d2-prompt-v1.2.1-validation",
+ "kind": "static_prompt_asset_validation_not_judge_run",
+ "generated_on": "2026-11-22",
+ "status": "pass",
+ "prompt_version": "v1.2.1",
+ "prompt_status": "design_draft",
+ "active": false,
+ "schema_version": "rag_judge_schema_v3",
+ "rubric_version": "v1.2.0",
+ "default_prompt_version": "v1.0.0",
+ "prompt_sha256": {
+  "faithfulness.txt": "ff9a1b610d43e3cedbabf06352a9ace9443da9a7c65f3c76ee81b17aca9c63a9",
+  "answer_correctness.txt": "a50520de0122216c9238d23c110967c3bbe259586ef24db100ee874a4ce35e95",
+  "answer_relevancy.txt": "a5386070407381098bcc14fc8c67a8853f94ebaa91d188e473ef92237dc58d88"
+ },
+ "base_prompt_sha256": {
+  "faithfulness.txt": "b637775869163fdd7bd2545ca9b79197c10193d2937c9bef4e61add72e934d61",
+  "answer_correctness.txt": "a50520de0122216c9238d23c110967c3bbe259586ef24db100ee874a4ce35e95",
+  "answer_relevancy.txt": "a5386070407381098bcc14fc8c67a8853f94ebaa91d188e473ef92237dc58d88"
+ },
+ "manifest_sha256": "fa375109d661e53f23a2f35f5cff20a3ea7314e80211975fc44a4d23aec026ed",
+ "fixture_sha256": "dc7be14b6026b579c15dea1a13d498b7479e14081aa17419ef2bfa525ae9be70",
+ "script_sha256": "ca8a17d1ac0e75ddfce2bc330b48981062a441db048a33121eef2302053a6ad3",
+ "checks": [
+  {
+   "check": "manifest_version",
+   "ok": true
+  },
+  {
+   "check": "manifest_status_design_draft",
+   "ok": true
+  },
+  {
+   "check": "manifest_active_false",
+   "ok": true
+  },
+  {
+   "check": "manifest_frozen_false",
+   "ok": true
+  },
+  {
+   "check": "manifest_schema_v3",
+   "ok": true
+  },
+  {
+   "check": "manifest_rubric_v120",
+   "ok": true
+  },
+  {
+   "check": "manifest_default_v100",
+   "ok": true
+  },
+  {
+   "check": "prompt_files_registered",
+   "ok": true
+  },
+  {
+   "check": "prompt_sha256",
+   "ok": true
+  },
+  {
+   "check": "faithfulness_changed_from_v120",
+   "ok": true
+  },
+  {
+   "check": "correctness_sha_unchanged",
+   "ok": true
+  },
+  {
+   "check": "relevancy_sha_unchanged",
+   "ok": true
+  },
+  {
+   "check": "continuity_rule",
+   "ok": true
+  },
+  {
+   "check": "continuity_example",
+   "ok": true
+  },
+  {
+   "check": "no_case_specific_ids",
+   "ok": true
+  },
+  {
+   "check": "strict_not_judge_metric",
+   "ok": true
+  },
+  {
+   "check": "strict_derived",
+   "ok": true
+  },
+  {
+   "check": "v121_schema_mapping",
+   "ok": true
+  },
+  {
+   "check": "fixture_sha256",
+   "ok": true
+  },
+  {
+   "check": "v1.2.0_faithfulness.txt_sha256",
+   "ok": true
+  },
+  {
+   "check": "v1.2.0_answer_correctness.txt_sha256",
+   "ok": true
+  },
+  {
+   "check": "v1.2.0_answer_relevancy.txt_sha256",
+   "ok": true
+  }
+ ],
+ "judge_run": false,
+ "runtime_activated": false
+}

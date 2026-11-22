@@ -7,10 +7,10 @@
 > 3. Agent 只能报告 `implemented` / `verified`，不能自行标 `accepted`；
 > 4. 未冻结的定义/目标，不得进入代码实现。
 >
-> 最后更新：2026-11-21
-> 当前阶段：**M1-D-2 v1.2.1 Prompt patch 设计与范围已准备，待审核；未改 Prompt、未跑 Judge**
-> 当前阻塞决策：**v1.2.1 evidence 连续性 patch 范围是否通过**
-> 当前不做：改 Prompt、重跑 10 条、跑 40 条、v1.2.0/v1.2.1 激活、M2/M3、生产 migration
+> 最后更新：2026-11-22
+> 当前阶段：**M1-D-2 v1.2.1 evidence-continuity patch 已实现/验证，待冻结审核；未跑 Judge**
+> 当前阻塞决策：**v1.2.1 是否冻结**
+> 当前不做：跑 Judge、跑 40、v1.2.0/v1.2.1 激活、M2/M3、生产 migration
 
 ---
 
@@ -19,25 +19,25 @@
 | 项 | 状态 |
 |---|---|
 | 项目阶段 | 核心研发向产品化过渡 |
-| 主线 | M1 评测可信度；Q11 证据违约后准备 v1.2.1 patch |
+| 主线 | M1 评测可信度；v1.2.1 evidence-continuity patch 待冻结 |
 | 并行 A | M2 只读工作台；API 审计完成，前端未开始 |
 | 并行 B | M4-A 生产约束；未开始 |
 | M3 优化闭环 | 未开始；等 M1 可信、M2 可用 |
-| 当前可写代码？ | **否**；先审 v1.2.1 patch 设计与变更范围 |
-| 当前可跑 Judge？ | **否**；无新批准 |
-| v1.2.0 / v1.2.1 | v1.2.0 `frozen`、未激活；v1.2.1 仅设计 |
-| 最近一次决策 | 2026-11-21 Q11 invalid 复核通过；批准准备 v1.2.1 patch 设计 |
-| 下一个交付 | 人工审核 `30-m1d2-v1.2.1-prompt-patch-scope.md` |
+| 当前可写代码？ | **否**；先审 v1.2.1 冻结 |
+| 当前可跑 Judge？ | **否**；10 条未批准 |
+| v1.2.0 / v1.2.1 | v1.2.0 `frozen`；v1.2.1 `design_draft`、`active=false` |
+| 最近一次决策 | 2026-11-22 v1.2.1 patch 实现/验证完成，待冻结 |
+| 下一个交付 | 人工审核 v1.2.1 freeze proposal |
 
 ### 现在只需要一个决定
 
-**只审 v1.2.1 patch 范围；不直接改 Prompt、不跑 Judge。**
+**v1.2.1 patch 已实现；是否冻结。**
 
 | 选项 | 含义 | 结果 |
 |---|---|---|
-| **通过范围** | 接受只修 evidence 连续性规则与 Q11 回归 | 进入 v1.2.1 design_draft 实现；仍需后续 freeze |
-| **改范围** | 规则/测试/版本映射需调整 | 留在设计阶段 |
-| **暂缓** | 不进入 patch | M1-D-1 保持 blocked |
+| **批准冻结** | 接受 F 连续性规则、C/R SHA 不变、rubric_version=v1.2.0 | 另开 freeze record；10 条 Judge 仍需重新申请 |
+| **退回** | Prompt 规则/测试/版本口径需改 | 留在 design_draft，不跑 Judge |
+| **暂缓** | 不冻结 | 保持 design_draft |
 
 ---
 
@@ -60,7 +60,7 @@
 | 里程碑 | 状态 | 已完成证据 | 当前阻塞/下一步 |
 |---|---|---|---|
 | **M0 评测基础设施** | `accepted`（冻结维护） | Dataset/Version/Item、RAG Adapter、Trace、检索指标、Judge、Run/Celery、持久化聚合、WeKnora 联调 | 只修缺陷/兼容，不再架构重构 |
-| **M1 评测可信度** | `in_progress` | M1-A 语义/Gold/target 已冻结；M1-B B 双指标草案（`19-…`）；M1-C C1–C4 已实现/验证；M1-D-0 Prompt `frozen`；M1-D-1 blocked at Q11；M1-D-2 v1.2.1 patch 设计待审 | v1.2.0 未激活；10/40 Judge 未通过；M1-E 未开始 |
+| **M1 评测可信度** | `in_progress` | M1-A 语义/Gold/target 已冻结；M1-B B 双指标草案（`19-…`）；M1-C C1–C4 已实现/验证；M1-D-0 Prompt `frozen`；M1-D-1 blocked at Q11；M1-D-2 v1.2.1 patch implemented/verified，待冻结 | v1.2.0/v1.2.1 未激活；10/40 Judge 未通过；M1-E 未开始 |
 | **M2 评测工作台** | `audit_complete` / 实现 `not_started` | API 审计完成：Run/详情/结果/失败/Trace 可用；前端 0 页面 | 等 M1-B 冻结后再决定是否写 P0 前端 |
 | **M3 RAG 优化闭环** | `not_started` | 无 | 依赖 M1 可信 + M2 可用 |
 | **M4 生产交付** | 基础已有 / 约束 `not_started` | 认证、加密、限流、Prometheus/Grafana/Sentry、备份/恢复演练 | M4-A：租户、保留期、审计、告警、成本、数据权利 |
@@ -72,7 +72,7 @@
 | M1-A 语义规范 + Gold + 目标 | `accepted` | 语义规范冻结 2026-11-18；final_labels SHA `f139623f…`；target v1.0.2 SHA `3ee15dfc…`（`freeze_draft_pending_human`，旧 v1.0.1 只读） |
 | M1-B Schema/Service 定稿 | `implemented`，**未 `accepted`** | P1-1 关闭；P1-2 证据契约已定；B 双指标冻结草案 `19-…` 待审核 |
 | M1-C 实现与测试 | `implemented` / `verified`，**未 `accepted`** | C1 Schema v3、C2 migration 022、C3 Service 双指标/invalid/聚合/retry、C4 静态回归已完成；10/40 Judge 未运行 |
-| M1-D 有限实验 | `in_progress`（M1-D-0 / M1-D-1 / M1-D-2） | M1-D-0 Prompt `frozen`；M1-D-1 blocked at Q11；M1-D-2 v1.2.1 patch 设计与范围待审 |
+| M1-D 有限实验 | `in_progress`（M1-D-0 / M1-D-1 / M1-D-2） | M1-D-0 Prompt `frozen`；M1-D-1 blocked at Q11；M1-D-2 v1.2.1 patch implemented/verified，待冻结 |
 | M1-E 质量验收 | `not_started` | 四组报告（HG/provisional/40 条/系统质量）+ 已知问题决定 + SHA 追溯 |
 
 ### 2.2 门禁视角
@@ -114,7 +114,10 @@
 | `docs/repair/phase3e/m1d1-ten-case-application.json` | `7378d368adf13b7d55e58904af200310fa20f47cf51ccc67967f13e7e437e2ad` | `static_application` | 机器可读 r3 申请；validation 50/50 pass |
 | `docs/repair/29-m1d1-judge-only-results.md` | raw `821bd7cc…`；summary `47f0979e…` | `stopped` / `blocked` | Q11 F invalid 后停止；3 attempted / 7 unprocessed |
 | `docs/repair/phase3e/m1d1-judge-only-results.json` | `821bd7ccbb5f842c34596f9f3b74f774b8e6318341a1d659f86c7ac473fe6472` | `raw_results` | 3 个 case 的原始 JudgeOutcome、token/cost、停止原因 |
-| `docs/repair/30-m1d2-v1.2.1-prompt-patch-scope.md` | design/scope | `design_scope_pending_review` | Q11 evidence 连续性规则、Q11 回归 fixture、版本/冻结计划；未改 Prompt |
+| `docs/repair/30-m1d2-v1.2.1-prompt-patch-scope.md` | design/scope | `design_record` | Q11 evidence 连续性规则、Q11 回归 fixture、版本/冻结计划；已按此实现 |
+| `backend/app/prompts/rag_judge/v1.2.1/` | F `ff9a1b61…` / C `a50520de…` / R `a5386070…`；MANIFEST `fa375109…` | `design_draft` / `active=false` | 只改 F 连续性；C/R SHA 不变；rubric_version=v1.2.0 |
+| `docs/repair/phase3e/m1d2-prompt-v1.2.1-validation.json` | `f3f5e375…` | `static_validation` 22/22 | v1.2.1 资产 SHA、C/R 继承、连续性规则、版本映射 |
+| `docs/repair/31-m1d2-v1.2.1-implementation.md` | implementation report | `implemented/verified`；未 frozen | Q11 bad/good tests、SHAs、冻结提案与 activation requirements |
 
 ### 3.2 决策时间线
 
@@ -136,6 +139,7 @@
 | 2026-11-21 | M1-D-1 10 条申请 r2 退回；补充 r3 | `pending_approval`；Production Service replay；未运行 |
 | 2026-11-21 | M1-D-1 r3 执行 3 个 case 后停在 Q11 F invalid | `stopped` / `blocked`；未 verified |
 | 2026-11-21 | Q11 invalid 复核通过；准备 v1.2.1 patch 设计与范围 | `design_scope_pending_review`；未改 Prompt |
+| 2026-11-22 | v1.2.1 evidence-continuity patch 实现/验证 | `design_draft` / `implemented/verified`；待冻结 |
 
 ---
 
@@ -260,16 +264,16 @@
 4. 输出 SHA、validation 与冻结提案；
 5. **不跑 Judge、不激活 v1.2.0**；冻结已完成，等 10 条 Judge 单独批准。
 6. M1-D-1 r3 Production Service replay 已执行 3 个 case，Q11 F invalid 后停止；结果见 `29-m1d1-judge-only-results.md`。
-7. M1-D-2 v1.2.1 Prompt patch 设计与范围已准备（`30-m1d2-v1.2.1-prompt-patch-scope.md`）；未改 Prompt。
+7. M1-D-2 v1.2.1 evidence-continuity patch 已实现/验证（`31-m1d2-v1.2.1-implementation.md`）；未 frozen、未激活。
 
 **后续（未批准）**：
 
-1. 人工审核 v1.2.1 evidence 连续性 patch 范围；通过后才进入 design_draft 实现；
+1. 人工审核 v1.2.1 freeze proposal；通过后另开 freeze record；
 2. v1.2.1 冻结后重新提交 10 条 Judge 申请；不得复用 v1.2.0 批准；
 3. 40 条分层报告（HG 13 / provisional 27 分开）；
-3. 6 条缺失 baseline 按方案 A 标 `baseline_delta: unavailable`，不跑 Judge 补齐；
-4. 四组报告 + 已知问题接受/修复/延期 + SHA 追溯；
-5. M1-E 验收。
+4. 6 条缺失 baseline 按方案 A 标 `baseline_delta: unavailable`，不跑 Judge 补齐；
+5. 四组报告 + 已知问题接受/修复/延期 + SHA 追溯；
+6. M1-E 验收。
 
 ### 5.4 并行线
 

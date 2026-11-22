@@ -1256,10 +1256,10 @@ alembic check   : No new upgrade operations detected
 - 调用/成本：9 次 Judge 调用；input 28,460 / output 2,245 tokens；CNY 0.089856，低于 ceiling CNY 1.00。
 - 状态：M1-D-1 `blocked`，未 verified；未激活 v1.2.0；M1-C/M1-D 未 accepted；下一步由人工复审 Q11 quote 契约问题。
 
-### M1-D-2 v1.2.1 Prompt patch 设计与范围（2026-11-21，design_scope_pending_review）
-- 文档：`docs/repair/30-m1d2-v1.2.1-prompt-patch-scope.md`；只准备设计与范围，未改 Prompt、未改代码、未跑 Judge。
-- 复核：Q11 C1 是连续文档；Judge 拼接两段不相邻句子，Service `quote_not_found` -> `invalid(contract_violation)`，strict 同步；判定正确，非 Service bug。
-- 范围：只改 v1.2.1 Faithfulness Prompt 的 evidence 连续性规则；C/R 继承 v1.2.0；Schema v3/Metric v3/r2/target 不变。
-- 计划：新增 v1.2.1 Prompt/MANIFEST/version；`JUDGE_V3_PROMPT_VERSIONS` 加 v1.2.1；新增 Q11 非连续 quote invalid / 连续 quote supported 回归测试。
-- 版本/冻结：v1.2.1 先 `design_draft`、`active=false`；人工审核后另开 freeze record；默认仍 v1.0.0。
-- 后续：冻结后重新提交 10 条 Judge 申请；40/M2/M3/v1.2.0 激活均不批准。
+### M1-D-2 v1.2.1 evidence-continuity patch（2026-11-22，implemented/verified，待冻结）
+- 设计：`docs/repair/30-m1d2-v1.2.1-prompt-patch-scope.md`；实现报告：`docs/repair/31-m1d2-v1.2.1-implementation.md`。
+- 资产：`backend/app/prompts/rag_judge/v1.2.1/`；F `ff9a1b61…`、C `a50520de…`、R `a5386070…`、MANIFEST `fa375109…`；status `design_draft`、active=false、schema v3、rubric_version=v1.2.0（A 方案）。
+- 变更：只加 evidence 连续性规则与模式级反例；C/R 与 v1.2.0 逐字一致、SHA 不变；`JUDGE_V3_PROMPT_VERSIONS` 加 v1.2.1；默认仍 v1.0.0。
+- Q11 回归：bad 拼接 quote -> `invalid(contract_violation)` / `quote_not_found`；good 精确 claim + 连续 quote -> `evaluated 1.0`。
+- 验证：定向测试通过；全量 `pytest -m "not prompt"` 1041 条通过；black/flake8/mypy/lint-imports 通过；静态校验 22/22 pass，validation SHA `f3f5e375…`。
+- 边界：未改 Service invalid 契约、r2、目标 v1.0.2、fixture、v1.2.0 Prompt；未跑 Judge、未激活、未跑 40；M1-D-1 保持 blocked，M1-C/M1-D 未 accepted。
