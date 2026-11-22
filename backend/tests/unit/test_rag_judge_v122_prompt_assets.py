@@ -33,13 +33,13 @@ def _sha256_text(text: str) -> str:
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
-def test_v122_manifest_is_design_draft_with_rubric_v120() -> None:
+def test_v122_manifest_is_frozen_with_rubric_v120() -> None:
     manifest = load_prompt_manifest(VERSION)
 
     assert manifest["version"] == VERSION
-    assert manifest["status"] == "design_draft"
+    assert manifest["status"] == "frozen"
     assert manifest["active"] is False
-    assert manifest["frozen"] is False
+    assert manifest["frozen"] is True
     assert manifest["schema_version"] == "rag_judge_schema_v3"
     assert manifest["rubric_version"] == "v1.2.0"
     assert manifest["default_prompt_version"] == "v1.0.0"
@@ -88,7 +88,7 @@ def test_v122_is_explicit_and_default_stays_v100(monkeypatch: pytest.MonkeyPatch
     assert agent.schema_version == JUDGE_SCHEMA_V3
     assert agent.metric_version == "v3"
     assert agent.rubric_version == "v1.2.0"
-    assert agent.prompt_status == "design_draft"
+    assert agent.prompt_status == "frozen"
     assert agent.prompt_active is False
 
 
@@ -226,5 +226,5 @@ def test_v122_q21_insufficient_service_scoring_only() -> None:
 def test_v122_assets_exist_but_are_inactive() -> None:
     assert (PROMPT_DIR / VERSION / "faithfulness.txt").is_file()
     manifest = load_prompt_manifest(VERSION)
-    assert manifest["status"] == "design_draft"
+    assert manifest["status"] == "frozen"
     assert manifest["active"] is False

@@ -4,7 +4,7 @@
  "generated_on": "2026-11-22",
  "status": "pass",
  "prompt_version": "v1.2.2",
- "prompt_status": "design_draft",
+ "prompt_status": "frozen",
  "active": false,
  "schema_version": "rag_judge_schema_v3",
  "rubric_version": "v1.2.0",
@@ -20,15 +20,15 @@
   "answer_correctness.txt": "a50520de0122216c9238d23c110967c3bbe259586ef24db100ee874a4ce35e95",
   "answer_relevancy.txt": "a5386070407381098bcc14fc8c67a8853f94ebaa91d188e473ef92237dc58d88"
  },
- "manifest_sha256": "2456eeff1dcc5d8c76e61929f9795e0488f0d2e9cd21762ab288c670cb44665b",
- "script_sha256": "f62d2137512495d73e142d08ebf6083247b3a16f07fe5ea13cb034a9a8cc6e30",
+ "manifest_sha256": "81dd3a3219f6f2437b83264e1fd28d74db05c243e3335b9ce321bac9dbb22f5d",
+ "script_sha256": "90b80a2d25b5ed996f8271694c3052b313e8b13f0f7066595e7b4a989f183011",
  "checks": [
   {
    "check": "manifest_version",
    "ok": true
   },
   {
-   "check": "manifest_status_design_draft",
+   "check": "manifest_status_frozen",
    "ok": true
   },
   {
@@ -36,7 +36,7 @@
    "ok": true
   },
   {
-   "check": "manifest_frozen_false",
+   "check": "manifest_frozen_true",
    "ok": true
   },
   {

@@ -1276,11 +1276,11 @@ alembic check   : No new upgrade operations detected
 - Q11：bad 非连续 quote -> invalid+quote_not_found；good 连续 quote -> evaluated 1.0，Q11 F=0.8 目标通过。
 - 边界：M1-D-3 blocked，未 verified；M1-D-1 保持 blocked；M1-C/M1-D 未 accepted；未激活 v1.2.1。
 
-### M1-D-4 v1.2.2 Prompt patch（2026-11-22，implemented/verified，待冻结）
-- 设计：`docs/repair/35-m1d4-v1.2.2-prompt-patch-scope.md`；实现报告：`docs/repair/36-m1d4-v1.2.2-implementation.md`。
-- 资产：`backend/app/prompts/rag_judge/v1.2.2/`；F `ed21979a…`、C `a50520de…`、R `a5386070…`、MANIFEST `2456eeff…`；status `design_draft`、active=false、schema v3、rubric_version=v1.2.0。
+### M1-D-4 v1.2.2 Prompt patch（2026-11-22，frozen / active=false）
+- 设计：`docs/repair/35-m1d4-v1.2.2-prompt-patch-scope.md`；实现报告：`docs/repair/36-m1d4-v1.2.2-implementation.md`；冻结记录：`docs/repair/37-m1d4-v1.2.2-freeze-record.md`。
+- 资产：`backend/app/prompts/rag_judge/v1.2.2/`；F `ed21979a…`、C `a50520de…`、R `a5386070…`；冻结前 MANIFEST `2456eeff…`、冻结后 `81dd3a32…`；status `frozen`、active=false、schema v3、rubric_version=v1.2.0、默认 v1.0.0。
 - 规则：absence/mixed sentence；evidence 必须直接支持 claim；C/R 与 v1.2.1 逐字一致、SHA 不变；`JUDGE_V3_PROMPT_VERSIONS` 加 v1.2.2。
-- Repair 版本隔离：v1.2.0/v1.2.1 repair SHA `e391d9fa…` 不变；v1.2.2 使用含 non_factual absence 的 `7541fe3f…` 示例；`repair_example_version=v1.2.2`。
-- 测试：v1.2.2 assets/repair 隔离/Q23 bad/good/Q21 Service 计分/Q11 回归；全量 pytest 1050 条通过；black/flake8/mypy/lint-imports 通过；静态校验 23/23 pass，validation SHA `9d3aae11…`。
-- 边界：未改 Service invalid 契约、r2、目标 v1.0.2、fixture、v1.2.0/v1.2.1 Prompt；未跑 Judge、未激活、未跑 40；单案例/10/40 未批准。
-- 后续：冻结 v1.2.2 后先做 Q23/Q21/Q11 单案例诊断，不直接跑 10 条；10/40 未批准。
+- Repair 版本隔离：v1.2.0/v1.2.1 repair SHA `e391d9fa…` 不变；v1.2.2 使用含 non_factual absence 的 `7541fe3f…` 示例；`repair_example_version=v1.2.2`、`agent_commit=2ef9200`。
+- 测试：v1.2.2 assets/repair 隔离/Q23 bad/good/Q21 Service 计分/Q11 回归；全量 pytest 1050 条通过；black/flake8/mypy/lint-imports 通过；静态校验 23/23 pass，冻结前 validation SHA `9d3aae11…`、冻结后 `fadef856…`。
+- 边界：未改 Service invalid 契约、r2、目标 v1.0.2、fixture、v1.2.0/v1.2.1 Prompt、Agent repair 代码；未跑 Judge、未激活、未跑 40；单案例/10/40 未批准。
+- 后续：先单独申请 Q23/Q21/Q11 单案例诊断，不直接跑 10 条；单案例通过后才申请 10 条，且不得复用 v1.2.1 批准。

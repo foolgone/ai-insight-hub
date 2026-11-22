@@ -1,11 +1,11 @@
 {
   "version": "v1.2.2",
-  "status": "design_draft",
+  "status": "frozen",
   "active": false,
-  "frozen": false,
+  "frozen": true,
   "runtime_active": false,
   "date": "2026-11-22",
-  "note": "M1-D-4：v1.2.2 只修 absence/mixed sentence 与 evidence 直接支持 claim 两条通用规则。rubric_version 保持 v1.2.0；target v1.0.2 未重算；active=false，默认仍 v1.0.0，未跑 Judge。",
+  "note": "M1-D-4：v1.2.2 已完成 metadata-only freeze。absence/mixed sentence 与 evidence 直接支持 patch；rubric_version 保持 v1.2.0；target v1.0.2 未重算；active=false，默认仍 v1.0.0，未跑 Judge。",
   "schema_version": "rag_judge_schema_v3",
   "rubric_version": "v1.2.0",
   "metric_version_mapping": {
