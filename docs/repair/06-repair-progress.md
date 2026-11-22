@@ -1284,3 +1284,12 @@ alembic check   : No new upgrade operations detected
 - 测试：v1.2.2 assets/repair 隔离/Q23 bad/good/Q21 Service 计分/Q11 回归；全量 pytest 1050 条通过；black/flake8/mypy/lint-imports 通过；静态校验 23/23 pass，冻结前 validation SHA `9d3aae11…`、冻结后 `fadef856…`。
 - 边界：未改 Service invalid 契约、r2、目标 v1.0.2、fixture、v1.2.0/v1.2.1 Prompt、Agent repair 代码；未跑 Judge、未激活、未跑 40；单案例/10/40 未批准。
 - 后续：先单独申请 Q23/Q21/Q11 单案例诊断，不直接跑 10 条；单案例通过后才申请 10 条，且不得复用 v1.2.1 批准。
+
+### M1-D-4 v1.2.2 单案例诊断申请（2026-11-22，pending_approval，未运行）
+- 文档：`docs/repair/38-m1d4-v1.2.2-single-case-diagnostic-application.md`；机器可读：`docs/repair/phase3e/m1d4-single-case-diagnostic-application.json`。
+- 范围：Q23/Q21/Q11 各 1 次 × 3 指标；主调用 9、repair 3、retry 2、最大 14；预计 CNY 0.10、ceiling 0.30。
+- 资产：v1.2.2 frozen；F `ed21979a…`、C `a50520de…`、R `a5386070…`、MANIFEST `81dd3a32…`、validation `fadef856…`；fixture `dc7be14b…`、target `3ee15dfc…`、labels `f139623f…`；agent_commit `2ef9200`、repair SHA `7541fe3f…`。
+- 验收：Q23 契约合规（absence=non_factual/null/[]；不得 factual+absence；C/R 真实 evaluated）；Q21 语义支持（不得运费/换货 quote 硬撑；目标单独报；F=1.0 失败）；Q11 回归（连续 quote；F/C/R 目标区间）。
+- 停止：invalid、一次重试后 failed、Q23 absence 复发、Q21 语义失败或 F=1.0、Q11 quote/目标失败、指纹漂移、超 14 calls 或 CNY 0.30、unprocessed。
+- 边界：judge_trace(session=None)；不建 Run、不写 DB、不调 WeKnora、不激活 v1.2.2、默认仍 v1.0.0；单案例不计入 10 条样本。
+- validation：43/43 pass；application SHA `a38e6477…`、validation SHA `829dc4c4…`；未跑 Judge，等待批准。
