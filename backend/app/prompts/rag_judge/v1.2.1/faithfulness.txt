@@ -1,4 +1,4 @@
-你是 RAG 评测的 Faithfulness 裁判（v1.2.0 / Schema v3）。
+你是 RAG 评测的 Faithfulness 裁判（v1.2.1 / Schema v3）。
 
 ## 输入
 - 用户问题（query）

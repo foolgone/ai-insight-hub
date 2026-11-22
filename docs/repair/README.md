@@ -115,8 +115,8 @@
 | `docs/repair/29-m1d1-judge-only-results.md` | raw `821bd7cc…`；summary `47f0979e…` | `stopped` / `blocked` | Q11 F invalid 后停止；3 attempted / 7 unprocessed |
 | `docs/repair/phase3e/m1d1-judge-only-results.json` | `821bd7ccbb5f842c34596f9f3b74f774b8e6318341a1d659f86c7ac473fe6472` | `raw_results` | 3 个 case 的原始 JudgeOutcome、token/cost、停止原因 |
 | `docs/repair/30-m1d2-v1.2.1-prompt-patch-scope.md` | design/scope | `design_record` | Q11 evidence 连续性规则、Q11 回归 fixture、版本/冻结计划；已按此实现 |
-| `backend/app/prompts/rag_judge/v1.2.1/` | F `ff9a1b61…` / C `a50520de…` / R `a5386070…`；MANIFEST `fa375109…` | `design_draft` / `active=false` | 只改 F 连续性；C/R SHA 不变；rubric_version=v1.2.0 |
-| `docs/repair/phase3e/m1d2-prompt-v1.2.1-validation.json` | `f3f5e375…` | `static_validation` 22/22 | v1.2.1 资产 SHA、C/R 继承、连续性规则、版本映射 |
+| `backend/app/prompts/rag_judge/v1.2.1/` | F `9efdc64d…` / C `a50520de…` / R `a5386070…`；MANIFEST `4fc1bb9c…` | `design_draft` / `active=false` | 只改 F 连续性；C/R SHA 不变；rubric_version=v1.2.0 |
+| `docs/repair/phase3e/m1d2-prompt-v1.2.1-validation.json` | `4dbbafda…` | `static_validation` 22/22 | v1.2.1 资产 SHA、C/R 继承、连续性规则、版本映射 |
 | `docs/repair/31-m1d2-v1.2.1-implementation.md` | implementation report | `implemented/verified`；未 frozen | Q11 bad/good tests、SHAs、冻结提案与 activation requirements |
 
 ### 3.2 决策时间线

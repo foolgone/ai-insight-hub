@@ -1258,8 +1258,8 @@ alembic check   : No new upgrade operations detected
 
 ### M1-D-2 v1.2.1 evidence-continuity patch（2026-11-22，implemented/verified，待冻结）
 - 设计：`docs/repair/30-m1d2-v1.2.1-prompt-patch-scope.md`；实现报告：`docs/repair/31-m1d2-v1.2.1-implementation.md`。
-- 资产：`backend/app/prompts/rag_judge/v1.2.1/`；F `ff9a1b61…`、C `a50520de…`、R `a5386070…`、MANIFEST `fa375109…`；status `design_draft`、active=false、schema v3、rubric_version=v1.2.0（A 方案）。
+- 资产：`backend/app/prompts/rag_judge/v1.2.1/`；F `9efdc64d…`、C `a50520de…`、R `a5386070…`、MANIFEST `4fc1bb9c…`；status `design_draft`、active=false、schema v3、rubric_version=v1.2.0（A 方案）。
 - 变更：只加 evidence 连续性规则与模式级反例；C/R 与 v1.2.0 逐字一致、SHA 不变；`JUDGE_V3_PROMPT_VERSIONS` 加 v1.2.1；默认仍 v1.0.0。
 - Q11 回归：bad 拼接 quote -> `invalid(contract_violation)` / `quote_not_found`；good 精确 claim + 连续 quote -> `evaluated 1.0`。
-- 验证：定向测试通过；全量 `pytest -m "not prompt"` 1041 条通过；black/flake8/mypy/lint-imports 通过；静态校验 22/22 pass，validation SHA `f3f5e375…`。
+- 验证：定向测试通过；全量 `pytest -m "not prompt"` 1041 条通过；black/flake8/mypy/lint-imports 通过；静态校验 22/22 pass，validation SHA `4dbbafda…`。
 - 边界：未改 Service invalid 契约、r2、目标 v1.0.2、fixture、v1.2.0 Prompt；未跑 Judge、未激活、未跑 40；M1-D-1 保持 blocked，M1-C/M1-D 未 accepted。

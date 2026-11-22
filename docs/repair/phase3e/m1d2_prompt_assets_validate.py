@@ -17,7 +17,7 @@ OUT_SHA = Path(__file__).resolve().parent / "m1d2-prompt-v1.2.1-validation.sha25
 
 PROMPT_FILES = ("faithfulness.txt", "answer_correctness.txt", "answer_relevancy.txt")
 EXPECTED_SHA = {
-    "faithfulness.txt": "ff9a1b610d43e3cedbabf06352a9ace9443da9a7c65f3c76ee81b17aca9c63a9",
+    "faithfulness.txt": "9efdc64df1eebafa727bc0946a03192c2d9e9907bd7a3170f867f19774211068",
     "answer_correctness.txt": "a50520de0122216c9238d23c110967c3bbe259586ef24db100ee874a4ce35e95",
     "answer_relevancy.txt": "a5386070407381098bcc14fc8c67a8853f94ebaa91d188e473ef92237dc58d88",
 }
