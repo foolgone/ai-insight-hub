@@ -8,8 +8,8 @@
 > 4. 未冻结的定义/目标，不得进入代码实现。
 >
 > 最后更新：2026-11-22
-> 当前阶段：**M1-D-4 v1.2.2 Prompt patch 设计与范围已准备，待审核；未改 Prompt、未跑 Judge**
-> 当前阻塞决策：**v1.2.2 absence / evidence-directness patch 范围是否通过**
+> 当前阶段：**M1-D-4 v1.2.2 Prompt patch 设计 r2 已修订（repair 版本隔离 / Q21 单案例验收），待审核；未改 Prompt、未跑 Judge**
+> 当前阻塞决策：**v1.2.2 r2 patch 范围是否通过**
 > 当前不做：改 Prompt、重跑 10 条、跑 40、v1.2.x 激活、M2/M3、生产 migration
 
 ---
@@ -26,17 +26,17 @@
 | 当前可写代码？ | **否**；先审 v1.2.2 patch 设计与范围 |
 | 当前可跑 Judge？ | **否**；无新批准 |
 | v1.2.1 / v1.2.2 | v1.2.1 `frozen`；v1.2.2 仅设计 |
-| 最近一次决策 | 2026-11-22 Q23 invalid 确认；批准准备 v1.2.2 设计 |
-| 下一个交付 | 人工审核 `35-m1d4-v1.2.2-prompt-patch-scope.md` |
+| 最近一次决策 | 2026-11-22 Q23 invalid 确认；v1.2.2 设计 r2 补 P1 |
+| 下一个交付 | 人工审核 v1.2.2 r2 范围 |
 
 ### 现在只需要一个决定
 
-**只审 v1.2.2 patch 范围；不直接改 Prompt、不跑 Judge。**
+**只审 v1.2.2 r2 patch 范围；不直接改 Prompt、不跑 Judge。**
 
 | 选项 | 含义 | 结果 |
 |---|---|---|
-| **通过范围** | 接受 absence/mixed sentence + evidence 直接支持两条规则 | 进入 v1.2.2 design_draft 实现 |
-| **改范围** | 规则/测试/repair example 需调整 | 留在设计阶段 |
+| **通过 r2 范围** | 接受 absence/直接支持规则 + repair 版本隔离 + Q21 单案例验收 | 进入 v1.2.2 design_draft 实现 |
+| **改范围** | 规则/测试/repair 隔离需调整 | 留在设计阶段 |
 | **暂缓** | 不进入 patch | M1-D-3 保持 blocked |
 
 ---
@@ -123,7 +123,7 @@
 | `docs/repair/phase3e/m1d3-ten-case-application.json` | `7077477ef6108dcf7996b5ce17b2c492752cbbc85644856d91abdb3b5f45da28` | `static_application` | 机器可读 M1-D-3 申请；validation 31/31 pass |
 | `docs/repair/34-m1d3-judge-only-results.md` | raw `96ff0d9b…`；summary `5e4d38c3…` | `stopped` / `blocked` | 6 attempted / 4 unprocessed；Q23 F invalid 后停止 |
 | `docs/repair/phase3e/m1d3-judge-only-results.json` | `96ff0d9b03add2365f5a74219402deb59a3015f7c6adc1f174cb039cdb34c526` | `raw_results` | 6 个 case 的原始 JudgeOutcome、token/cost、停止原因 |
-| `docs/repair/35-m1d4-v1.2.2-prompt-patch-scope.md` | design/scope | `design_scope_pending_review` | Q23 absence / Q21 evidence directness 规则、repair example、测试与冻结计划；未改 Prompt |
+| `docs/repair/35-m1d4-v1.2.2-prompt-patch-scope.md` | design/scope r2 | `design_scope_revised_pending_review` | Q23 absence / Q21 evidence directness、repair 版本隔离、Q21 单案例验收；未改 Prompt |
 
 ### 3.2 决策时间线
 
