@@ -1256,10 +1256,11 @@ alembic check   : No new upgrade operations detected
 - 调用/成本：9 次 Judge 调用；input 28,460 / output 2,245 tokens；CNY 0.089856，低于 ceiling CNY 1.00。
 - 状态：M1-D-1 `blocked`，未 verified；未激活 v1.2.0；M1-C/M1-D 未 accepted；下一步由人工复审 Q11 quote 契约问题。
 
-### M1-D-2 v1.2.1 evidence-continuity patch（2026-11-22，implemented/verified，待冻结）
-- 设计：`docs/repair/30-m1d2-v1.2.1-prompt-patch-scope.md`；实现报告：`docs/repair/31-m1d2-v1.2.1-implementation.md`。
-- 资产：`backend/app/prompts/rag_judge/v1.2.1/`；F `9efdc64d…`、C `a50520de…`、R `a5386070…`、MANIFEST `4fc1bb9c…`；status `design_draft`、active=false、schema v3、rubric_version=v1.2.0（A 方案）。
+### M1-D-2 v1.2.1 evidence-continuity patch（2026-11-22，frozen，未激活）
+- 设计：`docs/repair/30-m1d2-v1.2.1-prompt-patch-scope.md`；实现报告：`docs/repair/31-m1d2-v1.2.1-implementation.md`；freeze record：`docs/repair/32-m1d2-v1.2.1-freeze-record.md`。
+- 资产：`backend/app/prompts/rag_judge/v1.2.1/`；F `9efdc64d…`、C `a50520de…`、R `a5386070…`、MANIFEST `8bdd673c…`；status `frozen`、active=false、schema v3、rubric_version=v1.2.0（A 方案）。
 - 变更：只加 evidence 连续性规则与模式级反例；C/R 与 v1.2.0 逐字一致、SHA 不变；`JUDGE_V3_PROMPT_VERSIONS` 加 v1.2.1；默认仍 v1.0.0。
 - Q11 回归：bad 拼接 quote -> `invalid(contract_violation)` / `quote_not_found`；good 精确 claim + 连续 quote -> `evaluated 1.0`。
-- 验证：定向测试通过；全量 `pytest -m "not prompt"` 1041 条通过；black/flake8/mypy/lint-imports 通过；静态校验 22/22 pass，validation SHA `4dbbafda…`。
+- 验证：定向测试通过；全量 `pytest -m "not prompt"` 1041 条通过；black/flake8/mypy/lint-imports 通过；静态校验 22/22 pass，validation SHA `33890eed…`。
+- 冻结：`status=frozen`、`frozen=true`、`active=false`、`runtime_active=false`、默认 `v1.0.0`；旧 MANIFEST `4fc1bb9c…` -> 新 `8bdd673c…`；旧 validation `4dbbafda…` -> 新 `33890eed…`。
 - 边界：未改 Service invalid 契约、r2、目标 v1.0.2、fixture、v1.2.0 Prompt；未跑 Judge、未激活、未跑 40；M1-D-1 保持 blocked，M1-C/M1-D 未 accepted。

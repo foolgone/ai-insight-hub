@@ -1,11 +1,11 @@
 {
   "version": "v1.2.1",
-  "status": "design_draft",
+  "status": "frozen",
   "active": false,
-  "frozen": false,
+  "frozen": true,
   "runtime_active": false,
   "date": "2026-11-22",
-  "note": "M1-D-2：v1.2.1 是 Faithfulness evidence 连续性 prompt-contract patch。rubric_version 保持 v1.2.0，不声称 rubric 变更；目标仍为 v1.0.2，未重算；active=false，默认仍 v1.0.0，未跑 Judge。",
+  "note": "M1-D-2：v1.2.1 已完成 metadata-only freeze。Faithfulness evidence 连续性 prompt-contract patch；rubric_version 保持 v1.2.0，不声称 rubric 变更；目标仍为 v1.0.2，未重算；active=false，默认仍 v1.0.0，未跑 Judge。",
   "schema_version": "rag_judge_schema_v3",
   "rubric_version": "v1.2.0",
   "metric_version_mapping": {

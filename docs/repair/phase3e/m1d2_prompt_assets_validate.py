@@ -72,9 +72,9 @@ def main() -> None:
     faithfulness = prompts["faithfulness.txt"]
     checks: list[dict[str, Any]] = [
         {"check": "manifest_version", "ok": manifest.get("version") == VERSION},
-        {"check": "manifest_status_design_draft", "ok": manifest.get("status") == "design_draft"},
+        {"check": "manifest_status_frozen", "ok": manifest.get("status") == "frozen"},
         {"check": "manifest_active_false", "ok": manifest.get("active") is False},
-        {"check": "manifest_frozen_false", "ok": manifest.get("frozen") is False},
+        {"check": "manifest_frozen_true", "ok": manifest.get("frozen") is True},
         {
             "check": "manifest_schema_v3",
             "ok": manifest.get("schema_version") == "rag_judge_schema_v3",
@@ -156,7 +156,7 @@ def main() -> None:
     lines = [
         "# M1-D-2 v1.2.1 Prompt 资产校验（非 Judge 运行）",
         "",
-        "> 状态：`design_draft` / `active=false`；未冻结、未激活、未跑 Judge。",
+        "> 状态：`frozen` / `active=false`；metadata-only 冻结，未激活、未跑 Judge。",
         f"> version：`{VERSION}`；rubric_version：`{manifest.get('rubric_version')}`（A 方案）",
         f"> Schema / Metric：`{manifest.get('schema_version')}` / `v3`",
         f"> MANIFEST SHA256：`{manifest_sha}`",

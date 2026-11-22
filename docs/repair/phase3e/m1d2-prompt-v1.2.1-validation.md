@@ -1,10 +1,10 @@
 # M1-D-2 v1.2.1 Prompt 资产校验（非 Judge 运行）
 
-> 状态：`design_draft` / `active=false`；未冻结、未激活、未跑 Judge。
+> 状态：`frozen` / `active=false`；metadata-only 冻结，未激活、未跑 Judge。
 > version：`v1.2.1`；rubric_version：`v1.2.0`（A 方案）
 > Schema / Metric：`rag_judge_schema_v3` / `v3`
-> MANIFEST SHA256：`4fc1bb9cdfd95aaff8890a4f5b0699f635e8317e8e9c5d4dfc379ade45d6fad7`
-> 校验输出 SHA256：`4dbbafda8f0873f33a67e042a3ec076af497650c41d90bc960c1d6ef2dcc3ed9`
+> MANIFEST SHA256：`8bdd673cd44ed772dfc1630280e571d4cdd8ed786066eb72eb553a9be8b0b278`
+> 校验输出 SHA256：`33890eed752b53692b62118d9d4b887f16e7f0cd6ca1f45295b93fad08358d97`
 
 ## Prompt SHA256
 
