@@ -1,11 +1,11 @@
 {
   "version": "v1.2.3",
-  "status": "design_draft",
+  "status": "frozen",
   "active": false,
-  "frozen": false,
+  "frozen": true,
   "runtime_active": false,
   "date": "2026-11-22",
-  "note": "M1-D-5：v1.2.3 在 v1.2.2 基础上增加 Agent 侧 quote 预校验 + 定向 repair；F/C/R 的 few-shot 已去案例化以消除 gate case 泄漏。rubric_version 保持 v1.2.0；target v1.0.2 未重算；active=false，默认仍 v1.0.0，未跑 Judge。",
+  "note": "M1-D-5：v1.2.3 已完成 metadata-only freeze。Agent 侧 quote 预校验 + 定向 repair；F/C/R few-shot 已去案例化，泄漏审计 findings=0；rubric_version 保持 v1.2.0；target v1.0.2 未重算；active=false，默认仍 v1.0.0，未跑 Judge。",
   "schema_version": "rag_judge_schema_v3",
   "rubric_version": "v1.2.0",
   "metric_version_mapping": {

@@ -35,13 +35,13 @@ def _sha256_text(text: str) -> str:
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
-def test_v123_manifest_is_design_draft() -> None:
+def test_v123_manifest_is_frozen() -> None:
     manifest = load_prompt_manifest(VERSION)
 
     assert manifest["version"] == VERSION
-    assert manifest["status"] == "design_draft"
+    assert manifest["status"] == "frozen"
     assert manifest["active"] is False
-    assert manifest["frozen"] is False
+    assert manifest["frozen"] is True
     assert manifest["runtime_active"] is False
     assert manifest["schema_version"] == "rag_judge_schema_v3"
     assert manifest["rubric_version"] == "v1.2.0"
@@ -84,7 +84,7 @@ def test_v123_default_stays_v100(monkeypatch: pytest.MonkeyPatch) -> None:
     assert agent.prompt_version == VERSION
     assert agent.schema_version == JUDGE_SCHEMA_V3
     assert agent.rubric_version == "v1.2.0"
-    assert agent.prompt_status == "design_draft"
+    assert agent.prompt_status == "frozen"
     assert agent.prompt_active is False
 
 

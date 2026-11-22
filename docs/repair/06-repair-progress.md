@@ -1313,13 +1313,13 @@ alembic check   : No new upgrade operations detected
 - 版本/预算：version v1.2.3、rubric v1.2.0、schema/metric v3、target v1.0.2、default v1.0.0；单案例 9+3+2=14 / CNY 0.30；10 条 30+10+3=43 / CNY 1.00。
 - 门禁：本轮只批设计；实现、freeze、单案例 Q23/Q21/Q11、10、40 均需另行批准；未激活 v1.2.3。
 
-### M1-D-5 v1.2.3 合同修复实现（2026-11-22，design_draft / implemented / verified，待 freeze 重审）
-- 文档：`docs/repair/41-m1d5-v1.2.3-implementation.md`；设计 r2 审核 `approve_with_changes`；freeze 曾因 Prompt 泄漏退回。
-- 资产：`backend/app/prompts/rag_judge/v1.2.3/`；F `52f1b3cf…`、C `a5f9e5b2…`、R `f3efe431…`、MANIFEST `b1194bcb…`；status `design_draft`、active=false、schema v3、rubric v1.2.0、默认 v1.0.0。
+### M1-D-5 v1.2.3 合同修复实现（2026-11-22，frozen / implemented / verified）
+- 文档：`docs/repair/41-m1d5-v1.2.3-implementation.md`；冻结记录：`docs/repair/42-m1d5-v1.2.3-freeze-record.md`；设计 r2 审核 `approve_with_changes`。
+- 资产：`backend/app/prompts/rag_judge/v1.2.3/`；F `52f1b3cf…`、C `a5f9e5b2…`、R `f3efe431…`、冻结后 MANIFEST `7856b74e…`；status `frozen`、active=false、frozen=true、schema v3、rubric v1.2.0、默认 v1.0.0。
 - 共享校验：新增 `app/schemas/agents/rag_judge_evidence.py`；Service `_v3_evidence_refs` 改用 `check_quote`；v2 路径未改；错误码/顺序/invalid 契约保持。
 - Agent：v1.2.3 + faithfulness 在 `_validate_parsed` 用 `_active_input.contexts` 预校验；失败抛 `QuoteContractError(ValueError)`；复用 `parse_with_repair` 1 次 repair；repair example 含 factual + absence；旧 repair SHA 不变。
 - 报告：`agent_contract` 覆盖成功/repair 成功/repair 失败/无 repair；invalid outcome 也带 final_errors；大小上限；`judge_config` 仅 v1.2.3 加 contract 字段。
 - 泄漏审计：`m1d5_prompt_leakage_audit.py` 对比 10 case 的 answer/gold/claim/evidence；首轮 113 findings（F 69/C 43/R 1），去案例化后 **0 findings**；F/C/R 的 few-shot 全部改为合成域；C/R 规则语义未改但 SHA 变化。
 - Golden：Q23 真实 raw output 仍 3× quote_not_found，claim_count=10/ supported=3/insufficient=3/non_factual=4，错误顺序 cl1/cl2/cl3。
-- 测试：全量 pytest 1083 条通过；black/flake8/mypy/lint-imports 通过；静态校验 26/26 pass，validation SHA `c14c92ba…`；quote validator SHA `153ab4a6…`；audit SHA `d21cc41b…`。
-- 边界：未 frozen、未激活、未跑 Judge/10/40；未建 Run、未写 DB、未调 WeKnora；M1-D-4 blocked，M1-C/M1-D 未 accepted。
+- 测试：全量 pytest 1083 条通过；black/flake8/mypy/lint-imports 通过；静态校验 26/26 pass，validation SHA `8e790aac…`；quote validator SHA `153ab4a6…`；audit SHA `d21cc41b…`。
+- 边界：已 frozen，未激活、未跑 Judge/10/40；未建 Run、未写 DB、未调 WeKnora；M1-D-4 blocked，M1-C/M1-D 未 accepted。

@@ -1,12 +1,12 @@
 # M1-D-5 v1.2.3 Prompt 与合同修复静态校验（非 Judge 运行）
 
-> 状态：`design_draft` / `active=false`；未冻结、未激活、未跑 Judge。
+> 状态：`frozen` / `active=false`；metadata-only 冻结，未激活、未跑 Judge。
 > version：`v1.2.3`；rubric_version：`v1.2.0`
 > Schema / Metric：`rag_judge_schema_v3` / `v3`
-> MANIFEST SHA256：`b1194bcbe87da6054c9982423b8469ccb74b324c8c7b9ab13890585fb1200c98`
+> MANIFEST SHA256：`7856b74e588fc21ac00aee8340bc2294a090c0fd3e373de3079e3af41e7c4094`
 > quote validator SHA256：`153ab4a6f203ca0398133a2cc2ca6fda834f7670afa90651c66cfa44b92c722a`
 > leakage audit：findings=0，non_whitelisted=0
-> 校验输出 SHA256：`c14c92ba706ade5e54ba1ec859b7fb25652013f5195cbf569fcad335fcebb541`
+> 校验输出 SHA256：`8e790aacafccc04cd5b079c249c0720a3f0aa27d5a32f65d8f00b19c26908611`
 
 ## Prompt SHA256
 
