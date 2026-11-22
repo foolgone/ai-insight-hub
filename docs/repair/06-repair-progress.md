@@ -1264,3 +1264,11 @@ alembic check   : No new upgrade operations detected
 - 验证：定向测试通过；全量 `pytest -m "not prompt"` 1041 条通过；black/flake8/mypy/lint-imports 通过；静态校验 22/22 pass，validation SHA `33890eed…`。
 - 冻结：`status=frozen`、`frozen=true`、`active=false`、`runtime_active=false`、默认 `v1.0.0`；旧 MANIFEST `4fc1bb9c…` -> 新 `8bdd673c…`；旧 validation `4dbbafda…` -> 新 `33890eed…`。
 - 边界：未改 Service invalid 契约、r2、目标 v1.0.2、fixture、v1.2.0 Prompt；未跑 Judge、未激活、未跑 40；M1-D-1 保持 blocked，M1-C/M1-D 未 accepted。
+
+### M1-D-3 v1.2.1 10 条 Judge 申请（2026-11-22，pending_approval，未运行）
+- 申请：`docs/repair/33-m1d3-ten-case-judge-application.md`；JSON `docs/repair/phase3e/m1d3-ten-case-application.json`，SHA `7077477e…`；validation `1f2fdb3a…`，31/31 pass。
+- 冻结资产：prompt_version v1.2.1；F `9efdc64d…`、C `a50520de…`、R `a5386070…`、MANIFEST `8bdd673c…`；rubric_version v1.2.0；schema v3/metric v3；target v1.0.2。
+- 执行：Judge-only fixture（`pilot-10-v1.1.5-gate.json` SHA `dc7be14b…`）；`rag_judge_service.judge_trace(session=None, synthetic RagTrace, prompt_version=v1.2.1)`；不创建 Run、不写 DB、不调用 WeKnora。
+- Q11 证据：bad 非连续 quote -> invalid(contract_violation)+quote_not_found；good 精确 claim + 连续 quote -> evaluated 1.0。
+- 预算/规则：30 主调用 + 18 HG 重复 + 3 retry reserve = 51；ceiling CNY 1.00；Q36 C base/variant 双报，不参与 PASS/FAIL。
+- 边界：新申请不复用 v1.2.0 批准；未跑 Judge、未跑 40、未激活；M1-D-1 保持 blocked，M1-C/M1-D 未 accepted。
