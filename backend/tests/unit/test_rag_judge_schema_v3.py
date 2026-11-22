@@ -102,6 +102,7 @@ def test_judge_schema_version_mapping() -> None:
         assert judge_schema_version(version) == JUDGE_SCHEMA_V2
     assert judge_schema_version("v1.2.0") == JUDGE_SCHEMA_V3
     assert judge_schema_version("v1.2.1") == JUDGE_SCHEMA_V3
+    assert judge_schema_version("v1.2.2") == JUDGE_SCHEMA_V3
     assert judge_schema_version("v9.9.9") == JUDGE_SCHEMA_V1
 
 
@@ -109,6 +110,7 @@ def test_metric_version_mapping() -> None:
     for metric in ("faithfulness", "answer_correctness", "answer_relevancy"):
         assert metric_version_for_prompt(metric, "v1.2.0") == "v3"
         assert metric_version_for_prompt(metric, "v1.2.1") == "v3"
+        assert metric_version_for_prompt(metric, "v1.2.2") == "v3"
         assert metric_version_for_prompt(metric, "v1.1.5") == "v2"
         assert metric_version_for_prompt(metric, "v1.0.0") == "v1"
 

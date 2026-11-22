@@ -39,7 +39,7 @@ JUDGE_SCHEMA_V3 = "rag_judge_schema_v3"
 JUDGE_V2_PROMPT_VERSIONS: frozenset[str] = frozenset(
     {"v1.1.1", "v1.1.2", "v1.1.3", "v1.1.4", "v1.1.5"}
 )
-JUDGE_V3_PROMPT_VERSIONS: frozenset[str] = frozenset({"v1.2.0", "v1.2.1"})
+JUDGE_V3_PROMPT_VERSIONS: frozenset[str] = frozenset({"v1.2.0", "v1.2.1", "v1.2.2"})
 
 RAG_JUDGE_METRIC_VERSION_V2: dict[str, str] = {
     "faithfulness": "v2",

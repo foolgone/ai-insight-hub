@@ -235,6 +235,44 @@ class RagJudgeAgent(BaseAgent):
     def _repair_example(self) -> str | None:
         """给修复轮一条完整合法 JSON，避免长 schema 导致半截输出。"""
         if self.metric == "faithfulness":
+            if self.prompt_version == "v1.2.2":
+                # v1.2.2-only repair example: legal non_factual absence.
+                # Do not change v1.2.0/v1.2.1 examples below.
+                return json.dumps(
+                    {
+                        "claims": [
+                            {
+                                "claim_id": "cl1",
+                                "claim": "订单签收后 7 天内可申请无理由退款",
+                                "claim_type": "factual_claim",
+                                "claim_subtype": "policy",
+                                "support_status": "supported",
+                                "is_contradictory": False,
+                                "contradiction_with": [],
+                                "evidence_refs": [
+                                    {
+                                        "context_id": "C1",
+                                        "quote": "订单签收后 7 天内可申请无理由退款。",
+                                    }
+                                ],
+                                "reason": "C1 原文",
+                            },
+                            {
+                                "claim_id": "cl2",
+                                "claim": "文档未提及超时后的申诉渠道",
+                                "claim_type": "non_factual",
+                                "claim_subtype": "absence",
+                                "support_status": None,
+                                "is_contradictory": False,
+                                "contradiction_with": [],
+                                "evidence_refs": [],
+                                "reason": "absence 不需要证据",
+                            },
+                        ],
+                        "reason": "",
+                    },
+                    ensure_ascii=False,
+                )
             if self.schema_version in (JUDGE_SCHEMA_V2, JUDGE_SCHEMA_V3):
                 return json.dumps(
                     {
