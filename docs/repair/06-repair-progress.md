@@ -1265,10 +1265,13 @@ alembic check   : No new upgrade operations detected
 - 冻结：`status=frozen`、`frozen=true`、`active=false`、`runtime_active=false`、默认 `v1.0.0`；旧 MANIFEST `4fc1bb9c…` -> 新 `8bdd673c…`；旧 validation `4dbbafda…` -> 新 `33890eed…`。
 - 边界：未改 Service invalid 契约、r2、目标 v1.0.2、fixture、v1.2.0 Prompt；未跑 Judge、未激活、未跑 40；M1-D-1 保持 blocked，M1-C/M1-D 未 accepted。
 
-### M1-D-3 v1.2.1 10 条 Judge 申请（2026-11-22，pending_approval，未运行）
-- 申请：`docs/repair/33-m1d3-ten-case-judge-application.md`；JSON `docs/repair/phase3e/m1d3-ten-case-application.json`，SHA `7077477e…`；validation `1f2fdb3a…`，31/31 pass。
+### M1-D-3 v1.2.1 10 条 Judge（2026-11-22，stopped / blocked，未 verified）
+- 申请：`docs/repair/33-m1d3-ten-case-judge-application.md`；JSON SHA `7077477e…`；validation `1f2fdb3a…`，31/31 pass。
 - 冻结资产：prompt_version v1.2.1；F `9efdc64d…`、C `a50520de…`、R `a5386070…`、MANIFEST `8bdd673c…`；rubric_version v1.2.0；schema v3/metric v3；target v1.0.2。
-- 执行：Judge-only fixture（`pilot-10-v1.1.5-gate.json` SHA `dc7be14b…`）；`rag_judge_service.judge_trace(session=None, synthetic RagTrace, prompt_version=v1.2.1)`；不创建 Run、不写 DB、不调用 WeKnora。
-- Q11 证据：bad 非连续 quote -> invalid(contract_violation)+quote_not_found；good 精确 claim + 连续 quote -> evaluated 1.0。
-- 预算/规则：30 主调用 + 18 HG 重复 + 3 retry reserve = 51；ceiling CNY 1.00；Q36 C base/variant 双报，不参与 PASS/FAIL。
-- 边界：新申请不复用 v1.2.0 批准；未跑 Judge、未跑 40、未激活；M1-D-1 保持 blocked，M1-C/M1-D 未 accepted。
+- 执行：`rag_judge_service.judge_trace(session=None, synthetic RagTrace, prompt_version=v1.2.1)`；不创建 Run、不写 DB、不调用 WeKnora。
+- 结果：`docs/repair/34-m1d3-judge-only-results.md`；raw `m1d3-judge-only-results.json` SHA `96ff0d9b…`；summary SHA `5e4d38c3…`。
+- attempted：Q01/Q04/Q11/Q17/Q21/Q23；Q01/Q04/Q11/Q17 PASS；Q21 F=1.0 超出目标 0.6–0.7（target FAIL）；Q23 F `StructuredOutputError` → invalid(contract_violation)，strict 同步。
+- 停止：Q23 invalid 后立即停止；Q29/Q31/Q35/Q36 unprocessed；未重跑、未跑 40。
+- 调用/成本：18 次；input 58,335 / output 5,039；CNY 0.188378，低于 ceiling 1.00。
+- Q11：bad 非连续 quote -> invalid+quote_not_found；good 连续 quote -> evaluated 1.0，Q11 F=0.8 目标通过。
+- 边界：M1-D-3 blocked，未 verified；M1-D-1 保持 blocked；M1-C/M1-D 未 accepted；未激活 v1.2.1。
