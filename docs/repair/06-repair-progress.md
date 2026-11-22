@@ -1293,3 +1293,12 @@ alembic check   : No new upgrade operations detected
 - 停止：invalid、一次重试后 failed、Q23 absence 复发、Q21 语义失败或 F=1.0、Q11 quote/目标失败、指纹漂移、超 14 calls 或 CNY 0.30、unprocessed。
 - 边界：judge_trace(session=None)；不建 Run、不写 DB、不调 WeKnora、不激活 v1.2.2、默认仍 v1.0.0；单案例不计入 10 条样本。
 - validation：43/43 pass；application SHA `a38e6477…`、validation SHA `829dc4c4…`；未跑 Judge，等待批准。
+
+### M1-D-4 v1.2.2 单案例诊断执行（2026-11-22，stopped / blocked）
+- 批准后执行 Q23/Q21/Q11 各 1 次；Q23 F invalid 后按停止条件停止，Q21/Q11 未运行。
+- 运行时指纹：v1.2.2 显式加载；F `ed21979a…`、C `a50520de…`、R `a5386070…`、MANIFEST `81dd3a32…`、validation `fadef856…`、fixture `dc7be14b…`、target `3ee15dfc…`、labels `f139623f…`、agent_commit `2ef9200`、repair SHA `7541fe3f…`；默认仍 v1.0.0。
+- Q23：F/F_strict `invalid(contract_violation)`，3 个 `quote_not_found`（cl1/cl2/cl3 把“生鲜食品”与“质量问题需…”拼成非连续 quote）；cl5 混合句未拆分；cl9 absence 正确（non_factual/null/[]）。
+- Q23 C=0.2（target [0.0,0.2] pass）、R=0.9（[0.7,1.0] pass），均 evaluated；F 无分数，target [0.4,0.5] 不适用，未改目标。
+- 调用/成本：3 calls（primary 3、repair 0、retry 0）；input 10,293 / output 1,308；CNY 0.037260，低于 0.30；preflight 9/8 tokens。
+- 结果：`docs/repair/39-m1d4-v1.2.2-single-case-diagnostic-results.md`（MD SHA `764a614b…`）；raw `m1d4-single-case-results.json`（SHA `c2cae388…`）。
+- 边界：未重跑、未改 Prompt/Agent/fixture、未建 Run、未写 DB、未调 WeKnora、未激活 v1.2.2、未跑 10/40；M1-D-4 blocked，M1-C/M1-D 未 accepted。
