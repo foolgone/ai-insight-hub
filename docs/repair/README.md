@@ -27,7 +27,7 @@
 | 当前可跑 Judge？ | **仅 C 的 Q23 3 次 median 或 10 条 `diagnostic_only`，需单独批准**；正式 10/40 未批准 |
 | v1.2.1 / v1.2.2 / v1.2.3 / v1.2.4 | 四者均 `frozen`；v1.2.4 `active=false`；默认仍 `v1.0.0` |
 | 最近一次决策 | 2026-11-23 选 B + C：claim 分解修复 + Q23 3 次 median；A 保留条件 |
-| 下一个交付 | v1.2.5 claim 分解 scope/design + C 3 次 median runner 设计 |
+| 下一个交付 | 人工审核 v1.2.5 claim 分解 scope/design + C runner 设计 |
 
 ### 现在只需要一个决定
 
@@ -157,6 +157,8 @@
 | `docs/repair/phase3e/m1d6-single-case-analysis.json` | analysis SHA `24bea3ec…` | report-only | Q23 initial/patch、absence、patch 失败、停止条件 |
 | `docs/repair/49-m1d6-v1.2.4-single-case-diagnostic-results.md` | report SHA `d7762d6a…` | `stopped at Q23` | Q23 patch_schema_invalid；M1-D-6 blocked |
 | `docs/repair/50-m1d6-q23-root-cause-and-target-review.md` | read-only review | `pending_decision` | Q23 0.333 复现；S1 合并 derived=0.400；A/B/C 待选 |
+| `docs/repair/51-m1d6-v1.2.5-claim-decomposition-scope.md` | design/scope | `design_scope_pending_review` | claim 分解 + 内部矛盾 + patch 健壮性；未实现 |
+| `docs/repair/52-m1d6-v1.2.5-c3-median-runner-design.md` | runner design | `design_pending_review` | Q23 F×3 + median/min/max；18 calls / CNY 0.40；未实现 |
 
 ### 3.2 决策时间线
 
@@ -197,6 +199,7 @@
 | 2026-11-23 | v1.2.4 乱码修复复审通过；metadata-only freeze | `frozen` / `active=false`；未激活；单案例未批准 |
 | 2026-11-23 | v1.2.4 Q23/Q21/Q11 单案例执行：Q23 patch_schema_invalid | `stopped` / `blocked`；4 calls / CNY 0.0422808；Q21/Q11 未运行 |
 | 2026-11-23 | Q23 根因复核：patch null 次要；S0=0.333，S1 合并 derived=0.400 | `pending_decision`；待 A target v1.0.3 / B claim 分解 / C 3 次 median |
+| 2026-11-23 | 提交 v1.2.5 claim 分解 scope + C runner 设计 | `design_pending_review`；未实现、未跑 Judge |
 
 ---
 

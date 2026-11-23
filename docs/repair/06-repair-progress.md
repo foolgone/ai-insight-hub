@@ -1381,3 +1381,13 @@ alembic check   : No new upgrade operations detected
 - A（target v1.0.3）保留为条件：仅当 B 失败或人工确认 S0 当前拆分正确时提案；不静默改 v1.0.2。
 - v1.2.5 patch-only 不作为 Q23 通过路径；patch 健壮性可随 B 版本一并做，但不得写成保证 Q23 进区间。
 - 边界：未跑 Judge、未改 target/Prompt/Agent、未激活；10/40 仍不批准。
+
+### M1-D-6 v1.2.5 claim 分解 scope + C runner 设计（2026-11-23，design_pending_review）
+- 文档：`docs/repair/51-m1d6-v1.2.5-claim-decomposition-scope.md`、`docs/repair/52-m1d6-v1.2.5-c3-median-runner-design.md`。
+- 版本：v1.2.5 / rubric v1.2.0 / schema v3 / metric v3 / target v1.0.2 / default v1.0.0；F prompt 新 SHA，C/R 从 v1.2.4 复制不变。
+- P0-A：F prompt 增加“一个派生结论 = 一条 derived claim”；禁止“前提 insufficient + 结论 supported”双计数。
+- P0-B：内部矛盾规则：首句/结论与后文冲突 → `is_contradictory=true` + `contradiction_with`；通用合成示例，不含 Q23 文本。
+- P0-C：patch 健壮性（v1.2.5 独立 schema）：unsupported/insufficient 允许空 refs；supported 仍非空；显式 refusal；refusal → invalid；v1.2.4 patch 行为逐字不变。
+- 测试：S1 F=0.400、cl1 unsupported+contradictory、cl3/cl4 合并、patch null/refusal/空 refs/非连续 quote、conflict 2 refs、v1.2.0–v1.2.4 回归、泄漏 0、静态 validation/全量 pytest/black/flake8/mypy/lint-imports。
+- C runner：Q23 F×3 + C/R×1 + Q21/Q11×1×3；预算 11 primary + 5 patch + 2 reserve = 18 calls / CNY 0.40；ledger 在 LLM 边界；invalid 继续收集（diagnostic_only），预算/凭证/指纹/ledger 硬停止；报 median/min/max 与每次 claim 分解。
+- 边界：本轮只交设计；未改 Prompt/Agent/target/fixture、未实现、未 freeze、未跑 Judge、未激活。
