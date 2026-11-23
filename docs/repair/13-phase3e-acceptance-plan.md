@@ -13,6 +13,8 @@
 > 2. **Q23 根因复核已完成（见 `50-m1d6-q23-root-cause-and-target-review.md`）；初步建议 B（claim 分解修复）+ C（3 次 median），A（target v1.0.3）仅在确认 S0 当前拆分为正确口径时使用；不批准 v1.2.5 patch-only 作为 Q23 通过路径。**
 > 3. **正式 10 条闸门前，增加一次 `diagnostic_only` 的 10 条诊断批处理；它不计入验收、不写 PASS，允许记录 invalid 后继续收集分布。**
 > 4. **M1 出口仍是 10 条闸门 + 40 条规模/回归；不得用 3 个 case 的零 invalid 代替分布可信。**
+>
+> **2026-11-23 决策：选 B + C。** B 修 claim 分解（cl3/cl4 合成 derived；cl1 保持 unsupported + `is_contradictory`；target 不变）；C 做 Q23 3 次 median。A（target v1.0.3）保留为条件；v1.2.5 patch-only 不作为 Q23 通过路径。
 
 ## 1. 数据角色
 

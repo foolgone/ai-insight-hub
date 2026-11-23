@@ -1375,3 +1375,9 @@ alembic check   : No new upgrade operations detected
 - 结论：0.333 是 S0 拆分下的诚实分数，但不必然证明 target 失效；若人工确认 S1 符合 `12-judge-semantic-spec.md` §3.1/§8，target [0.4,0.5] 仍成立，应修 claim 分解而不是 patch。
 - 决策：不批准 v1.2.5 patch-only 作为 Q23 通过路径；先做 target/Gold 复核；Q23 建议 3 次 median；待 A target v1.0.3 / B claim 分解 / C 3 次 median。
 - 边界：未跑 Judge、未改 target v1.0.2、未改 Prompt/Agent、未激活、未跑 10/40；M1-D-6 仍 blocked。
+
+### M1-D-6 方向决策（2026-11-23）
+- 选择 **B + C**：B 修 claim 分解（cl3/cl4 合成 1 条 derived；cl1 保持 unsupported 并补 `is_contradictory`；target `[0.4,0.5]` 不变）；C 做 Q23 3 次 median。
+- A（target v1.0.3）保留为条件：仅当 B 失败或人工确认 S0 当前拆分正确时提案；不静默改 v1.0.2。
+- v1.2.5 patch-only 不作为 Q23 通过路径；patch 健壮性可随 B 版本一并做，但不得写成保证 Q23 进区间。
+- 边界：未跑 Judge、未改 target/Prompt/Agent、未激活；10/40 仍不批准。
