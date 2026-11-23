@@ -476,7 +476,18 @@ async def test_v125_supported_empty_refs_is_invalid() -> None:
 async def test_v125_noncontiguous_quote_is_invalid() -> None:
     patch = {
         "fixes": [
-            {"claim_id": "cl1", "evidence_refs": [{"context_id": "C1", "quote": "延保卡需在购买后 30 天"}]}
+            {
+                "claim_id": "cl1",
+                "evidence_refs": [{"context_id": "C1", "quote": QUOTE_ACTIVATION}],
+            },
+            {
+                "claim_id": "cl2",
+                "evidence_refs": [{"context_id": "C1", "quote": QUOTE_GIFT}],
+            },
+            {
+                "claim_id": "cl3",
+                "evidence_refs": [{"context_id": "C1", "quote": "延保卡需在购买后 30 天激活"}],
+            },
         ]
     }
     agent, _ = _agent(
@@ -491,8 +502,7 @@ async def test_v125_noncontiguous_quote_is_invalid() -> None:
 
     assert result.success is False
     report = agent.contract_report or {}
-    code = report["final_errors"][0]["code"]
-    assert code in {"patch_incomplete", "patch_quote_invalid"}
+    assert report["final_errors"][0]["code"] == "patch_quote_invalid"
 
 
 async def test_v125_patch_null_is_schema_invalid() -> None:
