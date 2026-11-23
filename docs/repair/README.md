@@ -8,9 +8,9 @@
 > 4. 未冻结的定义/目标，不得进入代码实现。
 >
 > 最后更新：2026-11-23
-> 当前阶段：**M1-D-6 v1.2.4 Patch Repair 已 metadata-only 冻结；未激活、未跑 Judge**
-> 当前阻塞决策：**是否批准 Q23/Q21/Q11 单案例诊断（freeze 后单独申请）**
-> 当前不做：跑 Judge、跑 10/40、v1.2.4 激活、M2/M3、生产 migration
+> 当前阶段：**M1-D-6 v1.2.4 单案例诊断已执行，Q23 停在 patch_schema_invalid；M1-D-6 diagnostic blocked**
+> 当前阻塞决策：**是否为 Q23 patch 失败设计 v1.2.5，或保持 v1.2.4 frozen/inactive**
+> 当前不做：10/40 Judge、v1.2.4 激活、M2/M3、生产 migration
 
 ---
 
@@ -19,25 +19,25 @@
 | 项 | 状态 |
 |---|---|
 | 项目阶段 | 核心研发向产品化过渡 |
-| 主线 | M1 评测可信度；v1.2.3/v1.2.4 `frozen`；M1-D-5 blocked；M1-D-6 待单案例 |
+| 主线 | M1 评测可信度；v1.2.3/v1.2.4 `frozen`；M1-D-5 blocked；M1-D-6 diagnostic blocked at Q23 |
 | 并行 A | M2 只读工作台；API 审计完成，前端未开始 |
 | 并行 B | M4-A 生产约束；未开始 |
 | M3 优化闭环 | 未开始；等 M1 可信、M2 可用 |
-| 当前可写代码？ | **否**；先审单案例诊断申请 |
-| 当前可跑 Judge？ | **否**；单案例/10 条未批准 |
+| 当前可写代码？ | **否**；先决策 v1.2.5 patch 修复或保持 v1.2.4 |
+| 当前可跑 Judge？ | **否**；单案例已停止，10/40 未批准 |
 | v1.2.1 / v1.2.2 / v1.2.3 / v1.2.4 | 四者均 `frozen`；v1.2.4 `active=false`；默认仍 `v1.0.0` |
-| 最近一次决策 | 2026-11-23 v1.2.4 metadata-only freeze 通过 |
-| 下一个交付 | 人工审核 Q23/Q21/Q11 单案例诊断申请 |
+| 最近一次决策 | 2026-11-23 单案例执行：Q23 patch_schema_invalid，停止 |
+| 下一个交付 | 人工决策 v1.2.5 patch 修复方案（或保持 v1.2.4 不激活） |
 
 ### 现在只需要一个决定
 
-**v1.2.4 已冻结；是否批准 Q23/Q21/Q11 单案例诊断。**
+**Q23 单案例已停在 patch_schema_invalid；是否设计 v1.2.5 patch 修复。**
 
 | 选项 | 含义 | 结果 |
 |---|---|---|
-| **批准单案例** | 接受 patch repair、ledger、Q23/Q21/Q11 验收点与预算 | 单独执行 3 案例各 1 次；不跑 10 条 |
-| **先补材料** | 单案例申请需补 ledger/SHA/预算/停止条件 | 保持 frozen，不跑 Judge |
-| **暂缓** | 不跑单案例 | 保持 frozen，M1-D-6 diagnostic pending |
+| **设计 v1.2.5** | 针对 null evidence_refs 与 Q23 claim 分解设计新 patch 修复 | 进入设计评审；不直接跑 Judge |
+| **保持 frozen** | 接受 v1.2.4 未通过 Q23，不进入 10 条 | v1.2.4 保持 frozen/inactive；M1-D-6 blocked |
+| **暂缓** | 不改、不跑 | 维持现状，等待更多证据 |
 
 ---
 
@@ -149,6 +149,11 @@
 | `docs/repair/phase3e/m1d6-prompt-leakage-audit.json` | `7a5fa618…` | `leakage_audit` findings=0 | 10 gate case answer/gold/claim/evidence 审计 |
 | `docs/repair/46-m1d6-v1.2.4-implementation.md` | implementation report | `frozen` / `implemented` | patch flow、effective ID、conflict、final_errors、C warning |
 | `docs/repair/47-m1d6-v1.2.4-freeze-record.md` | freeze record | `frozen` | 旧/新 MANIFEST、validation、patch schema/example、乱码修复、C 规则、ledger/activation requirements |
+| `docs/repair/phase3e/m1d6-single-case-diagnostic-application.json` | application SHA `54193e91…` | `approved` / executed | Q23/Q21/Q11 单案例；14 calls / CNY 0.30；ledger 前置 |
+| `docs/repair/phase3e/m1d6-single-case-ledger.jsonl` | ledger SHA `c07b8401…` | append-only / 4 attempts / 0 uncertain | primary 3 + patch 1；cost CNY 0.0422808 |
+| `docs/repair/phase3e/m1d6-single-case-results.json` | raw results SHA `5ace1709…` | `stopped` | Q23 F invalid；Q21/Q11 未运行 |
+| `docs/repair/phase3e/m1d6-single-case-analysis.json` | analysis SHA `6a0d343f…` | report-only | Q23 initial/patch、absence、patch 失败、停止条件 |
+| `docs/repair/49-m1d6-v1.2.4-single-case-diagnostic-results.md` | report SHA `5d20b488…` | `stopped at Q23` | Q23 patch_schema_invalid；M1-D-6 blocked |
 
 ### 3.2 决策时间线
 
@@ -187,6 +192,7 @@
 | 2026-11-23 | 提交 v1.2.4 Evidence-only Patch Repair 设计 | `design_draft_pending_review`；未实现 |
 | 2026-11-23 | v1.2.4 设计 approve_with_changes；P1-1~P1-4 修订并实现/验证 | `design_draft` / `implemented/verified`；待 freeze |
 | 2026-11-23 | v1.2.4 乱码修复复审通过；metadata-only freeze | `frozen` / `active=false`；未激活；单案例未批准 |
+| 2026-11-23 | v1.2.4 Q23/Q21/Q11 单案例执行：Q23 patch_schema_invalid | `stopped` / `blocked`；4 calls / CNY 0.0422808；Q21/Q11 未运行 |
 
 ---
 
@@ -330,11 +336,12 @@
 9. M1-D-4 v1.2.2 absence / evidence-directness patch 已实现/验证并 metadata-only `frozen`（`36-…`、`37-m1d4-v1.2.2-freeze-record.md`）；`active=false`、默认仍 v1.0.0。
 10. 已提交 Q23/Q21/Q11 单案例诊断申请（`38-…`），状态 `pending_approval`；未运行 Judge。
 11. 单案例诊断已执行：Q23 F invalid（3× `quote_not_found`）、cl5 混合句未拆分，按停止条件停止；Q21/Q11 未运行。结果见 `39-…`，3 calls / CNY 0.03726。
+12. v1.2.4 单案例已执行：Q23 patch 输出 `evidence_refs=null`，`patch_schema_invalid`；按停止条件停止。结果见 `49-…`，4 calls / CNY 0.0422808；Q21/Q11 未运行。
 
 **后续（未批准）**：
 
-1. 人工审核 Q23/Q21/Q11 单案例诊断申请；必须带 append-only ledger；
-2. 单案例预算 9 主 + 3 patch + 2 retry = 14 / CNY 0.30；patch 后 claim-level 人工复核；
+1. 人工决策：是否为 Q23 `patch_schema_invalid` 设计 v1.2.5（null/refusal 与 claim 分解）；
+2. v1.2.4 保持 frozen/inactive；不得复用本次单案例批准重跑；
 3. 未通过前不跑 10/40；不得复用 v1.2.1/v1.2.3 批准；
 4. 40 条分层报告（HG 13 / provisional 27 分开）；
 5. 6 条缺失 baseline 按方案 A 标 `baseline_delta: unavailable`，不跑 Judge 补齐；

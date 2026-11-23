@@ -2,3 +2,9 @@
 # Windows 检出若变成 CRLF，会报 `bad interpreter: /usr/bin/env bash^M`，
 # 且 tar 打包部署会把 CRLF 一起带到服务器，所以这里强制 LF。
 *.sh text eol=lf
+
+# M1-D-6 单案例证据：ledger / raw results / analysis / report 的 SHA 需要逐字节可复现。
+docs/repair/phase3e/m1d6-single-case-ledger.jsonl text eol=lf
+docs/repair/phase3e/m1d6-single-case-results.json text eol=lf
+docs/repair/phase3e/m1d6-single-case-analysis.json text eol=lf
+docs/repair/49-m1d6-v1.2.4-single-case-diagnostic-results.md text eol=lf

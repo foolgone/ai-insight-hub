@@ -1351,5 +1351,18 @@ alembic check   : No new upgrade operations detected
 - Patch：新增 `rag_judge_patch.py`（claim_id + evidence_refs 完整 replacement set，extra=forbid）；patch schema `da70dc60…`，patch example `629d74ac…`。
 - Agent：v1.2.4 + faithfulness 初始 Schema 单次解析；quote 错误 1 次 patch；effective claim_id；conflict/多 refs 校验；merge 只改 evidence_refs；final_errors 接 validation_errors。
 - C：首句/结论矛盾固定 0.0–0.2；C warning 记录 `correctness_first_sentence_warning`；不新增 C repair。
-- 测试：全量 pytest 1101 条通过；black/flake8/mypy/lint-imports 通过；静态校验 23/23，validation SHA `dadebc31…`；泄漏审计 `7a5fa618…`，0 findings。
-- 边界：未 frozen、未激活、未跑 Judge/10/40；未建 Run、未写 DB、未调 WeKnora；M1-D-5 blocked，M1-C/M1-D 未 accepted。
+- 测试：全量 pytest 1101 条通过；black/flake8/mypy/lint-imports 通过；静态校验 23/23，validation SHA `9ecdb424…`；泄漏审计 `7a5fa618…`，0 findings。
+- 边界：已 frozen、未激活、未跑 Judge/10/40；未建 Run、未写 DB、未调 WeKnora；M1-D-5 blocked，M1-C/M1-D 未 accepted。
+
+### M1-D-6 v1.2.4 单案例诊断执行（2026-11-23，stopped / blocked）
+- 申请：`docs/repair/48-m1d6-v1.2.4-single-case-diagnostic-application.md`；application SHA `54193e91…`；执行提交前 HEAD `a6f4c5a`。
+- 运行时指纹全部匹配：v1.2.4 frozen；F `52f1b3cf…`、C `ca489fcf…`、R `f3efe431…`、MANIFEST `33cad3a8…`、validation `9ecdb424…`（23/23）、patch schema `da70dc60…`、patch example `629d74ac…`、quote validator `153ab4a6…`、泄漏审计 `7a5fa618…`（0 findings）；默认仍 v1.0.0。
+- Ledger 预检：一次 primary+patch 自测产生 2 条 started（4 行 started/finished），attempts=2、uncertain=0；真实运行前 ledger 为空、初始 SHA `e3b0…`。
+- Q23：初始 F 输出 Schema 合法；quote 预检 3× `quote_not_found`（cl1/cl2/cl4，quote 为“生鲜食品质量问题需在签收后 24 小时内拍照反馈”，非 C1 连续原文）；触发 1 次 evidence-only patch。
+- Q23 patch：模型输出 `{"fixes":[{"claim_id":"cl1","evidence_refs":null},...]}`；`evidence_refs=null` 不满足 `EvidencePatch`（需要非空数组），Agent 记录 `patch_schema_invalid`，F/F_strict invalid，merged 未生成。
+- Q23 初始语义已偏离验收：cl1=`unsupported`（预期 supported）；patch 目标为 cl1/cl2/cl4（预期只修 cl2/cl3）；即使 patch schema 通过，`patch_applied_claims` 与 `cl1 supported` 条件也会失败。
+- Q23 其它指标：C=0.0（target [0.0,0.2] pass，`correctness_first_sentence_warning=null`）；R=0.9（[0.7,1.0] pass）；F 无分数；absence cl6/cl10 初始为 non_factual+absence+null+[]；cl5 无 mixed warning。
+- Q21/Q11：因 Q23 patch 失败停止，未运行；没有 Q21 豁免 quote 明细，也没有 Q11 quote 连续性/三项目标结果。
+- 调用/成本：4 calls（primary 3、patch 1、repair 0、retry 0）；input 12,313 / output 1,326；CNY 0.0422808，低于 0.30；ledger SHA `c07b8401…`，uncertain=0。
+- 结果：raw `m1d6-single-case-results.json`（SHA `5ace1709…`）；analysis `m1d6-single-case-analysis.json`（SHA `6a0d343f…`）；报告 `docs/repair/49-m1d6-v1.2.4-single-case-diagnostic-results.md`（SHA `5d20b488…`）。
+- 边界：未重跑、未改 Prompt/Agent/Service/validator/patch schema/example/target/fixture；未建 Run、未写 DB、未调 WeKnora、未激活 v1.2.4、未跑 10/40；M1-D-6 diagnostic blocked，M1-C/M1-D 未 accepted。

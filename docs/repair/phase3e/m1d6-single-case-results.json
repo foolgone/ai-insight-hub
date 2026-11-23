@@ -1,0 +1,763 @@
+{
+ "meta": {
+  "name": "m1d6-v1.2.4-single-case-diagnostic-results",
+  "kind": "judge_only_production_service_replay_not_end_to_end",
+  "date": "2026-11-23",
+  "diagnostic_only": true,
+  "counts_toward_10": false,
+  "application_sha256": "54193e918daf3111014790923431695c7641fb629d2341bd71ecbe03001b1388",
+  "judge_run": true,
+  "created_run": false,
+  "wrote_db": false,
+  "runtime_activated": false,
+  "weknora_called": false,
+  "rag_adapter_called": false,
+  "ran_10": false,
+  "ran_40": false,
+  "default_prompt_version": "v1.0.0",
+  "prompt_version": "v1.2.4",
+  "prompt_status": "frozen",
+  "prompt_sha256": {
+   "faithfulness.txt": "52f1b3cf3b92d6f9616e73ed7de26a0721d65c27763f48edd41b38f1e06a025d",
+   "answer_correctness.txt": "ca489fcf39691e9a71aec004a01938fb6c70b7b17da3c55fb0ada066e1d24968",
+   "answer_relevancy.txt": "f3efe431683ed26ba0a7338e6e2b5841d65d42dadde5cac30b8340e2ca95dfdc"
+  },
+  "manifest_sha256": "33cad3a810056bc01ead8a9c943702e439d9af7be62a568df221b1336551bc66",
+  "validation_sha256": "9ecdb4241be87e6fd3ddd68d9da337f3a321af24f518d25c20fff77f1e5212bc",
+  "leakage_audit_sha256": "7a5fa6182ae4eebff2f24b48133fe081f05b8096d249b76498cada48661dcce4",
+  "leakage_findings": 0,
+  "leakage_source_count": 152,
+  "fixture_sha256": "dc7be14b6026b579c15dea1a13d498b7479e14081aa17419ef2bfa525ae9be70",
+  "target_sha256": "3ee15dfca66fe13f0a45fda84ecf2612483f2de107ad079b196a6bd6344d5846",
+  "labels_sha256": "f139623fef80b55716fce0c773e776d284a5167683eb91559b23e49cabd000eb",
+  "patch_schema_sha256": "da70dc607aaf70879cf40e3420bc5440829b05d9be344a07907947df8c891cb8",
+  "patch_example_sha256": "629d74ac3bba3a36372c8a54796de6c5c91fc59b20a235061e0c86ae39129a47",
+  "quote_validator_sha256": "153ab4a6f203ca0398133a2cc2ca6fda834f7670afa90651c66cfa44b92c722a",
+  "ledger_file": "docs\\repair\\phase3e\\m1d6-single-case-ledger.jsonl",
+  "ledger_initial_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "ledger_self_test": {
+   "ok": true,
+   "errors": [],
+   "started_kinds": [
+    "primary",
+    "patch"
+   ],
+   "started_records": 2,
+   "finished_records": 2,
+   "ledger_lines": 4,
+   "attempts": 2,
+   "uncertain_calls": 0
+  },
+  "agent_commit": "8dcd53d",
+  "initial_implementation_commit": "88810fd",
+  "patch_prompt_fix_commit": "8dcd53d",
+  "status_doc_commit": "f761fa7",
+  "freeze_commit": "c813443",
+  "git_head": "a6f4c5a255b5b87ef3fb0b157ad079350841a7f8",
+  "rubric_version": "v1.2.0",
+  "schema_version": "rag_judge_schema_v3",
+  "metric_version": "v3",
+  "preflight": {
+   "application_sha256": "54193e918daf3111014790923431695c7641fb629d2341bd71ecbe03001b1388",
+   "fixture_sha256": "dc7be14b6026b579c15dea1a13d498b7479e14081aa17419ef2bfa525ae9be70",
+   "target_sha256": "3ee15dfca66fe13f0a45fda84ecf2612483f2de107ad079b196a6bd6344d5846",
+   "labels_sha256": "f139623fef80b55716fce0c773e776d284a5167683eb91559b23e49cabd000eb",
+   "manifest_sha256": "33cad3a810056bc01ead8a9c943702e439d9af7be62a568df221b1336551bc66",
+   "validation_sha256": "9ecdb4241be87e6fd3ddd68d9da337f3a321af24f518d25c20fff77f1e5212bc",
+   "leakage_audit_sha256": "7a5fa6182ae4eebff2f24b48133fe081f05b8096d249b76498cada48661dcce4",
+   "leakage_findings": 0,
+   "leakage_source_count": 152,
+   "patch_schema_sha256": "da70dc607aaf70879cf40e3420bc5440829b05d9be344a07907947df8c891cb8",
+   "patch_example_sha256": "629d74ac3bba3a36372c8a54796de6c5c91fc59b20a235061e0c86ae39129a47",
+   "quote_validator_sha256": "153ab4a6f203ca0398133a2cc2ca6fda834f7670afa90651c66cfa44b92c722a",
+   "prompt_sha256": {
+    "faithfulness.txt": "52f1b3cf3b92d6f9616e73ed7de26a0721d65c27763f48edd41b38f1e06a025d",
+    "answer_correctness.txt": "ca489fcf39691e9a71aec004a01938fb6c70b7b17da3c55fb0ada066e1d24968",
+    "answer_relevancy.txt": "f3efe431683ed26ba0a7338e6e2b5841d65d42dadde5cac30b8340e2ca95dfdc"
+   },
+   "ledger_file": "docs\\repair\\phase3e\\m1d6-single-case-ledger.jsonl",
+   "ledger_initial_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+   "ledger_initial_bytes": 0,
+   "ledger_self_test": {
+    "ok": true,
+    "errors": [],
+    "started_kinds": [
+     "primary",
+     "patch"
+    ],
+    "started_records": 2,
+    "finished_records": 2,
+    "ledger_lines": 4,
+    "attempts": 2,
+    "uncertain_calls": 0
+   },
+   "agent_commit": "8dcd53d",
+   "initial_implementation_commit": "88810fd",
+   "patch_prompt_fix_commit": "8dcd53d",
+   "status_doc_commit": "f761fa7",
+   "freeze_commit": "c813443",
+   "agent_file_unchanged_since_agent_commit": true,
+   "frozen_assets_unchanged_since_freeze_commit": true,
+   "commits_present": {
+    "agent": true,
+    "initial": true,
+    "patch_prompt_fix": true,
+    "status_doc": true,
+    "freeze": true
+   },
+   "git_head": "a6f4c5a255b5b87ef3fb0b157ad079350841a7f8",
+   "prompt_version": "v1.2.4",
+   "prompt_status": "frozen",
+   "active": false,
+   "runtime_active": false,
+   "default_prompt_version": "v1.0.0",
+   "schema_version": "rag_judge_schema_v3",
+   "rubric_version": "v1.2.0",
+   "metric_version": "v3",
+   "model": "qwen-max",
+   "temperature": 0.0,
+   "max_tokens": 8192,
+   "errors": []
+  },
+  "ledger_sha256": "c07b8401778e3668676db797376cd014406a8cafc587288ab71a966a20dfedf7",
+  "ledger_total_attempts": 4,
+  "ledger_finished_calls": 4,
+  "ledger_uncertain_calls": 0,
+  "ledger_started_by_kind": {
+   "primary": 3,
+   "patch": 1
+  },
+  "ledger_finished_by_kind": {
+   "primary": 3,
+   "patch": 1
+  },
+  "ledger_by_case_metric": {
+   "Q23/faithfulness": {
+    "case_id": "Q23",
+    "metric": "faithfulness",
+    "calls": 2,
+    "primary": 1,
+    "patch": 1,
+    "repair": 0,
+    "retry": 0,
+    "input_tokens": 8464,
+    "output_tokens": 1226,
+    "cost_cny": 0.0320832
+   },
+   "Q23/answer_correctness": {
+    "case_id": "Q23",
+    "metric": "answer_correctness",
+    "calls": 1,
+    "primary": 1,
+    "patch": 0,
+    "repair": 0,
+    "retry": 0,
+    "input_tokens": 2287,
+    "output_tokens": 61,
+    "cost_cny": 0.0060744
+   },
+   "Q23/answer_relevancy": {
+    "case_id": "Q23",
+    "metric": "answer_relevancy",
+    "calls": 1,
+    "primary": 1,
+    "patch": 0,
+    "repair": 0,
+    "retry": 0,
+    "input_tokens": 1562,
+    "output_tokens": 39,
+    "cost_cny": 0.0041232
+   }
+  },
+  "total_judge_calls": 4,
+  "cost_cny": 0.0422808,
+  "ceiling_cny": 0.3,
+  "budget_error": null,
+  "fingerprint_errors": [],
+  "missing_results": [
+   "Q21:faithfulness",
+   "Q21:answer_correctness",
+   "Q21:answer_relevancy",
+   "Q11:faithfulness",
+   "Q11:answer_correctness",
+   "Q11:answer_relevancy"
+  ],
+  "ledger_errors": [
+   "missing_results=['Q21:faithfulness', 'Q21:answer_correctness', 'Q21:answer_relevancy', 'Q11:faithfulness', 'Q11:answer_correctness', 'Q11:answer_relevancy']"
+  ],
+  "status": "stopped",
+  "verified": false,
+  "totals": {
+   "judge_calls": 4,
+   "primary_calls": 3,
+   "patch_calls": 1,
+   "repair_calls": 0,
+   "retry_calls": 0,
+   "input_tokens": 12313,
+   "output_tokens": 1326,
+   "cost_cny": 0.0422808,
+   "max_judge_calls": 14,
+   "ceiling_cny": 0.3
+  }
+ },
+ "effective_prompt_versions": [
+  {
+   "case_id": "Q23",
+   "metric": "faithfulness",
+   "prompt_version": "v1.2.4",
+   "prompt_sha256": "52f1b3cf3b92d6f9616e73ed7de26a0721d65c27763f48edd41b38f1e06a025d",
+   "expected_prompt_sha256": "52f1b3cf3b92d6f9616e73ed7de26a0721d65c27763f48edd41b38f1e06a025d",
+   "schema_version": "rag_judge_schema_v3",
+   "metric_version": "v3"
+  },
+  {
+   "case_id": "Q23",
+   "metric": "answer_correctness",
+   "prompt_version": "v1.2.4",
+   "prompt_sha256": "ca489fcf39691e9a71aec004a01938fb6c70b7b17da3c55fb0ada066e1d24968",
+   "expected_prompt_sha256": "ca489fcf39691e9a71aec004a01938fb6c70b7b17da3c55fb0ada066e1d24968",
+   "schema_version": "rag_judge_schema_v3",
+   "metric_version": "v3"
+  },
+  {
+   "case_id": "Q23",
+   "metric": "answer_relevancy",
+   "prompt_version": "v1.2.4",
+   "prompt_sha256": "f3efe431683ed26ba0a7338e6e2b5841d65d42dadde5cac30b8340e2ca95dfdc",
+   "expected_prompt_sha256": "f3efe431683ed26ba0a7338e6e2b5841d65d42dadde5cac30b8340e2ca95dfdc",
+   "schema_version": "rag_judge_schema_v3",
+   "metric_version": "v3"
+  }
+ ],
+ "cases": [
+  {
+   "case_id": "Q23",
+   "group": "human_gold",
+   "final_category": "constraint",
+   "targets": {
+    "F": [
+     0.4,
+     0.5
+    ],
+    "C": [
+     0.0,
+     0.2
+    ],
+    "R": [
+     0.7,
+     1.0
+    ]
+   },
+   "metrics": {
+    "faithfulness": {
+     "status": "invalid",
+     "score": null,
+     "skipped_reason": null,
+     "invalid_reason": "contract_violation"
+    },
+    "faithfulness_strict": {
+     "status": "invalid",
+     "score": null,
+     "skipped_reason": null,
+     "invalid_reason": "contract_violation"
+    },
+    "answer_correctness": {
+     "status": "evaluated",
+     "score": 0.0,
+     "skipped_reason": null,
+     "invalid_reason": null
+    },
+    "answer_relevancy": {
+     "status": "evaluated",
+     "score": 0.9,
+     "skipped_reason": null,
+     "invalid_reason": null
+    }
+   },
+   "fingerprint_errors": [],
+   "outcomes": [
+    {
+     "metric_name": "faithfulness",
+     "metric_version": "v3",
+     "status": "invalid",
+     "score": null,
+     "skipped_reason": null,
+     "invalid_reason": "contract_violation",
+     "error_type": "StructuredOutputError",
+     "error_message": "StructuredOutputError: evidence patch schema is invalid",
+     "latency_ms": 28627,
+     "judge_config": {
+      "agent": "rag_judge_faithfulness",
+      "model": "qwen-max",
+      "temperature": 0.0,
+      "max_tokens": 8192,
+      "prompt_version": "v1.2.4",
+      "resolved_prompt_version": "v1.2.4",
+      "prompt_sha256": "52f1b3cf3b92d6f9616e73ed7de26a0721d65c27763f48edd41b38f1e06a025d",
+      "schema_version": "rag_judge_schema_v3",
+      "rubric_version": "v1.2.0",
+      "metric_version": "v3",
+      "contract_repair_version": "v1.2.4",
+      "quote_validator_sha256": "153ab4a6f203ca0398133a2cc2ca6fda834f7670afa90651c66cfa44b92c722a"
+     },
+     "details": {
+      "errors": [
+       "StructuredOutputError: evidence patch schema is invalid"
+      ],
+      "failure_kind": "contract",
+      "agent_error_type": "StructuredOutputError",
+      "original_raw_output": "{\"fixes\":[{\"claim_id\":\"cl1\",\"evidence_refs\":null},{\"claim_id\":\"cl2\",\"evidence_refs\":null},{\"claim_id\":\"cl4\",\"evidence_refs\":null}]}",
+      "original_raw_truncated": false,
+      "token_usage": {
+       "input": 6668,
+       "output": 1185
+      },
+      "cost": "0",
+      "agent_contract": {
+       "contract_version": "v1.2.4",
+       "quote_validator_sha256": "153ab4a6f203ca0398133a2cc2ca6fda834f7670afa90651c66cfa44b92c722a",
+       "quote_precheck_errors": [
+        {
+         "claim_id": "cl1",
+         "context_id": "C1",
+         "code": "quote_not_found",
+         "quote": "生鲜食品质量问题需在签收后 24 小时内拍照反馈",
+         "context_excerpt": "生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。"
+        },
+        {
+         "claim_id": "cl2",
+         "context_id": "C1",
+         "code": "quote_not_found",
+         "quote": "生鲜食品质量问题需在签收后 24 小时内拍照反馈",
+         "context_excerpt": "生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。"
+        },
+        {
+         "claim_id": "cl4",
+         "context_id": "C1",
+         "code": "quote_not_found",
+         "quote": "生鲜食品质量问题需在签收后 24 小时内拍照反馈",
+         "context_excerpt": "生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。"
+        }
+       ],
+       "mixed_sentence_warnings": [],
+       "repair_triggered": true,
+       "repair_count": 1,
+       "passed_after_repair": false,
+       "final_errors": [
+        {
+         "code": "patch_schema_invalid",
+         "error_type": "ValidationError",
+         "validation_errors": "3 validation errors for EvidencePatch\nfixes.0.evidence_refs\n  Input should be a valid array [type=list_type, input_value=None, input_type=NoneType]\n    For further information visit https://errors.pydantic.dev/2.14/v/list_type\nfixes.1.evidence_refs\n  Input should be a valid array [type=list_type, input_value=None, input_type=NoneType]\n    For further information visit https://errors.pydantic.dev/2.14/v/list_type\nfixes.2.evidence_refs\n  Input should be a valid array [type=list_type, input_value=None, input_type=NoneType]\n    For further information visit https://errors.pydantic.dev/2.14/v/list_type"
+        }
+       ],
+       "patch_schema_sha256": "da70dc607aaf70879cf40e3420bc5440829b05d9be344a07907947df8c891cb8",
+       "patch_applied_claims": [],
+       "patch_semantic_review_required": false
+      }
+     },
+     "raw_output": "{\"fixes\":[{\"claim_id\":\"cl1\",\"evidence_refs\":null},{\"claim_id\":\"cl2\",\"evidence_refs\":null},{\"claim_id\":\"cl4\",\"evidence_refs\":null}]}",
+     "raw_truncated": false
+    },
+    {
+     "metric_name": "faithfulness_strict",
+     "metric_version": "v3",
+     "status": "invalid",
+     "score": null,
+     "skipped_reason": null,
+     "invalid_reason": "contract_violation",
+     "error_type": "StructuredOutputError",
+     "error_message": null,
+     "latency_ms": 0,
+     "judge_config": {
+      "agent": "rag_judge_faithfulness",
+      "model": "qwen-max",
+      "temperature": 0.0,
+      "max_tokens": 8192,
+      "prompt_version": "v1.2.4",
+      "resolved_prompt_version": "v1.2.4",
+      "prompt_sha256": "52f1b3cf3b92d6f9616e73ed7de26a0721d65c27763f48edd41b38f1e06a025d",
+      "schema_version": "rag_judge_schema_v3",
+      "rubric_version": "v1.2.0",
+      "metric_version": "v3",
+      "contract_repair_version": "v1.2.4",
+      "quote_validator_sha256": "153ab4a6f203ca0398133a2cc2ca6fda834f7670afa90651c66cfa44b92c722a"
+     },
+     "details": {
+      "failure_kind": "contract",
+      "agent_error_type": "StructuredOutputError",
+      "agent_contract": {
+       "contract_version": "v1.2.4",
+       "quote_validator_sha256": "153ab4a6f203ca0398133a2cc2ca6fda834f7670afa90651c66cfa44b92c722a",
+       "quote_precheck_errors": [
+        {
+         "claim_id": "cl1",
+         "context_id": "C1",
+         "code": "quote_not_found",
+         "quote": "生鲜食品质量问题需在签收后 24 小时内拍照反馈",
+         "context_excerpt": "生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。"
+        },
+        {
+         "claim_id": "cl2",
+         "context_id": "C1",
+         "code": "quote_not_found",
+         "quote": "生鲜食品质量问题需在签收后 24 小时内拍照反馈",
+         "context_excerpt": "生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。"
+        },
+        {
+         "claim_id": "cl4",
+         "context_id": "C1",
+         "code": "quote_not_found",
+         "quote": "生鲜食品质量问题需在签收后 24 小时内拍照反馈",
+         "context_excerpt": "生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。"
+        }
+       ],
+       "mixed_sentence_warnings": [],
+       "repair_triggered": true,
+       "repair_count": 1,
+       "passed_after_repair": false,
+       "final_errors": [
+        {
+         "code": "patch_schema_invalid",
+         "error_type": "ValidationError",
+         "validation_errors": "3 validation errors for EvidencePatch\nfixes.0.evidence_refs\n  Input should be a valid array [type=list_type, input_value=None, input_type=NoneType]\n    For further information visit https://errors.pydantic.dev/2.14/v/list_type\nfixes.1.evidence_refs\n  Input should be a valid array [type=list_type, input_value=None, input_type=NoneType]\n    For further information visit https://errors.pydantic.dev/2.14/v/list_type\nfixes.2.evidence_refs\n  Input should be a valid array [type=list_type, input_value=None, input_type=NoneType]\n    For further information visit https://errors.pydantic.dev/2.14/v/list_type"
+        }
+       ],
+       "patch_schema_sha256": "da70dc607aaf70879cf40e3420bc5440829b05d9be344a07907947df8c891cb8",
+       "patch_applied_claims": [],
+       "patch_semantic_review_required": false
+      }
+     },
+     "raw_output": null,
+     "raw_truncated": false
+    },
+    {
+     "metric_name": "answer_correctness",
+     "metric_version": "v3",
+     "status": "evaluated",
+     "score": 0.0,
+     "skipped_reason": null,
+     "invalid_reason": null,
+     "error_type": null,
+     "error_message": null,
+     "latency_ms": 2442,
+     "judge_config": {
+      "agent": "rag_judge_answer_correctness",
+      "model": "qwen-max",
+      "temperature": 0.0,
+      "max_tokens": 8192,
+      "prompt_version": "v1.2.4",
+      "resolved_prompt_version": "v1.2.4",
+      "prompt_sha256": "ca489fcf39691e9a71aec004a01938fb6c70b7b17da3c55fb0ada066e1d24968",
+      "schema_version": "rag_judge_schema_v3",
+      "rubric_version": "v1.2.0",
+      "metric_version": "v3"
+     },
+     "details": {
+      "missing_points": [
+       "不能按该条款反馈"
+      ],
+      "wrong_facts": [
+       "是的，可以按政策反馈"
+      ],
+      "reason": "首句给出了错误的结论，尽管后文有正确的解释",
+      "token_usage": {
+       "input": 2287,
+       "output": 61
+      },
+      "cost": "0",
+      "agent_contract": {
+       "contract_version": "v1.2.4",
+       "correctness_first_sentence_warning": null
+      }
+     },
+     "raw_output": "```json\n{\n  \"score\": 0.0,\n  \"missing_points\": [\"不能按该条款反馈\"],\n  \"wrong_facts\": [\"是的，可以按政策反馈\"],\n  \"reason\": \"首句给出了错误的结论，尽管后文有正确的解释\"\n}\n```",
+     "raw_truncated": false
+    },
+    {
+     "metric_name": "answer_relevancy",
+     "metric_version": "v3",
+     "status": "evaluated",
+     "score": 0.9,
+     "skipped_reason": null,
+     "invalid_reason": null,
+     "error_type": null,
+     "error_message": null,
+     "latency_ms": 1504,
+     "judge_config": {
+      "agent": "rag_judge_answer_relevancy",
+      "model": "qwen-max",
+      "temperature": 0.0,
+      "max_tokens": 8192,
+      "prompt_version": "v1.2.4",
+      "resolved_prompt_version": "v1.2.4",
+      "prompt_sha256": "f3efe431683ed26ba0a7338e6e2b5841d65d42dadde5cac30b8340e2ca95dfdc",
+      "schema_version": "rag_judge_schema_v3",
+      "rubric_version": "v1.2.0",
+      "metric_version": "v3"
+     },
+     "details": {
+      "reason": "回答完整回应了问题，明确了政策规定和超时情况，并提供了下一步建议。",
+      "token_usage": {
+       "input": 1562,
+       "output": 39
+      },
+      "cost": "0"
+     },
+     "raw_output": "```json\n{\n  \"score\": 0.9,\n  \"reason\": \"回答完整回应了问题，明确了政策规定和超时情况，并提供了下一步建议。\"\n}\n```",
+     "raw_truncated": false
+    }
+   ],
+   "claims": [],
+   "agent_contract": {
+    "contract_version": "v1.2.4",
+    "quote_validator_sha256": "153ab4a6f203ca0398133a2cc2ca6fda834f7670afa90651c66cfa44b92c722a",
+    "quote_precheck_errors": [
+     {
+      "claim_id": "cl1",
+      "context_id": "C1",
+      "code": "quote_not_found",
+      "quote": "生鲜食品质量问题需在签收后 24 小时内拍照反馈",
+      "context_excerpt": "生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。"
+     },
+     {
+      "claim_id": "cl2",
+      "context_id": "C1",
+      "code": "quote_not_found",
+      "quote": "生鲜食品质量问题需在签收后 24 小时内拍照反馈",
+      "context_excerpt": "生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。"
+     },
+     {
+      "claim_id": "cl4",
+      "context_id": "C1",
+      "code": "quote_not_found",
+      "quote": "生鲜食品质量问题需在签收后 24 小时内拍照反馈",
+      "context_excerpt": "生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。"
+     }
+    ],
+    "mixed_sentence_warnings": [],
+    "repair_triggered": true,
+    "repair_count": 1,
+    "passed_after_repair": false,
+    "final_errors": [
+     {
+      "code": "patch_schema_invalid",
+      "error_type": "ValidationError",
+      "validation_errors": "3 validation errors for EvidencePatch\nfixes.0.evidence_refs\n  Input should be a valid array [type=list_type, input_value=None, input_type=NoneType]\n    For further information visit https://errors.pydantic.dev/2.14/v/list_type\nfixes.1.evidence_refs\n  Input should be a valid array [type=list_type, input_value=None, input_type=NoneType]\n    For further information visit https://errors.pydantic.dev/2.14/v/list_type\nfixes.2.evidence_refs\n  Input should be a valid array [type=list_type, input_value=None, input_type=NoneType]\n    For further information visit https://errors.pydantic.dev/2.14/v/list_type"
+     }
+    ],
+    "patch_schema_sha256": "da70dc607aaf70879cf40e3420bc5440829b05d9be344a07907947df8c891cb8",
+    "patch_applied_claims": [],
+    "patch_semantic_review_required": false
+   },
+   "c_contract": {
+    "contract_version": "v1.2.4",
+    "correctness_first_sentence_warning": null
+   },
+   "calls": {
+    "calls": 4,
+    "primary": 3,
+    "patch": 1,
+    "repair": 0,
+    "retry": 0,
+    "input_tokens": 12313,
+    "output_tokens": 1326,
+    "cost_cny": 0.0422808
+   },
+   "status": "stopped",
+   "checks": {
+    "passed": false,
+    "failures": [
+     "faithfulness=invalid(contract_violation)",
+     "faithfulness_strict=invalid(contract_violation)"
+    ],
+    "notes": [],
+    "stop_codes": [
+     "invalid_contract"
+    ]
+   }
+  }
+ ],
+ "calls": [
+  {
+   "call_index": 1,
+   "ledger_seq": 1,
+   "case_id": "Q23",
+   "metric": "faithfulness",
+   "kind": "primary",
+   "model_requested": "qwen-max",
+   "temperature": 0.0,
+   "max_tokens": 8192,
+   "prompt_version": "v1.2.4",
+   "prompt_sha256": "52f1b3cf3b92d6f9616e73ed7de26a0721d65c27763f48edd41b38f1e06a025d",
+   "system_prompt_sha256": "52f1b3cf3b92d6f9616e73ed7de26a0721d65c27763f48edd41b38f1e06a025d",
+   "system_head": "你是 RAG 评测的 Faithfulness 裁判（v1.2.3 / Schema v3）。\n\n## 输入\n- 用户问题（query）\n- 模型回答（answer）\n- 检索上下文（contexts），按输入顺序编号为 C1、C2、……\n- 合法上下文编号列表（context_ids），例如 `[\"C1\", \"C2\"]`；`evidence_refs.context_id` 只能从该列表选择。\n",
+   "original_raw": null,
+   "validation_error": null,
+   "patch_claim_ids": [],
+   "content": "```json\n{\n  \"claims\": [\n    {\n      \"claim_id\": \"cl1\",\n      \"claim\": \"可以按政策反馈\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"unsupported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"生鲜食品质量问题需在签收后 24 小时内拍照反馈\"}\n      ],\n      \"reason\": \"文档规定生鲜食品质量问题需在签收后24小时内反馈，而用户是在第2天发现并反馈，已超出时限。\"\n    },\n    {\n      \"claim_id\": \"cl2\",\n      \"claim\": \"生鲜食品质量问题需在签收后 24 小时内拍照反馈\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"生鲜食品质量问题需在签收后 24 小时内拍照反馈\"}\n      ],\n      \"reason\": \"C1 逐字原文\"\n    },\n    {\n      \"claim_id\": \"cl3\",\n      \"claim\": \"您是在签收后第 2 天（即超过 24 小时）才发现并反馈\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"fact\",\n      \"support_status\": \"insufficient_evidence\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [],\n      \"reason\": \"上下文未提供具体时间信息，无法确认用户是否在24小时内反馈。\"\n    },\n    {\n      \"claim_id\": \"cl4\",\n      \"claim\": \"已超出政策规定的反馈时效\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"derived\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"生鲜食品质量问题需在签收后 24 小时内拍照反馈\"}\n      ],\n      \"reason\": \"根据文档的24小时反馈时限推导出超时结论。\"\n    },\n    {\n      \"claim_id\": \"cl5\",\n      \"claim\": \"该时限是硬性要求\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"condition\",\n      \"support_status\": \"insufficient_evidence\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [],\n      \"reason\": \"文档未明确说明该时限是否有例外情形或宽限期。\"\n    },\n    {\n      \"claim_id\": \"cl6\",\n      \"claim\": \"文档未提及例外情形或宽限期\",\n      \"claim_type\": \"non_factual\",\n      \"claim_subtype\": \"absence\",\n      \"support_status\": null,\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [],\n      \"reason\": \"文档未提及例外情形或宽限期。\"\n    },\n    {\n      \"claim_id\": \"cl7\",\n      \"claim\": \"24 小时起算点为“签收完成时间”（非签收日零点），且须“拍照反馈”（需保留问题实物及包装证据）\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"condition\",\n      \"support_status\": \"insufficient_evidence\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [],\n      \"reason\": \"文档未明确说明24小时起算点的具体定义和拍照反馈的要求。\"\n    },\n    {\n      \"claim_id\": \"cl8\",\n      \"claim\": \"建议立即通过订单页面或联系在线客服（9:00–21:00）提交带时间水印的照片凭证\",\n      \"claim_type\": \"non_factual\",\n      \"claim_subtype\": \"advice\",\n      \"support_status\": null,\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [],\n      \"reason\": \"纯建议\"\n    },\n    {\n      \"claim_id\": \"cl9\",\n      \"claim\": \"若已超时，可尝试联系客服说明具体情况（如物流延误导致开箱延迟、问题明显且可验证等），但是否受理由商家个案判断，政策不保证支持\",\n      \"claim_type\": \"non_factual\",\n      \"claim_subtype\": \"advice\",\n      \"support_status\": null,\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [],\n      \"reason\": \"纯建议\"\n    },\n    {\n      \"claim_id\": \"cl10\",\n      \"claim\": \"文档未说明超时后申诉渠道或人工复核机制\",\n      \"claim_type\": \"non_factual\",\n      \"claim_subtype\": \"absence\",\n      \"support_status\": null,\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [],\n      \"reason\": \"文档未说明超时后申诉渠道或人工复核机制。\"\n    }\n  ],\n  \"reason\": \"\"\n}\n```",
+   "response_model": "qwen-max",
+   "usage": {
+    "input": 6668,
+    "output": 1185
+   },
+   "latency_ms": 26674.845200031996,
+   "error": null
+  },
+  {
+   "call_index": 2,
+   "ledger_seq": 2,
+   "case_id": "Q23",
+   "metric": "faithfulness",
+   "kind": "patch",
+   "model_requested": null,
+   "temperature": 0.0,
+   "max_tokens": null,
+   "prompt_version": "v1.2.4",
+   "prompt_sha256": "52f1b3cf3b92d6f9616e73ed7de26a0721d65c27763f48edd41b38f1e06a025d",
+   "system_prompt_sha256": "4d7b82e816b7cb7e454799c12f0851d63251ed9f4585d89382e3bb670c393382",
+   "system_head": "你是 RAG Judge 的 evidence patch 修复器。只输出 JSON 对象，结构必须严格如下：{\"fixes\":[{\"claim_id\":\"cl1\",\"evidence_refs\":[{\"context_id\":\"C1\",\"quote\":\"context 连续原文\"}]}]}。示例：{\"fixes\": [{\"claim_id\": \"cl2\", \"evidence_refs\": [{",
+   "original_raw": null,
+   "validation_error": null,
+   "patch_claim_ids": [
+    "cl1",
+    "cl2",
+    "cl4"
+   ],
+   "content": "{\"fixes\":[{\"claim_id\":\"cl1\",\"evidence_refs\":null},{\"claim_id\":\"cl2\",\"evidence_refs\":null},{\"claim_id\":\"cl4\",\"evidence_refs\":null}]}",
+   "response_model": "qwen-max",
+   "usage": {
+    "input": 1796,
+    "output": 41
+   },
+   "latency_ms": 1924.8037000652403,
+   "error": null
+  },
+  {
+   "call_index": 3,
+   "ledger_seq": 3,
+   "case_id": "Q23",
+   "metric": "answer_correctness",
+   "kind": "primary",
+   "model_requested": "qwen-max",
+   "temperature": 0.0,
+   "max_tokens": 8192,
+   "prompt_version": "v1.2.4",
+   "prompt_sha256": "ca489fcf39691e9a71aec004a01938fb6c70b7b17da3c55fb0ada066e1d24968",
+   "system_prompt_sha256": "ca489fcf39691e9a71aec004a01938fb6c70b7b17da3c55fb0ada066e1d24968",
+   "system_head": "你是 RAG 评测的 Answer Correctness 裁判（v1.2.4）。\n\n## 输入\n- 用户问题（query）\n- 模型回答（answer）\n- 金标答案（gold_answer）\n\n当前输入契约没有 `answerability` 字段；按以下规则从 gold_answer 推断：\n\n| gold_answer 特征 | 推断 |\n|---|---|\n| 含“文档未提及/未说明/无",
+   "original_raw": null,
+   "validation_error": null,
+   "patch_claim_ids": [],
+   "content": "```json\n{\n  \"score\": 0.0,\n  \"missing_points\": [\"不能按该条款反馈\"],\n  \"wrong_facts\": [\"是的，可以按政策反馈\"],\n  \"reason\": \"首句给出了错误的结论，尽管后文有正确的解释\"\n}\n```",
+   "response_model": "qwen-max",
+   "usage": {
+    "input": 2287,
+    "output": 61
+   },
+   "latency_ms": 2436.6902000037953,
+   "error": null
+  },
+  {
+   "call_index": 4,
+   "ledger_seq": 4,
+   "case_id": "Q23",
+   "metric": "answer_relevancy",
+   "kind": "primary",
+   "model_requested": "qwen-max",
+   "temperature": 0.0,
+   "max_tokens": 8192,
+   "prompt_version": "v1.2.4",
+   "prompt_sha256": "f3efe431683ed26ba0a7338e6e2b5841d65d42dadde5cac30b8340e2ca95dfdc",
+   "system_prompt_sha256": "f3efe431683ed26ba0a7338e6e2b5841d65d42dadde5cac30b8340e2ca95dfdc",
+   "system_head": "你是 RAG 评测的 Answer Relevancy 裁判（v1.2.3）。\n\n## 输入\n- 用户问题（query）\n- 模型回答（answer）\n\n## 任务\n只判断回答是否围绕用户问题展开、是否回应了问题的各个部分。\n不判断答案是否符合事实、是否有上下文依据；正确性由 Correctness 负责，证据支持由 Faithfulness 负责。\n\n## 1. 评分区间（不重叠）\n- `0.0",
+   "original_raw": null,
+   "validation_error": null,
+   "patch_claim_ids": [],
+   "content": "```json\n{\n  \"score\": 0.9,\n  \"reason\": \"回答完整回应了问题，明确了政策规定和超时情况，并提供了下一步建议。\"\n}\n```",
+   "response_model": "qwen-max",
+   "usage": {
+    "input": 1562,
+    "output": 39
+   },
+   "latency_ms": 1500.0490999082103,
+   "error": null
+  }
+ ],
+ "stop_triggered": true,
+ "stop_reason": "Q23: faithfulness=invalid(contract_violation), faithfulness_strict=invalid(contract_violation)",
+ "stop_codes": [
+  "invalid_contract"
+ ],
+ "gate": {
+  "passed": false,
+  "verified": false,
+  "semantic_pass_target_miss": false,
+  "failures": [
+   "faithfulness=invalid(contract_violation)",
+   "faithfulness_strict=invalid(contract_violation)"
+  ],
+  "notes": []
+ },
+ "stop_conditions": [
+  {
+   "code": "invalid_contract",
+   "condition": "任一指标 invalid(contract_violation)",
+   "triggered": true,
+   "evidence": "invalid/failed metric present"
+  },
+  {
+   "code": "schema_or_patch_failure",
+   "condition": "初始 Schema 失败，或 patch 1 次后仍失败",
+   "triggered": true,
+   "evidence": "Q23 final_errors=[{'code': 'patch_schema_invalid', 'error_type': 'ValidationError', 'validation_errors': '3 validation errors for EvidencePatch\\nfixes.0.evidence_refs\\n  Input should be a valid array [type=list_type, input_value=None, input_type=NoneType]\\n    For further information visit https://errors.pydantic.dev/2.14/v/list_type\\nfixes.1.evidence_refs\\n  Input should be a valid array [type=list_type, input_value=None, input_type=NoneType]\\n    For further information visit https://errors.pydantic.dev/2.14/v/list_type\\nfixes.2.evidence_refs\\n  Input should be a valid array [type=list_type, input_value=None, input_type=NoneType]\\n    For further information visit https://errors.pydantic.dev/2.14/v/list_type'}]"
+  },
+  {
+   "code": "q23_patch_semantic_change",
+   "condition": "Q23 patch 改了 cl1 或其它非目标 claim",
+   "triggered": false,
+   "evidence": "changed_outside_applied=None"
+  },
+  {
+   "code": "q23_absence_contract",
+   "condition": "Q23 absence 仍为 factual/supported",
+   "triggered": false,
+   "evidence": "absence_fields=[]"
+  },
+  {
+   "code": "q23_f_or_c_target",
+   "condition": "Q23 F 或 C 目标 miss",
+   "triggered": false,
+   "evidence": "F=None, C=None"
+  },
+  {
+   "code": "q21_semantic_or_f_one",
+   "condition": "Q21 F=1.0，或仍用运费/换货 quote 支持 7 天豁免",
+   "triggered": false,
+   "evidence": "F=1.0=None, semantic_pass=None"
+  },
+  {
+   "code": "q11_quote_or_target",
+   "condition": "Q11 quote/契约违约，或三项目标任一 miss",
+   "triggered": false,
+   "evidence": "target_pass=None, quote_pass=None"
+  },
+  {
+   "code": "fingerprint_mismatch",
+   "condition": "Prompt/MANIFEST/fixture/target/patch schema/example/validator SHA 漂移",
+   "triggered": false,
+   "evidence": "fingerprint_errors=[]"
+  },
+  {
+   "code": "budget_ceiling",
+   "condition": "超过 14 calls 或 CNY 0.30",
+   "triggered": false,
+   "evidence": "calls=4, cost=0.0422808, budget_error=None"
+  },
+  {
+   "code": "ledger_or_missing_result",
+   "condition": "ledger 缺失/SHA 不匹配/uncertain_call=true，或任一 case 缺完整 F/C/R",
+   "triggered": true,
+   "evidence": "ledger_errors=[\"missing_results=['Q21:faithfulness', 'Q21:answer_correctness', 'Q21:answer_relevancy', 'Q11:faithfulness', 'Q11:answer_correctness', 'Q11:answer_relevancy']\"], uncertain=0, missing_cases=['Q11', 'Q21'], missing_metrics=[]"
+  }
+ ]
+}
