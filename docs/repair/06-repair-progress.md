@@ -1323,3 +1323,13 @@ alembic check   : No new upgrade operations detected
 - Golden：Q23 真实 raw output 仍 3× quote_not_found，claim_count=10/ supported=3/insufficient=3/non_factual=4，错误顺序 cl1/cl2/cl3。
 - 测试：全量 pytest 1083 条通过；black/flake8/mypy/lint-imports 通过；静态校验 26/26 pass，validation SHA `8e790aac…`；quote validator SHA `153ab4a6…`；audit SHA `d21cc41b…`。
 - 边界：已 frozen，未激活、未跑 Judge/10/40；未建 Run、未写 DB、未调 WeKnora；M1-D-4 blocked，M1-C/M1-D 未 accepted。
+
+### M1-D-5 v1.2.3 单案例诊断执行（2026-11-23，stopped / blocked）
+- 申请：`docs/repair/43-m1d5-v1.2.3-single-case-diagnostic-application.md`，application SHA `fb6b98e7…`；执行提交前 HEAD `3870c8c`。
+- 运行时指纹全部匹配：v1.2.3 frozen；F `52f1b3cf…`、C `a5f9e5b2…`、R `f3efe431…`、MANIFEST `7856b74e…`、validation `8e790aac…`、leakage audit `d21cc41b…`（0 findings）、quote validator `153ab4a6…`、repair `af9c103b…`；默认仍 v1.0.0。
+- Q23：首次 F 输出 cl2/cl3 quote 为 answer 截断句，Agent 预校验记录 2 条 `quote_not_found`，触发 1 次 repair；repair 输出把 `contradiction_with`/`evidence_refs` 写成字符串，`StructuredOutputError`，F/F_strict invalid。
+- Q23 结果：C=0.3（target [0.0,0.2] miss）、R=0.9（[0.7,1.0] pass）；F 无分数，F target 不适用；cl5 mixed warning 已记录；absence cl9 首次输出正确但最终 invalid。
+- 调用/成本：4 calls（primary 3、repair 1、retry 0）；input 11,962 / output 2,405；CNY 0.051797，低于 0.30；preflight 9/8。
+- Q21/Q11：因 Q23 停止条件未运行；无 C/R 重新核目标数据。
+- 结果：`docs/repair/44-m1d5-v1.2.3-single-case-diagnostic-results.md`（MD SHA `8c73f5bd…`）；raw `m1d5-single-case-results.json`（SHA `2394bac8…`）。
+- 边界：未重跑、未改 Prompt/Agent/Service/fixture；未建 Run、未写 DB、未调 WeKnora、未激活 v1.2.3、未跑 10/40；M1-D-5 diagnostic blocked，M1-C/M1-D 未 accepted。
