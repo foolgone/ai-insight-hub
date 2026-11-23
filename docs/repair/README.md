@@ -8,7 +8,7 @@
 > 4. 未冻结的定义/目标，不得进入代码实现。
 >
 > 最后更新：2026-11-23
-> 当前阶段：**M1-D-6 v1.2.4 已实现/验证，待 freeze 审核；未冻结、未激活、未跑 Judge**
+> 当前阶段：**M1-D-6 v1.2.4 已实现，待 freeze 复验；未冻结、未激活、未跑 Judge**
 > 当前阻塞决策：**是否冻结 v1.2.4**
 > 当前不做：跑 Judge、单案例/10/40、v1.2.4 激活、M2/M3、生产 migration
 
@@ -19,7 +19,7 @@
 | 项 | 状态 |
 |---|---|
 | 项目阶段 | 核心研发向产品化过渡 |
-| 主线 | M1 评测可信度；v1.2.3 `frozen`；M1-D-5 blocked；v1.2.4 implemented/verified 待 freeze |
+| 主线 | M1 评测可信度；v1.2.3 `frozen`；M1-D-5 blocked；v1.2.4 implemented、待 freeze 复验 |
 | 并行 A | M2 只读工作台；API 审计完成，前端未开始 |
 | 并行 B | M4-A 生产约束；未开始 |
 | M3 优化闭环 | 未开始；等 M1 可信、M2 可用 |
@@ -60,7 +60,7 @@
 | 里程碑 | 状态 | 已完成证据 | 当前阻塞/下一步 |
 |---|---|---|---|
 | **M0 评测基础设施** | `accepted`（冻结维护） | Dataset/Version/Item、RAG Adapter、Trace、检索指标、Judge、Run/Celery、持久化聚合、WeKnora 联调 | 只修缺陷/兼容，不再架构重构 |
-| **M1 评测可信度** | `in_progress` | M1-A 语义/Gold/target 已冻结；M1-B B 双指标草案（`19-…`）；M1-C C1–C4 已实现/验证；M1-D-0 Prompt `frozen`；M1-D-1 blocked at Q11；M1-D-2 v1.2.1 `frozen`；M1-D-3 blocked at Q23；M1-D-4 v1.2.2 `frozen`、Q23 invalid -> blocked；M1-D-5 v1.2.3 `frozen`、单案例 Q23 invalid -> diagnostic blocked；M1-D-6 v1.2.4 implemented/verified，待 freeze | v1.2.x 未激活；10/40 Judge 未批准；M1-E 未开始 |
+| **M1 评测可信度** | `in_progress` | M1-A 语义/Gold/target 已冻结；M1-B B 双指标草案（`19-…`）；M1-C C1–C4 已实现/验证；M1-D-0 Prompt `frozen`；M1-D-1 blocked at Q11；M1-D-2 v1.2.1 `frozen`；M1-D-3 blocked at Q23；M1-D-4 v1.2.2 `frozen`、Q23 invalid -> blocked；M1-D-5 v1.2.3 `frozen`、单案例 Q23 invalid -> diagnostic blocked；M1-D-6 v1.2.4 implemented，待 freeze 复验 | v1.2.x 未激活；10/40 Judge 未批准；M1-E 未开始 |
 | **M2 评测工作台** | `audit_complete` / 实现 `not_started` | API 审计完成：Run/详情/结果/失败/Trace 可用；前端 0 页面 | 等 M1-B 冻结后再决定是否写 P0 前端 |
 | **M3 RAG 优化闭环** | `not_started` | 无 | 依赖 M1 可信 + M2 可用 |
 | **M4 生产交付** | 基础已有 / 约束 `not_started` | 认证、加密、限流、Prometheus/Grafana/Sentry、备份/恢复演练 | M4-A：租户、保留期、审计、告警、成本、数据权利 |
@@ -147,7 +147,7 @@
 | `backend/app/prompts/rag_judge/v1.2.4/` | F `52f1b3cf…`（不变）/ C `ca489fcf…` / R `f3efe431…`（不变）；MANIFEST `31cd22a3…` | `design_draft` / `active=false` | evidence-only patch、C 首句规则、patch schema/example |
 | `docs/repair/phase3e/m1d6-prompt-v1.2.4-validation.json` | `dadebc31…` | `static_validation` 23/23 | patch schema/example、C 规则、泄漏审计、旧版本隔离 |
 | `docs/repair/phase3e/m1d6-prompt-leakage-audit.json` | `7a5fa618…` | `leakage_audit` findings=0 | 10 gate case answer/gold/claim/evidence 审计 |
-| `docs/repair/46-m1d6-v1.2.4-implementation.md` | implementation report | `implemented/verified`；未 frozen | patch flow、effective ID、conflict、final_errors、C warning |
+| `docs/repair/46-m1d6-v1.2.4-implementation.md` | implementation report | `implemented`；待复验；未 frozen | patch flow、effective ID、conflict、final_errors、C warning |
 
 ### 3.2 决策时间线
 
