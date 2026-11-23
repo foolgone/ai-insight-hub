@@ -19,13 +19,13 @@ PATCH_SCHEMA_SHA = "da70dc607aaf70879cf40e3420bc5440829b05d9be344a07907947df8c89
 PATCH_EXAMPLE_SHA = "629d74ac3bba3a36372c8a54796de6c5c91fc59b20a235061e0c86ae39129a47"
 
 
-def test_v124_manifest_design_draft_and_assets() -> None:
+def test_v124_manifest_frozen_and_assets() -> None:
     manifest = load_prompt_manifest(VERSION)
 
     assert manifest["version"] == VERSION
-    assert manifest["status"] == "design_draft"
+    assert manifest["status"] == "frozen"
     assert manifest["active"] is False
-    assert manifest["frozen"] is False
+    assert manifest["frozen"] is True
     assert manifest["rubric_version"] == "v1.2.0"
     assert manifest["default_prompt_version"] == "v1.0.0"
     assert manifest["contract_repair_version"] == "v1.2.4"

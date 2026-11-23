@@ -80,9 +80,9 @@ def main() -> None:
 
     checks: list[dict[str, Any]] = [
         {"check": "manifest_version", "ok": manifest.get("version") == VERSION},
-        {"check": "manifest_status_design_draft", "ok": manifest.get("status") == "design_draft"},
+        {"check": "manifest_status_frozen", "ok": manifest.get("status") == "frozen"},
         {"check": "manifest_active_false", "ok": manifest.get("active") is False},
-        {"check": "manifest_frozen_false", "ok": manifest.get("frozen") is False},
+        {"check": "manifest_frozen_true", "ok": manifest.get("frozen") is True},
         {
             "check": "manifest_schema_v3",
             "ok": manifest.get("schema_version") == "rag_judge_schema_v3",

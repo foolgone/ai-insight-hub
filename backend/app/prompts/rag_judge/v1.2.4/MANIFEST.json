@@ -1,11 +1,11 @@
 {
   "version": "v1.2.4",
-  "status": "design_draft",
+  "status": "frozen",
   "active": false,
-  "frozen": false,
+  "frozen": true,
   "runtime_active": false,
   "date": "2026-11-23",
-  "note": "M1-D-6：v1.2.4 使用 evidence-only patch repair，禁止 repair 修改 claim/support_status；C prompt 增加首句/结论矛盾硬上限。F 保持不变；rubric_version v1.2.0；target v1.0.2 未重算；active=false，默认仍 v1.0.0，未跑 Judge。",
+  "note": "M1-D-6：v1.2.4 已完成 metadata-only freeze。Evidence-only patch repair；C prompt 首句/结论矛盾硬上限；F SHA 不变；patch prompt 乱码已修复；rubric_version v1.2.0；target v1.0.2 未重算；active=false，默认仍 v1.0.0，未跑 Judge。",
   "schema_version": "rag_judge_schema_v3",
   "rubric_version": "v1.2.0",
   "metric_version_mapping": {

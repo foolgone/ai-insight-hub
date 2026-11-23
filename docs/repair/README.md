@@ -8,9 +8,9 @@
 > 4. 未冻结的定义/目标，不得进入代码实现。
 >
 > 最后更新：2026-11-23
-> 当前阶段：**M1-D-6 v1.2.4 已实现，待 freeze 复验；未冻结、未激活、未跑 Judge**
-> 当前阻塞决策：**是否冻结 v1.2.4**
-> 当前不做：跑 Judge、单案例/10/40、v1.2.4 激活、M2/M3、生产 migration
+> 当前阶段：**M1-D-6 v1.2.4 Patch Repair 已 metadata-only 冻结；未激活、未跑 Judge**
+> 当前阻塞决策：**是否批准 Q23/Q21/Q11 单案例诊断（freeze 后单独申请）**
+> 当前不做：跑 Judge、跑 10/40、v1.2.4 激活、M2/M3、生产 migration
 
 ---
 
@@ -19,25 +19,25 @@
 | 项 | 状态 |
 |---|---|
 | 项目阶段 | 核心研发向产品化过渡 |
-| 主线 | M1 评测可信度；v1.2.3 `frozen`；M1-D-5 blocked；v1.2.4 implemented、待 freeze 复验 |
+| 主线 | M1 评测可信度；v1.2.3/v1.2.4 `frozen`；M1-D-5 blocked；M1-D-6 待单案例 |
 | 并行 A | M2 只读工作台；API 审计完成，前端未开始 |
 | 并行 B | M4-A 生产约束；未开始 |
 | M3 优化闭环 | 未开始；等 M1 可信、M2 可用 |
-| 当前可写代码？ | **否**；先审 v1.2.4 实现与 freeze |
-| 当前可跑 Judge？ | **否**；单案例已停止，10 条未批准 |
-| v1.2.1 / v1.2.2 / v1.2.3 / v1.2.4 | v1.2.1-3 `frozen`；v1.2.4 `design_draft`、`active=false`；默认仍 `v1.0.0` |
-| 最近一次决策 | 2026-11-23 v1.2.4 evidence-only patch + C 首句规则实现/验证 |
-| 下一个交付 | 人工审核 v1.2.4 freeze proposal |
+| 当前可写代码？ | **否**；先审单案例诊断申请 |
+| 当前可跑 Judge？ | **否**；单案例/10 条未批准 |
+| v1.2.1 / v1.2.2 / v1.2.3 / v1.2.4 | 四者均 `frozen`；v1.2.4 `active=false`；默认仍 `v1.0.0` |
+| 最近一次决策 | 2026-11-23 v1.2.4 metadata-only freeze 通过 |
+| 下一个交付 | 人工审核 Q23/Q21/Q11 单案例诊断申请 |
 
 ### 现在只需要一个决定
 
-**v1.2.4 已实现/验证；是否冻结。**
+**v1.2.4 已冻结；是否批准 Q23/Q21/Q11 单案例诊断。**
 
 | 选项 | 含义 | 结果 |
 |---|---|---|
-| **批准冻结** | 接受 evidence-only patch、final_errors、C 首句规则、版本/预算/门禁 | 另开 freeze record；单案例仍需单独批准 |
-| **改实现** | patch/ C 规则/测试需调整 | 留在 design_draft |
-| **暂缓** | 不进入 v1.2.4 | v1.2.3 保持 frozen，M1-D-5 blocked |
+| **批准单案例** | 接受 patch repair、ledger、Q23/Q21/Q11 验收点与预算 | 单独执行 3 案例各 1 次；不跑 10 条 |
+| **先补材料** | 单案例申请需补 ledger/SHA/预算/停止条件 | 保持 frozen，不跑 Judge |
+| **暂缓** | 不跑单案例 | 保持 frozen，M1-D-6 diagnostic pending |
 
 ---
 
@@ -60,7 +60,7 @@
 | 里程碑 | 状态 | 已完成证据 | 当前阻塞/下一步 |
 |---|---|---|---|
 | **M0 评测基础设施** | `accepted`（冻结维护） | Dataset/Version/Item、RAG Adapter、Trace、检索指标、Judge、Run/Celery、持久化聚合、WeKnora 联调 | 只修缺陷/兼容，不再架构重构 |
-| **M1 评测可信度** | `in_progress` | M1-A 语义/Gold/target 已冻结；M1-B B 双指标草案（`19-…`）；M1-C C1–C4 已实现/验证；M1-D-0 Prompt `frozen`；M1-D-1 blocked at Q11；M1-D-2 v1.2.1 `frozen`；M1-D-3 blocked at Q23；M1-D-4 v1.2.2 `frozen`、Q23 invalid -> blocked；M1-D-5 v1.2.3 `frozen`、单案例 Q23 invalid -> diagnostic blocked；M1-D-6 v1.2.4 implemented，待 freeze 复验 | v1.2.x 未激活；10/40 Judge 未批准；M1-E 未开始 |
+| **M1 评测可信度** | `in_progress` | M1-A 语义/Gold/target 已冻结；M1-B B 双指标草案（`19-…`）；M1-C C1–C4 已实现/验证；M1-D-0 Prompt `frozen`；M1-D-1 blocked at Q11；M1-D-2 v1.2.1 `frozen`；M1-D-3 blocked at Q23；M1-D-4 v1.2.2 `frozen`、Q23 invalid -> blocked；M1-D-5 v1.2.3 `frozen`、单案例 Q23 invalid -> diagnostic blocked；M1-D-6 v1.2.4 `frozen`、待单案例 | v1.2.x 未激活；10/40 Judge 未批准；M1-E 未开始 |
 | **M2 评测工作台** | `audit_complete` / 实现 `not_started` | API 审计完成：Run/详情/结果/失败/Trace 可用；前端 0 页面 | 等 M1-B 冻结后再决定是否写 P0 前端 |
 | **M3 RAG 优化闭环** | `not_started` | 无 | 依赖 M1 可信 + M2 可用 |
 | **M4 生产交付** | 基础已有 / 约束 `not_started` | 认证、加密、限流、Prometheus/Grafana/Sentry、备份/恢复演练 | M4-A：租户、保留期、审计、告警、成本、数据权利 |
@@ -72,7 +72,7 @@
 | M1-A 语义规范 + Gold + 目标 | `accepted` | 语义规范冻结 2026-11-18；final_labels SHA `f139623f…`；target v1.0.2 SHA `3ee15dfc…`（`freeze_draft_pending_human`，旧 v1.0.1 只读） |
 | M1-B Schema/Service 定稿 | `implemented`，**未 `accepted`** | P1-1 关闭；P1-2 证据契约已定；B 双指标冻结草案 `19-…` 待审核 |
 | M1-C 实现与测试 | `implemented` / `verified`，**未 `accepted`** | C1 Schema v3、C2 migration 022、C3 Service 双指标/invalid/聚合/retry、C4 静态回归已完成；10/40 Judge 未运行 |
-| M1-D 有限实验 | `in_progress`（M1-D-0 … M1-D-6） | M1-D-0 Prompt `frozen`；M1-D-1 blocked at Q11；M1-D-2 v1.2.1 `frozen`；M1-D-3 blocked at Q23；M1-D-4 v1.2.2 `frozen`、Q23 invalid -> blocked；M1-D-5 v1.2.3 `frozen`、单案例 Q23 invalid -> diagnostic blocked；M1-D-6 v1.2.4 implemented/verified，待 freeze |
+| M1-D 有限实验 | `in_progress`（M1-D-0 … M1-D-6） | M1-D-0 Prompt `frozen`；M1-D-1 blocked at Q11；M1-D-2 v1.2.1 `frozen`；M1-D-3 blocked at Q23；M1-D-4 v1.2.2 `frozen`、Q23 invalid -> blocked；M1-D-5 v1.2.3 `frozen`、单案例 Q23 invalid -> diagnostic blocked；M1-D-6 v1.2.4 `frozen`、待单案例 |
 | M1-E 质量验收 | `not_started` | 四组报告（HG/provisional/40 条/系统质量）+ 已知问题决定 + SHA 追溯 |
 
 ### 2.2 门禁视角
@@ -144,10 +144,11 @@
 | `docs/repair/44-m1d5-v1.2.3-single-case-diagnostic-results.md` | report SHA `8c73f5bd…` | `stopped` / `blocked` | Q23 repair 后 Schema 失败；F invalid；C target miss；Q21/Q11 未运行 |
 | `docs/repair/phase3e/m1d5-single-case-results.json` | `2394bac8…` | `raw_results` | 4 calls（3 primary + 1 repair）/ CNY 0.051797；Q23 首次与 repair 输出 |
 | `docs/repair/45-m1d6-v1.2.4-evidence-patch-design.md` | design/scope r2 | `approved_with_changes`；实现见 `46-…` | evidence-only patch、final_errors、C 首句规则、ledger、预算/门禁 |
-| `backend/app/prompts/rag_judge/v1.2.4/` | F `52f1b3cf…`（不变）/ C `ca489fcf…` / R `f3efe431…`（不变）；MANIFEST `31cd22a3…` | `design_draft` / `active=false` | evidence-only patch、C 首句规则、patch schema/example |
-| `docs/repair/phase3e/m1d6-prompt-v1.2.4-validation.json` | `dadebc31…` | `static_validation` 23/23 | patch schema/example、C 规则、泄漏审计、旧版本隔离 |
+| `backend/app/prompts/rag_judge/v1.2.4/` | F `52f1b3cf…`（不变）/ C `ca489fcf…` / R `f3efe431…`（不变）；MANIFEST `33cad3a8…` | `frozen` / `active=false` | evidence-only patch、C 首句规则、patch schema/example |
+| `docs/repair/phase3e/m1d6-prompt-v1.2.4-validation.json` | `9ecdb424…` | `static_validation` 23/23 | patch schema/example、C 规则、泄漏审计、旧版本隔离 |
 | `docs/repair/phase3e/m1d6-prompt-leakage-audit.json` | `7a5fa618…` | `leakage_audit` findings=0 | 10 gate case answer/gold/claim/evidence 审计 |
-| `docs/repair/46-m1d6-v1.2.4-implementation.md` | implementation report | `implemented`；待复验；未 frozen | patch flow、effective ID、conflict、final_errors、C warning |
+| `docs/repair/46-m1d6-v1.2.4-implementation.md` | implementation report | `frozen` / `implemented` | patch flow、effective ID、conflict、final_errors、C warning |
+| `docs/repair/47-m1d6-v1.2.4-freeze-record.md` | freeze record | `frozen` | 旧/新 MANIFEST、validation、patch schema/example、乱码修复、C 规则、ledger/activation requirements |
 
 ### 3.2 决策时间线
 
@@ -185,6 +186,7 @@
 | 2026-11-23 | v1.2.3 Q23/Q21/Q11 单案例执行：Q23 repair 后仍 invalid | `stopped` / `blocked`；4 calls / CNY 0.051797；Q21/Q11 未运行 |
 | 2026-11-23 | 提交 v1.2.4 Evidence-only Patch Repair 设计 | `design_draft_pending_review`；未实现 |
 | 2026-11-23 | v1.2.4 设计 approve_with_changes；P1-1~P1-4 修订并实现/验证 | `design_draft` / `implemented/verified`；待 freeze |
+| 2026-11-23 | v1.2.4 乱码修复复审通过；metadata-only freeze | `frozen` / `active=false`；未激活；单案例未批准 |
 
 ---
 
@@ -331,9 +333,9 @@
 
 **后续（未批准）**：
 
-1. 人工审核 v1.2.4 实现与 freeze proposal；本轮只批 freeze，不跑 Judge；
-2. freeze 通过后，单案例 Q23/Q21/Q11 必须三案例全跑并重新批准；C 首句规则需重新核 C 目标；
-3. 未通过前不跑单案例/10/40；不得复用 v1.2.1 或 v1.2.3 批准；
+1. 人工审核 Q23/Q21/Q11 单案例诊断申请；必须带 append-only ledger；
+2. 单案例预算 9 主 + 3 patch + 2 retry = 14 / CNY 0.30；patch 后 claim-level 人工复核；
+3. 未通过前不跑 10/40；不得复用 v1.2.1/v1.2.3 批准；
 4. 40 条分层报告（HG 13 / provisional 27 分开）；
 5. 6 条缺失 baseline 按方案 A 标 `baseline_delta: unavailable`，不跑 Judge 补齐；
 6. 四组报告 + 已知问题接受/修复/延期 + SHA 追溯；

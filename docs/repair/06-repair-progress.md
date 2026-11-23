@@ -1345,9 +1345,9 @@ alembic check   : No new upgrade operations detected
 - 版本：v1.2.4 / rubric v1.2.0 / schema+metric v3 / target v1.0.2 / default v1.0.0；F 可保持 52f1b3cf…，C 变化，R 保持 f3efe431…。
 - 门禁：本轮只批设计；实现、freeze、单案例 Q23/Q21/Q11、10、40 均需另行批准；未激活 v1.2.4。
 
-### M1-D-6 v1.2.4 Evidence-only Patch Repair 实现（2026-11-23，design_draft / implemented，待 freeze 复验）
-- 文档：`docs/repair/46-m1d6-v1.2.4-implementation.md`；设计 r2 P1-1~P1-4 已修订并实现。
-- 资产：`backend/app/prompts/rag_judge/v1.2.4/`；F `52f1b3cf…`（不变）、C `ca489fcf…`、R `f3efe431…`（不变）、MANIFEST `31cd22a3…`；status design_draft、active=false、rubric v1.2.0、默认 v1.0.0。
+### M1-D-6 v1.2.4 Evidence-only Patch Repair 实现（2026-11-23，frozen / implemented）
+- 文档：`docs/repair/46-m1d6-v1.2.4-implementation.md`；冻结记录：`docs/repair/47-m1d6-v1.2.4-freeze-record.md`；设计 r2 P1-1~P1-4 已修订并实现。
+- 资产：`backend/app/prompts/rag_judge/v1.2.4/`；F `52f1b3cf…`（不变）、C `ca489fcf…`、R `f3efe431…`（不变）、MANIFEST `33cad3a8…`；status frozen、active=false、rubric v1.2.0、默认 v1.0.0。
 - Patch：新增 `rag_judge_patch.py`（claim_id + evidence_refs 完整 replacement set，extra=forbid）；patch schema `da70dc60…`，patch example `629d74ac…`。
 - Agent：v1.2.4 + faithfulness 初始 Schema 单次解析；quote 错误 1 次 patch；effective claim_id；conflict/多 refs 校验；merge 只改 evidence_refs；final_errors 接 validation_errors。
 - C：首句/结论矛盾固定 0.0–0.2；C warning 记录 `correctness_first_sentence_warning`；不新增 C repair。
