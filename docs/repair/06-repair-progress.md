@@ -1391,3 +1391,9 @@ alembic check   : No new upgrade operations detected
 - 测试：S1 F=0.400、cl1 unsupported+contradictory、cl3/cl4 合并、patch null/refusal/空 refs/非连续 quote、conflict 2 refs、v1.2.0–v1.2.4 回归、泄漏 0、静态 validation/全量 pytest/black/flake8/mypy/lint-imports。
 - C runner：Q23 F×3 + C/R×1 + Q21/Q11×1×3；预算 11 primary + 5 patch + 2 reserve = 18 calls / CNY 0.40；ledger 在 LLM 边界；invalid 继续收集（diagnostic_only），预算/凭证/指纹/ledger 硬停止；报 median/min/max 与每次 claim 分解。
 - 边界：本轮只交设计；未改 Prompt/Agent/target/fixture、未实现、未 freeze、未跑 Judge、未激活。
+
+### 后续执行计划表落盘（2026-11-23）
+- `README.md` §5.6 增加主计划、决策点 D1–D5、预算汇总、出口标准、停止/时间盒。
+- 流程压缩：v1.2.5 采用“版本包一次审”（scope + impl + tests + freeze），单案例在 freeze 后预授权；10/40 仍单独批准。
+- 关键时间盒：v1.2.5 是最后一个 claim 分解版本；单案例失败不自动出 v1.2.6，转 A/10 条 diagnostic/known limitation。
+- 预算：单案例 18 calls / CNY 0.40；10 条 diagnostic 51 / 1.00；正式 10 条 51 / 1.00；40 条 CNY 1.4–1.8；无日历承诺。

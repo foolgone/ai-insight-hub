@@ -23,11 +23,11 @@
 | 并行 A | M2 只读工作台；API 审计完成，前端未开始 |
 | 并行 B | M4-A 生产约束；未开始 |
 | M3 优化闭环 | 未开始；等 M1 可信、M2 可用 |
-| 当前可写代码？ | **写 v1.2.5 claim 分解 scope/design + C runner 设计**；不写 v1.2.5 patch-only |
+| 当前可写代码？ | **写 v1.2.5 版本包（claim 分解 + patch v125 + tests + freeze）**；不写 v1.2.5 patch-only |
 | 当前可跑 Judge？ | **仅 C 的 Q23 3 次 median 或 10 条 `diagnostic_only`，需单独批准**；正式 10/40 未批准 |
 | v1.2.1 / v1.2.2 / v1.2.3 / v1.2.4 | 四者均 `frozen`；v1.2.4 `active=false`；默认仍 `v1.0.0` |
 | 最近一次决策 | 2026-11-23 选 B + C：claim 分解修复 + Q23 3 次 median；A 保留条件 |
-| 下一个交付 | 人工审核 v1.2.5 claim 分解 scope/design + C runner 设计 |
+| 下一个交付 | v1.2.5 版本包（scope + impl + tests + freeze），一次审核 |
 
 ### 现在只需要一个决定
 
@@ -347,17 +347,7 @@
 11. 单案例诊断已执行：Q23 F invalid（3× `quote_not_found`）、cl5 混合句未拆分，按停止条件停止；Q21/Q11 未运行。结果见 `39-…`，3 calls / CNY 0.03726。
 12. v1.2.4 单案例已执行：Q23 patch 输出 `evidence_refs=null`，`patch_schema_invalid`；按停止条件停止。结果见 `49-…`，4 calls / CNY 0.0422808；Q21/Q11 未运行。
 
-**后续（未批准）**：
-
-1. Q23 根因复核已完成（`50-m1d6-q23-root-cause-and-target-review.md`）；人工选择 A/B/C，推荐 B + C；不跑 Judge。
-2. v1.2.4 保持 frozen/inactive；不得复用本次单案例批准重跑。
-3. B：修 claim 分解（cl3/cl4 合成 derived；cl1 unsupported + `is_contradictory`），target 不变；A：仅确认 S0 时走 target v1.0.3；不批准 v1.2.5 patch-only 作为 Q23 通过路径。
-4. 用 v1.2.4 frozen 跑 10 条 `diagnostic_only` 批处理；不计入验收，报告 `invalid` rate、target pass rate、claim 分解、C/R 分布。
-5. 诊断后再决定正式 10 条闸门；不得复用 v1.2.1/v1.2.3 批准。
-6. 40 条分层报告（HG 13 / provisional 27 分开）。
-7. 6 条缺失 baseline 按方案 A 标 `baseline_delta: unavailable`，不跑 Judge 补齐。
-8. 四组报告 + 已知问题接受/修复/延期 + SHA 追溯。
-9. M1-E 验收。
+**后续执行计划见 §5.6。**
 
 ### 5.4 并行线
 
@@ -375,11 +365,75 @@
 | M1-C 实现与测试 | 5–8 |
 | M1-D 实验 | 2–4（不含模型等待） |
 | Q23 target/Gold 复核 | 0.5–1 |
+| v1.2.5 版本包（claim 分解 + patch v125 + tests + freeze） | 2–4 |
+| Q23×3 + Q21/Q11 单案例 | 0.5（不含调用费） |
 | 10 条诊断批处理 | 0.5（不含调用费） |
+| 正式 10 条闸门 | 0.5（不含调用费） |
+| 40 条规模/回归 | 1–2（不含调用费） |
 | M1-E 验收 | 1–2 |
 | M2 P0 前端 | 6–9 |
 | M2 compare 接口（P1） | +2–3 |
+| M3 首个优化实验 | TBD |
 | M4-A 约束文档 | 2–3 |
+
+### 5.6 后续执行计划表（2026-11-23 校准）
+
+#### 5.6.1 主计划
+
+| # | 阶段 | 动作 | 交付 | 批准/门禁 | 预算 |
+|---:|---|---|---|---|---|
+| 0 | **v1.2.5 版本包** | 按 51/52 + P1 修订；实现 F claim 分解、内部矛盾、patch v125/refusal、tests、freeze | 一份版本包（scope + impl + tests + freeze + validation + leakage 0） | **一次版本包审核**；不再分设计/实现/freeze 三次审 | 2–4 人日；0 Judge |
+| 1 | **Q23×3 + Q21/Q11 单案例** | freeze 后预授权；Q23 F×3、C/R×1；Q21/Q11 各 1 次 ×3 指标；ledger | 结果报告：median/min/max、claim 分解、patch/refusal、C/R snapshot | 只审结果；不是 acceptance | 18 calls / CNY 0.40 |
+| 2 | **10 条 `diagnostic_only`（推荐）** | 固定 10 条 + Q23/Q35/Q36 repeats；允许记录 invalid 后继续 | 分布报告：invalid rate、target pass、claim_count、C/R、unprocessed | 单独批准；不写 PASS | 51 calls / CNY 1.00 |
+| 3 | **正式 10 条闸门** | 10/10 目标通过；无 invalid/failed；HG 按 §5.2 重复 | 官方 10 条报告 | 单独批准 | 51 calls / CNY 1.00 |
+| 4 | **40 条规模/回归** | 40 条 + 6 条缺失 baseline；HG/provisional 分开 | 40 条报告 + known issues + SHA | 单独批准 | CNY 1.4–1.8 |
+| 5 | **M1-E 验收** | M1-C/M1-D/M1-E 一并验收；四组报告 + 已知问题接受/修复/延期 + SHA 追溯 | M1-E acceptance record | 决策角色 | 1–2 人日 |
+| 6 | **M2 P0 只读工作台** | Run 列表/详情/Case/Evidence | 前端 P0；只读 | 10 条诊断/正式 10 报告后 + 单独批准 | 6–9 人日 |
+| 7 | **M3 优化闭环** | 首个受控优化实验 | 对比报告 | M1 accepted + M2 可用 | TBD |
+| 8 | **M4-A 生产约束** | 租户/保留期/审计/告警/成本/数据权利 | 决策文档 + 迁移计划（不执行） | 可并行；单独批准 | 2–3 人日 |
+
+> 固定 10 条沿用 `pilot-10-v1.1.5-gate.json`：Q01/Q04/Q11/Q17/Q21/Q23/Q29/Q31/Q35/Q36；Q23/Q35/Q36 按 HG 规则重复。40 条沿用 `pilot-40-final-labels.json` + target v1.0.2；6 条缺失 baseline 标 `baseline_delta: unavailable`。
+
+#### 5.6.2 决策点
+
+| 决策点 | 时点 | 选项 | 默认/建议 |
+|---|---|---|---|
+| **D1** | v1.2.5 单案例后 | 通过 → 10 条；失败 → A target 复核 / 10 条 diagnostic / known limitation；**不出 v1.2.6** | 通过则 10 条；失败先 A/诊断 |
+| **D2** | 10 条 diagnostic 后 | 系统性问题 → 修；仅 Q23 → known limitation + 正式 10；target 问题 → M1-A | 仅 Q23 不阻塞 40 |
+| **D3** | 正式 10 条后 | 10/10 → 40 条；否则停止/修复 | 不跳过 40 |
+| **D4** | 40 条后 | M1-E；否则 known issues/修复 | M1-E 前不启动 M3 |
+| **D5** | M1-E 后 | M2/M3/M4 | 按并行线推进 |
+
+#### 5.6.3 预算汇总
+
+| 项 | 估算 |
+|---|---|
+| v1.2.5 版本包 | 2–4 人日；0 Judge |
+| Q23×3 + Q21/Q11 单案例 | 18 calls / CNY 0.40 |
+| 10 条 diagnostic | 51 calls / CNY 1.00 |
+| 正式 10 条闸门 | 51 calls / CNY 1.00 |
+| 40 条规模/回归 | CNY 1.4–1.8 |
+| M1 剩余 Judge 成本 | 约 CNY 3.8–4.2（diagnostic + 正式 10 + 40）；跳过 diagnostic 约 2.8–3.2 |
+| M2 P0 / M4-A | 6–9 / 2–3 人日 |
+
+> 以上是人日/调用估算，不是日历承诺；10/40 仍需单独批准。
+
+#### 5.6.4 出口标准
+
+- **v1.2.5**：tests 全绿；leakage 0；freeze candidate；v1.2.4 行为不变。
+- **单案例**：Q23 median F=`0.400`；cl1 `unsupported` + `is_contradictory`；cl3/cl4 合并为 1 条 derived；Q21/Q11 目标内；ledger 干净。
+- **10 条 diagnostic**：分布报告可解释；不写 PASS。
+- **正式 10 条**：10/10 目标通过；无 `invalid` / `failed`；HG 按 §5.2。
+- **40 条**：40/40 完成；target pass + known issues 分开；不得写“40 条 Human Gold 通过”。
+- **M1-E**：四组报告 + 已知问题决定 + SHA 追溯；M1-C/M1-D/M1-E 一并 accepted；M1 只在 M1-E 后 accepted。
+
+#### 5.6.5 停止/时间盒
+
+- v1.2.5 是最后一个 claim 分解版本；单案例失败不自动出 v1.2.6。
+- 不得“复跑直到通过”；不得静默改 target；target 变更只走 M1-A。
+- 预算/凭证/指纹/ledger 任一异常 → 硬停止。
+- 诊断批处理允许记录 invalid 后继续；正式 10/40 不允许。
+- Q23 若只是单案例 outlier，写入 known issues，不阻塞 40；若系统性 invalid/quote 问题，先修 Agent/patch。
 
 ---
 
