@@ -158,7 +158,7 @@ def _usage_details(result: Any) -> dict[str, Any]:
 
 
 def _agent_contract_details(agent: Any) -> dict[str, Any]:
-    """v1.2.3-only Agent contract report; empty for older prompt versions."""
+    """v1.2.3+ Agent contract report; empty for older prompt versions."""
     report = getattr(agent, "contract_report", None)
     if not report:
         return {}

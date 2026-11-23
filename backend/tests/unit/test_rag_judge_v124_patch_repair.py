@@ -8,7 +8,7 @@ from pathlib import Path
 import pytest
 
 from app.agents.base import AgentConfig
-from app.agents.rag_judge_agent import RagJudgeAgent
+from app.agents.rag_judge_agent import PATCH_EXAMPLE_CONTEXT, RagJudgeAgent
 from app.core.llm import LLMResponse, LLMUsage
 from app.models import RagTrace
 from app.schemas.agents.rag_judge import FaithfulnessOutputV3
@@ -42,8 +42,10 @@ class FakeLLM:
     def __init__(self, responses: list[str]) -> None:
         self.responses = list(responses)
         self.calls = 0
+        self.last_messages: list[object] = []
 
     async def chat(self, messages, **kwargs):  # noqa: ANN001, ANN002
+        self.last_messages = list(messages)
         item = self.responses[min(self.calls, len(self.responses) - 1)]
         self.calls += 1
         return LLMResponse(
@@ -342,3 +344,53 @@ async def test_v124_patch_string_evidence_refs_has_schema_final_errors() -> None
     report = agent.contract_report or {}
     assert report["final_errors"][0]["code"] == "patch_schema_invalid"
     assert report["final_errors"][0]["validation_errors"]
+
+
+def test_patch_example_is_readable_and_contiguous() -> None:
+    agent = RagJudgeAgent("faithfulness", llm=object(), prompt_version="v1.2.4")
+    data = json.loads(agent._patch_example())
+    ref = data["fixes"][0]["evidence_refs"][0]
+
+    assert data["fixes"]
+    assert data["fixes"][0]["evidence_refs"]
+    assert ref["context_id"] == "C1"
+    assert ref["quote"]
+    assert "?" not in ref["quote"]
+    assert ref["quote"] in PATCH_EXAMPLE_CONTEXT
+
+
+async def test_patch_system_prompt_is_readable_and_has_rules() -> None:
+    agent, llm = _agent(
+        "faithfulness",
+        [json.dumps(Q23_RAW, ensure_ascii=False), json.dumps(PATCH_OK, ensure_ascii=False)],
+    )
+
+    result = await agent.judge(_payload())
+
+    assert result.success is True
+    system = next(
+        message["content"] for message in llm.last_messages if message["role"] == "system"
+    )
+    user = next(message["content"] for message in llm.last_messages if message["role"] == "user")
+    assert "只返回 fixes" in user
+    assert "不得修改" in user
+    assert "连续逐字子串" in user
+    assert "?" not in system
+    assert agent._patch_example() in system
+
+
+async def test_v124_duplicate_effective_claim_id_is_invalid() -> None:
+    raw = json.loads(json.dumps(Q23_RAW))
+    raw["claims"][1]["claim_id"] = raw["claims"][0]["claim_id"]
+    agent, llm = _agent(
+        "faithfulness",
+        [json.dumps(raw, ensure_ascii=False), json.dumps(PATCH_OK, ensure_ascii=False)],
+    )
+
+    result = await agent.judge(_payload())
+
+    assert result.success is False
+    assert llm.calls == 1
+    report = agent.contract_report or {}
+    assert report["final_errors"][0]["code"] == "patch_failed"
+    assert "duplicate" in report["final_errors"][0]["validation_errors"]

@@ -51,7 +51,7 @@
   },
   "repair_example_version": "v1.2.4",
   "patch_schema_sha256": "da70dc607aaf70879cf40e3420bc5440829b05d9be344a07907947df8c891cb8",
-  "patch_example_sha256": "d999089ffffdc08a75f15783cccb321d697702a128d5f1973b51df41c25d9283",
+  "patch_example_sha256": "629d74ac3bba3a36372c8a54796de6c5c91fc59b20a235061e0c86ae39129a47",
   "contract_repair_version": "v1.2.4",
   "quote_validation": "agent_precheck_v2_evidence_patch",
   "quote_validator_sha256": "153ab4a6f203ca0398133a2cc2ca6fda834f7670afa90651c66cfa44b92c722a",

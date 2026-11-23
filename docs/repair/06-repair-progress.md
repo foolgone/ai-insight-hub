@@ -1347,9 +1347,9 @@ alembic check   : No new upgrade operations detected
 
 ### M1-D-6 v1.2.4 Evidence-only Patch Repair 实现（2026-11-23，design_draft / implemented / verified，待 freeze）
 - 文档：`docs/repair/46-m1d6-v1.2.4-implementation.md`；设计 r2 P1-1~P1-4 已修订并实现。
-- 资产：`backend/app/prompts/rag_judge/v1.2.4/`；F `52f1b3cf…`（不变）、C `ca489fcf…`、R `f3efe431…`（不变）、MANIFEST `02b28842…`；status design_draft、active=false、rubric v1.2.0、默认 v1.0.0。
-- Patch：新增 `rag_judge_patch.py`（claim_id + evidence_refs 完整 replacement set，extra=forbid）；patch schema `da70dc60…`，patch example `d999089f…`。
+- 资产：`backend/app/prompts/rag_judge/v1.2.4/`；F `52f1b3cf…`（不变）、C `ca489fcf…`、R `f3efe431…`（不变）、MANIFEST `31cd22a3…`；status design_draft、active=false、rubric v1.2.0、默认 v1.0.0。
+- Patch：新增 `rag_judge_patch.py`（claim_id + evidence_refs 完整 replacement set，extra=forbid）；patch schema `da70dc60…`，patch example `629d74ac…`。
 - Agent：v1.2.4 + faithfulness 初始 Schema 单次解析；quote 错误 1 次 patch；effective claim_id；conflict/多 refs 校验；merge 只改 evidence_refs；final_errors 接 validation_errors。
 - C：首句/结论矛盾固定 0.0–0.2；C warning 记录 `correctness_first_sentence_warning`；不新增 C repair。
-- 测试：全量 pytest 1098 条通过；black/flake8/mypy/lint-imports 通过；静态校验 23/23，validation SHA `d063d5d5…`；泄漏审计 `7a5fa618…`，0 findings。
+- 测试：全量 pytest 1101 条通过；black/flake8/mypy/lint-imports 通过；静态校验 23/23，validation SHA `dadebc31…`；泄漏审计 `7a5fa618…`，0 findings。
 - 边界：未 frozen、未激活、未跑 Judge/10/40；未建 Run、未写 DB、未调 WeKnora；M1-D-5 blocked，M1-C/M1-D 未 accepted。

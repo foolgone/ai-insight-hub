@@ -12,7 +12,7 @@
  "contract_repair_version": "v1.2.4",
  "quote_validator_sha256": "153ab4a6f203ca0398133a2cc2ca6fda834f7670afa90651c66cfa44b92c722a",
  "patch_schema_sha256": "da70dc607aaf70879cf40e3420bc5440829b05d9be344a07907947df8c891cb8",
- "patch_example_sha256": "d999089ffffdc08a75f15783cccb321d697702a128d5f1973b51df41c25d9283",
+ "patch_example_sha256": "629d74ac3bba3a36372c8a54796de6c5c91fc59b20a235061e0c86ae39129a47",
  "leakage_audit": {
   "status": "pass",
   "finding_count": 0,
@@ -30,8 +30,8 @@
   "answer_correctness.txt": "a5f9e5b2d3d0e1bb80803f8a09e5ea7c980b5e8d1c7b9155e86266de92d493ef",
   "answer_relevancy.txt": "f3efe431683ed26ba0a7338e6e2b5841d65d42dadde5cac30b8340e2ca95dfdc"
  },
- "manifest_sha256": "02b28842d53a7d753e3aad265f732067cd747c90edd0e725f70f420f677a9302",
- "script_sha256": "8a511c543cf289f47d950c6ffddb91894271af4a298a16950c5b41b3923d4baf",
+ "manifest_sha256": "31cd22a314a22ae89909036d57a860d8452f497d6945d8e66e05e8de2b856d04",
+ "script_sha256": "639d0f7d4a06e0eeed62244a66a67f7cd6bc6dc6f870bd588e1bec6760d035ae",
  "checks": [
   {
    "check": "manifest_version",

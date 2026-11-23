@@ -144,8 +144,8 @@
 | `docs/repair/44-m1d5-v1.2.3-single-case-diagnostic-results.md` | report SHA `8c73f5bd…` | `stopped` / `blocked` | Q23 repair 后 Schema 失败；F invalid；C target miss；Q21/Q11 未运行 |
 | `docs/repair/phase3e/m1d5-single-case-results.json` | `2394bac8…` | `raw_results` | 4 calls（3 primary + 1 repair）/ CNY 0.051797；Q23 首次与 repair 输出 |
 | `docs/repair/45-m1d6-v1.2.4-evidence-patch-design.md` | design/scope r2 | `approved_with_changes`；实现见 `46-…` | evidence-only patch、final_errors、C 首句规则、ledger、预算/门禁 |
-| `backend/app/prompts/rag_judge/v1.2.4/` | F `52f1b3cf…`（不变）/ C `ca489fcf…` / R `f3efe431…`（不变）；MANIFEST `02b28842…` | `design_draft` / `active=false` | evidence-only patch、C 首句规则、patch schema/example |
-| `docs/repair/phase3e/m1d6-prompt-v1.2.4-validation.json` | `d063d5d5…` | `static_validation` 23/23 | patch schema/example、C 规则、泄漏审计、旧版本隔离 |
+| `backend/app/prompts/rag_judge/v1.2.4/` | F `52f1b3cf…`（不变）/ C `ca489fcf…` / R `f3efe431…`（不变）；MANIFEST `31cd22a3…` | `design_draft` / `active=false` | evidence-only patch、C 首句规则、patch schema/example |
+| `docs/repair/phase3e/m1d6-prompt-v1.2.4-validation.json` | `dadebc31…` | `static_validation` 23/23 | patch schema/example、C 规则、泄漏审计、旧版本隔离 |
 | `docs/repair/phase3e/m1d6-prompt-leakage-audit.json` | `7a5fa618…` | `leakage_audit` findings=0 | 10 gate case answer/gold/claim/evidence 审计 |
 | `docs/repair/46-m1d6-v1.2.4-implementation.md` | implementation report | `implemented/verified`；未 frozen | patch flow、effective ID、conflict、final_errors、C warning |
 

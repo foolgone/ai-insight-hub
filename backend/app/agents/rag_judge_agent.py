@@ -55,6 +55,7 @@ PROMPT_DIR = Path(__file__).resolve().parents[1] / "prompts" / "rag_judge"
 PROMPT_VERSION_PATTERN = re.compile(r"^v\d+\.\d+\.\d+$")
 CONTRACT_REPAIR_VERSION = "v1.2.3"
 PATCH_REPAIR_VERSION = "v1.2.4"
+PATCH_EXAMPLE_CONTEXT = "延保卡需在购买后 30 天内激活。"
 PATCH_SCHEMA_PATH = (
     Path(__file__).resolve().parents[1] / "schemas" / "agents" / "rag_judge_patch.py"
 )
@@ -492,6 +493,8 @@ class RagJudgeAgent(BaseAgent):
         effective_claims: dict[str, Any] = {}
         for index, claim in enumerate(initial.claims, 1):
             effective = str(getattr(claim, "claim_id", None) or f"cl{index}")
+            if effective in effective_claims:
+                raise ValueError(f"duplicate effective claim_id: {effective}")
             effective_claims[effective] = claim
         error_ids = {str(item.get("claim_id")) for item in quote_errors}
         unknown = error_ids - set(effective_claims)
@@ -500,11 +503,13 @@ class RagJudgeAgent(BaseAgent):
 
         patch_payload = {
             "rules": [
-                "??? fixes????? claim ???claim_type?claim_subtype?support_status?"
-                "is_contradictory?contradiction_with?",
-                "?? fix ??????? evidence_refs replacement set?",
-                "quote ??? contexts ??????????? claim ???/??/???" "?????????? quote ???????",
-                "conflict claim ???????? distinct?non-nested quotes?",
+                "只返回 fixes，不得输出其它字段。",
+                "只允许修改被标记 claim 的 evidence_refs；不得修改 claim、claim_type、"
+                "claim_subtype、support_status、is_contradictory、contradiction_with。",
+                "每个 fix 必须给出完整的 evidence_refs replacement set。",
+                "quote 必须是 context 的连续逐字子串，并直接支持该 claim 的谓词/条件/结论。",
+                "conflict claim 必须给至少两条 distinct、non-nested quotes。",
+                "找不到直接支持的连续 quote 时失败，不得用邻近无关 quote。",
             ],
             "claims": [
                 {
@@ -528,11 +533,11 @@ class RagJudgeAgent(BaseAgent):
             {
                 "role": "system",
                 "content": (
-                    "?? RAG Judge ? evidence patch ????"
-                    "??? JSON ????????????"
+                    "你是 RAG Judge 的 evidence patch 修复器。"
+                    "只输出 JSON 对象，结构必须严格如下："
                     '{"fixes":[{"claim_id":"cl1","evidence_refs":'
-                    '[{"context_id":"C1","quote":"context ????"}]}]}?'
-                    f"???{self._patch_example()}"
+                    '[{"context_id":"C1","quote":"context 连续原文"}]}]}。'
+                    f"示例：{self._patch_example()}"
                 ),
             },
             {"role": "user", "content": json.dumps(patch_payload, ensure_ascii=False)},
@@ -622,7 +627,7 @@ class RagJudgeAgent(BaseAgent):
                         "evidence_refs": [
                             {
                                 "context_id": "C1",
-                                "quote": "???????? 30 ?????",
+                                "quote": PATCH_EXAMPLE_CONTEXT,
                             }
                         ],
                     }
