@@ -1366,3 +1366,12 @@ alembic check   : No new upgrade operations detected
 - 调用/成本：4 calls（primary 3、patch 1、repair 0、retry 0）；input 12,313 / output 1,326；CNY 0.0422808，低于 0.30；ledger SHA `c07b8401…`，uncertain=0。
 - 结果：raw `m1d6-single-case-results.json`（SHA `dec1d964…`）；analysis `m1d6-single-case-analysis.json`（SHA `24bea3ec…`）；报告 `docs/repair/49-m1d6-v1.2.4-single-case-diagnostic-results.md`（SHA `d7762d6a…`）。
 - 边界：未重跑、未改 Prompt/Agent/Service/validator/patch schema/example/target/fixture；未建 Run、未写 DB、未调 WeKnora、未激活 v1.2.4、未跑 10/40；M1-D-6 diagnostic blocked，M1-C/M1-D 未 accepted。
+
+### M1-D-6 Q23 根因与 M1-A target/Gold 复核（2026-11-23，read-only）
+- 文档：`docs/repair/50-m1d6-q23-root-cause-and-target-review.md`；只读复核，未跑 Judge、未改 target/Prompt/Agent。
+- 复算：按 v1.2.4 初始 claims 保留 support_status、把 quote 换成合法连续子串，`_faithfulness_score_v3` 得 F=`0.333333`（2 supported / 6 scorable）；strict=`0.666667`；validation_errors=[]。
+- 根因：`cl3`（第 2 天）`insufficient` + `cl4`（已超出）`supported` 把同一派生结论拆成两条；`cl1`（可以按政策反馈）`unsupported` 符合 Gold/语义规范，v1.2.3 的 insufficient 反而更弱。
+- 方案对比：S0 当前拆分 F=0.333（target miss）；S1 合并 cl3+cl4 为 1 条 derived supported → F=0.400（target 下界 pass）；S2 合并为 insufficient → 0.200；S3 历史 cl1 supported → 0.500。
+- 结论：0.333 是 S0 拆分下的诚实分数，但不必然证明 target 失效；若人工确认 S1 符合 `12-judge-semantic-spec.md` §3.1/§8，target [0.4,0.5] 仍成立，应修 claim 分解而不是 patch。
+- 决策：不批准 v1.2.5 patch-only 作为 Q23 通过路径；先做 target/Gold 复核；Q23 建议 3 次 median；待 A target v1.0.3 / B claim 分解 / C 3 次 median。
+- 边界：未跑 Judge、未改 target v1.0.2、未改 Prompt/Agent、未激活、未跑 10/40；M1-D-6 仍 blocked。

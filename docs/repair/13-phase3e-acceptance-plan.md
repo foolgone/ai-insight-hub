@@ -10,7 +10,7 @@
 >
 > **2026-11-23 方向校准（执行约束）：M1-D-6 在 Q23 单案例停在 `patch_schema_invalid`；复盘确认，即使 patch 完美，Q23 初始 claim 分解也只得到 F=0.333，仍低于 `[0.4, 0.5]`。根因是 claim 分解/目标带宽，不是 patch。因此：**
 > 1. **单案例诊断只作信号，不单独判死版本；HG 案例按 §5.1 重复 3 次后再判定。**
-> 2. **先做 Q23 target/Gold 复核，再决定 target v1.0.3 或 claim 粒度修复；不批准 v1.2.5 patch-only 作为 Q23 通过路径。**
+> 2. **Q23 根因复核已完成（见 `50-m1d6-q23-root-cause-and-target-review.md`）；初步建议 B（claim 分解修复）+ C（3 次 median），A（target v1.0.3）仅在确认 S0 当前拆分为正确口径时使用；不批准 v1.2.5 patch-only 作为 Q23 通过路径。**
 > 3. **正式 10 条闸门前，增加一次 `diagnostic_only` 的 10 条诊断批处理；它不计入验收、不写 PASS，允许记录 invalid 后继续收集分布。**
 > 4. **M1 出口仍是 10 条闸门 + 40 条规模/回归；不得用 3 个 case 的零 invalid 代替分布可信。**
 

@@ -9,7 +9,7 @@
 >
 > 最后更新：2026-11-23
 > 当前阶段：**M1-D-6 v1.2.4 单案例 Q23 停在 patch_schema_invalid；进入方向校准：先 target 复核，再做 10 条诊断批处理**
-> 当前阻塞决策：**Q23 target/Gold 复核；v1.2.5 patch-only 不作为 Q23 通过路径**
+> 当前阻塞决策：**Q23 A/B/C 选择：推荐 B（claim 分解修复）+ C（3 次 median）；A（target v1.0.3）仅在确认 S0 时使用；v1.2.5 patch-only 不作为 Q23 通过路径**
 > 当前不做：10/40 正式验收、v1.2.4 激活、M2/M3、生产 migration
 
 ---
@@ -23,21 +23,23 @@
 | 并行 A | M2 只读工作台；API 审计完成，前端未开始 |
 | 并行 B | M4-A 生产约束；未开始 |
 | M3 优化闭环 | 未开始；等 M1 可信、M2 可用 |
-| 当前可写代码？ | **只写 target 复核/诊断 runner**；不写新 Judge Prompt，除非复核结论要求 |
-| 当前可跑 Judge？ | **仅 10 条 `diagnostic_only` 批处理，需单独批准**；正式 10/40 未批准 |
+| 当前可写代码？ | **只写 C 的 3 次诊断 runner / B 的 claim 分解修复（需先批准）**；不写 v1.2.5 patch-only |
+| 当前可跑 Judge？ | **仅 C 的 Q23 3 次 median 或 10 条 `diagnostic_only`，需单独批准**；正式 10/40 未批准 |
 | v1.2.1 / v1.2.2 / v1.2.3 / v1.2.4 | 四者均 `frozen`；v1.2.4 `active=false`；默认仍 `v1.0.0` |
-| 最近一次决策 | 2026-11-23 方向校准：单案例不单独判死，先 target 复核 + 分布诊断 |
-| 下一个交付 | Q23 target/Gold 复核结论 + 10 条诊断批处理申请 |
+| 最近一次决策 | 2026-11-23 Q23 根因复核：patch null 次要；S0=0.333，S1 合并 derived=0.400 |
+| 下一个交付 | 人工选择 A/B/C（target v1.0.3 / claim 分解修复 / 3 次 median） |
 
 ### 现在只需要一个决定
 
-**Q23 已证明 patch-only 不是瓶颈；当前决策是“先校准目标，再做分布诊断”。**
+**Q23 根因复核已完成：patch-only 不是瓶颈；当前决策是 A/B/C。**
 
 | 选项 | 含义 | 结果 |
 |---|---|---|
-| **推荐：target 复核 + 10 条诊断** | 先 M1-A 复核 Q23 target/Gold，再用 v1.2.4 frozen 跑 10 条 `diagnostic_only` | 不激活、不写 PASS；产出分布报告 |
-| **仅 v1.2.5 patch 健壮性** | 修 null/refusal，但不作为 Q23 通过路径 | 可与 target 复核并行；不直接跑 Judge |
-| **保持 frozen** | 不改不跑 | 维持现状，等待更多证据 |
+| **B（推荐）** | 修 claim 分解：cl3/cl4 合成 1 条 derived；cl1 保持 unsupported 并补 `is_contradictory` | target `[0.4,0.5]` 不变；新版本 / freeze / 单案例 |
+| **C（与 B 并行）** | Q23 3 次 F，报 median / min / max | 只作诊断，不计入 10 条 |
+| **A（条件）** | 确认 S0 当前拆分正确 → target v1.0.3 | 不静默改 v1.0.2；需 M1-A 单独批准 |
+| **v1.2.5 patch-only** | 不批准作为 Q23 通过路径 | 可另做 patch 健壮性；不保证 Q23 进区间 |
+| **10 条 `diagnostic_only`** | B/C 决定后，用 frozen 资产跑分布 | 不计入验收；产出 invalid / target / claim 分布 |
 
 ---
 
@@ -60,7 +62,7 @@
 | 里程碑 | 状态 | 已完成证据 | 当前阻塞/下一步 |
 |---|---|---|---|
 | **M0 评测基础设施** | `accepted`（冻结维护） | Dataset/Version/Item、RAG Adapter、Trace、检索指标、Judge、Run/Celery、持久化聚合、WeKnora 联调 | 只修缺陷/兼容，不再架构重构 |
-| **M1 评测可信度** | `in_progress` | M1-A 语义/Gold/target 已冻结；M1-B B 双指标草案（`19-…`）；M1-C C1–C4 已实现/验证；M1-D-0 Prompt `frozen`；M1-D-1 blocked at Q11；M1-D-2 v1.2.1 `frozen`；M1-D-3 blocked at Q23；M1-D-4 v1.2.2 `frozen`、Q23 invalid -> blocked；M1-D-5 v1.2.3 `frozen`、单案例 Q23 invalid -> diagnostic blocked；M1-D-6 v1.2.4 `frozen`、Q23 `patch_schema_invalid` -> blocked；方向校准：target 复核 + 10 条诊断 | v1.2.x 未激活；10/40 正式验收未批准；M1-E 未开始 |
+| **M1 评测可信度** | `in_progress` | M1-A 语义/Gold/target 已冻结；M1-B B 双指标草案（`19-…`）；M1-C C1–C4 已实现/验证；M1-D-0 Prompt `frozen`；M1-D-1 blocked at Q11；M1-D-2 v1.2.1 `frozen`；M1-D-3 blocked at Q23；M1-D-4 v1.2.2 `frozen`、Q23 invalid -> blocked；M1-D-5 v1.2.3 `frozen`、单案例 Q23 invalid -> diagnostic blocked；M1-D-6 v1.2.4 `frozen`、Q23 `patch_schema_invalid` -> blocked；Q23 根因复核完成，待 A/B/C，推荐 B+C | v1.2.x 未激活；10/40 正式验收未批准；M1-E 未开始 |
 | **M2 评测工作台** | `audit_complete` / 实现 `not_started` | API 审计完成：Run/详情/结果/失败/Trace 可用；前端 0 页面 | 建议等 M1 有 10 条诊断报告 + 用户批准后再写 P0 前端 |
 | **M3 RAG 优化闭环** | `not_started` | 无 | 依赖 M1 可信 + M2 可用 |
 | **M4 生产交付** | 基础已有 / 约束 `not_started` | 认证、加密、限流、Prometheus/Grafana/Sentry、备份/恢复演练 | M4-A：租户、保留期、审计、告警、成本、数据权利 |
@@ -344,9 +346,9 @@
 
 **后续（未批准）**：
 
-1. M1-A Q23 target/Gold 复核：cl1 支持状态、claim 分解、F 区间、是否 3 次 median；不跑 Judge。
+1. Q23 根因复核已完成（`50-m1d6-q23-root-cause-and-target-review.md`）；人工选择 A/B/C，推荐 B + C；不跑 Judge。
 2. v1.2.4 保持 frozen/inactive；不得复用本次单案例批准重跑。
-3. 复核后若 target 不成立，走 target v1.0.3；若 Judge 不成立，修 claim 粒度；不批准 v1.2.5 patch-only 作为 Q23 通过路径。
+3. B：修 claim 分解（cl3/cl4 合成 derived；cl1 unsupported + `is_contradictory`），target 不变；A：仅确认 S0 时走 target v1.0.3；不批准 v1.2.5 patch-only 作为 Q23 通过路径。
 4. 用 v1.2.4 frozen 跑 10 条 `diagnostic_only` 批处理；不计入验收，报告 `invalid` rate、target pass rate、claim 分解、C/R 分布。
 5. 诊断后再决定正式 10 条闸门；不得复用 v1.2.1/v1.2.3 批准。
 6. 40 条分层报告（HG 13 / provisional 27 分开）。
