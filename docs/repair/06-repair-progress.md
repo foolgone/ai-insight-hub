@@ -1333,3 +1333,13 @@ alembic check   : No new upgrade operations detected
 - Q21/Q11：因 Q23 停止条件未运行；无 C/R 重新核目标数据。
 - 结果：`docs/repair/44-m1d5-v1.2.3-single-case-diagnostic-results.md`（MD SHA `8c73f5bd…`）；raw `m1d5-single-case-results.json`（SHA `2394bac8…`）。
 - 边界：未重跑、未改 Prompt/Agent/Service/fixture；未建 Run、未写 DB、未调 WeKnora、未激活 v1.2.3、未跑 10/40；M1-D-5 diagnostic blocked，M1-C/M1-D 未 accepted。
+
+### M1-D-6 v1.2.4 Evidence-only Patch Repair 设计（2026-11-23，design_draft_pending_review）
+- 文档：`docs/repair/45-m1d6-v1.2.4-evidence-patch-design.md`；只提交设计与范围，未改 Prompt/Agent、未冻结、未跑 Judge。
+- 根因：v1.2.3 repair 返回完整 claims，顺手把 cl1 从 supported 改成 insufficient_evidence，F 0.5→0.333；只做字符串转数组不够。
+- P0：新增 patch Schema（fixes: claim_id/context_id/quote；extra=forbid）；只替换被标记 claim 的 evidence_refs；禁止改 claim/type/subtype/support_status/is_contradictory/contradiction_with；1 次 patch，失败 invalid。
+- P0：捕获 StructuredOutputError.validation_errors，写入 agent_contract.final_errors；invalid F/F_strict 都带。
+- P1：C prompt 增加“wrong_facts 命中首句/最终结论 → 固定 0.0–0.2”；不引用 Q23；C SHA 变化；target 不变；选择 warning 不新增 C repair。
+- P2：诊断 driver 增加 append-only attempt ledger；中断标记 uncertain_call=true；预算按 started 计数。
+- 版本：v1.2.4 / rubric v1.2.0 / schema+metric v3 / target v1.0.2 / default v1.0.0；F 可保持 52f1b3cf…，C 变化，R 保持 f3efe431…。
+- 门禁：本轮只批设计；实现、freeze、单案例 Q23/Q21/Q11、10、40 均需另行批准；未激活 v1.2.4。
