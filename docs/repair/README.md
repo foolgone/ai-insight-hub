@@ -8,9 +8,9 @@
 > 4. 未冻结的定义/目标，不得进入代码实现。
 >
 > 最后更新：2026-11-23
-> 当前阶段：**M1-D-6 v1.2.4 单案例诊断已执行，Q23 停在 patch_schema_invalid；M1-D-6 diagnostic blocked**
-> 当前阻塞决策：**是否为 Q23 patch 失败设计 v1.2.5，或保持 v1.2.4 frozen/inactive**
-> 当前不做：10/40 Judge、v1.2.4 激活、M2/M3、生产 migration
+> 当前阶段：**M1-D-6 v1.2.4 单案例 Q23 停在 patch_schema_invalid；进入方向校准：先 target 复核，再做 10 条诊断批处理**
+> 当前阻塞决策：**Q23 target/Gold 复核；v1.2.5 patch-only 不作为 Q23 通过路径**
+> 当前不做：10/40 正式验收、v1.2.4 激活、M2/M3、生产 migration
 
 ---
 
@@ -19,25 +19,25 @@
 | 项 | 状态 |
 |---|---|
 | 项目阶段 | 核心研发向产品化过渡 |
-| 主线 | M1 评测可信度；v1.2.3/v1.2.4 `frozen`；M1-D-5 blocked；M1-D-6 diagnostic blocked at Q23 |
+| 主线 | M1 评测可信度；v1.2.4 `frozen`；M1-D-6 blocked；方向校准：target 复核 + 10 条诊断 |
 | 并行 A | M2 只读工作台；API 审计完成，前端未开始 |
 | 并行 B | M4-A 生产约束；未开始 |
 | M3 优化闭环 | 未开始；等 M1 可信、M2 可用 |
-| 当前可写代码？ | **否**；先决策 v1.2.5 patch 修复或保持 v1.2.4 |
-| 当前可跑 Judge？ | **否**；单案例已停止，10/40 未批准 |
+| 当前可写代码？ | **只写 target 复核/诊断 runner**；不写新 Judge Prompt，除非复核结论要求 |
+| 当前可跑 Judge？ | **仅 10 条 `diagnostic_only` 批处理，需单独批准**；正式 10/40 未批准 |
 | v1.2.1 / v1.2.2 / v1.2.3 / v1.2.4 | 四者均 `frozen`；v1.2.4 `active=false`；默认仍 `v1.0.0` |
-| 最近一次决策 | 2026-11-23 单案例执行：Q23 patch_schema_invalid，停止 |
-| 下一个交付 | 人工决策 v1.2.5 patch 修复方案（或保持 v1.2.4 不激活） |
+| 最近一次决策 | 2026-11-23 方向校准：单案例不单独判死，先 target 复核 + 分布诊断 |
+| 下一个交付 | Q23 target/Gold 复核结论 + 10 条诊断批处理申请 |
 
 ### 现在只需要一个决定
 
-**Q23 单案例已停在 patch_schema_invalid；是否设计 v1.2.5 patch 修复。**
+**Q23 已证明 patch-only 不是瓶颈；当前决策是“先校准目标，再做分布诊断”。**
 
 | 选项 | 含义 | 结果 |
 |---|---|---|
-| **设计 v1.2.5** | 针对 null evidence_refs 与 Q23 claim 分解设计新 patch 修复 | 进入设计评审；不直接跑 Judge |
-| **保持 frozen** | 接受 v1.2.4 未通过 Q23，不进入 10 条 | v1.2.4 保持 frozen/inactive；M1-D-6 blocked |
-| **暂缓** | 不改、不跑 | 维持现状，等待更多证据 |
+| **推荐：target 复核 + 10 条诊断** | 先 M1-A 复核 Q23 target/Gold，再用 v1.2.4 frozen 跑 10 条 `diagnostic_only` | 不激活、不写 PASS；产出分布报告 |
+| **仅 v1.2.5 patch 健壮性** | 修 null/refusal，但不作为 Q23 通过路径 | 可与 target 复核并行；不直接跑 Judge |
+| **保持 frozen** | 不改不跑 | 维持现状，等待更多证据 |
 
 ---
 
@@ -60,8 +60,8 @@
 | 里程碑 | 状态 | 已完成证据 | 当前阻塞/下一步 |
 |---|---|---|---|
 | **M0 评测基础设施** | `accepted`（冻结维护） | Dataset/Version/Item、RAG Adapter、Trace、检索指标、Judge、Run/Celery、持久化聚合、WeKnora 联调 | 只修缺陷/兼容，不再架构重构 |
-| **M1 评测可信度** | `in_progress` | M1-A 语义/Gold/target 已冻结；M1-B B 双指标草案（`19-…`）；M1-C C1–C4 已实现/验证；M1-D-0 Prompt `frozen`；M1-D-1 blocked at Q11；M1-D-2 v1.2.1 `frozen`；M1-D-3 blocked at Q23；M1-D-4 v1.2.2 `frozen`、Q23 invalid -> blocked；M1-D-5 v1.2.3 `frozen`、单案例 Q23 invalid -> diagnostic blocked；M1-D-6 v1.2.4 `frozen`、待单案例 | v1.2.x 未激活；10/40 Judge 未批准；M1-E 未开始 |
-| **M2 评测工作台** | `audit_complete` / 实现 `not_started` | API 审计完成：Run/详情/结果/失败/Trace 可用；前端 0 页面 | 等 M1-B 冻结后再决定是否写 P0 前端 |
+| **M1 评测可信度** | `in_progress` | M1-A 语义/Gold/target 已冻结；M1-B B 双指标草案（`19-…`）；M1-C C1–C4 已实现/验证；M1-D-0 Prompt `frozen`；M1-D-1 blocked at Q11；M1-D-2 v1.2.1 `frozen`；M1-D-3 blocked at Q23；M1-D-4 v1.2.2 `frozen`、Q23 invalid -> blocked；M1-D-5 v1.2.3 `frozen`、单案例 Q23 invalid -> diagnostic blocked；M1-D-6 v1.2.4 `frozen`、Q23 `patch_schema_invalid` -> blocked；方向校准：target 复核 + 10 条诊断 | v1.2.x 未激活；10/40 正式验收未批准；M1-E 未开始 |
+| **M2 评测工作台** | `audit_complete` / 实现 `not_started` | API 审计完成：Run/详情/结果/失败/Trace 可用；前端 0 页面 | 建议等 M1 有 10 条诊断报告 + 用户批准后再写 P0 前端 |
 | **M3 RAG 优化闭环** | `not_started` | 无 | 依赖 M1 可信 + M2 可用 |
 | **M4 生产交付** | 基础已有 / 约束 `not_started` | 认证、加密、限流、Prometheus/Grafana/Sentry、备份/恢复演练 | M4-A：租户、保留期、审计、告警、成本、数据权利 |
 
@@ -154,6 +154,7 @@
 | `docs/repair/phase3e/m1d6-single-case-results.json` | raw results SHA `dec1d964…` | `stopped` | Q23 F invalid；Q21/Q11 未运行 |
 | `docs/repair/phase3e/m1d6-single-case-analysis.json` | analysis SHA `24bea3ec…` | report-only | Q23 initial/patch、absence、patch 失败、停止条件 |
 | `docs/repair/49-m1d6-v1.2.4-single-case-diagnostic-results.md` | report SHA `d7762d6a…` | `stopped at Q23` | Q23 patch_schema_invalid；M1-D-6 blocked |
+| `docs/repair/50-m1d6-q23-root-cause-and-target-review.md` | read-only review | `pending_decision` | Q23 0.333 复现；S1 合并 derived=0.400；A/B/C 待选 |
 
 ### 3.2 决策时间线
 
@@ -193,6 +194,7 @@
 | 2026-11-23 | v1.2.4 设计 approve_with_changes；P1-1~P1-4 修订并实现/验证 | `design_draft` / `implemented/verified`；待 freeze |
 | 2026-11-23 | v1.2.4 乱码修复复审通过；metadata-only freeze | `frozen` / `active=false`；未激活；单案例未批准 |
 | 2026-11-23 | v1.2.4 Q23/Q21/Q11 单案例执行：Q23 patch_schema_invalid | `stopped` / `blocked`；4 calls / CNY 0.0422808；Q21/Q11 未运行 |
+| 2026-11-23 | Q23 根因复核：patch null 次要；S0=0.333，S1 合并 derived=0.400 | `pending_decision`；待 A target v1.0.3 / B claim 分解 / C 3 次 median |
 
 ---
 
@@ -260,6 +262,8 @@
 ## 5. 下一步开发计划
 
 > 顺序原则：**先冻结指标定义与验收目标 → 再实现 Schema/Service → 最后跑 Judge**。不允许代码反过来决定标准。
+>
+> **2026-11-23 方向校准**：单案例诊断不单独判死版本；先做 Q23 target/Gold 复核，再用 10 条 `diagnostic_only` 批处理测量分布。规则见 `13-phase3e-acceptance-plan.md` §5.4。
 
 ### 5.1 当前流程（P0）
 
@@ -340,19 +344,21 @@
 
 **后续（未批准）**：
 
-1. 人工决策：是否为 Q23 `patch_schema_invalid` 设计 v1.2.5（null/refusal 与 claim 分解）；
-2. v1.2.4 保持 frozen/inactive；不得复用本次单案例批准重跑；
-3. 未通过前不跑 10/40；不得复用 v1.2.1/v1.2.3 批准；
-4. 40 条分层报告（HG 13 / provisional 27 分开）；
-5. 6 条缺失 baseline 按方案 A 标 `baseline_delta: unavailable`，不跑 Judge 补齐；
-6. 四组报告 + 已知问题接受/修复/延期 + SHA 追溯；
-7. M1-E 验收。
+1. M1-A Q23 target/Gold 复核：cl1 支持状态、claim 分解、F 区间、是否 3 次 median；不跑 Judge。
+2. v1.2.4 保持 frozen/inactive；不得复用本次单案例批准重跑。
+3. 复核后若 target 不成立，走 target v1.0.3；若 Judge 不成立，修 claim 粒度；不批准 v1.2.5 patch-only 作为 Q23 通过路径。
+4. 用 v1.2.4 frozen 跑 10 条 `diagnostic_only` 批处理；不计入验收，报告 `invalid` rate、target pass rate、claim 分解、C/R 分布。
+5. 诊断后再决定正式 10 条闸门；不得复用 v1.2.1/v1.2.3 批准。
+6. 40 条分层报告（HG 13 / provisional 27 分开）。
+7. 6 条缺失 baseline 按方案 A 标 `baseline_delta: unavailable`，不跑 Judge 补齐。
+8. 四组报告 + 已知问题接受/修复/延期 + SHA 追溯。
+9. M1-E 验收。
 
 ### 5.4 并行线
 
 | 线 | 状态 | 启动条件 | 第一交付 |
 |---|---|---|---|
-| M2 最小只读工作台 | 审计完成 | 用户明确批准写前端 | Run 列表 + 详情 + Case + Evidence；只读 |
+| M2 最小只读工作台 | 审计完成 | 用户明确批准写前端；建议等 M1 有 10 条诊断报告后再开工 | Run 列表 + 详情 + Case + Evidence；只读 |
 | M4-A 生产约束 | 未开始 | 可与 M1 并行 | 用户/租户、保留期、审计、成本、告警、数据权利决策 |
 | M3 优化闭环 | 未开始 | M1 可信 + M2 可用 | 首个受控优化实验 |
 
@@ -363,6 +369,8 @@
 | M1-B 冻结（含目标 revision） | 0.5–1 |
 | M1-C 实现与测试 | 5–8 |
 | M1-D 实验 | 2–4（不含模型等待） |
+| Q23 target/Gold 复核 | 0.5–1 |
+| 10 条诊断批处理 | 0.5（不含调用费） |
 | M1-E 验收 | 1–2 |
 | M2 P0 前端 | 6–9 |
 | M2 compare 接口（P1） | +2–3 |

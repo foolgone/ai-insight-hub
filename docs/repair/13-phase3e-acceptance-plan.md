@@ -7,6 +7,12 @@
 > 前置：40 条 final_labels 已冻结（`pilot-40-final-labels.json`，SHA `f139623f…`）；目标表已冻结（`pilot-40-targets-v1.2.0.json`，SHA `34357b34…`）；v1.2.0 运行时未创建/未激活。
 >
 > **2026-11-19 更新：人工改选方案 B（F_strict + F_coverage）。现有 `F` 目标映射到 `F_coverage`；`F_strict` 只作诊断。本文 §2.4 中“新分母 F=1.0 / Q21 不可达”等描述属于 A 方案的历史评估，B 下不再成立；B 的指标定义与目标映射见 `18-m1b-dual-metric-design-evaluation.md`（`M1-B-003`，`proposed_pending_human`）。**
+>
+> **2026-11-23 方向校准（执行约束）：M1-D-6 在 Q23 单案例停在 `patch_schema_invalid`；复盘确认，即使 patch 完美，Q23 初始 claim 分解也只得到 F=0.333，仍低于 `[0.4, 0.5]`。根因是 claim 分解/目标带宽，不是 patch。因此：**
+> 1. **单案例诊断只作信号，不单独判死版本；HG 案例按 §5.1 重复 3 次后再判定。**
+> 2. **先做 Q23 target/Gold 复核，再决定 target v1.0.3 或 claim 粒度修复；不批准 v1.2.5 patch-only 作为 Q23 通过路径。**
+> 3. **正式 10 条闸门前，增加一次 `diagnostic_only` 的 10 条诊断批处理；它不计入验收、不写 PASS，允许记录 invalid 后继续收集分布。**
+> 4. **M1 出口仍是 10 条闸门 + 40 条规模/回归；不得用 3 个 case 的零 invalid 代替分布可信。**
 
 ## 1. 数据角色
 
@@ -190,9 +196,25 @@ Human Gold 范围以 `docs/repair/phase3e/human-gold.json` 为准：
 - 把 known miss 写成 PASS；
 - 把单次 0.9 当成稳定 0.9。
 
+### 5.4 诊断批处理（`diagnostic_only`，非验收）
+
+目的：在正式 10 条闸门前，用一次 10 条运行测量分布，避免用 3 个单案例反复打补丁。
+
+规则：
+
+- 使用 frozen v1.2.x 资产；不激活、不改 target/fixture/Prompt；
+- 运行 10 条；记录 `invalid` 后继续收集，只有预算、凭证、指纹漂移、`unprocessed` 才硬停止；
+- 结果标记 `diagnostic_only`，不计入 10 条闸门，不得写 PASS/accepted；
+- 必须报告：`invalid` rate、target pass rate、`claim_count` 分布、C/R 分布、high variance cases、`unprocessed`；
+- 批处理后决定：系统性修复 / target-Gold 复核 / 进入正式 10 条闸门；
+- 同一资产只跑一次；不得“复跑直到通过”；HG 重复仍按 §5.1 单独 3 次；
+- 诊断批处理不得替代 §6.3 的 10 条闸门，也不得把“分布可解释”写成“10 条通过”。
+
 ## 6. 验收分层
 
-### 6.1 单案例层
+### 6.1 单案例层（验收）
+
+> 本节是验收层；§5.4 的 `diagnostic_only` 单案例/10 条诊断不适用“必须目标范围内”，只记录分布与根因，不得写成 PASS。
 
 每个案例必须满足：
 
@@ -224,6 +246,8 @@ Human Gold 范围以 `docs/repair/phase3e/human-gold.json` 为准：
 - high variance 数。
 
 ### 6.3 整体验收
+
+> §5.4 的诊断批处理不是验收；10 条闸门仍按本节 10/10 目标通过执行。不得把诊断批处理的“分布可解释”写成“10 条通过”。
 
 - **10 条闸门**：10/10 目标通过；不得有 HG supported quote invalid、`invalid(contract_violation)`、`failed(execution)`。
 - **40 条规模/回归**：完成 40/40；目标通过数 + known issues 分开报告；不得写“40 条 Human Gold 通过”。
