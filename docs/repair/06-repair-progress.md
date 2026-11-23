@@ -1337,9 +1337,19 @@ alembic check   : No new upgrade operations detected
 ### M1-D-6 v1.2.4 Evidence-only Patch Repair 设计（2026-11-23，design_draft_pending_review）
 - 文档：`docs/repair/45-m1d6-v1.2.4-evidence-patch-design.md`；只提交设计与范围，未改 Prompt/Agent、未冻结、未跑 Judge。
 - 根因：v1.2.3 repair 返回完整 claims，顺手把 cl1 从 supported 改成 insufficient_evidence，F 0.5→0.333；只做字符串转数组不够。
-- P0：新增 patch Schema（fixes: claim_id/context_id/quote；extra=forbid）；只替换被标记 claim 的 evidence_refs；禁止改 claim/type/subtype/support_status/is_contradictory/contradiction_with；1 次 patch，失败 invalid。
+- P0：新增 patch Schema（fixes: claim_id + evidence_refs list；extra=forbid）；完整 replacement set；只替换被标记 claim 的 evidence_refs；禁止改 claim/type/subtype/support_status/is_contradictory/contradiction_with；1 次 patch，失败 invalid。
+- P0：effective claim_id；null claim_id 用 clN patch，原值保持 null。
 - P0：捕获 StructuredOutputError.validation_errors，写入 agent_contract.final_errors；invalid F/F_strict 都带。
 - P1：C prompt 增加“wrong_facts 命中首句/最终结论 → 固定 0.0–0.2”；不引用 Q23；C SHA 变化；target 不变；选择 warning 不新增 C repair。
 - P2：诊断 driver 增加 append-only attempt ledger；中断标记 uncertain_call=true；预算按 started 计数。
 - 版本：v1.2.4 / rubric v1.2.0 / schema+metric v3 / target v1.0.2 / default v1.0.0；F 可保持 52f1b3cf…，C 变化，R 保持 f3efe431…。
 - 门禁：本轮只批设计；实现、freeze、单案例 Q23/Q21/Q11、10、40 均需另行批准；未激活 v1.2.4。
+
+### M1-D-6 v1.2.4 Evidence-only Patch Repair 实现（2026-11-23，design_draft / implemented / verified，待 freeze）
+- 文档：`docs/repair/46-m1d6-v1.2.4-implementation.md`；设计 r2 P1-1~P1-4 已修订并实现。
+- 资产：`backend/app/prompts/rag_judge/v1.2.4/`；F `52f1b3cf…`（不变）、C `ca489fcf…`、R `f3efe431…`（不变）、MANIFEST `02b28842…`；status design_draft、active=false、rubric v1.2.0、默认 v1.0.0。
+- Patch：新增 `rag_judge_patch.py`（claim_id + evidence_refs 完整 replacement set，extra=forbid）；patch schema `da70dc60…`，patch example `d999089f…`。
+- Agent：v1.2.4 + faithfulness 初始 Schema 单次解析；quote 错误 1 次 patch；effective claim_id；conflict/多 refs 校验；merge 只改 evidence_refs；final_errors 接 validation_errors。
+- C：首句/结论矛盾固定 0.0–0.2；C warning 记录 `correctness_first_sentence_warning`；不新增 C repair。
+- 测试：全量 pytest 1098 条通过；black/flake8/mypy/lint-imports 通过；静态校验 23/23，validation SHA `d063d5d5…`；泄漏审计 `7a5fa618…`，0 findings。
+- 边界：未 frozen、未激活、未跑 Judge/10/40；未建 Run、未写 DB、未调 WeKnora；M1-D-5 blocked，M1-C/M1-D 未 accepted。

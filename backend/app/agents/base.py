@@ -317,7 +317,7 @@ class BaseAgent(ABC):
 
             payload: Any = response.content
             if self.output_schema is not None:
-                payload = await _parse_structured(
+                payload = await self._parse_structured_output(
                     self.output_schema,
                     text=response.content,
                     llm=agent_llm,
@@ -514,6 +514,28 @@ class BaseAgent(ABC):
             )
         except Exception as exc:  # noqa: BLE001
             logger.opt(exception=exc).error("failure tracking failed")
+
+    async def _parse_structured_output(
+        self,
+        schema: type[BaseModel],
+        *,
+        text: str,
+        llm: Any,
+        usage_collector: list[LLMUsage] | None = None,
+        validator: Any = None,
+        raw_sink: list[str] | None = None,
+        repair_example: str | None = None,
+    ) -> Any:
+        """Parse structured output; overridable for version-gated repair strategies."""
+        return await _parse_structured(
+            schema,
+            text=text,
+            llm=llm,
+            usage_collector=usage_collector if usage_collector is not None else [],
+            validator=validator,
+            raw_sink=raw_sink,
+            repair_example=repair_example,
+        )
 
 
 async def _parse_structured(

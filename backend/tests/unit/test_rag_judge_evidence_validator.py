@@ -135,3 +135,15 @@ def test_quote_contract_error_is_value_error() -> None:
 
 def test_validator_sha_is_stable() -> None:
     assert len(quote_validator_sha256()) == 64
+
+
+def test_contiguous_but_semantically_unrelated_quote_passes_known_limitation() -> None:
+    """Shared validator only checks verbatim continuity; semantic support is manual."""
+    check = check_quote(
+        quote="第二句用于测试完整句子窗口。",
+        context_id="C1",
+        context_map=build_context_map([CONTEXT]),
+        claim_id="cl1",
+    )
+
+    assert check.ok is True

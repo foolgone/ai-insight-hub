@@ -20,6 +20,7 @@ from typing import Any
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.agents.structured_output import StructuredOutputError, extract_json_text
 from app.agents.base import (
     AgentConfig,
     AgentInputError,
@@ -38,11 +39,13 @@ from app.schemas.agents.rag_judge import (
     metric_version_for_prompt,
     output_schema_for,
 )
+from app.schemas.agents.rag_judge_patch import EvidencePatch
 from app.schemas.agents.rag_judge_evidence import (
     QuoteCheck,
     QuoteContractError,
     build_context_map,
     check_claims_evidence,
+    check_quote,
     detect_mixed_absence,
     format_quote_contract_error,
     quote_validator_sha256,
@@ -51,6 +54,10 @@ from app.schemas.agents.rag_judge_evidence import (
 PROMPT_DIR = Path(__file__).resolve().parents[1] / "prompts" / "rag_judge"
 PROMPT_VERSION_PATTERN = re.compile(r"^v\d+\.\d+\.\d+$")
 CONTRACT_REPAIR_VERSION = "v1.2.3"
+PATCH_REPAIR_VERSION = "v1.2.4"
+PATCH_SCHEMA_PATH = (
+    Path(__file__).resolve().parents[1] / "schemas" / "agents" / "rag_judge_patch.py"
+)
 
 
 class RagJudgePromptError(RuntimeError):
@@ -144,11 +151,13 @@ class RagJudgeAgent(BaseAgent):
         self.contract_repair_version: str | None = None
         self.quote_validator_sha256: str | None = None
         self.contract_report: dict[str, Any] | None = None
-        if self.prompt_version == CONTRACT_REPAIR_VERSION and metric == "faithfulness":
-            self.contract_repair_version = CONTRACT_REPAIR_VERSION
+        if self.prompt_version in (CONTRACT_REPAIR_VERSION, PATCH_REPAIR_VERSION) and (
+            metric == "faithfulness"
+        ):
+            self.contract_repair_version = self.prompt_version
             self.quote_validator_sha256 = quote_validator_sha256()
             self.contract_report = {
-                "contract_version": CONTRACT_REPAIR_VERSION,
+                "contract_version": self.prompt_version,
                 "quote_validator_sha256": self.quote_validator_sha256,
                 "quote_precheck_errors": [],
                 "mixed_sentence_warnings": [],
@@ -156,6 +165,21 @@ class RagJudgeAgent(BaseAgent):
                 "repair_count": 0,
                 "passed_after_repair": None,
                 "final_errors": [],
+            }
+            if self.prompt_version == PATCH_REPAIR_VERSION:
+                self.contract_report.update(
+                    {
+                        "patch_schema_sha256": hashlib.sha256(
+                            PATCH_SCHEMA_PATH.read_bytes()
+                        ).hexdigest(),
+                        "patch_applied_claims": [],
+                        "patch_semantic_review_required": False,
+                    }
+                )
+        elif self.prompt_version == PATCH_REPAIR_VERSION and metric == "answer_correctness":
+            self.contract_report = {
+                "contract_version": PATCH_REPAIR_VERSION,
+                "correctness_first_sentence_warning": None,
             }
         super().__init__(
             config
@@ -251,9 +275,11 @@ class RagJudgeAgent(BaseAgent):
         return parsed.model_dump(mode="json")
 
     def _validate_parsed(self, model: Any) -> None:
-        """业务校验：分数合法；v1.2.3 额外做 evidence quote 合同预校验。"""
-        if self.contract_report is not None:
+        """业务校验：分数合法；v1.2.3+ 额外做 evidence quote 合同预校验。"""
+        if self.metric == "faithfulness" and self.contract_report is not None:
             self._validate_quote_contract(model)
+        elif self.prompt_version == PATCH_REPAIR_VERSION and self.metric == "answer_correctness":
+            self._check_correctness_first_sentence(model)
 
         score = getattr(model, "score", None)
         if score is None:
@@ -261,6 +287,30 @@ class RagJudgeAgent(BaseAgent):
         value = float(score)
         if not math.isfinite(value) or value < 0 or value > 1:
             raise ValueError("score must be a finite number within [0, 1]")
+
+    def _check_correctness_first_sentence(self, model: Any) -> None:
+        """v1.2.4 warning only: first-sentence wrong_facts with score > 0.2."""
+        if self.contract_report is None or self._active_input is None:
+            return
+        score = getattr(model, "score", None)
+        wrong_facts = list(getattr(model, "wrong_facts", None) or [])
+        answer = (self._active_input.answer or "").strip()
+        if score is None or not answer or not wrong_facts:
+            return
+        first_sentence = re.split(r"[。！？\n]", answer, maxsplit=1)[0].strip()
+        normalized_first = "".join(first_sentence.split())
+        for wrong in wrong_facts:
+            normalized_wrong = "".join(str(wrong).split())
+            if normalized_first and (
+                normalized_first in normalized_wrong or normalized_wrong in normalized_first
+            ):
+                if float(score) > 0.2:
+                    self.contract_report["correctness_first_sentence_warning"] = {
+                        "score": float(score),
+                        "first_sentence": first_sentence,
+                        "wrong_fact": str(wrong),
+                    }
+                return
 
     def _validate_quote_contract(self, model: Any) -> None:
         """v1.2.3-only：让 Agent 在 repair 前看到 quote 错误。"""
@@ -349,6 +399,250 @@ class RagJudgeAgent(BaseAgent):
             "quote": (check.quote or "")[:300],
             "context_excerpt": (check.context_excerpt or "")[:300] or None,
         }
+
+    async def _parse_structured_output(
+        self,
+        schema: Any,
+        *,
+        text: str,
+        llm: Any,
+        usage_collector: list[Any] | None = None,
+        validator: Any = None,
+        raw_sink: list[str] | None = None,
+        repair_example: str | None = None,
+    ) -> Any:
+        """v1.2.4 only: initial schema single-pass + evidence-only patch."""
+        if self.prompt_version != PATCH_REPAIR_VERSION or self.metric != "faithfulness":
+            return await super()._parse_structured_output(
+                schema,
+                text=text,
+                llm=llm,
+                usage_collector=usage_collector,
+                validator=validator,
+                raw_sink=raw_sink,
+                repair_example=repair_example,
+            )
+        try:
+            initial = schema.model_validate_json(extract_json_text(text))
+        except Exception as exc:  # noqa: BLE001
+            self._record_final_error("initial_schema_invalid", exc)
+            raise StructuredOutputError(
+                "initial faithfulness output is schema-invalid",
+                original_output=text,
+                raw_output=text,
+                validation_errors=str(exc),
+            ) from exc
+
+        try:
+            self._validate_parsed(initial)
+        except QuoteContractError as exc:
+            quote_errors = [
+                item
+                for item in (self.contract_report or {}).get("quote_precheck_errors", [])
+                if item.get("code") in {"quote_not_found", "unknown_context_id", "empty_quote"}
+            ]
+            if not quote_errors:
+                self._record_final_error("mixed_sentence_requires_review", exc)
+                raise StructuredOutputError(
+                    "mixed sentence requires review; evidence patch cannot split claims",
+                    original_output=text,
+                    raw_output=text,
+                    validation_errors=str(exc),
+                ) from exc
+            try:
+                merged = await self._apply_evidence_patch(
+                    initial,
+                    schema=schema,
+                    quote_errors=quote_errors,
+                    llm=llm,
+                    usage_collector=usage_collector,
+                )
+                self._validate_parsed(merged)
+            except StructuredOutputError:
+                raise
+            except Exception as exc:  # noqa: BLE001
+                self._record_final_error("patch_failed", exc)
+                raise StructuredOutputError(
+                    "evidence patch failed",
+                    original_output=text,
+                    raw_output=text,
+                    validation_errors=str(exc),
+                ) from exc
+            if raw_sink is not None:
+                raw_sink.append(json.dumps(merged.model_dump(mode="json"), ensure_ascii=False))
+            return merged
+
+        if raw_sink is not None:
+            raw_sink.append(text)
+        return initial
+
+    async def _apply_evidence_patch(
+        self,
+        initial: Any,
+        *,
+        schema: Any,
+        quote_errors: list[dict[str, Any]],
+        llm: Any,
+        usage_collector: list[Any] | None,
+    ) -> Any:
+        assert self.contract_report is not None
+        payload = self._active_input
+        contexts = list(payload.contexts) if payload else []
+        context_map = build_context_map(contexts)
+        effective_claims: dict[str, Any] = {}
+        for index, claim in enumerate(initial.claims, 1):
+            effective = str(getattr(claim, "claim_id", None) or f"cl{index}")
+            effective_claims[effective] = claim
+        error_ids = {str(item.get("claim_id")) for item in quote_errors}
+        unknown = error_ids - set(effective_claims)
+        if unknown:
+            raise ValueError(f"quote error claim ids not found: {sorted(unknown)}")
+
+        patch_payload = {
+            "rules": [
+                "??? fixes????? claim ???claim_type?claim_subtype?support_status?"
+                "is_contradictory?contradiction_with?",
+                "?? fix ??????? evidence_refs replacement set?",
+                "quote ??? contexts ??????????? claim ???/??/???" "?????????? quote ???????",
+                "conflict claim ???????? distinct?non-nested quotes?",
+            ],
+            "claims": [
+                {
+                    "claim_id": effective,
+                    "claim": claim.claim,
+                    "claim_type": claim.claim_type,
+                    "claim_subtype": claim.claim_subtype,
+                    "support_status": claim.support_status,
+                    "evidence_refs": [
+                        {"context_id": ref.context_id, "quote": ref.quote}
+                        for ref in claim.evidence_refs
+                    ],
+                }
+                for effective, claim in effective_claims.items()
+                if effective in error_ids
+            ],
+            "quote_errors": quote_errors,
+            "contexts": {key: value for key, value in context_map.items()},
+        }
+        messages = [
+            {
+                "role": "system",
+                "content": (
+                    "?? RAG Judge ? evidence patch ????"
+                    "??? JSON ????????????"
+                    '{"fixes":[{"claim_id":"cl1","evidence_refs":'
+                    '[{"context_id":"C1","quote":"context ????"}]}]}?'
+                    f"???{self._patch_example()}"
+                ),
+            },
+            {"role": "user", "content": json.dumps(patch_payload, ensure_ascii=False)},
+        ]
+        response = await llm.chat(
+            messages,
+            temperature=0.0,
+            response_format={"type": "json_object"},
+        )
+        if usage_collector is not None:
+            usage_collector.append(response.usage)
+        try:
+            patch = EvidencePatch.model_validate_json(extract_json_text(response.content))
+        except Exception as exc:  # noqa: BLE001
+            self._record_final_error("patch_schema_invalid", exc)
+            raise StructuredOutputError(
+                "evidence patch schema is invalid",
+                original_output=str(response.content),
+                raw_output=str(response.content),
+                validation_errors=str(exc),
+            ) from exc
+
+        seen: set[str] = set()
+        claim_by_id = {
+            str(getattr(c, "claim_id", None) or f"cl{i}"): c
+            for i, c in enumerate(initial.claims, 1)
+        }
+        for fix in patch.fixes:
+            if fix.claim_id in seen:
+                raise ValueError(f"duplicate patch claim_id: {fix.claim_id}")
+            seen.add(fix.claim_id)
+            if fix.claim_id not in error_ids or fix.claim_id not in claim_by_id:
+                raise ValueError(f"patch claim_id not allowed: {fix.claim_id}")
+            checks = [
+                check_quote(
+                    quote=ref.quote,
+                    context_id=ref.context_id,
+                    context_map=context_map,
+                    claim_id=fix.claim_id,
+                )
+                for ref in fix.evidence_refs
+            ]
+            bad = [check for check in checks if not check.ok]
+            if bad:
+                raise ValueError(
+                    "patch quote invalid: "
+                    + "; ".join(f"{check.claim_id}:{check.error}" for check in bad)
+                )
+            original = claim_by_id[fix.claim_id]
+            if (
+                getattr(original, "claim_subtype", None) == "conflict"
+                and getattr(original, "support_status", None) == "supported"
+            ):
+                quotes = {ref.quote.strip() for ref in fix.evidence_refs}
+                if len(quotes) < 2 or any(
+                    left != right and (left in right or right in left)
+                    for left in quotes
+                    for right in quotes
+                ):
+                    raise ValueError(
+                        f"conflict claim {fix.claim_id} needs >=2 distinct non-nested quotes"
+                    )
+
+        data = initial.model_dump(mode="json")
+        by_effective = {
+            str(claim.get("claim_id") or f"cl{index}"): index
+            for index, claim in enumerate(data.get("claims") or [], 1)
+        }
+        for fix in patch.fixes:
+            index = by_effective[fix.claim_id]
+            data["claims"][index - 1]["evidence_refs"] = [
+                ref.model_dump(mode="json") for ref in fix.evidence_refs
+            ]
+        merged = schema.model_validate(data)
+        self.contract_report["repair_triggered"] = True
+        self.contract_report["repair_count"] = 1
+        self.contract_report["patch_applied_claims"] = sorted(seen)
+        self.contract_report["patch_semantic_review_required"] = True
+        return merged
+
+    def _patch_example(self) -> str:
+        return json.dumps(
+            {
+                "fixes": [
+                    {
+                        "claim_id": "cl2",
+                        "evidence_refs": [
+                            {
+                                "context_id": "C1",
+                                "quote": "???????? 30 ?????",
+                            }
+                        ],
+                    }
+                ]
+            },
+            ensure_ascii=False,
+        )
+
+    def _record_final_error(self, code: str, exc: Exception) -> None:
+        if self.contract_report is None:
+            return
+        validation_errors = getattr(exc, "validation_errors", None) or str(exc)
+        self.contract_report["final_errors"] = [
+            {
+                "code": code,
+                "error_type": type(exc).__name__,
+                "validation_errors": validation_errors,
+            }
+        ]
+        self.contract_report["passed_after_repair"] = False
 
     def _repair_example(self) -> str | None:
         """给修复轮一条完整合法 JSON，避免长 schema 导致半截输出。"""

@@ -1309,7 +1309,8 @@ async def judge_trace(
                     for key, value in data.items()
                     if key in ("reason", "missing_points", "wrong_facts")
                 }
-                | _usage_details(result),
+                | _usage_details(result)
+                | _agent_contract_details(agent),
                 judge_config=config,
                 raw_output=raw_output,
                 raw_truncated=raw_truncated,
