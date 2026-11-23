@@ -68,6 +68,7 @@ LEDGER_FILE = BASE / "docs/repair/phase3e/m1d6-v125-ledger.jsonl"
 OUT_JSON = BASE / "docs/repair/phase3e/m1d6-v125-results.json"
 OUT_MD = BASE / "docs/repair/56-m1d6-v1.2.5-c-single-case-results.md"
 OUT_SHA = BASE / "docs/repair/phase3e/m1d6-v125-results.sha256"
+OUT_REPORT_SHA = BASE / "docs/repair/phase3e/m1d6-v125-report.sha256"
 
 EXPECTED_APPLICATION_SHA = (
     "f53dd12eb9115a0688b500929620294831f338ae5841df359378a7a511be2975"
@@ -765,7 +766,9 @@ def q23_run_record(
     )
     initial_output = primary.get("content") if primary else None
     patch_output = patch.get("content") if patch else None
-    merged_output = getattr(f, "raw_output", None)
+    f_status = getattr(f, "status", None)
+    raw_output = getattr(f, "raw_output", None)
+    merged_output = raw_output if f_status == "evaluated" else None
     cl1 = next((claim for claim in claims if claim.get("claim_id") == "cl1"), None)
     derived = [
         {
@@ -822,7 +825,7 @@ def q23_run_record(
     return {
         "run_id": run_id,
         "case_id": "Q23",
-        "f_status": getattr(f, "status", None),
+        "f_status": f_status,
         "f_score": getattr(f, "score", None),
         "f_invalid_reason": getattr(f, "invalid_reason", None),
         "f_strict_status": getattr(strict, "status", None),
@@ -852,6 +855,7 @@ def q23_run_record(
         "initial_output": initial_output,
         "patch_output": patch_output,
         "merged_output": merged_output,
+        "raw_output": raw_output,
         "agent_contract": contract,
         "validation_errors": details.get("validation_errors") or [],
         "mixed_sentence_warnings": list(contract.get("mixed_sentence_warnings") or []),
@@ -1768,22 +1772,63 @@ def render_q23_run(run: dict[str, Any]) -> list[str]:
         f"- patch：triggered=`{patch.get('triggered')}`；"
         f"applied=`{patch.get('applied_claims')}`；"
         f"refusal=`{patch.get('refusal')}`；"
+        f"provided=`{patch.get('provided_claims')}`；"
         f"missing=`{patch.get('missing_claims')}`；"
         f"unsupported_quote_claims=`{patch.get('unsupported_quote_claims')}`；"
-        f"example_copied=`{patch.get('example_quote_copied')}`",
+        f"example_copied=`{patch.get('example_quote_copied')}`；"
+        f"merged_output_present=`{patch.get('merged_output_present')}`",
+        f"- final_errors：`{json.dumps(patch.get('final_errors'), ensure_ascii=False)}`",
         f"- fingerprint_errors：`{run.get('fingerprint_errors')}`",
         f"- call summary：`{json.dumps(run.get('call_summary'), ensure_ascii=False)}`",
+        f"- initial claim preview：`{json.dumps(run.get('initial_preview'), ensure_ascii=False)}`",
+        "",
+        "initial output：",
+        "",
+        "```text",
+        extract_json_text(str(run.get("initial_output") or "")),
+        "```",
+        "",
+        "patch output：",
+        "",
+        "```text",
+        str(run.get("patch_output") or ""),
+        "```",
+        "",
+        "merged output：",
+        "",
+        "```text",
+        str(run.get("merged_output") or "null（未生成）"),
+        "```",
+        "",
+        "initial claims：",
+        "",
+        "| claim_id | type | subtype | support | contradictory | claim |",
+        "|---|---|---|---|---|---|",
+        *[
+            f"| {claim.get('claim_id')} | {claim.get('claim_type')} | "
+            f"{claim.get('claim_subtype')} | {claim.get('support_status')} | "
+            f"{claim.get('is_contradictory')} | {claim.get('claim')} |"
+            for claim in (run.get("initial_claims") or [])
+        ],
         "",
         "cl1：",
         "",
         "```json",
-        json.dumps(run.get("cl1"), ensure_ascii=False, indent=1),
+        json.dumps(
+            run.get("cl1") or run.get("initial_cl1"),
+            ensure_ascii=False,
+            indent=1,
+        ),
         "```",
         "",
         "derived claims：",
         "",
         "```json",
-        json.dumps(run.get("derived_claims"), ensure_ascii=False, indent=1),
+        json.dumps(
+            run.get("derived_claims") or run.get("initial_derived_claims"),
+            ensure_ascii=False,
+            indent=1,
+        ),
         "```",
         "",
         "effective claim_id mapping：",
@@ -1804,6 +1849,7 @@ def render_q23_run(run: dict[str, Any]) -> list[str]:
 
 def write_report(results: dict[str, Any], json_sha: str) -> str:
     meta = results["meta"]
+    preflight = results["preflight"]
     q23 = results["q23"]
     q23_summary_data = q23["summary"]
     q23_cr = q23["c_r_snapshot"]
@@ -1814,6 +1860,8 @@ def write_report(results: dict[str, Any], json_sha: str) -> str:
         "# M1-D-6 v1.2.5 C 单案例诊断结果（Q23 F×3 + Q21/Q11）",
         "",
         f"> 状态：`{meta['status']}`；diagnostic only；不写 PASS；不计入 10 条。",
+        f"> diagnostic verdict：`{meta.get('diagnostic_verdict', '—')}`；"
+        f"{meta.get('diagnostic_verdict_reason', '—')}",
         f"> application SHA：`{meta['application_sha256']}`",
         f"> ledger SHA：`{meta['ledger_sha256']}`；"
         f"total attempts：`{meta['ledger_total_attempts']}`；"
@@ -1822,9 +1870,9 @@ def write_report(results: dict[str, Any], json_sha: str) -> str:
         f"> Prompt：`{meta['prompt_version']}` / `frozen` / "
         f"rubric `{meta['rubric_version']}` / schema `{meta['schema_version']}` / "
         f"metric `{meta['metric_version']}`",
-        f"> F / C / R：`{meta['preflight']['prompt_sha256']['faithfulness.txt']}` / "
-        f"`{meta['preflight']['prompt_sha256']['answer_correctness.txt']}` / "
-        f"`{meta['preflight']['prompt_sha256']['answer_relevancy.txt']}`",
+        f"> F / C / R：`{preflight['prompt_sha256']['faithfulness.txt']}` / "
+        f"`{preflight['prompt_sha256']['answer_correctness.txt']}` / "
+        f"`{preflight['prompt_sha256']['answer_relevancy.txt']}`",
         f"> MANIFEST / validation / leakage：`{meta['manifest_sha256']}` / "
         f"`{meta['validation_sha256']}` / `{meta['leakage_audit_sha256']}`",
         f"> patch schema / example / validator：`{meta['patch_schema_sha256']}` / "
@@ -1855,9 +1903,9 @@ def write_report(results: dict[str, Any], json_sha: str) -> str:
         "| 项 | 值 |",
         "|---|---|",
         f"| prompt / rubric | `{meta['prompt_version']}` / `{meta['rubric_version']}` |",
-        f"| F / C / R | `{meta['preflight']['prompt_sha256']['faithfulness.txt']}` / "
-        f"`{meta['preflight']['prompt_sha256']['answer_correctness.txt']}` / "
-        f"`{meta['preflight']['prompt_sha256']['answer_relevancy.txt']}` |",
+        f"| F / C / R | `{preflight['prompt_sha256']['faithfulness.txt']}` / "
+        f"`{preflight['prompt_sha256']['answer_correctness.txt']}` / "
+        f"`{preflight['prompt_sha256']['answer_relevancy.txt']}` |",
         f"| MANIFEST / validation | `{meta['manifest_sha256']}` / "
         f"`{meta['validation_sha256']}` |",
         f"| patch schema / example | `{meta['patch_schema_sha256']}` / "
@@ -1899,19 +1947,21 @@ def write_report(results: dict[str, Any], json_sha: str) -> str:
             "## 3. Q23 F 逐次",
             "",
             "| run | status | F | F_strict | scorable | supported | unsupported | "
-            "insufficient | patch | target hit |",
-            "|---|---|---:|---|---:|---:|---:|---:|---|---|",
+            "insufficient | patch | failure | target hit |",
+            "|---|---|---:|---|---:|---:|---:|---:|---|---|---|",
         ]
     )
     for run in q23["runs"]:
         counts = run.get("counts") or {}
         patch = run.get("patch") or {}
+        final_errors = patch.get("final_errors") or []
+        failure = final_errors[0].get("code") if final_errors else "—"
         lines.append(
             f"| {run['run_id']} | {run.get('f_status')} | {run.get('f_score')} | "
             f"{run.get('f_strict_score')} | {counts.get('scorable_claim_count')} | "
             f"{counts.get('supported_count')} | {counts.get('unsupported_count')} | "
             f"{counts.get('insufficient_evidence_count')} | "
-            f"`{patch.get('applied_claims')}` | {run.get('target_hit')} |"
+            f"`{patch.get('applied_claims')}` | `{failure}` | {run.get('target_hit')} |"
         )
     lines.extend(
         [
@@ -1928,6 +1978,16 @@ def write_report(results: dict[str, Any], json_sha: str) -> str:
             f"{q23_summary_data['target_hit_rate']} |",
             f"| median in target | {q23_summary_data['median_in_target']} |",
             f"| insufficient valid runs | {q23_summary_data['insufficient_valid_runs']} |",
+            "",
+            f"- **D1 诊断结论**：Q23 F valid=`{q23_summary_data['valid_run_count']}`/3，"
+            f"median=`{q23_summary_data['median']}` → C 诊断未通过；"
+            "按失败路径，不自动出 v1.2.6；选择 A target 复核 / 10 条 diagnostic / "
+            "known limitation。",
+            "",
+            "- 初步观察：F1/F3 已把 cl1 标 unsupported + is_contradictory，且 derived "
+            "合并为 1 条；但 F1 preview=0.25、F3 preview=0.333，仍 target miss。"
+            "F2 preview=0.5，但 initial Schema 因 factual_claim+absence 失败。"
+            "即使 patch 修好，S1 稳定性仍未达成；本次不是单一 patch 问题。",
             "",
             "## 5. Q23 claim 分解逐次",
             "",
@@ -1958,27 +2018,55 @@ def write_report(results: dict[str, Any], json_sha: str) -> str:
     )
     if q21:
         lines.extend(render_metric_table(q21.get("metrics") or {}))
+        f_status = (q21.get("metrics") or {}).get("faithfulness", {}).get("status")
+        f_outcome = next(
+            (
+                outcome
+                for outcome in q21.get("outcomes") or []
+                if outcome.get("metric_name") == "faithfulness"
+            ),
+            None,
+        )
         lines.extend(
             [
                 "",
                 f"- forbidden quote：`{q21.get('forbidden_quote')}`",
                 "- exemption claims：`"
                 f"{json.dumps(q21.get('exemption_claims'), ensure_ascii=False)}`",
-                "",
             ]
         )
+        if f_status != "evaluated":
+            lines.append(
+                f"- **F {f_status}**：`{f_outcome.get('error_message') if f_outcome else None}`；"
+                "exemption claim/quote 检查不可评估。"
+            )
+        lines.append("")
     else:
         lines.extend(["未运行或未收集。", ""])
     lines.extend(["## 8. Q11", ""])
     if q11:
         lines.extend(render_metric_table(q11.get("metrics") or {}))
+        f_status = (q11.get("metrics") or {}).get("faithfulness", {}).get("status")
+        f_outcome = next(
+            (
+                outcome
+                for outcome in q11.get("outcomes") or []
+                if outcome.get("metric_name") == "faithfulness"
+            ),
+            None,
+        )
         lines.extend(
             [
                 "",
                 f"- quote checks：`{json.dumps(q11.get('quote_checks'), ensure_ascii=False)}`",
-                "",
             ]
         )
+        if f_status != "evaluated":
+            lines.append(
+                f"- **F {f_status}**：`{f_outcome.get('error_message') if f_outcome else None}`；"
+                "quote 连续性检查不可评估。"
+            )
+        lines.append("")
     else:
         lines.extend(["未运行或未收集。", ""])
     lines.extend(
@@ -2005,9 +2093,9 @@ def write_report(results: dict[str, Any], json_sha: str) -> str:
             "| 项 | 值 |",
             "|---|---|",
             f"| application | `{meta['application_sha256']}` |",
-            f"| F / C / R | `{meta['preflight']['prompt_sha256']['faithfulness.txt']}` / "
-            f"`{meta['preflight']['prompt_sha256']['answer_correctness.txt']}` / "
-            f"`{meta['preflight']['prompt_sha256']['answer_relevancy.txt']}` |",
+            f"| F / C / R | `{preflight['prompt_sha256']['faithfulness.txt']}` / "
+            f"`{preflight['prompt_sha256']['answer_correctness.txt']}` / "
+            f"`{preflight['prompt_sha256']['answer_relevancy.txt']}` |",
             f"| MANIFEST / validation | `{meta['manifest_sha256']}` / "
             f"`{meta['validation_sha256']}` |",
             f"| patch schema / example | `{meta['patch_schema_sha256']}` / "
@@ -2222,6 +2310,11 @@ async def main() -> None:
     report = write_report(results, json_sha)
     OUT_MD.write_text(report, encoding="utf-8", newline="\n")
     md_sha = sha256_bytes(OUT_MD.read_bytes())
+    OUT_REPORT_SHA.write_text(
+        f"{md_sha}  {OUT_MD.name}\n",
+        encoding="utf-8",
+        newline="\n",
+    )
     print(
         json.dumps(
             {
@@ -2248,4 +2341,29 @@ if __name__ == "__main__":
         result = preflight()
         print(json.dumps(dry_run_payload(result), ensure_ascii=False, indent=1))
         raise SystemExit(1 if result["errors"] else 0)
+    if "--report-only" in sys.argv:
+        results = load_json(OUT_JSON)
+        json_sha = sha256_bytes(OUT_JSON.read_bytes())
+        report = write_report(results, json_sha)
+        OUT_MD.write_text(report, encoding="utf-8", newline="\n")
+        md_sha = sha256_bytes(OUT_MD.read_bytes())
+        OUT_REPORT_SHA.write_text(
+            f"{md_sha}  {OUT_MD.name}\n",
+            encoding="utf-8",
+            newline="\n",
+        )
+        print(
+            json.dumps(
+                {
+                    "status": results["meta"]["status"],
+                    "q23_f_median": results["meta"]["q23_f_median"],
+                    "ledger_sha256": results["meta"]["ledger_sha256"],
+                    "json_sha256": json_sha,
+                    "md_sha256": md_sha,
+                },
+                ensure_ascii=False,
+                indent=1,
+            )
+        )
+        raise SystemExit(0)
     asyncio.run(main())

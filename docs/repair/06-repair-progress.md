@@ -1416,3 +1416,15 @@ alembic check   : No new upgrade operations detected
 - 规则：invalid 继续收集（diagnostic_only）；预算/凭证/指纹/ledger/preflight/unprocessed 硬停止；不写 PASS；不计入 10 条；Q23 C/R 只作 snapshot。
 - 边界：未执行、未激活、未跑 10/40；不修改 v1.2.5 frozen 资产；target v1.0.2 未改；M1-D-6 仍 blocked。
 - 下一步：执行 C 单案例（预授权）；结果只审结果，再决定 D1。
+
+### M1-D-6 v1.2.5 C 单案例执行（2026-11-23，collected / diagnostic failed）
+- 0-Judge dry-run：`m1d6-v125-dry-run.json`（SHA `83f612f6…`）；ok、0 LLM calls、预算自测 18/18、ledger 初始空 e3b0…、冻结资产未漂移。
+- 执行：15 calls（primary 11 + patch 4；retry/repair 0）；ledger `69c2a5a4…`；0 uncertain；CNY 0.183756；未触发预算/凭证/指纹/ledger 硬停止。
+- Q23 F：3/3 invalid；median/min/max=None；valid_runs=0；Q23-CR C=0.0（target hit）、R=0.7（target hit）。
+- Q23 失败：F1 patch 返回 `evidence_refs:null` → patch_schema_invalid；F2 initial Schema factual_claim+absence → initial_schema_invalid；F3 patch 返回 null → patch_schema_invalid。
+- Q23 初步观察：F1/F3 已把 cl1 标 unsupported+is_contradictory、derived 合并 1 条，但 F preview 0.25/0.333，仍 target miss；F2 preview 0.5 但 initial Schema invalid。S1 稳定性未达成，不是单一 patch 问题。
+- Q21：F invalid（patch refusal cl5，no_direct_quote）；C=0.9、R=0.9 仅 snapshot。
+- Q11：F invalid（patch null refs）；C=0.9、R=0.9；quote 连续性不可评估。
+- 结果：raw `m1d6-v125-results.json`（SHA `b3551e9a…`）；报告 `56-m1d6-v1.2.5-c-single-case-results.md`（SHA `94361e19…`）。
+- D1：失败路径；不出 v1.2.6；选择 A target 复核 / 10 条 diagnostic / known limitation；target v1.0.2 未改。
+- 边界：未激活、未跑 10/40、未写 PASS、未创建 Run/未写 DB/未调 WeKnora；M1-D-6 仍 blocked。

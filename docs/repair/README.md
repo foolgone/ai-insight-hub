@@ -8,8 +8,8 @@
 > 4. 未冻结的定义/目标，不得进入代码实现。
 >
 > 最后更新：2026-11-23
-> 当前阶段：**M1-D-6 v1.2.5 已 frozen；C 单案例申请已提交（预授权）；未执行、未激活、未跑 10/40**
-> 当前决策：**按 52 提交 C 单案例申请（预授权 18 calls / CNY 0.40）；结果只审结果，不写 PASS**
+> 当前阶段：**M1-D-6 v1.2.5 C 单案例已执行：Q23 F 0/3 valid（median=None）、Q21/Q11 F invalid；D1 失败路径**
+> 当前决策：**D1 失败：A target 复核 / 10 条 diagnostic / known limitation；不出 v1.2.6；不静默改 target**
 > 当前不做：10/40 正式验收、v1.2.5 激活、M2/M3、生产 migration
 
 ---
@@ -19,25 +19,26 @@
 | 项 | 状态 |
 |---|---|
 | 项目阶段 | 核心研发向产品化过渡 |
-| 主线 | M1 评测可信度；v1.2.4/v1.2.5 `frozen`；v1.2.5 `active=false`；M1-D-6 blocked |
+| 主线 | M1 评测可信度；v1.2.4/v1.2.5 `frozen`；v1.2.5 `active=false`；C 诊断失败；M1-D-6 blocked |
 | 并行 A | M2 只读工作台；API 审计完成，前端未开始 |
 | 并行 B | M4-A 生产约束；未开始 |
 | M3 优化闭环 | 未开始；等 M1 可信、M2 可用 |
-| 当前可写代码？ | **只写 C 单案例 runner/申请**；不改 v1.2.5 frozen 资产 |
-| 当前可跑 Judge？ | **仅 C 单案例（预授权，18 calls / CNY 0.40）**；正式 10/40 未批准 |
+| 当前可写代码？ | **否**；先做 D1 决策（A / 10 条 diagnostic / known limitation） |
+| 当前可跑 Judge？ | **否**；C 已完成；10/40 未批准 |
 | v1.2.1 / v1.2.2 / v1.2.3 / v1.2.4 / v1.2.5 | 五者均 `frozen`；v1.2.5 `active=false`；默认仍 `v1.0.0` |
-| 最近一次决策 | 2026-11-23 v1.2.5 metadata-only freeze 通过 |
-| 下一个交付 | C 单案例执行（预授权；18 calls / CNY 0.40；ledger 前置） |
+| 最近一次决策 | 2026-11-23 C 诊断：Q23 F 0/3 valid；Q21/Q11 F invalid |
+| 下一个交付 | D1 决策：A target 复核 / 10 条 diagnostic / known limitation |
 
 ### 现在只需要一个决定
 
-**v1.2.5 已冻结；按 52 进入 C 单案例（预授权）。**
+**C 诊断失败；按 D1 选择下一步。**
 
 | 选项 | 含义 | 结果 |
 |---|---|---|
-| **执行 C 单案例** | 提交申请后按 52 运行；18 calls / CNY 0.40；ledger；diagnostic_only | 只审结果，不写 PASS |
-| **先审申请** | 检查范围/SHA/预算后再跑 | 申请已提交，等你确认 |
-| **暂缓** | 不跑 | v1.2.5 保持 frozen/inactive |
+| **A：target 复核** | 复核 Q23 target/Gold 是否仍成立 | 不静默改 v1.0.2；另走 M1-A |
+| **10 条 diagnostic** | 用 v1.2.5 frozen 跑分布，记录 invalid 后继续 | 不计入验收；需单独批准 |
+| **known limitation** | 把 Q23/Q21/Q11 F invalid 记录为已知限制 | 不出 v1.2.6；不阻塞 40 但需明示 |
+| **v1.2.6** | 不自动出 | 需新的明确设计/批准 |
 
 ---
 
@@ -160,6 +161,10 @@
 | `docs/repair/53-m1d6-v1.2.5-implementation.md` | implementation report | `frozen` / implemented/verified | F claim 分解 + patch v125 + tests |
 | `docs/repair/54-m1d6-v1.2.5-freeze-record.md` | freeze record | `frozen` | 旧/新 MANIFEST、validation、F/C/R、patch v125、C 单案例预授权 |
 | `docs/repair/55-m1d6-v1.2.5-c-single-case-application.md` | C application | `approved` / preauthorized | Q23 F×3 + C/R×1 + Q21/Q11；18 calls / CNY 0.40；ledger |
+| `docs/repair/56-m1d6-v1.2.5-c-single-case-results.md` | C results | `collected` / diagnostic failed | Q23 F 0/3 valid；Q21/Q11 F invalid；15 calls / CNY 0.1838 |
+| `docs/repair/phase3e/m1d6-v125-ledger.jsonl` | ledger SHA `69c2a5a4…` | 15 attempts / 0 uncertain | primary 11 + patch 4；cost CNY 0.183756 |
+| `docs/repair/phase3e/m1d6-v125-dry-run.json` | dry-run SHA `83f612f6…` | ok / 0 LLM calls | 18/18 budget self-test；ledger empty |
+| `docs/repair/phase3e/m1d6_run_single_case_v125.py` | C runner | implemented | Q23 F×3 + C/R + Q21/Q11；dry-run/report-only |
 | `backend/app/prompts/rag_judge/v1.2.5/` | F `9c80d4d5…`；C/R `ca489fcf…` / `f3efe431…`；MANIFEST `2e4ef8bf…` | `frozen` / `active=false` | claim 分解 + 内部矛盾；C/R 不变 |
 | `docs/repair/phase3e/m1d7-prompt-v1.2.5-validation.json` | `20ab5ca3…` | `static_validation` 28/28 | patch schema/example、F 规则、旧版本隔离 |
 | `docs/repair/phase3e/m1d7-prompt-leakage-audit.json` | `28937947…` | `leakage_audit` findings=0 | gate cases + m1d3/m1d4/m1d6 输出 |
@@ -207,6 +212,7 @@
 | 2026-11-23 | v1.2.5 实现/验证：claim 分解 + patch v125 + tests | `design_draft` / implemented/verified；待 freeze；未跑 Judge |
 | 2026-11-23 | v1.2.5 metadata-only freeze | `frozen` / `active=false`；默认 v1.0.0；未激活 |
 | 2026-11-23 | 提交 C 单案例申请（Q23 F×3 + C/R×1 + Q21/Q11） | `approved` / preauthorized；18 calls / CNY 0.40；未执行 |
+| 2026-11-23 | C 单案例执行：Q23 F 0/3 valid；Q21/Q11 F invalid | `collected` / diagnostic failed；15 calls / CNY 0.183756；未写 PASS |
 
 ---
 
