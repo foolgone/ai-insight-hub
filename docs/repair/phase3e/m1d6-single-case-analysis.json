@@ -7,7 +7,7 @@
   "diagnostic_only": true,
   "counts_toward_10": false,
   "application_sha256": "54193e918daf3111014790923431695c7641fb629d2341bd71ecbe03001b1388",
-  "results_json_sha256": "5ace17098bc2e9f2f36240abd6ef053542e8660700abb3ea55dcf2dbd279154b",
+  "results_json_sha256": "dec1d9644f091338d59d24200d1fe1f0a40659e130bc7ceff7d6cf752bf3d939",
   "ledger_sha256": "c07b8401778e3668676db797376cd014406a8cafc587288ab71a966a20dfedf7",
   "prompt_version": "v1.2.4",
   "rubric_version": "v1.2.0",

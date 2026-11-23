@@ -1364,5 +1364,5 @@ alembic check   : No new upgrade operations detected
 - Q23 其它指标：C=0.0（target [0.0,0.2] pass，`correctness_first_sentence_warning=null`）；R=0.9（[0.7,1.0] pass）；F 无分数；absence cl6/cl10 初始为 non_factual+absence+null+[]；cl5 无 mixed warning。
 - Q21/Q11：因 Q23 patch 失败停止，未运行；没有 Q21 豁免 quote 明细，也没有 Q11 quote 连续性/三项目标结果。
 - 调用/成本：4 calls（primary 3、patch 1、repair 0、retry 0）；input 12,313 / output 1,326；CNY 0.0422808，低于 0.30；ledger SHA `c07b8401…`，uncertain=0。
-- 结果：raw `m1d6-single-case-results.json`（SHA `5ace1709…`）；analysis `m1d6-single-case-analysis.json`（SHA `6a0d343f…`）；报告 `docs/repair/49-m1d6-v1.2.4-single-case-diagnostic-results.md`（SHA `5d20b488…`）。
+- 结果：raw `m1d6-single-case-results.json`（SHA `dec1d964…`）；analysis `m1d6-single-case-analysis.json`（SHA `24bea3ec…`）；报告 `docs/repair/49-m1d6-v1.2.4-single-case-diagnostic-results.md`（SHA `d7762d6a…`）。
 - 边界：未重跑、未改 Prompt/Agent/Service/validator/patch schema/example/target/fixture；未建 Run、未写 DB、未调 WeKnora、未激活 v1.2.4、未跑 10/40；M1-D-6 diagnostic blocked，M1-C/M1-D 未 accepted。

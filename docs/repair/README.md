@@ -151,9 +151,9 @@
 | `docs/repair/47-m1d6-v1.2.4-freeze-record.md` | freeze record | `frozen` | 旧/新 MANIFEST、validation、patch schema/example、乱码修复、C 规则、ledger/activation requirements |
 | `docs/repair/phase3e/m1d6-single-case-diagnostic-application.json` | application SHA `54193e91…` | `approved` / executed | Q23/Q21/Q11 单案例；14 calls / CNY 0.30；ledger 前置 |
 | `docs/repair/phase3e/m1d6-single-case-ledger.jsonl` | ledger SHA `c07b8401…` | append-only / 4 attempts / 0 uncertain | primary 3 + patch 1；cost CNY 0.0422808 |
-| `docs/repair/phase3e/m1d6-single-case-results.json` | raw results SHA `5ace1709…` | `stopped` | Q23 F invalid；Q21/Q11 未运行 |
-| `docs/repair/phase3e/m1d6-single-case-analysis.json` | analysis SHA `6a0d343f…` | report-only | Q23 initial/patch、absence、patch 失败、停止条件 |
-| `docs/repair/49-m1d6-v1.2.4-single-case-diagnostic-results.md` | report SHA `5d20b488…` | `stopped at Q23` | Q23 patch_schema_invalid；M1-D-6 blocked |
+| `docs/repair/phase3e/m1d6-single-case-results.json` | raw results SHA `dec1d964…` | `stopped` | Q23 F invalid；Q21/Q11 未运行 |
+| `docs/repair/phase3e/m1d6-single-case-analysis.json` | analysis SHA `24bea3ec…` | report-only | Q23 initial/patch、absence、patch 失败、停止条件 |
+| `docs/repair/49-m1d6-v1.2.4-single-case-diagnostic-results.md` | report SHA `d7762d6a…` | `stopped at Q23` | Q23 patch_schema_invalid；M1-D-6 blocked |
 
 ### 3.2 决策时间线
 

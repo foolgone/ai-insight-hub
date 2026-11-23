@@ -23,6 +23,7 @@ APPLICATION_FILE = (
     BASE / "docs/repair/phase3e/m1d6-single-case-diagnostic-application.json"
 )
 ANALYSIS_FILE = BASE / "docs/repair/phase3e/m1d6-single-case-analysis.json"
+RESULTS_SHA_FILE = BASE / "docs/repair/phase3e/m1d6-single-case-results.sha256"
 REPORT_FILE = BASE / "docs/repair/49-m1d6-v1.2.4-single-case-diagnostic-results.md"
 SHA_FILE = BASE / "docs/repair/phase3e/m1d6-single-case-analysis.sha256"
 
@@ -839,8 +840,14 @@ def main() -> None:
     ANALYSIS_FILE.write_text(
         json.dumps(analysis, ensure_ascii=False, indent=1) + "\n",
         encoding="utf-8",
+        newline="\n",
     )
     analysis_sha = sha256_bytes(ANALYSIS_FILE.read_bytes())
+    RESULTS_SHA_FILE.write_text(
+        f"{analysis['meta']['results_json_sha256']}  {RESULTS_FILE.name}\n",
+        encoding="utf-8",
+        newline="\n",
+    )
     report = build_report(analysis, analysis_sha)
     REPORT_FILE.write_text(report, encoding="utf-8", newline="\n")
     report_sha = sha256_bytes(REPORT_FILE.read_bytes())
