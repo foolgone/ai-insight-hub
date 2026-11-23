@@ -1408,3 +1408,11 @@ alembic check   : No new upgrade operations detected
 - 流程压缩：v1.2.5 采用“版本包一次审”（scope + impl + tests + freeze），单案例在 freeze 后预授权；10/40 仍单独批准。
 - 关键时间盒：v1.2.5 是最后一个 claim 分解版本；单案例失败不自动出 v1.2.6，转 A/10 条 diagnostic/known limitation。
 - 预算：单案例 18 calls / CNY 0.40；10 条 diagnostic 51 / 1.00；正式 10 条 51 / 1.00；40 条 CNY 1.4–1.8；无日历承诺。
+
+### M1-D-6 v1.2.5 C 单案例申请（2026-11-23，approved / preauthorized）
+- 文档：`docs/repair/55-m1d6-v1.2.5-c-single-case-application.md`；application SHA `f53dd12e…`。
+- 冻结资产：MANIFEST `2e4ef8bf…`；validation `20ab5ca3…`（28/28）；F `9c80d4d5…`；C/R `ca489fcf…` / `f3efe431…`；patch schema `bfc71529…`；example `43f48a42…`；leakage `28937947…`（0）。
+- 范围：Q23 F×3 + C/R×1；Q21/Q11 各 1×3；11 primary + 5 patch + 2 reserve = 18 calls / CNY 0.40；ledger 前置。
+- 规则：invalid 继续收集（diagnostic_only）；预算/凭证/指纹/ledger/preflight/unprocessed 硬停止；不写 PASS；不计入 10 条；Q23 C/R 只作 snapshot。
+- 边界：未执行、未激活、未跑 10/40；不修改 v1.2.5 frozen 资产；target v1.0.2 未改；M1-D-6 仍 blocked。
+- 下一步：执行 C 单案例（预授权）；结果只审结果，再决定 D1。
