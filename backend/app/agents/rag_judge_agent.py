@@ -40,6 +40,7 @@ from app.schemas.agents.rag_judge import (
     output_schema_for,
 )
 from app.schemas.agents.rag_judge_patch import EvidencePatch
+from app.schemas.agents.rag_judge_patch_v125 import EvidencePatchV125
 from app.schemas.agents.rag_judge_evidence import (
     QuoteCheck,
     QuoteContractError,
@@ -55,10 +56,23 @@ PROMPT_DIR = Path(__file__).resolve().parents[1] / "prompts" / "rag_judge"
 PROMPT_VERSION_PATTERN = re.compile(r"^v\d+\.\d+\.\d+$")
 CONTRACT_REPAIR_VERSION = "v1.2.3"
 PATCH_REPAIR_VERSION = "v1.2.4"
+CLAIM_DECOMPOSITION_VERSION = "v1.2.5"
 PATCH_EXAMPLE_CONTEXT = "延保卡需在购买后 30 天内激活。"
 PATCH_SCHEMA_PATH = (
     Path(__file__).resolve().parents[1] / "schemas" / "agents" / "rag_judge_patch.py"
 )
+PATCH_SCHEMA_V125_PATH = (
+    Path(__file__).resolve().parents[1] / "schemas" / "agents" / "rag_judge_patch_v125.py"
+)
+PATCH_SCHEMA_PATHS = {
+    PATCH_REPAIR_VERSION: PATCH_SCHEMA_PATH,
+    CLAIM_DECOMPOSITION_VERSION: PATCH_SCHEMA_V125_PATH,
+}
+PATCH_REPAIR_VERSIONS = (PATCH_REPAIR_VERSION, CLAIM_DECOMPOSITION_VERSION)
+
+
+class ContradictionContractError(ValueError):
+    """v1.2.5 contradiction_with reference contract violation."""
 
 
 class RagJudgePromptError(RuntimeError):
@@ -152,7 +166,7 @@ class RagJudgeAgent(BaseAgent):
         self.contract_repair_version: str | None = None
         self.quote_validator_sha256: str | None = None
         self.contract_report: dict[str, Any] | None = None
-        if self.prompt_version in (CONTRACT_REPAIR_VERSION, PATCH_REPAIR_VERSION) and (
+        if self.prompt_version in (CONTRACT_REPAIR_VERSION, *PATCH_REPAIR_VERSIONS) and (
             metric == "faithfulness"
         ):
             self.contract_repair_version = self.prompt_version
@@ -167,19 +181,28 @@ class RagJudgeAgent(BaseAgent):
                 "passed_after_repair": None,
                 "final_errors": [],
             }
-            if self.prompt_version == PATCH_REPAIR_VERSION:
+            if self.prompt_version in PATCH_REPAIR_VERSIONS:
+                schema_path = PATCH_SCHEMA_PATHS[self.prompt_version]
                 self.contract_report.update(
                     {
-                        "patch_schema_sha256": hashlib.sha256(
-                            PATCH_SCHEMA_PATH.read_bytes()
-                        ).hexdigest(),
+                        "patch_schema_sha256": hashlib.sha256(schema_path.read_bytes()).hexdigest(),
                         "patch_applied_claims": [],
                         "patch_semantic_review_required": False,
                     }
                 )
-        elif self.prompt_version == PATCH_REPAIR_VERSION and metric == "answer_correctness":
+            if self.prompt_version == CLAIM_DECOMPOSITION_VERSION:
+                self.contract_report.update(
+                    {
+                        "patch_refusal": None,
+                        "patch_unsupported_quote_claims": [],
+                        "patch_expected_claims": [],
+                        "patch_provided_claims": [],
+                        "patch_missing_claims": [],
+                    }
+                )
+        elif self.prompt_version in PATCH_REPAIR_VERSIONS and metric == "answer_correctness":
             self.contract_report = {
-                "contract_version": PATCH_REPAIR_VERSION,
+                "contract_version": self.prompt_version,
                 "correctness_first_sentence_warning": None,
             }
         super().__init__(
@@ -278,8 +301,10 @@ class RagJudgeAgent(BaseAgent):
     def _validate_parsed(self, model: Any) -> None:
         """业务校验：分数合法；v1.2.3+ 额外做 evidence quote 合同预校验。"""
         if self.metric == "faithfulness" and self.contract_report is not None:
+            if self.prompt_version == CLAIM_DECOMPOSITION_VERSION:
+                self._validate_contradiction_references(model)
             self._validate_quote_contract(model)
-        elif self.prompt_version == PATCH_REPAIR_VERSION and self.metric == "answer_correctness":
+        elif self.prompt_version in PATCH_REPAIR_VERSIONS and self.metric == "answer_correctness":
             self._check_correctness_first_sentence(model)
 
         score = getattr(model, "score", None)
@@ -288,6 +313,41 @@ class RagJudgeAgent(BaseAgent):
         value = float(score)
         if not math.isfinite(value) or value < 0 or value > 1:
             raise ValueError("score must be a finite number within [0, 1]")
+
+    def _validate_contradiction_references(self, model: Any) -> None:
+        """v1.2.5: is_contradictory / contradiction_with reference integrity."""
+        claims = list(getattr(model, "claims", None) or [])
+        effective: dict[str, Any] = {}
+        for index, claim in enumerate(claims, 1):
+            claim_id = str(getattr(claim, "claim_id", None) or f"cl{index}")
+            if claim_id in effective:
+                raise ContradictionContractError(f"duplicate effective claim_id: {claim_id}")
+            effective[claim_id] = claim
+
+        for claim_id, claim in effective.items():
+            flag = bool(getattr(claim, "is_contradictory", False))
+            refs = [str(ref).strip() for ref in (getattr(claim, "contradiction_with", None) or [])]
+            if flag and not refs:
+                raise ContradictionContractError(
+                    f"{claim_id}: is_contradictory=true requires contradiction_with"
+                )
+            if not flag and refs:
+                raise ContradictionContractError(
+                    f"{claim_id}: is_contradictory=false requires empty contradiction_with"
+                )
+            if len(set(refs)) != len(refs):
+                raise ContradictionContractError(f"{claim_id}: duplicate contradiction_with ids")
+            for ref in refs:
+                if not ref:
+                    raise ContradictionContractError(f"{claim_id}: empty contradiction_with id")
+                if ref == claim_id:
+                    raise ContradictionContractError(
+                        f"{claim_id}: contradiction_with cannot reference itself"
+                    )
+                if ref not in effective:
+                    raise ContradictionContractError(
+                        f"{claim_id}: contradiction_with unknown claim_id {ref!r}"
+                    )
 
     def _check_correctness_first_sentence(self, model: Any) -> None:
         """v1.2.4 warning only: first-sentence wrong_facts with score > 0.2."""
@@ -412,8 +472,8 @@ class RagJudgeAgent(BaseAgent):
         raw_sink: list[str] | None = None,
         repair_example: str | None = None,
     ) -> Any:
-        """v1.2.4 only: initial schema single-pass + evidence-only patch."""
-        if self.prompt_version != PATCH_REPAIR_VERSION or self.metric != "faithfulness":
+        """v1.2.4/v1.2.5: initial schema single-pass + evidence-only patch."""
+        if self.metric != "faithfulness" or self.prompt_version not in PATCH_REPAIR_VERSIONS:
             return await super()._parse_structured_output(
                 schema,
                 text=text,
@@ -451,16 +511,42 @@ class RagJudgeAgent(BaseAgent):
                     validation_errors=str(exc),
                 ) from exc
             try:
-                merged = await self._apply_evidence_patch(
-                    initial,
-                    schema=schema,
-                    quote_errors=quote_errors,
-                    llm=llm,
-                    usage_collector=usage_collector,
-                )
-                self._validate_parsed(merged)
+                if self.prompt_version == CLAIM_DECOMPOSITION_VERSION:
+                    merged = await self._apply_evidence_patch_v125(
+                        initial,
+                        schema=schema,
+                        quote_errors=quote_errors,
+                        llm=llm,
+                        usage_collector=usage_collector,
+                    )
+                else:
+                    merged = await self._apply_evidence_patch(
+                        initial,
+                        schema=schema,
+                        quote_errors=quote_errors,
+                        llm=llm,
+                        usage_collector=usage_collector,
+                    )
+                try:
+                    self._validate_parsed(merged)
+                except ContradictionContractError as exc:
+                    self._record_final_error("contradiction_reference_invalid", exc)
+                    raise StructuredOutputError(
+                        "contradiction reference invalid after patch",
+                        original_output=text,
+                        raw_output=text,
+                        validation_errors=str(exc),
+                    ) from exc
             except StructuredOutputError:
                 raise
+            except ContradictionContractError as exc:
+                self._record_final_error("contradiction_reference_invalid", exc)
+                raise StructuredOutputError(
+                    "contradiction reference invalid",
+                    original_output=text,
+                    raw_output=text,
+                    validation_errors=str(exc),
+                ) from exc
             except Exception as exc:  # noqa: BLE001
                 self._record_final_error("patch_failed", exc)
                 raise StructuredOutputError(
@@ -472,6 +558,14 @@ class RagJudgeAgent(BaseAgent):
             if raw_sink is not None:
                 raw_sink.append(json.dumps(merged.model_dump(mode="json"), ensure_ascii=False))
             return merged
+        except ContradictionContractError as exc:
+            self._record_final_error("contradiction_reference_invalid", exc)
+            raise StructuredOutputError(
+                "contradiction reference invalid",
+                original_output=text,
+                raw_output=text,
+                validation_errors=str(exc),
+            ) from exc
 
         if raw_sink is not None:
             raw_sink.append(text)
@@ -617,6 +711,294 @@ class RagJudgeAgent(BaseAgent):
         self.contract_report["patch_applied_claims"] = sorted(seen)
         self.contract_report["patch_semantic_review_required"] = True
         return merged
+
+    def _patch_error(
+        self,
+        code: str,
+        message: str,
+        *,
+        content: str | None = None,
+        details: Any = None,
+    ) -> None:
+        validation_errors = (
+            details
+            if isinstance(details, str)
+            else json.dumps(details, ensure_ascii=False)
+            if details is not None
+            else message
+        )
+        exc = StructuredOutputError(
+            message,
+            original_output=content,
+            raw_output=content,
+            validation_errors=validation_errors,
+        )
+        self._record_final_error(code, exc)
+        raise exc
+
+    async def _apply_evidence_patch_v125(
+        self,
+        initial: Any,
+        *,
+        schema: Any,
+        quote_errors: list[dict[str, Any]],
+        llm: Any,
+        usage_collector: list[Any] | None,
+    ) -> Any:
+        """v1.2.5: evidence-only patch with explicit refusal and full coverage."""
+        assert self.contract_report is not None
+        payload = self._active_input
+        contexts = list(payload.contexts) if payload else []
+        context_map = build_context_map(contexts)
+        effective_claims: dict[str, Any] = {}
+        for index, claim in enumerate(initial.claims, 1):
+            effective = str(getattr(claim, "claim_id", None) or f"cl{index}")
+            if effective in effective_claims:
+                self._patch_error(
+                    "patch_incomplete",
+                    f"duplicate effective claim_id: {effective}",
+                )
+            effective_claims[effective] = claim
+        error_ids = {str(item.get("claim_id")) for item in quote_errors}
+        unknown = error_ids - set(effective_claims)
+        if unknown:
+            self._patch_error(
+                "patch_incomplete",
+                f"quote error claim ids not found: {sorted(unknown)}",
+            )
+        self.contract_report["patch_expected_claims"] = sorted(error_ids)
+
+        patch_payload = {
+            "rules": [
+                "只返回 fixes 或 refusal 之一，不得同时输出。",
+                "fixes 必须覆盖本次全部 quote 错误 claim；缺一个即 patch_incomplete。",
+                "refusal.claim_ids 必须覆盖本次全部 quote 错误 claim；缺一个即 " "patch_refusal_incomplete。",
+                "fixes 只允许修改 evidence_refs；不得修改 claim、claim_type、"
+                "claim_subtype、support_status、is_contradictory、contradiction_with。",
+                "unsupported / insufficient_evidence 可以返回 evidence_refs: []；"
+                "supported 必须至少 1 条连续 quote。",
+                "unsupported 的非空 refs 只能指向与 claim 冲突的原文；找不到就返回 [] " "或 refusal。",
+                "修复 insufficient_evidence 时不得给 evidence_refs。",
+                "quote 必须是 context 的连续逐字子串，并直接支持（或矛盾于）该 claim。",
+                "conflict claim + supported 必须给至少两条 distinct、non-nested quotes。",
+                "找不到直接支持的连续 quote 时返回 refusal，不得返回 null，不得伪造 quote。",
+            ],
+            "claims": [
+                {
+                    "claim_id": effective,
+                    "claim": claim.claim,
+                    "claim_type": claim.claim_type,
+                    "claim_subtype": claim.claim_subtype,
+                    "support_status": claim.support_status,
+                    "evidence_refs": [
+                        {"context_id": ref.context_id, "quote": ref.quote}
+                        for ref in claim.evidence_refs
+                    ],
+                }
+                for effective, claim in effective_claims.items()
+                if effective in error_ids
+            ],
+            "quote_errors": quote_errors,
+            "contexts": {key: value for key, value in context_map.items()},
+        }
+        system_prompt = (
+            "你是 RAG Judge 的 evidence patch 修复器（v1.2.5）。"
+            "只输出 JSON 对象，结构必须严格为以下二选一："
+            '1) {"fixes":[{"claim_id":"cl2","evidence_refs":'
+            '[{"context_id":"C1","quote":"context 连续原文"}]}]}；'
+            '2) {"refusal":{"claim_ids":["cl2"],"reason_code":"no_direct_quote",'
+            '"reason":"..."}}。'
+            "unsupported / insufficient_evidence 可以返回 evidence_refs: []；"
+            "supported 必须非空；找不到直接 quote 时返回 refusal，不得返回 null。"
+            "示例仅示意 JSON 结构；claim_id、support_status、quote 必须以本次输入为准，"
+            "不得照抄示例。"
+            f"示例：{self._patch_example_v125()}"
+        )
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": json.dumps(patch_payload, ensure_ascii=False)},
+        ]
+        response = await llm.chat(
+            messages,
+            temperature=0.0,
+            response_format={"type": "json_object"},
+        )
+        if usage_collector is not None:
+            usage_collector.append(response.usage)
+        try:
+            patch = EvidencePatchV125.model_validate_json(extract_json_text(response.content))
+        except Exception as exc:  # noqa: BLE001
+            self._patch_error(
+                "patch_schema_invalid",
+                "v1.2.5 evidence patch schema is invalid",
+                content=str(response.content),
+                details=str(exc),
+            )
+            raise AssertionError("unreachable") from exc
+
+        claim_by_id = {
+            str(getattr(claim, "claim_id", None) or f"cl{index}"): claim
+            for index, claim in enumerate(initial.claims, 1)
+        }
+
+        if patch.refusal is not None:
+            refusal = patch.refusal
+            provided = [str(item) for item in refusal.claim_ids]
+            self.contract_report["patch_refusal"] = refusal.model_dump(mode="json")
+            self.contract_report["patch_provided_claims"] = provided
+            missing = sorted(error_ids - set(provided))
+            self.contract_report["patch_missing_claims"] = missing
+            if missing:
+                self._patch_error(
+                    "patch_refusal_incomplete",
+                    "refusal does not cover all quote error claims",
+                    content=str(response.content),
+                    details={"missing": missing, "expected": sorted(error_ids)},
+                )
+            extra = sorted(set(provided) - error_ids)
+            if extra or len(set(provided)) != len(provided):
+                self._patch_error(
+                    "patch_refusal_invalid",
+                    "refusal contains unknown or duplicate claim ids",
+                    content=str(response.content),
+                    details={"extra": extra, "provided": provided},
+                )
+            self._patch_error(
+                "patch_refused",
+                "v1.2.5 evidence patch refused",
+                content=str(response.content),
+                details=refusal.model_dump(mode="json"),
+            )
+
+        provided = [str(fix.claim_id) for fix in patch.fixes]
+        self.contract_report["patch_provided_claims"] = provided
+        missing = sorted(error_ids - set(provided))
+        self.contract_report["patch_missing_claims"] = missing
+        if missing:
+            self._patch_error(
+                "patch_incomplete",
+                "fixes do not cover all quote error claims",
+                content=str(response.content),
+                details={"missing": missing, "expected": sorted(error_ids)},
+            )
+        extra = sorted(set(provided) - error_ids)
+        if extra or len(set(provided)) != len(provided):
+            self._patch_error(
+                "patch_incomplete",
+                "fixes contain unknown or duplicate claim ids",
+                content=str(response.content),
+                details={"extra": extra, "provided": provided},
+            )
+
+        seen: set[str] = set()
+        unsupported_quote_claims: list[str] = []
+        for fix in patch.fixes:
+            if fix.claim_id not in claim_by_id:
+                self._patch_error(
+                    "patch_incomplete",
+                    f"patch claim_id not allowed: {fix.claim_id}",
+                )
+            original = claim_by_id[fix.claim_id]
+            status = getattr(original, "support_status", None)
+            refs = list(fix.evidence_refs)
+            if not refs:
+                if status == "supported":
+                    self._patch_error(
+                        "patch_empty_refs_for_supported",
+                        f"supported claim {fix.claim_id} requires evidence_refs",
+                        content=str(response.content),
+                    )
+            else:
+                if status == "insufficient_evidence":
+                    self._patch_error(
+                        "patch_refs_for_insufficient",
+                        f"insufficient_evidence claim {fix.claim_id} must not have "
+                        "evidence_refs",
+                        content=str(response.content),
+                    )
+                checks = [
+                    check_quote(
+                        quote=ref.quote,
+                        context_id=ref.context_id,
+                        context_map=context_map,
+                        claim_id=fix.claim_id,
+                    )
+                    for ref in refs
+                ]
+                bad = [check for check in checks if not check.ok]
+                if bad:
+                    self._patch_error(
+                        "patch_quote_invalid",
+                        "patch quote invalid",
+                        content=str(response.content),
+                        details=[
+                            {
+                                "claim_id": check.claim_id,
+                                "context_id": check.context_id,
+                                "error": check.error,
+                                "quote": (check.quote or "")[:300],
+                            }
+                            for check in bad
+                        ],
+                    )
+                if getattr(original, "claim_subtype", None) == "conflict" and status == "supported":
+                    quotes = {ref.quote.strip() for ref in refs}
+                    if len(quotes) < 2 or any(
+                        left != right and (left in right or right in left)
+                        for left in quotes
+                        for right in quotes
+                    ):
+                        self._patch_error(
+                            "patch_conflict_refs_invalid",
+                            f"conflict claim {fix.claim_id} needs >=2 distinct "
+                            "non-nested quotes",
+                            content=str(response.content),
+                        )
+                if status == "unsupported":
+                    unsupported_quote_claims.append(fix.claim_id)
+            seen.add(fix.claim_id)
+
+        data = initial.model_dump(mode="json")
+        by_effective = {
+            str(claim.get("claim_id") or f"cl{index}"): index
+            for index, claim in enumerate(data.get("claims") or [], 1)
+        }
+        for fix in patch.fixes:
+            index = by_effective[fix.claim_id]
+            data["claims"][index - 1]["evidence_refs"] = [
+                ref.model_dump(mode="json") for ref in fix.evidence_refs
+            ]
+        merged = schema.model_validate(data)
+        self.contract_report["repair_triggered"] = True
+        self.contract_report["repair_count"] = 1
+        self.contract_report["patch_applied_claims"] = sorted(seen)
+        self.contract_report["patch_semantic_review_required"] = True
+        self.contract_report["patch_unsupported_quote_claims"] = sorted(
+            set(unsupported_quote_claims)
+        )
+        return merged
+
+    def _patch_example_v125(self) -> str:
+        return json.dumps(
+            {
+                "fixes": [
+                    {
+                        "claim_id": "cl2",
+                        "evidence_refs": [
+                            {
+                                "context_id": "C1",
+                                "quote": PATCH_EXAMPLE_CONTEXT,
+                            }
+                        ],
+                    },
+                    {
+                        "claim_id": "cl3",
+                        "evidence_refs": [],
+                    },
+                ]
+            },
+            ensure_ascii=False,
+        )
 
     def _patch_example(self) -> str:
         return json.dumps(
