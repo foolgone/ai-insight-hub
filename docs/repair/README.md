@@ -8,9 +8,9 @@
 > 4. 未冻结的定义/目标，不得进入代码实现。
 >
 > 最后更新：2026-11-23
-> 当前阶段：**M1-D-6 v1.2.5 已实现/验证（design_draft）；等待 freeze 审核；未冻结、未激活、未跑 Judge**
-> 当前决策：**是否 freeze v1.2.5（metadata-only）；freeze 后才可提交 Q23×3 + Q21/Q11 单案例申请**
-> 当前不做：10/40 正式验收、v1.2.4/v1.2.5 激活、M2/M3、生产 migration
+> 当前阶段：**M1-D-6 v1.2.5 已 metadata-only 冻结；`active=false`、默认 `v1.0.0`；未激活、未跑 Judge**
+> 当前决策：**按 52 提交 C 单案例申请（预授权 18 calls / CNY 0.40）；结果只审结果，不写 PASS**
+> 当前不做：10/40 正式验收、v1.2.5 激活、M2/M3、生产 migration
 
 ---
 
@@ -19,25 +19,25 @@
 | 项 | 状态 |
 |---|---|
 | 项目阶段 | 核心研发向产品化过渡 |
-| 主线 | M1 评测可信度；v1.2.4 `frozen`；v1.2.5 `design_draft` / implemented/verified；M1-D-6 blocked |
+| 主线 | M1 评测可信度；v1.2.4/v1.2.5 `frozen`；v1.2.5 `active=false`；M1-D-6 blocked |
 | 并行 A | M2 只读工作台；API 审计完成，前端未开始 |
 | 并行 B | M4-A 生产约束；未开始 |
 | M3 优化闭环 | 未开始；等 M1 可信、M2 可用 |
-| 当前可写代码？ | **否**；等 v1.2.5 freeze 审核；不写 v1.2.5 patch-only |
-| 当前可跑 Judge？ | **否**；单案例/10/40 均未批准 |
-| v1.2.1 / v1.2.2 / v1.2.3 / v1.2.4 / v1.2.5 | v1.2.1–4 `frozen`；v1.2.5 `design_draft`、`active=false`；默认仍 `v1.0.0` |
-| 最近一次决策 | 2026-11-23 v1.2.5 实现/验证完成；待 freeze |
-| 下一个交付 | 人工审核 v1.2.5 freeze（MANIFEST/validation/leakage/patch/Agent） |
+| 当前可写代码？ | **只写 C 单案例 runner/申请**；不改 v1.2.5 frozen 资产 |
+| 当前可跑 Judge？ | **仅 C 单案例（预授权，18 calls / CNY 0.40）**；正式 10/40 未批准 |
+| v1.2.1 / v1.2.2 / v1.2.3 / v1.2.4 / v1.2.5 | 五者均 `frozen`；v1.2.5 `active=false`；默认仍 `v1.0.0` |
+| 最近一次决策 | 2026-11-23 v1.2.5 metadata-only freeze 通过 |
+| 下一个交付 | 提交 C 单案例申请（Q23 F×3 + C/R×1 + Q21/Q11） |
 
 ### 现在只需要一个决定
 
-**v1.2.5 已实现/验证；是否 freeze。**
+**v1.2.5 已冻结；按 52 进入 C 单案例（预授权）。**
 
 | 选项 | 含义 | 结果 |
 |---|---|---|
-| **批准 freeze** | 接受 claim 分解、内部矛盾、patch v125、tests、validation、leakage | `status=frozen`、`frozen=true`、`active=false`；默认仍 v1.0.0 |
-| **改实现** | 测试/规则/patch 语义需调整 | 留在 design_draft |
-| **暂缓** | 不 freeze | v1.2.5 保持 design_draft；不跑单案例 |
+| **执行 C 单案例** | 提交申请后按 52 运行；18 calls / CNY 0.40；ledger；diagnostic_only | 只审结果，不写 PASS |
+| **先审申请** | 检查范围/SHA/预算后再跑 | 申请已提交，等你确认 |
+| **暂缓** | 不跑 | v1.2.5 保持 frozen/inactive |
 
 ---
 
@@ -157,9 +157,10 @@
 | `docs/repair/50-m1d6-q23-root-cause-and-target-review.md` | read-only review | `pending_decision` | Q23 0.333 复现；S1 合并 derived=0.400；A/B/C 待选 |
 | `docs/repair/51-m1d6-v1.2.5-claim-decomposition-scope.md` | design/scope | `approved_with_changes`；实现见 53 | claim 分解 + 内部矛盾 + patch 健壮性 |
 | `docs/repair/52-m1d6-v1.2.5-c3-median-runner-design.md` | runner design | `approved_with_changes`；未执行 | Q23 F×3 + median/min/max；18 calls / CNY 0.40 |
-| `docs/repair/53-m1d6-v1.2.5-implementation.md` | implementation report | `design_draft` / implemented/verified | F claim 分解 + patch v125 + tests；未 freeze |
-| `backend/app/prompts/rag_judge/v1.2.5/` | F `9c80d4d5…`；C/R `ca489fcf…` / `f3efe431…`；MANIFEST `d03a85a5…` | `design_draft` / `active=false` | claim 分解 + 内部矛盾；C/R 不变 |
-| `docs/repair/phase3e/m1d7-prompt-v1.2.5-validation.json` | `8381a9a9…` | `static_validation` 28/28 | patch schema/example、F 规则、旧版本隔离 |
+| `docs/repair/53-m1d6-v1.2.5-implementation.md` | implementation report | `frozen` / implemented/verified | F claim 分解 + patch v125 + tests |
+| `docs/repair/54-m1d6-v1.2.5-freeze-record.md` | freeze record | `frozen` | 旧/新 MANIFEST、validation、F/C/R、patch v125、C 单案例预授权 |
+| `backend/app/prompts/rag_judge/v1.2.5/` | F `9c80d4d5…`；C/R `ca489fcf…` / `f3efe431…`；MANIFEST `2e4ef8bf…` | `frozen` / `active=false` | claim 分解 + 内部矛盾；C/R 不变 |
+| `docs/repair/phase3e/m1d7-prompt-v1.2.5-validation.json` | `20ab5ca3…` | `static_validation` 28/28 | patch schema/example、F 规则、旧版本隔离 |
 | `docs/repair/phase3e/m1d7-prompt-leakage-audit.json` | `28937947…` | `leakage_audit` findings=0 | gate cases + m1d3/m1d4/m1d6 输出 |
 
 ### 3.2 决策时间线
@@ -203,6 +204,7 @@
 | 2026-11-23 | Q23 根因复核：patch null 次要；S0=0.333，S1 合并 derived=0.400 | `pending_decision`；待 A target v1.0.3 / B claim 分解 / C 3 次 median |
 | 2026-11-23 | 提交 v1.2.5 claim 分解 scope + C runner 设计 | `design_pending_review`；未实现、未跑 Judge |
 | 2026-11-23 | v1.2.5 实现/验证：claim 分解 + patch v125 + tests | `design_draft` / implemented/verified；待 freeze；未跑 Judge |
+| 2026-11-23 | v1.2.5 metadata-only freeze | `frozen` / `active=false`；默认 v1.0.0；未激活 |
 
 ---
 

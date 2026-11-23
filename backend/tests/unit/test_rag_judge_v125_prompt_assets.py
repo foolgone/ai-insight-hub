@@ -44,14 +44,14 @@ def _sha(text: str) -> str:
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
-def test_v125_manifest_is_design_draft_and_inactive() -> None:
+def test_v125_manifest_is_frozen_and_inactive() -> None:
     manifest = json.loads(
         (PROMPT_ROOT / CLAIM_DECOMPOSITION_VERSION / "MANIFEST.json").read_text(encoding="utf-8")
     )
     assert manifest["version"] == CLAIM_DECOMPOSITION_VERSION
-    assert manifest["status"] == "design_draft"
+    assert manifest["status"] == "frozen"
     assert manifest["active"] is False
-    assert manifest["frozen"] is False
+    assert manifest["frozen"] is True
     assert manifest["runtime_active"] is False
     assert manifest["schema_version"] == "rag_judge_schema_v3"
     assert manifest["rubric_version"] == "v1.2.0"

@@ -1392,15 +1392,16 @@ alembic check   : No new upgrade operations detected
 - C runner：Q23 F×3 + C/R×1 + Q21/Q11×1×3；预算 11 primary + 5 patch + 2 reserve = 18 calls / CNY 0.40；ledger 在 LLM 边界；invalid 继续收集（diagnostic_only），预算/凭证/指纹/ledger 硬停止；报 median/min/max 与每次 claim 分解。
 - 边界：本轮只交设计；未改 Prompt/Agent/target/fixture、未实现、未 freeze、未跑 Judge、未激活。
 
-### M1-D-6 v1.2.5 实现（2026-11-23，design_draft / implemented / verified）
+### M1-D-6 v1.2.5 实现（2026-11-23，frozen / implemented / verified）
 - 文档：`docs/repair/53-m1d6-v1.2.5-implementation.md`；实现提交 `318b302`。
-- 资产：F `9c80d4d5…`；C/R `ca489fcf…` / `f3efe431…`（与 v1.2.4 一致）；MANIFEST `d03a85a5…`；patch schema v125 `bfc71529…`；patch example `43f48a42…`；quote validator `153ab4a6…`。
+- 资产：F `9c80d4d5…`；C/R `ca489fcf…` / `f3efe431…`（与 v1.2.4 一致）；MANIFEST `2e4ef8bf…`（冻结后）、`d03a85a5…`（冻结前）；patch schema v125 `bfc71529…`；patch example `43f48a42…`；quote validator `153ab4a6…`。
 - F Prompt：新增 §6.1 内部矛盾、§7.1 派生结论原子性；合成延保示例，无 Q23 文本。
 - Patch：新增 `rag_judge_patch_v125.py`；fixes/refusal 互斥、完整覆盖、空 refs/refusal 规则；v1.2.4 patch 逐字不变。
 - Agent：`CLAIM_DECOMPOSITION_VERSION`、`_apply_evidence_patch_v125`、`_validate_contradiction_references`；错误码细分。
-- 测试：新增 24 条；全量 1125 条通过；black/flake8/mypy/lint-imports 通过；静态 validation 28/28；泄漏审计 `28937947…`，0 findings。
-- 边界：MANIFEST 仍 `design_draft` / `frozen=false` / `active=false`；默认仍 v1.0.0；未 freeze、未激活、未跑 Judge/10/40；未改 target v1.0.2。
-- 下一步：人工审核 freeze；通过后才提交 Q23×3 + Q21/Q11 单案例申请。
+- 测试：新增 24 条；全量 1125 条通过；black/flake8/mypy/lint-imports 通过；冻结后静态 validation 28/28；泄漏审计 `28937947…`，0 findings。
+- 冻结：`docs/repair/54-m1d6-v1.2.5-freeze-record.md`；MANIFEST `status=frozen` / `frozen=true` / `active=false`；validation 冻结后 `20ab5ca3…`。
+- 边界：默认仍 v1.0.0；未激活、未跑 Judge/10/40；未改 target v1.0.2；C 单案例仅预授权，需按 52 提交申请后执行。
+- 下一步：提交 C 单案例申请（Q23 F×3 + C/R×1 + Q21/Q11；18 calls / CNY 0.40）；结果只审结果，不写 PASS。
 
 ### 后续执行计划表落盘（2026-11-23）
 - `README.md` §5.6 增加主计划、决策点 D1–D5、预算汇总、出口标准、停止/时间盒。

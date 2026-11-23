@@ -1,11 +1,11 @@
 {
   "version": "v1.2.5",
-  "status": "design_draft",
+  "status": "frozen",
   "active": false,
-  "frozen": false,
+  "frozen": true,
   "runtime_active": false,
   "date": "2026-11-23",
-  "note": "M1-D-6 v1.2.5：claim 分解修复 + 内部矛盾标注 + v1.2.5 patch 健壮性。F prompt 新 SHA；C/R 从 v1.2.4 逐字复制；patch schema/example 新 SHA；rubric_version v1.2.0；target v1.0.2 未重算；active=false，默认仍 v1.0.0，未冻结、未跑 Judge。",
+  "note": "M1-D-6 v1.2.5 ??? metadata-only freeze?F claim ?? + ?????C/R ?????patch v125 ???rubric_version v1.2.0?target v1.0.2 ????active=false???? v1.0.0??????? Judge?",
   "schema_version": "rag_judge_schema_v3",
   "rubric_version": "v1.2.0",
   "metric_version_mapping": {
@@ -81,13 +81,14 @@
     "默认 RAG_JUDGE_PROMPT_VERSION 仍为 v1.0.0；v1.2.5 只显式加载"
   ],
   "open_issues": [
-    "本版本为 design_draft，未冻结、未激活、未跑 Judge",
+    "? metadata-only ????????? Judge",
     "claim 分解仍依赖模型遵循 Prompt；单案例需 3 次 F 观察分布",
     "patch 只保证逐字连续，不保证 unsupported 非空 refs 的矛盾语义；需 claim-level 人工复核",
     "10/40、M2/M3、v1.2.5 激活均未批准"
   ],
   "default_prompt_version": "v1.0.0",
-  "implementation_status": "design_draft_default_off",
+  "implementation_status": "frozen_default_off",
   "design_record": "docs/repair/51-m1d6-v1.2.5-claim-decomposition-scope.md",
-  "c_runner_design": "docs/repair/52-m1d6-v1.2.5-c3-median-runner-design.md"
+  "c_runner_design": "docs/repair/52-m1d6-v1.2.5-c3-median-runner-design.md",
+  "freeze_record": "docs/repair/54-m1d6-v1.2.5-freeze-record.md"
 }

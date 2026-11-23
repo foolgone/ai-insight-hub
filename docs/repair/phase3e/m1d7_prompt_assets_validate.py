@@ -97,11 +97,11 @@ def main() -> None:
     checks: list[dict[str, Any]] = [
         {"check": "manifest_version", "ok": manifest.get("version") == VERSION},
         {
-            "check": "manifest_status_design_draft",
-            "ok": manifest.get("status") == "design_draft",
+            "check": "manifest_status_frozen",
+            "ok": manifest.get("status") == "frozen",
         },
         {"check": "manifest_active_false", "ok": manifest.get("active") is False},
-        {"check": "manifest_frozen_false", "ok": manifest.get("frozen") is False},
+        {"check": "manifest_frozen_true", "ok": manifest.get("frozen") is True},
         {
             "check": "manifest_runtime_active_false",
             "ok": manifest.get("runtime_active") is False,
@@ -263,7 +263,7 @@ def main() -> None:
     lines = [
         "# M1-D-7 v1.2.5 静态校验（非 Judge 运行）",
         "",
-        "> 状态：`design_draft` / `active=false` / `frozen=false`；未冻结、未激活、未跑 Judge。",
+        "> 状态：`frozen` / `active=false` / `frozen=true`；metadata-only 冻结，未激活、未跑 Judge。",
         f"> version：`{VERSION}`；rubric_version：`{manifest.get('rubric_version')}`",
         f"> F / C / R：`{prompt_sha['faithfulness.txt']}` / "
         f"`{prompt_sha['answer_correctness.txt']}` / "
