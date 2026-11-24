@@ -1503,3 +1503,15 @@ alembic check   : No new upgrade operations detected
 - ?????auth hydration ?? `/datasources`?`/users/me/llm-credential` ?? 401??????P1 ??
 - ???M2 P0 **verified**???????? accepted???? accepted?
 
+### M3 P0 两 Run 对比（2026-11-24，implemented / verified）
+- 入口：`/rag-evaluations/compare?base=<runId>&target=<runId>`；Run 列表「对比 Run」、Run 详情「对比此 Run」。
+- 前端只读：两 Run 的 aggregate + results 各拉一次，按 dataset_item_id 对齐；无新后端接口、无 migration。
+- 指标：F/C/R base/target/delta；invalid/failed/skipped/unprocessed 分列；缺失显示 —。
+- Case diff：target 无结果→unprocessed；target 有 invalid→invalid；否则按 F/C/R 绝对变化最大的指标判定 improved/regressed/unchanged，并标注驱动指标。
+- 版本不一致：页面明确警告，不静默比较；同一 Run 禁止渲染表格。
+- 验收：base `67596d50…`（F 0.700 / C 0.120 / R 0.540）vs target `56573a73…`（F 0.700 / C 0.120 / R 0.500）；R Δ -0.040；Case diff 变好 1 / 变差 2 / 不变 2。
+- 观察：两条 mock Run 输入相同，F/C 稳定、R 有 ±0.2 漂移，属 Judge beta 非确定性，不作优化结论。
+- 截图：`docs/04-development/assets/m3-p0/compare.jpeg`；文档 `22-m3-p0-run-comparison.md`。
+- 已知问题（P1）：`partial_failed` Run `9c771d04…` 因 Windows Celery `Event loop is closed`（asyncpg 池跨 loop），重启 worker 后正常；401 竞态仍在。
+- 边界：不改 target/Prompt/Judge；不做导出/显著性/实验管理；未跑 10/40；M2 P0 已 accepted，M3 P0 待 accepted。
+

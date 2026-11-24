@@ -1,7 +1,12 @@
 import { describe, expect, it } from 'vitest'
 import {
+  caseDiffMeta,
   caseKnownIssue,
+  caseScore,
   claimSupportMeta,
+  classifyCaseDiff,
+  countCaseDiff,
+  metricComparisonRows,
   claimsOf,
   formatPercent,
   formatScore,
@@ -133,5 +138,76 @@ describe('ragEvaluation helpers', () => {
     expect(claimSupportMeta('unsupported').variant).toBe('error')
     expect(claimSupportMeta('insufficient_evidence').label).toBe('insufficient')
     expect(claimSupportMeta(null).label).toBe('—')
+  })
+})
+
+describe('Run comparison helpers', () => {
+  it('caseScore prefers F then C then R', () => {
+    expect(caseScore({ metrics: { faithfulness: { score: 0.7 } } })).toBe(0.7)
+    expect(
+      caseScore({
+        metrics: {
+          faithfulness: { score: null },
+          answer_correctness: { score: 0.9 },
+        },
+      })
+    ).toBe(0.9)
+    expect(caseScore({ metrics: {} })).toBe(null)
+    expect(caseScore(null)).toBe(null)
+  })
+
+  it('classifyCaseDiff covers all five statuses', () => {
+    const base = { metrics: { faithfulness: { status: 'evaluated', score: 0.5 } } }
+    expect(
+      classifyCaseDiff(base, { metrics: { faithfulness: { status: 'evaluated', score: 0.8 } } })
+        .status
+    ).toBe('improved')
+    expect(
+      classifyCaseDiff(base, { metrics: { faithfulness: { status: 'evaluated', score: 0.2 } } })
+        .status
+    ).toBe('regressed')
+    expect(
+      classifyCaseDiff(base, { metrics: { faithfulness: { status: 'evaluated', score: 0.5 } } })
+        .status
+    ).toBe('unchanged')
+    expect(
+      classifyCaseDiff(base, { metrics: { faithfulness: { status: 'invalid' } } }).status
+    ).toBe('invalid')
+    expect(classifyCaseDiff(base, null).status).toBe('unprocessed')
+    expect(classifyCaseDiff(base, { metrics: {} }).status).toBe('unprocessed')
+    expect(
+      classifyCaseDiff(null, { metrics: { faithfulness: { status: 'evaluated', score: 0.8 } } })
+        .status
+    ).toBe('improved')
+  })
+
+  it('classifyCaseDiff rounds delta to 6 decimals', () => {
+    const result = classifyCaseDiff(
+      { metrics: { faithfulness: { score: 0.1234567 } } },
+      { metrics: { faithfulness: { score: 0.2234567 } } }
+    )
+    expect(result.delta).toBe(0.1)
+  })
+
+  it('metricComparisonRows returns base/target/delta with null when missing', () => {
+    const rows = metricComparisonRows(
+      { metrics: { faithfulness: { mean: 0.5 }, answer_correctness: { mean: 0.4 } } },
+      { metrics: { faithfulness: { mean: 0.7 }, answer_relevancy: { mean: 0.6 } } }
+    )
+    expect(rows[0]).toMatchObject({ short: 'F', base: 0.5, target: 0.7, delta: 0.2 })
+    expect(rows[1].delta).toBe(null)
+    expect(rows[2].delta).toBe(null)
+  })
+
+  it('countCaseDiff aggregates statuses', () => {
+    const counts = countCaseDiff([
+      { diff: { status: 'improved' } },
+      { diff: { status: 'improved' } },
+      { diff: { status: 'invalid' } },
+      { diff: { status: 'unprocessed' } },
+    ])
+    expect(counts).toEqual({ improved: 2, regressed: 0, unchanged: 0, invalid: 1, unprocessed: 1 })
+    expect(caseDiffMeta('improved').label).toBe('变好')
+    expect(caseDiffMeta('unknown').variant).toBe('default')
   })
 })

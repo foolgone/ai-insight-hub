@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { LuArrowLeft, LuFileText, LuRefreshCw } from 'react-icons/lu'
+import { LuArrowLeft, LuArrowLeftRight, LuFileText, LuRefreshCw } from 'react-icons/lu'
 import { AsyncState } from '../../components/common/AsyncState'
 import { PageLoading } from '../../components/common/PageLoading'
 import { Badge } from '../../components/Badge'
@@ -237,6 +237,13 @@ export default function RagEvaluationDetail() {
             >
               刷新
             </Button>
+            <Link
+              to={`/rag-evaluations/compare?base=${run.id}`}
+              className="inline-flex h-10 items-center gap-2 rounded border border-gray-300 bg-white px-4 text-sm text-gray-700 transition-colors hover:bg-gray-50"
+            >
+              <LuArrowLeftRight className="h-4 w-4" aria-hidden="true" />
+              对比此 Run
+            </Link>
             <Link
               to="/reports"
               className="inline-flex h-10 items-center gap-2 rounded border border-gray-300 bg-white px-4 text-sm text-gray-700 transition-colors hover:bg-gray-50"

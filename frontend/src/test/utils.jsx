@@ -44,6 +44,7 @@ export async function preloadRoutes() {
     import('../pages/RagEvaluations'),
     import('../pages/RagEvaluations/Detail'),
     import('../pages/RagEvaluations/CaseDetail'),
+    import('../pages/RagEvaluations/Compare'),
     import('../pages/KnowledgeBase'),
     import('../pages/Reports'),
     import('../pages/NotFound'),

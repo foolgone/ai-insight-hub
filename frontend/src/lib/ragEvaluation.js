@@ -210,3 +210,169 @@ export function claimSupportMeta(status) {
   }
   return { label: status || '—', variant: 'default' }
 }
+
+export const CASE_DIFF_META = {
+  improved: { label: '变好', variant: 'success' },
+  regressed: { label: '变差', variant: 'error' },
+  unchanged: { label: '不变', variant: 'default' },
+  invalid: { label: 'invalid', variant: 'warning' },
+  unprocessed: { label: '未处理', variant: 'default' },
+}
+
+export function caseDiffMeta(status) {
+  return CASE_DIFF_META[status] || { label: status || '未知', variant: 'default' }
+}
+
+/** Case 级分数：按 F → C → R 取首个有效分数（用于展示/兼容）。 */
+export function caseScore(caseRow) {
+  for (const metric of JUDGE_METRICS) {
+    const value = caseRow?.metrics?.[metric]?.score
+    if (typeof value === 'number' && Number.isFinite(value)) return value
+  }
+  return null
+}
+
+/** 逐指标 base/target/delta（缺失侧为 null）。 */
+export function caseMetricDeltas(baseCase, targetCase) {
+  return JUDGE_METRICS.map(name => {
+    const base = baseCase?.metrics?.[name]?.score
+    const target = targetCase?.metrics?.[name]?.score
+    return {
+      name,
+      short: metricShort(name),
+      base: typeof base === 'number' ? base : null,
+      target: typeof target === 'number' ? target : null,
+      delta:
+        typeof base === 'number' && typeof target === 'number'
+          ? Number((target - base).toFixed(6))
+          : null,
+    }
+  })
+}
+
+function meanScore(caseRow) {
+  const values = JUDGE_METRICS.map(name => caseRow?.metrics?.[name]?.score).filter(
+    value => typeof value === 'number' && Number.isFinite(value)
+  )
+  if (!values.length) return null
+  return Number((values.reduce((sum, value) => sum + value, 0) / values.length).toFixed(6))
+}
+
+/**
+ * 两 Run 的 Case diff：
+ * - target 无结果 → unprocessed
+ * - target 任一指标 invalid → invalid
+ * - target 无有效分数 → unprocessed
+ * - 按 F/C/R 中绝对变化最大的指标判定 improved/regressed/unchanged
+ * - base 无有效分数但 target 有 → improved（备注）
+ */
+export function classifyCaseDiff(baseCase, targetCase, epsilon = 1e-6) {
+  const baseScore = caseScore(baseCase)
+  const targetMetrics = Object.values(targetCase?.metrics || {})
+  if (!targetCase || targetMetrics.length === 0) {
+    return {
+      status: 'unprocessed',
+      baseScore,
+      targetScore: null,
+      delta: null,
+      deltas: caseMetricDeltas(baseCase, targetCase),
+      driver: null,
+      note: 'target 无结果',
+    }
+  }
+  if (targetMetrics.some(metric => metric.status === 'invalid')) {
+    return {
+      status: 'invalid',
+      baseScore,
+      targetScore: caseScore(targetCase),
+      delta: null,
+      deltas: caseMetricDeltas(baseCase, targetCase),
+      driver: null,
+      note: 'target 有 invalid 指标',
+    }
+  }
+  const targetScore = caseScore(targetCase)
+  if (typeof targetScore !== 'number') {
+    return {
+      status: 'unprocessed',
+      baseScore,
+      targetScore: null,
+      delta: null,
+      deltas: caseMetricDeltas(baseCase, targetCase),
+      driver: null,
+      note: 'target 无有效分数',
+    }
+  }
+
+  const deltas = caseMetricDeltas(baseCase, targetCase)
+  const comparable = deltas.filter(row => row.delta !== null)
+  const baseMean = meanScore(baseCase)
+  const targetMean = meanScore(targetCase)
+  const meanDelta =
+    baseMean !== null && targetMean !== null ? Number((targetMean - baseMean).toFixed(6)) : null
+
+  if (!comparable.length) {
+    return {
+      status: 'improved',
+      baseScore,
+      targetScore,
+      delta: meanDelta,
+      deltas,
+      driver: null,
+      note: 'base 无同指标分数',
+    }
+  }
+
+  const driver = comparable.reduce((max, row) =>
+    Math.abs(row.delta) > Math.abs(max.delta) ? row : max
+  )
+  if (Math.abs(driver.delta) <= epsilon) {
+    return {
+      status: 'unchanged',
+      baseScore,
+      targetScore,
+      delta: 0,
+      deltas,
+      driver,
+      note: '',
+    }
+  }
+  const sign = driver.delta > 0 ? '+' : ''
+  return {
+    status: driver.delta > 0 ? 'improved' : 'regressed',
+    baseScore,
+    targetScore,
+    delta: meanDelta,
+    deltas,
+    driver,
+    note: `${driver.short} ${sign}${driver.delta.toFixed(3)}`,
+  }
+}
+
+/** 指标 base/target/delta；任一侧缺失时 delta=null。 */
+export function metricComparisonRows(baseAggregate, targetAggregate) {
+  return JUDGE_METRICS.map(name => {
+    const base = metricMean(baseAggregate, name)
+    const target = metricMean(targetAggregate, name)
+    return {
+      name,
+      label: metricLabel(name),
+      short: metricShort(name),
+      base,
+      target,
+      delta:
+        typeof base === 'number' && typeof target === 'number'
+          ? Number((target - base).toFixed(6))
+          : null,
+    }
+  })
+}
+
+/** Case diff 计数（按分类）。 */
+export function countCaseDiff(rows = []) {
+  const counts = { improved: 0, regressed: 0, unchanged: 0, invalid: 0, unprocessed: 0 }
+  for (const row of rows) {
+    if (counts[row.diff.status] !== undefined) counts[row.diff.status] += 1
+  }
+  return counts
+}

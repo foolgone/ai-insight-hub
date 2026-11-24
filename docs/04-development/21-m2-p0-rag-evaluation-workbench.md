@@ -153,6 +153,8 @@
 
 ### 8.6 状态
 
-- M2 P0：**verified**（代码、CI、真实 Run、页面验收均通过）。
-- 等待项目决策角色确认后标记 **accepted**；不自行 accepted。
-- 下一步：M3 两 Run 对比；M4-A 约束文档并行。
+- M2 P0：**accepted**（2026-11-24，项目决策角色确认）。
+- accepted 范围：**RAG 评测工作台 P0 的页面与真实 Run 流程**；不包含 Judge 质量，也不包含 M1。
+- 本轮 Judge 使用 `qwen-flash` 仅为运行时配置，不是模型切换、不是 baseline；F/C/R 不得作为 M1 证据。
+- 已知问题转 P1 backlog（不阻塞 accepted）：auth hydration 401 竞态、无数据集管理页、failed Run 不自动清理。
+- 下一步：M3 P0 两 Run 对比；M4-A 约束文档并行。

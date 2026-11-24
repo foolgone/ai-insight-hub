@@ -39,7 +39,17 @@
 
 实现方式：复用现有 `/api/v1/rag/evaluations`、`/rag/traces`、`/qa-datasets`；后端仅给 Run 列表补了 `aggregate` 只读字段，未改架构。
 
-**真实 Run（2026-11-24）**：`67596d50-5782-456e-a96a-63929b9a9a80`，completed，5/5 evaluated，F 0.700 / C 0.120 / R 0.540，invalid 0，failed 0；截图见 `docs/04-development/assets/m2-p0/`。M2 P0 状态：**verified**（待 accepted）。
+**真实 Run（2026-11-24）**：`67596d50-5782-456e-a96a-63929b9a9a80`，completed，5/5 evaluated，F 0.700 / C 0.120 / R 0.540，invalid 0，failed 0；截图见 `docs/04-development/assets/m2-p0/`。M2 P0 状态：**accepted**（范围仅页面与真实 Run 流程，不含 Judge 质量/M1；qwen-flash 仅为运行时配置，F/C/R 不作 M1 证据）。
+
+### M3 P0 已交付
+
+| 项 | 内容 |
+|---|---|
+| 入口 | `/rag-evaluations/compare?base=<runId>&target=<runId>`；Run 列表/详情均有入口 |
+| 指标 | F/C/R base/target/delta；invalid/failed/skipped/unprocessed 分列 |
+| Case diff | `变好/变差/不变/invalid/未处理`，按 F/C/R 绝对变化最大的指标判定 |
+| 验收 Run | base `67596d50…` vs target `56573a73…`；R Δ -0.040；变好 1 / 变差 2 / 不变 2 |
+| 截图 | `docs/04-development/assets/m3-p0/compare.jpeg` |
 
 ### M1 当前口径（beta）
 

@@ -23,6 +23,7 @@ export const RagEvaluationDetail = lazyWithPreload(() => import('../pages/RagEva
 export const RagEvaluationCaseDetail = lazyWithPreload(
   () => import('../pages/RagEvaluations/CaseDetail')
 )
+export const RagEvaluationCompare = lazyWithPreload(() => import('../pages/RagEvaluations/Compare'))
 export const KnowledgeBase = lazyWithPreload(() => import('../pages/KnowledgeBase'))
 export const Reports = lazyWithPreload(() => import('../pages/Reports'))
 export const NotFound = lazyWithPreload(() => import('../pages/NotFound'))
@@ -36,6 +37,7 @@ const ROUTE_COMPONENTS = [
   RagEvaluations,
   RagEvaluationDetail,
   RagEvaluationCaseDetail,
+  RagEvaluationCompare,
   KnowledgeBase,
   Reports,
   NotFound,

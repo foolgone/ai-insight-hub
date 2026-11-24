@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { LuPlus, LuRefreshCw } from 'react-icons/lu'
+import { LuArrowLeftRight, LuPlus, LuRefreshCw } from 'react-icons/lu'
 import { AsyncState } from '../../components/common/AsyncState'
 import { PageHeader } from '../../components/common/PageHeader'
 import { Badge } from '../../components/Badge'
@@ -160,6 +160,13 @@ export default function RagEvaluations() {
             >
               刷新
             </Button>
+            <Link
+              to="/rag-evaluations/compare"
+              className="inline-flex h-10 items-center gap-2 rounded border border-gray-300 bg-white px-4 text-sm text-gray-700 transition-colors hover:bg-gray-50"
+            >
+              <LuArrowLeftRight className="h-4 w-4" aria-hidden="true" />
+              对比 Run
+            </Link>
             <Button icon={<LuPlus className="h-4 w-4" />} onClick={() => setCreateOpen(true)}>
               新建评测
             </Button>
