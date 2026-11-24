@@ -1455,3 +1455,11 @@ alembic check   : No new upgrade operations detected
 - D3 信号：invalid 更可能是 qwen-max 世代/能力瓶颈；但模型切换需重新基线 + 新批准；Q17/Q21 走 M1-A target 复核，不静默改 v1.0.2。
 - 结果：raw `m1d6-v125-model-comparison-flash-results.json`（SHA `efdfa729…`）；报告 `60-m1d6-v1.2.5-model-comparison-flash-results.md`。
 - 边界：未激活、未跑正式 10/40、未写 PASS、未创建 Run/未写 DB/未调 WeKnora；未使用 max/OpenCode/deepseek；M1-D-6 仍 blocked。
+
+### Q17/Q21 M1-A Target 复核（2026-11-24，desk，0 Judge）
+- 文档：`61-m1d6-q17-q21-target-review.md`；证据 JSON `m1d6-q17-q21-target-review.json`（SHA `a7819032…`）。
+- Q17：flash 0.5（4 claims）/ qwen-max 0.6（5 claims）；cl1 scope、cl4 relationship 均正确 insufficient；旧 target `[0.7,0.9]` 下界不可达 → 建议 `[0.4,0.7]`。
+- Q21：flash 0.75（4 scorable）/ qwen-max 0.8（5 scorable）；豁免 claim 正确 insufficient；旧 target `[0.6,0.7]` 低于诚实分数 → 建议 `[0.7,0.9]`。
+- 附带发现：Q17 flash 少拆“取决于退换货原因”这条 supported claim，分母 5→4、F 0.6→0.5；target 需为分解差异留余量。
+- 结论：两者均 valid，问题是 target 校准；不改 v1.0.2，写 v1.0.3 需 M1-A 批准 + 重新基线。
+- 边界：未跑 Judge、未改 Prompt/Agent/fixture；未写 PASS、未激活、未跑 10/40；M1-D-6 仍 blocked。

@@ -8,8 +8,8 @@
 > 4. 未冻结的定义/目标，不得进入代码实现。
 >
 > 最后更新：2026-11-24
-> 当前阶段：**D3 模型对比已执行：qwen3.8-flash（no thinking）5/5 evaluated、0 invalid；Q23/Q35/Q36 转 valid 且 target hit；Q17/Q21 target miss**
-> 当前决策：**invalid 更可能是 qwen-max 世代/能力瓶颈；是否切换模型需另行提案 + 重新基线；Q17/Q21 走 M1-A**
+> 当前阶段：**M1-A target 复核完成：Q17 `[0.7,0.9]`→建议 `[0.4,0.7]`；Q21 `[0.6,0.7]`→建议 `[0.7,0.9]`；v1.0.2 未改，待批准 v1.0.3**
+> 当前决策：**批准 target v1.0.3 变更 + 重新基线，或先做模型切换提案；不出 v1.2.6、不跑 10/40**
 > 当前不做：正式 10/40、v1.2.5 激活、M2/M3、生产 migration
 
 ---
@@ -19,25 +19,25 @@
 | 项 | 状态 |
 |---|---|
 | 项目阶段 | 核心研发向产品化过渡 |
-| 主线 | M1 评测可信度；v1.2.4/v1.2.5 `frozen`；v1.2.5 `active=false`；flash 模型对比完成；M1-D-6 blocked |
+| 主线 | M1 评测可信度；v1.2.4/v1.2.5 `frozen`；v1.2.5 `active=false`；flash 对比完成；target 复核完成；M1-D-6 blocked |
 | 并行 A | M2 只读工作台；API 审计完成，前端未开始 |
 | 并行 B | M4-A 生产约束；未开始 |
 | M3 优化闭环 | 未开始；等 M1 可信、M2 可用 |
-| 当前可写代码？ | **否**；先做 D3 决策（模型切换 / target 复核 / harness） |
-| 当前可跑 Judge？ | **否**；6 calls 已执行；正式 10/40 未批准 |
+| 当前可写代码？ | **否**；先批准 target v1.0.3 或模型切换 |
+| 当前可跑 Judge？ | **否**；target 复核 0 calls；正式 10/40 未批准 |
 | v1.2.1 / v1.2.2 / v1.2.3 / v1.2.4 / v1.2.5 | 五者均 `frozen`；v1.2.5 `active=false`；默认仍 `v1.0.0` |
-| 最近一次决策 | 2026-11-24 D3：qwen3.8-flash 5/5 valid、0 invalid；Q17/Q21 target miss |
-| 下一个交付 | D3 决策：模型切换提案 + 重新基线，或 contract harness / target 复核 |
+| 最近一次决策 | 2026-11-24 M1-A：Q17/ Q21 target 均不成立；建议 v1.0.3 |
+| 下一个交付 | 批准 target v1.0.3，或决定模型切换 |
 
 ### 现在只需要一个决定
 
-**flash 对比完成：invalid 消失，Q17/Q21 仍 target miss。**
+**target 复核完成：Q17 下界过高，Q21 上界过低。**
 
 | 选项 | 含义 | 结果 |
 |---|---|---|
-| **模型切换提案** | qwen3.8-flash（no thinking）替代 qwen-max | 需重新基线 + 新批准；不出 v1.2.6 |
-| **target 复核（M1-A）** | Q17 F=0.5 vs `[0.7,0.9]`；Q21 F=0.75 vs `[0.6,0.7]` | 不静默改 v1.0.2 |
-| **contract harness** | 记录 flash 下仍存在的 patch/claim 行为 | 只设计；当前 patch 正常 |
+| **批准 target v1.0.3（推荐）** | Q17 `[0.4,0.7]`、Q21 `[0.7,0.9]` | 不原地改 v1.0.2；需新 SHA + 重新基线 |
+| **只改 Q21** | Q21 语义修正明确，Q17 再议 | 部分推进 |
+| **模型切换提案** | qwen3.8-flash（no thinking）替代 qwen-max | 需重新基线 + 新批准 |
 | **v1.2.6** | 不自动出 | 当前无单一确定性缺陷 |
 
 ---
@@ -166,6 +166,8 @@
 | `docs/repair/58-m1d6-v1.2.5-failure-mode-diagnostic-results.md` | failure-mode results | `collected` / D2 mixed | F 6 evaluated / 3 invalid / 1 skipped；Q23/Q35/Q36 invalid；32 calls / CNY 0.3747 |
 | `docs/repair/59-m1d6-v1.2.5-model-comparison-flash-application.md` | flash comparison application | `approved` | qwen3.8-flash + no thinking；5 cases；13 calls / CNY 0.60 |
 | `docs/repair/60-m1d6-v1.2.5-model-comparison-flash-results.md` | flash comparison results | `collected` / D3 | 5/5 evaluated、0 invalid；Q23/Q35/Q36 target hit；6 calls / CNY 0.1577（上界） |
+| `docs/repair/61-m1d6-q17-q21-target-review.md` | M1-A target review | `read_only_review` | Q17 建议 `[0.4,0.7]`；Q21 建议 `[0.7,0.9]`；v1.0.2 未改 |
+| `docs/repair/phase3e/m1d6-q17-q21-target-review.json` | review SHA `a7819032…` | 0 Judge calls | claim 明细 + 语义判定 + 建议区间 |
 | `docs/repair/phase3e/m1d6-v125-model-comparison-flash-preflight.json` | preflight SHA `0e5925e8…` | `preflight_passed` | /models 200；thinking on/off 对比；6.8k 输入 631 输出 |
 | `docs/repair/phase3e/m1d6-v125-model-comparison-flash-application.json` | application SHA `6f69e8f4…` | `approved` | 5 primary + 5 patch + 3 retry |
 | `docs/repair/phase3e/m1d6-v125-model-comparison-flash-ledger.jsonl` | ledger SHA `6f9c4204…` | 6 attempts / 0 uncertain | primary 5 + patch 1；CNY 0.1577（上界） |
@@ -226,6 +228,7 @@
 | 2026-11-24 | failure-mode diagnostic（10 条 × 1 次） | `collected`；F 6/3/1；invalid Q23/Q35/Q36；D2 mixed；32 calls / CNY 0.3747 |
 | 2026-11-24 | 回滚 OpenCode/deepseek 产物到 `0b4a226` | 严格回到 qwen 欠费前；工作树 clean |
 | 2026-11-24 | DashScope 充值后 flash 对比（qwen3.8-flash，no thinking） | `collected`；5/5 evaluated、0 invalid；Q23/Q35/Q36 target hit；Q17/Q21 miss；6 calls / CNY 0.1577 |
+| 2026-11-24 | Q17/Q21 M1-A target 复核（desk，0 Judge） | `read_only_review`；Q17→`[0.4,0.7]`、Q21→`[0.7,0.9]`；v1.0.2 未改 |
 
 ---
 

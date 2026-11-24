@@ -1,0 +1,429 @@
+{
+  "meta": {
+    "name": "m1d6-q17-q21-target-review",
+    "status": "read_only_review",
+    "date": "2026-11-24",
+    "scope": "M1-A target review (desk only)",
+    "judge_run": false,
+    "judge_calls": 0,
+    "target_changed": false,
+    "target_version": "v1.0.2",
+    "prompt_version": "v1.2.5",
+    "prompt_status": "frozen",
+    "freeze_commit": "e9e5f8e",
+    "agent_commit": "318b302",
+    "sources": {
+      "flash_results": "docs/repair/phase3e/m1d6-v125-model-comparison-flash-results.json",
+      "flash_results_sha256": "efdfa729a61e41112f74a6115a6deeef9297586465fb93479236d4220eaf0bb3",
+      "baseline_results": "docs/repair/phase3e/m1d6-v125-failure-mode-results.json",
+      "baseline_sha256": "309fa9b8306174f9f74fe7968a9aa1bc70109af140c7a465a6a52f5dc3294b50",
+      "targets": "docs/repair/phase3e/pilot-40-targets-v1.2.0-v1.0.2.json",
+      "targets_sha256": "3ee15dfca66fe13f0a45fda84ecf2612483f2de107ad079b196a6bd6344d5846",
+      "fixture": "docs/repair/phase3e/pilot-10-v1.1.5-gate.json",
+      "fixture_sha256": "dc7be14b6026b579c15dea1a13d498b7479e14081aa17419ef2bfa525ae9be70",
+      "faithfulness_prompt_sha256": "9c80d4d5cd60ea7c95ad02c71f97ab566cc2fd82e2a2230124ee4b21247b9d8e"
+    }
+  },
+  "cases": {
+    "Q17": {
+      "target_record": {
+        "case_id": "Q17",
+        "group": "provisional",
+        "final_category": "multi",
+        "target_source": "pilot10",
+        "targets": {
+          "F": [
+            0.7,
+            0.9
+          ],
+          "C": [
+            0.8,
+            1.0
+          ],
+          "R": [
+            0.8,
+            1.0
+          ]
+        },
+        "target_status": "reapproval_required",
+        "semantic_reason": "policy_relationship factual; F may return to 0.8; target 0.9-1.0 replaced by 0.7-0.9",
+        "known_non_pass": false
+      },
+      "flash": {
+        "status": "evaluated",
+        "score": 0.5,
+        "counts": {
+          "claim_count": 4,
+          "supported_count": 2,
+          "unsupported_count": 0,
+          "insufficient_evidence_count": 2,
+          "non_factual_count": 0,
+          "scorable_claim_count": 4
+        },
+        "claims": [
+          {
+            "claim_id": "cl1",
+            "claim": "订单满 99 元包邮适用于正向发货环节",
+            "claim_type": "factual_claim",
+            "claim_subtype": "policy_scope",
+            "support_status": "insufficient_evidence",
+            "is_contradictory": false,
+            "quotes": []
+          },
+          {
+            "claim_id": "cl2",
+            "claim": "因质量问题退换货时，运费由商家承担",
+            "claim_type": "factual_claim",
+            "claim_subtype": "policy",
+            "support_status": "supported",
+            "is_contradictory": false,
+            "quotes": [
+              "因质量问题产生的退换货运费由商家承担"
+            ]
+          },
+          {
+            "claim_id": "cl3",
+            "claim": "非质量问题（如无理由退货）退货运费由买家承担",
+            "claim_type": "factual_claim",
+            "claim_subtype": "policy",
+            "support_status": "supported",
+            "is_contradictory": false,
+            "quotes": [
+              "非质量问题的退货运费由买家承担"
+            ]
+          },
+          {
+            "claim_id": "cl4",
+            "claim": "退货运费责任归属与是否满 99 元无关，不因包邮资格而改变",
+            "claim_type": "factual_claim",
+            "claim_subtype": "policy_relationship",
+            "support_status": "insufficient_evidence",
+            "is_contradictory": false,
+            "quotes": []
+          }
+        ]
+      },
+      "qwen_max": {
+        "status": "evaluated",
+        "score": 0.6,
+        "counts": {
+          "claim_count": 5,
+          "supported_count": 3,
+          "unsupported_count": 0,
+          "insufficient_evidence_count": 2,
+          "non_factual_count": 0,
+          "scorable_claim_count": 5
+        },
+        "claims": [
+          {
+            "claim_id": "cl1",
+            "claim": "订单满 99 元包邮适用于正向发货环节",
+            "claim_type": "factual_claim",
+            "claim_subtype": "policy_scope",
+            "support_status": "insufficient_evidence",
+            "is_contradictory": false,
+            "quotes": []
+          },
+          {
+            "claim_id": "cl2",
+            "claim": "退货时的运费承担方取决于退换货原因",
+            "claim_type": "factual_claim",
+            "claim_subtype": "condition",
+            "support_status": "supported",
+            "is_contradictory": false,
+            "quotes": [
+              "因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。"
+            ]
+          },
+          {
+            "claim_id": "cl3",
+            "claim": "若因质量问题退换货，运费由商家承担",
+            "claim_type": "factual_claim",
+            "claim_subtype": "policy",
+            "support_status": "supported",
+            "is_contradictory": false,
+            "quotes": [
+              "因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。"
+            ]
+          },
+          {
+            "claim_id": "cl4",
+            "claim": "若为非质量问题（如无理由退货），运费由买家承担",
+            "claim_type": "factual_claim",
+            "claim_subtype": "policy",
+            "support_status": "supported",
+            "is_contradictory": false,
+            "quotes": [
+              "因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。"
+            ]
+          },
+          {
+            "claim_id": "cl5",
+            "claim": "该规则与是否满 99 元无关，不因包邮资格而改变退货运费责任归属",
+            "claim_type": "factual_claim",
+            "claim_subtype": "policy_relationship",
+            "support_status": "insufficient_evidence",
+            "is_contradictory": false,
+            "quotes": []
+          }
+        ]
+      },
+      "semantic_verdicts": {
+        "cl1": {
+          "verdict": "insufficient_evidence",
+          "reason": "上下文只写“满 99 元包邮；未满收 10 元运费”，没有明确‘包邮仅适用于正向发货’这一适用范围；policy_scope 需要显式依据。"
+        },
+        "cl2": {
+          "verdict": "supported",
+          "reason": "对应 §7“因质量问题产生的退换货运费由商家承担”。"
+        },
+        "cl3": {
+          "verdict": "supported",
+          "reason": "对应 §7“非质量问题的退货运费由买家承担”。"
+        },
+        "cl4": {
+          "verdict": "insufficient_evidence",
+          "reason": "上下文没有写‘退货运费与是否满 99 无关’；这是并列条款的推断，不是显式关系。"
+        }
+      },
+      "honest_range": {
+        "flash_4_claims": 0.5,
+        "qwen_max_5_claims": 0.6,
+        "note": "两种分解下 F=0.5/0.6；cl1 与 cl4 均为 insufficient，0.7 下界不可达。"
+      },
+      "target_valid": false,
+      "recommended_range": [
+        0.4,
+        0.7
+      ],
+      "recommendation_basis": "覆盖 4-claim 0.5、5-claim 0.6，并为‘是否把取决于原因拆成独立 claim’留 0.1 余量；上界 0.7 允许一条推断被判 supported。",
+      "caveat": "flash 少拆了‘退货时的运费承担方取决于退换货原因’这条 supported claim，属 claim 分解不稳定，不是 target 本身。"
+    },
+    "Q21": {
+      "target_record": {
+        "case_id": "Q21",
+        "group": "provisional",
+        "final_category": "constraint",
+        "target_source": "matrix",
+        "targets": {
+          "F": [
+            0.6,
+            0.7
+          ]
+        },
+        "target_status": "unchanged",
+        "semantic_reason": "none",
+        "known_non_pass": false
+      },
+      "flash": {
+        "status": "evaluated",
+        "score": 0.75,
+        "counts": {
+          "claim_count": 5,
+          "supported_count": 3,
+          "unsupported_count": 0,
+          "insufficient_evidence_count": 1,
+          "non_factual_count": 1,
+          "scorable_claim_count": 4
+        },
+        "claims": [
+          {
+            "claim_id": "cl1",
+            "claim": "签收后第 10 天不支持无理由退款",
+            "claim_type": "factual_claim",
+            "claim_subtype": "derived",
+            "support_status": "supported",
+            "is_contradictory": false,
+            "quotes": [
+              "订单签收后 7 天内可申请无理由退款。"
+            ]
+          },
+          {
+            "claim_id": "cl2",
+            "claim": "无理由退款仅限订单签收后 7 天内申请",
+            "claim_type": "factual_claim",
+            "claim_subtype": "policy",
+            "support_status": "supported",
+            "is_contradictory": false,
+            "quotes": [
+              "订单签收后 7 天内可申请无理由退款。"
+            ]
+          },
+          {
+            "claim_id": "cl3",
+            "claim": "该限制适用于“普通商品”（即非定制、非生鲜、非已激活虚拟商品）",
+            "claim_type": "factual_claim",
+            "claim_subtype": "condition",
+            "support_status": "supported",
+            "is_contradictory": false,
+            "quotes": [
+              "定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。"
+            ]
+          },
+          {
+            "claim_id": "cl4",
+            "claim": "若商品存在质量问题，则不受 7 天无理由限制，仍可依据保修或退换货政策主张权益",
+            "claim_type": "factual_claim",
+            "claim_subtype": "condition",
+            "support_status": "insufficient_evidence",
+            "is_contradictory": false,
+            "quotes": []
+          },
+          {
+            "claim_id": "cl5",
+            "claim": "建议联系客服（9:00–21:00）核实具体订单情况",
+            "claim_type": "non_factual",
+            "claim_subtype": "advice",
+            "support_status": null,
+            "is_contradictory": false,
+            "quotes": []
+          }
+        ]
+      },
+      "qwen_max": {
+        "status": "evaluated",
+        "score": 0.8,
+        "counts": {
+          "claim_count": 6,
+          "supported_count": 4,
+          "unsupported_count": 0,
+          "insufficient_evidence_count": 1,
+          "non_factual_count": 1,
+          "scorable_claim_count": 5
+        },
+        "claims": [
+          {
+            "claim_id": "cl1",
+            "claim": "不可以。",
+            "claim_type": "factual_claim",
+            "claim_subtype": "policy",
+            "support_status": "supported",
+            "is_contradictory": false,
+            "quotes": [
+              "订单签收后 7 天内可申请无理由退款。"
+            ]
+          },
+          {
+            "claim_id": "cl2",
+            "claim": "无理由退款仅限订单签收后 7 天内申请",
+            "claim_type": "factual_claim",
+            "claim_subtype": "policy",
+            "support_status": "supported",
+            "is_contradictory": false,
+            "quotes": [
+              "订单签收后 7 天内可申请无理由退款。"
+            ]
+          },
+          {
+            "claim_id": "cl3",
+            "claim": "签收第 10 天已超出该时效窗口（7 天），因此不支持无理由退款",
+            "claim_type": "factual_claim",
+            "claim_subtype": "derived",
+            "support_status": "supported",
+            "is_contradictory": false,
+            "quotes": [
+              "订单签收后 7 天内可申请无理由退款。"
+            ]
+          },
+          {
+            "claim_id": "cl4",
+            "claim": "该限制适用于“普通商品”（即非定制、非生鲜、非已激活虚拟商品）",
+            "claim_type": "factual_claim",
+            "claim_subtype": "condition",
+            "support_status": "supported",
+            "is_contradictory": false,
+            "quotes": [
+              "定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。"
+            ]
+          },
+          {
+            "claim_id": "cl5",
+            "claim": "若商品存在质量问题，则不受 7 天无理由限制，仍可依据保修或退换货政策主张权益",
+            "claim_type": "factual_claim",
+            "claim_subtype": "condition",
+            "support_status": "insufficient_evidence",
+            "is_contradictory": false,
+            "quotes": []
+          },
+          {
+            "claim_id": "cl6",
+            "claim": "如需进一步协助，建议联系客服（9:00–21:00）核实具体订单情况",
+            "claim_type": "non_factual",
+            "claim_subtype": "advice",
+            "support_status": null,
+            "is_contradictory": false,
+            "quotes": []
+          }
+        ]
+      },
+      "semantic_verdicts": {
+        "cl1": {
+          "verdict": "supported",
+          "reason": "由“签收后 7 天内可申请无理由退款”直接推导第 10 天超期。"
+        },
+        "cl2": {
+          "verdict": "supported",
+          "reason": "对应 §1 退款时效原文。"
+        },
+        "cl3": {
+          "verdict": "supported_with_caveat",
+          "reason": "上下文只列了定制/生鲜/虚拟不支持；‘普通商品适用’是补集推断，可 supported，但属判断项。"
+        },
+        "cl4": {
+          "verdict": "insufficient_evidence",
+          "reason": "上下文没有‘质量问题不受 7 天无理由限制’的条款；§12 只讲特殊商品的质量问题反馈时限。"
+        },
+        "cl5": {
+          "verdict": "non_factual",
+          "reason": "客服建议，不计入忠实度分母。"
+        }
+      },
+      "honest_range": {
+        "flash_4_scorable": 0.75,
+        "qwen_max_5_scorable": 0.8,
+        "note": "两种分解下 F=0.75/0.8；旧 target 上界 0.7 低于诚实分数。"
+      },
+      "target_valid": false,
+      "recommended_range": [
+        0.7,
+        0.9
+      ],
+      "recommendation_basis": "下界 0.7 覆盖 3/4；上界 0.9 覆盖 4/5 与 5/6，同时能捕获把豁免 claim 错判 supported 的回归（会显著高于 0.9 或直接 unsupported）。",
+      "caveat": "cl3‘普通商品适用’是补集推断；若 M1-A 判定它应 insufficient，Q21 的诚实分数会降到 0.5-0.6，target 需重新讨论。"
+    }
+  },
+  "conclusion": {
+    "both_targets_valid": false,
+    "action": "M1-A target v1.0.3 proposal only; do not modify v1.0.2 in place",
+    "proposed_changes": {
+      "Q17": {
+        "from": [
+          0.7,
+          0.9
+        ],
+        "to": [
+          0.4,
+          0.7
+        ]
+      },
+      "Q21": {
+        "from": [
+          0.6,
+          0.7
+        ],
+        "to": [
+          0.7,
+          0.9
+        ]
+      }
+    },
+    "requires": "M1-A approval before writing target v1.0.3",
+    "not_a_judge_fix": "两个 case 都是 valid，问题在 target 校准，不在 Judge 稳定性。"
+  },
+  "boundaries": [
+    "desk review only; no Judge calls",
+    "target v1.0.2 unchanged",
+    "no Prompt/Agent/Service/validator/fixture change",
+    "no PASS, no 10/40, no activation"
+  ]
+}
