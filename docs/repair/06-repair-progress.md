@@ -1442,3 +1442,16 @@ alembic check   : No new upgrade operations detected
 - D2：`mixed`；不出 v1.2.6；评估更强模型/确定性 contract harness（factual+absence、patch null）+ Q17/Q21 target 复核；known limitation 只记录。
 - 结果：raw `m1d6-v125-failure-mode-results.json`（SHA `309fa9b8…`）；报告 `58-m1d6-v1.2.5-failure-mode-diagnostic-results.md`（SHA `2fb9380d…`）。
 - 边界：未激活、未跑正式 10/40、未写 PASS、未创建 Run/未写 DB/未调 WeKnora；target v1.0.2 未改；M1-D-6 仍 blocked。
+
+### D3 DashScope Flash 模型对比（2026-11-24，collected）
+- 背景：DashScope 充值恢复；用户要求只用 flash、不用 max；OpenCode/deepseek 产物已回滚到 `0b4a226`。
+- 申请：`59-m1d6-v1.2.5-model-comparison-flash-application.md`；application SHA `6f69e8f4…`；preflight SHA `0e5925e8…`。
+- 模型：`qwen3.8-flash`，`enable_thinking=false`；max_tokens 8192；temperature 0。
+- 为何关 thinking：thinking 开时 1.5k prompt 消耗 3649 reasoning，7k 输入会撞满 8192；关闭后 6.8k 输入仅 631 输出、`finish_reason=stop`。
+- 范围：Q23/Q35/Q36/Q17/Q21 × F only × 1 次；5 primary + 5 patch + 3 retry = 13 calls / CNY 0.60。
+- 执行：6 calls（primary 5 + patch 1）；ledger `6f9c4204…`；0 uncertain；CNY 0.1576632（qwen-max 表作上界）。
+- 结果：**5/5 evaluated、0 invalid**；Q23 0.4 `[0.4,0.5]` hit；Q35 1.0 `[0.8,1.0]` hit；Q36 1.0 hit；Q17 0.5 `[0.7,0.9]` miss（baseline 0.6）；Q21 0.75 `[0.6,0.7]` miss（baseline 0.8）。
+- Q23：patch applied cl6；14 claims（10 scorable：4 supported / 1 unsupported / 5 insufficient）；Q21 豁免 claim 仍正确 insufficient。
+- D3 信号：invalid 更可能是 qwen-max 世代/能力瓶颈；但模型切换需重新基线 + 新批准；Q17/Q21 走 M1-A target 复核，不静默改 v1.0.2。
+- 结果：raw `m1d6-v125-model-comparison-flash-results.json`（SHA `efdfa729…`）；报告 `60-m1d6-v1.2.5-model-comparison-flash-results.md`。
+- 边界：未激活、未跑正式 10/40、未写 PASS、未创建 Run/未写 DB/未调 WeKnora；未使用 max/OpenCode/deepseek；M1-D-6 仍 blocked。
