@@ -1,0 +1,151 @@
+{
+  "meta": {
+    "date": "2026-11-24",
+    "environment": "VM PostgreSQL 192.168.150.100:5433 + Redis 192.168.150.100:6379; host API/worker/Vite; STORAGE_BACKEND=local; RAG_ADAPTER=mock",
+    "judge_model": "qwen-flash",
+    "prompt_version": "v1.2.5",
+    "note": "M2 P0 acceptance run; Judge beta; no target calibration."
+  },
+  "dataset": {
+    "dataset_id": "d3a7071f-1385-4cf0-9fbb-8c607646ba14",
+    "version_id": "9e7e73cb-f4f2-486e-a75d-b347c722e0d1",
+    "name": "M2 P0 验收数据集",
+    "item_count": 5
+  },
+  "run": {
+    "run_id": "67596d50-5782-456e-a96a-63929b9a9a80",
+    "status": "completed",
+    "items": {
+      "total_items": 5,
+      "completed_items": 5,
+      "evaluated_items": 5,
+      "invalid_items": 0,
+      "failed_items": 0,
+      "skipped_items": 0,
+      "unprocessed_items": 0
+    },
+    "aggregate": {
+      "faithfulness": {
+        "mean": 0.7,
+        "evaluated": 5,
+        "invalid": 0,
+        "failed": 0
+      },
+      "answer_relevancy": {
+        "mean": 0.54,
+        "evaluated": 5,
+        "invalid": 0,
+        "failed": 0
+      },
+      "answer_correctness": {
+        "mean": 0.12,
+        "evaluated": 5,
+        "invalid": 0,
+        "failed": 0
+      },
+      "faithfulness_strict": {
+        "mean": 1.0,
+        "evaluated": 5,
+        "invalid": 0,
+        "failed": 0
+      }
+    }
+  },
+  "cases": {
+    "213d117d-dee1-4d12-8541-7d3a6ec245b4": {
+      "faithfulness": {
+        "status": "evaluated",
+        "score": 1.0,
+        "invalid_reason": null
+      },
+      "answer_correctness": {
+        "status": "evaluated",
+        "score": 0.3,
+        "invalid_reason": null
+      },
+      "answer_relevancy": {
+        "status": "evaluated",
+        "score": 0.7,
+        "invalid_reason": null
+      }
+    },
+    "373d0868-707d-4a2e-beff-64d39158d259": {
+      "faithfulness": {
+        "status": "evaluated",
+        "score": 0.5,
+        "invalid_reason": null
+      },
+      "answer_correctness": {
+        "status": "evaluated",
+        "score": 0.0,
+        "invalid_reason": null
+      },
+      "answer_relevancy": {
+        "status": "evaluated",
+        "score": 0.3,
+        "invalid_reason": null
+      }
+    },
+    "9a4434e1-e8bc-477d-b1d4-d18d07da8e8e": {
+      "faithfulness": {
+        "status": "evaluated",
+        "score": 0.5,
+        "invalid_reason": null
+      },
+      "answer_correctness": {
+        "status": "evaluated",
+        "score": 0.0,
+        "invalid_reason": null
+      },
+      "answer_relevancy": {
+        "status": "evaluated",
+        "score": 0.9,
+        "invalid_reason": null
+      }
+    },
+    "b47e7c1b-dfd3-487a-b8ec-d1fbcc26dba4": {
+      "faithfulness": {
+        "status": "evaluated",
+        "score": 1.0,
+        "invalid_reason": null
+      },
+      "answer_correctness": {
+        "status": "evaluated",
+        "score": 0.3,
+        "invalid_reason": null
+      },
+      "answer_relevancy": {
+        "status": "evaluated",
+        "score": 0.5,
+        "invalid_reason": null
+      }
+    },
+    "4fcad290-46de-4391-81cc-832b9770c447": {
+      "faithfulness": {
+        "status": "evaluated",
+        "score": 0.5,
+        "invalid_reason": null
+      },
+      "answer_correctness": {
+        "status": "evaluated",
+        "score": 0.0,
+        "invalid_reason": null
+      },
+      "answer_relevancy": {
+        "status": "evaluated",
+        "score": 0.3,
+        "invalid_reason": null
+      }
+    }
+  },
+  "failed_runs": [
+    {
+      "run_id": "574476ec-b5bd-49fe-8ebc-8381f057e40f",
+      "reason": "BYOK credential not configured"
+    },
+    {
+      "run_id": "33298d98-dcce-4250-9210-37fd134674d7",
+      "reason": "DeepSeek 402 Insufficient Balance"
+    }
+  ]
+}

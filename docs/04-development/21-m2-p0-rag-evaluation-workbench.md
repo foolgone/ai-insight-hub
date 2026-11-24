@@ -118,6 +118,8 @@
 | Judge 模型 | `qwen-flash`（DashScope；v1.2.5 frozen/inactive；非校准） |
 | 任务 | Celery 正常消费，API 轮询到 completed |
 
+机读摘要：`docs/04-development/assets/m2-p0/run-67596d50-summary.json`（含逐 case F/C/R 与失败 Run 原因）。
+
 失败 Run（保留展示，作为 known issues 证据）：
 
 | Run ID | 原因 |
