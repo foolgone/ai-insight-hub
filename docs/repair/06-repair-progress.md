@@ -1515,3 +1515,13 @@ alembic check   : No new upgrade operations detected
 - 已知问题（P1）：`partial_failed` Run `9c771d04…` 因 Windows Celery `Event loop is closed`（asyncpg 池跨 loop），重启 worker 后正常；401 竞态仍在。
 - 边界：不改 target/Prompt/Judge；不做导出/显著性/实验管理；未跑 10/40；M2 P0 已 accepted，M3 P0 待 accepted。
 
+### M3 P0 accepted + β 噪声提示 + M4-A 文档（2026-11-24）
+- M3 P0 验收结论：**accepted（页面/流程）**；不证明两条 Run 的优化效果。
+- accepted 范围：对比页、指标 delta、Case diff、钻取、版本警告；不改 target/Prompt/Judge。
+- 补 P1 必补：`JudgeNoiseNotice` 固定提示“同配置/同输入 ±0.2、delta 非因果、建议重复 3 次”；同 dataset/version/adapter/mode/top_k（或配置不可得）升级“同配置比较”强警告。
+- 单测：同版本同 adapter 显示强警告；不同 adapter 不显示强警告；lib 增加 `isSameConfigComparison` 覆盖。
+- 截图已更新：`docs/04-development/assets/m3-p0/compare.jpeg`（含 β 噪声提示）。
+- M4-A 决策文档：`docs/05-operations/01-m4a-constraints-decision.md`；覆盖租户、保留期、审计、告警、成本、数据权利；只写文档，不实现、不做 migration、不碰生产。
+- P1 backlog：`partial_failed` Run `9c771d04…` 的 Windows Celery event-loop；401 hydration；100 条结果上限；无导出。
+- 边界：M1 v1.2.5 beta/inactive；未跑 10/40；未改生产。
+

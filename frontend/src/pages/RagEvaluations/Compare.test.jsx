@@ -152,6 +152,8 @@ describe('RagEvaluationCompare', () => {
     expect(await screen.findByRole('heading', { name: 'Run 对比' })).toBeInTheDocument()
     expect(await screen.findByText('+0.200')).toBeInTheDocument()
     expect(await screen.findByText('Case 级变化')).toBeInTheDocument()
+    expect(await screen.findByText(/±0.2/)).toBeInTheDocument()
+    expect(await screen.findByText(/同配置比较/)).toBeInTheDocument()
     expect(await screen.findByText('+0.100')).toBeInTheDocument()
     expect(await screen.findByText('变好')).toBeInTheDocument()
     expect(await screen.findByText('变差')).toBeInTheDocument()
@@ -161,6 +163,16 @@ describe('RagEvaluationCompare', () => {
       'href',
       '/rag-evaluations/run-b/cases/item-1'
     )
+  })
+
+  it('不同 adapter 时不显示同配置强警告', async () => {
+    getRagEvaluation.mockImplementation(async runId =>
+      runId === 'run-a' ? BASE_RUN : { ...TARGET_RUN, adapter: 'weknora' }
+    )
+    renderAt('/rag-evaluations/compare?base=run-a&target=run-b')
+    await screen.findByText('Case 级变化')
+    expect(screen.queryByText(/同配置比较/)).not.toBeInTheDocument()
+    expect(screen.getByText(/±0.2/)).toBeInTheDocument()
   })
 
   it('版本不一致时给出明确警告', async () => {

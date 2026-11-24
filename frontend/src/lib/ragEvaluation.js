@@ -376,3 +376,33 @@ export function countCaseDiff(rows = []) {
   }
   return counts
 }
+
+/** 对比所需的 Run 配置快照（缺失字段为 null）。 */
+export function comparisonConfig(run) {
+  const retrieval = run?.retrieval_config || {}
+  const snapshot = run?.config_snapshot || {}
+  return {
+    datasetId: run?.dataset_id ?? null,
+    versionId: run?.dataset_version_id ?? null,
+    adapter: run?.adapter ?? null,
+    mode: run?.execution_mode ?? null,
+    topK: retrieval.top_k ?? snapshot.top_k ?? null,
+  }
+}
+
+/**
+ * 是否同配置比较：同 dataset + version + adapter + mode；
+ * top_k 双方可得时必须相等；任一侧不可得时按保守口径视为同配置（提示更强，避免把噪声当效果）。
+ */
+export function isSameConfigComparison(base, target) {
+  if (!base || !target) return false
+  const left = comparisonConfig(base)
+  const right = comparisonConfig(target)
+  if (!left.datasetId || !right.datasetId) return false
+  if (left.datasetId !== right.datasetId) return false
+  if (left.versionId !== right.versionId) return false
+  if (!left.adapter || left.adapter !== right.adapter) return false
+  if (!left.mode || left.mode !== right.mode) return false
+  if (left.topK === null || right.topK === null) return true
+  return left.topK === right.topK
+}

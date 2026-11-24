@@ -12,6 +12,7 @@ import {
   formatScore,
   groupResultsByItem,
   invalidReasonLabel,
+  isSameConfigComparison,
   itemDisplayLabel,
   judgeMetricRows,
   metricLabel,
@@ -209,5 +210,34 @@ describe('Run comparison helpers', () => {
     expect(counts).toEqual({ improved: 2, regressed: 0, unchanged: 0, invalid: 1, unprocessed: 1 })
     expect(caseDiffMeta('improved').label).toBe('变好')
     expect(caseDiffMeta('unknown').variant).toBe('default')
+  })
+})
+
+describe('same-config comparison', () => {
+  const base = {
+    dataset_id: 'ds-1',
+    dataset_version_id: 'v-1',
+    adapter: 'mock',
+    execution_mode: 'query',
+    retrieval_config: { top_k: 3 },
+  }
+
+  it('同 dataset/version/adapter/mode/top_k → true', () => {
+    expect(isSameConfigComparison(base, { ...base })).toBe(true)
+  })
+
+  it('top_k 不可得时按保守口径 → true', () => {
+    expect(isSameConfigComparison(base, { ...base, retrieval_config: {} })).toBe(true)
+  })
+
+  it('adapter 或 top_k 不同 → false', () => {
+    expect(isSameConfigComparison(base, { ...base, adapter: 'weknora' })).toBe(false)
+    expect(isSameConfigComparison(base, { ...base, retrieval_config: { top_k: 5 } })).toBe(false)
+    expect(isSameConfigComparison(base, { ...base, dataset_version_id: 'v-2' })).toBe(false)
+  })
+
+  it('缺少 Run → false', () => {
+    expect(isSameConfigComparison(null, base)).toBe(false)
+    expect(isSameConfigComparison(base, null)).toBe(false)
   })
 })

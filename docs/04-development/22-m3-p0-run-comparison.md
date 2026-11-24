@@ -1,6 +1,6 @@
 # M3 P0：两 Run 对比
 
-> 状态：`implemented` / `verified`（待 accepted）；前端只读，无新后端接口。
+> 状态：**accepted（页面/流程）**；前端只读，无新后端接口。β 噪声提示已补（P1 必补项）。
 > 日期：2026-11-24
 > 入口：`/rag-evaluations/compare?base=<runId>&target=<runId>`；Run 列表「对比 Run」、Run 详情「对比此 Run」。
 
@@ -56,6 +56,15 @@ Case diff：**变好 1 / 变差 2 / 不变 2 / invalid 0 / 未处理 0**。
 | 点击 Case 打开详情 | ✅ 跳到 `/rag-evaluations/<run>/cases/<item>` |
 | 不同 dataset/version 有警告 | ✅ 版本不一致警告（单测覆盖） |
 | 无 500 / 空白页 | ✅ 页面正常渲染 |
+
+## 4.1 β 噪声提示（P1 必补，已实现）
+
+对比页固定展示 `JudgeNoiseNotice`：
+
+- Judge 为 beta；同配置/同输入的两条 Run 也可能出现 ±0.2 波动；
+- delta 不代表因果变化；建议重复 3 次，或确认 RAG 输入/配置确实不同，再判断优化效果；
+- 同 dataset + version + adapter + mode + top_k（或配置字段不可得）时，升级为“同配置比较”强警告，明确 delta 主要反映 Judge 噪声。
+- 单测覆盖：同版本同 adapter → 显示强警告；不同 adapter → 不显示强警告。
 
 ## 5. 已知问题（P1）
 

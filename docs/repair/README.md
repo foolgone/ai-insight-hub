@@ -50,6 +50,12 @@
 | Case diff | `变好/变差/不变/invalid/未处理`，按 F/C/R 绝对变化最大的指标判定 |
 | 验收 Run | base `67596d50…` vs target `56573a73…`；R Δ -0.040；变好 1 / 变差 2 / 不变 2 |
 | 截图 | `docs/04-development/assets/m3-p0/compare.jpeg` |
+| β 噪声 | 固定提示 ±0.2；同配置比较升级强警告；单测覆盖 |
+| 状态 | **accepted（页面/流程）**；不证明优化效果 |
+
+### M4-A 决策文档
+
+`docs/05-operations/01-m4a-constraints-decision.md`：租户 / 保留期 / 审计 / 告警 / 成本 / 数据权利，当前状态、缺口、选项、推荐、风险；只写文档，不实现。
 
 ### M1 当前口径（beta）
 

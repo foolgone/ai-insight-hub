@@ -8,6 +8,7 @@ import { Button } from '../../components/Button'
 import { Empty } from '../../components/Empty'
 import { Select } from '../../components/Select'
 import { Table } from '../../components/Table'
+import { JudgeNoiseNotice } from '../../components/rag/JudgeNoiseNotice'
 import { RagBetaNotice } from '../../components/rag/RagBetaNotice'
 import {
   useDatasetItemsQuery,
@@ -22,6 +23,7 @@ import {
   countCaseDiff,
   formatScore,
   groupResultsByItem,
+  isSameConfigComparison,
   itemDisplayLabel,
   metricComparisonRows,
   metricShort,
@@ -138,6 +140,7 @@ export default function RagEvaluationCompare() {
     base && target && base.dataset_version_id !== target.dataset_version_id
   )
   const datasetMismatch = Boolean(base && target && base.dataset_id !== target.dataset_id)
+  const sameConfig = isSameConfigComparison(base, target)
 
   const loading =
     runsQuery.isLoading ||
@@ -282,6 +285,7 @@ export default function RagEvaluationCompare() {
       />
 
       <RagBetaNotice />
+      <JudgeNoiseNotice sameConfig={sameConfig} />
 
       <div className="grid gap-3 rounded-md border border-gray-200 bg-white p-4 md:grid-cols-[1fr_auto_1fr]">
         <div>
