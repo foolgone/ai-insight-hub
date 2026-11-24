@@ -7,7 +7,6 @@
 """
 from __future__ import annotations
 
-import asyncio
 from datetime import datetime, timezone
 from decimal import Decimal
 from typing import Any
@@ -17,6 +16,7 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.celery import celery_app
+from app.core.async_task import run_task
 from app.core.config import settings
 from app.core.cost_alerts import CostAlertManager
 from app.core.degradation import level_for_ratio
@@ -87,7 +87,7 @@ async def run_cost_monitor(
 
 @celery_app.task(name="tasks.monitor_cost")
 def monitor_cost_task() -> dict[str, Any]:
-    return asyncio.run(run_cost_monitor())
+    return run_task(run_cost_monitor())
 
 
 __all__ = ["monitor_cost_task", "run_cost_monitor"]

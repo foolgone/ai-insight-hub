@@ -1525,3 +1525,13 @@ alembic check   : No new upgrade operations detected
 - P1 backlog：`partial_failed` Run `9c771d04…` 的 Windows Celery event-loop；401 hydration；100 条结果上限；无导出。
 - 边界：M1 v1.2.5 beta/inactive；未跑 10/40；未改生产。
 
+### P1-0 / P1-1 修复 + M4-A 基线补 P1（2026-11-25）
+- **P1-0**：新增 `app/core/async_task.py::run_task`，Celery worker 进程内复用同一事件循环；所有任务入口由 `asyncio.run` 切换为 `run_task`，避免 asyncpg/httpx 连接池绑定已关闭 loop。
+  - 验证：同一 worker 连续 3 个 RAG Run `9400c82b…` / `be80f57b…` / `0352a0f8…` 全部 completed，evaluated 5/5、failed 0。
+  - 单测：`tests/unit/test_async_task.py`（同 loop 复用、错误传播后仍可用）。
+- **P1-1**：`apiClient` 请求拦截器在“有持久会话、无 access token”时先用 HttpOnly refresh cookie 静默换 token，再发首个请求；刷新失败标记避免重复刷新。
+  - 验证：Playwright 登录后 reload `/rag-evaluations`，401 响应数 = 0。
+  - 单测：`client.refresh.test.js` 新增静默刷新/刷新失败两条。
+- **M4-A**：文档标记 `accepted_baseline`；补 5 个实现前 P1（租户隔离验收矩阵、保留期拆分、审计不可篡改、告警落地、成本/数据权利），并加入 P1 backlog（P1-0/P1-1 done，P1-2/P1-3/P1-4 pending）。
+- 边界：M4-A 未实现、未 migration、未碰生产；M1 v1.2.5 beta/inactive；未跑 10/40。
+

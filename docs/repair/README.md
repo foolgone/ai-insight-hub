@@ -55,7 +55,17 @@
 
 ### M4-A 决策文档
 
-`docs/05-operations/01-m4a-constraints-decision.md`：租户 / 保留期 / 审计 / 告警 / 成本 / 数据权利，当前状态、缺口、选项、推荐、风险；只写文档，不实现。
+`docs/05-operations/01-m4a-constraints-decision.md`：**accepted as decision baseline**；租户 / 保留期 / 审计 / 告警 / 成本 / 数据权利，当前状态、缺口、选项、推荐、风险；已补 5 个实现前 P1（租户验收矩阵、保留期拆分、审计不可篡改、告警落地、成本/数据权利）。**不是 implementation approved**，未写代码、未做 migration、未碰生产。
+
+### P1 backlog 状态
+
+| 优先级 | 项 | 状态 |
+|---|---|---|
+| P1-0 | Celery `Event loop is closed` / asyncpg 跨 loop | **done / verified**：同一 worker 连续 3 Run 全 completed |
+| P1-1 | 401 auth hydration 竞态 | **done / verified**：刷新 401=0 |
+| P1-2 | 对比页 100 条上限/分页 | pending |
+| P1-3 | 导出/报告注入 | pending |
+| P1-4 | M4-A 实现（tenant 先行） | pending（未批准） |
 
 ### M1 当前口径（beta）
 

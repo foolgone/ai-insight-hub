@@ -5,7 +5,6 @@ Celery beat 每周一 09:00 执行。没有 SMTP 时只写日志，不发邮件�
 """
 from __future__ import annotations
 
-import asyncio
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
@@ -13,6 +12,7 @@ from loguru import logger
 from sqlalchemy import func, select
 
 from app.core.celery import celery_app
+from app.core.async_task import run_task
 from app.core.config import settings
 from app.models import KnowledgeGap, LlmCall, Task
 from app.services import notification_service
@@ -110,7 +110,7 @@ def weekly_digest() -> dict[str, Any]:
         await dispose_engine()
         return payload
 
-    payload = asyncio.run(_run())
+    payload = run_task(_run())
     body = render_digest(payload)
     sent = notification_service.send_email(
         f"AI Insight Hub 周报（{payload['since']:%m-%d} ~ {payload['until']:%m-%d}）",

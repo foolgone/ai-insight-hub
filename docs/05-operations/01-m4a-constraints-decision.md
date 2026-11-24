@@ -1,7 +1,7 @@
 # M4-A 约束决策文档（租户 / 保留期 / 审计 / 告警 / 成本 / 数据权利）
 
-> 状态：`decision_draft`；**只写文档，不写代码、不做 migration、不碰生产。**
-> 日期：2026-11-24
+> 状态：`accepted_baseline`（决策基线；**不是 implementation approved**）；**只写文档，不写代码、不做 migration、不碰生产。**
+> 日期：2026-11-24（2026-11-25 补 5 个实现前 P1）
 > 适用范围：AI Insight Hub 平台化前的约束设计。
 > 上游：M2 P0 accepted；M3 P0 accepted（页面/流程）；Judge v1.2.5 beta/inactive。
 
@@ -72,8 +72,9 @@
 | 原始上传（对话/音频） | 90 天 | 可配置 30/90/180 |
 | 清洗后数据 | 180 天 | 与原始数据联动 |
 | RagTrace | 180 天 | 含 question/answer/contexts |
-| 评测 Run/Result | 365 天 | 报告引用需保留 |
-| 报告文件 | 30 天 | 已有 `expires_at`，补清理 |
+| 评测 Run/Result 元数据 | 365 天 | 指标与历史记录保留；不因报告文件过期而删除 |
+| 报告文件 | 30 天 | 已有 `expires_at`；过期可重新生成 |
+| 报告元数据 | 365 天 | 与评测 Run 对齐；删文件不删历史指标 |
 | `llm_calls` | 400 天 | 计费/成本对账 |
 | `audit_logs` | 730 天 | 合规 |
 
@@ -224,6 +225,49 @@
 5. 成本预算/价格表校验；
 6. 导出/删除/脱敏；
 7. 租户隔离回归测试与渗透测试。
+
+### 8.1 实现前必须补的 P1（评审结论）
+
+1. **租户隔离验收矩阵**
+   - 跨租户访问统一返回 **404**，不泄露资源存在性；
+   - repository 查询强制 tenant scope，禁止只按 `user_id`；
+   - 存储 key 必须为 `tenant/<id>/...`；
+   - 旧数据回填默认租户，双写/校验期后再切读；
+   - `platform_admin` 跨租户操作必须逐次审计。
+
+2. **保留期拆分**
+   - 报告文件 30 天；报告元数据与评测 Run **365 天**，分开写清；
+   - 文件过期可重新生成，**不删除历史指标**；
+   - `RagTrace` / `RagEvaluationRun` / `RagEvaluationResult` 必须进入删除级联；
+   - legal hold + 7 天宽限 + dry-run 后再物理删除。
+
+3. **审计不可篡改**
+   - 应用账号对 `audit_logs` 无 UPDATE/DELETE 权限；
+   - 采用 hash chain 或独立 append-only 存储；
+   - before/after 必须脱敏；支持 CSV/JSON 导出。
+
+4. **告警落地**
+   - Alertmanager + 规则文件 + 飞书通道；
+   - 每条告警必须有 owner、runbook、dashboard 链接；
+   - 阈值先跑 **2 周观察期**，再转正式告警，避免误报。
+
+5. **成本与数据权利**
+   - 价格表启动校验非 0；记录价格版本；
+   - 月预算 100% 时 **graceful stop**，不硬杀运行中任务；
+   - 导出 24h SLA、删除 7 天宽限；
+   - WeKnora 作为子处理者写入 DPA，明确删除/保留边界。
+
+### 8.2 P1 backlog 与当前状态
+
+| 优先级 | 项 | 验收 | 状态 |
+|---|---|---|---|
+| P1-0 | Windows Celery `Event loop is closed` / asyncpg 跨 `asyncio.run` | 同一 worker 连续 3 个 Run 无 `partial_failed` | **done / verified**：`9400c82b…`、`be80f57b…`、`0352a0f8…` 全部 completed |
+| P1-1 | 401 auth hydration 竞态 | 刷新/首次进入页面无 401 | **done / verified**：Playwright 登录 + reload，401=0 |
+| P1-2 | 对比页 100 条结果上限/分页 | 200 条 Run 可完整对比 | pending |
+| P1-3 | 导出/报告注入 | 对比结果可导出/进入报告 | pending |
+| P1-4 | M4-A 实现：租户 → 审计 → 保留期 → 告警 → 成本 → 数据权利 | 按 §8 顺序拆 PR | pending（需实现批准） |
+
+> P1-0/P1-1 已完成并验证；M4-A 实现仍未批准。
 
 ## 9. 边界
 
