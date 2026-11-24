@@ -14,3 +14,9 @@ docs/repair/phase3e/m1d6-v125-ledger.jsonl text eol=lf
 docs/repair/phase3e/m1d6-v125-dry-run.json text eol=lf
 docs/repair/phase3e/m1d6-v125-results.json text eol=lf
 docs/repair/56-m1d6-v1.2.5-c-single-case-results.md text eol=lf
+
+# M1-D-6 v1.2.5 failure-mode 证据：SHA 需要逐字节可复现。
+docs/repair/phase3e/m1d6-v125-failure-mode-ledger.jsonl text eol=lf
+docs/repair/phase3e/m1d6-v125-failure-mode-dry-run.json text eol=lf
+docs/repair/phase3e/m1d6-v125-failure-mode-results.json text eol=lf
+docs/repair/58-m1d6-v1.2.5-failure-mode-diagnostic-results.md text eol=lf

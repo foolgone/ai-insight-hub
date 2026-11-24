@@ -1428,3 +1428,17 @@ alembic check   : No new upgrade operations detected
 - 结果：raw `m1d6-v125-results.json`（SHA `b3551e9a…`）；报告 `56-m1d6-v1.2.5-c-single-case-results.md`（SHA `94361e19…`）。
 - D1：失败路径；不出 v1.2.6；选择 A target 复核 / 10 条 diagnostic / known limitation；target v1.0.2 未改。
 - 边界：未激活、未跑 10/40、未写 PASS、未创建 Run/未写 DB/未调 WeKnora；M1-D-6 仍 blocked。
+
+### M1-D-6 v1.2.5 Failure-Mode Diagnostic（2026-11-24，collected / D2 mixed）
+- 申请：`docs/repair/57-m1d6-v1.2.5-failure-mode-application.md`；application SHA `148118fe…`。
+- 范围：10 条 × 1 次 × 3 指标；无 HG repeats；30 primary + 10 patch + 3 retry = 43 calls / CNY 0.80；ledger 前置。
+- 执行：32 calls（primary 31 + patch 1；repair 0/retry 0）；ledger `454e1672…`；0 uncertain；CNY 0.3746904；未触发硬停止。
+- 分布：F evaluated 6 / invalid 3 / skipped 1；invalid cases Q23/Q35/Q36；valid cases Q01/Q04/Q11/Q17/Q21/Q29/Q31。
+- invalid 分类：`initial_schema_invalid` 2（Q23/Q35，factual+absence）、`patch_null` 1（Q36）。
+- Q23：initial_schema_invalid；initial preview 0.5；cl1 unsupported+is_contradictory、derived 1。
+- Q21：F=0.8（[0.6,0.7] miss）；豁免 claim 正确 insufficient；不是 invalid。
+- Q11：F=0.8（[0.6,0.9] hit）；quote checks 连续；不是 invalid。
+- 其他：Q17 F=0.6（[0.7,0.9] miss）；Q29 F skipped(no_scorable_claims)；Q35 Q36 失败在 Schema/patch，不是分数。
+- D2：`mixed`；不出 v1.2.6；评估更强模型/确定性 contract harness（factual+absence、patch null）+ Q17/Q21 target 复核；known limitation 只记录。
+- 结果：raw `m1d6-v125-failure-mode-results.json`（SHA `309fa9b8…`）；报告 `58-m1d6-v1.2.5-failure-mode-diagnostic-results.md`（SHA `2fb9380d…`）。
+- 边界：未激活、未跑正式 10/40、未写 PASS、未创建 Run/未写 DB/未调 WeKnora；target v1.0.2 未改；M1-D-6 仍 blocked。

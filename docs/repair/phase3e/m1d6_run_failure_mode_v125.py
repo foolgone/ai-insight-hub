@@ -1599,10 +1599,14 @@ def write_report(results: dict[str, Any], json_sha: str) -> str:
         "",
         f"- cases：`{meta['case_count']}`；valid=`{meta['valid_case_count']}`；"
         f"invalid=`{meta['invalid_case_count']}`。",
+        f"- F status：`{meta.get('f_status_counts')}`；"
+        f"F target hit=`{meta.get('f_target_hit_cases')}`；"
+        f"F target miss=`{meta.get('f_target_miss_cases')}`",
         f"- invalid cases：`{meta['invalid_cases']}`",
         f"- valid cases：`{meta['valid_cases']}`",
         f"- invalid by class：`{meta['invalid_by_class']}`",
         f"- D2 cluster signal：`{meta['d2_cluster_signal']}`",
+        f"- D2 interpretation：{meta.get('d2_interpretation', '—')}",
         f"- 停止：`{meta['stop_triggered']}`；{meta['stop_reason'] or '—'}",
         "- **diagnostic_only；未创建 Run、未写 DB、未调 WeKnora/RAG adapter；"
         "未激活 v1.2.5；未跑正式 10/40。**",
@@ -1634,8 +1638,8 @@ def write_report(results: dict[str, Any], json_sha: str) -> str:
             "",
             "## 2. 逐 case 结果",
             "",
-            "| case | F | C | R | invalid class | targets |",
-            "|---|---|---|---|---|---|",
+            "| case | F | C | R | F hit | invalid class | targets |",
+            "|---|---|---|---|---|---|---|",
         ]
     )
     for case in results["cases"]:
@@ -1647,6 +1651,7 @@ def write_report(results: dict[str, Any], json_sha: str) -> str:
             f"({metrics['answer_correctness']['score']}) | "
             f"{metrics['answer_relevancy']['status']} "
             f"({metrics['answer_relevancy']['score']}) | "
+            f"{metrics['faithfulness']['target_hit']} | "
             f"`{metrics['faithfulness']['invalid_class']}` | "
             f"`{case['targets']}` |"
         )
@@ -1698,19 +1703,24 @@ def write_report(results: dict[str, Any], json_sha: str) -> str:
                 f"{json.dumps(case.get('q21', {}).get('exemption_claims'), ensure_ascii=False)}`"
             )
             lines.append(f"- Q21 evaluable：`{case.get('q21', {}).get('evaluable')}`")
+            lines.append(
+                "- Q21 说明：豁免 claim 正确判 insufficient_evidence；"
+                "F=0.8 是 target [0.6,0.7] miss，不是 invalid。"
+            )
         else:
             lines.append(
                 "- Q11 quote checks：`"
                 f"{json.dumps(case.get('q11', {}).get('quote_checks'), ensure_ascii=False)}`"
             )
             lines.append(f"- Q11 evaluable：`{case.get('q11', {}).get('evaluable')}`")
+            lines.append("- Q11 说明：F=0.8 target hit；quote checks 全部连续。")
         lines.append("")
     lines.extend(
         [
             "## 5. 其余 7 条",
             "",
-            "| case | F | C | R | invalid class |",
-            "|---|---|---|---|---|",
+            "| case | F | C | R | F hit | invalid class |",
+            "|---|---|---|---|---|---|",
         ]
     )
     for case in results["cases"]:
@@ -1724,10 +1734,24 @@ def write_report(results: dict[str, Any], json_sha: str) -> str:
             f"({metrics['answer_correctness']['score']}) | "
             f"{metrics['answer_relevancy']['status']} "
             f"({metrics['answer_relevancy']['score']}) | "
+            f"{metrics['faithfulness']['target_hit']} | "
             f"`{metrics['faithfulness']['invalid_class']}` |"
         )
     lines.extend(
         [
+            "",
+            "## 5.1 D2 观察",
+            "",
+            "- invalid 3/10：Q23/Q35/Q36；不是 Q23/Q21/Q11 集中，Q21/Q11 均 valid。",
+            "- 两个失败类：`initial_schema_invalid` x2（Q23/Q35，factual+absence）、"
+            "`patch_null` x1（Q36）；不是单一确定性缺陷。",
+            "- C/R 全部 evaluated；F target miss：Q17=0.6、Q21=0.8；"
+            "Q29 F skipped(no_scorable_claims)。",
+            "- 其他观察：Q35 initial preview 0.857、Q36 initial preview 1.0，"
+            "失败发生在 Schema/patch，不是分数本身。",
+            "- D2：`mixed`；不出 v1.2.6；评估更强模型/确定性 contract harness"
+            "（factual+absence 归一化、patch null 处理）+ Q17/Q21 target 复核；"
+            "known limitation 只能记录，不能作为验收路径。",
             "",
             "## 6. 停止与边界",
             "",
