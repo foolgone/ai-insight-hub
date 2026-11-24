@@ -76,8 +76,6 @@ export async function listDatasetItems(datasetId, versionId, params = {}) {
 
 /** @param {string} datasetId @param {string} versionId @param {string} itemId */
 export async function getDatasetItem(datasetId, versionId, itemId) {
-  const { data } = await apiClient.get(
-    endpoints.qaDatasets.item(datasetId, versionId, itemId)
-  )
+  const { data } = await apiClient.get(endpoints.qaDatasets.item(datasetId, versionId, itemId))
   return data
 }

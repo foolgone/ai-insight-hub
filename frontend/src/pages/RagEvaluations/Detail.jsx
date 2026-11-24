@@ -109,9 +109,7 @@ export default function RagEvaluationDetail() {
         const item = itemMap.get(value)
         return (
           <div className="min-w-0">
-            <p className="truncate text-sm font-medium text-gray-900">
-              {itemDisplayLabel(item)}
-            </p>
+            <p className="truncate text-sm font-medium text-gray-900">{itemDisplayLabel(item)}</p>
             <p className="mt-0.5 truncate text-[11px] text-gray-500">
               {item?.query || `item ${shortId(value)}`}
             </p>
@@ -253,7 +251,10 @@ export default function RagEvaluationDetail() {
       <RagBetaNotice issues={issues} />
 
       {run.error_message ? (
-        <p role="alert" className="rounded border border-error-500/30 bg-error-50 p-3 text-sm text-error-700">
+        <p
+          role="alert"
+          className="rounded border border-error-500/30 bg-error-50 p-3 text-sm text-error-700"
+        >
           {run.error_message}
         </p>
       ) : null}
@@ -287,7 +288,9 @@ export default function RagEvaluationDetail() {
       <div className="rounded-md border border-gray-200 bg-white p-4">
         <h2 className="text-sm font-semibold text-gray-900">Known issues</h2>
         {issues.length === 0 ? (
-          <p className="mt-2 text-sm text-gray-500">本 Run 没有 invalid / failed / skipped / unprocessed。</p>
+          <p className="mt-2 text-sm text-gray-500">
+            本 Run 没有 invalid / failed / skipped / unprocessed。
+          </p>
         ) : (
           <ul className="mt-3 space-y-2">
             {issues.map(issue => (

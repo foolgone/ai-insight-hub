@@ -106,11 +106,7 @@ export function CreateRagEvaluationModal({ open, onClose, onCreated }) {
           <Button variant="outline" onClick={onClose}>
             取消
           </Button>
-          <Button
-            onClick={handleSubmit}
-            loading={createMutation.isPending}
-            disabled={!versionId}
-          >
+          <Button onClick={handleSubmit} loading={createMutation.isPending} disabled={!versionId}>
             创建并运行
           </Button>
         </>
@@ -146,11 +142,7 @@ export function CreateRagEvaluationModal({ open, onClose, onCreated }) {
             value={versionId}
             onChange={setVersionId}
             placeholder={
-              !datasetId
-                ? '先选择数据集'
-                : versionsQuery.isLoading
-                  ? '加载版本中…'
-                  : '选择版本'
+              !datasetId ? '先选择数据集' : versionsQuery.isLoading ? '加载版本中…' : '选择版本'
             }
             disabled={!datasetId || versionsQuery.isLoading}
             ariaLabel="数据集版本"
@@ -162,12 +154,7 @@ export function CreateRagEvaluationModal({ open, onClose, onCreated }) {
             <label className="mb-1 block text-sm font-medium text-gray-700" htmlFor="rag-mode">
               执行模式
             </label>
-            <Select
-              options={MODE_OPTIONS}
-              value={mode}
-              onChange={setMode}
-              ariaLabel="执行模式"
-            />
+            <Select options={MODE_OPTIONS} value={mode} onChange={setMode} ariaLabel="执行模式" />
           </div>
           <div>
             <label className="mb-1 block text-sm font-medium text-gray-700" htmlFor="rag-adapter">
@@ -186,13 +173,7 @@ export function CreateRagEvaluationModal({ open, onClose, onCreated }) {
           <label className="mb-1 block text-sm font-medium text-gray-700" htmlFor="rag-limit">
             条数上限（1–200）
           </label>
-          <Input
-            id="rag-limit"
-            type="number"
-            value={limit}
-            onChange={setLimit}
-            placeholder="20"
-          />
+          <Input id="rag-limit" type="number" value={limit} onChange={setLimit} placeholder="20" />
         </div>
 
         {submitError ? (

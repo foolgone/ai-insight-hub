@@ -13,12 +13,7 @@ import { CreateRagEvaluationModal } from '../../components/rag/CreateRagEvaluati
 import { RagBetaNotice } from '../../components/rag/RagBetaNotice'
 import { useRagEvaluationsQuery } from '../../hooks/useRagEvaluations'
 import { formatDateTime } from '../../lib/format'
-import {
-  formatScore,
-  judgeMetricRows,
-  runStatusMeta,
-  shortId,
-} from '../../lib/ragEvaluation'
+import { formatScore, judgeMetricRows, runStatusMeta, shortId } from '../../lib/ragEvaluation'
 
 const PAGE_SIZE = 10
 
@@ -175,7 +170,10 @@ export default function RagEvaluations() {
       <RagBetaNotice />
 
       {notice ? (
-        <p role="status" className="rounded border border-success-500/30 bg-success-50 p-3 text-sm text-success-700">
+        <p
+          role="status"
+          className="rounded border border-success-500/30 bg-success-50 p-3 text-sm text-success-700"
+        >
           {notice}
         </p>
       ) : null}
@@ -208,12 +206,7 @@ export default function RagEvaluations() {
             description="创建一次评测后，这里会显示状态、指标和 invalid 计数。"
           />
         ) : (
-          <Table
-            columns={columns}
-            dataSource={items}
-            rowKey="id"
-            caption="RAG 评测 Run 列表"
-          />
+          <Table columns={columns} dataSource={items} rowKey="id" caption="RAG 评测 Run 列表" />
         )}
       </AsyncState>
 

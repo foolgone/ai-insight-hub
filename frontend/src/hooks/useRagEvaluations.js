@@ -17,13 +17,7 @@ export const ragEvaluationKeys = {
     versionId,
     params,
   ],
-  item: (datasetId, versionId, itemId) => [
-    'qa-datasets',
-    'item',
-    datasetId,
-    versionId,
-    itemId,
-  ],
+  item: (datasetId, versionId, itemId) => ['qa-datasets', 'item', datasetId, versionId, itemId],
 }
 
 const ACTIVE_STATUSES = new Set(['pending', 'queued', 'running'])
@@ -47,8 +41,7 @@ export function useRagEvaluationQuery(runId, options = {}) {
     queryKey: ragEvaluationKeys.detail(runId),
     queryFn: () => ragApi.getRagEvaluation(runId),
     enabled: Boolean(runId),
-    refetchInterval: query =>
-      ACTIVE_STATUSES.has(query.state.data?.status) ? 5000 : false,
+    refetchInterval: query => (ACTIVE_STATUSES.has(query.state.data?.status) ? 5000 : false),
     ...options,
   })
 }

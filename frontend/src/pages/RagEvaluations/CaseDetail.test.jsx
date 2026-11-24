@@ -134,7 +134,9 @@ describe('RagEvaluationCaseDetail', () => {
     expect(await screen.findByText('Case 详情')).toBeInTheDocument()
     expect((await screen.findAllByText('第 10 天还能无理由退款吗？')).length).toBeGreaterThan(0)
     expect(await screen.findByText('不可以。签收后 7 天内才可申请无理由退款。')).toBeInTheDocument()
-    expect((await screen.findAllByText('订单签收后 7 天内可申请无理由退款。')).length).toBeGreaterThan(0)
+    expect(
+      (await screen.findAllByText('订单签收后 7 天内可申请无理由退款。')).length
+    ).toBeGreaterThan(0)
     expect(await screen.findByText('第 10 天已超过 7 天，不能无理由退款')).toBeInTheDocument()
     expect(await screen.findByText('“订单签收后 7 天内可申请无理由退款。”')).toBeInTheDocument()
     expect((await screen.findAllByText('insufficient')).length).toBeGreaterThan(0)

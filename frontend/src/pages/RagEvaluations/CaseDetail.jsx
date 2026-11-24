@@ -44,11 +44,7 @@ export default function RagEvaluationCaseDetail() {
     limit: 100,
     dataset_item_id: itemId,
   })
-  const itemQuery = useDatasetItemQuery(
-    run?.dataset_id,
-    run?.dataset_version_id,
-    itemId
-  )
+  const itemQuery = useDatasetItemQuery(run?.dataset_id, run?.dataset_version_id, itemId)
 
   const results = resultsQuery.data?.items || []
   const traceId = results.find(row => row.trace_id)?.trace_id
@@ -149,7 +145,10 @@ export default function RagEvaluationCaseDetail() {
         {trace?.retrieved_contexts?.length ? (
           <ol className="space-y-3">
             {trace.retrieved_contexts.map((context, index) => (
-              <li key={`${context.chunk_id || context.document_id || index}`} className="rounded border border-gray-100 bg-gray-50 p-3">
+              <li
+                key={`${context.chunk_id || context.document_id || index}`}
+                className="rounded border border-gray-100 bg-gray-50 p-3"
+              >
                 <div className="flex flex-wrap items-center gap-2 text-[11px] text-gray-500">
                   <Badge size="sm">C{context.rank ?? index + 1}</Badge>
                   {context.title ? <span>{context.title}</span> : null}
@@ -160,9 +159,7 @@ export default function RagEvaluationCaseDetail() {
                     <span className="font-mono">chunk {shortId(context.chunk_id)}</span>
                   ) : null}
                 </div>
-                <p className="mt-2 whitespace-pre-wrap text-sm text-gray-800">
-                  {context.content}
-                </p>
+                <p className="mt-2 whitespace-pre-wrap text-sm text-gray-800">{context.content}</p>
               </li>
             ))}
           </ol>
@@ -185,9 +182,7 @@ export default function RagEvaluationCaseDetail() {
                     {meta.label}
                   </Badge>
                 </div>
-                <p className="mt-2 text-2xl font-bold text-gray-900">
-                  {formatScore(row.score, 3)}
-                </p>
+                <p className="mt-2 text-2xl font-bold text-gray-900">{formatScore(row.score, 3)}</p>
                 {row.status !== 'evaluated' ? (
                   <p className="mt-1 text-[11px] text-warning-700">
                     {invalidReasonLabel(row.invalid_reason || row.error_message)}
@@ -227,7 +222,10 @@ export default function RagEvaluationCaseDetail() {
                   const support = claimSupportMeta(claim.support_status)
                   const quotes = quotesOf(claim)
                   return (
-                    <tr key={claim.claim_id || index} className="border-b border-gray-100 align-top">
+                    <tr
+                      key={claim.claim_id || index}
+                      className="border-b border-gray-100 align-top"
+                    >
                       <td className="py-2 pr-3 font-mono text-[11px] text-gray-500">
                         {claim.claim_id || `cl${index + 1}`}
                       </td>

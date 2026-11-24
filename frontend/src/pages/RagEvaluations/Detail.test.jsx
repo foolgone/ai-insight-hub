@@ -38,8 +38,22 @@ const RUN = {
   aggregate: {
     metrics: {
       faithfulness: { mean: 0.75, evaluated: 1, invalid: 1, failed: 0, skipped: 0, coverage: 0.5 },
-      answer_correctness: { mean: 0.9, evaluated: 1, invalid: 0, failed: 0, skipped: 0, coverage: 0.5 },
-      answer_relevancy: { mean: 0.8, evaluated: 1, invalid: 0, failed: 0, skipped: 0, coverage: 0.5 },
+      answer_correctness: {
+        mean: 0.9,
+        evaluated: 1,
+        invalid: 0,
+        failed: 0,
+        skipped: 0,
+        coverage: 0.5,
+      },
+      answer_relevancy: {
+        mean: 0.8,
+        evaluated: 1,
+        invalid: 0,
+        failed: 0,
+        skipped: 0,
+        coverage: 0.5,
+      },
     },
   },
 }

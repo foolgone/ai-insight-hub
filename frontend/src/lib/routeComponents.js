@@ -19,9 +19,7 @@ export const QualityAssessmentDetail = lazyWithPreload(
   () => import('../pages/QualityAssessment/Detail')
 )
 export const RagEvaluations = lazyWithPreload(() => import('../pages/RagEvaluations'))
-export const RagEvaluationDetail = lazyWithPreload(
-  () => import('../pages/RagEvaluations/Detail')
-)
+export const RagEvaluationDetail = lazyWithPreload(() => import('../pages/RagEvaluations/Detail'))
 export const RagEvaluationCaseDetail = lazyWithPreload(
   () => import('../pages/RagEvaluations/CaseDetail')
 )
