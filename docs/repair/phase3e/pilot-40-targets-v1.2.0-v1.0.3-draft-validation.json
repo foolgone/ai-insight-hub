@@ -1,0 +1,122 @@
+{
+  "meta": {
+    "name": "pilot-40-targets-v1.2.0-v1.0.3-draft-validation",
+    "status": "pass",
+    "date": "2026-11-24",
+    "draft_file": "docs\\repair\\phase3e\\pilot-40-targets-v1.2.0-v1.0.3-draft.json",
+    "draft_sha256": "50aeda481d188484d6021ea4632535076ed8626dbcbdd0dcb8bb1b3d52ce47dc",
+    "base_file": "docs\\repair\\phase3e\\pilot-40-targets-v1.2.0-v1.0.2.json",
+    "base_sha256": "3ee15dfca66fe13f0a45fda84ecf2612483f2de107ad079b196a6bd6344d5846",
+    "review_file": "docs\\repair\\phase3e\\m1d6-q17-q21-target-review.json",
+    "review_sha256": "800de34f1b791ba107092f84b66c58e3a1e5bdf5442d79c1666964fa3edf67b1",
+    "checks_count": 21,
+    "note": "draft only; not active; v1.0.2 remains active until M1-A approval"
+  },
+  "checks": [
+    {
+      "check": "draft_json_parses",
+      "ok": true,
+      "detail": "docs\\repair\\phase3e\\pilot-40-targets-v1.2.0-v1.0.3-draft.json"
+    },
+    {
+      "check": "draft_version",
+      "ok": true,
+      "detail": "v1.0.3-draft"
+    },
+    {
+      "check": "draft_status",
+      "ok": true,
+      "detail": "draft_pending_m1a_review"
+    },
+    {
+      "check": "draft_not_active",
+      "ok": true,
+      "detail": "False"
+    },
+    {
+      "check": "draft_not_frozen",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "check": "case_count_40",
+      "ok": true,
+      "detail": "40"
+    },
+    {
+      "check": "same_case_ids",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "check": "based_on_v102_sha",
+      "ok": true,
+      "detail": "3ee15dfca66fe13f0a45fda84ecf2612483f2de107ad079b196a6bd6344d5846"
+    },
+    {
+      "check": "only_q17_q21_changed",
+      "ok": true,
+      "detail": "[\"Q17\", \"Q21\"]"
+    },
+    {
+      "check": "q17_f_range",
+      "ok": true,
+      "detail": "[0.5, 0.7]"
+    },
+    {
+      "check": "q21_f_range",
+      "ok": true,
+      "detail": "[0.5, 0.7]"
+    },
+    {
+      "check": "q17_other_targets_unchanged",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "check": "q21_other_targets_unchanged",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "check": "all_ranges_valid",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "check": "q17_target_status",
+      "ok": true,
+      "detail": "draft_recalibrated"
+    },
+    {
+      "check": "q21_target_status",
+      "ok": true,
+      "detail": "draft_recalibrated"
+    },
+    {
+      "check": "other_target_status_unchanged",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "check": "review_q21_cl3_insufficient",
+      "ok": true,
+      "detail": "insufficient_evidence"
+    },
+    {
+      "check": "review_q17_range",
+      "ok": true,
+      "detail": "[0.5, 0.7]"
+    },
+    {
+      "check": "review_q21_range",
+      "ok": true,
+      "detail": "[0.5, 0.7]"
+    },
+    {
+      "check": "v102_sha_unchanged",
+      "ok": true,
+      "detail": "3ee15dfca66fe13f0a45fda84ecf2612483f2de107ad079b196a6bd6344d5846"
+    }
+  ]
+}

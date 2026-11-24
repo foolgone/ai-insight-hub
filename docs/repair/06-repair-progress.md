@@ -1463,3 +1463,15 @@ alembic check   : No new upgrade operations detected
 - 附带发现：Q17 flash 少拆“取决于退换货原因”这条 supported claim，分母 5→4、F 0.6→0.5；target 需为分解差异留余量。
 - 结论：两者均 valid，问题是 target 校准；不改 v1.0.2，写 v1.0.3 需 M1-A 批准 + 重新基线。
 - 边界：未跑 Judge、未改 Prompt/Agent/fixture；未写 PASS、未激活、未跑 10/40；M1-D-6 仍 blocked。
+
+### Target 复核 r2 + v1.0.3 draft + 5-case 申请（2026-11-24）
+- 按用户裁决修正：**Q21 cl3 = insufficient_evidence**（v1.2.2 决策 + v1.2.5 §5.2：condition 不得只凭反推）；重算 flash 2/4=0.5、qwen-max 3/5=0.6。
+- Q17 建议区间改为 `[0.5,0.7]`（`0.4` 会放行欠支持）；Q21 改为 `[0.5,0.7]`（上界 0.7 拒绝 0.75/0.8 过支持）。
+- 复核 r2：`61-m1d6-q17-q21-target-review.md`；review JSON SHA `800de34f…`。
+- **target v1.0.3 draft**：`pilot-40-targets-v1.2.0-v1.0.3-draft.json`（SHA `50aeda48…`）；仅 Q17.F/Q21.F 改 `[0.5,0.7]`，其余 38 条不变；status `draft_pending_m1a_review`、active=false。
+- validation：`pilot-40-targets-v1.2.0-v1.0.3-draft-validation.json`（SHA `d500f4cb…`）；21/21 pass；v1.0.2 SHA `3ee15dfc…` 未变、仍 active。
+- 文档：`62-m1d6-target-v1.0.3-draft.md`；不激活、不覆盖 v1.0.2。
+- **5-case 模型对比申请**：`63-m1d6-model-comparison-5case-application.md`；application SHA `3c172380…`；preflight SHA `1b85d717…`。
+- 范围：Q23/Q35/Q36/Q17/Q21 × 2 arms（qwen-max + qwen3.8-flash no thinking）× F only × 1 次；10 primary + 10 patch + 3 retry = 23 calls / CNY 0.60；target 用 active v1.0.2，draft 不参与。
+- 预检：qwen-max 200（充值恢复）、flash 200；flash thinking 开 1.5k prompt 用 3649 reasoning，故对比 arm 关闭 thinking。
+- 状态：`pending_approval`；未跑 Judge；未启动 flash 全量重新基线；未跑 10/40；M1-D-6 仍 blocked。
