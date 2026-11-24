@@ -82,3 +82,75 @@
 1. 在可用环境跑通第 4 节流程，记录 Run/报告。
 2. M3：两个 Run 的前后对比（复用 `RunComparisonPanel` 的交互模式）。
 3. M4-A：租户、保留期、审计、告警、成本、数据权利。
+
+## 8. 执行记录（2026-11-24，VM Docker 拓扑）
+
+### 8.1 环境
+
+| 组件 | 位置 | 说明 |
+|---|---|---|
+| PostgreSQL | VM `192.168.150.100:5433` | `aiinsight` 容器；`alembic upgrade head` 通过 |
+| Redis | VM `192.168.150.100:6379` | `aiinsight-redis`；Celery broker `/1`、result `/2` |
+| API | Windows 宿主机 `:8000` | uvicorn；`STORAGE_BACKEND=local`、`RAG_ADAPTER=mock` |
+| Celery worker | Windows 宿主机 | `-P solo`；任务 `tasks.rag_evaluation` 正常消费 |
+| 前端 | Windows 宿主机 `:5173` | Vite dev server |
+| MinIO | 未使用 | 本轮 `STORAGE_BACKEND=local` |
+| RAG | `mock` | 不依赖 WeKnora |
+
+### 8.2 测试数据
+
+| 项 | 值 |
+|---|---|
+| seed 脚本 | `backend/scripts/seed_rag_eval.py`（幂等，仅本地测试） |
+| dataset_id | `d3a7071f-1385-4cf0-9fbb-8c607646ba14` |
+| version_id | `9e7e73cb-f4f2-486e-a75d-b347c722e0d1` |
+| items | 5 条（M2P0-01..05，mock 上下文对齐） |
+
+### 8.3 真实 Run
+
+| 项 | 值 |
+|---|---|
+| Run ID | `67596d50-5782-456e-a96a-63929b9a9a80` |
+| 状态 | **completed** |
+| 样本 | 5 / 5 evaluated；invalid 0；failed 0；skipped 0 |
+| F / C / R | **0.700 / 0.120 / 0.540** |
+| faithfulness_strict | 1.000 |
+| Judge 模型 | `qwen-flash`（DashScope；v1.2.5 frozen/inactive；非校准） |
+| 任务 | Celery 正常消费，API 轮询到 completed |
+
+失败 Run（保留展示，作为 known issues 证据）：
+
+| Run ID | 原因 |
+|---|---|
+| `574476ec-b5bd-49fe-8ebc-8381f057e40f` | BYOK 未配置 DeepSeek Key（`LLMCredentialNotConfiguredError`） |
+| `33298d98-dcce-4250-9210-37fd134674d7` | DeepSeek 账户 402 Insufficient Balance |
+
+### 8.4 页面验收（6/6）
+
+| 验收项 | 结果 |
+|---|---|
+| 真实 Run，不是 mock 页面数据 | ✅ 来自 VM PG + Celery |
+| 列表显示真实 F/C/R | ✅ 0.70 / 0.12 / 0.54 |
+| 详情指标与 API 一致 | ✅ F 0.700、C 0.120、R 0.540 |
+| Case 详情能看到 answer/contexts/claims/evidence | ✅ question/answer/gold、3 条 contexts、claims + quote |
+| invalid/skipped/failed 不隐藏、不折算 0 | ✅ 失败 Run 显示 failed；成功 Run 显示 0 |
+| 报告入口可用 | ✅ `/reports` 打开“报告中心”，可进入生成报告 |
+
+截图：
+
+- `docs/04-development/assets/m2-p0/run-list.jpeg`
+- `docs/04-development/assets/m2-p0/run-detail.jpeg`
+- `docs/04-development/assets/m2-p0/case-detail.jpeg`
+
+### 8.5 已知问题（P0）
+
+- 页面加载初期 `/datasources`、`/users/me/llm-credential` 偶发 401（auth hydration 竞态），随后恢复，不影响页面数据；建议 P1 修。
+- Judge 依赖运行账号的 LLM 可用性；本轮 DeepSeek 402 时改用 DashScope `qwen-flash` 完成验收。
+- 失败 Run 不会自动清理，列表会同时显示 failed 与 completed（符合“known issues 不隐藏”）。
+- 数据集仍通过 seed 脚本创建，M2 P0 无数据集管理页。
+
+### 8.6 状态
+
+- M2 P0：**verified**（代码、CI、真实 Run、页面验收均通过）。
+- 等待项目决策角色确认后标记 **accepted**；不自行 accepted。
+- 下一步：M3 两 Run 对比；M4-A 约束文档并行。

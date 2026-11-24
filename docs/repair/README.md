@@ -8,8 +8,8 @@
 > 4. 未冻结的定义/目标，不得进入代码实现。
 >
 > 最后更新：2026-11-24
-> 当前阶段：**战略转向：M1 校准停止，v1.2.5 标为 beta / known issues；M2 P0 RAG 评测工作台已实现**
-> 当前决策：**Judge 不再作为平台前置门禁；先交付可用的 RAG 评测工作台与端到端流程**
+> 当前阶段：**M2 P0 已 verified：VM PG/Redis + 宿主机 API/worker/前端，mock 适配器 5 条真实 Run 通过页面验收**
+> 当前决策：**等待 accepted；之后 M3 两 Run 对比、M4-A 约束并行**
 > 当前不做：target 校准、5-case 模型对比、10/40 Judge、v1.2.6、M1-E 验收
 
 ---
@@ -26,7 +26,7 @@
 | Judge 展示 | invalid / skipped / known issues 原样展示；人工复核可覆盖 |
 | 当前可写代码？ | **是**：M2 P0 及平台主流程 |
 | 当前可跑 Judge？ | **否**（仅 beta 展示；不新增校准调用） |
-| 下一个交付 | 真实环境跑通「数据源 → 清洗 → 质量评估 → RAG 评测 → 报告」 |
+| 下一个交付 | M2 P0 accepted 确认 → M3 两 Run 对比 |
 | 之后 | M3 两 Run 对比；M4-A 租户/保留期/审计/告警/成本/数据权利 |
 
 ### M2 P0 已交付
@@ -38,6 +38,8 @@
 | Case 详情 | `/rag-evaluations/:runId/cases/:itemId` | question/answer/contexts、claims/evidence、invalid 原因、raw output |
 
 实现方式：复用现有 `/api/v1/rag/evaluations`、`/rag/traces`、`/qa-datasets`；后端仅给 Run 列表补了 `aggregate` 只读字段，未改架构。
+
+**真实 Run（2026-11-24）**：`67596d50-5782-456e-a96a-63929b9a9a80`，completed，5/5 evaluated，F 0.700 / C 0.120 / R 0.540，invalid 0，failed 0；截图见 `docs/04-development/assets/m2-p0/`。M2 P0 状态：**verified**（待 accepted）。
 
 ### M1 当前口径（beta）
 
