@@ -13,6 +13,9 @@ import {
   NotFound,
   QualityAssessment,
   QualityAssessmentDetail,
+  RagEvaluationCaseDetail,
+  RagEvaluationDetail,
+  RagEvaluations,
   Reports,
 } from './lib/routeComponents'
 
@@ -38,6 +41,12 @@ export function AppRoutes() {
             <Route path="data-cleaning" element={<DataCleaning />} />
             <Route path="quality-assessment" element={<QualityAssessment />} />
             <Route path="quality-assessment/:id" element={<QualityAssessmentDetail />} />
+            <Route path="rag-evaluations" element={<RagEvaluations />} />
+            <Route path="rag-evaluations/:runId" element={<RagEvaluationDetail />} />
+            <Route
+              path="rag-evaluations/:runId/cases/:itemId"
+              element={<RagEvaluationCaseDetail />}
+            />
             <Route path="knowledge-base" element={<KnowledgeBase />} />
             <Route path="reports" element={<Reports />} />
           </Route>

@@ -156,6 +156,7 @@ class RagEvaluationRunListItem(BaseSchema):
     invalid_items: int
     unprocessed_items: int
     status: str
+    aggregate: dict[str, Any] | None = None
     error_message: str | None
     created_at: datetime
     completed_at: datetime | None

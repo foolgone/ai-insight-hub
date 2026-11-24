@@ -8,6 +8,7 @@ import {
   LuClipboardCheck,
   LuDatabase,
   LuFileText,
+  LuFlaskConical,
   LuLayoutDashboard,
   LuWand2,
 } from 'react-icons/lu'
@@ -19,6 +20,7 @@ const MENU_ITEMS = [
   { key: 'datasources', label: '数据源管理', path: '/data-sources', icon: LuDatabase },
   { key: 'cleaning', label: '数据清洗', path: '/data-cleaning', icon: LuWand2 },
   { key: 'quality', label: '质量评估', path: '/quality-assessment', icon: LuClipboardCheck },
+  { key: 'rag', label: 'RAG 评测', path: '/rag-evaluations', icon: LuFlaskConical },
   { key: 'knowledge', label: '知识库', path: '/knowledge-base', icon: LuBookOpen },
   { key: 'reports', label: '报告中心', path: '/reports', icon: LuFileText },
 ]

@@ -18,6 +18,13 @@ export const QualityAssessment = lazyWithPreload(() => import('../pages/QualityA
 export const QualityAssessmentDetail = lazyWithPreload(
   () => import('../pages/QualityAssessment/Detail')
 )
+export const RagEvaluations = lazyWithPreload(() => import('../pages/RagEvaluations'))
+export const RagEvaluationDetail = lazyWithPreload(
+  () => import('../pages/RagEvaluations/Detail')
+)
+export const RagEvaluationCaseDetail = lazyWithPreload(
+  () => import('../pages/RagEvaluations/CaseDetail')
+)
 export const KnowledgeBase = lazyWithPreload(() => import('../pages/KnowledgeBase'))
 export const Reports = lazyWithPreload(() => import('../pages/Reports'))
 export const NotFound = lazyWithPreload(() => import('../pages/NotFound'))
@@ -28,6 +35,9 @@ const ROUTE_COMPONENTS = [
   DataCleaning,
   QualityAssessment,
   QualityAssessmentDetail,
+  RagEvaluations,
+  RagEvaluationDetail,
+  RagEvaluationCaseDetail,
   KnowledgeBase,
   Reports,
   NotFound,

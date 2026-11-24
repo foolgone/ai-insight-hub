@@ -8,9 +8,9 @@
 > 4. 未冻结的定义/目标，不得进入代码实现。
 >
 > 最后更新：2026-11-24
-> 当前阶段：**target 复核 r2 完成：Q21 cl3 判 insufficient；Q17/Q21 建议均 `[0.5,0.7]`；v1.0.3 draft 已生成（不激活）；5-case 模型对比申请待批准**
-> 当前决策：**先批准 5-case 对比（qwen-max + qwen3.8-flash），选模型后再确认 target v1.0.3；不出 v1.2.6、不跑 10/40**
-> 当前不做：正式 10/40、v1.2.5 激活、M2/M3、生产 migration
+> 当前阶段：**战略转向：M1 校准停止，v1.2.5 标为 beta / known issues；M2 P0 RAG 评测工作台已实现**
+> 当前决策：**Judge 不再作为平台前置门禁；先交付可用的 RAG 评测工作台与端到端流程**
+> 当前不做：target 校准、5-case 模型对比、10/40 Judge、v1.2.6、M1-E 验收
 
 ---
 
@@ -18,27 +18,47 @@
 
 | 项 | 状态 |
 |---|---|
-| 项目阶段 | 核心研发向产品化过渡 |
-| 主线 | M1 评测可信度；v1.2.4/v1.2.5 `frozen`；v1.2.5 `active=false`；target v1.0.3 draft；5-case 对比待批；M1-D-6 blocked |
-| 并行 A | M2 只读工作台；API 审计完成，前端未开始 |
-| 并行 B | M4-A 生产约束；未开始 |
-| M3 优化闭环 | 未开始；等 M1 可信、M2 可用 |
-| 当前可写代码？ | **否**；先批准 5-case 对比 |
-| 当前可跑 Judge？ | **否**；申请 `pending_approval`；正式 10/40 未批准 |
-| v1.2.1 / v1.2.2 / v1.2.3 / v1.2.4 / v1.2.5 | 五者均 `frozen`；v1.2.5 `active=false`；默认仍 `v1.0.0` |
-| 最近一次决策 | 2026-11-24 target r2：cl3=insufficient；Q17/Q21 `[0.5,0.7]`；v1.0.3 draft |
-| 下一个交付 | 批准 5-case 对比（23 calls / CNY 0.60） |
+| 项目阶段 | 平台交付优先；M1 降级为 beta 能力 |
+| 主线 | M2 P0：RAG 评测工作台（Run 列表 / Run 详情 / Case 详情 / 报告入口） |
+| M1 | v1.2.4 / v1.2.5 保持 `frozen` / `inactive`；标为 **beta / known issues**；不再跑 Judge |
+| M1 校准 | **已停止**：target v1.0.3、5-case 对比、10/40、v1.2.6、M1-E 全部冻结 |
+| 平台验收 | 用户能完成一次完整评测，看到可解释结果和报告；不以 target 通过率为门槛 |
+| Judge 展示 | invalid / skipped / known issues 原样展示；人工复核可覆盖 |
+| 当前可写代码？ | **是**：M2 P0 及平台主流程 |
+| 当前可跑 Judge？ | **否**（仅 beta 展示；不新增校准调用） |
+| 下一个交付 | 真实环境跑通「数据源 → 清洗 → 质量评估 → RAG 评测 → 报告」 |
+| 之后 | M3 两 Run 对比；M4-A 租户/保留期/审计/告警/成本/数据权利 |
+
+### M2 P0 已交付
+
+| 页面 | 路由 | 内容 |
+|---|---|---|
+| Run 列表 | `/rag-evaluations` | 状态、时间、数据集、F/C/R、invalid 数、新建评测 |
+| Run 详情 | `/rag-evaluations/:runId` | 指标汇总、样本进度、known issues、Case 列表、失败列表、报告入口 |
+| Case 详情 | `/rag-evaluations/:runId/cases/:itemId` | question/answer/contexts、claims/evidence、invalid 原因、raw output |
+
+实现方式：复用现有 `/api/v1/rag/evaluations`、`/rag/traces`、`/qa-datasets`；后端仅给 Run 列表补了 `aggregate` 只读字段，未改架构。
+
+### M1 当前口径（beta）
+
+| 项 | 状态 |
+|---|---|
+| v1.2.5 | `frozen` / `inactive`；**beta** |
+| 已知限制 | `factual_claim + absence`、`patch_null`、Q17/Q21 target 未校准 |
+| target v1.0.2 | 保持 active，仅作参考；v1.0.3 draft 不激活 |
+| 正式 10/40 | 不跑；不作为上线门槛 |
+| M1-D-6 | `blocked`，不再推进 |
 
 ### 现在只需要一个决定
 
-**target draft 已备；先做 5-case 双模型对比，再定模型与 target。**
+**M2 P0 已上线到代码；下一步是在真实环境跑通一次完整流程。**
 
 | 选项 | 含义 | 结果 |
 |---|---|---|
-| **批准 5-case 对比（推荐）** | qwen-max + qwen3.8-flash × Q23/Q35/Q36/Q17/Q21 | 23 calls / CNY 0.60；不改 target |
-| **先审 v1.0.3 draft** | Q17/Q21 均 `[0.5,0.7]`，未激活 | 审核通过后才生成正式 v1.0.3 |
-| **只跑 flash** | 不重跑 qwen-max | 无法同条件对比 invalid |
-| **v1.2.6** | 不自动出 | 当前无单一确定性缺陷 |
+| **真实环境跑通（推荐）** | 启动栈 → 数据源 → 清洗 → 质量 → RAG 评测 → 报告 | 平台验收唯一标准 |
+| **先补 M3 对比** | 两个 Run 前后对比 | P0 之后再排 |
+| **M4-A 约束** | 租户/保留期/审计/告警/成本/数据权利 | 与真实客户前必须 |
+| **恢复 Judge 校准** | 本轮明确停止 | 不再作为门禁 |
 
 ---
 

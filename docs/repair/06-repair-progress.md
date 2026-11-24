@@ -1475,3 +1475,18 @@ alembic check   : No new upgrade operations detected
 - 范围：Q23/Q35/Q36/Q17/Q21 × 2 arms（qwen-max + qwen3.8-flash no thinking）× F only × 1 次；10 primary + 10 patch + 3 retry = 23 calls / CNY 0.60；target 用 active v1.0.2，draft 不参与。
 - 预检：qwen-max 200（充值恢复）、flash 200；flash thinking 开 1.5k prompt 用 3649 reasoning，故对比 arm 关闭 thinking。
 - 状态：`pending_approval`；未跑 Judge；未启动 flash 全量重新基线；未跑 10/40；M1-D-6 仍 blocked。
+
+### 战略转向：停止 M1 校准，交付 M2 P0（2026-11-24）
+- 决策：Judge 不再作为平台前置门禁；v1.2.5 保持 frozen/inactive，标为 **beta / known issues**，不再跑 Judge；不激活、不标 accepted；页面展示 beta 与已知限制，人工复核可覆盖。
+- 立即停止：target v1.0.3 / Q17/Q21 校准、5-case 模型对比、10/40、v1.2.6、M1-E、任何新 baseline。
+- 验收改变：唯一标准改为“用户能在平台完成一次完整评测，看到可解释结果和报告”；invalid/known issues 作为产品限制展示，不阻塞开发。
+- **M2 P0 已实现**（前端，0→可用）：
+  - `/rag-evaluations` Run 列表：状态/时间/数据集/F-C-R/invalid 计数/新建评测；
+  - `/rag-evaluations/:runId` Run 详情：指标卡、样本进度、known issues、Case 列表、失败/invalid、报告入口；
+  - `/rag-evaluations/:runId/cases/:itemId` Case 详情：question/answer/contexts、claims/evidence、invalid 原因、raw output；
+  - 侧边栏新增“RAG 评测”；复用现有 `/rag/evaluations`、`/rag/traces`、`/qa-datasets` API。
+- 后端唯一改动：Run 列表项补 `aggregate` 只读字段；无新路由、无分层变化。
+- 文档：`docs/04-development/21-m2-p0-rag-evaluation-workbench.md`（含真实流程 runbook）。
+- 验证：`npm run lint` pass；`npm run test:coverage` pass（新增页面/库/API 单测，全局阈值通过）；`npm run build` pass；后端 rag evaluation 相关 49 条测试 pass。
+- 未完成：本机未启动 Docker/Postgres/Redis，真实端到端 Run 待环境可用后执行。
+- 下一步：真实环境跑通数据源→清洗→质量→RAG 评测→报告；之后 M3 两 Run 对比、M4-A 约束。

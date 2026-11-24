@@ -99,6 +99,7 @@ def _run_list_item(run: RagEvaluationRun, task: Task | None) -> RagEvaluationRun
         invalid_items=run.invalid_items,
         unprocessed_items=run.unprocessed_items,
         status=run.status,
+        aggregate=run.aggregate,
         error_message=run.error_message,
         created_at=run.created_at,
         completed_at=run.completed_at,
