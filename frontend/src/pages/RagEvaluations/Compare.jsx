@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { LuArrowLeft, LuArrowLeftRight, LuRefreshCw } from 'react-icons/lu'
+import { LuArrowLeft, LuArrowLeftRight, LuDownload, LuRefreshCw } from 'react-icons/lu'
 import { AsyncState } from '../../components/common/AsyncState'
 import { PageHeader } from '../../components/common/PageHeader'
 import { Badge } from '../../components/Badge'
@@ -11,12 +11,18 @@ import { Table } from '../../components/Table'
 import { JudgeNoiseNotice } from '../../components/rag/JudgeNoiseNotice'
 import { RagBetaNotice } from '../../components/rag/RagBetaNotice'
 import {
-  useDatasetItemsQuery,
+  useAllDatasetItemsQuery,
   useRagEvaluationQuery,
   useAllRagEvaluationResultsQuery,
   useRagEvaluationsQuery,
 } from '../../hooks/useRagEvaluations'
 import { formatDateTime } from '../../lib/format'
+import {
+  buildCompareExportFilename,
+  buildCompareExportPayload,
+  downloadTextFile,
+  toCompareCsv,
+} from '../../lib/ragCompareExport'
 import {
   caseDiffMeta,
   classifyCaseDiff,
@@ -75,12 +81,18 @@ export default function RagEvaluationCompare() {
     { maxRows: MAX_RESULT_ROWS },
     { enabled: Boolean(targetId) }
   )
-  const baseItemsQuery = useDatasetItemsQuery(base?.dataset_id, base?.dataset_version_id, {
-    enabled: Boolean(base?.dataset_id && base?.dataset_version_id),
-  })
-  const targetItemsQuery = useDatasetItemsQuery(target?.dataset_id, target?.dataset_version_id, {
-    enabled: Boolean(target?.dataset_id && target?.dataset_version_id),
-  })
+  const baseItemsQuery = useAllDatasetItemsQuery(
+    base?.dataset_id,
+    base?.dataset_version_id,
+    { maxRows: MAX_RESULT_ROWS },
+    { enabled: Boolean(base?.dataset_id && base?.dataset_version_id) }
+  )
+  const targetItemsQuery = useAllDatasetItemsQuery(
+    target?.dataset_id,
+    target?.dataset_version_id,
+    { maxRows: MAX_RESULT_ROWS },
+    { enabled: Boolean(target?.dataset_id && target?.dataset_version_id) }
+  )
 
   useEffect(() => {
     if (!baseId || targetId) return
@@ -157,6 +169,38 @@ export default function RagEvaluationCompare() {
   )
   const datasetMismatch = Boolean(base && target && base.dataset_id !== target.dataset_id)
   const sameConfig = isSameConfigComparison(base, target)
+
+  const exportDisabled =
+    !base ||
+    !target ||
+    rows.length === 0 ||
+    baseResultsQuery.isLoading ||
+    targetResultsQuery.isLoading ||
+    baseItemsQuery.isLoading ||
+    targetItemsQuery.isLoading
+
+  const handleExport = format => {
+    const payload = buildCompareExportPayload({
+      base,
+      target,
+      metricRows,
+      rows,
+      diffCounts,
+      alignedCount,
+      caseTruncated,
+      maxCases: MAX_COMPARE_CASES,
+    })
+    const filename = buildCompareExportFilename(format, baseId, targetId, payload.exported_at)
+    if (format === 'csv') {
+      downloadTextFile(filename, toCompareCsv(payload), 'text/csv;charset=utf-8')
+      return
+    }
+    downloadTextFile(
+      filename,
+      `${JSON.stringify(payload, null, 2)}\n`,
+      'application/json;charset=utf-8'
+    )
+  }
 
   const loading =
     runsQuery.isLoading ||
@@ -284,19 +328,37 @@ export default function RagEvaluationCompare() {
         title="Run 对比"
         description="同一数据集版本下，比较两个 completed Run 的指标与 Case 变化。只读，不改 target。"
         actions={
-          <Button
-            variant="outline"
-            icon={<LuRefreshCw className="h-4 w-4" />}
-            onClick={() => {
-              runsQuery.refetch()
-              baseQuery.refetch()
-              targetQuery.refetch()
-              baseResultsQuery.refetch()
-              targetResultsQuery.refetch()
-            }}
-          >
-            刷新
-          </Button>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button
+              variant="outline"
+              icon={<LuDownload className="h-4 w-4" />}
+              onClick={() => handleExport('csv')}
+              disabled={exportDisabled}
+            >
+              导出 CSV
+            </Button>
+            <Button
+              variant="outline"
+              icon={<LuDownload className="h-4 w-4" />}
+              onClick={() => handleExport('json')}
+              disabled={exportDisabled}
+            >
+              导出 JSON
+            </Button>
+            <Button
+              variant="outline"
+              icon={<LuRefreshCw className="h-4 w-4" />}
+              onClick={() => {
+                runsQuery.refetch()
+                baseQuery.refetch()
+                targetQuery.refetch()
+                baseResultsQuery.refetch()
+                targetResultsQuery.refetch()
+              }}
+            >
+              刷新
+            </Button>
+          </div>
         }
       />
 

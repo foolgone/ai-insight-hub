@@ -1,7 +1,7 @@
 # M3 P0：两 Run 对比
 
-> 状态：**accepted（页面/流程）**；前端只读，无新后端接口。β 噪声提示已补（P1 必补项）。**P1-2 全量分页已验收（120 Case 真实 + 250 Case mocked）**。
-> 日期：2026-11-24（2026-11-25 补 P1-2）
+> 状态：**accepted（页面/流程）**；前端只读，无新后端接口。β 噪声提示已补（P1 必补项）。**P1-2 全量分页已验收（120 Case 真实 + 250 Case mocked）**；**P1-3a CSV/JSON 导出已验收（120 Case）**。
+> 日期：2026-11-24（2026-11-25 补 P1-2 / P1-3a）
 > 入口：`/rag-evaluations/compare?base=<runId>&target=<runId>`；Run 列表「对比 Run」、Run 详情「对比此 Run」。
 
 ## 1. 范围
@@ -13,7 +13,7 @@
 | 指标 | F / C / R 的 base、target、delta；invalid / failed / skipped / unprocessed 分开 |
 | Case diff | 按 `dataset_item_id` 对齐；`变好 / 变差 / 不变 / invalid / 未处理` |
 | 钻取 | 点击 Case 跳到 M2 的 Case 详情 |
-| 导出 | 不做（P1 再接报告） |
+| 导出 | P1-3a 已实现 CSV/JSON（带 noise/same_config）；报告章节 P1-3b |
 
 ## 2. 实现
 
@@ -70,7 +70,7 @@ Case diff：**变好 1 / 变差 2 / 不变 2 / invalid 0 / 未处理 0**。
 
 - ✅ 已修复（P1-0）：Windows Celery `Event loop is closed` / asyncpg 跨 `asyncio.run`；改为 worker 进程内持久 event loop，连续 3 Run 全 completed。
 - ✅ 已修复（P1-2）：对比页 100 条结果上限；改按 page/limit 拉全量，200 Case 上限（见 §7）。
-- ⏳ 无导出；P1-3 接 CSV/JSON 与报告章节。
+- ✅ P1-3a 已导出 CSV/JSON（120 Case，带 noise_notice / same_config）；P1-3b 报告章节 next。
 - ✅ 已修复（P1-1）：页面刷新后的 401 竞态；静默 refresh，Playwright reload 401=0。
 
 ## 6. 边界
@@ -147,3 +147,50 @@ Case diff：**变好 31 / 变差 32 / 不变 57 / invalid 0 / 未处理 0**（�
 | 前端 lint / build | ✅ 通过 |
 | 后端 `test_results_pagination_is_stable` | ✅ 分页拼接与稳定排序一致 |
 | 后端 RAG 评测集成测试 | ✅ 24 passed |
+
+## 8. P1-3a：CSV / JSON 导出（2026-11-25）
+
+> 范围：**仅前端导出**；不新增后端接口、不做报告注入（P1-3b）。
+
+### 8.1 改动
+
+| 文件 | 改动 |
+|---|---|
+| `frontend/src/lib/ragCompareExport.js` | 纯函数：导出 payload、CSV 转义 + BOM、文件名、Blob 下载。 |
+| `frontend/src/pages/RagEvaluations/Compare.jsx` | 页头“导出 CSV / 导出 JSON”；只导出当前已对齐的 Case；无数据或加载中禁用。 |
+| `frontend/src/api/ragEvaluations.js` | `listAllDatasetItems` 分页拉全量条目；修复 120 Case 中后 20 条 `item_key/question` 缺失。 |
+| `frontend/src/hooks/useRagEvaluations.js` | `useAllDatasetItemsQuery`。 |
+
+### 8.2 导出字段
+
+- **元数据**：`schema_version`、`exported_at`、base/target run id、dataset/name/version、execution_mode、adapter、top_k、judge_model、prompt_version、`same_config`、`noise_notice`。
+- **指标**：F/C/R 的 base / target / delta。
+- **Case**：`dataset_item_id`、`item_key`、`question`、F/C/R base/target/delta、`verdict`、`verdict_label`、`driver_metric`、`driver_delta`、`note`。
+- **汇总**：improved / regressed / unchanged / invalid / unprocessed、total、aligned_total、exported_cases、case_truncated、truncation_note。
+- **上限**：只导出页面实际对比的 Case（最多 200）；超过时带截断说明。
+- **文件名**：`rag-compare_<base8>_<target8>_<timestamp>.csv/json`。
+
+### 8.3 真实验收（120 Case）
+
+| 项 | CSV | JSON |
+|---|---|---|
+| 行数 / Case 数 | 120 行（17 列） | 120 cases / 3 metrics |
+| verdict 计数 | 31 / 32 / 57 / 0 / 0 | 31 / 32 / 57 / 0 / 0 |
+| item_key / question 完整 | 120/120 | 120/120 |
+| same_config / noise | `# same_config=true`、`# noise_notice=` | `true`、`judge_beta=true` |
+| 解析 | Python `csv` 读取 120 行，中文正常 | `JSON.parse` 通过，schema `m3.compare.export.v1` |
+| BOM | `EF BB BF`（Excel 中文兼容） | n/a |
+| 文件名 | `rag-compare_5328123c_7b2fa311_20261125T074055Z.csv` | 同名 `.json` |
+
+- 页面渲染 120 行，缺失标签 0；导出按钮截图：`docs/04-development/assets/m3-p13/compare-export-buttons.png`。
+- **权限**：纯前端 Blob 下载，不上传服务端/对象存储；只包含当前登录用户已加载的 Run 数据。
+- 200 上限与 `same_config=false` 由 mocked 单测覆盖（250 Case → 200 行 + 截断说明）。
+
+### 8.4 测试
+
+| 项 | 结果 |
+|---|---|
+| 导出模块单测 | 10 passed：CSV 逗号/引号/换行/中文、Excel 注入、CSV/JSON 120 行、250→200、same_config true/false、文件名 |
+| Compare UI | 导出按钮加载后可用 |
+| API 分页 | 120 条 dataset items 两页拉完 |
+| 全量 | 84 files / 435 tests；lint / build 通过 |

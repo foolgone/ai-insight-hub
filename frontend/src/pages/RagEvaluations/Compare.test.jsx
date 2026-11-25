@@ -1,10 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import RagEvaluationCompare from './Compare'
 import {
   getRagEvaluation,
+  listAllDatasetItems,
   listAllRagEvaluationResults,
   listDatasetItems,
   listRagEvaluationResults,
@@ -17,6 +18,7 @@ vi.mock('../../api/ragEvaluations', () => ({
   listRagEvaluationResults: vi.fn(),
   listAllRagEvaluationResults: vi.fn(),
   listDatasetItems: vi.fn(),
+  listAllDatasetItems: vi.fn(),
 }))
 
 const BASE_RUN = {
@@ -157,6 +159,22 @@ describe('RagEvaluationCompare', () => {
       }
     })
     listDatasetItems.mockResolvedValue({ items: ITEMS })
+    listAllDatasetItems.mockImplementation(async () => ({
+      items: ITEMS,
+      total: ITEMS.length,
+      loaded: ITEMS.length,
+      truncated: false,
+      totalPages: 1,
+    }))
+  })
+
+  it('加载完成后导出 CSV/JSON 按钮可用', async () => {
+    renderAt('/rag-evaluations/compare?base=run-a&target=run-b')
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: '导出 CSV' })).toBeEnabled()
+    })
+    expect(screen.getByRole('button', { name: '导出 JSON' })).toBeEnabled()
   })
 
   it('展示指标 delta 与 Case 级 improved/regressed/unchanged/invalid', async () => {

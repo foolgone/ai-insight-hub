@@ -1546,3 +1546,11 @@ alembic check   : No new upgrade operations detected
 - 测试：前端 83 files / 423 tests、lint、build 通过；后端 RAG 评测集成 24 passed。
 - 截图：`docs/04-development/assets/m3-p12/compare-120.png`、`compare-120-cases.png`。
 
+### P1-3a 对比结果 CSV/JSON 导出（2026-11-25）
+- 纯前端导出：`ragCompareExport.js` 生成 payload、CSV（UTF-8 BOM、逗号/引号/换行转义、Excel 公式注入防护）与文件名；Blob 下载，不上传服务端/对象存储。
+- 对比页新增“导出 CSV / 导出 JSON”；只导出实际对比的 Case（最多 200），带 same_config、noise_notice、指标 delta、Case 汇总与 driver_metric。
+- 同时补 `listAllDatasetItems` 分页：120 Case 的 item_key/question 不再缺后 20 条；对比页 Case 标签完整。
+- 真实验收（120 Case）：CSV 120 行 / 17 列 / BOM；JSON 120 cases / 3 metrics / schema m3.compare.export.v1；verdict 31/32/57/0/0；item 元数据 120/120；same_config=true；noise 提示存在。
+- 单测：导出模块 10（CSV 转义、250→200、same_config true/false、JSON round-trip）；API 分页与 Compare UI 各补 1；前端全量 84 files / 435 tests，lint/build 通过。
+- 截图：`docs/04-development/assets/m3-p13/compare-export-buttons.png`。
+

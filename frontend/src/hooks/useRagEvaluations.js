@@ -106,6 +106,20 @@ export function useDatasetItemsQuery(datasetId, versionId, options = {}) {
   })
 }
 
+export function useAllDatasetItemsQuery(
+  datasetId,
+  versionId,
+  { maxRows = 1000 } = {},
+  options = {}
+) {
+  return useQuery({
+    queryKey: ['qa-datasets', 'all-items', datasetId, versionId, maxRows],
+    queryFn: () => ragApi.listAllDatasetItems(datasetId, versionId, { maxRows }),
+    enabled: Boolean(datasetId && versionId),
+    ...options,
+  })
+}
+
 export function useDatasetItemQuery(datasetId, versionId, itemId) {
   return useQuery({
     queryKey: ragEvaluationKeys.item(datasetId, versionId, itemId),

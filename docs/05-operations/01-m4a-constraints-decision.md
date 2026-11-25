@@ -264,10 +264,11 @@
 | P1-0 | Windows Celery `Event loop is closed` / asyncpg 跨 `asyncio.run` | 同一 worker 连续 3 个 Run 无 `partial_failed` | **done / verified**：`9400c82b…`、`be80f57b…`、`0352a0f8…` 全部 completed |
 | P1-1 | 401 auth hydration 竞态 | 刷新/首次进入页面无 401 | **done / verified**：Playwright 登录 + reload，401=0 |
 | P1-2 | 对比页 100 条结果上限/分页 | 200 条 Run 可完整对比 | **done / verified**：120 真实（每侧 5 页）+ 250 mocked；200 上限与截断提示 |
-| P1-3 | 导出/报告注入 | 对比结果可导出/进入报告 | next |
+| P1-3a | 对比结果 CSV/JSON 导出 | 对比结果可导出 | **done / verified**：120 Case，noise/same_config，200 上限 mocked |
+| P1-3b | 报告“Run 对比”章节 | 对比结果进入报告 | next |
 | P1-4 | M4-A 实现：租户 → 审计 → 保留期 → 告警 → 成本 → 数据权利 | 按 §8 顺序拆 PR | pending（需实现批准） |
 
-> P1-0/P1-1/P1-2 已完成并验证；P1-3 next；M4-A 实现仍未批准。
+> P1-0/P1-1/P1-2/P1-3a 已完成并验证；P1-3b next；M4-A 实现仍未批准。
 
 ## 9. 边界
 

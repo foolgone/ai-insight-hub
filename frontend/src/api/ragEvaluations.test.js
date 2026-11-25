@@ -6,6 +6,7 @@ import {
   getDatasetItem,
   getRagEvaluation,
   getRagTrace,
+  listAllDatasetItems,
   listDatasetItems,
   listAllRagEvaluationResults,
   listDatasetVersions,
@@ -150,5 +151,47 @@ describe('listAllRagEvaluationResults', () => {
 
     expect(attempts).toBe(2)
     expect(all.items).toEqual([{ id: 'r-1' }])
+  })
+})
+
+describe('listAllDatasetItems', () => {
+  const originAdapter = apiClient.defaults.adapter
+  let calls = 0
+
+  afterEach(() => {
+    apiClient.defaults.adapter = originAdapter
+    calls = 0
+  })
+
+  it('120 条按两页拉完，不丢行', async () => {
+    const total = 120
+    apiClient.defaults.adapter = async config => {
+      calls += 1
+      const page = Number(config.params?.page || 1)
+      const limit = Number(config.params?.limit || 100)
+      const start = (page - 1) * limit
+      const items = Array.from(
+        { length: Math.max(0, Math.min(limit, total - start)) },
+        (_, index) => ({ id: `item-${start + index + 1}` })
+      )
+      return {
+        data: {
+          items,
+          pagination: { page, limit, total, pages: Math.ceil(total / limit) },
+        },
+        status: 200,
+        statusText: 'OK',
+        headers: {},
+        config,
+      }
+    }
+
+    const all = await listAllDatasetItems('ds-1', 'v-1')
+
+    expect(all.total).toBe(120)
+    expect(all.loaded).toBe(120)
+    expect(all.items).toHaveLength(120)
+    expect(all.truncated).toBe(false)
+    expect(calls).toBe(2)
   })
 })

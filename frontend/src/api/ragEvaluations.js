@@ -32,7 +32,9 @@ export async function listRagEvaluationResults(runId, params = {}) {
  * @param {{ pageSize?: number, maxRows?: number }} [options]
  */
 export async function listAllRagEvaluationResults(runId, { pageSize = 100, maxRows = 1000 } = {}) {
-  const first = await fetchResultPage(runId, 1, pageSize)
+  const first = await fetchPageWithRetry(() =>
+    listRagEvaluationResults(runId, { page: 1, limit: pageSize })
+  )
   const firstItems = Array.isArray(first?.items) ? first.items : []
   const total = Number(first?.pagination?.total ?? firstItems.length)
   const totalPages = Math.min(
@@ -42,7 +44,9 @@ export async function listAllRagEvaluationResults(runId, { pageSize = 100, maxRo
   const items = [...firstItems]
   // 串行拉页：避免一次并发过多触发限流；5-10 页的延迟可忽略。
   for (let page = 2; page <= totalPages; page += 1) {
-    const payload = await fetchResultPage(runId, page, pageSize)
+    const payload = await fetchPageWithRetry(() =>
+      listRagEvaluationResults(runId, { page, limit: pageSize })
+    )
     if (Array.isArray(payload?.items)) items.push(...payload.items)
   }
   const capped = items.slice(0, maxRows)
@@ -61,10 +65,10 @@ function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
 
-async function fetchResultPage(runId, page, pageSize) {
+async function fetchPageWithRetry(fetcher) {
   for (let attempt = 0; ; attempt += 1) {
     try {
-      return await listRagEvaluationResults(runId, { page, limit: pageSize })
+      return await fetcher()
     } catch (error) {
       const status = Number(error?.status) || 0
       const retryable = status === 0 || RETRYABLE_STATUS.has(status)
@@ -129,4 +133,42 @@ export async function listDatasetItems(datasetId, versionId, params = {}) {
 export async function getDatasetItem(datasetId, versionId, itemId) {
   const { data } = await apiClient.get(endpoints.qaDatasets.item(datasetId, versionId, itemId))
   return data
+}
+
+/**
+ * 拉取一个数据集版本的全部条目（分页），最多 maxRows 行。
+ * 对比页需要 item_key/question 补齐 120+ Case 的元数据，不能只看前 100 条。
+ * @param {string} datasetId
+ * @param {string} versionId
+ * @param {{ pageSize?: number, maxRows?: number }} [options]
+ */
+export async function listAllDatasetItems(
+  datasetId,
+  versionId,
+  { pageSize = 100, maxRows = 1000 } = {}
+) {
+  const first = await fetchPageWithRetry(() =>
+    listDatasetItems(datasetId, versionId, { page: 1, limit: pageSize })
+  )
+  const firstItems = Array.isArray(first?.items) ? first.items : []
+  const total = Number(first?.pagination?.total ?? firstItems.length)
+  const totalPages = Math.min(
+    Number(first?.pagination?.pages ?? Math.ceil(total / pageSize)),
+    Math.ceil(maxRows / pageSize) || 1
+  )
+  const items = [...firstItems]
+  for (let page = 2; page <= totalPages; page += 1) {
+    const payload = await fetchPageWithRetry(() =>
+      listDatasetItems(datasetId, versionId, { page, limit: pageSize })
+    )
+    if (Array.isArray(payload?.items)) items.push(...payload.items)
+  }
+  const capped = items.slice(0, maxRows)
+  return {
+    items: capped,
+    total,
+    loaded: capped.length,
+    truncated: total > capped.length,
+    totalPages,
+  }
 }
