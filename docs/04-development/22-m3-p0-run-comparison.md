@@ -1,7 +1,7 @@
 # M3 P0：两 Run 对比
 
-> 状态：**accepted（页面/流程）**；前端只读，无新后端接口。β 噪声提示已补（P1 必补项）。
-> 日期：2026-11-24
+> 状态：**accepted（页面/流程）**；前端只读，无新后端接口。β 噪声提示已补（P1 必补项）。**P1-2 全量分页已验收（120 Case 真实 + 250 Case mocked）**。
+> 日期：2026-11-24（2026-11-25 补 P1-2）
 > 入口：`/rag-evaluations/compare?base=<runId>&target=<runId>`；Run 列表「对比 Run」、Run 详情「对比此 Run」。
 
 ## 1. 范围
@@ -68,10 +68,10 @@ Case diff：**变好 1 / 变差 2 / 不变 2 / invalid 0 / 未处理 0**。
 
 ## 5. 已知问题（P1）
 
-- `partial_failed` Run `9c771d04…`：Windows Celery solo 下第二个任务首个 item 出现 `RuntimeError: Event loop is closed`（asyncpg 连接池跨 `asyncio.run` 复用）；重启 worker 后正常。建议后端做 engine dispose 或持久 loop。
-- 对比页复用 M2 的 100 条结果上限；更大 Run 需要分页对齐。
-- 无导出；P1 接报告。
-- 401 竞态仍在（M2 P1 backlog）。
+- ✅ 已修复（P1-0）：Windows Celery `Event loop is closed` / asyncpg 跨 `asyncio.run`；改为 worker 进程内持久 event loop，连续 3 Run 全 completed。
+- ✅ 已修复（P1-2）：对比页 100 条结果上限；改按 page/limit 拉全量，200 Case 上限（见 §7）。
+- ⏳ 无导出；P1-3 接 CSV/JSON 与报告章节。
+- ✅ 已修复（P1-1）：页面刷新后的 401 竞态；静默 refresh，Playwright reload 401=0。
 
 ## 6. 边界
 
@@ -79,3 +79,71 @@ Case diff：**变好 1 / 变差 2 / 不变 2 / invalid 0 / 未处理 0**。
 - 不做 pairwise 显著性、不做实验配置管理、不做自动优化。
 - v1.2.5 保持 beta / inactive；F/C/R 不作 M1 证据。
 - M2 P0 已 accepted；M3 P0 待 accepted。
+
+## 7. P1-2：对比页全量分页（120 Case 真实验收，2026-11-25）
+
+### 7.1 改动
+
+| 层 | 改动 |
+|---|---|
+| 前端 API | `listAllRagEvaluationResults`：按 `page/limit` 串行拉完（每页 100），每侧最多 1000 行；429/502/503/504 按 `Retry-After` 退避重试（最多 3 次）。 |
+| 前端 Hook | `useAllRagEvaluationResultsQuery`：对比页专用的全量结果查询，缓存键带 `maxRows`。 |
+| 对比页 | 每侧最多拉 1000 行；按 `dataset_item_id` 对齐后仅展示前 200 Case；显示 `结果加载：Base loaded/total · Target loaded/total`；超过 200 显示“仅对比前 200 个 Case（对齐后共 N 个）”；加载失败展示错误与重试。 |
+| 后端仓储 | `list_results` 在无显式 `sort` 时按 `dataset_item_id, metric_name` 稳定排序，保证 LIMIT/OFFSET 跨页不重复、不丢行；无 migration、无新路由。 |
+| 测试 | 前端 250 Case mocked 单测（200 行上限 + 截断提示）、429 退避重试单测；后端 `test_results_pagination_is_stable`。 |
+
+### 7.2 真实验收 Run
+
+| 项 | Base | Target |
+|---|---|---|
+| Run ID | `5328123c-f3f5-4f6b-9d59-763c5e415719` | `7b2fa311-760b-4064-a45e-648647102250` |
+| 数据集/版本 | M3 P1-2 分页验收数据集 / `43eccb08-4fca-43d1-87ca-974f523481be` | 同左 |
+| 状态 | completed | completed |
+| 样本 | 120/120 evaluated，0 failed / 0 invalid | 同左 |
+| 结果行 | 480（120 × F/C/R/faithfulness_strict） | 480 |
+| 分页 | 5 页（100/100/100/100/80） | 同左 |
+| F | 0.776 | 0.801（Δ +0.026） |
+| C | 0.128 | 0.125（Δ -0.003） |
+| R | 0.498 | 0.488（Δ -0.010） |
+
+Case diff：**变好 31 / 变差 32 / 不变 57 / invalid 0 / 未处理 0**（合计 120）。
+
+> 两条 Run 使用相同 mock 输入与同配置；F/C/R 仍有小幅漂移，符合 Judge beta 噪声提示，不据此判断优化效果。
+
+### 7.3 分页与对齐验收
+
+| 验收项 | 结果 |
+|---|---|
+| 每侧结果完整加载 | ✅ Base 480/480、Target 480/480 |
+| 每侧分页页数 | ✅ 5 页（每页 100） |
+| 无重复行 | ✅ 每侧 480 loaded / 480 unique |
+| 无缺行 | ✅ Base 缺于 Target 0 条；Target 缺于 Base 0 条 |
+| 对齐并集 | ✅ 120（与数据集 120 items 一致） |
+| UI 渲染 Case 行 | ✅ 120 |
+| 截断提示 | ✅ 无（未超过 200 上限） |
+| 加载中/失败状态 | ✅ `AsyncState` 加载态；失败显示错误与“重试”（两侧 refetch） |
+| 429 保护 | ✅ 串行拉页 + `Retry-After` 退避，最多 3 次 |
+| 首屏到 Case 表格 | ✅ 约 1.34 s（本地 dev，120 Case） |
+
+截图：
+
+- `docs/04-development/assets/m3-p12/compare-120.png`（指标与样本状态）
+- `docs/04-development/assets/m3-p12/compare-120-cases.png`（`结果加载：Base 480/480 · Target 480/480` 与 Case 表）
+
+### 7.4 成本降级说明（按验收规则）
+
+- 200 Case × 3 Judge 指标 × 2 Run 的成本预计超过 **CNY 1.00**，按验收规则降级为：
+  - **120 条真实 Run**（验证 2 页以上：实际每侧 5 页）；
+  - **250 条 mocked 单测**（验证 200 Case 上限与截断提示）。
+- 本记录不声称跑过 200 条真实 Case；200 上限由 mocked 单测覆盖。
+
+### 7.5 测试与检查
+
+| 项 | 结果 |
+|---|---|
+| 前端 250 Case 分页单测 | ✅ 200 行渲染 + “仅对比前 200 个 Case”提示 |
+| 前端 429 退避单测 | ✅ 首次 429 后重试成功 |
+| 前端全量测试 | ✅ 83 files / 423 tests |
+| 前端 lint / build | ✅ 通过 |
+| 后端 `test_results_pagination_is_stable` | ✅ 分页拼接与稳定排序一致 |
+| 后端 RAG 评测集成测试 | ✅ 24 passed |

@@ -7,6 +7,7 @@ import {
   getRagEvaluation,
   getRagTrace,
   listDatasetItems,
+  listAllRagEvaluationResults,
   listDatasetVersions,
   listDatasets,
   listRagEvaluationFailures,
@@ -75,5 +76,80 @@ describe('ragEvaluations API', () => {
 
     await getDatasetItem('ds-1', 'v-1', 'item-1')
     expect(lastConfig.url).toBe('/qa-datasets/ds-1/versions/v-1/items/item-1')
+  })
+})
+
+
+describe('listAllRagEvaluationResults', () => {
+  const originAdapter = apiClient.defaults.adapter
+  let calls = 0
+
+  afterEach(() => {
+    apiClient.defaults.adapter = originAdapter
+    calls = 0
+  })
+
+  it('按 page/limit 拉完，并按 maxRows 截断', async () => {
+    const total = 250
+    apiClient.defaults.adapter = async config => {
+      calls += 1
+      const page = Number(config.params?.page || 1)
+      const limit = Number(config.params?.limit || 100)
+      const start = (page - 1) * limit
+      const items = Array.from(
+        { length: Math.max(0, Math.min(limit, total - start)) },
+        (_, index) => ({ id: `r-${start + index + 1}` })
+      )
+      return {
+        data: {
+          items,
+          pagination: { page, limit, total, pages: Math.ceil(total / limit) },
+        },
+        status: 200,
+        statusText: 'OK',
+        headers: {},
+        config,
+      }
+    }
+
+    const all = await listAllRagEvaluationResults('run-1', { maxRows: 200 })
+
+    expect(all.total).toBe(250)
+    expect(all.loaded).toBe(200)
+    expect(all.items).toHaveLength(200)
+    expect(all.truncated).toBe(true)
+    expect(calls).toBe(2)
+  })
+
+  it('429 时按 Retry-After 退避后重试', async () => {
+    let attempts = 0
+    apiClient.defaults.adapter = async config => {
+      attempts += 1
+      if (attempts === 1) {
+        return Promise.reject({
+          config,
+          response: {
+            status: 429,
+            data: { error: { code: 'RATE_LIMIT_EXCEEDED', message: 'Too many requests' } },
+            headers: { 'retry-after': '0' },
+          },
+        })
+      }
+      return {
+        data: {
+          items: [{ id: 'r-1' }],
+          pagination: { page: 1, limit: 100, total: 1, pages: 1 },
+        },
+        status: 200,
+        statusText: 'OK',
+        headers: {},
+        config,
+      }
+    }
+
+    const all = await listAllRagEvaluationResults('run-1')
+
+    expect(attempts).toBe(2)
+    expect(all.items).toEqual([{ id: 'r-1' }])
   })
 })

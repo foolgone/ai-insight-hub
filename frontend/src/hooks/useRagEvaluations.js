@@ -55,6 +55,15 @@ export function useRagEvaluationResultsQuery(runId, params = {}, options = {}) {
   })
 }
 
+export function useAllRagEvaluationResultsQuery(runId, { maxRows = 1000 } = {}, options = {}) {
+  return useQuery({
+    queryKey: ['rag-evaluations', 'all-results', runId, maxRows],
+    queryFn: () => ragApi.listAllRagEvaluationResults(runId, { maxRows }),
+    enabled: Boolean(runId),
+    ...options,
+  })
+}
+
 export function useRagEvaluationFailuresQuery(runId, params = {}, options = {}) {
   return useQuery({
     queryKey: ragEvaluationKeys.failures(runId, params),

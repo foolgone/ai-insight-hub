@@ -7,9 +7,9 @@
 > 3. Agent 只能报告 `implemented` / `verified`，不能自行标 `accepted`；
 > 4. 未冻结的定义/目标，不得进入代码实现。
 >
-> 最后更新：2026-11-24
-> 当前阶段：**M2 P0 已 verified：VM PG/Redis + 宿主机 API/worker/前端，mock 适配器 5 条真实 Run 通过页面验收**
-> 当前决策：**等待 accepted；之后 M3 两 Run 对比、M4-A 约束并行**
+> 最后更新：2026-11-25
+> 当前阶段：**M2 P0 / M3 P0 accepted；M4-A accepted as baseline；P1-0 / P1-1 / P1-2 已修复并验证**
+> 当前决策：**P1-3 导出/报告 next；P1-5 本地测试库隔离在 M4-A 实现前完成；M4-A implementation 未批准**
 > 当前不做：target 校准、5-case 模型对比、10/40 Judge、v1.2.6、M1-E 验收
 
 ---
@@ -19,15 +19,15 @@
 | 项 | 状态 |
 |---|---|
 | 项目阶段 | 平台交付优先；M1 降级为 beta 能力 |
-| 主线 | M2 P0：RAG 评测工作台（Run 列表 / Run 详情 / Case 详情 / 报告入口） |
+| 主线 | M3 Run 对比（已 accepted）+ P1 可靠性/交付（导出、报告）；M2 工作台已 accepted |
 | M1 | v1.2.4 / v1.2.5 保持 `frozen` / `inactive`；标为 **beta / known issues**；不再跑 Judge |
 | M1 校准 | **已停止**：target v1.0.3、5-case 对比、10/40、v1.2.6、M1-E 全部冻结 |
 | 平台验收 | 用户能完成一次完整评测，看到可解释结果和报告；不以 target 通过率为门槛 |
 | Judge 展示 | invalid / skipped / known issues 原样展示；人工复核可覆盖 |
 | 当前可写代码？ | **是**：M2 P0 及平台主流程 |
 | 当前可跑 Judge？ | **否**（仅 beta 展示；不新增校准调用） |
-| 下一个交付 | M2 P0 accepted 确认 → M3 两 Run 对比 |
-| 之后 | M3 两 Run 对比；M4-A 租户/保留期/审计/告警/成本/数据权利 |
+| 下一个交付 | P1-3a 对比结果导出（CSV/JSON）→ P1-3b 报告注入 |
+| 之后 | P1-5 本地测试库隔离；M4-A 实现（需单独批准） |
 
 ### M2 P0 已交付
 
@@ -63,8 +63,8 @@
 |---|---|---|
 | P1-0 | Celery `Event loop is closed` / asyncpg 跨 loop | **done / verified**：同一 worker 连续 3 Run 全 completed |
 | P1-1 | 401 auth hydration 竞态 | **done / verified**：刷新 401=0 |
-| P1-2 | 对比页 100 条上限/分页 | pending |
-| P1-3 | 导出/报告注入 | pending |
+| P1-2 | 对比页 100 条上限/分页 | **done / verified**：120 真实（每侧 5 页）+ 250 mocked；200 上限 |
+| P1-3 | 导出/报告注入 | next |
 | P1-4 | M4-A 实现（tenant 先行） | pending（未批准） |
 
 ### M1 当前口径（beta）

@@ -24,6 +24,60 @@ export async function listRagEvaluationResults(runId, params = {}) {
   return data
 }
 
+/**
+ * 拉取一个 Run 的全部结果（分页），最多 maxRows 行。
+ * P1-2：对比页不能只看前 100 条；按 page/limit 拉完。
+ * 限流/网关错误按 Retry-After 退避重试；仍失败由调用方展示错误与重试。
+ * @param {string} runId
+ * @param {{ pageSize?: number, maxRows?: number }} [options]
+ */
+export async function listAllRagEvaluationResults(
+  runId,
+  { pageSize = 100, maxRows = 1000 } = {}
+) {
+  const first = await fetchResultPage(runId, 1, pageSize)
+  const firstItems = Array.isArray(first?.items) ? first.items : []
+  const total = Number(first?.pagination?.total ?? firstItems.length)
+  const totalPages = Math.min(
+    Number(first?.pagination?.pages ?? Math.ceil(total / pageSize)),
+    Math.ceil(maxRows / pageSize) || 1
+  )
+  const items = [...firstItems]
+  // 串行拉页：避免一次并发过多触发限流；5-10 页的延迟可忽略。
+  for (let page = 2; page <= totalPages; page += 1) {
+    const payload = await fetchResultPage(runId, page, pageSize)
+    if (Array.isArray(payload?.items)) items.push(...payload.items)
+  }
+  const capped = items.slice(0, maxRows)
+  return {
+    items: capped,
+    total,
+    loaded: capped.length,
+    truncated: total > capped.length,
+    totalPages,
+  }
+}
+
+const RETRYABLE_STATUS = new Set([429, 502, 503, 504])
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms))
+}
+
+async function fetchResultPage(runId, page, pageSize) {
+  for (let attempt = 0; ; attempt += 1) {
+    try {
+      return await listRagEvaluationResults(runId, { page, limit: pageSize })
+    } catch (error) {
+      const status = Number(error?.status) || 0
+      const retryable = status === 0 || RETRYABLE_STATUS.has(status)
+      if (!retryable || attempt >= 2) throw error
+      const retryAfterMs = Math.min(Number(error?.retryAfter || 0) * 1000, 10000)
+      await sleep(retryAfterMs || 500 * 2 ** attempt)
+    }
+  }
+}
+
 /** @param {string} runId @param {{ page?: number, limit?: number, metric_name?: string }} [params] */
 export async function listRagEvaluationFailures(runId, params = {}) {
   const { data } = await apiClient.get(endpoints.ragEvaluations.failures(runId), { params })

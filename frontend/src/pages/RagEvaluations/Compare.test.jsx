@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import RagEvaluationCompare from './Compare'
 import {
   getRagEvaluation,
+  listAllRagEvaluationResults,
   listDatasetItems,
   listRagEvaluationResults,
   listRagEvaluations,
@@ -14,6 +15,7 @@ vi.mock('../../api/ragEvaluations', () => ({
   listRagEvaluations: vi.fn(),
   getRagEvaluation: vi.fn(),
   listRagEvaluationResults: vi.fn(),
+  listAllRagEvaluationResults: vi.fn(),
   listDatasetItems: vi.fn(),
 }))
 
@@ -143,6 +145,17 @@ describe('RagEvaluationCompare', () => {
     listRagEvaluationResults.mockImplementation(async runId => ({
       items: runId === 'run-a' ? BASE_RESULTS : TARGET_RESULTS,
     }))
+    listAllRagEvaluationResults.mockImplementation(async runId => {
+      const payload = await listRagEvaluationResults(runId, { page: 1, limit: 100 })
+      const items = payload.items || []
+      return {
+        items,
+        total: items.length,
+        loaded: items.length,
+        truncated: false,
+        totalPages: 1,
+      }
+    })
     listDatasetItems.mockResolvedValue({ items: ITEMS })
   })
 
@@ -163,6 +176,32 @@ describe('RagEvaluationCompare', () => {
       'href',
       '/rag-evaluations/run-b/cases/item-1'
     )
+  })
+
+  it('250 个 Case 分页加载，仅对比前 200 并提示', async () => {
+    const total = 250
+    const makeRows = () =>
+      Array.from({ length: total }, (_, index) => ({
+        id: `row-${index}`,
+        dataset_item_id: `item-${index}`,
+        metric_name: 'faithfulness',
+        status: 'evaluated',
+        score: 0.5,
+      }))
+    listAllRagEvaluationResults.mockImplementation(async () => ({
+      items: makeRows(),
+      total,
+      loaded: total,
+      truncated: false,
+      totalPages: 1,
+    }))
+    listDatasetItems.mockResolvedValue({ items: [] })
+
+    renderAt('/rag-evaluations/compare?base=run-a&target=run-b')
+
+    expect(await screen.findByText(/仅对比前 200 个 Case/)).toBeInTheDocument()
+    expect(await screen.findByText(/Base 250\/250/)).toBeInTheDocument()
+    expect(screen.getAllByRole('link', { name: '查看 Case' })).toHaveLength(200)
   })
 
   it('不同 adapter 时不显示同配置强警告', async () => {

@@ -18,6 +18,7 @@ from app.composition import enqueue
 from app.core.advisory_lock import AdvisoryLock, lock_key_for_run
 from app.core.config import settings
 from app.core.security import hash_password
+from app.repositories import rag_evaluation as rag_repo
 from app.models import (
     QaDataset,
     QaDatasetItem,
@@ -180,6 +181,36 @@ async def test_full_run_retrieve_mode(
         .where(RagEvaluationResult.run_id == uuid.UUID(created["run_id"]))
     )
     assert total == 12
+
+
+async def test_results_pagination_is_stable(
+    client, auth_headers, test_user, db_session, monkeypatch
+) -> None:
+    """P1-2：分页拉全量结果时顺序稳定，不重复、不丢行。"""
+    monkeypatch.setattr(enqueue, "enqueue_rag_evaluation", _fake_enqueue())
+    _, version, _ = await _seed(
+        db_session,
+        test_user,
+        queries=[f"分页问题 {index}" for index in range(5)],
+        evidence=[_evidence_doc() for _ in range(5)],
+    )
+    created = await _create_run(client, auth_headers, version)
+    await execute_run(db_session, uuid.UUID(created["run_id"]))
+
+    collected: list[dict[str, Any]] = []
+    for page in range(1, 5):
+        response = await client.get(
+            f"{BASE}/{created['run_id']}/results",
+            headers=auth_headers,
+            params={"page": page, "limit": 5},
+        )
+        assert response.status_code == 200, response.text
+        collected.extend(response.json()["items"])
+
+    expected = await rag_repo.results_for_run(db_session, uuid.UUID(created["run_id"]))
+    assert len(collected) == 20
+    assert len({row["id"] for row in collected}) == 20
+    assert [row["id"] for row in collected] == [str(row.id) for row in expected]
 
 
 async def test_query_mode_copies_judge_outcomes(

@@ -187,6 +187,9 @@ async def list_results(
         stmt = stmt.where(RagEvaluationResult.status == status)
     if dataset_item_id is not None:
         stmt = stmt.where(RagEvaluationResult.dataset_item_id == dataset_item_id)
+    if params.sort is None:
+        # P1-2：分页拉全量结果必须稳定排序，否则 LIMIT/OFFSET 可能重复或漏行。
+        stmt = stmt.order_by(RagEvaluationResult.dataset_item_id, RagEvaluationResult.metric_name)
     return await paginate(session, stmt, params, sortable=RESULT_SORTABLE)
 
 

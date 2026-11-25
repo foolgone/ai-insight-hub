@@ -1535,3 +1535,14 @@ alembic check   : No new upgrade operations detected
 - **M4-A**：文档标记 `accepted_baseline`；补 5 个实现前 P1（租户隔离验收矩阵、保留期拆分、审计不可篡改、告警落地、成本/数据权利），并加入 P1 backlog（P1-0/P1-1 done，P1-2/P1-3/P1-4 pending）。
 - 边界：M4-A 未实现、未 migration、未碰生产；M1 v1.2.5 beta/inactive；未跑 10/40。
 
+### P1-2 对比页全量分页（2026-11-25）
+- 前端 `listAllRagEvaluationResults` 按 `page/limit` 串行拉完（每页 100，每侧最多 1000 行）；429/502/503/504 按 `Retry-After` 退避重试（最多 3 次）。
+- `useAllRagEvaluationResultsQuery` 接入对比页；显示 `loaded/total`；对齐后展示前 200 Case，超过提示“仅对比前 200 个 Case”。
+- 后端 `list_results` 无显式 sort 时按 `dataset_item_id, metric_name` 稳定排序，保证分页无重复/缺行；新增 `test_results_pagination_is_stable`。
+- 真实验收（120 Case，每侧 480 行 / 5 页）：
+  - Base `5328123c…`、Target `7b2fa311…`，均 completed，120/120 evaluated，0 failed / 0 invalid；
+  - 对齐并集 120，重复 0，缺行 0；UI 渲染 120 行；无截断提示；结果请求 10 次；首屏到表格约 1.34 s。
+- 成本降级：200 Case 预计 > CNY 1.00，按规则用 120 条真实 + 250 条 mocked；不声称跑 200。
+- 测试：前端 83 files / 423 tests、lint、build 通过；后端 RAG 评测集成 24 passed。
+- 截图：`docs/04-development/assets/m3-p12/compare-120.png`、`compare-120-cases.png`。
+

@@ -13,7 +13,7 @@ import { RagBetaNotice } from '../../components/rag/RagBetaNotice'
 import {
   useDatasetItemsQuery,
   useRagEvaluationQuery,
-  useRagEvaluationResultsQuery,
+  useAllRagEvaluationResultsQuery,
   useRagEvaluationsQuery,
 } from '../../hooks/useRagEvaluations'
 import { formatDateTime } from '../../lib/format'
@@ -29,6 +29,9 @@ import {
   metricShort,
   shortId,
 } from '../../lib/ragEvaluation'
+
+const MAX_RESULT_ROWS = 1000
+const MAX_COMPARE_CASES = 200
 
 const COUNT_ROWS = [
   ['已评分', 'evaluated_items'],
@@ -62,14 +65,14 @@ export default function RagEvaluationCompare() {
   const base = baseQuery.data
   const target = targetQuery.data
 
-  const baseResultsQuery = useRagEvaluationResultsQuery(
+  const baseResultsQuery = useAllRagEvaluationResultsQuery(
     baseId,
-    { limit: 100 },
+    { maxRows: MAX_RESULT_ROWS },
     { enabled: Boolean(baseId) }
   )
-  const targetResultsQuery = useRagEvaluationResultsQuery(
+  const targetResultsQuery = useAllRagEvaluationResultsQuery(
     targetId,
-    { limit: 100 },
+    { maxRows: MAX_RESULT_ROWS },
     { enabled: Boolean(targetId) }
   )
   const baseItemsQuery = useDatasetItemsQuery(base?.dataset_id, base?.dataset_version_id, {
@@ -103,7 +106,7 @@ export default function RagEvaluationCompare() {
     return map
   }, [baseItemsQuery.data, targetItemsQuery.data])
 
-  const { rows, diffCounts } = useMemo(() => {
+  const { rows, diffCounts, alignedCount, caseTruncated } = useMemo(() => {
     const baseMap = new Map(
       groupResultsByItem(baseResultsQuery.data?.items || []).map(item => [item.itemId, item])
     )
@@ -131,10 +134,23 @@ export default function RagEvaluationCompare() {
           'zh-CN'
         )
       )
-    return { rows: built, diffCounts: countCaseDiff(built) }
+    const displayed = built.slice(0, MAX_COMPARE_CASES)
+    return {
+      rows: displayed,
+      diffCounts: countCaseDiff(displayed),
+      alignedCount: built.length,
+      caseTruncated: built.length > MAX_COMPARE_CASES,
+    }
   }, [baseResultsQuery.data, targetResultsQuery.data, itemMap, baseId, targetId])
 
   const metricRows = metricComparisonRows(base?.aggregate, target?.aggregate)
+  const baseLoaded = baseResultsQuery.data?.loaded ?? 0
+  const baseTotal = baseResultsQuery.data?.total ?? 0
+  const targetLoaded = targetResultsQuery.data?.loaded ?? 0
+  const targetTotal = targetResultsQuery.data?.total ?? 0
+  const resultsTruncated = Boolean(
+    baseResultsQuery.data?.truncated || targetResultsQuery.data?.truncated
+  )
   const sameRun = Boolean(baseId && targetId && baseId === targetId)
   const versionMismatch = Boolean(
     base && target && base.dataset_version_id !== target.dataset_version_id
@@ -445,6 +461,18 @@ export default function RagEvaluationCompare() {
                 按 dataset_item_id 对齐；F/C/R 各自比较，分类取绝对变化最大的指标。
               </p>
             </div>
+            <p className="mb-2 text-xs text-gray-500">
+              结果加载：Base {baseLoaded}/{baseTotal} · Target {targetLoaded}/{targetTotal}
+              {resultsTruncated ? `（每侧最多 ${MAX_RESULT_ROWS} 行，已截断）` : ''}
+            </p>
+            {caseTruncated ? (
+              <p
+                role="alert"
+                className="mb-2 rounded border border-warning-500/30 bg-warning-50 p-2 text-xs text-warning-800"
+              >
+                仅对比前 {MAX_COMPARE_CASES} 个 Case（对齐后共 {alignedCount} 个）。
+              </p>
+            ) : null}
             <AsyncState
               loading={baseResultsQuery.isLoading || targetResultsQuery.isLoading}
               error={baseResultsQuery.error || targetResultsQuery.error}
