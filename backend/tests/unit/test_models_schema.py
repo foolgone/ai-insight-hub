@@ -184,7 +184,7 @@ def test_cleaned_data_fk_cascades_on_delete() -> None:
 
 
 def test_audit_log_user_fk_sets_null() -> None:
-    fk = next(iter(_table("audit_logs").foreign_keys))
+    fk = next(item for item in _table("audit_logs").foreign_keys if item.parent.name == "user_id")
     assert fk.ondelete == "SET NULL"
 
 
