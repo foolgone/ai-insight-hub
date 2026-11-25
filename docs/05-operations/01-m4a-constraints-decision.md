@@ -257,7 +257,11 @@
    - 导出 24h SLA、删除 7 天宽限；
    - WeKnora 作为子处理者写入 DPA，明确删除/保留边界。
 
-### 8.2 P1 backlog 与当前状态
+### 8.2 Tenant-first 实施 scope
+
+`docs/05-operations/02-m4a-tenant-first-scope.md`：tenant 切片的表清单、迁移方案、JWT/角色、Repository/存储、feature flag、验收矩阵。状态 `scope_draft`，**尚未批准实现**；批准前不写 migration/代码。
+
+### 8.3 P1 backlog 与当前状态
 
 | 优先级 | 项 | 验收 | 状态 |
 |---|---|---|---|

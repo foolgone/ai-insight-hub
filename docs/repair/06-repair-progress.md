@@ -1573,3 +1573,11 @@ alembic check   : No new upgrade operations detected
   - 两次均 exit 0；dev 库 `aiinsight` 未读写；P1-5 提交 CI 全绿。
 - 边界：只改测试/脚本/文档，不改产品行为；测试库可丢弃；M4-A 实现仍未批准。
 
+### M4-A tenant-first scope 提交（2026-11-25）
+- 新增 `docs/05-operations/02-m4a-tenant-first-scope.md`（`scope_draft`，未批准实现）。
+- 覆盖：完整核心表清单（含 knowledge_base/gaps；说明 `rag_evaluation_failures` 无物理表）、
+  023 迁移 up/down、JWT tenant_id、四角色、TenantContext、Repository/存储强制、
+  `tenant/<id>/...` key 与历史双读、feature flag/灰度/回滚、验收矩阵、PR 拆分。
+- 明确不做：audit 不可篡改、retention、alerting、cost、data-rights 产品化；不改 M1/Judge。
+- 下一步：等 scope 审核通过后，才允许写 migration/代码；先在 `aiinsight_test` + staging 验证。
+
