@@ -78,7 +78,7 @@ Case diff：**变好 1 / 变差 2 / 不变 2 / invalid 0 / 未处理 0**。
 - 不改 target、Prompt、fixture、Judge；不跑 10/40。
 - 不做 pairwise 显著性、不做实验配置管理、不做自动优化。
 - v1.2.5 保持 beta / inactive；F/C/R 不作 M1 证据。
-- M2 P0 已 accepted；M3 P0 待 accepted。
+- M2 P0 / M3 P0 已 accepted；P1-2 分页已验收。
 
 ## 7. P1-2：对比页全量分页（120 Case 真实验收，2026-11-25）
 
