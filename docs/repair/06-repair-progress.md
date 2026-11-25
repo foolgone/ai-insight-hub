@@ -1570,6 +1570,6 @@ alembic check   : No new upgrade operations detected
 - 实机验收（VM `192.168.150.100:5433` / Redis 6379 DB15）：
   - 第一次：**1138 passed / 255 deselected**，5m50s；
   - 第二次：**1138 passed / 255 deselected**，5m16s；
-  - 两次均 exit 0；dev 库 `aiinsight` 未读写。
+  - 两次均 exit 0；dev 库 `aiinsight` 未读写；P1-5 提交 CI 全绿。
 - 边界：只改测试/脚本/文档，不改产品行为；测试库可丢弃；M4-A 实现仍未批准。
 

@@ -69,7 +69,7 @@ Redis:      192.168.150.100:6379 / DB 15
 | 第一次全量 | ✅ **1138 passed / 255 deselected**，5m50s，exit 0 |
 | 第二次全量 | ✅ **1138 passed / 255 deselected**，5m16s，exit 0 |
 | dev 库 | ✅ 未读写；守卫拒绝 `aiinsight` |
-| CI | 仍使用 `aiinsight_test`；P1-3b 提交 CI 全绿 |
+| CI | 仍使用 `aiinsight_test`；P1-5 提交 CI 全绿（2026-11-25） |
 
 ## 6. 常见问题
 
