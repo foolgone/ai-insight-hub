@@ -30,6 +30,7 @@ from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.sql import func
 
+from app.core.tenancy import DEFAULT_TENANT_ID_SQL
 from app.models.base import Base
 
 _EMPTY_ARRAY = text("'[]'::jsonb")
@@ -41,6 +42,7 @@ class RagTrace(Base):
 
     __tablename__ = "rag_traces"
     __table_args__ = (
+        Index("idx_rag_traces_tenant_user_created", "tenant_id", "user_id", "created_at"),
         CheckConstraint("mode IN ('retrieve', 'query')", name="rag_trace_mode_valid"),
         CheckConstraint("status IN ('success', 'failed')", name="rag_trace_status_valid"),
         CheckConstraint(
@@ -56,6 +58,12 @@ class RagTrace(Base):
 
     id: Mapped[uuid.UUID] = mapped_column(
         PG_UUID(as_uuid=True), primary_key=True, server_default=text("gen_random_uuid()")
+    )
+    tenant_id: Mapped[uuid.UUID] = mapped_column(
+        PG_UUID(as_uuid=True),
+        ForeignKey("tenants.id", ondelete="RESTRICT"),
+        nullable=False,
+        server_default=text(DEFAULT_TENANT_ID_SQL),
     )
     user_id: Mapped[uuid.UUID] = mapped_column(
         PG_UUID(as_uuid=True),

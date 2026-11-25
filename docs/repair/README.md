@@ -9,7 +9,7 @@
 >
 > 最后更新：2026-11-25
 > 当前阶段：**M2 P0 / M3 P0 accepted；M4-A accepted as baseline；P1-0 / P1-1 / P1-2 / P1-3a / P1-3b / P1-5 已完成并验证**
-> 当前决策：**M4-A tenant-first scope 已提交待评审；实现仍未批准，不写 migration/代码**
+> 当前决策：**M4-A tenant-first scope 已批准；PR-1（023 migration + 模型）已实现待验收；PR-2 未开始**
 > 当前不做：target 校准、5-case 模型对比、10/40 Judge、v1.2.6、M1-E 验收
 
 ---
@@ -26,7 +26,7 @@
 | Judge 展示 | invalid / skipped / known issues 原样展示；人工复核可覆盖 |
 | 当前可写代码？ | **是**：M2 P0 及平台主流程 |
 | 当前可跑 Judge？ | **否**（仅 beta 展示；不新增校准调用） |
-| 下一个交付 | M4-A tenant-first scope 评审（`docs/05-operations/02-m4a-tenant-first-scope.md`） |
+| 下一个交付 | PR-1 验收（023 migration + 模型）；PR-2 等验收后开 |
 | 之后 | M4-A 实现（需单独批准） |
 
 ### M2 P0 已交付
@@ -67,7 +67,7 @@
 | P1-3a | 对比结果 CSV/JSON 导出 | **done / verified**：120 Case；noise/same_config；200 上限 mocked |
 | P1-3b | 报告“Run 对比”章节 | **accepted**（CI 全绿 2026-11-25）：120 Case；确定性渲染；跨租户 404 |
 | P1-5 | 本地测试库隔离 | **done / verified**：`aiinsight_test`；连续两次 1138 passed |
-| P1-4 | M4-A 实现（tenant 先行） | pending（未批准） |
+| P1-4 | M4-A 实现（tenant 先行） | **PR-1 implemented / verified**：023 migration + 模型；PR-2 未开始 |
 
 ### M1 当前口径（beta）
 

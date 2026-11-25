@@ -27,6 +27,7 @@ from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.sql import func
 
+from app.core.tenancy import DEFAULT_TENANT_ID_SQL
 from app.models.base import Base
 
 EMBEDDING_DIM = 384
@@ -39,6 +40,7 @@ class AnalysisResult(Base):
 
     __tablename__ = "analysis_results"
     __table_args__ = (
+        Index("idx_analysis_results_tenant_datasource", "tenant_id", "datasource_id"),
         CheckConstraint(
             "analysis_type IN ('quality', 'knowledge', 'insight', 'other')",
             name="analysis_type_valid",
@@ -63,6 +65,12 @@ class AnalysisResult(Base):
 
     id: Mapped[uuid.UUID] = mapped_column(
         PG_UUID(as_uuid=True), primary_key=True, server_default=text("gen_random_uuid()")
+    )
+    tenant_id: Mapped[uuid.UUID] = mapped_column(
+        PG_UUID(as_uuid=True),
+        ForeignKey("tenants.id", ondelete="RESTRICT"),
+        nullable=False,
+        server_default=text(DEFAULT_TENANT_ID_SQL),
     )
     datasource_id: Mapped[uuid.UUID] = mapped_column(
         PG_UUID(as_uuid=True),
@@ -93,6 +101,7 @@ class KnowledgeBase(Base):
 
     __tablename__ = "knowledge_base"
     __table_args__ = (
+        Index("idx_knowledge_base_tenant_datasource", "tenant_id", "datasource_id"),
         CheckConstraint("source IN ('seed', 'manual', 'extracted')", name="source_valid"),
         CheckConstraint("status IN ('active', 'archived', 'needs_review')", name="status_valid"),
         CheckConstraint("quality_score >= 0 AND quality_score <= 100", name="quality_score_range"),
@@ -116,6 +125,12 @@ class KnowledgeBase(Base):
 
     id: Mapped[uuid.UUID] = mapped_column(
         PG_UUID(as_uuid=True), primary_key=True, server_default=text("gen_random_uuid()")
+    )
+    tenant_id: Mapped[uuid.UUID] = mapped_column(
+        PG_UUID(as_uuid=True),
+        ForeignKey("tenants.id", ondelete="RESTRICT"),
+        nullable=False,
+        server_default=text(DEFAULT_TENANT_ID_SQL),
     )
     datasource_id: Mapped[uuid.UUID] = mapped_column(
         PG_UUID(as_uuid=True),
@@ -156,6 +171,7 @@ class KnowledgeGap(Base):
 
     __tablename__ = "knowledge_gaps"
     __table_args__ = (
+        Index("idx_knowledge_gaps_tenant_datasource", "tenant_id", "datasource_id"),
         CheckConstraint("status IN ('open', 'adopted', 'ignored')", name="gap_status_valid"),
         # 同一数据源内按归一化问题去重（question_key = md5(归一化文本)）
         Index("uk_kb_gaps_datasource_key", "datasource_id", "question_key", unique=True),
@@ -164,6 +180,12 @@ class KnowledgeGap(Base):
 
     id: Mapped[uuid.UUID] = mapped_column(
         PG_UUID(as_uuid=True), primary_key=True, server_default=text("gen_random_uuid()")
+    )
+    tenant_id: Mapped[uuid.UUID] = mapped_column(
+        PG_UUID(as_uuid=True),
+        ForeignKey("tenants.id", ondelete="RESTRICT"),
+        nullable=False,
+        server_default=text(DEFAULT_TENANT_ID_SQL),
     )
     datasource_id: Mapped[uuid.UUID] = mapped_column(
         PG_UUID(as_uuid=True),

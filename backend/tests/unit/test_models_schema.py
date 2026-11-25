@@ -8,6 +8,7 @@ from app.models import Base, CleanedData, KnowledgeBase, LlmCall, PromptVersion,
 pytestmark = pytest.mark.unit
 
 EXPECTED_TABLES = {
+    "tenants",
     "users",
     "data_sources",
     "datasource_types",
@@ -44,13 +45,17 @@ def _table(name: str):
 
 def test_all_tables_registered() -> None:
     assert set(Base.metadata.tables) == EXPECTED_TABLES
-    assert len(Base.metadata.tables) == 24
+    assert len(Base.metadata.tables) == 25
 
 
 @pytest.mark.parametrize(
     ("table", "columns"),
     [
-        ("users", {"id", "email", "password_hash", "role", "quota", "usage", "deleted_at"}),
+        ("tenants", {"id", "name", "slug", "status", "created_at", "updated_at"}),
+        (
+            "users",
+            {"id", "tenant_id", "email", "password_hash", "role", "quota", "usage", "deleted_at"},
+        ),
         ("data_sources", {"id", "user_id", "type", "status", "workflow_status", "config"}),
         (
             "datasource_types",
@@ -239,3 +244,29 @@ def test_enum_check_constraints() -> None:
         "ck_tasks_task_type_valid",
         "ck_tasks_progress_range",
     } <= checks
+
+
+def test_tenant_columns_registered() -> None:
+    business_tables = [
+        "users",
+        "data_sources",
+        "raw_data",
+        "cleaned_data",
+        "analysis_results",
+        "knowledge_base",
+        "knowledge_gaps",
+        "tasks",
+        "reports",
+        "qa_datasets",
+        "qa_dataset_versions",
+        "qa_dataset_items",
+        "rag_traces",
+        "rag_evaluation_runs",
+        "rag_evaluation_results",
+    ]
+    for table in business_tables:
+        assert "tenant_id" in Base.metadata.tables[table].c, table
+        assert Base.metadata.tables[table].c.tenant_id.nullable is False, table
+    for table in ("audit_logs", "llm_calls"):
+        assert "tenant_id" in Base.metadata.tables[table].c, table
+        assert Base.metadata.tables[table].c.tenant_id.nullable is True, table

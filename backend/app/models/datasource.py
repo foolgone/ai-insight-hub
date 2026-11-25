@@ -30,6 +30,7 @@ from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.sql import func
 
+from app.core.tenancy import DEFAULT_TENANT_ID_SQL
 from app.models.base import Base
 
 EMBEDDING_DIM = 384
@@ -51,6 +52,8 @@ class DataSource(Base):
 
     __tablename__ = "data_sources"
     __table_args__ = (
+        Index("idx_data_sources_tenant_created", "tenant_id", "created_at"),
+        Index("idx_data_sources_tenant_user", "tenant_id", "user_id"),
         # type 的取值由 datasource_types 字典表约束（迁移 014 起，API 层校验）
         CheckConstraint(
             "status IN ('active', 'archived', 'processing', 'error')", name="status_valid"
@@ -84,6 +87,12 @@ class DataSource(Base):
     id: Mapped[uuid.UUID] = mapped_column(
         PG_UUID(as_uuid=True), primary_key=True, server_default=text("gen_random_uuid()")
     )
+    tenant_id: Mapped[uuid.UUID] = mapped_column(
+        PG_UUID(as_uuid=True),
+        ForeignKey("tenants.id", ondelete="RESTRICT"),
+        nullable=False,
+        server_default=text(DEFAULT_TENANT_ID_SQL),
+    )
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     description: Mapped[str | None] = mapped_column(Text)
     type: Mapped[str] = mapped_column(String(50), nullable=False)
@@ -110,6 +119,7 @@ class RawData(Base):
 
     __tablename__ = "raw_data"
     __table_args__ = (
+        Index("idx_raw_data_tenant_datasource", "tenant_id", "datasource_id"),
         CheckConstraint(
             "status IN ('pending', 'processing', 'completed', 'failed')", name="status_valid"
         ),
@@ -120,6 +130,12 @@ class RawData(Base):
 
     id: Mapped[uuid.UUID] = mapped_column(
         PG_UUID(as_uuid=True), primary_key=True, server_default=text("gen_random_uuid()")
+    )
+    tenant_id: Mapped[uuid.UUID] = mapped_column(
+        PG_UUID(as_uuid=True),
+        ForeignKey("tenants.id", ondelete="RESTRICT"),
+        nullable=False,
+        server_default=text(DEFAULT_TENANT_ID_SQL),
     )
     datasource_id: Mapped[uuid.UUID] = mapped_column(
         PG_UUID(as_uuid=True),
@@ -141,6 +157,7 @@ class CleanedData(Base):
 
     __tablename__ = "cleaned_data"
     __table_args__ = (
+        Index("idx_cleaned_data_tenant_datasource", "tenant_id", "datasource_id"),
         CheckConstraint("quality_score >= 0 AND quality_score <= 100", name="quality_score_range"),
         Index("idx_cleaned_data_datasource_id", "datasource_id", "created_at"),
         Index("idx_cleaned_data_dialogue_id", "dialogue_id"),
@@ -166,6 +183,12 @@ class CleanedData(Base):
 
     id: Mapped[uuid.UUID] = mapped_column(
         PG_UUID(as_uuid=True), primary_key=True, server_default=text("gen_random_uuid()")
+    )
+    tenant_id: Mapped[uuid.UUID] = mapped_column(
+        PG_UUID(as_uuid=True),
+        ForeignKey("tenants.id", ondelete="RESTRICT"),
+        nullable=False,
+        server_default=text(DEFAULT_TENANT_ID_SQL),
     )
     datasource_id: Mapped[uuid.UUID] = mapped_column(
         PG_UUID(as_uuid=True),

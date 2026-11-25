@@ -1581,3 +1581,11 @@ alembic check   : No new upgrade operations detected
 - 明确不做：audit 不可篡改、retention、alerting、cost、data-rights 产品化；不改 M1/Judge。
 - 下一步：等 scope 审核通过后，才允许写 migration/代码；先在 `aiinsight_test` + staging 验证。
 
+### M4-A tenant-first PR-1（2026-11-25，implemented / verified）
+- 023 migration：`tenants` + 固定默认租户；17 张核心表新增 `tenant_id`，按 user/父资源回填后设 NOT NULL（`audit_logs` / `llm_calls` 保持 nullable）；新增 tenant 复合索引。
+- 模型：新增 `Tenant`、`User.tenant` 关系；核心模型补 `tenant_id`；新表登记进 `app/models/__init__.py`。
+- 兼容：业务表 `tenant_id` server_default 指向默认租户，flag=false 期间旧代码写入可用；未改 JWT/Repository/存储。
+- 测试：`test_migration_023` 覆盖 schema/默认租户/完整回填/父子一致/up-down 连续两次/旧用户默认租户；全量 **1144 passed / 255 deselected**（5m16s），`alembic check` 无新操作。
+- 静态检查：black / flake8 / mypy / import-linter 通过。
+- 边界：仅 `aiinsight_test`；未做生产 migration、未开 flag、未改产品行为。PR-2 等 PR-1 验收后再开。
+

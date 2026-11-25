@@ -1,6 +1,6 @@
 # M4-A tenant-first：实现 scope / design
 
-> 状态：`scope_draft`（**仅方案，未批准实现**）
+> 状态：`scope_approved`（2026-11-25）；**PR-1 已实现/已验证，待验收**；PR-2 未开始
 > 日期：2026-11-25
 > 上游：`docs/05-operations/01-m4a-constraints-decision.md`（accepted baseline）
 > 边界：**本文件不写 migration、不改代码、不碰生产**；只定义 tenant 切片。
@@ -73,8 +73,8 @@
 | `rag_evaluation_runs` | `user_id` / dataset/version | 优先 `user_id`，否则父 dataset | Run 列表/详情/取消/重试 |
 | `rag_evaluation_results` | `run_id` | 父 Run | 结果分页/失败/钻取 |
 | `rag_evaluation_failures` | **无表**（接口视图） | 随 `results` / Run | `/failures` 由 Run 租户过滤 |
-| `audit_logs` | `user_id` nullable | `user_id` → 用户租户；NULL → 默认租户 | 写入/查询（本期只写） |
-| `llm_calls` | `user_id` nullable / datasource/task | 优先 user，其次 datasource/task，NULL → 默认租户 | 成本查询/对账 |
+| `audit_logs` | `user_id` nullable | `user_id` → 用户租户；NULL → 默认租户；**列保持 nullable** | 写入/查询（本期只写） |
+| `llm_calls` | `user_id` nullable / datasource/task | 优先 user，其次 datasource/task，NULL → 默认租户；**列保持 nullable** | 成本查询/对账 |
 
 ### 3.3 本切片一起纳入的依赖表
 
@@ -93,7 +93,7 @@
    - 子表 → 父表 `tenant_id`；
    - `audit_logs` / `llm_calls` 的 NULL 用户 → 默认租户。
 4. 校验：核心表 `tenant_id IS NULL` 计数必须为 0；子表与父表不一致计数必须为 0。
-5. `ALTER COLUMN tenant_id SET NOT NULL`。
+5. 业务表 `ALTER COLUMN tenant_id SET NOT NULL`；`audit_logs` / `llm_calls` 保持 nullable，允许平台级记录。
 6. 建索引：`(tenant_id, created_at)`、`(tenant_id, user_id)`、子表 `(tenant_id, parent_id)`；按查询热点补。
 7. `users.role` CHECK 扩展为 `platform_admin / tenant_admin / user / viewer`；存量 `admin` → `tenant_admin`。
 8. 不在迁移里做存储对象搬迁；由代码双读 + 后续 backfill 脚本处理。
@@ -122,7 +122,7 @@
 
 | 角色 | 权限 |
 |---|---|
-| `platform_admin` | 跨租户运维；通过 `X-Tenant-Id` 选择目标租户；每次跨租户请求写 `audit_logs` |
+| `platform_admin` | 跨租户运维；通过 `X-Tenant-Id` 选择目标租户；每次跨租户请求写 `audit_logs`；**仅 env/CLI 一次性引导，不自动建** |
 | `tenant_admin` | 本租户管理员；本期只做成员/配置管理边界，**不默认获得其他用户业务数据**（见开放决策） |
 | `user` | 本租户内自己的资源（沿用现有 user 归属） |
 | `viewer` | 本租户只读 |
@@ -165,7 +165,13 @@
 | 成本/看板 | `llm_calls` / cost 查询 | tenant + user |
 | 后台任务 | digest / cost monitor / stale recovery / cleanup | 逐租户或平台任务显式标记 |
 
-> **关键风险**：`digest` / `cost_monitor` 当前是全局聚合；多租户后必须改为逐租户执行，或仅平台内部使用且不对外发送。验收会覆盖。
+> **关键风险**：`digest` / `cost_monitor` 当前是全局聚合；多租户后：租户 UI/接口只返回当前 tenant，全局视图只允许 platform_admin 端点；后台任务按 tenant 分组，平台任务显式标 platform。验收会覆盖。
+
+### 6.3 Tenant-scoped repository guard
+
+- 不只靠每个查询手工加 `tenant_id`：提供 base/helper（列表、详情、count、下载、报告、对比、导出）统一注入 tenant 条件；
+- 新增查询若没有 tenant 条件，测试/代码评审必须显式说明是平台任务；
+- 跨租户统一 404，测试覆盖列表、详情、下载、报告、对比、导出。
 
 ## 7. 存储
 
@@ -226,15 +232,21 @@
 - 新增 tenant 测试覆盖同上矩阵。
 - staging 冒烟：登录、上传、清洗、评测、对比、导出、报告下载。
 
-## 10. 风险与开放决策（需批准）
+## 10. 已确认决策（2026-11-25）
 
-1. **email 唯一性**：本期建议保留全局唯一（不改登录语义）；后续是否改 `(tenant_id, email)` 待定。
-2. **tenant_admin 数据可见性**：本期建议不默认查看其他用户业务数据，仅管理成员/配置；如需要租户级共享，单列后续切片。
-3. **platform_admin 引导**：迁移不自动创建 platform_admin；用脚本/环境变量在 staging 创建，避免生产出现隐式超级账号。
-4. **未纳入表**：`user_llm_credentials` / `api_keys` / `webhooks` / prompt 系 / `datasource_types` 本期不加 tenant_id；需在后续切片补，期间继续按 user 归属。
-5. **RLS**：本期应用层强制；是否加 PostgreSQL RLS 作为纵深防御，待渗透测试后决定。
-6. **历史对象搬迁**：本期双读；批量搬迁与旧对象清理单独排期。
-7. **聚合任务**：digest/cost 逐租户改造会改变现有全局报表语义，需确认平台是否仍需要全局视图。
+1. **email 全局唯一：保持。** 当前是“一个用户一个 tenant”；同一自然人跨 tenant 需后续 `tenant_memberships`，本期不做，不为未来提前拆唯一约束。
+2. **tenant_admin 默认不看其他用户业务数据。** 只管理本租户用户/角色/设置、查看本租户聚合指标/账单；不默认读取他人对话/报告/Run 明细。后续需要时新增 `tenant_data_admin` 或显式 permission。
+3. **platform_admin 仅 env/CLI 一次性引导。** 不自动建默认超级账号、不设默认密码；创建/变更写审计；现有 `admin` 映射为默认租户 `tenant_admin`，不是 platform_admin。
+4. **凭证/API keys/prompt 表下一片再补。** 生产启用门禁：`TENANT_ENFORCEMENT_ENABLED=true` 上生产前，必须完成或证明 `user_llm_credentials`、`api_keys`、`webhooks`、prompt 系、`datasource_types` 已按 tenant 隔离。
+5. **RLS 本期不做。** PR-1 先做 repository 显式 tenant 过滤、跨租户 404 测试、tenant-scoped guard、全量回归；RLS 作为后续 hardening slice。
+6. **digest/cost：租户看租户，platform_admin 看全局。** 租户 UI/接口只返回当前 tenant；全局 digest/cost 只在 platform_admin 端点；后台任务按 tenant 分组，平台任务显式标 platform。
+7. **历史存储对象：先双读，后批量搬迁。** 新写入 `tenant/<id>/...`；旧 key 双读；staging flag=true 稳定后单独 job，生产搬迁单独批准；访问必须校验 tenant/owner，不能只靠 key 前缀。
+
+### 10.1 补充实现约束
+
+- `audit_logs` / `llm_calls` 的 `tenant_id` 允许 NULL（平台级记录）；租户业务记录必须非空；平台级查询只允许 platform_admin。
+- 引入 tenant-scoped repository guard（列表、详情、下载、报告、对比、导出），跨租户统一 404。
+- 023 验收：默认租户幂等创建、回填幂等、upgrade/downgrade 在 `aiinsight_test` 连续两次、旧用户落默认租户、flag=false 单租户行为不变。
 
 ## 11. 建议 PR 拆分（批准后）
 
@@ -250,3 +262,22 @@
 - 本 scope 审核通过后，才允许写 migration/代码。
 - 先在 `aiinsight_test` 验证 migration up/down，再上 staging 开 flag。
 - 生产 migration 与 flag 切换单独批准。
+
+## 13. PR-1 批准范围（2026-11-25）
+
+### 允许
+
+- `023` migration：`tenants` + 默认租户 + `tenant_id` nullable/backfill/NOT NULL/index；
+- 模型/关系更新（Tenant、tenant_id、必要索引）；
+- 迁移测试、回填测试、up/down 连续两次测试；
+- 仅在 `aiinsight_test` 执行。
+
+### 不允许
+
+- 生产 migration；
+- JWT / Repository 改造提前混进 PR-1；
+- 存储搬迁；
+- audit / retention / alerting / cost 一起做；
+- 打开 `TENANT_ENFORCEMENT_ENABLED=true`。
+
+PR-2（JWT/Repo）等 PR-1 验收后再开。

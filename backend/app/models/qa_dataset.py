@@ -28,6 +28,7 @@ from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.sql import func
 
+from app.core.tenancy import DEFAULT_TENANT_ID_SQL
 from app.models.base import Base
 
 _EMPTY_JSON = text("'[]'::jsonb")
@@ -39,6 +40,7 @@ class QaDataset(Base):
 
     __tablename__ = "qa_datasets"
     __table_args__ = (
+        Index("idx_qa_datasets_tenant_user", "tenant_id", "user_id"),
         CheckConstraint(
             "source_type IN ('doc', 'conv', 'mixed')", name="qa_dataset_source_type_valid"
         ),
@@ -48,6 +50,12 @@ class QaDataset(Base):
 
     id: Mapped[uuid.UUID] = mapped_column(
         PG_UUID(as_uuid=True), primary_key=True, server_default=text("gen_random_uuid()")
+    )
+    tenant_id: Mapped[uuid.UUID] = mapped_column(
+        PG_UUID(as_uuid=True),
+        ForeignKey("tenants.id", ondelete="RESTRICT"),
+        nullable=False,
+        server_default=text(DEFAULT_TENANT_ID_SQL),
     )
     user_id: Mapped[uuid.UUID] = mapped_column(
         PG_UUID(as_uuid=True),
@@ -77,6 +85,7 @@ class QaDatasetVersion(Base):
 
     __tablename__ = "qa_dataset_versions"
     __table_args__ = (
+        Index("idx_qa_dataset_versions_tenant_dataset", "tenant_id", "dataset_id"),
         CheckConstraint(
             "status IN ('draft', 'published', 'archived')",
             name="qa_dataset_version_status_valid",
@@ -87,6 +96,12 @@ class QaDatasetVersion(Base):
 
     id: Mapped[uuid.UUID] = mapped_column(
         PG_UUID(as_uuid=True), primary_key=True, server_default=text("gen_random_uuid()")
+    )
+    tenant_id: Mapped[uuid.UUID] = mapped_column(
+        PG_UUID(as_uuid=True),
+        ForeignKey("tenants.id", ondelete="RESTRICT"),
+        nullable=False,
+        server_default=text(DEFAULT_TENANT_ID_SQL),
     )
     dataset_id: Mapped[uuid.UUID] = mapped_column(
         PG_UUID(as_uuid=True),
@@ -110,6 +125,7 @@ class QaDatasetItem(Base):
 
     __tablename__ = "qa_dataset_items"
     __table_args__ = (
+        Index("idx_qa_dataset_items_tenant_version", "tenant_id", "version_id"),
         CheckConstraint(
             "split IN ('train', 'valid', 'test')",
             name="qa_dataset_item_split_valid",
@@ -121,6 +137,12 @@ class QaDatasetItem(Base):
 
     id: Mapped[uuid.UUID] = mapped_column(
         PG_UUID(as_uuid=True), primary_key=True, server_default=text("gen_random_uuid()")
+    )
+    tenant_id: Mapped[uuid.UUID] = mapped_column(
+        PG_UUID(as_uuid=True),
+        ForeignKey("tenants.id", ondelete="RESTRICT"),
+        nullable=False,
+        server_default=text(DEFAULT_TENANT_ID_SQL),
     )
     version_id: Mapped[uuid.UUID] = mapped_column(
         PG_UUID(as_uuid=True),

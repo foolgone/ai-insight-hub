@@ -1,9 +1,10 @@
-"""ORM 模型包（24 张表，数据库设计 §3）。
+"""ORM 模型包（25 张表，数据库设计 §3）。
 
 Alembic ``autogenerate`` 依赖本包导入全部模型；**新增模型后必须在此登记**，
 否则 ``migrations/env.py`` 的 ``Base.metadata`` 不包含该表。
 
 分组：
+- 租户：tenants（1 张，M4-A tenant slice）
 - 业务：users / data_sources / datasource_types / raw_data / cleaned_data /
   analysis_results / knowledge_base / reports / tasks / api_keys / audit_logs /
   webhooks（12 张）
@@ -26,6 +27,7 @@ from app.models.rag_evaluation import RagEvaluationResult, RagEvaluationRun
 from app.models.report import Report
 from app.models.security import ApiKey, AuditLog, Webhook
 from app.models.task import Task
+from app.models.tenant import Tenant
 from app.models.user import User
 
 __all__ = [
@@ -50,6 +52,7 @@ __all__ = [
     "RawData",
     "Report",
     "Task",
+    "Tenant",
     "User",
     "UserLLMCredential",
     "VersionRollbackLog",

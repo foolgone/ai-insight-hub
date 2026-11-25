@@ -21,6 +21,7 @@ from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.sql import func
 
+from app.core.tenancy import DEFAULT_TENANT_ID_SQL
 from app.models.base import Base
 
 
@@ -29,6 +30,8 @@ class Task(Base):
 
     __tablename__ = "tasks"
     __table_args__ = (
+        Index("idx_tasks_tenant_status", "tenant_id", "status"),
+        Index("idx_tasks_tenant_user_created", "tenant_id", "user_id", "created_at"),
         CheckConstraint(
             "task_type IN ('clean', 'structure', 'evaluate', 'extract', 'analyze', 'report')",
             name="task_type_valid",
@@ -47,6 +50,12 @@ class Task(Base):
 
     id: Mapped[uuid.UUID] = mapped_column(
         PG_UUID(as_uuid=True), primary_key=True, server_default=text("gen_random_uuid()")
+    )
+    tenant_id: Mapped[uuid.UUID] = mapped_column(
+        PG_UUID(as_uuid=True),
+        ForeignKey("tenants.id", ondelete="RESTRICT"),
+        nullable=False,
+        server_default=text(DEFAULT_TENANT_ID_SQL),
     )
     task_type: Mapped[str] = mapped_column(String(50), nullable=False)
     task_name: Mapped[str | None] = mapped_column(String(255))

@@ -22,6 +22,7 @@ from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.sql import func
 
+from app.core.tenancy import DEFAULT_TENANT_ID_SQL
 from app.models.base import Base
 
 
@@ -30,6 +31,8 @@ class Report(Base):
 
     __tablename__ = "reports"
     __table_args__ = (
+        Index("idx_reports_tenant_user", "tenant_id", "user_id"),
+        Index("idx_reports_tenant_datasource_created", "tenant_id", "datasource_id", "created_at"),
         CheckConstraint(
             "report_type IN ('quality', 'knowledge', 'insight', 'comprehensive')",
             name="report_type_valid",
@@ -44,6 +47,12 @@ class Report(Base):
 
     id: Mapped[uuid.UUID] = mapped_column(
         PG_UUID(as_uuid=True), primary_key=True, server_default=text("gen_random_uuid()")
+    )
+    tenant_id: Mapped[uuid.UUID] = mapped_column(
+        PG_UUID(as_uuid=True),
+        ForeignKey("tenants.id", ondelete="RESTRICT"),
+        nullable=False,
+        server_default=text(DEFAULT_TENANT_ID_SQL),
     )
     datasource_id: Mapped[uuid.UUID] = mapped_column(
         PG_UUID(as_uuid=True),

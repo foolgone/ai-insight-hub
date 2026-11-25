@@ -29,6 +29,7 @@ from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.sql import func
 
+from app.core.tenancy import DEFAULT_TENANT_ID_SQL
 from app.models.base import Base
 
 _EMPTY_OBJECT = text("'{}'::jsonb")
@@ -39,6 +40,8 @@ class RagEvaluationRun(Base):
 
     __tablename__ = "rag_evaluation_runs"
     __table_args__ = (
+        Index("idx_rag_evaluation_runs_tenant_status", "tenant_id", "status"),
+        Index("idx_rag_evaluation_runs_tenant_user_created", "tenant_id", "user_id", "created_at"),
         CheckConstraint("retry_scope IN ('all', 'failed_only')", name="retry_scope_valid"),
         CheckConstraint("execution_mode IN ('retrieve', 'query')", name="mode_valid"),
         CheckConstraint(
@@ -55,6 +58,12 @@ class RagEvaluationRun(Base):
 
     id: Mapped[uuid.UUID] = mapped_column(
         PG_UUID(as_uuid=True), primary_key=True, server_default=text("gen_random_uuid()")
+    )
+    tenant_id: Mapped[uuid.UUID] = mapped_column(
+        PG_UUID(as_uuid=True),
+        ForeignKey("tenants.id", ondelete="RESTRICT"),
+        nullable=False,
+        server_default=text(DEFAULT_TENANT_ID_SQL),
     )
     user_id: Mapped[uuid.UUID] = mapped_column(
         PG_UUID(as_uuid=True),
@@ -126,6 +135,7 @@ class RagEvaluationResult(Base):
 
     __tablename__ = "rag_evaluation_results"
     __table_args__ = (
+        Index("idx_rag_evaluation_results_tenant_run", "tenant_id", "run_id"),
         CheckConstraint(
             "status IN ('evaluated', 'skipped', 'invalid', 'failed')",
             name="rag_eval_result_status_m1c",
@@ -154,6 +164,12 @@ class RagEvaluationResult(Base):
 
     id: Mapped[uuid.UUID] = mapped_column(
         PG_UUID(as_uuid=True), primary_key=True, server_default=text("gen_random_uuid()")
+    )
+    tenant_id: Mapped[uuid.UUID] = mapped_column(
+        PG_UUID(as_uuid=True),
+        ForeignKey("tenants.id", ondelete="RESTRICT"),
+        nullable=False,
+        server_default=text(DEFAULT_TENANT_ID_SQL),
     )
     run_id: Mapped[uuid.UUID] = mapped_column(
         PG_UUID(as_uuid=True),
