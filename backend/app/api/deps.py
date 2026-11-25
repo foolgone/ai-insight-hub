@@ -30,7 +30,8 @@ from app.core.tenancy import (
     TenantContext,
     attach_tenant_context,
 )
-from app.models import AuditLog, Tenant, User
+from app.models import Tenant, User
+from app.repositories import audit_log as audit_repo
 from app.services.credential_service import credential_service
 
 
@@ -103,24 +104,16 @@ async def get_current_user(
     attach_tenant_context(user, context)
 
     if requested_tenant_id is not None and requested_tenant_id != user.tenant_id:
-        session.add(
-            AuditLog(
-                user_id=user.id,
-                tenant_id=requested_tenant_id,
-                action="tenant.cross_access",
-                resource_type="tenant",
-                resource_id=requested_tenant_id,
-                details={
-                    "actor_tenant_id": str(user.tenant_id),
-                    "target_tenant_id": str(requested_tenant_id),
-                    "method": request.method,
-                    "path": request.url.path,
-                },
-                ip_address=request.client.host if request.client else None,
-                user_agent=request.headers.get("user-agent"),
-            )
+        await audit_repo.add_cross_tenant_access(
+            session,
+            user_id=user.id,
+            target_tenant_id=requested_tenant_id,
+            actor_tenant_id=user.tenant_id,
+            method=request.method,
+            path=request.url.path,
+            ip_address=request.client.host if request.client else None,
+            user_agent=request.headers.get("user-agent"),
         )
-        await session.flush()
     return user
 
 
