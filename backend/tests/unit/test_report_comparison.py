@@ -200,3 +200,13 @@ def test_render_excel_contains_comparison_section() -> None:
     sections = workbook["Sections"]
     values = [row[0].value for row in sections.iter_rows()]
     assert "Run 对比" in values
+
+
+def test_render_pdf_accepts_comparison_output() -> None:
+    report = SimpleNamespace(title="Run 对比报告", report_type="comprehensive", config={})
+    output = build_comparison_output(report, _payload(), generated_at="2026-11-25T04:00:00")
+
+    pdf = report_service.render_pdf(report, output, {})
+
+    assert pdf.startswith(b"%PDF")
+    assert len(pdf) > 1000

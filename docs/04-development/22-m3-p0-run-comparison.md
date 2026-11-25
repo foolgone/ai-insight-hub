@@ -246,7 +246,7 @@ Case diff：**变好 31 / 变差 32 / 不变 57 / invalid 0 / 未处理 0**（�
 
 | 项 | 结果 |
 |---|---|
-| 报告章节单测 | 6 passed：数字/噪声/same_config false/空 Top/200 截断/Markdown+Excel 模板渲染 |
+| 报告章节单测 | 7 passed：数字/噪声/same_config false/空 Top/200 截断/Markdown+Excel+PDF 渲染 |
 | 报告集成 | 2 passed：对比报告不调用 Agent + 跨租户 404；报告套件 15 passed |
 | 前端 | 84 files / 439 tests；导出/报告快照、Top 5 排序、Compare UI |
 | lint / build / mypy / import-linter | 通过 |

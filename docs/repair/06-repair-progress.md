@@ -1559,7 +1559,6 @@ alembic check   : No new upgrade operations detected
 - 报告服务：创建时校验 base/target Run 属于当前用户（跨租户 404）；命中对比配置时跳过报告 Agent，确定性追加“Run 对比”section，再走原 markdown/excel/pdf 渲染。
 - 章节：Base/Target 元数据、F/C/R delta、样本状态、Case 汇总、Top 5 变好/变差（驱动指标）、Judge beta/同配置噪声、对比页与导出提示。
 - 真实验收（120 Case，报告 `a4290722…`）：completed；变好 31 / 变差 32 / 不变 57 / 0 / 0；F/C/R 与页面一致；Top 变好 `P12-002/017/027/037/047`、Top 变差 `P12-007/072/015/030/055` 与导出 JSON 完全一致。
-- 测试：报告章节单测 6、报告集成 2（不调用 Agent + 跨租户 404），报告套件 15 passed；前端 84 files / 439 tests；lint/build/mypy/import-linter 通过。
+- 测试：报告章节单测 7、报告集成 2（不调用 Agent + 跨租户 404），报告套件 15 passed；前端 84 files / 439 tests；lint/build/mypy/import-linter 通过。
 - 截图：`docs/04-development/assets/m3-p13/compare-report-preview.png`、`compare-report-cases.png`。
 - 备注：CSV 元数据注释块非严格 CSV，机器消费以 JSON 为准；question 可能含客户数据，导出/报告仅当前用户/租户，不生成公开链接。
-
