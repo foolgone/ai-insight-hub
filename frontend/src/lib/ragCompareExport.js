@@ -25,6 +25,12 @@ function runExportMeta(run) {
     judge_model: judgeConfig.model ?? run?.config_snapshot?.model ?? null,
     prompt_version: judgeConfig.prompt_version ?? null,
     completed_at: run?.completed_at ?? null,
+    total_items: run?.total_items ?? null,
+    evaluated_items: run?.evaluated_items ?? null,
+    invalid_items: run?.invalid_items ?? null,
+    failed_items: run?.failed_items ?? null,
+    skipped_items: run?.skipped_items ?? null,
+    unprocessed_items: run?.unprocessed_items ?? null,
   }
 }
 
@@ -147,6 +153,38 @@ export function buildCompareExportPayload({
         : null,
     },
     cases,
+  }
+}
+
+/** 取指定分类中驱动指标绝对变化最大的 Case（最多 limit 条）。 */
+export function topDiffCases(rows = [], status = 'improved', limit = 5) {
+  return rows
+    .filter(row => row.diff?.status === status && typeof row.diff?.driver?.delta === 'number')
+    .sort((left, right) => Math.abs(right.diff.driver.delta) - Math.abs(left.diff.driver.delta))
+    .slice(0, limit)
+    .map(row => ({
+      dataset_item_id: row.itemId,
+      item_key: row.item?.item_key ?? null,
+      question: row.item?.query ?? null,
+      verdict: status,
+      driver_metric: row.diff.driver.name ?? null,
+      driver_delta: row.diff.driver.delta,
+      note: row.diff.note ?? null,
+    }))
+}
+
+/**
+ * 生成报告“Run 对比”章节所需快照（P1-3b）：在导出 payload 基础上补
+ * Top 变好/变差（最多 5 条）与对比页链接。
+ */
+export function buildComparisonReportPayload({ compareUrl = null, ...params }) {
+  const payload = buildCompareExportPayload(params)
+  return {
+    ...payload,
+    same_config: payload.comparison.same_config,
+    top_improved: topDiffCases(params.rows, 'improved', 5),
+    top_regressed: topDiffCases(params.rows, 'regressed', 5),
+    compare_url: compareUrl,
   }
 }
 

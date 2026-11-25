@@ -1,7 +1,7 @@
 # M3 P0：两 Run 对比
 
-> 状态：**accepted（页面/流程）**；前端只读，无新后端接口。β 噪声提示已补（P1 必补项）。**P1-2 全量分页已验收（120 Case 真实 + 250 Case mocked）**；**P1-3a CSV/JSON 导出已验收（120 Case）**。
-> 日期：2026-11-24（2026-11-25 补 P1-2 / P1-3a）
+> 状态：**accepted（页面/流程）**；前端只读，无新后端接口。β 噪声提示已补（P1 必补项）。**P1-2 全量分页已验收（120 Case 真实 + 250 Case mocked）**；**P1-3a CSV/JSON 导出已验收（120 Case）**；**P1-3b 报告“Run 对比”章节已验收（120 Case）**。
+> 日期：2026-11-24（2026-11-25 补 P1-2 / P1-3a / P1-3b）
 > 入口：`/rag-evaluations/compare?base=<runId>&target=<runId>`；Run 列表「对比 Run」、Run 详情「对比此 Run」。
 
 ## 1. 范围
@@ -13,7 +13,7 @@
 | 指标 | F / C / R 的 base、target、delta；invalid / failed / skipped / unprocessed 分开 |
 | Case diff | 按 `dataset_item_id` 对齐；`变好 / 变差 / 不变 / invalid / 未处理` |
 | 钻取 | 点击 Case 跳到 M2 的 Case 详情 |
-| 导出 | P1-3a 已实现 CSV/JSON（带 noise/same_config）；报告章节 P1-3b |
+| 导出 | P1-3a 已实现 CSV/JSON（带 noise/same_config）；P1-3b 报告章节已实现 |
 
 ## 2. 实现
 
@@ -70,7 +70,7 @@ Case diff：**变好 1 / 变差 2 / 不变 2 / invalid 0 / 未处理 0**。
 
 - ✅ 已修复（P1-0）：Windows Celery `Event loop is closed` / asyncpg 跨 `asyncio.run`；改为 worker 进程内持久 event loop，连续 3 Run 全 completed。
 - ✅ 已修复（P1-2）：对比页 100 条结果上限；改按 page/limit 拉全量，200 Case 上限（见 §7）。
-- ✅ P1-3a 已导出 CSV/JSON（120 Case，带 noise_notice / same_config）；P1-3b 报告章节 next。
+- ✅ P1-3a 已导出 CSV/JSON（120 Case，带 noise_notice / same_config）；P1-3b 报告章节已验收（见 §9）。
 - ✅ 已修复（P1-1）：页面刷新后的 401 竞态；静默 refresh，Playwright reload 401=0。
 
 ## 6. 边界
@@ -169,6 +169,7 @@ Case diff：**变好 31 / 变差 32 / 不变 57 / invalid 0 / 未处理 0**（�
 - **汇总**：improved / regressed / unchanged / invalid / unprocessed、total、aligned_total、exported_cases、case_truncated、truncation_note。
 - **上限**：只导出页面实际对比的 Case（最多 200）；超过时带截断说明。
 - **文件名**：`rag-compare_<base8>_<target8>_<timestamp>.csv/json`。
+- **CSV 说明**：文件开头为 `# key=value` 元数据注释块（不是严格矩形 CSV）；机器消费请以 JSON 为准，Excel/部分解析器会把注释当额外行。
 
 ### 8.3 真实验收（120 Case）
 
@@ -184,6 +185,7 @@ Case diff：**变好 31 / 变差 32 / 不变 57 / invalid 0 / 未处理 0**（�
 
 - 页面渲染 120 行，缺失标签 0；导出按钮截图：`docs/04-development/assets/m3-p13/compare-export-buttons.png`。
 - **权限**：纯前端 Blob 下载，不上传服务端/对象存储；只包含当前登录用户已加载的 Run 数据。
+- **客户数据**：`question` 可能含客户对话内容；导出只在当前用户会话内下载，不生成公开链接（P1-3b 报告与 M4-A 数据权利同样保留此约束）。
 - 200 上限与 `same_config=false` 由 mocked 单测覆盖（250 Case → 200 行 + 截断说明）。
 
 ### 8.4 测试
@@ -194,3 +196,62 @@ Case diff：**变好 31 / 变差 32 / 不变 57 / invalid 0 / 未处理 0**（�
 | Compare UI | 导出按钮加载后可用 |
 | API 分页 | 120 条 dataset items 两页拉完 |
 | 全量 | 84 files / 435 tests；lint / build 通过 |
+
+## 9. P1-3b：报告“Run 对比”章节（2026-11-25）
+
+> 复用现有报告中心的模板/任务/存储/下载链路；**不新建报告引擎、不做 migration**。
+> 对比章节为确定性渲染，不调用报告 Agent，确保数字与对比页一致。
+
+### 9.1 改动
+
+| 层 | 改动 |
+|---|---|
+| 对比页 | 新增“生成报告”按钮 + 弹窗：标题、格式（Markdown/Excel/PDF），生成到当前数据源下。 |
+| 前端快照 | `buildComparisonReportPayload`：在导出快照上补 Top 变好/变差（最多 5 条，按驱动指标绝对变化）、对比页链接、same_config、样本计数。 |
+| 报告配置 | `ReportConfig.run_comparison`（存 JSONB config，无 migration）。 |
+| 报告服务 | 创建时校验 base/target Run 属于当前用户（跨租户 404）；命中对比配置时跳过 Agent，追加“Run 对比”section，再走原 markdown/excel/pdf 渲染与存储。 |
+| 模板 | 对比报告的质量/知识/洞察概览显示“本报告为 Run 对比报告，不含…”，避免误导。 |
+
+### 9.2 章节内容
+
+- **Base / Target**：Run ID、dataset/version、mode/adapter/top_k、judge model/prompt、完成时间。
+- **指标**：F/C/R 的 base / target / delta；样本状态 invalid / failed / skipped / unprocessed。
+- **Case 汇总**：变好 / 变差 / 不变 / invalid / 未处理，对齐/导出数，200 截断说明。
+- **Top 变化**：最多 5 条变好、5 条变差，带 item_key/问题、驱动指标、delta、说明。
+- **Beta 提示**：Judge beta；same_config=true 时追加“同配置比较”噪声警告；delta 不代表因果。
+- **链接**：对比页链接 + “导出 CSV / 导出 JSON”提示。
+
+### 9.3 真实验收（120 Case）
+
+| 项 | 结果 |
+|---|---|
+| 报告 | `a4290722-9550-4ac5-a047-fe74c0d7abbc`，completed，comprehensive / markdown |
+| 章节 | ✅ “Run 对比”存在 |
+| 指标 | ✅ F 0.776→0.801（+0.026）、C 0.128→0.125（-0.003）、R 0.498→0.488（-0.010） |
+| Case 汇总 | ✅ 变好 31 / 变差 32 / 不变 57 / invalid 0 / 未处理 0（合计 120） |
+| Top 变好 | ✅ `P12-002/017/027/037/047`，与导出 JSON 排序完全一致 |
+| Top 变差 | ✅ `P12-007/072/015/030/055`，与导出 JSON 排序完全一致 |
+| same_config | ✅ 报告显示“同配置比较”噪声警告 |
+| noise | ✅ “Judge beta 噪声提示”存在 |
+| 导出链接 | ✅ 对比页链接 + CSV/JSON 导出提示 |
+| 打开 | ✅ 报告中心预览可打开，数字与对比页一致 |
+| 跨租户 | ✅ 引用他人 Run 创建报告返回 404 `RAG_EVALUATION_NOT_FOUND`（集成测试） |
+
+截图：
+
+- `docs/04-development/assets/m3-p13/compare-report-preview.png`（摘要/章节开头）
+- `docs/04-development/assets/m3-p13/compare-report-cases.png`（指标、样本状态、Case 汇总、Top 变好/变差）
+
+### 9.4 测试
+
+| 项 | 结果 |
+|---|---|
+| 报告章节单测 | 6 passed：数字/噪声/same_config false/空 Top/200 截断/Markdown+Excel 模板渲染 |
+| 报告集成 | 2 passed：对比报告不调用 Agent + 跨租户 404；报告套件 15 passed |
+| 前端 | 84 files / 439 tests；导出/报告快照、Top 5 排序、Compare UI |
+| lint / build / mypy / import-linter | 通过 |
+
+### 9.5 备注
+
+- CSV 顶部 `#` 元数据块不是严格 CSV；机器消费以 JSON 为准（P1-3a 备注）。
+- `question` 可能含客户数据；导出与报告均只允许当前用户/租户，不生成公开链接；M4-A 数据权利继续保留此约束。

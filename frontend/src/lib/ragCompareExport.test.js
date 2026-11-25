@@ -2,11 +2,13 @@ import { describe, expect, it } from 'vitest'
 import {
   buildCompareExportFilename,
   buildCompareExportPayload,
+  buildComparisonReportPayload,
   COMPARE_EXPORT_NOISE_NOTICE,
   COMPARE_EXPORT_SCHEMA_VERSION,
   csvCell,
   csvEscape,
   toCompareCsv,
+  topDiffCases,
 } from './ragCompareExport'
 
 const BASE_RUN = {
@@ -271,6 +273,83 @@ describe('toCompareCsv', () => {
     expect(rows).toHaveLength(200)
     expect(csv).toContain('# case_truncated=true')
     expect(csv).toContain('仅导出前 200 个 Case')
+  })
+})
+
+describe('报告快照', () => {
+  function rowWithDelta(index, status, driverDelta) {
+    const row = makeRow(index, status)
+    return {
+      ...row,
+      diff: {
+        ...row.diff,
+        driver: { name: 'faithfulness', short: 'F', delta: driverDelta },
+        note: `F ${driverDelta > 0 ? '+' : ''}${driverDelta.toFixed(3)}`,
+      },
+    }
+  }
+
+  it('Top 变好/变差按驱动指标绝对变化排序，最多 5 条', () => {
+    const rows = [
+      rowWithDelta(0, 'improved', 0.1),
+      rowWithDelta(1, 'improved', 0.5),
+      rowWithDelta(2, 'improved', 0.3),
+      rowWithDelta(3, 'improved', 0.7),
+      rowWithDelta(4, 'improved', 0.2),
+      rowWithDelta(5, 'improved', 0.6),
+      rowWithDelta(6, 'regressed', -0.4),
+      rowWithDelta(7, 'regressed', -0.8),
+      rowWithDelta(8, 'unchanged', 0),
+    ]
+    const improved = topDiffCases(rows, 'improved', 5)
+    const regressed = topDiffCases(rows, 'regressed', 5)
+
+    expect(improved).toHaveLength(5)
+    expect(improved.map(item => item.driver_delta)).toEqual([0.7, 0.6, 0.5, 0.3, 0.2])
+    expect(improved[0]).toMatchObject({
+      item_key: 'P12-003',
+      verdict: 'improved',
+      driver_metric: 'faithfulness',
+    })
+    expect(regressed.map(item => item.driver_delta)).toEqual([-0.8, -0.4])
+  })
+
+  it('空数据时 Top 为空，报告快照仍保留汇总与链接', () => {
+    const payload = buildComparisonReportPayload({
+      base: BASE_RUN,
+      target: TARGET_RUN,
+      metricRows: METRIC_ROWS,
+      rows: [],
+      diffCounts: {},
+      alignedCount: 0,
+      caseTruncated: false,
+      compareUrl: '/rag-evaluations/compare?base=a&target=b',
+    })
+
+    expect(payload.top_improved).toEqual([])
+    expect(payload.top_regressed).toEqual([])
+    expect(payload.compare_url).toBe('/rag-evaluations/compare?base=a&target=b')
+    expect(payload.case_summary.total).toBe(0)
+  })
+
+  it('报告快照含 Top 5 与 same_config/noise', () => {
+    const payload = buildComparisonReportPayload({
+      base: BASE_RUN,
+      target: TARGET_RUN,
+      metricRows: METRIC_ROWS,
+      rows: makeRows(),
+      diffCounts: DIFF_COUNTS,
+      alignedCount: 120,
+      caseTruncated: false,
+      compareUrl: '/rag-evaluations/compare?base=a&target=b',
+    })
+
+    expect(payload.top_improved).toHaveLength(5)
+    expect(payload.top_regressed).toHaveLength(5)
+    expect(payload.same_config).toBe(true)
+    expect(payload.comparison.same_config).toBe(true)
+    expect(payload.comparison.noise_notice).toContain('Judge 为 beta')
+    expect(payload.case_summary.improved).toBe(31)
   })
 })
 

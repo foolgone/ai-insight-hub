@@ -1,6 +1,6 @@
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { LuArrowLeft, LuArrowLeftRight, LuDownload, LuRefreshCw } from 'react-icons/lu'
+import { LuArrowLeft, LuArrowLeftRight, LuDownload, LuFileText, LuRefreshCw } from 'react-icons/lu'
 import { AsyncState } from '../../components/common/AsyncState'
 import { PageHeader } from '../../components/common/PageHeader'
 import { Badge } from '../../components/Badge'
@@ -10,16 +10,19 @@ import { Select } from '../../components/Select'
 import { Table } from '../../components/Table'
 import { JudgeNoiseNotice } from '../../components/rag/JudgeNoiseNotice'
 import { RagBetaNotice } from '../../components/rag/RagBetaNotice'
+import { ComparisonReportModal } from '../../components/reports/ComparisonReportModal'
 import {
   useAllDatasetItemsQuery,
   useRagEvaluationQuery,
   useAllRagEvaluationResultsQuery,
   useRagEvaluationsQuery,
 } from '../../hooks/useRagEvaluations'
+import { useDatasourceStore } from '../../stores/datasourceStore'
 import { formatDateTime } from '../../lib/format'
 import {
   buildCompareExportFilename,
   buildCompareExportPayload,
+  buildComparisonReportPayload,
   downloadTextFile,
   toCompareCsv,
 } from '../../lib/ragCompareExport'
@@ -60,6 +63,8 @@ function formatDelta(delta) {
 
 export default function RagEvaluationCompare() {
   const [params, setParams] = useSearchParams()
+  const [reportOpen, setReportOpen] = useState(false)
+  const currentDatasourceId = useDatasourceStore(state => state.currentId)
   const baseId = params.get('base') || ''
   const targetId = params.get('target') || ''
 
@@ -201,6 +206,21 @@ export default function RagEvaluationCompare() {
       'application/json;charset=utf-8'
     )
   }
+
+  const reportComparison = useMemo(() => {
+    if (!base || !target || rows.length === 0) return null
+    return buildComparisonReportPayload({
+      base,
+      target,
+      metricRows,
+      rows,
+      diffCounts,
+      alignedCount,
+      caseTruncated,
+      maxCases: MAX_COMPARE_CASES,
+      compareUrl: `/rag-evaluations/compare?base=${baseId}&target=${targetId}`,
+    })
+  }, [base, target, metricRows, rows, diffCounts, alignedCount, caseTruncated, baseId, targetId])
 
   const loading =
     runsQuery.isLoading ||
@@ -344,6 +364,15 @@ export default function RagEvaluationCompare() {
               disabled={exportDisabled}
             >
               导出 JSON
+            </Button>
+            <Button
+              variant="outline"
+              icon={<LuFileText className="h-4 w-4" />}
+              onClick={() => setReportOpen(true)}
+              disabled={!reportComparison || !currentDatasourceId}
+              title={currentDatasourceId ? undefined : '请先在顶部「数据源选择器」中选择数据源'}
+            >
+              生成报告
             </Button>
             <Button
               variant="outline"
@@ -560,6 +589,13 @@ export default function RagEvaluationCompare() {
           </div>
         </>
       )}
+
+      <ComparisonReportModal
+        open={reportOpen}
+        onClose={() => setReportOpen(false)}
+        datasourceId={currentDatasourceId}
+        comparison={reportComparison}
+      />
     </section>
   )
 }

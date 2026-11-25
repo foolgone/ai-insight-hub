@@ -8,8 +8,8 @@
 > 4. 未冻结的定义/目标，不得进入代码实现。
 >
 > 最后更新：2026-11-25
-> 当前阶段：**M2 P0 / M3 P0 accepted；M4-A accepted as baseline；P1-0 / P1-1 / P1-2 / P1-3a 已修复并验证**
-> 当前决策：**P1-3b 报告章节 next；P1-5 本地测试库隔离在 M4-A 实现前完成；M4-A implementation 未批准**
+> 当前阶段：**M2 P0 / M3 P0 accepted；M4-A accepted as baseline；P1-0 / P1-1 / P1-2 / P1-3a / P1-3b 已修复并验证**
+> 当前决策：**P1-5 本地测试库隔离 next；之后 M4-A 实现（需单独批准）；M4-A implementation 未批准**
 > 当前不做：target 校准、5-case 模型对比、10/40 Judge、v1.2.6、M1-E 验收
 
 ---
@@ -26,8 +26,8 @@
 | Judge 展示 | invalid / skipped / known issues 原样展示；人工复核可覆盖 |
 | 当前可写代码？ | **是**：M2 P0 及平台主流程 |
 | 当前可跑 Judge？ | **否**（仅 beta 展示；不新增校准调用） |
-| 下一个交付 | P1-3b 报告“Run 对比”章节 |
-| 之后 | P1-5 本地测试库隔离；M4-A 实现（需单独批准） |
+| 下一个交付 | P1-5 本地测试库隔离 |
+| 之后 | M4-A 实现（需单独批准） |
 
 ### M2 P0 已交付
 
@@ -65,7 +65,7 @@
 | P1-1 | 401 auth hydration 竞态 | **done / verified**：刷新 401=0 |
 | P1-2 | 对比页 100 条上限/分页 | **done / verified**：120 真实（每侧 5 页）+ 250 mocked；200 上限 |
 | P1-3a | 对比结果 CSV/JSON 导出 | **done / verified**：120 Case；noise/same_config；200 上限 mocked |
-| P1-3b | 报告“Run 对比”章节 | next |
+| P1-3b | 报告“Run 对比”章节 | **done / verified**：120 Case；确定性渲染；跨租户 404 |
 | P1-4 | M4-A 实现（tenant 先行） | pending（未批准） |
 
 ### M1 当前口径（beta）
