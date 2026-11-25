@@ -265,10 +265,11 @@
 | P1-1 | 401 auth hydration 竞态 | 刷新/首次进入页面无 401 | **done / verified**：Playwright 登录 + reload，401=0 |
 | P1-2 | 对比页 100 条结果上限/分页 | 200 条 Run 可完整对比 | **done / verified**：120 真实（每侧 5 页）+ 250 mocked；200 上限与截断提示 |
 | P1-3a | 对比结果 CSV/JSON 导出 | 对比结果可导出 | **done / verified**：120 Case，noise/same_config，200 上限 mocked |
-| P1-3b | 报告“Run 对比”章节 | 对比结果进入报告 | **done / verified**：120 Case；复用报告模板/任务；确定性渲染；跨租户 404 |
+| P1-3b | 报告“Run 对比”章节 | 对比结果进入报告 | **accepted**（CI 全绿）：120 Case；复用报告模板/任务；确定性渲染；跨租户 404 |
+| P1-5 | 本地测试库隔离 | 本地全量 pytest 可复现 | **done / verified**：`aiinsight_test`；连续两次 1138 passed |
 | P1-4 | M4-A 实现：租户 → 审计 → 保留期 → 告警 → 成本 → 数据权利 | 按 §8 顺序拆 PR | pending（需实现批准） |
 
-> P1-0/P1-1/P1-2/P1-3a/P1-3b 已完成并验证；P1-5 next；M4-A 实现仍未批准。
+> P1-0/P1-1/P1-2/P1-3a/P1-3b/P1-5 已完成并验证；M4-A 实现仍未批准。
 
 ## 9. 边界
 

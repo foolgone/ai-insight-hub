@@ -1562,3 +1562,14 @@ alembic check   : No new upgrade operations detected
 - 测试：报告章节单测 7、报告集成 2（不调用 Agent + 跨租户 404），报告套件 15 passed；前端 84 files / 439 tests；lint/build/mypy/import-linter 通过。
 - 截图：`docs/04-development/assets/m3-p13/compare-report-preview.png`、`compare-report-cases.png`。
 - 备注：CSV 元数据注释块非严格 CSV，机器消费以 JSON 为准；question 可能含客户数据，导出/报告仅当前用户/租户，不生成公开链接。
+
+### P1-5 本地测试库隔离（2026-11-25）
+- 新增 `backend/scripts/run_tests_local.py`：从 `backend/.env` 派生 `aiinsight_test`，自动建库、`DROP/CREATE SCHEMA public`、`alembic upgrade head`，Redis 切到 DB 15 并 FLUSHDB，再执行 `pytest -m "not prompt"`。
+- `tests/conftest.py` 新增守卫：integration/security 或使用 `db_session` 的用例只允许 `*_test` 库，否则 `pytest.exit`；直接对 dev 库跑集成测试会被拒绝。
+- 文档：`docs/04-development/23-local-test-db.md`（命令/环境变量/验收）；`AGENTS.md` 全量命令改为脚本；测试策略总览加入口。
+- 实机验收（VM `192.168.150.100:5433` / Redis 6379 DB15）：
+  - 第一次：**1138 passed / 255 deselected**，5m50s；
+  - 第二次：**1138 passed / 255 deselected**，5m16s；
+  - 两次均 exit 0；dev 库 `aiinsight` 未读写。
+- 边界：只改测试/脚本/文档，不改产品行为；测试库可丢弃；M4-A 实现仍未批准。
+

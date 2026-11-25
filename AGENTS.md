@@ -39,8 +39,8 @@ api → tasks → services → application → agents → repositories → ports
 
 ```bash
 # 后端（在 backend/ 下，用 backend/venv）
-pytest -m "not prompt"          # 全量（645 条，跳过需要真实 Key 的 prompt 用例）
-pytest tests/unit -q            # 单测
+python scripts/run_tests_local.py  # 全量（隔离 aiinsight_test；跳过需真实 Key 的 prompt 用例）
+pytest tests/unit -q            # 单测（不依赖测试库）
 black app tests && flake8 app tests && mypy app
 lint-imports                    # 分层契约
 
