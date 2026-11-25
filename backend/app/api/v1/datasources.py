@@ -57,8 +57,8 @@ from app.services.credential_service import PROVIDER_ASR, credential_service
 
 router = APIRouter()
 
-READ_ROLES = ("admin", "user", "viewer")
-WRITE_ROLES = ("admin", "user")
+READ_ROLES = ("platform_admin", "tenant_admin", "user", "viewer")
+WRITE_ROLES = ("platform_admin", "tenant_admin", "user")
 
 # raw_data.raw_content.text 入库上限（更大文件由对象存储承载，清洗 Agent 走存储读取）
 MAX_RAW_TEXT_CHARS = 200_000

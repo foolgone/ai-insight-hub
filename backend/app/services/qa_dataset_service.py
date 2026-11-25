@@ -218,7 +218,7 @@ async def list_datasets(
     keyword: str | None,
     params: PaginationParams,
 ) -> tuple[list[QaDataset], Pagination]:
-    scope: uuid.UUID | None = None if user.role == "admin" else user.id
+    scope: uuid.UUID | None = None if user.role == "platform_admin" else user.id
     return await repo.list_datasets(session, user_id=scope, keyword=keyword, params=params)
 
 

@@ -70,7 +70,7 @@ async def _enforce_verify_rate_limit(user_id: uuid.UUID) -> None:
 )
 async def put_llm_credential(
     payload: CredentialIn,
-    user: User = Depends(require_roles("admin", "user")),
+    user: User = Depends(require_roles("platform_admin", "tenant_admin", "user")),
     session: AsyncSession = Depends(get_db),
 ) -> CredentialStatus:
     _ensure_enabled()
@@ -99,7 +99,7 @@ async def put_llm_credential(
     summary="查询自己的凭据状态（不含明文/密文）",
 )
 async def get_llm_credential(
-    user: User = Depends(require_roles("admin", "user", "viewer")),
+    user: User = Depends(require_roles("platform_admin", "tenant_admin", "user", "viewer")),
     session: AsyncSession = Depends(get_db),
 ) -> CredentialStatus:
     if not settings.BYOK_ENABLED:
@@ -114,7 +114,7 @@ async def get_llm_credential(
     summary="删除自己的 LLM API Key（幂等）",
 )
 async def delete_llm_credential(
-    user: User = Depends(require_roles("admin", "user")),
+    user: User = Depends(require_roles("platform_admin", "tenant_admin", "user")),
     session: AsyncSession = Depends(get_db),
 ) -> Response:
     _ensure_enabled()
@@ -130,7 +130,7 @@ async def delete_llm_credential(
 )
 async def verify_llm_credential(
     payload: CredentialIn,
-    user: User = Depends(require_roles("admin", "user")),
+    user: User = Depends(require_roles("platform_admin", "tenant_admin", "user")),
 ) -> CredentialStatus:
     _ensure_enabled()
     _validate_payload(payload)

@@ -67,7 +67,7 @@ def _validate_payload(payload: AsrCredentialIn) -> tuple[str, str, str | None]:
 )
 async def put_asr_credential(
     payload: AsrCredentialIn,
-    user: User = Depends(require_roles("admin", "user")),
+    user: User = Depends(require_roles("platform_admin", "tenant_admin", "user")),
     session: AsyncSession = Depends(get_db),
 ) -> AsrCredentialStatus:
     _ensure_enabled()
@@ -113,7 +113,7 @@ async def put_asr_credential(
     summary="查询自己的语音转写配置（不含明文/密文）",
 )
 async def get_asr_credential(
-    user: User = Depends(require_roles("admin", "user", "viewer")),
+    user: User = Depends(require_roles("platform_admin", "tenant_admin", "user", "viewer")),
     session: AsyncSession = Depends(get_db),
 ) -> AsrCredentialStatus:
     if not settings.ASR_ENABLED:
@@ -128,7 +128,7 @@ async def get_asr_credential(
     summary="删除自己的语音转写配置（幂等）",
 )
 async def delete_asr_credential(
-    user: User = Depends(require_roles("admin", "user")),
+    user: User = Depends(require_roles("platform_admin", "tenant_admin", "user")),
     session: AsyncSession = Depends(get_db),
 ) -> Response:
     _ensure_enabled()

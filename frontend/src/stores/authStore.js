@@ -9,7 +9,7 @@ import { clearAccessToken, setAccessToken } from '../lib/token'
  * @property {string} id
  * @property {string} email
  * @property {string} name
- * @property {'admin'|'user'|'viewer'} role
+ * @property {'platform_admin'|'tenant_admin'|'user'|'viewer'|'admin'} role
  */
 
 export const useAuthStore = create((set, get) => ({

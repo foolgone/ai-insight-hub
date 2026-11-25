@@ -54,7 +54,7 @@ async def list_tasks(
     status: str | None = None,
 ) -> tuple[list[Task], Pagination]:
     stmt = select(Task)
-    if user.role != "admin":
+    if user.role != "platform_admin":
         stmt = stmt.where(Task.user_id == user.id)
     if datasource_id is not None:
         stmt = stmt.where(Task.datasource_id == datasource_id)

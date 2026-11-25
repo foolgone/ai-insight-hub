@@ -16,9 +16,15 @@ def _user(role: str) -> object:
     return UserFactory(role=role, id=uuid.uuid4())
 
 
-def test_admin_can_access_any_resource() -> None:
-    admin = _user("admin")
+def test_platform_admin_can_access_any_resource() -> None:
+    admin = _user("platform_admin")
     assert_owner(uuid.uuid4(), admin)
+
+
+def test_tenant_admin_cannot_access_other_user_resource() -> None:
+    admin = _user("tenant_admin")
+    with pytest.raises(PermissionDeniedError):
+        assert_owner(uuid.uuid4(), admin)
 
 
 def test_user_can_access_own_resource() -> None:

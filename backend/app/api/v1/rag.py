@@ -32,8 +32,8 @@ from app.services.rag import execute as rag_execute
 
 router = APIRouter()
 
-READ_ROLES = ("admin", "user", "viewer")
-WRITE_ROLES = ("admin", "user")
+READ_ROLES = ("platform_admin", "tenant_admin", "user", "viewer")
+WRITE_ROLES = ("platform_admin", "tenant_admin", "user")
 
 
 def _context_to_read(item: dict) -> RagContextRead:
@@ -139,7 +139,7 @@ async def list_traces(
     user: User = Depends(require_roles(*READ_ROLES)),
     session: AsyncSession = Depends(get_db),
 ) -> Page[RagTraceListItem]:
-    scope = None if user.role == "admin" else user.id
+    scope = None if user.role == "platform_admin" else user.id
     rows, pagination = await trace_repo.list_traces(
         session,
         user_id=scope,

@@ -32,7 +32,10 @@ class User(Base):
     __tablename__ = "users"
     __table_args__ = (
         Index("idx_users_tenant_created", "tenant_id", "created_at"),
-        CheckConstraint("role IN ('admin', 'user', 'viewer')", name="role_valid"),
+        CheckConstraint(
+            "role IN ('platform_admin', 'tenant_admin', 'user', 'viewer')",
+            name="role_valid",
+        ),
         Index("idx_users_email", "email", postgresql_where=text("deleted_at IS NULL")),
         Index("idx_users_role", "role", postgresql_where=text("deleted_at IS NULL")),
         Index("idx_users_created_at", "created_at"),

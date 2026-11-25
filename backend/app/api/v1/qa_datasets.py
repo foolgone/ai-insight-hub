@@ -39,8 +39,8 @@ from app.services import qa_dataset_service
 
 router = APIRouter()
 
-READ_ROLES = ("admin", "user", "viewer")
-WRITE_ROLES = ("admin", "user")
+READ_ROLES = ("platform_admin", "tenant_admin", "user", "viewer")
+WRITE_ROLES = ("platform_admin", "tenant_admin", "user")
 
 
 def _item_to_read(item: QaDatasetItem) -> QaDatasetItemRead:

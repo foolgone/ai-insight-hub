@@ -114,7 +114,7 @@ async def list_datasources(
     data_source_type: str | None = None,
 ) -> tuple[list[DataSource], Pagination]:
     stmt = select(DataSource).where(DataSource.deleted_at.is_(None))
-    if user.role != "admin":
+    if user.role != "platform_admin":
         stmt = stmt.where(DataSource.user_id == user.id)
     if status:
         stmt = stmt.where(DataSource.status == status)

@@ -358,7 +358,7 @@ async def list_runs(
     adapter: str | None,
     params: PaginationParams,
 ) -> tuple[list[RagEvaluationRun], Any]:
-    scope = None if user.role == "admin" else user.id
+    scope = None if user.role == "platform_admin" else user.id
     return await repo.list_runs(
         session,
         user_id=scope,
@@ -780,7 +780,7 @@ async def summary(
     adapter: str | None,
     limit: int = 1000,
 ) -> list[dict[str, Any]]:
-    scope = None if user.role == "admin" else user.id
+    scope = None if user.role == "platform_admin" else user.id
     runs = await repo.list_runs_for_summary(
         session,
         user_id=scope,

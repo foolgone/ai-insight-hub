@@ -51,7 +51,7 @@ def test_all_tables_registered() -> None:
 @pytest.mark.parametrize(
     ("table", "columns"),
     [
-        ("tenants", {"id", "name", "slug", "status", "created_at", "updated_at"}),
+        ("tenants", {"id", "name", "slug", "kind", "status", "created_at", "updated_at"}),
         (
             "users",
             {"id", "tenant_id", "email", "password_hash", "role", "quota", "usage", "deleted_at"},

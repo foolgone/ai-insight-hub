@@ -1,6 +1,6 @@
 # M4-A tenant-first：实现 scope / design
 
-> 状态：`scope_approved`（2026-11-25）；PR-1 accepted；**PR-2 前置决策已提交，代码未开始**
+> 状态：`scope_approved`（2026-11-25）；PR-1 accepted；**PR-2 024 已实现/验证，JWT/Repo 未开始**
 > 前置决策：`docs/05-operations/03-m4a-pr2-decisions.md`
 > 日期：2026-11-25
 > 上游：`docs/05-operations/01-m4a-constraints-decision.md`（accepted baseline）

@@ -1,6 +1,6 @@
 # M4-A PR-2 前置决策（tasks / server_default / 角色 / JWT / platform_admin）
 
-> 状态：`decision_submitted`（2026-11-25）；**PR-2 代码未开始**
+> 状态：`approved`（2026-11-25）；**024 已实现/已验证，待验收**；JWT/Repository 未开始
 > 上游：`docs/05-operations/02-m4a-tenant-first-scope.md`（scope approved）
 > PR-1：accepted（test/staging，仅 migration/模型）；生产 migration 未批准
 > 本文只做决策，不写 migration/代码。
@@ -87,3 +87,51 @@ PR-1 给业务表 `tenant_id` 加了 `server_default = 默认租户`，保证 fl
 - retention / alerting / cost 预算 / data-rights / RLS。
 - 生产 migration；不打开 `TENANT_ENFORCEMENT_ENABLED=true`。
 - 不改 M1 / Judge / target / Prompt。
+
+## 8. 024 前置 P1（已补，2026-11-25）
+
+### 8.1 platform sentinel 必须隐藏
+
+- `tenants` 增加 `kind`：`customer` / `platform`；默认租户 `customer`，sentinel `platform`。
+- 租户列表、租户切换器、普通用户 API **只允许 `kind='customer'`**；platform sentinel 不出现在任何面向租户的查询。
+- 不允许普通 user 加入 platform tenant；platform_admin 由 CLI/env 引导，不通过租户成员关系加入 sentinel。
+- 只有 platform_admin 的内部任务/CLI 可使用 sentinel。
+- 024 测试：customer 范围只返回默认租户；platform tenant 不在其中；`users.tenant_id` 不指向 platform sentinel。
+
+### 8.2 flag 语义写死
+
+| flag | 语义 |
+|---|---|
+| `TENANT_ENFORCEMENT_ENABLED=false` | 请求落当前用户/默认租户；保持单租户行为；不做跨租户 404 断言 |
+| `TENANT_ENFORCEMENT_ENABLED=true` | 所有 tenant-scoped 查询强制 tenant；跨租户统一 404 |
+
+PR-2 必须同时测 false/true 两套；**跨租户 404 只在 flag=true 下断言**；flag=false 只做单租户回归。
+PR-2 不打开 flag（默认 false）；staging 开 flag 等 PR-3/025 完成。
+
+### 8.3 024 migration 验收
+
+- tenants 默认租户 + platform sentinel 幂等创建（固定 UUID / slug）；
+- 存量 `admin` → `tenant_admin`；`user` / `viewer` 不变；
+- 024 up/down 连续两次在 `aiinsight_test` 通过；
+- 024 不碰 JWT / Repository / 存储；不碰生产；
+- 角色 CHECK 只允许 `platform_admin / tenant_admin / user / viewer`。
+
+### 8.4 Repository guard 覆盖清单
+
+- 列表、详情、下载、报告、对比、导出、失败列表（`/results?status=failed`）。
+- 禁止绕过 guard 的裸 SQL；所有 tenant-scoped SQL 必须经过 repository/base helper。
+- 跨租户读 / 写 / 下载 / 报告 / 对比 → 404。
+- platform_admin 的 `X-Tenant-Id` 必须校验 tenant 存在且 `status='active'`，并写审计；不存在/停用 → 404 或 400（不泄露资源）。
+
+## 9. 024 实施结果（2026-11-25，implemented / verified）
+
+| 项 | 结果 |
+|---|---|
+| platform sentinel | `tenants.kind`（customer/platform）；固定 UUID `000…002`、`slug='platform'`；幂等插入 |
+| 隐藏 | customer 范围只返回默认租户；platform 不在其中；无用户指向 platform sentinel |
+| 角色 | CHECK 扩展为 platform_admin / tenant_admin / user / viewer；存量 admin → tenant_admin |
+| 角色代码 | API role 常量与直接 require_roles 接受 platform_admin / tenant_admin；全局数据范围只给 platform_admin；tenant_admin 不越用户 |
+| Frontend | role 展示/权限兼容 platform_admin / tenant_admin；旧 admin 仍兼容 |
+| 测试 | `test_migration_024` 4 条（schema/sentinel 隐藏/admin 映射/up-down 两次）；后端全量 **1149 passed / 255 deselected**；前端 **84 files / 440 tests** |
+| 校验 | alembic check 无新操作；black/flake8/mypy/import-linter 通过 |
+| 边界 | 未改 JWT/Repository/存储；未开 flag；未碰生产 |

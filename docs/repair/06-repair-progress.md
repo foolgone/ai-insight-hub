@@ -1598,3 +1598,9 @@ alembic check   : No new upgrade operations detected
 - platform_admin：仅一次性 CLI/env 引导，不自动建；X-Tenant-Id 切租户，每次跨租户操作写审计。
 - 下一步：决策评审通过后才开 PR-2（先 024 migration，再 JWT/Repo）。
 
+### M4-A PR-2 / 024（2026-11-25，implemented / verified）
+- 024 migration：tenants.kind（customer/platform）+ platform sentinel（固定 UUID、slug='platform'）；users.role CHECK 扩展四角色，存量 admin → tenant_admin。
+- 角色代码：API role 常量/require_roles 接受 platform_admin / tenant_admin；全局数据范围只给 platform_admin；tenant_admin 保持用户数据边界；前端角色展示/权限兼容。
+- 测试：test_migration_024 覆盖 sentinel/隐藏/admin 映射/up-down 两次；后端全量 **1149 passed / 255 deselected**；前端 **84 files / 440 tests**；alembic check、black/flake8/mypy/import-linter 通过。
+- 边界：未改 JWT/Repository/存储；未开 flag；未碰生产。JWT/Repository 等 024 验收后再开。
+

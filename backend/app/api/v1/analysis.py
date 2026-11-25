@@ -36,8 +36,8 @@ from app.services import evaluation_service, insight_service, run_service
 
 router = APIRouter()
 
-READ_ROLES = ("admin", "user", "viewer")
-WRITE_ROLES = ("admin", "user")
+READ_ROLES = ("platform_admin", "tenant_admin", "user", "viewer")
+WRITE_ROLES = ("platform_admin", "tenant_admin", "user")
 
 SECONDS_PER_RECORD = 3.0
 MAX_ESTIMATED_RECORDS = 100
