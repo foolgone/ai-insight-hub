@@ -14,11 +14,13 @@ from app.api.v1 import (
     rag_evaluations,
     reports,
     tasks,
+    tenants,
     users,
 )
 
 router = APIRouter()
 router.include_router(auth.router, prefix="/auth", tags=["认证"])
+router.include_router(tenants.router, prefix="/tenants", tags=["租户"])
 router.include_router(users.router, prefix="/users", tags=["用户"])
 router.include_router(llm_credential.router, prefix="/users", tags=["用户"])
 router.include_router(asr_credential.router, prefix="/users", tags=["用户"])

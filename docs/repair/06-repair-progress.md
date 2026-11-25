@@ -1608,6 +1608,6 @@ alembic check   : No new upgrade operations detected
 - JWT：access/refresh 增加 tenant_id；旧 token 无 claim 在 7 天 grace 内按 DB 租户解析；刷新后新 claim；claim/DB 不一致或超期 401。
 - TenantContext：从 JWT 解析；platform_admin X-Tenant-Id 校验 customer+active；普通用户 header 忽略；跨租户写审计。
 - Repository guard：数据源/任务/报告/数据集/RAG Trace/RAG 评测列表 tenant 过滤；详情/下载/结果/失败列表统一 404；写入显式 tenant_id。
-- 测试：test_tenant_enforcement 5 条（JWT/旧 token/flag false/flag true 404/platform_admin header+audit/sentinel 隐藏）；后端全量 1155 passed / 255 deselected；前端 440；alembic check、black/flake8/mypy/import-linter 通过。
+- 测试：test_tenant_enforcement 6 条（JWT/旧 token/flag false/flag true 404/platform_admin header+audit/sentinel 隐藏）；后端全量 1156 passed / 255 deselected；前端 440；alembic check、black/flake8/mypy/import-linter 通过。
 - 边界：未做存储前缀/搬迁、retention/alerting/cost/RLS；未开 flag；未碰生产。PR-3 待验收后开。
 

@@ -338,3 +338,22 @@ async def test_platform_tenant_hidden_from_customer_scope(db_session) -> None:
     assert (
         await db_session.scalar(select(Tenant).where(Tenant.id == PLATFORM_TENANT_ID))
     ).kind == "platform"
+
+
+async def test_tenant_list_hides_platform_sentinel(client, db_session) -> None:
+    tenant_a = await _tenant(db_session, f"list-a-{uuid.uuid4().hex[:6]}")
+    _, headers_a = await _headers(client, db_session, tenant_a)
+
+    own = await client.get(f"{BASE}/tenants", headers=headers_a)
+    assert own.status_code == 200, own.text
+    assert {item["id"] for item in own.json()} == {str(tenant_a.id)}
+    assert all(item["slug"] != "platform" for item in own.json())
+
+    default_tenant = await db_session.get(Tenant, DEFAULT_TENANT_ID)
+    _, admin_headers = await _headers(client, db_session, default_tenant, role="platform_admin")
+    all_customer = await client.get(f"{BASE}/tenants", headers=admin_headers)
+    assert all_customer.status_code == 200, all_customer.text
+    slugs = {item["slug"] for item in all_customer.json()}
+    assert "default" in slugs
+    assert tenant_a.slug in slugs
+    assert "platform" not in slugs
