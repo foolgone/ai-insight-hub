@@ -39,7 +39,12 @@ def _now() -> datetime:
     return datetime.now(timezone.utc)
 
 
-def create_token(user_id: str, role: str, token_type: TokenType) -> tuple[str, str, datetime]:
+def create_token(
+    user_id: str,
+    role: str,
+    token_type: TokenType,
+    tenant_id: str | None = None,
+) -> tuple[str, str, datetime]:
     """生成 Token，返回 ``(token, jti, expires_at)``。"""
     now = _now()
     if token_type == "access":
@@ -55,16 +60,22 @@ def create_token(user_id: str, role: str, token_type: TokenType) -> tuple[str, s
         "iat": now,
         "exp": expires_at,
     }
+    if tenant_id is not None:
+        payload["tenant_id"] = str(tenant_id)
     token = jwt.encode(payload, settings.JWT_SECRET_KEY, algorithm=settings.JWT_ALGORITHM)
     return token, jti, expires_at
 
 
-def create_access_token(user_id: str, role: str) -> tuple[str, str, datetime]:
-    return create_token(user_id, role, "access")
+def create_access_token(
+    user_id: str, role: str, tenant_id: str | None = None
+) -> tuple[str, str, datetime]:
+    return create_token(user_id, role, "access", tenant_id=tenant_id)
 
 
-def create_refresh_token(user_id: str, role: str) -> tuple[str, str, datetime]:
-    return create_token(user_id, role, "refresh")
+def create_refresh_token(
+    user_id: str, role: str, tenant_id: str | None = None
+) -> tuple[str, str, datetime]:
+    return create_token(user_id, role, "refresh", tenant_id=tenant_id)
 
 
 def _invalid_error(token_type: TokenType, message: str) -> Exception:

@@ -29,6 +29,7 @@ from app.core.exceptions import (
     QaDatasetNotFoundError,
 )
 from app.core.ownership import assert_owner
+from app.core.tenancy import require_tenant, tenant_id_for_write, tenant_scope
 from app.core.pagination import PaginationParams
 from app.models import QaDataset, QaDatasetItem, QaDatasetVersion, User
 from app.repositories import qa_dataset as repo
@@ -143,6 +144,7 @@ async def _dataset_or_404(session: AsyncSession, dataset_id: uuid.UUID, user: Us
     dataset = await repo.get_dataset(session, dataset_id)
     if dataset is None:
         raise QaDatasetNotFoundError(details={"dataset_id": str(dataset_id)})
+    require_tenant(dataset, user, QaDatasetNotFoundError)
     assert_owner(dataset.user_id, user)
     return dataset
 
@@ -177,6 +179,7 @@ async def create_dataset(
             details={"name": payload.name, "dataset_id": str(existed.id)}
         )
     dataset = QaDataset(
+        tenant_id=tenant_id_for_write(user),
         user_id=user.id,
         name=payload.name,
         description=payload.description,
@@ -219,7 +222,13 @@ async def list_datasets(
     params: PaginationParams,
 ) -> tuple[list[QaDataset], Pagination]:
     scope: uuid.UUID | None = None if user.role == "platform_admin" else user.id
-    return await repo.list_datasets(session, user_id=scope, keyword=keyword, params=params)
+    return await repo.list_datasets(
+        session,
+        user_id=scope,
+        tenant_id=tenant_scope(user),
+        keyword=keyword,
+        params=params,
+    )
 
 
 # --------------------------------------------------------------------------- 版本
@@ -242,6 +251,7 @@ async def create_version(
 
     number = await repo.next_version_number(session, dataset.id)
     version = QaDatasetVersion(
+        tenant_id=dataset.tenant_id,
         dataset_id=dataset.id,
         version=number,
         status=DRAFT,
@@ -253,6 +263,7 @@ async def create_version(
     if source_items:
         clones = [
             QaDatasetItem(
+                tenant_id=version.tenant_id,
                 version_id=version.id,
                 item_key=row.item_key,
                 query=row.query,
@@ -408,6 +419,7 @@ async def import_items(
 
     rows = [
         QaDatasetItem(
+            tenant_id=version.tenant_id,
             version_id=version.id,
             item_key=item.item_key,
             query=item.query,

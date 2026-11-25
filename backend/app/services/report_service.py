@@ -27,6 +27,7 @@ if TYPE_CHECKING:
 
 from app.core.ownership import assert_owner
 from app.core.pagination import PaginationParams
+from app.core.tenancy import apply_tenant_filter, require_tenant, tenant_id_for_write
 from app.repositories.pagination import paginate
 from app.repositories import cleaned_data as cleaned_repo
 from app.core.exceptions import (
@@ -438,6 +439,7 @@ async def _datasource_or_404(
     datasource = await session.get(DataSource, datasource_id)
     if datasource is None or datasource.deleted_at is not None:
         raise DataSourceNotFoundError(details={"datasource_id": str(datasource_id)})
+    require_tenant(datasource, user, DataSourceNotFoundError)
     assert_owner(datasource.user_id, user)
     return datasource
 
@@ -479,6 +481,7 @@ async def create_report(
         await _ensure_comparison_runs_owned(session, user, config.run_comparison)
 
     report = Report(
+        tenant_id=tenant_id_for_write(user),
         datasource_id=datasource_id,
         user_id=user.id,
         title=title,
@@ -492,6 +495,7 @@ async def create_report(
     await session.refresh(report)
 
     task = Task(
+        tenant_id=report.tenant_id,
         task_type="report",
         task_name=f"生成报告：{title}"[:255],
         datasource_id=datasource_id,
@@ -663,6 +667,7 @@ async def list_reports(
 ) -> tuple[list[Report], Any]:
     await _datasource_or_404(session, datasource_id, user)
     stmt = select(Report).where(Report.datasource_id == datasource_id)
+    stmt = apply_tenant_filter(stmt, Report, user)
     if report_type:
         stmt = stmt.where(Report.report_type == report_type)
     if status:
@@ -674,6 +679,7 @@ async def _report_or_404(session: AsyncSession, report_id: uuid.UUID, user: User
     report = await session.get(Report, report_id)
     if report is None:
         raise ReportNotFoundError(details={"report_id": str(report_id)})
+    require_tenant(report, user, ReportNotFoundError)
     await _datasource_or_404(session, report.datasource_id, user)
     return report
 

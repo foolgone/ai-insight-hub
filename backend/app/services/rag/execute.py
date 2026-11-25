@@ -16,8 +16,9 @@ from typing import Any
 from loguru import logger
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.exceptions import QaDatasetNotFoundError
+from app.core.exceptions import QaDatasetNotFoundError, RagTraceNotFoundError
 from app.core.ownership import assert_owner
+from app.core.tenancy import require_tenant, tenant_id_for_write
 from app.models import QaDatasetItem, RagTrace, User
 from app.ports.rag import RAGMode, RAGPort, RAGResult, RetrievedContext
 from app.repositories import qa_dataset as qa_repo
@@ -49,6 +50,7 @@ async def load_item_for_user(
     dataset = await qa_repo.get_dataset(session, version.dataset_id)
     if dataset is None:
         raise QaDatasetNotFoundError(details={"dataset_id": str(version.dataset_id)})
+    require_tenant(dataset, user, QaDatasetNotFoundError)
     assert_owner(dataset.user_id, user)
     return item
 
@@ -66,12 +68,17 @@ async def execute_query(
     idempotency_key: str | None = None,
 ) -> RagTrace:
     """执行一次查询并返回 trace；同一幂等键重复调用返回既有 trace。"""
+    dataset_item = None
     if dataset_item_id is not None:
-        await load_item_for_user(session, user=user, dataset_item_id=dataset_item_id)
+        dataset_item = await load_item_for_user(session, user=user, dataset_item_id=dataset_item_id)
+    write_tenant_id = (
+        dataset_item.tenant_id if dataset_item is not None else tenant_id_for_write(user)
+    )
 
     if idempotency_key:
         existing = await trace_repo.get_by_idempotency_key(session, idempotency_key)
         if existing is not None:
+            require_tenant(existing, user, RagTraceNotFoundError)
             logger.info("rag trace idempotent hit key={} trace={}", idempotency_key, existing.id)
             return existing
 
@@ -91,6 +98,7 @@ async def execute_query(
 
     if result is not None:
         trace = RagTrace(
+            tenant_id=write_tenant_id,
             user_id=user.id,
             dataset_item_id=dataset_item_id,
             task_id=task_id,
@@ -114,6 +122,7 @@ async def execute_query(
         )
     else:
         trace = RagTrace(
+            tenant_id=write_tenant_id,
             user_id=user.id,
             dataset_item_id=dataset_item_id,
             task_id=task_id,

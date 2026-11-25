@@ -22,6 +22,7 @@ if TYPE_CHECKING:
     from app.agents.extraction_agent import KnowledgeExtractionAgent
 
 from app.core.ownership import assert_owner
+from app.core.tenancy import require_tenant, tenant_id_for_write
 from app.core.pagination import PaginationParams
 from app.application import task_control
 from app.core.config import settings
@@ -69,6 +70,7 @@ async def _datasource_or_404(
     datasource = await session.get(DataSource, datasource_id)
     if datasource is None or datasource.deleted_at is not None:
         raise DataSourceNotFoundError(details={"datasource_id": str(datasource_id)})
+    require_tenant(datasource, user, DataSourceNotFoundError)
     assert_owner(datasource.user_id, user)
     return datasource
 
@@ -105,6 +107,7 @@ async def create_extraction_task(
         session, datasource_id=datasource_id, task_type=EXTRACT_TASK_TYPE
     )
     task = Task(
+        tenant_id=tenant_id_for_write(user),
         task_type=EXTRACT_TASK_TYPE,
         task_name="知识提取",
         datasource_id=datasource_id,
@@ -155,6 +158,7 @@ def _parse_source_ids(values: list[Any]) -> list[uuid.UUID] | None:
 async def _insert_extracted_faqs(
     session: AsyncSession,
     *,
+    tenant_id: uuid.UUID,
     datasource_id: uuid.UUID,
     faqs: list[dict[str, Any]],
 ) -> int:
@@ -163,6 +167,7 @@ async def _insert_extracted_faqs(
         confidence = float(item.get("confidence", 0.8))
         session.add(
             KnowledgeBase(
+                tenant_id=tenant_id,
                 datasource_id=datasource_id,
                 question=str(item["question"]),
                 answer=str(item["answer"]),
@@ -205,6 +210,7 @@ async def _save_gaps(
     if task.datasource_id is not None:
         await knowledge_gap_repo.upsert_many(
             session,
+            tenant_id=task.tenant_id,
             datasource_id=task.datasource_id,
             gaps=gaps[:MAX_GAP_ITEMS],
             task_id=task.id,
@@ -342,6 +348,7 @@ async def _execute_extraction(
             removed = await _replace_seed_knowledge(session, datasource_id)
             inserted = await _insert_extracted_faqs(
                 session,
+                tenant_id=task.tenant_id,
                 datasource_id=datasource_id,
                 faqs=faqs,
             )
@@ -467,6 +474,7 @@ async def create_faq(
 ) -> KnowledgeBase:
     await _datasource_or_404(session, datasource_id, user)
     faq = KnowledgeBase(
+        tenant_id=tenant_id_for_write(user),
         datasource_id=datasource_id,
         question=payload.question,
         answer=payload.answer,

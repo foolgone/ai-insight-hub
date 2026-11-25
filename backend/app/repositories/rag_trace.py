@@ -41,13 +41,16 @@ async def list_traces(
     session: AsyncSession,
     *,
     user_id: uuid.UUID | None,
-    task_id: uuid.UUID | None,
+    tenant_id: uuid.UUID | None = None,
+    task_id: uuid.UUID | None = None,
     dataset_item_id: uuid.UUID | None,
     status: str | None,
     adapter: str | None,
     params: PaginationParams,
 ) -> tuple[list[RagTrace], Pagination]:
     stmt: Select = select(RagTrace)
+    if tenant_id is not None:
+        stmt = stmt.where(RagTrace.tenant_id == tenant_id)
     if user_id is not None:
         stmt = stmt.where(RagTrace.user_id == user_id)
     if task_id is not None:

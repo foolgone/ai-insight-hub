@@ -304,6 +304,7 @@ async def upload_file(
             }
 
         raw_data = RawData(
+            tenant_id=datasource.tenant_id,
             datasource_id=datasource.id,
             raw_content=raw_content,
             file_info={

@@ -22,6 +22,7 @@ from app.core.exceptions import (
     RagEvaluationNotFoundError,
 )
 from app.core.ownership import assert_owner
+from app.core.tenancy import require_tenant, tenant_scope
 from app.core.pagination import PaginationParams
 from app.models import (
     QaDatasetItem,
@@ -198,6 +199,7 @@ async def _dataset_bundle(
     dataset = await qa_repo.get_dataset(session, version.dataset_id)
     if dataset is None:
         raise RagEvaluationNotFoundError(details={"dataset_id": str(version.dataset_id)})
+    require_tenant(dataset, user, RagEvaluationNotFoundError)
     assert_owner(dataset.user_id, user)
     return dataset, version
 
@@ -295,6 +297,7 @@ async def create_run(
 
     run_id = uuid.uuid4()
     task = Task(
+        tenant_id=dataset.tenant_id,
         task_type="rag_eval",
         task_name="RAG 批量评测",
         user_id=user.id,
@@ -307,6 +310,7 @@ async def create_run(
 
     run = RagEvaluationRun(
         id=run_id,
+        tenant_id=dataset.tenant_id,
         user_id=user.id,
         task_id=task.id,
         attempt=1,
@@ -343,6 +347,7 @@ async def get_run(session: AsyncSession, *, user: User, run_id: uuid.UUID) -> Ra
     run = await repo.get_run(session, run_id)
     if run is None:
         raise RagEvaluationNotFoundError(details={"run_id": str(run_id)})
+    require_tenant(run, user, RagEvaluationNotFoundError)
     assert_owner(run.user_id, user)
     return run
 
@@ -362,6 +367,7 @@ async def list_runs(
     return await repo.list_runs(
         session,
         user_id=scope,
+        tenant_id=tenant_scope(user),
         dataset_id=dataset_id,
         dataset_version_id=dataset_version_id,
         status=status,
@@ -518,6 +524,7 @@ async def retry_run(
 
     new_run_id = uuid.uuid4()
     task = Task(
+        tenant_id=parent.tenant_id,
         task_type="rag_eval",
         task_name="RAG 批量评测（重试失败）",
         user_id=user.id,
@@ -538,6 +545,7 @@ async def retry_run(
 
     run = RagEvaluationRun(
         id=new_run_id,
+        tenant_id=parent.tenant_id,
         user_id=user.id,
         task_id=task.id,
         parent_run_id=parent.id,
@@ -784,6 +792,7 @@ async def summary(
     runs = await repo.list_runs_for_summary(
         session,
         user_id=scope,
+        tenant_id=tenant_scope(user),
         dataset_id=dataset_id,
         execution_mode=execution_mode,
         adapter=adapter,

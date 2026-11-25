@@ -23,6 +23,7 @@ from app.application.metrics import (
 from app.core.advisory_lock import AdvisoryLock
 from app.core.config import settings
 from app.core.database import SessionLocal
+from app.core.tenancy import DEFAULT_TENANT_ID
 from app.models import QaDatasetItem, RagEvaluationResult, RagEvaluationRun, RagTrace, Task, User
 from app.repositories import qa_dataset as qa_repo
 from app.repositories import rag_evaluation as repo
@@ -164,6 +165,7 @@ def _row_from_metric(
     if trace_reused:
         details["source_trace_id"] = str(trace.id)
     return RagEvaluationResult(
+        tenant_id=getattr(run, "tenant_id", DEFAULT_TENANT_ID),
         run_id=run.id,
         dataset_item_id=item.id,
         trace_id=trace.id,
@@ -188,6 +190,7 @@ def _failed_row(
     trace_reused: bool = False,
 ) -> RagEvaluationResult:
     return RagEvaluationResult(
+        tenant_id=getattr(run, "tenant_id", DEFAULT_TENANT_ID),
         run_id=run.id,
         dataset_item_id=item.id,
         trace_id=trace_id,
@@ -208,6 +211,7 @@ def _copy_parent_result(
     details["reused_from_run_id"] = str(parent.run_id)
     details["reused_result_id"] = str(parent.id)
     return RagEvaluationResult(
+        tenant_id=getattr(run, "tenant_id", DEFAULT_TENANT_ID),
         run_id=run.id,
         dataset_item_id=item.id,
         trace_id=parent.trace_id,
@@ -271,6 +275,7 @@ def _strict_row_from_coverage(
             strict_details["strict_score"] = score
             strict_details["strict_gap"] = round(float(coverage.score or 0.0) - float(score), 6)
     return RagEvaluationResult(
+        tenant_id=getattr(run, "tenant_id", DEFAULT_TENANT_ID),
         run_id=run.id,
         dataset_item_id=item.id,
         trace_id=coverage.trace_id,
@@ -406,6 +411,7 @@ async def _evaluate_trace(
                     )
             rows.append(
                 RagEvaluationResult(
+                    tenant_id=getattr(run, "tenant_id", DEFAULT_TENANT_ID),
                     run_id=run.id,
                     dataset_item_id=item.id,
                     trace_id=trace.id,

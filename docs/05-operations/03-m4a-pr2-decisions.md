@@ -1,6 +1,6 @@
 # M4-A PR-2 前置决策（tasks / server_default / 角色 / JWT / platform_admin）
 
-> 状态：`approved`（2026-11-25）；**024 已实现/已验证，待验收**；JWT/Repository 未开始
+> 状态：`implemented`（2026-11-25）；**PR-2 JWT/TenantContext/Repository 已实现/验证，待验收**；PR-3 未开始
 > 上游：`docs/05-operations/02-m4a-tenant-first-scope.md`（scope approved）
 > PR-1：accepted（test/staging，仅 migration/模型）；生产 migration 未批准
 > 本文只做决策，不写 migration/代码。
@@ -135,3 +135,17 @@ PR-2 不打开 flag（默认 false）；staging 开 flag 等 PR-3/025 完成。
 | 测试 | `test_migration_024` 4 条（schema/sentinel 隐藏/admin 映射/up-down 两次）；后端全量 **1149 passed / 255 deselected**；前端 **84 files / 440 tests** |
 | 校验 | alembic check 无新操作；black/flake8/mypy/import-linter 通过 |
 | 边界 | 未改 JWT/Repository/存储；未开 flag；未碰生产 |
+
+## 10. PR-2 实施结果（2026-11-25，implemented / verified）
+
+| 项 | 结果 |
+|---|---|
+| JWT | access/refresh 增加 `tenant_id`；旧 token 无 claim 在 7 天 grace 内按 DB 租户解析，刷新后带新 claim；claim/DB 不一致或超期 → 401 |
+| TenantContext | 从 JWT 解析；platform_admin `X-Tenant-Id` 校验 `kind=customer` + `status=active`；普通用户 header 忽略 |
+| Repository guard | 数据源/任务/报告/数据集/RAG Trace/RAG 评测列表加 tenant 过滤；详情/下载/结果/失败列表经 `require_tenant` 404 |
+| 写入 | 业务写入显式 `tenant_id`（根资源用用户租户，子资源用父资源 tenant）；不依赖 server_default |
+| 审计 | platform_admin 跨租户请求写 `audit_logs(action='tenant.cross_access')`，含 target tenant/method/path |
+| Flag | `TENANT_ENFORCEMENT_ENABLED=false` 默认；测试覆盖 false（单租户）与 true（跨租户 404）两套 |
+| 测试 | `test_tenant_enforcement` 5 条；后端全量 **1155 passed / 255 deselected**；前端 84 files / 440 tests |
+| 校验 | alembic check、black/flake8/mypy/import-linter 通过 |
+| 边界 | 未做存储前缀/搬迁、retention/alerting/cost/RLS；未开 flag；未碰生产 |

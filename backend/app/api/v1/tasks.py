@@ -15,6 +15,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.deps import require_roles
 from app.api.deps import pagination_params
 from app.core.pagination import PaginationParams
+from app.core.tenancy import apply_tenant_filter
 from app.composition import executors
 from app.core.database import SessionLocal, get_db
 from app.models import Task, User
@@ -55,6 +56,7 @@ async def _task_snapshots(user: User) -> list[dict[str, Any]]:
     """按用户权限取最近任务快照（platform_admin 看全部，其余只看自己的）。"""
     async with SessionLocal() as session:
         stmt = select(Task).order_by(Task.created_at.desc()).limit(STREAM_LIMIT)
+        stmt = apply_tenant_filter(stmt, Task, user)
         if user.role != "platform_admin":
             stmt = stmt.where(Task.user_id == user.id)
         rows = list((await session.execute(stmt)).scalars().all())

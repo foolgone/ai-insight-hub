@@ -31,6 +31,7 @@ BUSINESS_CODES = {
     "AUTH_TOKEN_EXPIRED",
     "AUTH_REFRESH_TOKEN_INVALID",
     "AUTH_FORBIDDEN",
+    "TENANT_NOT_FOUND",
     "USER_NOT_FOUND",
     "USER_EMAIL_EXISTS",
     "DATASOURCE_NOT_FOUND",
@@ -81,7 +82,7 @@ def test_business_codes_match_api_design_exactly() -> None:
     assert {code.value for code in ErrorCode} == BUSINESS_CODES
     # API §12.2 原定 28 条 + BYOK 扩展 5 条（LLM 3 + ASR 2）+ 类型字典 3 条 + 盲区台账 1 条
     # + RAG 评测数据集 4 条（迁移 019）+ RAG Trace 1 条（迁移 020）+ RAG 批量评测 3 条（迁移 021）
-    assert len(ErrorCode) == 42
+    assert len(ErrorCode) == 43
 
 
 def test_error_status_covers_all_business_codes() -> None:

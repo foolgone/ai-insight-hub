@@ -11,7 +11,7 @@ from typing import Any
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models import KnowledgeBase
+from app.models import DataSource, KnowledgeBase
 
 SEED_KNOWLEDGE: tuple[dict[str, Any], ...] = (
     {
@@ -209,8 +209,13 @@ SEED_KNOWLEDGE: tuple[dict[str, Any], ...] = (
 )
 
 
-async def seed_knowledge(session: AsyncSession, datasource_id: uuid.UUID) -> int:
+async def seed_knowledge(
+    session: AsyncSession, datasource_id: uuid.UUID, tenant_id: uuid.UUID | None = None
+) -> int:
     """初始化种子知识；已初始化过则返回 0（幂等）。"""
+    if tenant_id is None:
+        datasource = await session.get(DataSource, datasource_id)
+        tenant_id = datasource.tenant_id if datasource is not None else None
     existing = int(
         await session.scalar(
             select(func.count())
@@ -228,6 +233,7 @@ async def seed_knowledge(session: AsyncSession, datasource_id: uuid.UUID) -> int
     for item in SEED_KNOWLEDGE:
         session.add(
             KnowledgeBase(
+                tenant_id=tenant_id,
                 datasource_id=datasource_id,
                 question=item["question"],
                 answer=item["answer"],

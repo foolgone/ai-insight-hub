@@ -23,6 +23,7 @@ from app.agents.evaluation_agent import quality_level_for
 from app.core.errors import FrameworkErrorCode
 from app.core.exceptions import AIInsightHubException, DataSourceNotFoundError
 from app.core.ownership import assert_owner
+from app.core.tenancy import require_tenant
 from app.models import AnalysisResult, DataSource, Task, User
 from app.repositories import analysis_results as analysis_repo
 from app.schemas.agents.evaluation import ISSUE_CATEGORY_LABELS
@@ -299,6 +300,7 @@ async def _datasource_or_404(
     datasource = await session.get(DataSource, datasource_id)
     if datasource is None or datasource.deleted_at is not None:
         raise DataSourceNotFoundError(details={"datasource_id": str(datasource_id)})
+    require_tenant(datasource, user, DataSourceNotFoundError)
     assert_owner(datasource.user_id, user)
     return datasource
 

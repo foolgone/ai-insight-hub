@@ -73,6 +73,13 @@ class ApiKeyScopeDeniedError(AIInsightHubException):
 
 
 # --------------------------------------------------------------------------- 资源不存在
+class TenantNotFoundError(AIInsightHubException):
+    """租户不存在/停用（404）。"""
+
+    code = ErrorCode.TENANT_NOT_FOUND
+    default_message = "租户不存在"
+
+
 class UserNotFoundError(AIInsightHubException):
     code = ErrorCode.USER_NOT_FOUND
     default_message = "User not found"
@@ -331,6 +338,7 @@ __all__ = [
     "TaskNotRetryableError",
     "TokenExpiredError",
     "UserEmailExistsError",
+    "TenantNotFoundError",
     "UserNotFoundError",
     "WebhookNotFoundError",
 ]

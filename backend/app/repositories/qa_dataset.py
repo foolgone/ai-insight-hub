@@ -54,10 +54,13 @@ async def list_datasets(
     session: AsyncSession,
     *,
     user_id: uuid.UUID | None,
+    tenant_id: uuid.UUID | None,
     keyword: str | None,
     params: PaginationParams,
 ) -> tuple[list[QaDataset], Pagination]:
     stmt: Select = select(QaDataset)
+    if tenant_id is not None:
+        stmt = stmt.where(QaDataset.tenant_id == tenant_id)
     if user_id is not None:
         stmt = stmt.where(QaDataset.user_id == user_id)
     if keyword:

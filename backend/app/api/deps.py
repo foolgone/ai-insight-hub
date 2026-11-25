@@ -1,15 +1,16 @@
-"""API 依赖：当前用户、RBAC、归属校验（API 设计 §3.5）。
+"""API 依赖：当前用户、RBAC、租户上下文。
 
 - ``get_token_payload``：解析 ``Authorization: Bearer <access>`` 并检查黑名单；
-- ``get_current_user``：加载登录用户（不存在/软删 → USER_NOT_FOUND，停用 → AUTH_FORBIDDEN）；
-- ``require_roles``：角色白名单（admin/user/viewer）。
+- ``get_current_user``：加载用户、校验 tenant claim、解析 X-Tenant-Id（platform_admin）；
+- ``require_roles``：角色白名单（platform_admin / tenant_admin / user / viewer）。
 """
 from __future__ import annotations
 
 import uuid
 from collections.abc import Callable
+from datetime import datetime, timedelta, timezone
 
-from fastapi import Depends, Header, Query
+from fastapi import Depends, Header, Query, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
@@ -18,13 +19,18 @@ from app.core.exceptions import (
     LLMCredentialInvalidError,
     LLMCredentialNotConfiguredError,
     PermissionDeniedError,
+    TenantNotFoundError,
     TokenExpiredError,
     UserNotFoundError,
 )
 from app.core.pagination import PaginationParams
 from app.core.redis import is_token_blacklisted
 from app.core.security import decode_token
-from app.models import User
+from app.core.tenancy import (
+    TenantContext,
+    attach_tenant_context,
+)
+from app.models import AuditLog, Tenant, User
 from app.services.credential_service import credential_service
 
 
@@ -42,10 +48,12 @@ async def get_token_payload(
 
 
 async def get_current_user(
+    request: Request,
     payload: dict = Depends(get_token_payload),
     session: AsyncSession = Depends(get_db),
+    x_tenant_id: str | None = Header(default=None, alias="X-Tenant-Id"),
 ) -> User:
-    """当前登录用户。"""
+    """当前登录用户 + 租户上下文。"""
     try:
         user_id = uuid.UUID(str(payload["sub"]))
     except ValueError as exc:  # pragma: no cover - 已由 decode_token 保证
@@ -56,7 +64,86 @@ async def get_current_user(
         raise UserNotFoundError()
     if not user.is_active:
         raise PermissionDeniedError("User is inactive")
+
+    _verify_tenant_claim(payload, user)
+    if not settings.TENANT_ENFORCEMENT_ENABLED:
+        # flag=false：仍解析 context 供写入使用，但不做跨租户拒绝。
+        context = TenantContext(
+            tenant_id=user.tenant_id,
+            enforced=False,
+            is_platform_admin=user.role == "platform_admin",
+            actor_user_id=user.id,
+        )
+        attach_tenant_context(user, context)
+        return user
+
+    target_tenant_id = user.tenant_id
+    requested_tenant_id = None
+    if user.role == "platform_admin" and x_tenant_id:
+        try:
+            requested_tenant_id = uuid.UUID(x_tenant_id)
+        except ValueError as exc:
+            raise TenantNotFoundError(details={"tenant_id": x_tenant_id}) from exc
+        tenant = await session.get(Tenant, requested_tenant_id)
+        if (
+            tenant is None
+            or tenant.status != "active"
+            or getattr(tenant, "kind", "customer") != "customer"
+        ):
+            raise TenantNotFoundError(details={"tenant_id": x_tenant_id})
+        target_tenant_id = tenant.id
+
+    context = TenantContext(
+        tenant_id=target_tenant_id,
+        enforced=True,
+        is_platform_admin=user.role == "platform_admin",
+        actor_user_id=user.id,
+        requested_tenant_id=requested_tenant_id,
+    )
+    attach_tenant_context(user, context)
+
+    if requested_tenant_id is not None and requested_tenant_id != user.tenant_id:
+        session.add(
+            AuditLog(
+                user_id=user.id,
+                tenant_id=requested_tenant_id,
+                action="tenant.cross_access",
+                resource_type="tenant",
+                resource_id=requested_tenant_id,
+                details={
+                    "actor_tenant_id": str(user.tenant_id),
+                    "target_tenant_id": str(requested_tenant_id),
+                    "method": request.method,
+                    "path": request.url.path,
+                },
+                ip_address=request.client.host if request.client else None,
+                user_agent=request.headers.get("user-agent"),
+            )
+        )
+        await session.flush()
     return user
+
+
+def _verify_tenant_claim(payload: dict, user: User) -> None:
+    """校验 JWT tenant claim；旧 token 在 grace 期内按 DB 租户解析。"""
+    claim = payload.get("tenant_id")
+    if claim is not None:
+        try:
+            claim_tenant_id = uuid.UUID(str(claim))
+        except ValueError as exc:
+            raise TokenExpiredError("Invalid tenant claim") from exc
+        if claim_tenant_id != user.tenant_id:
+            raise TokenExpiredError("Tenant claim mismatch")
+        return
+    issued_at = payload.get("iat")
+    if issued_at is None:
+        raise TokenExpiredError("Missing tenant claim")
+    try:
+        issued = datetime.fromtimestamp(float(issued_at), tz=timezone.utc)
+    except (TypeError, ValueError) as exc:
+        raise TokenExpiredError("Invalid token issued-at") from exc
+    if datetime.now(timezone.utc) - issued > timedelta(days=settings.TENANT_CLAIM_GRACE_DAYS):
+        raise TokenExpiredError("Tenant claim grace period expired; re-login")
 
 
 def require_roles(*roles: str) -> Callable:

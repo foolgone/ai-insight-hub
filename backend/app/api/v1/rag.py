@@ -16,6 +16,7 @@ from app.api.deps import pagination_params, require_roles
 from app.core.database import get_db
 from app.core.exceptions import RagTraceNotFoundError
 from app.core.ownership import assert_owner
+from app.core.tenancy import require_tenant, tenant_scope
 from app.core.pagination import PaginationParams
 from app.models import RagTrace, User
 from app.repositories import rag_trace as trace_repo
@@ -79,6 +80,7 @@ async def _trace_or_404(session: AsyncSession, *, user: User, trace_id: uuid.UUI
     trace = await trace_repo.get_trace(session, trace_id)
     if trace is None:
         raise RagTraceNotFoundError(details={"trace_id": str(trace_id)})
+    require_tenant(trace, user, RagTraceNotFoundError)
     assert_owner(trace.user_id, user)
     return trace
 
@@ -143,6 +145,7 @@ async def list_traces(
     rows, pagination = await trace_repo.list_traces(
         session,
         user_id=scope,
+        tenant_id=tenant_scope(user),
         task_id=task_id,
         dataset_item_id=dataset_item_id,
         status=trace_status,

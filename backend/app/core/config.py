@@ -120,6 +120,12 @@ class Settings(BaseSettings):
     JWT_ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
     JWT_REFRESH_TOKEN_EXPIRE_DAYS: int = 7
 
+    # ---------------- 租户隔离（M4-A PR-2） ----------------
+    # 默认关闭：保持单租户行为；staging 在 PR-3 删除 server_default 后才可开启。
+    TENANT_ENFORCEMENT_ENABLED: bool = False
+    # 旧 access token（无 tenant_id claim）兼容期，按 iat 计算。
+    TENANT_CLAIM_GRACE_DAYS: int = 7
+
     # ---------------- 认证 Cookie（T4：refresh token 只放 HttpOnly Cookie） ----------------
     AUTH_COOKIE_NAME: str = "aiih_refresh"
     AUTH_COOKIE_PATH: str = "/api/v1/auth"
