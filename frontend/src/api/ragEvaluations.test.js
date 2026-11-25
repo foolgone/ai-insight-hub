@@ -79,7 +79,6 @@ describe('ragEvaluations API', () => {
   })
 })
 
-
 describe('listAllRagEvaluationResults', () => {
   const originAdapter = apiClient.defaults.adapter
   let calls = 0

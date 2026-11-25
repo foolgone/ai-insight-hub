@@ -31,10 +31,7 @@ export async function listRagEvaluationResults(runId, params = {}) {
  * @param {string} runId
  * @param {{ pageSize?: number, maxRows?: number }} [options]
  */
-export async function listAllRagEvaluationResults(
-  runId,
-  { pageSize = 100, maxRows = 1000 } = {}
-) {
+export async function listAllRagEvaluationResults(runId, { pageSize = 100, maxRows = 1000 } = {}) {
   const first = await fetchResultPage(runId, 1, pageSize)
   const firstItems = Array.isArray(first?.items) ? first.items : []
   const total = Number(first?.pagination?.total ?? firstItems.length)
