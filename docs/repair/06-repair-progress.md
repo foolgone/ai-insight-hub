@@ -1589,3 +1589,12 @@ alembic check   : No new upgrade operations detected
 - 静态检查：black / flake8 / mypy / import-linter 通过。
 - 边界：仅 `aiinsight_test`；未做生产 migration、未开 flag、未改产品行为。PR-2 等 PR-1 验收后再开。
 
+### M4-A PR-2 前置决策（2026-11-25，decision_submitted）
+- 新增 `docs/05-operations/03-m4a-pr2-decisions.md`（仅决策，未写 migration/代码）。
+- tasks：核实平台任务不写 `tasks` 表；保持 `tenant_id NOT NULL`，未来平台任务使用 platform sentinel tenant（024 预置，不扩 task_type）。
+- server_default：PR-2 保留；PR-3 用 025 删除业务表默认租户，并补“缺少 tenant context 写入失败”负向测试；staging flag=true 只能在 PR-3 后。
+- 角色：024 扩展四角色并把存量 admin 映射 tenant_admin；旧 JWT role claim 不用于鉴权。
+- 旧 JWT：无 tenant_id 时按 DB 用户租户解析，兼容一个 refresh 周期；refresh 后签发新 claim；mismatch 401。
+- platform_admin：仅一次性 CLI/env 引导，不自动建；X-Tenant-Id 切租户，每次跨租户操作写审计。
+- 下一步：决策评审通过后才开 PR-2（先 024 migration，再 JWT/Repo）。
+

@@ -261,6 +261,10 @@
 
 `docs/05-operations/02-m4a-tenant-first-scope.md`：tenant 切片的表清单、迁移方案、JWT/角色、Repository/存储、feature flag、验收矩阵。状态 `scope_draft`，**尚未批准实现**；批准前不写 migration/代码。
 
+### 8.2.1 PR-2 前置决策
+
+`docs/05-operations/03-m4a-pr2-decisions.md`：tasks 平台任务语义、server_default 移除时机、admin→tenant_admin、旧 JWT 兼容、platform_admin 引导/审计。状态 `decision_submitted`，PR-2 代码未开始。
+
 ### 8.3 P1 backlog 与当前状态
 
 | 优先级 | 项 | 验收 | 状态 |
