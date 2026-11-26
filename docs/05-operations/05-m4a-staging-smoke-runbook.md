@@ -85,8 +85,9 @@ export TENANT_ENFORCEMENT_ENABLED=true
 
 | 项 | 值 |
 |---|---|
-| 迁移前 revision | |
+| 迁移前 revision（head） | |
 | 迁移后 revision | |
+| 回滚目标 revision（025 down_revision） | |
 | 测试租户 A / B | |
 | 上传 object key | |
 | 报告 file_path | |
@@ -101,7 +102,7 @@ export TENANT_ENFORCEMENT_ENABLED=true
 
 1. `TENANT_ENFORCEMENT_ENABLED=false`，重启 API/worker；
 2. 验证旧单租户流程（登录、数据源、上传、报告）；
-3. `alembic downgrade c1d5f8a3e7b2`（025 -> 024，恢复 server_default）；
+3. 解析并记录 025 的 down_revision（当前链为 `c1d5f8a3e7b2`；以后新增 migration 后按当时链更新，不要照抄），执行 `alembic downgrade "$PRE_025_REV"`（025 -> 024，恢复 server_default）；
 4. 验证 15 张业务表 `column_default` 恢复；
 5. **不清对象、不删 tenant**；
 6. 记录回滚耗时与验证结果。

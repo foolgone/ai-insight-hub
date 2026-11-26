@@ -29,7 +29,7 @@
 | tenant 审计 | 下方 SQL | **0 NULL / 0 mismatch** |
 | 监控 | API 5xx、任务失败率、DB 连接、存储错误 | 窗口内可观测 |
 | 告警 | 值班人 / 通知渠道 | 已确认 |
-| 回滚包 | 025 downgrade 已在 staging 演练通过 | 记录 staging 演练日期 |
+| 回滚包 | 025 downgrade 已在 staging 演练通过 | 记录 staging 演练日期、当时 head、025 down_revision |
 
 ### 2.1 tenant 回填审计 SQL
 
@@ -129,7 +129,7 @@ alembic current
 - 5xx / 任务失败率持续超阈值；
 - 发现跨租户访问。
 
-执行：按 `06-m4a-rollback-runbook.md`，**先 flag=false，再 downgrade 025**；不清对象、不删 tenant。
+执行：按 `06-m4a-rollback-runbook.md`，**先 flag=false，再 downgrade 025**；目标 revision 取演练时链上 025 的 down_revision，不照抄旧值；不清对象、不删 tenant。
 
 ## 7. 签字
 
