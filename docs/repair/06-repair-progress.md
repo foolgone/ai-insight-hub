@@ -1636,3 +1636,10 @@ alembic check   : No new upgrade operations detected
 - 拆分建议：PR-4a 后台 context（无 migration）、PR-4b audit/migration、PR-4c staging 验证。
 - 边界：PR-4 代码、026 migration、生产 migration 均未批准；staging 仍是下一道门。
 
+### M4-A PR-4 scope P1 修订（2026-11-26，draft_scope accepted）
+- `recover_stale_rag_runs` 定为「平台级只读扫描 + 按 run.tenant_id 显式更新」；更新 SQL 带 tenant 谓词，A/B stale Run 测试要求跨租户 0。
+- audit P1 事件补齐：login.success/failure、token.revoke、report.generate/download、data.export/delete、tenant.status.change、run.recovered_stale；已有跨租户/凭据/任务事件保留。
+- append-only 定为 DB trigger `BEFORE UPDATE OR DELETE`；明确 migration 临时禁用规则、备份/恢复、只读导出、分区/归档边界、写入失败 savepoint + 告警策略。
+- staging 验证扩到 10 步，新增 stale recovery A/B 与 audit tenant_id 证据。
+- 状态：scope draft accepted；PR-4a/4b/4c 实施仍未批准，等 PR-3 staging 结果。
+

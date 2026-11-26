@@ -9,7 +9,7 @@
 >
 > 最后更新：2026-11-26
 > 当前阶段：**M2 P0 / M3 P0 accepted；M4-A accepted as baseline；P1-0 / P1-1 / P1-2 / P1-3a / P1-3b / P1-5 已完成并验证**
-> 当前决策：**PR-1 / PR-2 / PR-3 accepted for local/test；staging flag 冒烟待排期；PR-4 scope draft，代码/migration 未批准；生产 migration 未批准**
+> 当前决策：**PR-1 / PR-2 / PR-3 accepted for local/test；staging flag 冒烟待排期；PR-4 scope draft accepted（4 P1 已纳入），代码/migration 未批准；生产 migration 未批准**
 > 当前不做：target 校准、5-case 模型对比、10/40 Judge、v1.2.6、M1-E 验收
 
 ---

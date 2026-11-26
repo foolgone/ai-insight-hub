@@ -1,6 +1,6 @@
 # M4-A PR-4 scope：后台任务 tenant context + audit 扩展
 
-> 状态：`draft_scope`（2026-11-26，**未批准**；不写代码、不加 migration）
+> 状态：`draft_scope`（2026-11-26，P1 revision 2；**scope draft accepted，implementation 未批准**）
 > 前置：PR-3 accepted for local/test；staging flag=true 冒烟尚未执行
 > 边界：本文件只定义 PR-4 范围与验收；PR-4 代码、026 migration、生产 migration 均需单独批准
 > 不做：retention、alerting、cost 预算、RLS、M1/Judge 变更
@@ -18,9 +18,9 @@
 | `tasks.extract_knowledge` | `knowledge.py` | `tasks`、`knowledge_base`、`knowledge_gaps` | `Task.tenant_id` | 显式 tenant |
 | `tasks.generate_report` | `report.py` | `reports`、`tasks`、报告文件 | `Report.tenant_id` | 显式 tenant |
 | `tasks.rag_evaluation` | `rag_evaluation.py` → runner | `rag_evaluation_runs/results`、`rag_traces`、`tasks` | `Run.tenant_id` + `system_context` | PR-3 已补 |
-| `tasks.recover_stale_rag_runs` | `rag_evaluation.py` | `rag_evaluation_runs`、`tasks` 状态 | `Run.tenant_id` | 尚无显式 context；需 PR-4 审计 |
-| `tasks.weekly_digest` | `digest.py` | 只读聚合 + 邮件；不写业务表 | 无（平台级） | 跨全租户聚合；需明确平台级语义 |
-| `tasks.monitor_cost` | `cost_monitor.py` | 只读 `llm_calls`；日志/告警 | 无（平台级） | 全局成本；需明确平台级语义 |
+| `tasks.recover_stale_rag_runs` | `rag_evaluation.py` | `rag_evaluation_runs`、`tasks` 状态 | `Run.tenant_id` | 尚无显式 context；PR-4a 必补 |
+| `tasks.weekly_digest` | `digest.py` | 只读聚合 + 邮件；不写业务表 | 无（平台级） | 跨全租户聚合；固定平台级语义 |
+| `tasks.monitor_cost` | `cost_monitor.py` | 只读 `llm_calls`；日志/告警 | 无（平台级） | 全局成本；固定平台级语义 |
 | `tasks.ping` | `__init__.py` | 无 | 无 | 无需处理 |
 
 ### 1.2 audit_logs 现状
@@ -29,7 +29,7 @@
 |---|---|
 | 字段 | `id` / `user_id` / `tenant_id`(nullable) / `action` / `resource_type` / `resource_id` / `details` JSONB / `ip_address` / `user_agent` / `created_at` |
 | 已有写入 | platform_admin 跨租户访问（`tenant.cross_access`）；凭据 create/update/delete（`details.provider`，`tenant_id` 为空） |
-| 未覆盖 | 数据源/报告删除、任务取消/重试、platform_admin 写操作、租户状态变更、批量导出 |
+| 未覆盖 | 登录成功/失败、token 撤销、报告生成/下载、数据导出、数据删除、任务取消/重试、租户状态变更、stale recovery |
 | before/after | 无；只能记录调用参数/摘要 |
 | append-only | 仅应用层未提供 update/delete；DB 无强制 |
 | 密钥安全 | 凭据审计不含 Key；PR-4 需白名单脱敏 |
@@ -48,7 +48,7 @@
 - 任务入口只接收资源 ID；从 DB 加载父资源后，用 `system_context(parent.tenant_id, actor_user_id=...)` 显式 attach。
 - 子资源写入用父资源 tenant：`Task` / `RawData` / `Report` / `Run`；禁止从环境变量或默认租户兜底。
 - 平台级任务（digest / cost monitor）不 attach 业务 tenant；不得写业务表；日志中标记 `scope=platform`。
-- `recover_stale_rag_runs` 逐 Run 处理：每个 Run 用自身 `tenant_id`；状态更新不得跨 Run 混用。审计可选：记录 `run.recovered_stale`（若 PR-4 audit 扩展到系统事件）。
+- `recover_stale_rag_runs` 采用「平台级只读扫描 + 按 Run tenant 显式更新」；不要求用户请求上下文，但每次更新必须带 tenant 谓词。
 
 ### 3.2 覆盖矩阵（实施时逐项打勾）
 
@@ -61,50 +61,89 @@
 | extract | tasks / knowledge_base / knowledge_gaps | Task | 有 | 维持 |
 | report | reports / tasks / file | Report | 有 | 维持 |
 | rag_evaluation | runs / results / traces / tasks | Run | 有 | 维持 |
-| recover_stale | runs / tasks | Run | 部分 | 补显式 context + 测试 |
+| recover_stale | runs / tasks | Run（逐条） | 部分 | 补显式 context + tenant 谓词 + A/B 测试 |
 | weekly_digest | 无 | 平台级 | 有 | 固定 `scope=platform`；禁止写业务表 |
 | monitor_cost | 无 | 平台级 | 有 | 同上 |
 
+### 3.3 `recover_stale_rag_runs` 方案（P1-1 已定）
+
+采用 **平台级只读扫描 + 按 `run.tenant_id` 显式更新**：
+
+1. 查询只读：扫描 `rag_evaluation_runs` 中 heartbeat 超时的 Run（跨租户只读，不需要 tenant 过滤）。
+2. 每条 Run 独立处理：
+   - `attach_tenant_context(user, system_context(run.tenant_id, actor_user_id=run.user_id))`（如加载 user）；
+   - Run 状态更新必须带 tenant 谓词：
+     `UPDATE rag_evaluation_runs SET status=... WHERE id=:run_id AND tenant_id=:tenant_id AND status='running' AND last_heartbeat_at < :cutoff`；
+   - Task 状态更新同样带 `tenant_id`：`UPDATE tasks ... WHERE id=:task_id AND tenant_id=:tenant_id`。
+3. 单条失败隔离：记录错误与 alert，不中断其他 Run；失败 Run 保持原状态，下个周期重试，不写入错误租户。
+4. 可选审计：`run.recovered_stale`，`tenant_id=run.tenant_id`，details 记录 run_id/task_id/old_status。
+
+验收测试（PR-4a）：
+
+- tenant A/B 各造 1 条 stale Run + 对应 Task；
+- `TENANT_ENFORCEMENT_ENABLED=true` 执行 recovery；
+- A/B 各自的 Run/Task 只被本租户更新；
+- 构造错误 tenant 的更新尝试影响 0 行；
+- 任务不因缺 TenantContext 失败；跨租户更新计数 = 0。
+
 ## 4. audit 扩展设计
 
-### 4.1 Schema（建议，最终 migration 单独评审）
+### 4.1 Schema（026，PR-4b）
 
 | 字段 | 类型 | 说明 |
 |---|---|---|
 | `tenant_id` | UUID nullable | 有租户上下文时必须写；平台级事件可为 NULL |
 | `before` | JSONB nullable | 变更前安全快照；仅白名单字段 |
 | `after` | JSONB nullable | 变更后安全快照；仅白名单字段 |
-| `request_id` | varchar(64) nullable | 可选：串联一次请求/任务 |
+| `request_id` | varchar(64) nullable | 串联一次请求/任务（可选，写入时生成） |
 
-> 是否新增 `before`/`after` 列，还是放入 `details`，在实施评审时定；本 scope 只固定“可查询、可脱敏、不可篡改”的要求。
+> 采用独立 `before` / `after` 列，不放入 `details`，便于查询与脱敏测试；026 只加列，不改历史行。
 
-### 4.2 审计事件（P1 最小集）
+### 4.2 审计事件（P1 完整集）
 
-| 事件 | action | tenant_id | before/after |
+| 事件 | action | tenant_id | before/after / details |
 |---|---|---|---|
-| platform_admin 切租户访问 | `tenant.cross_access` | target tenant | 保留现有 details；可加 request_id |
-| 凭据 create / update / delete | `credential.create/update/delete` | actor tenant | 仅 provider、指纹/掩码，不含 Key |
-| 数据源删除 / 强制删除 | `datasource.delete` | datasource tenant | 名称、类型、级联计数 |
-| 报告删除 | `report.delete` | report tenant | 标题、格式、状态 |
+| platform_admin 切租户访问 | `tenant.cross_access` | target tenant | 保留现有 details；加 request_id |
+| 登录成功 | `login.success` | actor tenant | method / request_id；不含密码 |
+| 登录失败 | `login.failure` | 可识别用户时 actor tenant，否则 NULL | reason / email hash / IP；不含密码 |
+| token 撤销 | `token.revoke` | actor tenant | jti hash / reason |
+| 凭据 create / update / delete | `credential.create/update/delete` | actor tenant | 仅 provider、掩码指纹，不含 Key |
+| 数据删除（数据源/报告/原始数据） | `data.delete` | resource tenant | `resource_type` 区分；before 快照 + 级联计数 |
+| 报告生成 | `report.generate` | report tenant | report_id / format / status |
+| 报告下载 | `report.download` | report tenant | report_id / format |
+| 数据导出 | `data.export` | resource tenant | export_type / row_count / format |
 | 任务取消 / 重试 | `task.cancel/retry` | task tenant | 状态前后 |
-| 租户状态变更（platform_admin） | `tenant.update` | target tenant | status before/after |
+| 租户状态变更（platform_admin） | `tenant.status.change` | target tenant | status before/after |
+| stale Run 回收（系统事件） | `run.recovered_stale` | run tenant | run_id / task_id / old_status |
 
-> 导出/对比等读操作不默认写审计；如合规需要，单独加“导出审计”事件，避免日志膨胀。
+> 导出/对比需要写 `data.export`；其他纯读操作不默认写审计，避免日志膨胀。
 
-### 4.3 append-only
+### 4.3 append-only（P1-3 已定：DB trigger）
 
-- 应用层：不提供 update/delete audit API；repository 只 `add`。
-- DB 层建议二选一（实施评审）：
-  1. 撤销应用角色的 `UPDATE/DELETE` 权限；
-  2. `BEFORE UPDATE OR DELETE` trigger 直接 `RAISE EXCEPTION`。
-- 测试：直接 SQL `UPDATE audit_logs` / `DELETE` 必须失败（或应用层无入口）；新增测试不依赖真实权限时用 trigger。
-- 历史行：不要求回填 `before/after`；`tenant_id` 保持现状，新增事件必须写。
+**机制**：在 `audit_logs` 上创建 `BEFORE UPDATE OR DELETE` trigger，函数直接 `RAISE EXCEPTION 'audit_logs is append-only'`；应用层只保留 `INSERT` / `SELECT`，不提供 update/delete API。
+
+| 关注点 | 规则 |
+|---|---|
+| 运行时绕过 | 无；应用角色不能 UPDATE/DELETE；不提供 API |
+| migration / 数据修复 | DDL 不受 trigger 影响；如必须改历史行，只能在单独评审的 migration 中 `ALTER TABLE audit_logs DISABLE TRIGGER trg_audit_logs_append_only`，改完同一事务 `ENABLE`；禁止临时手工绕过 |
+| 备份 / 恢复 | `pg_dump` / restore 以 INSERT 方式重建；不触发 UPDATE/DELETE；恢复演练需验证 trigger 仍在 |
+| 审计导出 | 只读 `SELECT`；导出为 CSV/JSON，不修改原表；导出动作本身记 `data.export` |
+| 分区 / 归档 | 不在 PR-4；未来分区 drop 属单独批准的维护操作，禁止用 DELETE 做 retention |
+| 写入失败 | audit insert 放在 savepoint 内 best-effort；失败回滚 savepoint，业务继续；同时写 error log + `audit_write_failed` 告警指标（critical 事件高优先级）。不静默失败 |
+| 历史行 | 不回填 `before/after`；新增事件必须带 tenant_id（可识别时） |
+
+测试（PR-4b）：
+
+- 直接 SQL `UPDATE audit_logs` / `DELETE` → 异常；
+- 正常 `INSERT` 成功；
+- migration up/down 后 trigger 仍存在；
+- audit insert 失败时业务事务不回滚（savepoint），且产生告警日志。
 
 ### 4.4 脱敏
 
 - 白名单序列化：只记录名称、状态、类型、计数、provider、掩码指纹。
 - 禁止记录：API Key、Authorization、Cookie、密码、完整 prompt/response（除非已有单独脱敏策略）。
-- 测试：构造含 `api_key` / `password` 的 payload，断言审计中不出现原值。
+- 测试：构造含 `api_key` / `password` / `authorization` / `cookie` 的 payload，断言审计中不出现原值。
 
 ## 5. staging 验证步骤（PR-4 部分）
 
@@ -113,20 +152,23 @@
 | # | 验证 | 预期 |
 |---|---|---|
 | 1 | 凭据 create/update/delete | `audit_logs.tenant_id` 为 actor tenant；无 Key 明文 |
-| 2 | 数据源删除 | 审计 before/after 含名称/类型/级联计数 |
+| 2 | 数据删除 | `data.delete` 审计 before/after 含名称/类型/级联计数 |
 | 3 | 任务取消/重试 | 审计状态前后正确 |
-| 4 | `recover_stale_rag_runs` | 每个 Run 的 tenant 不混用；Task 状态同步 |
-| 5 | digest / cost monitor | 不写业务表；日志 `scope=platform` |
-| 6 | append-only | UPDATE/DELETE 被拒绝 |
-| 7 | 跨租户 | 既有 404 矩阵不回归 |
+| 4 | 报告生成 / 下载 | `report.generate` / `report.download` 均带 report tenant |
+| 5 | 登录成功/失败 + token 撤销 | `login.success/failure`、`token.revoke` 均写审计；失败不泄露密码 |
+| 6 | 数据导出 | `data.export` 带 resource tenant / row_count |
+| 7 | `recover_stale_rag_runs` | A/B 各有 stale Run；flag=true 下各自恢复，跨租户更新 = 0；无 context 失败 |
+| 8 | digest / cost monitor | 不写业务表；日志 `scope=platform` |
+| 9 | append-only | UPDATE/DELETE 被 trigger 拒绝；导出只读 |
+| 10 | 跨租户 | 既有 404 矩阵不回归 |
 
 ## 6. 拆分建议（均需单独批准）
 
 | 子项 | 内容 | 是否含 migration |
 |---|---|---|
-| PR-4a | 后台任务 context 覆盖 + recover_stale 显式 context + 测试 | 否 |
-| PR-4b | audit before/after/request_id + append-only + 脱敏 + 测试 | 是（新 migration，编号实施时定） |
-| PR-4c | staging 验证记录 + 回滚/监控补充 | 否 |
+| PR-4a | 后台任务 context 覆盖 + recover_stale 显式 context/tenant 谓词 + A/B 测试 | 否 |
+| PR-4b | audit before/after/request_id + trigger append-only + 事件接入 + 脱敏 + 测试 | 是（026，暂定编号） |
+| PR-4c | staging 验证记录（含 stale recovery + audit）+ 回滚/监控补充 | 否 |
 
 ## 7. 非目标
 
@@ -141,14 +183,17 @@
 
 - 覆盖矩阵中所有写业务表的任务均有显式 tenant 来源和测试；
 - 平台级任务不误写业务表，语义固定；
-- audit 事件含 tenant_id，before/after 可查询且脱敏；
-- append-only 有可执行测试；
-- staging 验证 1–7 通过并留证据；
+- `recover_stale_rag_runs` A/B 测试通过：只更新对应 tenant，跨租户 0，缺 context 不失败；
+- audit 事件 P1 集齐（登录/token/报告/导出/删除/租户状态/跨租户/凭据/任务/stale）；
+- audit 事件带 tenant_id（可识别时），before/after 可查询且脱敏；
+- append-only trigger 有可执行测试；migration/备份/导出规则明确；
+- staging 验证 1–10 通过并留证据；
 - 不碰生产；不改变 PR-3 staging 门槛。
 
-## 9. 待决策
+## 9. 实施参数（不阻塞 scope）
 
-1. `before/after` 用独立列还是 `details` 子对象？
-2. append-only 用权限还是 trigger？应用角色是否与迁移角色分离？
-3. 导出/对比是否纳入审计 P1？
-4. `recover_stale_rag_runs` 是否写系统审计事件？
+1. `request_id` 生成方式（请求中间件 / Celery task id）。
+2. 审计导出格式与存放位置（CSV/JSON；对象存储或受控下载）。
+3. `data.export` 的首批接入路由清单（对比导出、报告导出等）。
+
+> 以上在 PR-4b 实施评审时定；append-only 机制、stale recovery 语义、P1 事件集已定，不再留待评审。
