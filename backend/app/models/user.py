@@ -11,7 +11,6 @@ from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
 
-from app.core.tenancy import DEFAULT_TENANT_ID_SQL
 from app.models.base import Base
 
 if TYPE_CHECKING:
@@ -48,7 +47,6 @@ class User(Base):
         PG_UUID(as_uuid=True),
         ForeignKey("tenants.id", ondelete="RESTRICT"),
         nullable=False,
-        server_default=text(DEFAULT_TENANT_ID_SQL),
     )
     email: Mapped[str] = mapped_column(String(255), nullable=False, unique=True)
     password_hash: Mapped[str] = mapped_column(String(255), nullable=False)

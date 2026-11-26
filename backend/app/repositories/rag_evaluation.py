@@ -140,6 +140,7 @@ def _result_values(row: RagEvaluationResult) -> dict[str, Any]:
     否则会撞 ``null value in column ... violates not-null constraint``。
     """
     return {
+        "tenant_id": row.tenant_id,
         "run_id": row.run_id,
         "dataset_item_id": row.dataset_item_id,
         "trace_id": row.trace_id,

@@ -276,6 +276,7 @@ async def upload_file(
 
         stored = storage_service.save_upload_from_path(
             tmp_path,
+            tenant_id=datasource.tenant_id,
             datasource_id=datasource.id,
             filename=filename,
             content_type=file.content_type,

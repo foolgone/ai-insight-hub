@@ -589,7 +589,7 @@ async def _execute_report(
         else:
             content = render_excel(report, output)
         extension = EXTENSIONS[report.format]
-        object_name = f"reports/{report.id}.{extension}"
+        object_name = f"tenant/{report.tenant_id}/reports/{report.id}.{extension}"
         stored = storage_service.save_bytes(
             content,
             object_name=object_name,

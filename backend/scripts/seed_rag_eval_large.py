@@ -16,6 +16,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from sqlalchemy import select  # noqa: E402
 
 from app.core.database import SessionLocal  # noqa: E402
+from app.core.tenancy import attach_tenant_context, system_context  # noqa: E402
 from app.models import QaDatasetVersion, User  # noqa: E402
 from app.repositories import qa_dataset as repo  # noqa: E402
 from app.schemas.qa_dataset import QaDatasetCreate  # noqa: E402
@@ -60,6 +61,7 @@ async def main() -> None:
         user = await session.scalar(select(User).where(User.email == ADMIN_EMAIL))
         if user is None:
             raise SystemExit("admin user missing; run scripts/seed_data.py first")
+        attach_tenant_context(user, system_context(user.tenant_id, actor_user_id=user.id))
 
         dataset = await repo.get_dataset_by_name(session, user.id, DATASET_NAME)
         if dataset is None:

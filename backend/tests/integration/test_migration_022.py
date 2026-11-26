@@ -80,6 +80,7 @@ def _seed_dataset(session: Session, item_count: int):
     session.flush()
 
     dataset = QaDataset(
+        tenant_id=user.tenant_id,
         user_id=user.id,
         name=f"migration022-{uuid.uuid4().hex[:8]}",
         source_type="doc",
@@ -88,6 +89,7 @@ def _seed_dataset(session: Session, item_count: int):
     session.flush()
 
     version = QaDatasetVersion(
+        tenant_id=user.tenant_id,
         dataset_id=dataset.id,
         version=1,
         status="published",
@@ -99,6 +101,7 @@ def _seed_dataset(session: Session, item_count: int):
 
     items = [
         QaDatasetItem(
+            tenant_id=user.tenant_id,
             version_id=version.id,
             item_key=f"I{index}",
             query=f"query-{index}",
@@ -122,6 +125,7 @@ def _create_run(
     completed_items: int,
 ) -> RagEvaluationRun:
     run = RagEvaluationRun(
+        tenant_id=user.tenant_id,
         user_id=user.id,
         dataset_id=dataset.id,
         dataset_name=dataset.name,
@@ -151,6 +155,7 @@ def _add_result(
     derived_from_result_id: uuid.UUID | None = None,
 ) -> RagEvaluationResult:
     row = RagEvaluationResult(
+        tenant_id=run.tenant_id,
         run_id=run.id,
         dataset_item_id=item.id,
         metric_name=metric_name,

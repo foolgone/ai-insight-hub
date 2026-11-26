@@ -30,7 +30,6 @@ from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.sql import func
 
-from app.core.tenancy import DEFAULT_TENANT_ID_SQL
 from app.models.base import Base
 
 EMBEDDING_DIM = 384
@@ -91,7 +90,6 @@ class DataSource(Base):
         PG_UUID(as_uuid=True),
         ForeignKey("tenants.id", ondelete="RESTRICT"),
         nullable=False,
-        server_default=text(DEFAULT_TENANT_ID_SQL),
     )
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     description: Mapped[str | None] = mapped_column(Text)
@@ -135,7 +133,6 @@ class RawData(Base):
         PG_UUID(as_uuid=True),
         ForeignKey("tenants.id", ondelete="RESTRICT"),
         nullable=False,
-        server_default=text(DEFAULT_TENANT_ID_SQL),
     )
     datasource_id: Mapped[uuid.UUID] = mapped_column(
         PG_UUID(as_uuid=True),
@@ -188,7 +185,6 @@ class CleanedData(Base):
         PG_UUID(as_uuid=True),
         ForeignKey("tenants.id", ondelete="RESTRICT"),
         nullable=False,
-        server_default=text(DEFAULT_TENANT_ID_SQL),
     )
     datasource_id: Mapped[uuid.UUID] = mapped_column(
         PG_UUID(as_uuid=True),

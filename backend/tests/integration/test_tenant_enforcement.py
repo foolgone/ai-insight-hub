@@ -9,6 +9,7 @@ from jose import jwt as jose_jwt
 from sqlalchemy import select
 
 from app.core.config import settings
+from app.core.exceptions import TenantContextMissingError
 from app.core.security import (
     create_access_token,
     create_refresh_token,
@@ -16,6 +17,7 @@ from app.core.security import (
     hash_password,
 )
 from app.core.tenancy import DEFAULT_TENANT_ID, PLATFORM_TENANT_ID
+from app.services import cleaning_service
 from app.models import (
     AuditLog,
     QaDataset,
@@ -357,3 +359,24 @@ async def test_tenant_list_hides_platform_sentinel(client, db_session) -> None:
     assert "default" in slugs
     assert tenant_a.slug in slugs
     assert "platform" not in slugs
+
+
+async def test_flag_true_write_without_context_does_not_fall_back(
+    client, db_session, monkeypatch
+) -> None:
+    """flag=true 且未 attach context：业务写入必须失败，不得写默认租户。"""
+    monkeypatch.setattr(settings, "TENANT_ENFORCEMENT_ENABLED", True)
+    tenant = await _tenant(db_session, f"noctx-{uuid.uuid4().hex[:6]}")
+    user = await _user(db_session, tenant)
+
+    with pytest.raises(TenantContextMissingError):
+        await cleaning_service.create_clean_task(
+            db_session,
+            user=user,
+            datasource_id=uuid.uuid4(),
+            task_name="no-tenant-context",
+            params={},
+        )
+
+    persisted = await db_session.scalar(select(Task).where(Task.task_name == "no-tenant-context"))
+    assert persisted is None

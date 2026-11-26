@@ -74,11 +74,20 @@ async def _seed(db_session: AsyncSession) -> tuple[RagTrace, QaDatasetItem]:
     user = UserFactory()
     await persist(db_session, user)
 
-    dataset = QaDataset(user_id=user.id, name="judge-ds", source_type="doc")
+    dataset = QaDataset(
+        tenant_id=user.tenant_id, user_id=user.id, name="judge-ds", source_type="doc"
+    )
     await persist(db_session, dataset)
-    version = QaDatasetVersion(dataset_id=dataset.id, version=1, status="published", item_count=1)
+    version = QaDatasetVersion(
+        tenant_id=dataset.tenant_id,
+        dataset_id=dataset.id,
+        version=1,
+        status="published",
+        item_count=1,
+    )
     await persist(db_session, version)
     item = QaDatasetItem(
+        tenant_id=version.tenant_id,
         version_id=version.id,
         item_key="Q001",
         query="退款多久到账？",
@@ -89,6 +98,7 @@ async def _seed(db_session: AsyncSession) -> tuple[RagTrace, QaDatasetItem]:
     await persist(db_session, item)
 
     trace = RagTrace(
+        tenant_id=user.tenant_id,
         user_id=user.id,
         dataset_item_id=item.id,
         adapter="mock",

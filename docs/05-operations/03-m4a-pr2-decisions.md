@@ -1,6 +1,6 @@
 # M4-A PR-2 前置决策（tasks / server_default / 角色 / JWT / platform_admin）
 
-> 状态：`implemented`（2026-11-25）；**PR-2 JWT/TenantContext/Repository 已实现/验证，待验收**；PR-3 未开始
+> 状态：`accepted`（2026-11-25）；PR-2 accepted；**PR-3 已实现/验证，待验收**（见 `04-m4a-pr3-write-paths.md`）
 > 上游：`docs/05-operations/02-m4a-tenant-first-scope.md`（scope approved）
 > PR-1：accepted（test/staging，仅 migration/模型）；生产 migration 未批准
 > 本文只做决策，不写 migration/代码。
@@ -150,3 +150,20 @@ PR-2 不打开 flag（默认 false）；staging 开 flag 等 PR-3/025 完成。
 | 测试 | `test_tenant_enforcement` 6 条；后端全量 **1156 passed / 255 deselected**；前端 84 files / 440 tests |
 | 校验 | alembic check、black/flake8/mypy/import-linter 通过 |
 | 边界 | 未做存储前缀/搬迁、retention/alerting/cost/RLS；未开 flag；未碰生产 |
+
+## 11. Tenant guard 覆盖矩阵（PR-2 验收补充）
+
+| 分类 | 资源 | 保护方式 |
+|---|---|---|
+| tenant-scoped | data_sources / tasks / reports / qa_datasets / rag_traces / rag_evaluation_runs / rag_evaluation_results | 列表 tenant 过滤；详情/下载/结果/失败 `require_tenant`；跨租户 404 |
+| user-scoped | knowledge_base / knowledge_gaps / analysis_results / raw_data / cleaned_data / LLM/ASR credentials | 经 datasource 父资源 tenant guard + `assert_owner`；同租户跨用户 403；跨租户 404；凭证只按当前用户读写 |
+| platform-level | prompt / datasource_types / audit_logs / llm_calls | tenant 切片不暴露给普通用户；audit/llm 允许 tenant_id NULL；platform_admin 专用查询 |
+
+> user-scoped 资源不因为“没有独立 tenant_id 过滤”而泄漏：所有入口先校验 datasource 的 tenant/owner，再访问子资源；`test_tenant_enforcement` 覆盖知识/质量/清洗/原始数据入口的跨租户 404。
+
+## 12. 旧 JWT grace 边界（验收口径）
+
+- 旧 access token **无 `tenant_id`**：按 token `iat` 计算，7 天内按 DB 用户租户解析；超过 7 天 → 401，必须重新登录。
+- 旧 refresh token **无 `tenant_id`**：刷新时按 DB 用户租户签发新的 access/refresh，两个新 token 都带 `tenant_id`。
+- 新 token 的 claim 与 DB 用户租户不一致：401；不静默降级。
+- 该兼容期是**一次性迁移窗口**，不是永久兼容；7 天后无 claim 的 token 全部失效。

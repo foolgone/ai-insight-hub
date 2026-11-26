@@ -296,6 +296,13 @@ class InternalError(AIInsightHubException):
     default_message = "Internal server error"
 
 
+class TenantContextMissingError(AIInsightHubException):
+    """flag=true 时业务写入缺少租户上下文（500，调用方必须显式提供）。"""
+
+    code = ErrorCode.TENANT_CONTEXT_MISSING
+    default_message = "Tenant context is required for this write"
+
+
 __all__ = [
     "AIInsightHubException",
     "ApiKeyInvalidError",
@@ -336,6 +343,7 @@ __all__ = [
     "TaskNotCancellableError",
     "TaskNotFoundError",
     "TaskNotRetryableError",
+    "TenantContextMissingError",
     "TokenExpiredError",
     "UserEmailExistsError",
     "TenantNotFoundError",

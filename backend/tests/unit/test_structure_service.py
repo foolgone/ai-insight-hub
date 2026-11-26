@@ -16,6 +16,7 @@ pytestmark = pytest.mark.unit
 class _Raw:
     def __init__(self, content: dict) -> None:
         self.id = uuid.uuid4()
+        self.tenant_id = uuid.uuid4()
         self.raw_content = content
         self.status = "pending"
 

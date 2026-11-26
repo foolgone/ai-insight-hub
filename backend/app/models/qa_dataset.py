@@ -28,7 +28,6 @@ from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.sql import func
 
-from app.core.tenancy import DEFAULT_TENANT_ID_SQL
 from app.models.base import Base
 
 _EMPTY_JSON = text("'[]'::jsonb")
@@ -55,7 +54,6 @@ class QaDataset(Base):
         PG_UUID(as_uuid=True),
         ForeignKey("tenants.id", ondelete="RESTRICT"),
         nullable=False,
-        server_default=text(DEFAULT_TENANT_ID_SQL),
     )
     user_id: Mapped[uuid.UUID] = mapped_column(
         PG_UUID(as_uuid=True),
@@ -101,7 +99,6 @@ class QaDatasetVersion(Base):
         PG_UUID(as_uuid=True),
         ForeignKey("tenants.id", ondelete="RESTRICT"),
         nullable=False,
-        server_default=text(DEFAULT_TENANT_ID_SQL),
     )
     dataset_id: Mapped[uuid.UUID] = mapped_column(
         PG_UUID(as_uuid=True),
@@ -142,7 +139,6 @@ class QaDatasetItem(Base):
         PG_UUID(as_uuid=True),
         ForeignKey("tenants.id", ondelete="RESTRICT"),
         nullable=False,
-        server_default=text(DEFAULT_TENANT_ID_SQL),
     )
     version_id: Mapped[uuid.UUID] = mapped_column(
         PG_UUID(as_uuid=True),

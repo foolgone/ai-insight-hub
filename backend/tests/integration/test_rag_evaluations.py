@@ -69,9 +69,15 @@ async def _seed(
     published: bool = True,
     checksum: str = "checksum-1",
 ) -> tuple[QaDataset, QaDatasetVersion, list[QaDatasetItem]]:
-    dataset = QaDataset(user_id=user.id, name=f"ds-{uuid.uuid4().hex[:8]}", source_type="doc")
+    dataset = QaDataset(
+        tenant_id=user.tenant_id,
+        user_id=user.id,
+        name=f"ds-{uuid.uuid4().hex[:8]}",
+        source_type="doc",
+    )
     await persist(db_session, dataset)
     version = QaDatasetVersion(
+        tenant_id=dataset.tenant_id,
         dataset_id=dataset.id,
         version=1,
         status="published" if published else "draft",
@@ -84,6 +90,7 @@ async def _seed(
         gold = evidence[index - 1]
         items.append(
             QaDatasetItem(
+                tenant_id=version.tenant_id,
                 version_id=version.id,
                 item_key=f"Q{index}",
                 query=query,
@@ -647,6 +654,7 @@ async def test_recover_stale_runs_marks_task_and_run_failed(test_user, db_sessio
     _, version, _ = await _seed(db_session, test_user, queries=["q1"], evidence=[_evidence_doc()])
     old = datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(hours=2)
     task = Task(
+        tenant_id=test_user.tenant_id,
         task_type="rag_eval",
         task_name="stale",
         user_id=test_user.id,
@@ -656,6 +664,7 @@ async def test_recover_stale_runs_marks_task_and_run_failed(test_user, db_sessio
     )
     await persist(db_session, task)
     run = RagEvaluationRun(
+        tenant_id=test_user.tenant_id,
         user_id=test_user.id,
         task_id=task.id,
         dataset_name="stale-ds",
@@ -798,6 +807,7 @@ async def test_recover_stale_skips_run_held_by_live_worker(test_user, db_session
     _, version, _ = await _seed(db_session, test_user, queries=["q1"], evidence=[_evidence_doc()])
     old = datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(hours=2)
     run = RagEvaluationRun(
+        tenant_id=test_user.tenant_id,
         user_id=test_user.id,
         dataset_name="stale-locked",
         dataset_version_id=version.id,
@@ -1042,6 +1052,7 @@ async def test_summary_excludes_retry_child_runs(
         db_session, test_user, queries=["q1", "q2"], evidence=[_evidence_doc(), None]
     )
     parent = RagEvaluationRun(
+        tenant_id=test_user.tenant_id,
         user_id=test_user.id,
         dataset_id=dataset.id,
         dataset_name=dataset.name,
@@ -1071,6 +1082,7 @@ async def test_summary_excludes_retry_child_runs(
     )
     await persist(db_session, parent)
     child = RagEvaluationRun(
+        tenant_id=test_user.tenant_id,
         user_id=test_user.id,
         dataset_id=dataset.id,
         dataset_name=dataset.name,

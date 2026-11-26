@@ -80,6 +80,7 @@ class ErrorCode(str, Enum):
     RAG_EVALUATION_CONFLICT = "RAG_EVALUATION_CONFLICT"
     # 500
     INTERNAL_ERROR = "INTERNAL_ERROR"
+    TENANT_CONTEXT_MISSING = "TENANT_CONTEXT_MISSING"
 
 
 class FrameworkErrorCode(str, Enum):
@@ -134,6 +135,7 @@ ERROR_STATUS: dict[ErrorCode | FrameworkErrorCode, int] = {
     ErrorCode.RAG_EVALUATION_INVALID: 400,
     ErrorCode.RAG_EVALUATION_CONFLICT: 409,
     ErrorCode.INTERNAL_ERROR: 500,
+    ErrorCode.TENANT_CONTEXT_MISSING: 500,
 }
 
 FRAMEWORK_STATUS: dict[FrameworkErrorCode, int] = {

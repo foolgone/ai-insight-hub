@@ -6,9 +6,11 @@ import uuid
 import pytest
 
 from app.composition import enqueue
+from app.core.config import settings
+from app.core.tenancy import DEFAULT_TENANT_ID
 from app.agents.base import AgentResult
 from app.models import QaDataset, QaDatasetVersion, RagEvaluationRun, Report
-from app.services import report_service
+from app.services import report_service, storage_service
 from tests.factories import UserFactory, persist
 
 pytestmark = pytest.mark.integration
@@ -52,9 +54,15 @@ async def _datasource(client, auth_headers, name: str = "report-ds") -> str:
 
 
 async def _comparison_runs(db_session, user, count: int = 2) -> list[RagEvaluationRun]:
-    dataset = QaDataset(user_id=user.id, name=f"cmp-ds-{uuid.uuid4().hex[:8]}", source_type="doc")
+    dataset = QaDataset(
+        tenant_id=user.tenant_id,
+        user_id=user.id,
+        name=f"cmp-ds-{uuid.uuid4().hex[:8]}",
+        source_type="doc",
+    )
     await persist(db_session, dataset)
     version = QaDatasetVersion(
+        tenant_id=dataset.tenant_id,
         dataset_id=dataset.id,
         version=1,
         status="published",
@@ -65,6 +73,7 @@ async def _comparison_runs(db_session, user, count: int = 2) -> list[RagEvaluati
     runs: list[RagEvaluationRun] = []
     for _ in range(count):
         run = RagEvaluationRun(
+            tenant_id=user.tenant_id,
             user_id=user.id,
             dataset_id=dataset.id,
             dataset_name=dataset.name,
@@ -171,6 +180,7 @@ async def test_markdown_report_lifecycle(client, auth_headers, db_session, monke
     assert row is not None
     assert row.status == "completed"
     assert row.file_size and row.file_size > 0
+    assert row.file_path.startswith(f"tenant/{DEFAULT_TENANT_ID}/reports/")
     assert row.data["summary"] == "整体质量良好。"
 
     detail = await client.get(f"/api/v1/reports/{report_id}", headers=auth_headers)
@@ -193,6 +203,35 @@ async def test_markdown_report_lifecycle(client, auth_headers, db_session, monke
     missing = await client.get(f"/api/v1/reports/{report_id}", headers=auth_headers)
     assert missing.status_code == 404
     assert missing.json()["error"]["code"] == "REPORT_NOT_FOUND"
+
+
+async def test_legacy_report_key_still_downloadable(
+    client, auth_headers, test_user, db_session, monkeypatch, tmp_path
+) -> None:
+    """旧报告仍按旧 key（reports/<id>.md）读取，不要求搬迁后才能下载。"""
+    monkeypatch.setattr(settings, "STORAGE_BACKEND", "local")
+    monkeypatch.setattr(settings, "STORAGE_LOCAL_DIR", str(tmp_path))
+    datasource_id = await _datasource(client, auth_headers, "legacy-report-ds")
+    legacy_key = f"reports/legacy-{uuid.uuid4().hex}.md"
+    storage_service.save_bytes(
+        "旧报告内容".encode(), object_name=legacy_key, content_type="text/markdown"
+    )
+    report = Report(
+        tenant_id=test_user.tenant_id,
+        datasource_id=uuid.UUID(datasource_id),
+        user_id=test_user.id,
+        title="旧 key 报告",
+        report_type="quality",
+        format="markdown",
+        status="completed",
+        file_path=legacy_key,
+        file_size=18,
+    )
+    await persist(db_session, report)
+
+    response = await client.get(f"/api/v1/reports/{report.id}/download", headers=auth_headers)
+    assert response.status_code == 200, response.text
+    assert response.content.decode() == "旧报告内容"
 
 
 async def test_excel_report_generation(client, auth_headers, db_session, monkeypatch) -> None:

@@ -1611,3 +1611,13 @@ alembic check   : No new upgrade operations detected
 - 测试：test_tenant_enforcement 6 条（JWT/旧 token/flag false/flag true 404/platform_admin header+audit/sentinel 隐藏）；后端全量 1156 passed / 255 deselected；前端 440；alembic check、black/flake8/mypy/import-linter 通过。
 - 边界：未做存储前缀/搬迁、retention/alerting/cost/RLS；未开 flag；未碰生产。PR-3 待验收后开。
 
+### M4-A PR-3 存储前缀 / 025 / 负向写入（2026-11-26，implemented / verified）
+- 存储：上传新 key `tenant/<tenant_id>/uploads/<datasource_id>/...`；报告新 key `tenant/<tenant_id>/reports/...`；`save_upload` / `save_upload_from_path` 必填 tenant；旧 key 按原 object_name 继续读取。
+- 025 migration：移除 15 张业务表 `tenant_id` server_default（保留 NOT NULL/外键）；downgrade 恢复默认值仅供回滚；`test_migration_025` 覆盖默认值、缺 tenant 插入拒绝、up/down 两次。
+- 写入路径：补 `docs/05-operations/04-m4a-pr3-write-paths.md`，盘点 API 创建数据源/任务/报告/数据集/Run、Celery 子资源、seed/CLI、报告生成/存储、RAG 执行。
+- 显式 tenant：用户注册落默认租户（显式常量）；structure 知识点/摘要用 `raw.tenant_id`；RAG 批量结果 pg_insert 补 `tenant_id`；seed 脚本 attach `system_context`；测试工厂默认 `DEFAULT_TENANT_ID`。
+- 负向：flag=true 且无 TenantContext，`tenant_id_for_write` 抛 `TENANT_CONTEXT_MISSING`；`cleaning_service.create_clean_task` 不落 Task；DB 层缺 tenant 插入被 NOT NULL 拒绝。
+- 测试：`test_tenant_enforcement` 增加无 context 负向；上传/报告 tenant 前缀断言；旧报告 key 下载；后端全量 **1163 passed / 255 deselected**（4m54s）；alembic check、black/flake8/mypy/import-linter 通过。
+- 冒烟：本地真实栈（aiinsight_test + Redis + API + Celery，`TENANT_ENFORCEMENT_ENABLED=true`）注册→建数据源→上传→清洗完成→报告完成→跨租户 404→租户列表隐藏他租户，全部通过。
+- 边界：staging 当前不可访问，未对其 migration/开 flag；未做 retention/alerting/cost/RLS；生产 migration 未批准。
+

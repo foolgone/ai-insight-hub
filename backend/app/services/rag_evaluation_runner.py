@@ -23,7 +23,7 @@ from app.application.metrics import (
 from app.core.advisory_lock import AdvisoryLock
 from app.core.config import settings
 from app.core.database import SessionLocal
-from app.core.tenancy import DEFAULT_TENANT_ID
+from app.core.tenancy import attach_tenant_context, system_context
 from app.models import QaDatasetItem, RagEvaluationResult, RagEvaluationRun, RagTrace, Task, User
 from app.repositories import qa_dataset as qa_repo
 from app.repositories import rag_evaluation as repo
@@ -165,7 +165,7 @@ def _row_from_metric(
     if trace_reused:
         details["source_trace_id"] = str(trace.id)
     return RagEvaluationResult(
-        tenant_id=getattr(run, "tenant_id", DEFAULT_TENANT_ID),
+        tenant_id=getattr(run, "tenant_id", None),
         run_id=run.id,
         dataset_item_id=item.id,
         trace_id=trace.id,
@@ -190,7 +190,7 @@ def _failed_row(
     trace_reused: bool = False,
 ) -> RagEvaluationResult:
     return RagEvaluationResult(
-        tenant_id=getattr(run, "tenant_id", DEFAULT_TENANT_ID),
+        tenant_id=getattr(run, "tenant_id", None),
         run_id=run.id,
         dataset_item_id=item.id,
         trace_id=trace_id,
@@ -211,7 +211,7 @@ def _copy_parent_result(
     details["reused_from_run_id"] = str(parent.run_id)
     details["reused_result_id"] = str(parent.id)
     return RagEvaluationResult(
-        tenant_id=getattr(run, "tenant_id", DEFAULT_TENANT_ID),
+        tenant_id=getattr(run, "tenant_id", None),
         run_id=run.id,
         dataset_item_id=item.id,
         trace_id=parent.trace_id,
@@ -275,7 +275,7 @@ def _strict_row_from_coverage(
             strict_details["strict_score"] = score
             strict_details["strict_gap"] = round(float(coverage.score or 0.0) - float(score), 6)
     return RagEvaluationResult(
-        tenant_id=getattr(run, "tenant_id", DEFAULT_TENANT_ID),
+        tenant_id=getattr(run, "tenant_id", None),
         run_id=run.id,
         dataset_item_id=item.id,
         trace_id=coverage.trace_id,
@@ -411,7 +411,7 @@ async def _evaluate_trace(
                     )
             rows.append(
                 RagEvaluationResult(
-                    tenant_id=getattr(run, "tenant_id", DEFAULT_TENANT_ID),
+                    tenant_id=getattr(run, "tenant_id", None),
                     run_id=run.id,
                     dataset_item_id=item.id,
                     trace_id=trace.id,
@@ -612,6 +612,9 @@ async def execute_run(session: AsyncSession, run_id: uuid.UUID) -> dict[str, Any
     await session.commit()
 
     user = await session.get(User, run.user_id)
+    if user is not None:
+        # 内部任务：租户来自已持久化 Run，显式 attach，不依赖请求上下文。
+        attach_tenant_context(user, system_context(run.tenant_id, actor_user_id=user.id))
     if user is None:
         run.status = service.RUN_FAILED
         run.error_message = "user_missing"

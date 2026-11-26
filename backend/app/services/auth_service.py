@@ -17,6 +17,7 @@ from app.core.exceptions import (
     UserEmailExistsError,
 )
 from app.core.redis import blacklist_token, is_token_blacklisted
+from app.core.tenancy import DEFAULT_TENANT_ID
 from app.core.security import (
     create_access_token,
     create_refresh_token,
@@ -58,6 +59,7 @@ async def register(
         raise UserEmailExistsError(details={"email": email})
 
     user = User(
+        tenant_id=DEFAULT_TENANT_ID,
         email=email,
         password_hash=hash_password(password),
         name=name,
