@@ -1,6 +1,6 @@
 # M4-A PR-4 scope：后台任务 tenant context + audit 扩展
 
-> 状态：`draft_scope`（2026-11-26，P1 revision 2；**scope draft accepted，implementation 未批准**）
+> 状态：`draft_scope`（2026-11-26，P1 revision 3；**scope draft accepted，implementation 未批准**）
 > 前置：PR-3 accepted for local/test；staging flag=true 冒烟尚未执行
 > 边界：本文件只定义 PR-4 范围与验收；PR-4 代码、026 migration、生产 migration 均需单独批准
 > 不做：retention、alerting、cost 预算、RLS、M1/Judge 变更
@@ -76,7 +76,7 @@
      `UPDATE rag_evaluation_runs SET status=... WHERE id=:run_id AND tenant_id=:tenant_id AND status='running' AND last_heartbeat_at < :cutoff`；
    - Task 状态更新同样带 `tenant_id`：`UPDATE tasks ... WHERE id=:task_id AND tenant_id=:tenant_id`。
 3. 单条失败隔离：记录错误与 alert，不中断其他 Run；失败 Run 保持原状态，下个周期重试，不写入错误租户。
-4. 可选审计：`run.recovered_stale`，`tenant_id=run.tenant_id`，details 记录 run_id/task_id/old_status。
+4. 审计：`run.recovered_stale` 为高风险事件，必须与 Run/Task 更新同事务写 `audit_outbox`；`tenant_id=run.tenant_id`，details 记录 run_id/task_id/old_status。
 
 验收测试（PR-4a）：
 
@@ -101,21 +101,22 @@
 
 ### 4.2 审计事件（P1 完整集）
 
-| 事件 | action | tenant_id | before/after / details |
-|---|---|---|---|
-| platform_admin 切租户访问 | `tenant.cross_access` | target tenant | 保留现有 details；加 request_id |
-| 登录成功 | `login.success` | actor tenant | method / request_id；不含密码 |
-| 登录失败 | `login.failure` | 可识别用户时 actor tenant，否则 NULL | reason / email hash / IP；不含密码 |
-| token 撤销 | `token.revoke` | actor tenant | jti hash / reason |
-| 凭据 create / update / delete | `credential.create/update/delete` | actor tenant | 仅 provider、掩码指纹，不含 Key |
-| 数据删除（数据源/报告/原始数据） | `data.delete` | resource tenant | `resource_type` 区分；before 快照 + 级联计数 |
-| 报告生成 | `report.generate` | report tenant | report_id / format / status |
-| 报告下载 | `report.download` | report tenant | report_id / format |
-| 数据导出 | `data.export` | resource tenant | export_type / row_count / format |
-| 任务取消 / 重试 | `task.cancel/retry` | task tenant | 状态前后 |
-| 租户状态变更（platform_admin） | `tenant.status.change` | target tenant | status before/after |
-| stale Run 回收（系统事件） | `run.recovered_stale` | run tenant | run_id / task_id / old_status |
+| 事件 | action | tenant_id | before/after / details | 审计失败策略 |
+|---|---|---|---|---|
+| platform_admin 切租户访问 | `tenant.cross_access` | target tenant | 保留现有 details；加 request_id | **高风险：outbox** |
+| 登录成功 | `login.success` | actor tenant | method / request_id；不含密码 | 低风险：best-effort |
+| 登录失败 | `login.failure` | 可识别用户时 actor tenant，否则 NULL | reason / email hash / IP；不含密码 | 低风险：best-effort |
+| token 撤销 | `token.revoke` | actor tenant | jti hash / reason | 低风险：best-effort |
+| 凭据 create / update / delete | `credential.create/update/delete` | actor tenant | 仅 provider、掩码指纹，不含 Key | **高风险：outbox** |
+| 数据删除（数据源/报告/原始数据） | `data.delete` | resource tenant | `resource_type` 区分；before 快照 + 级联计数 | **高风险：outbox** |
+| 报告生成 | `report.generate` | report tenant | report_id / format / status | 低风险：best-effort |
+| 报告下载 | `report.download` | report tenant | report_id / format | 低风险：best-effort |
+| 数据导出 | `data.export` | resource tenant | export_type / row_count / format | **高风险：outbox** |
+| 任务取消 / 重试 | `task.cancel/retry` | task tenant | 状态前后 | 低风险：best-effort |
+| 租户状态变更（platform_admin） | `tenant.status.change` | target tenant | status before/after | **高风险：outbox** |
+| stale Run 回收（系统事件） | `run.recovered_stale` | run tenant | run_id / task_id / old_status | **高风险：outbox** |
 
+> 高风险事件不能“业务成功、审计缺失”；低风险事件允许主流程继续，但必须告警。
 > 导出/对比需要写 `data.export`；其他纯读操作不默认写审计，避免日志膨胀。
 
 ### 4.3 append-only（P1-3 已定：DB trigger）
@@ -124,12 +125,12 @@
 
 | 关注点 | 规则 |
 |---|---|
-| 运行时绕过 | 无；应用角色不能 UPDATE/DELETE；不提供 API |
+| 运行时绕过 | 无；应用层不提供 UPDATE/DELETE 路径，DB trigger 强制拒绝 |
 | migration / 数据修复 | DDL 不受 trigger 影响；如必须改历史行，只能在单独评审的 migration 中 `ALTER TABLE audit_logs DISABLE TRIGGER trg_audit_logs_append_only`，改完同一事务 `ENABLE`；禁止临时手工绕过 |
 | 备份 / 恢复 | `pg_dump` / restore 以 INSERT 方式重建；不触发 UPDATE/DELETE；恢复演练需验证 trigger 仍在 |
 | 审计导出 | 只读 `SELECT`；导出为 CSV/JSON，不修改原表；导出动作本身记 `data.export` |
 | 分区 / 归档 | 不在 PR-4；未来分区 drop 属单独批准的维护操作，禁止用 DELETE 做 retention |
-| 写入失败 | audit insert 放在 savepoint 内 best-effort；失败回滚 savepoint，业务继续；同时写 error log + `audit_write_failed` 告警指标（critical 事件高优先级）。不静默失败 |
+| 写入失败 | 按事件分级：高风险走 durable outbox；低风险才允许 savepoint best-effort + 告警。详见 4.5 |
 | 历史行 | 不回填 `before/after`；新增事件必须带 tenant_id（可识别时） |
 
 测试（PR-4b）：
@@ -137,13 +138,65 @@
 - 直接 SQL `UPDATE audit_logs` / `DELETE` → 异常；
 - 正常 `INSERT` 成功；
 - migration up/down 后 trigger 仍存在；
-- audit insert 失败时业务事务不回滚（savepoint），且产生告警日志。
+- 低风险 audit insert 失败时业务事务不回滚（savepoint），且产生告警日志；高风险按 4.5 走 outbox。
 
 ### 4.4 脱敏
 
 - 白名单序列化：只记录名称、状态、类型、计数、provider、掩码指纹。
 - 禁止记录：API Key、Authorization、Cookie、密码、完整 prompt/response（除非已有单独脱敏策略）。
 - 测试：构造含 `api_key` / `password` / `authorization` / `cookie` 的 payload，断言审计中不出现原值。
+
+### 4.5 审计失败分级与 durable outbox（P1 已定）
+
+**不允许所有事件统一 best-effort。** 按事件风险分两级：
+
+| 等级 | 事件 | 失败策略 | 失败后果 |
+|---|---|---|---|
+| 高风险 | `tenant.cross_access`、`credential.*`、`data.delete`、`data.export`、`tenant.status.change`、`run.recovered_stale` | 业务事务内写 `audit_outbox`（durable），由 dispatcher 异步投递 `audit_logs` | outbox 写入失败 → 业务事务回滚 / 任务重试；audit_logs 投递失败 → outbox 保留 + 重试 + 告警，不丢失 |
+| 低风险 | `login.success/failure`、`token.revoke`、`report.generate/download`、`task.cancel/retry` | savepoint 内直接写 `audit_logs`；失败回滚 savepoint | 主流程继续；写 `audit_write_failed` 告警指标 |
+
+#### 4.5.1 高风险流程
+
+1. 业务事务内 `INSERT audit_outbox`（与业务行同一事务，`flush` 参与提交）；
+2. outbox 插入失败 → 抛出业务异常 / 回滚事务；API 返回 5xx，Celery 任务异常并按策略重试，**不允许业务成功但审计缺失**；
+3. 事务提交后由 dispatcher 读取 `status='pending'` 行，写 `audit_logs` 并标记 `delivered`；
+4. `audit_logs` 写入失败 → outbox 行保留、指数退避重试、`audit_outbox_pending` 告警；不删除 outbox；
+5. `run.recovered_stale` 与 Run/Task 状态更新同事务写 outbox；outbox 失败则回滚更新，Run 保持 stale，下轮重试。
+
+#### 4.5.2 低风险流程
+
+1. `SAVEPOINT` 内写 `audit_logs`；
+2. 插入失败 → 回滚 savepoint，记录 error log + `audit_write_failed` 指标；
+3. 业务主流程继续，不返回失败。
+
+#### 4.5.3 outbox 表（026）
+
+| 字段 | 说明 |
+|---|---|
+| `id` BIGSERIAL | 主键 |
+| `tenant_id` / `user_id` | 事件归属；平台级可为 NULL |
+| `action` / `resource_type` / `resource_id` | 与 audit_logs 对齐 |
+| `before` / `after` / `details` / `request_id` | 安全快照；同一脱敏白名单 |
+| `ip_address` / `user_agent` | 与 audit_logs 对齐 |
+| `status` | `pending` / `delivered` |
+| `attempts` / `next_attempt_at` | 重试控制 |
+| `created_at` / `delivered_at` | 时间戳 |
+
+- outbox 行可更新状态（不是 append-only 表）；`audit_logs` 仍是 append-only trigger。
+- outbox 不存密钥；脱敏规则与 audit_logs 相同。
+- dispatcher：每 5s 批量 100 条；失败退避 5s/30s/5min；`pending > 5min` 或 `attempts > 5` 告警。
+- outbox 的归档/清理不在 PR-4；不得用 DELETE 清 pending。
+
+#### 4.5.4 测试（PR-4b）
+
+| 用例 | 预期 |
+|---|---|
+| 高风险事件 outbox 插入失败 | 业务请求失败/事务回滚，业务行不存在 |
+| 高风险事件 outbox 成功、audit_logs 插入失败 | outbox 保持 pending；重试后 audit_logs 有记录；无丢失 |
+| `run.recovered_stale` outbox 失败 | Run/Task 更新回滚，Run 仍 stale；下轮重试 |
+| 低风险事件 audit_logs 插入失败 | 主流程成功；产生 `audit_write_failed` 告警 |
+| 低风险事件正常 | audit_logs 有记录 |
+| 所有事件 | 无“静默丢失”：outbox 深度/失败指标可查 |
 
 ## 5. staging 验证步骤（PR-4 部分）
 
@@ -186,6 +239,7 @@
 - `recover_stale_rag_runs` A/B 测试通过：只更新对应 tenant，跨租户 0，缺 context 不失败；
 - audit 事件 P1 集齐（登录/token/报告/导出/删除/租户状态/跨租户/凭据/任务/stale）；
 - audit 事件带 tenant_id（可识别时），before/after 可查询且脱敏；
+- 高风险事件 outbox 失败会阻塞业务；低风险事件失败不阻塞但告警；无静默丢失；
 - append-only trigger 有可执行测试；migration/备份/导出规则明确；
 - staging 验证 1–10 通过并留证据；
 - 不碰生产；不改变 PR-3 staging 门槛。
