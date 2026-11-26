@@ -1643,3 +1643,12 @@ alembic check   : No new upgrade operations detected
 - staging 验证扩到 10 步，新增 stale recovery A/B 与 audit tenant_id 证据。
 - 状态：scope draft accepted；PR-4a/4b/4c 实施仍未批准，等 PR-3 staging 结果。
 
+### RC1 收敛：m4a-tenant-20261126（2026-11-26）
+- 范围冻结：只允许 P0 bugfix / 验收证据 / 发布文档；禁止新 M4-A 功能、PR-4 代码、M1 校准、新前端功能。
+- RC 包：`docs/releases/rc-m4a-tenant-20261126.md`；运行时 `e2eaebd`，测试/证据 `deb9975`，后续仅文档；migration head 025 `b8d3e6f1a2c9`，down_revision `c1d5f8a3e7b2`；flag 默认 false。
+- 发布就绪：后端全量连续两次 **1164 passed**（295.89s / 295.22s）；定向门禁 45 passed（023/024/025、上传清洗、报告、storage、tenant enforcement）；前端 build 成功（35.34s）；black/flake8/mypy/import-linter/alembic check 通过；CI 全绿。
+- 证据：flag=false 单租户流程、flag=true 跨租户 404、旧 key 读取/跨租户授权、本地真实栈 flag=true 冒烟均通过；本地冒烟不替代 staging。
+- staging 时间盒：2026-11-27 ~ 2026-12-01（3 个工作日）；完整 `STAGING_SMOKE_INPUT` 到位后按 05 runbook 执行。
+- 到期决策：A VM pre-prod（隔离/备份/签字）；B 内部演示版；C 暂停 M4-A。生产 migration 保持 blocked。
+- 线程关闭：M1 校准、M2 P0、M3 P0、P1-0~P1-5、M4-A scope 文档、PR-4（未批准）；staging 为唯一开放门禁。
+
