@@ -1617,7 +1617,15 @@ alembic check   : No new upgrade operations detected
 - 写入路径：补 `docs/05-operations/04-m4a-pr3-write-paths.md`，盘点 API 创建数据源/任务/报告/数据集/Run、Celery 子资源、seed/CLI、报告生成/存储、RAG 执行。
 - 显式 tenant：用户注册落默认租户（显式常量）；structure 知识点/摘要用 `raw.tenant_id`；RAG 批量结果 pg_insert 补 `tenant_id`；seed 脚本 attach `system_context`；测试工厂默认 `DEFAULT_TENANT_ID`。
 - 负向：flag=true 且无 TenantContext，`tenant_id_for_write` 抛 `TENANT_CONTEXT_MISSING`；`cleaning_service.create_clean_task` 不落 Task；DB 层缺 tenant 插入被 NOT NULL 拒绝。
-- 测试：`test_tenant_enforcement` 增加无 context 负向；上传/报告 tenant 前缀断言；旧报告 key 下载；后端全量 **1163 passed / 255 deselected**（4m54s）；alembic check、black/flake8/mypy/import-linter 通过。
+- 测试：`test_tenant_enforcement` 增加无 context 负向；上传/报告 tenant 前缀断言；旧报告 key 下载；后端全量 **1164 passed / 255 deselected**（4m54s）；alembic check、black/flake8/mypy/import-linter 通过。
 - 冒烟：本地真实栈（aiinsight_test + Redis + API + Celery，`TENANT_ENFORCEMENT_ENABLED=true`）注册→建数据源→上传→清洗完成→报告完成→跨租户 404→租户列表隐藏他租户，全部通过。
 - 边界：staging 当前不可访问，未对其 migration/开 flag；未做 retention/alerting/cost/RLS；生产 migration 未批准。
+
+### M4-A PR-3 P1 验收补充（2026-11-26，implemented / verified）
+- 新增旧 key 跨租户授权测试：tenant A 的旧上传 raw-data 与旧报告（`reports/<id>.md`），tenant B 在 flag=true 下读取/下载均 404；A 仍可正常读取。
+- 新增 `05-m4a-staging-smoke-runbook.md`：staging 备份、023–025 迁移、flag=true 冒烟、证据表与回滚演练；状态 planned，待排期。
+- 新增 `06-m4a-rollback-runbook.md`：固定顺序「flag=false → 验证单租户 → 备份 → downgrade 025 → 验证默认值 → 单租户冒烟」；不清对象、不删 tenant。
+- 新增 `07-m4a-prod-migration-change-ticket.md`：备份/恢复演练、tenant 审计 SQL、维护窗口、迁移后 smoke/监控、单独签字；draft，未批准。
+- 测试：后端全量 **1164 passed / 255 deselected**（5m30s）；静态检查与 alembic check 通过。
+- 结论：PR-3 accepted for local/test；staging 冒烟与生产 migration 均未执行。
 

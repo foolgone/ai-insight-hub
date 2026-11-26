@@ -1,6 +1,6 @@
 # M4-A tenant-first：实现 scope / design
 
-> 状态：`scope_approved`（2026-11-25）；PR-1 / PR-2 accepted；**PR-3 已实现/验证，待验收**
+> 状态：`scope_approved`（2026-11-25）；PR-1 / PR-2 / PR-3 accepted for local/test；staging 待排期
 > 前置决策：`docs/05-operations/03-m4a-pr2-decisions.md`
 > 日期：2026-11-25
 > 上游：`docs/05-operations/01-m4a-constraints-decision.md`（accepted baseline）
@@ -289,6 +289,7 @@ PR-2（JWT/Repo）等 PR-1 验收后再开。
 - 025：移除 15 张业务表 `tenant_id` server_default，保留 NOT NULL / 外键；downgrade 恢复默认值仅用于回滚。
 - 负向：flag=true 且无 TenantContext 时业务写入抛 `TENANT_CONTEXT_MISSING`；DB 层缺 tenant 插入被 NOT NULL 拒绝。
 - 写入路径盘点：`docs/05-operations/04-m4a-pr3-write-paths.md`（API / Celery 子资源 / seed / 报告 / 数据集 / RAG）。
-- 测试：`test_migration_025`、`test_tenant_enforcement`（含无 context 负向）、上传/报告 tenant 前缀、旧 key 下载；后端全量 **1163 passed / 255 deselected**。
-- 冒烟：本地真实栈 `TENANT_ENFORCEMENT_ENABLED=true`：注册→建数据源→上传→清洗→报告→跨租户 404 全部通过；staging 待可访问环境执行同一 runbook。
+- 测试：`test_migration_025`、`test_tenant_enforcement`（含无 context 负向）、上传/报告 tenant 前缀、旧 key 下载；后端全量 **1164 passed / 255 deselected**。
+- 冒烟：本地真实栈 `TENANT_ENFORCEMENT_ENABLED=true` 通过（注册→数据源→上传→清洗→报告→跨租户 404）；**不替代 staging 结论**。
+- P1：旧 key 跨租户授权测试；staging runbook / 回滚顺序 / 生产变更单见 `05`、`06`、`07`。
 - 边界：未做 retention/alerting/cost/RLS；未执行生产 migration；未在持久环境开启 flag。

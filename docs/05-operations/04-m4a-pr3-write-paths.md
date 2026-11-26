@@ -1,6 +1,6 @@
 # M4-A PR-3：写入路径清单 / 存储前缀 / 025 说明
 
-> 状态：`implemented / verified`（2026-11-26，待验收）；后端全量 1163 passed；本地真实栈 flag=true 冒烟通过
+> 状态：`implemented / verified`（2026-11-26，accepted for local/test）；后端全量 1164 passed
 > 上游：`docs/05-operations/02-m4a-tenant-first-scope.md`（scope approved）
 > 范围：存储 tenant 前缀、旧 key 双读、025 移除业务表默认租户、负向写入测试
 > 不做：retention、alerting、cost 预算、RLS、生产 migration
@@ -88,8 +88,17 @@ alembic check                               # 需在 aiinsight_test 上执行
 | 新报告 key | `tenant/<default>/reports/<report_id>.md`（集成测试 + 真实栈冒烟） |
 | 旧 key | 存储层按原 key 读取；旧报告 `reports/<id>.md` 仍可下载 |
 | 跨租户 | flag=true 下 GET 他租户数据源 → 404；租户列表不含他租户 |
-| 全量 | **1163 passed / 255 deselected**；black / flake8 / mypy / import-linter / alembic check 通过 |
+| 旧 key 跨租户 | 旧上传 raw-data / 旧报告详情+下载，tenant B → 404；tenant A 仍可读 |
+| 全量 | **1164 passed / 255 deselected**；black / flake8 / mypy / import-linter / alembic check 通过 |
 | 真实栈冒烟 | 本地 API + Celery（flag=true）：注册、建数据源、上传、清洗完成、报告完成、跨租户 404、tenant 前缀全部通过 |
 
 > staging 环境在当前会话不可访问；未对其执行 migration 或开启 flag。合并/验收后需在 staging 用同一 runbook 执行一次 flag=true 冒烟，再决定生产 migration 是否单独批准。
+
+## 7. 后续 P1（2026-11-26）
+
+- 旧 key 跨租户授权测试已补：`test_legacy_keys_still_require_tenant_authorization`。
+- staging runbook：`05-m4a-staging-smoke-runbook.md`（未执行，待排期）。
+- 回滚顺序：`06-m4a-rollback-runbook.md`（先 flag=false，再 downgrade 025）。
+- 生产变更单：`07-m4a-prod-migration-change-ticket.md`（draft / 未批准）。
+- 本地真实栈冒烟只证明代码路径，**不替代 staging 结论**。
 

@@ -17,7 +17,6 @@ from app.core.security import (
     hash_password,
 )
 from app.core.tenancy import DEFAULT_TENANT_ID, PLATFORM_TENANT_ID
-from app.services import cleaning_service
 from app.models import (
     AuditLog,
     QaDataset,
@@ -25,10 +24,12 @@ from app.models import (
     QaDatasetVersion,
     RagEvaluationRun,
     RagTrace,
+    RawData,
     Report,
     Task,
     Tenant,
 )
+from app.services import cleaning_service, storage_service
 from tests.factories import UserFactory, persist
 
 pytestmark = pytest.mark.integration
@@ -380,3 +381,75 @@ async def test_flag_true_write_without_context_does_not_fall_back(
 
     persisted = await db_session.scalar(select(Task).where(Task.task_name == "no-tenant-context"))
     assert persisted is None
+
+
+async def test_legacy_keys_still_require_tenant_authorization(
+    client, db_session, monkeypatch, tmp_path
+) -> None:
+    """旧 key 兼容不得绕开 tenant 授权：旧对象仍只用 object_name/file_path 读取。
+
+    仓库没有“原始上传下载”独立 API；旧上传通过 raw-data 列表/结构入口访问，
+    这些入口先经 datasource tenant guard。本用例同时覆盖旧报告下载与旧上传入口。
+    """
+    monkeypatch.setattr(settings, "TENANT_ENFORCEMENT_ENABLED", True)
+    monkeypatch.setattr(settings, "STORAGE_BACKEND", "local")
+    monkeypatch.setattr(settings, "STORAGE_LOCAL_DIR", str(tmp_path))
+
+    tenant_a = await _tenant(db_session, f"legacy-a-{uuid.uuid4().hex[:6]}")
+    tenant_b = await _tenant(db_session, f"legacy-b-{uuid.uuid4().hex[:6]}")
+    user_a, headers_a = await _headers(client, db_session, tenant_a)
+    _, headers_b = await _headers(client, db_session, tenant_b)
+    ds_a = await _datasource(client, headers_a, "legacy-tenant-a-ds")
+
+    legacy_raw_key = f"legacy-ds-{uuid.uuid4().hex[:6]}/legacy-upload.csv"
+    storage_service.save_bytes(
+        b"legacy-upload", object_name=legacy_raw_key, content_type="text/csv"
+    )
+    raw = RawData(
+        tenant_id=tenant_a.id,
+        datasource_id=uuid.UUID(ds_a),
+        raw_content={"format": "csv", "text": "客户,客服\n旧数据,旧回复"},
+        file_info={
+            "filename": "legacy-upload.csv",
+            "size": 13,
+            "mime_type": "text/csv",
+            "object_name": legacy_raw_key,
+            "storage_backend": "local",
+        },
+        status="completed",
+    )
+    await persist(db_session, raw)
+
+    legacy_report_key = f"reports/legacy-{uuid.uuid4().hex}.md"
+    storage_service.save_bytes(
+        b"legacy-report", object_name=legacy_report_key, content_type="text/markdown"
+    )
+    report = Report(
+        tenant_id=tenant_a.id,
+        datasource_id=uuid.UUID(ds_a),
+        user_id=user_a.id,
+        title="旧 key 报告",
+        report_type="quality",
+        format="markdown",
+        status="completed",
+        file_path=legacy_report_key,
+        file_size=13,
+    )
+    await persist(db_session, report)
+
+    # A 仍可读取旧上传元数据与旧报告
+    listed_a = await client.get(f"{BASE}/datasources/{ds_a}/raw-data", headers=headers_a)
+    assert listed_a.status_code == 200, listed_a.text
+    assert str(raw.id) in {item["id"] for item in listed_a.json()["items"]}
+    downloaded_a = await client.get(f"{BASE}/reports/{report.id}/download", headers=headers_a)
+    assert downloaded_a.status_code == 200
+    assert downloaded_a.content == b"legacy-report"
+
+    # B 不能因旧 key 兼容绕过 tenant 授权
+    assert (
+        await client.get(f"{BASE}/datasources/{ds_a}/raw-data", headers=headers_b)
+    ).status_code == 404
+    assert (await client.get(f"{BASE}/reports/{report.id}", headers=headers_b)).status_code == 404
+    assert (
+        await client.get(f"{BASE}/reports/{report.id}/download", headers=headers_b)
+    ).status_code == 404
