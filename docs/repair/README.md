@@ -9,7 +9,7 @@
 >
 > 最后更新：2026-11-26
 > 当前阶段：**M2 P0 / M3 P0 accepted；M4-A accepted as baseline；P1-0 / P1-1 / P1-2 / P1-3a / P1-3b / P1-5 已完成并验证**
-> 当前决策：**PR-1 / PR-2 / PR-3 accepted for local/test；staging flag 冒烟待排期；生产 migration 未批准**
+> 当前决策：**PR-1 / PR-2 / PR-3 accepted for local/test；staging flag 冒烟待排期；PR-4 scope draft，代码/migration 未批准；生产 migration 未批准**
 > 当前不做：target 校准、5-case 模型对比、10/40 Judge、v1.2.6、M1-E 验收
 
 ---
@@ -26,7 +26,7 @@
 | Judge 展示 | invalid / skipped / known issues 原样展示；人工复核可覆盖 |
 | 当前可写代码？ | **是**：M2 P0 及平台主流程 |
 | 当前可跑 Judge？ | **否**（仅 beta 展示；不新增校准调用） |
-| 下一个交付 | staging flag=true 冒烟排期（runbook 05）；生产变更单待签字（07） |
+| 下一个交付 | staging flag=true 冒烟排期（runbook 05）；并行已备 PR-4 scope（08）；生产变更单待签字（07） |
 | 之后 | M4-A 实现（需单独批准） |
 
 ### M2 P0 已交付

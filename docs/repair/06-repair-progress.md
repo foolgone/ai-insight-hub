@@ -1629,3 +1629,10 @@ alembic check   : No new upgrade operations detected
 - 测试：后端全量 **1164 passed / 255 deselected**（5m30s）；静态检查与 alembic check 通过。
 - 结论：PR-3 accepted for local/test；staging 冒烟与生产 migration 均未执行。
 
+### M4-A PR-4 scope（2026-11-26，draft_scope / 未批准）
+- 新增 `docs/05-operations/08-m4a-pr4-scope.md`：只定义范围，不写代码、不加 migration。
+- 后台任务覆盖清单：clean / structure / evaluate / insight / extract / report / rag_evaluation 已有显式 tenant；recover_stale 需补显式 context；digest / cost monitor 固定为平台级只读。
+- audit 扩展：租户事件必须带 tenant_id；before/after 白名单脱敏；append-only（权限或 trigger，实施评审）；凭据审计不含 Key。
+- 拆分建议：PR-4a 后台 context（无 migration）、PR-4b audit/migration、PR-4c staging 验证。
+- 边界：PR-4 代码、026 migration、生产 migration 均未批准；staging 仍是下一道门。
+
