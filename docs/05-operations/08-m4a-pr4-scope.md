@@ -1,6 +1,6 @@
 # M4-A PR-4 scope：后台任务 tenant context + audit 扩展
 
-> 状态：`draft_scope`（2026-11-26，P1 revision 3；**scope draft accepted，implementation 未批准**）
+> 状态：`draft_scope`（2026-11-26，P1 revision 4；**scope draft accepted，implementation 未批准**）
 > 前置：PR-3 accepted for local/test；staging flag=true 冒烟尚未执行
 > 边界：本文件只定义 PR-4 范围与验收；PR-4 代码、026 migration、生产 migration 均需单独批准
 > 不做：retention、alerting、cost 预算、RLS、M1/Judge 变更
@@ -93,11 +93,13 @@
 | 字段 | 类型 | 说明 |
 |---|---|---|
 | `tenant_id` | UUID nullable | 有租户上下文时必须写；平台级事件可为 NULL |
+| `event_id` | UUID nullable, unique | 幂等键；高风险由 outbox 带入，低风险写入时生成；重复投递 `ON CONFLICT DO NOTHING` |
 | `before` | JSONB nullable | 变更前安全快照；仅白名单字段 |
 | `after` | JSONB nullable | 变更后安全快照；仅白名单字段 |
 | `request_id` | varchar(64) nullable | 串联一次请求/任务（可选，写入时生成） |
 
 > 采用独立 `before` / `after` 列，不放入 `details`，便于查询与脱敏测试；026 只加列，不改历史行。
+> `event_id` 是 at-least-once 投递的幂等键：同一 outbox 重试两次，`audit_logs` 只有一条。
 
 ### 4.2 审计事件（P1 完整集）
 
@@ -160,6 +162,8 @@
 1. 业务事务内 `INSERT audit_outbox`（与业务行同一事务，`flush` 参与提交）；
 2. outbox 插入失败 → 抛出业务异常 / 回滚事务；API 返回 5xx，Celery 任务异常并按策略重试，**不允许业务成功但审计缺失**；
 3. 事务提交后由 dispatcher 读取 `status='pending'` 行，写 `audit_logs` 并标记 `delivered`；
+   - 写 `audit_logs` 使用 `INSERT ... ON CONFLICT (event_id) DO NOTHING`；
+   - 若 `audit_logs` 已存在同 `event_id`，直接标记 outbox `delivered`，不产生重复审计；
 4. `audit_logs` 写入失败 → outbox 行保留、指数退避重试、`audit_outbox_pending` 告警；不删除 outbox；
 5. `run.recovered_stale` 与 Run/Task 状态更新同事务写 outbox；outbox 失败则回滚更新，Run 保持 stale，下轮重试。
 
@@ -174,6 +178,7 @@
 | 字段 | 说明 |
 |---|---|
 | `id` BIGSERIAL | 主键 |
+| `event_id` UUID unique | 幂等键；与 `audit_logs.event_id` 对应 |
 | `tenant_id` / `user_id` | 事件归属；平台级可为 NULL |
 | `action` / `resource_type` / `resource_id` | 与 audit_logs 对齐 |
 | `before` / `after` / `details` / `request_id` | 安全快照；同一脱敏白名单 |
@@ -185,18 +190,40 @@
 - outbox 行可更新状态（不是 append-only 表）；`audit_logs` 仍是 append-only trigger。
 - outbox 不存密钥；脱敏规则与 audit_logs 相同。
 - dispatcher：每 5s 批量 100 条；失败退避 5s/30s/5min；`pending > 5min` 或 `attempts > 5` 告警。
-- outbox 的归档/清理不在 PR-4；不得用 DELETE 清 pending。
+- **保留/清理**：`delivered` 行保留 **30 天**后由日任务清理；`pending` **永不自动清理**；`audit_logs` 保留 **730 天**（策略，PR-4 不实现 audit_logs purge）。
+- 清理任务只 `DELETE audit_outbox WHERE status='delivered' AND delivered_at < now()-30d`；不碰 pending。
+- 清理动作自身写低风险审计 `audit.cleanup`（best-effort + `audit_write_failed` 告警）。
 
-#### 4.5.4 测试（PR-4b）
+#### 4.5.4 只读高风险事件的事务边界（P1 已定）
+
+`tenant.cross_access`、`data.export` 等读请求没有业务写事务，不能依赖请求结束时的 `get_db` 提交：
+
+1. 在返回数据之前，用**独立短事务** `SessionLocal()` 插入 `audit_outbox` 并 `commit`；
+2. outbox 写失败 → **拒绝请求**（503 / deny），不得返回数据；
+3. 成功后继续查询/生成导出；审计已 durable，不依赖响应阶段提交；
+4. 同一请求重试时用新的 `event_id`；同一事件重试由 outbox/dispatcher 幂等键去重。
+
+测试：模拟短事务 outbox 失败 → 跨租户读/导出返回 503 且无数据；成功 → 响应前 outbox 已存在。
+
+#### 4.5.5 测试（PR-4b）
 
 | 用例 | 预期 |
 |---|---|
 | 高风险事件 outbox 插入失败 | 业务请求失败/事务回滚，业务行不存在 |
 | 高风险事件 outbox 成功、audit_logs 插入失败 | outbox 保持 pending；重试后 audit_logs 有记录；无丢失 |
+| 同一 outbox 投递两次 | `audit_logs` 只有一条（`event_id` 唯一 + `ON CONFLICT`） |
+| 只读跨租户 outbox 失败 | 返回 503 / deny，无跨租户数据 |
 | `run.recovered_stale` outbox 失败 | Run/Task 更新回滚，Run 仍 stale；下轮重试 |
 | 低风险事件 audit_logs 插入失败 | 主流程成功；产生 `audit_write_failed` 告警 |
 | 低风险事件正常 | audit_logs 有记录 |
+| outbox 清理 | delivered 超 30 天删除；pending 保留；audit_logs 不受影响 |
 | 所有事件 | 无“静默丢失”：outbox 深度/失败指标可查 |
+
+### 4.6 认证事件等级（可选复核）
+
+`login.failure` / `token.revoke` 当前保持**低风险 best-effort**（主流程不因审计失败中断）。
+如后续合规要求“认证事件不可丢”，在 M4-A 数据权利/审计评审时升级为高风险 outbox；
+升级不改变本 scope 的其他设计。
 
 ## 5. staging 验证步骤（PR-4 部分）
 
@@ -240,6 +267,9 @@
 - audit 事件 P1 集齐（登录/token/报告/导出/删除/租户状态/跨租户/凭据/任务/stale）；
 - audit 事件带 tenant_id（可识别时），before/after 可查询且脱敏；
 - 高风险事件 outbox 失败会阻塞业务；低风险事件失败不阻塞但告警；无静默丢失；
+- `event_id` 幂等：同一 outbox 重试不产生重复 audit_logs；
+- 只读高风险事件（跨租户/导出）在返回数据前完成 outbox 提交，失败拒绝请求；
+- outbox delivered 保留 30 天、pending 不清、audit_logs 730 天策略明确；
 - append-only trigger 有可执行测试；migration/备份/导出规则明确；
 - staging 验证 1–10 通过并留证据；
 - 不碰生产；不改变 PR-3 staging 门槛。
