@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Button } from '../Button'
 import { Input } from '../Input'
@@ -23,34 +23,47 @@ const ADAPTER_OPTIONS = [
 
 /**
  * 新建 RAG 评测 Run。
- * P0 只暴露必要字段：数据集版本 / 模式 / 适配器 / 条数上限。
+ * P0 暴露必要字段：数据集版本 / 模式 / 适配器 / 条数上限 / top_k。
+ * 支持从 QA 数据集页带 dataset_id + dataset_version_id 直接打开。
  */
-export function CreateRagEvaluationModal({ open, onClose, onCreated }) {
-  const [datasetId, setDatasetId] = useState('')
-  const [versionId, setVersionId] = useState('')
+export function CreateRagEvaluationModal({
+  open,
+  onClose,
+  onCreated,
+  initialDatasetId = '',
+  initialVersionId = '',
+}) {
+  const [datasetId, setDatasetId] = useState(initialDatasetId || '')
+  const [versionId, setVersionId] = useState(initialVersionId || '')
   const [mode, setMode] = useState('query')
   const [adapter, setAdapter] = useState('mock')
   const [limit, setLimit] = useState('20')
+  const [topK, setTopK] = useState('5')
   const [submitError, setSubmitError] = useState('')
+  const previousDatasetRef = useRef(initialDatasetId || '')
 
   const datasetsQuery = useDatasetsQuery(open)
   const versionsQuery = useDatasetVersionsQuery(datasetId)
   const createMutation = useCreateRagEvaluation()
 
   useEffect(() => {
-    if (!open) {
-      setDatasetId('')
-      setVersionId('')
-      setMode('query')
-      setAdapter('mock')
-      setLimit('20')
-      setSubmitError('')
-    }
+    if (open) return
+    previousDatasetRef.current = ''
+    setDatasetId('')
+    setVersionId('')
+    setMode('query')
+    setAdapter('mock')
+    setLimit('20')
+    setTopK('5')
+    setSubmitError('')
   }, [open])
 
   useEffect(() => {
+    if (!open) return
+    if (previousDatasetRef.current === datasetId) return
+    previousDatasetRef.current = datasetId
     setVersionId('')
-  }, [datasetId])
+  }, [datasetId, open])
 
   const datasetOptions = useMemo(
     () =>
@@ -61,14 +74,15 @@ export function CreateRagEvaluationModal({ open, onClose, onCreated }) {
     [datasetsQuery.data]
   )
 
-  const versionOptions = useMemo(
-    () =>
-      (versionsQuery.data?.items || []).map(item => ({
-        label: `v${item.version} · ${item.status} · ${item.item_count} 条`,
-        value: item.id,
-      })),
-    [versionsQuery.data]
-  )
+  const versionOptions = useMemo(() => {
+    const rows = Array.isArray(versionsQuery.data)
+      ? versionsQuery.data
+      : versionsQuery.data?.items || []
+    return rows.map(item => ({
+      label: `v${item.version} · ${item.status} · ${item.item_count} 条`,
+      value: item.id,
+    }))
+  }, [versionsQuery.data])
 
   const handleSubmit = async () => {
     setSubmitError('')
@@ -81,6 +95,11 @@ export function CreateRagEvaluationModal({ open, onClose, onCreated }) {
       setSubmitError('条数上限需在 1–200 之间')
       return
     }
+    const parsedTopK = Number(topK)
+    if (!Number.isFinite(parsedTopK) || parsedTopK < 1 || parsedTopK > 50) {
+      setSubmitError('top_k 需在 1–50 之间')
+      return
+    }
     try {
       const created = await createMutation.mutateAsync({
         dataset_version_id: versionId,
@@ -88,6 +107,7 @@ export function CreateRagEvaluationModal({ open, onClose, onCreated }) {
         adapter,
         split: 'test',
         limit: Math.trunc(parsedLimit),
+        top_k: Math.trunc(parsedTopK),
       })
       onCreated?.(created)
       onClose?.()
@@ -174,11 +194,28 @@ export function CreateRagEvaluationModal({ open, onClose, onCreated }) {
           </div>
         </div>
 
-        <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700" htmlFor="rag-limit">
-            条数上限（1–200）
-          </label>
-          <Input id="rag-limit" type="number" value={limit} onChange={setLimit} placeholder="20" />
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div>
+            <label className="mb-1 block text-sm font-medium text-gray-700" htmlFor="rag-limit">
+              条数上限（1–200）
+            </label>
+            <Input
+              id="rag-limit"
+              type="number"
+              value={limit}
+              onChange={setLimit}
+              placeholder="20"
+            />
+          </div>
+          <div>
+            <label className="mb-1 block text-sm font-medium text-gray-700" htmlFor="rag-top-k">
+              top_k（1–50）
+            </label>
+            <Input id="rag-top-k" type="number" value={topK} onChange={setTopK} placeholder="5" />
+            <p className="mt-1 text-xs text-gray-500">
+              对比两次 Run 时使用不同 top_k，避免同配置噪声。
+            </p>
+          </div>
         </div>
 
         {submitError ? (

@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { LuDownload, LuPlus, LuSparkles } from 'react-icons/lu'
 import { AsyncState } from '../../components/common/AsyncState'
 import { PageLoading } from '../../components/common/PageLoading'
@@ -248,6 +249,14 @@ export default function KnowledgeBase() {
         <Empty
           title="尚未选择数据源"
           description="在顶部「数据源选择器」中选择数据源后管理知识库。"
+          action={
+            <Link
+              to="/data-sources"
+              className="inline-flex h-8 items-center rounded border border-gray-300 px-3 text-xs text-gray-700 hover:bg-gray-50"
+            >
+              去数据源管理
+            </Link>
+          }
         />
       ) : (
         <>

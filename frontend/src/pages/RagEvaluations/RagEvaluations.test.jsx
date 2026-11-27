@@ -1,10 +1,15 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import RagEvaluations from './index'
-import { listDatasets, listRagEvaluations } from '../../api/ragEvaluations'
+import {
+  createRagEvaluation,
+  listDatasetVersions,
+  listDatasets,
+  listRagEvaluations,
+} from '../../api/ragEvaluations'
 
 vi.mock('../../api/ragEvaluations', () => ({
   listRagEvaluations: vi.fn(),
@@ -40,13 +45,13 @@ const RUN = {
   },
 }
 
-function renderPage() {
+function renderPage(route = '/rag-evaluations') {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false, gcTime: 0 } },
   })
   return render(
     <QueryClientProvider client={queryClient}>
-      <MemoryRouter initialEntries={['/rag-evaluations']}>
+      <MemoryRouter initialEntries={[route]}>
         <RagEvaluations />
       </MemoryRouter>
     </QueryClientProvider>
@@ -61,6 +66,7 @@ describe('RagEvaluationsPage', () => {
       pagination: { page: 1, limit: 10, total: 1, pages: 1 },
     })
     listDatasets.mockResolvedValue({ items: [], pagination: { total: 0 } })
+    listDatasetVersions.mockResolvedValue([])
   })
 
   afterEach(() => vi.clearAllMocks())
@@ -92,6 +98,46 @@ describe('RagEvaluationsPage', () => {
     expect(await screen.findByRole('dialog', { name: '新建 RAG 评测' })).toBeInTheDocument()
     expect(await screen.findByText(/还没有已发布的数据集版本/)).toBeInTheDocument()
     expect(listDatasets).toHaveBeenCalled()
+  })
+
+  it('从数据集页带版本参数打开并提交不同 top_k', async () => {
+    const user = userEvent.setup()
+    listDatasets.mockResolvedValue({
+      items: [{ id: 'ds-1', name: '售后政策评测集' }],
+      pagination: { total: 1 },
+    })
+    listDatasetVersions.mockResolvedValue([
+      { id: 'v-1', version: 1, status: 'published', item_count: 2 },
+    ])
+    createRagEvaluation.mockResolvedValue({
+      run_id: 'run-new',
+      task_id: 'task-new',
+      status: 'pending',
+    })
+
+    renderPage('/rag-evaluations?action=create&dataset_id=ds-1&dataset_version_id=v-1')
+
+    expect(await screen.findByRole('dialog', { name: '新建 RAG 评测' })).toBeInTheDocument()
+    await waitFor(() => expect(listDatasetVersions).toHaveBeenCalledWith('ds-1'))
+    expect(screen.getByRole('combobox', { name: '数据集' })).toHaveTextContent('售后政策评测集')
+    await waitFor(() =>
+      expect(screen.getByRole('combobox', { name: '数据集版本' })).toHaveTextContent('v1')
+    )
+
+    const topKInput = screen.getByLabelText(/top_k/)
+    await user.clear(topKInput)
+    await user.type(topKInput, '3')
+    await user.click(screen.getByRole('button', { name: '创建并运行' }))
+
+    await waitFor(() =>
+      expect(createRagEvaluation).toHaveBeenCalledWith(
+        expect.objectContaining({
+          dataset_version_id: 'v-1',
+          adapter: 'mock',
+          top_k: 3,
+        })
+      )
+    )
   })
 
   it('空列表展示 Empty', async () => {

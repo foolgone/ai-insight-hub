@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
 import {
   LuChevronRight,
   LuFileText,
+  LuFlaskConical,
   LuPencil,
   LuPlus,
   LuRefreshCw,
@@ -77,6 +79,7 @@ function percent(value) {
 export default function QaDatasets() {
   const { canWrite } = usePermissions()
   const queryClient = useQueryClient()
+  const navigate = useNavigate()
 
   const [page, setPage] = useState(1)
   const [keywordInput, setKeywordInput] = useState('')
@@ -113,10 +116,10 @@ export default function QaDatasets() {
   const itemsPagination = itemsQuery.data?.pagination
 
   useEffect(() => {
-    if (!datasets.length) return
-    if (!selectedId || !datasets.some(dataset => dataset.id === selectedId)) {
-      setSelectedId(datasets[0].id)
-    }
+    // 只在首次进入且未选择时自动选第一个；创建后不要被旧列表回拉，
+    // 否则会切换数据集并导致“版本/数据集不匹配”的 404。
+    if (selectedId || !datasets.length) return
+    setSelectedId(datasets[0].id)
   }, [datasets, selectedId])
 
   useEffect(() => {
@@ -503,6 +506,19 @@ export default function QaDatasets() {
                             发布版本
                           </Button>
                         </>
+                      ) : null}
+                      {canWrite && selectedVersion.status === 'published' ? (
+                        <Button
+                          size="sm"
+                          icon={<LuFlaskConical className="h-4 w-4" />}
+                          onClick={() =>
+                            navigate(
+                              `/rag-evaluations?action=create&dataset_id=${selectedId}&dataset_version_id=${selectedVersion.id}`
+                            )
+                          }
+                        >
+                          发起评测
+                        </Button>
                       ) : null}
                       <Button
                         size="sm"

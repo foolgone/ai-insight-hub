@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { MemoryRouter } from 'react-router-dom'
+import { MemoryRouter, useLocation } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import QaDatasets from './index'
 import {
@@ -94,6 +94,11 @@ const ITEMS = {
   pagination: { page: 1, limit: 10, total: 1, pages: 1 },
 }
 
+function LocationProbe() {
+  const location = useLocation()
+  return <span data-testid="location">{`${location.pathname}${location.search}`}</span>
+}
+
 function renderPage() {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false, gcTime: 0 }, mutations: { retry: false } },
@@ -102,6 +107,7 @@ function renderPage() {
     <QueryClientProvider client={queryClient}>
       <MemoryRouter>
         <QaDatasets />
+        <LocationProbe />
       </MemoryRouter>
     </QueryClientProvider>
   )
@@ -319,6 +325,19 @@ describe('QaDatasetsPage', () => {
       expect(listQaDatasets).toHaveBeenLastCalledWith(
         expect.objectContaining({ keyword: '退款', page: 1 })
       )
+    )
+  })
+
+  it('已发布版本可直接带版本参数发起评测', async () => {
+    const user = userEvent.setup()
+    getQaDataset.mockResolvedValue({ ...DATASET, versions: [VERSION_PUBLISHED] })
+    renderPage()
+    await screen.findByText('已发布 · 不可变')
+
+    await user.click(screen.getByRole('button', { name: '发起评测' }))
+
+    expect(screen.getByTestId('location')).toHaveTextContent(
+      '/rag-evaluations?action=create&dataset_id=ds-a&dataset_version_id=v1'
     )
   })
 

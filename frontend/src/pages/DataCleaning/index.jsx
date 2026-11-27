@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { LuPlus, LuRefreshCw } from 'react-icons/lu'
 import { Badge } from '../../components/Badge'
 import { PageHeader } from '../../components/common/PageHeader'
@@ -345,6 +346,14 @@ export default function DataCleaning() {
             <Empty
               title="尚未选择数据源"
               description="在顶部「数据源选择器」中选择一个数据源后查看清洗结果。"
+              action={
+                <Link
+                  to="/data-sources"
+                  className="inline-flex h-8 items-center rounded border border-gray-300 px-3 text-xs text-gray-700 hover:bg-gray-50"
+                >
+                  去数据源管理
+                </Link>
+              }
             />
           </div>
         ) : (

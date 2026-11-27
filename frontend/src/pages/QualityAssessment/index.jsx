@@ -160,6 +160,14 @@ export default function QualityAssessment() {
         <Empty
           title="尚未选择数据源"
           description="在顶部「数据源选择器」中选择数据源后查看评估结果。"
+          action={
+            <Link
+              to="/data-sources"
+              className="inline-flex h-8 items-center rounded border border-gray-300 px-3 text-xs text-gray-700 hover:bg-gray-50"
+            >
+              去数据源管理
+            </Link>
+          }
         />
       ) : listQuery.isError ? (
         <AsyncState error={listQuery.error} onRetry={() => listQuery.refetch()} />

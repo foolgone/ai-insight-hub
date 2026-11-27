@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useEffect, useMemo, useState } from 'react'
+import { Link, useSearchParams } from 'react-router-dom'
 import { LuArrowLeftRight, LuPlus, LuRefreshCw } from 'react-icons/lu'
 import { AsyncState } from '../../components/common/AsyncState'
 import { PageHeader } from '../../components/common/PageHeader'
@@ -27,10 +27,28 @@ const STATUS_OPTIONS = [
 ]
 
 export default function RagEvaluations() {
+  const [searchParams, setSearchParams] = useSearchParams()
   const [page, setPage] = useState(1)
   const [status, setStatus] = useState('')
   const [createOpen, setCreateOpen] = useState(false)
   const [notice, setNotice] = useState('')
+  const initialDatasetId = searchParams.get('dataset_id') || ''
+  const initialVersionId = searchParams.get('dataset_version_id') || ''
+
+  useEffect(() => {
+    if (searchParams.get('action') === 'create') setCreateOpen(true)
+  }, [searchParams])
+
+  const closeCreate = () => {
+    setCreateOpen(false)
+    if (searchParams.get('action')) {
+      const next = new URLSearchParams(searchParams)
+      next.delete('action')
+      next.delete('dataset_id')
+      next.delete('dataset_version_id')
+      setSearchParams(next, { replace: true })
+    }
+  }
 
   const params = useMemo(
     () => ({ page, limit: PAGE_SIZE, ...(status ? { status } : {}) }),
@@ -211,6 +229,11 @@ export default function RagEvaluations() {
           <Empty
             title="还没有 RAG 评测 Run"
             description="创建一次评测后，这里会显示状态、指标和 invalid 计数。"
+            action={
+              <Button icon={<LuPlus className="h-4 w-4" />} onClick={() => setCreateOpen(true)}>
+                新建评测
+              </Button>
+            }
           />
         ) : (
           <Table columns={columns} dataSource={items} rowKey="id" caption="RAG 评测 Run 列表" />
@@ -227,12 +250,16 @@ export default function RagEvaluations() {
       ) : null}
 
       <CreateRagEvaluationModal
+        key={`${createOpen}-${initialDatasetId}-${initialVersionId}`}
         open={createOpen}
-        onClose={() => setCreateOpen(false)}
+        onClose={closeCreate}
+        initialDatasetId={initialDatasetId}
+        initialVersionId={initialVersionId}
         onCreated={created => {
           setNotice(`已创建 Run ${shortId(created?.run_id)}，任务已入队。`)
           setPage(1)
           query.refetch()
+          closeCreate()
         }}
       />
     </section>
