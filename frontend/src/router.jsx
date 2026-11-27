@@ -13,6 +13,7 @@ import {
   NotFound,
   QualityAssessment,
   QualityAssessmentDetail,
+  QaDatasets,
   RagEvaluationCaseDetail,
   RagEvaluationCompare,
   RagEvaluationDetail,
@@ -42,6 +43,7 @@ export function AppRoutes() {
             <Route path="data-cleaning" element={<DataCleaning />} />
             <Route path="quality-assessment" element={<QualityAssessment />} />
             <Route path="quality-assessment/:id" element={<QualityAssessmentDetail />} />
+            <Route path="qa-datasets" element={<QaDatasets />} />
             <Route path="rag-evaluations" element={<RagEvaluations />} />
             <Route path="rag-evaluations/compare" element={<RagEvaluationCompare />} />
             <Route path="rag-evaluations/:runId" element={<RagEvaluationDetail />} />

@@ -76,9 +76,14 @@ export const endpoints = {
     root: '/qa-datasets',
     byId: datasetId => `/qa-datasets/${datasetId}`,
     versions: datasetId => `/qa-datasets/${datasetId}/versions`,
+    importItems: (datasetId, versionId) =>
+      `/qa-datasets/${datasetId}/versions/${versionId}/import`,
+    publish: (datasetId, versionId) =>
+      `/qa-datasets/${datasetId}/versions/${versionId}/publish`,
     items: (datasetId, versionId) => `/qa-datasets/${datasetId}/versions/${versionId}/items`,
     item: (datasetId, versionId, itemId) =>
       `/qa-datasets/${datasetId}/versions/${versionId}/items/${itemId}`,
+    stats: datasetId => `/qa-datasets/${datasetId}/stats`,
   },
   tasks: {
     list: '/tasks',

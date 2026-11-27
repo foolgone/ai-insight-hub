@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { Button } from '../Button'
 import { Input } from '../Input'
 import { Modal } from '../Modal'
@@ -128,7 +129,11 @@ export function CreateRagEvaluationModal({ open, onClose, onCreated }) {
           />
           {!datasetsQuery.isLoading && !datasetOptions.length ? (
             <p className="mt-1 text-xs text-gray-500">
-              还没有 QA 数据集。先通过 /qa-datasets API 导入数据后，再回来创建评测。
+              还没有已发布的数据集版本。先到{' '}
+              <Link className="text-primary-700 underline" to="/qa-datasets">
+                QA 数据集
+              </Link>{' '}
+              创建、导入并发布版本，再回来创建评测。
             </p>
           ) : null}
         </div>

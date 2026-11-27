@@ -9,6 +9,7 @@ import { listCleanedData } from './api/cleaning'
 import { listQualityResults } from './api/quality'
 import { listFaq } from './api/knowledge'
 import { listReports } from './api/reports'
+import { listQaDatasets } from './api/qaDatasets'
 
 vi.mock('./api/datasources', () => ({
   listDataSources: vi.fn(),
@@ -43,6 +44,18 @@ vi.mock('./api/knowledge', () => ({
   updateFaq: vi.fn(),
   deleteFaq: vi.fn(),
 }))
+vi.mock('./api/qaDatasets', () => ({
+  listQaDatasets: vi.fn(),
+  getQaDataset: vi.fn(),
+  createQaDataset: vi.fn(),
+  createQaDatasetVersion: vi.fn(),
+  importQaDatasetItems: vi.fn(),
+  publishQaDatasetVersion: vi.fn(),
+  listQaDatasetItems: vi.fn(),
+  updateQaDatasetItem: vi.fn(),
+  deleteQaDatasetItem: vi.fn(),
+  getQaDatasetStats: vi.fn(),
+}))
 vi.mock('./api/reports', () => ({
   listReports: vi.fn(),
   createReport: vi.fn(),
@@ -75,6 +88,7 @@ describe('AppRoutes', () => {
     })
     listFaq.mockResolvedValue({ items: [], pagination: { total: 0 } })
     listReports.mockResolvedValue({ items: [], pagination: { total: 0 } })
+    listQaDatasets.mockResolvedValue({ items: [], pagination: { total: 0 } })
   })
 
   afterEach(() => useAuthStore.setState({ user: null }))
@@ -116,6 +130,7 @@ describe('AppRoutes', () => {
     ['/data-cleaning', '数据清洗'],
     ['/quality-assessment', '质量评估'],
     ['/quality-assessment/abc', '评估详情'],
+    ['/qa-datasets', 'QA 数据集'],
     ['/knowledge-base', '知识库'],
     ['/reports', '报告中心'],
   ])('已登录访问 %s 渲染 %s 页面', async (path, heading) => {

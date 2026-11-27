@@ -90,7 +90,7 @@ describe('RagEvaluationsPage', () => {
     await user.click(screen.getByRole('button', { name: '新建评测' }))
 
     expect(await screen.findByRole('dialog', { name: '新建 RAG 评测' })).toBeInTheDocument()
-    expect(await screen.findByText(/还没有 QA 数据集/)).toBeInTheDocument()
+    expect(await screen.findByText(/还没有已发布的数据集版本/)).toBeInTheDocument()
     expect(listDatasets).toHaveBeenCalled()
   })
 

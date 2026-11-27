@@ -18,6 +18,7 @@ export const QualityAssessment = lazyWithPreload(() => import('../pages/QualityA
 export const QualityAssessmentDetail = lazyWithPreload(
   () => import('../pages/QualityAssessment/Detail')
 )
+export const QaDatasets = lazyWithPreload(() => import('../pages/QaDatasets'))
 export const RagEvaluations = lazyWithPreload(() => import('../pages/RagEvaluations'))
 export const RagEvaluationDetail = lazyWithPreload(() => import('../pages/RagEvaluations/Detail'))
 export const RagEvaluationCaseDetail = lazyWithPreload(
@@ -34,6 +35,7 @@ const ROUTE_COMPONENTS = [
   DataCleaning,
   QualityAssessment,
   QualityAssessmentDetail,
+  QaDatasets,
   RagEvaluations,
   RagEvaluationDetail,
   RagEvaluationCaseDetail,

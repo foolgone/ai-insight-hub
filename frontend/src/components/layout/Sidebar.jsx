@@ -10,6 +10,7 @@ import {
   LuFileText,
   LuFlaskConical,
   LuLayoutDashboard,
+  LuListChecks,
   LuWand2,
 } from 'react-icons/lu'
 import { useMediaQuery } from '../../hooks/useMediaQuery'
@@ -20,6 +21,7 @@ const MENU_ITEMS = [
   { key: 'datasources', label: '数据源管理', path: '/data-sources', icon: LuDatabase },
   { key: 'cleaning', label: '数据清洗', path: '/data-cleaning', icon: LuWand2 },
   { key: 'quality', label: '质量评估', path: '/quality-assessment', icon: LuClipboardCheck },
+  { key: 'qa-datasets', label: 'QA 数据集', path: '/qa-datasets', icon: LuListChecks },
   { key: 'rag', label: 'RAG 评测', path: '/rag-evaluations', icon: LuFlaskConical },
   { key: 'knowledge', label: '知识库', path: '/knowledge-base', icon: LuBookOpen },
   { key: 'reports', label: '报告中心', path: '/reports', icon: LuFileText },
