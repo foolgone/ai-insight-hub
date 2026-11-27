@@ -1,10 +1,23 @@
 # P0-B 端到端演示实测记录
 
-> 状态：`AI_AGENT_PASSED / PENDING_OWNER_ACCEPTANCE`
+> 状态：`FUNCTIONAL_VERIFIED_BY_AI / PENDING_NON_DEVELOPER_TEST`
 > 测试者：**AI agent（owner 指定）**；不是独立人类，且同一 AI 参与过 P0-B 实现。
-> 因此本记录**不能**冒充“独立非开发者可用性测试”，只作为 owner 验收的实测证据。
+> 因此本记录**只作为功能证据，不作为 P0-B 验收通过**。
 > Runbook：`docs/releases/p0b-e2e-demo-runbook.md`
 > 环境：`aiinsight_demo`，**未写 `aiinsight_preprod` / 未碰生产**
+
+## 0. Owner 决策（2026-11-27）
+
+| 项 | 结论 |
+|---|---|
+| P0-B 实现 | 功能链路通过，`functional_verified` |
+| P0-B 验收 | **`pending_non_developer_test`**，不标 accepted |
+| 原因 | AI 参与过实现，不是独立非开发者；2 分 03 秒是自动化时间；空状态 CTA 未逐项点击；demo 关闭限流后成功，默认限流未验证；手工 FAQ embedding 超时为 P1 |
+| P0-C | **不开始**，等 P0-B 人类测试通过 |
+
+> 本记录后续内容为 AI 功能实测证据；人类验收记录需另起一份或在本文件末尾追加“人类测试”章节。
+>
+> 2026-11-27：AI 功能证据归档后，`aiinsight_demo` 已重置为空库并保持默认限流，供下一次人类测试。本记录中的 ID 是当时的历史数据，当前 demo 库中已不存在；截图、CSV、报告和 `p0b_ai_test_result.json` 保留在证据目录。
 
 ## 1. 测试者
 
@@ -31,7 +44,7 @@
 | Storage | `backend/.storage/demo-p0b`，local |
 | RAG | `mock` |
 | flag | `TENANT_ENFORCEMENT_ENABLED=false` |
-| 限流 | 本轮 demo 设为 `RATE_LIMIT_ENABLED=false`（见卡点 2） |
+| 限流 | 本轮 AI 预跑临时设为 `RATE_LIMIT_ENABLED=false`（见卡点 2）；**人类验收必须保持默认开启** |
 | 凭据来源 | 本地安全文件，不记录密码、不进 repo |
 
 隔离确认：
@@ -102,13 +115,15 @@
 ## 5. 验收检查
 
 - [x] 测试者业务操作全程 UI，未执行 CLI/SQL/seed；
-- [ ] 空状态 CTA 逐项验证：本轮未单独逐项点击（自动化从顶部按钮进入）；链路本身从空库启动并完成，**该项建议 owner 决定是否补测**；
+- [ ] 空状态 CTA 逐项验证：本轮未单独逐项点击（自动化从顶部按钮进入）；
 - [x] 发布后直接发起评测，版本已预选（截图 `13-evaluation-modal-preselected.png`）；
 - [x] 两个 Run 的 top_k 不同（3 / 5），对比页未提示 same-config；
 - [x] Beta 提示可见（`10-beta.png`、Run 详情）；
 - [x] 报告 completed / 可下载；
 - [x] 未写 `aiinsight_preprod`，未碰生产；
-- [x] 有效流程 2 分 03 秒 ≤30 分钟（自动化时间，非人类可用性结论）。
+- [ ] 默认限流下无阻塞：本轮 demo 关闭了 `RATE_LIMIT_ENABLED`，默认限流未验证；
+- [ ] 独立非开发者人类测试：未执行；
+- [x] 有效流程 2 分 03 秒 ≤30 分钟（自动化时间，**不能**证明人类 ≤30 分钟）。
 
 > 环境准备说明：测试前由开发/运维执行了 demo 库重置、migration 025、demo 账号 seed；这是 runbook 第 2 节允许的环境准备，不计入测试者的 UI 操作，但**不能**据此声称“全程零 SQL/seed”。
 
@@ -117,11 +132,23 @@
 | 项 | 内容 |
 |---|---|
 | 预跑卡点 1 | 手工新建 FAQ 首次同步加载 embedding，超过前端 30s，UI 报网络异常；后端实际 `201 Created`。按 runbook 允许路径改用“提取知识（异步）”。建议记 P1。 |
-| 预跑卡点 2 | AI 直连 API 每 3s 轮询评测状态，触发 demo 默认限流 429 `RATE_LIMIT_EXCEEDED`。重启 demo API（`RATE_LIMIT_ENABLED=false`）并重置 demo 库后重跑；属测试方式/环境问题，非产品缺陷。 |
+| 预跑卡点 2 | AI 直连 API 每 3s 轮询评测状态，触发 demo 默认限流 429 `RATE_LIMIT_EXCEEDED`。重启 demo API（`RATE_LIMIT_ENABLED=false`）并重置 demo 库后重跑；属测试方式/环境问题，非产品缺陷，但**默认限流下的人类轮询行为仍未验证**。 |
 | 有效流程阻塞步骤 | 无 |
 | 是否重试 | 是（两次预跑后重跑成功） |
-| 是否影响验收 | 否（有效流程完整通过）；但独立非开发者条件不满足 |
-| 测试结论 | **AI_AGENT_PASSED**；建议 owner 验收 |
-| 验收结论 | **PENDING_OWNER_ACCEPTANCE** |
+| 是否影响验收 | **是**：AI 不是独立非开发者，空状态 CTA 未逐项验证，默认限流未验证 |
+| 测试结论 | **functional_verified**（仅功能链路） |
+| 验收结论 | **pending_non_developer_test** |
 
-> 结论边界：本次是 owner 指定的 AI 自动化实测，不能替代“未参与开发的非开发者”可用性测试。P0-B 是否 accepted、P0-C 是否开始，由 owner 明确决定；本记录不自行标记 accepted。
+> 结论边界：本次是 owner 指定的 AI 自动化实测，只作为功能证据，不能替代“未参与开发的非开发者”可用性测试。P0-B 保持 pending；P0-C 不开始。
+
+## 7. 下一次人类测试要求
+
+| 项 | 要求 |
+|---|---|
+| 测试者 | QA / 产品 / 业务同学，未参与 P0-B 开发；找不到时 owner 本人，记录标 `owner acceptance`，不冒充独立测试；不能是开发或 AI |
+| 环境 | `aiinsight_demo` 空库；**保持默认限流，不关闭 `RATE_LIMIT_ENABLED`**；RAG mock；flag=false；不写 preprod/生产 |
+| 必测 | 空状态 CTA 逐项点击（数据源 / 数据清洗 / 质量 / 知识库 / 报告 / QA 数据集 / RAG 评测）；数据集创建→导入→发布→发起评测；两个不同 top_k 的 Run；对比 + CSV；报告 + 下载；Beta 提示 |
+| 记录 | 真实人类姓名/角色、开始/结束/总耗时、卡点、截图、Run/Report ID、是否使用 CLI、隔离确认 |
+| 通过 | 人类全程浏览器、无 CLI；≤30 分钟；空状态 CTA 全部勾选；默认限流下无阻塞；未写 preprod/生产；记录完整 |
+
+> 人类测试通过后，由 owner 给 P0-B accepted/blocked；AI 不再代填验收结论。

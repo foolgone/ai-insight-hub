@@ -1,9 +1,21 @@
 # 产品 P0 scope：QA 数据集管理页 + 端到端演示
 
-> 状态：`draft_scope`（2026-11-27，**未批准实施**；不写功能代码）
+> 状态：`draft_scope`（2026-11-27 初始范围，保留作决策记录）
 > 决策背景：产品优先，生产多租户 migration `deferred_by_product_priority`
-> 环境：preprod 演示/验证；生产未碰、未迁移、未激活
-> 验收：一个用户不碰命令行，在 preprod 完成「建数据集 → 跑评测 → 看对比 → 导出/报告」
+> 环境：P0-B 本轮验收使用 `aiinsight_demo`（preprod 证据冻结）；生产未碰、未迁移、未激活
+> 验收：一个未参与开发的人类，不碰命令行，完成「空状态 CTA → 建数据集 → 跑评测 → 看对比 → 导出/报告」
+
+> **2026-11-27 状态更新**
+>
+> | 阶段 | 状态 |
+> |---|---|
+> | P0-A | accepted |
+> | P0-B | implementation `functional_verified`；验收 `pending_non_developer_test` |
+> | P0-C | 未开始，等 P0-B 人类测试通过 |
+> | 生产 migration | deferred / blocked |
+> | M1 | v1.2.5 beta / inactive |
+>
+> P0-B 验收要求与证据模板见 `docs/releases/p0b-e2e-demo-runbook.md`；AI 功能证据见 `docs/releases/p0b-e2e-test-record.md`，不作为验收通过。
 
 ## 1. 现状事实
 
@@ -74,7 +86,10 @@
 - 失败 Run 清理/重试按钮（retry/cancel API 已有）；
 - Dashboard / 质量 / 洞察页面 polish；
 - 一键 seed（管理员）与演示数据重置；
-- CSV 导入映射、数据集归档/删除策略（需后端评审）。
+- CSV 导入映射、数据集归档/删除策略（需后端评审）；
+- 手工 FAQ 首次 embedding 同步加载超过前端 30s（演示改用异步提取）；
+- 默认限流下的轮询/429 体验；
+- gold_evidence 编辑。
 
 ## 4. 非目标
 
