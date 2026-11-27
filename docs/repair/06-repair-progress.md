@@ -1652,3 +1652,12 @@ alembic check   : No new upgrade operations detected
 - 到期决策：A VM pre-prod（隔离/备份/签字）；B 内部演示版；C 暂停 M4-A。生产 migration 保持 blocked。
 - 线程关闭：M1 校准、M2 P0、M3 P0、P1-0~P1-5、M4-A scope 文档、PR-4（未批准）；staging 为唯一开放门禁。
 
+### VM pre-prod 验收（2026-11-27，accepted / 偏差追认）
+- 窗口偏差：原批准 10:00–12:00，实际 00:22–00:40；owner 追认为等效批准窗口，记录一次、不重跑。
+- 环境：Windows 宿主机 API/worker/Vite + VM `aiinsight-postgres` 的 `aiinsight_preprod`；Redis 3/4/5；local storage；RAG mock；flag 初始 false。
+- 迁移：dev 022 dump → preprod；023–025 升级 10.3s，head 025 `b8d3e6f1a2c9`，025 down `c1d5f8a3e7b2`；15 表 0 NULL、父子 0 mismatch、default NULL。
+- 功能：flag=false/true 上传/清洗/报告通过；新 key tenant 前缀；旧 key 报告 A 下载 200、B 404；B 跨租户 404；platform_admin X-Tenant-Id + `tenant.cross_access`（audit 984）；A 租户列表仅 A。
+- 回滚：flag=false → 备份 → 025 downgrade 2.6s → 15 表默认值恢复 → 单租户冒烟 → re-upgrade 2.5s → head 025 / 0 NULL / 0 mismatch；最终 flag=false。
+- 收尾：测试账号密码文件已删除；`aiinsight_preprod`/`aiinsight_preprod_restore`/备份保留为证据，不再用于新测试；本机 API/worker/Vite 已停止；dev 库未写入，仍 022。
+- 生产：migration blocked；变更单进入评审，需补 MinIO/S3、nginx/TLS、生产备份/恢复、监控、签字。
+

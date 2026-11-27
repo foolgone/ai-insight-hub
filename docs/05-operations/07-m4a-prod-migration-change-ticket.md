@@ -1,9 +1,10 @@
 # M4-A 生产 migration 变更单（模板，未批准）
 
-> 状态：`draft / not approved`
+> 状态：`draft / review_package`（2026-11-27；**未批准**）
 > 变更：生产 `alembic upgrade head`（含 023 / 024 / 025）
 > **不得随 PR 合并自动上生产；必须单独评审、单独签字。**
-> 适用条件：staging flag=true 冒烟通过 + 回滚演练通过 + 本变更单签字。
+> pre-prod：accepted（2026-11-27，见 `docs/releases/preprod-acceptance-20261127.md`）
+> 仍缺：MinIO/S3 smoke 或风险接受、生产 nginx/TLS、生产备份/恢复演练、监控、签字。
 
 ## 1. 基本信息
 
@@ -17,12 +18,14 @@
 | 影响服务 | API、Celery worker、对象存储读取 |
 | 预计停机 | 迁移本身无长锁；重启 API/worker 期间短时不可用 |
 | 回滚方案 | `06-m4a-rollback-runbook.md` |
+| pre-prod 证据 | `docs/releases/preprod-acceptance-20261127.md`（accepted；不覆盖 MinIO/S3/TLS） |
 
 ## 2. 变更前检查（全部必须）
 
 | 项 | 命令 / 证据 | 通过标准 |
 |---|---|---|
 | 当前 revision | `alembic current` | 记录起点 |
+| pre-prod accepted | `docs/releases/preprod-acceptance-20261127.md` | 023–025、tenant、旧 key、025 回滚通过 |
 | 备份 | `pg_dump -Fc ...` | 备份文件校验可读 |
 | 恢复演练 | 恢复到临时库并启动只读检查 | 表结构/行数抽样一致 |
 | 对象备份 | bucket/version 或本地目录快照 | 记录快照 ID |
@@ -141,3 +144,16 @@ alembic current
 | 最终批准 | | | |
 
 > 当前状态：**未提交生产审批**。只有 staging 冒烟、回滚演练、备份恢复演练、监控与 tenant 审计全部通过后，才进入本变更单签字。
+
+## 8. 评审包待补（2026-11-27）
+
+| 项 | 状态 |
+|---|---|
+| MinIO/S3 IAM、bucket policy、tenant 前缀、旧 key | **待验证**，或书面接受未验证风险 |
+| 生产 nginx / TLS / 上传大小 / 超时 | **待验证** |
+| 生产备份/恢复演练 + 025 downgrade 演练 | **待执行** |
+| 生产 tenant 回填审计 0 NULL / 0 mismatch + 迁移前快照 | **待执行** |
+| 监控/告警窗口 | **待确认** |
+| owner + 运维/DBA 签字 | **待签** |
+
+> pre-prod accepted 仅证明 VM pre-prod；生产 migration 仍需单独 go/no-go。

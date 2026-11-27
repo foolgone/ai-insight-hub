@@ -8,8 +8,8 @@
 > 4. 未冻结的定义/目标，不得进入代码实现。
 >
 > 最后更新：2026-11-26
-> 当前阶段：**RC1 `rc-m4a-tenant-20261126` 冻结；唯一开放门禁 = staging flag=true 冒烟**
-> 当前决策：**PR-1 / 024 / PR-2 / PR-3 accepted for local/test；PR-4 scope frozen，代码/migration 未批准；staging 时间盒 2026-11-27 ~ 2026-12-01；生产 migration blocked**
+> 当前阶段：**RC1 `rc-m4a-tenant-20261126` 冻结；VM pre-prod accepted；下一道门 = 生产变更单评审**
+> 当前决策：**pre-prod accepted（2026-11-27，偏差已追认）；PR-4 scope frozen，代码/migration 未批准；生产 migration blocked，等变更单评审 + storage/nginx/备份/监控/签字**
 > 当前不做：target 校准、5-case 模型对比、10/40 Judge、v1.2.6、M1-E 验收
 
 ---
@@ -18,7 +18,7 @@
 
 | 项 | 状态 |
 |---|---|
-| 项目阶段 | **RC1 收敛**：停止扩 scope；M1 降级为 beta 能力 |
+| 项目阶段 | **RC1 收敛；VM pre-prod accepted**；停止扩 scope；M1 降级为 beta 能力 |
 | 主线 | M3 Run 对比（已 accepted）+ P1 可靠性/交付（导出、报告）；M2 工作台已 accepted |
 | M1 | v1.2.4 / v1.2.5 保持 `frozen` / `inactive`；标为 **beta / known issues**；不再跑 Judge |
 | M1 校准 | **已停止**：target v1.0.3、5-case 对比、10/40、v1.2.6、M1-E 全部冻结 |
@@ -26,8 +26,8 @@
 | Judge 展示 | invalid / skipped / known issues 原样展示；人工复核可覆盖 |
 | 当前可写代码？ | **仅 P0 bugfix / 验收证据 / 发布文档**；不写新功能、PR-4、M1 |
 | 当前可跑 Judge？ | **否**（仅 beta 展示；不新增校准调用） |
-| 下一个交付 | staging 时间盒内拿到 `STAGING_SMOKE_INPUT` 并跑 runbook 05；到期未拿到按 A/B/C 决策 |
-| 之后 | staging 通过 → PR-4a 是否开工；生产 migration 单独评审（07） |
+| 下一个交付 | 生产变更单评审包：MinIO/S3 smoke 或风险接受、nginx/TLS、备份恢复、tenant 审计、监控、签字（07） |
+| 之后 | 生产 go/no-go；PR-4a 是否开工；M1 保持 frozen |
 
 ### M2 P0 已交付
 
