@@ -8,7 +8,7 @@
 > 4. 未冻结的定义/目标，不得进入代码实现。
 >
 > 最后更新：2026-11-26
-> 当前阶段：**RC1 `rc-m4a-tenant-20261126` 冻结；VM pre-prod accepted；下一道门 = 生产变更单评审**
+> 当前阶段：**RC1 `rc-m4a-tenant-20261126` 冻结；VM pre-prod accepted；生产评审包已提交但 NO-GO**
 > 当前决策：**pre-prod accepted（2026-11-27，偏差已追认）；PR-4 scope frozen，代码/migration 未批准；生产 migration blocked，等变更单评审 + storage/nginx/备份/监控/签字**
 > 当前不做：target 校准、5-case 模型对比、10/40 Judge、v1.2.6、M1-E 验收
 
@@ -26,7 +26,7 @@
 | Judge 展示 | invalid / skipped / known issues 原样展示；人工复核可覆盖 |
 | 当前可写代码？ | **仅 P0 bugfix / 验收证据 / 发布文档**；不写新功能、PR-4、M1 |
 | 当前可跑 Judge？ | **否**（仅 beta 展示；不新增校准调用） |
-| 下一个交付 | 生产变更单评审包：MinIO/S3 smoke 或风险接受、nginx/TLS、备份恢复、tenant 审计、监控、签字（07） |
+| 下一个交付 | 运维/DBA 补齐生产评审包 1/2/3/5/6；开发在窗口跑 tenant 审计（4）；见 `prod-review-package-20261127.md` |
 | 之后 | 生产 go/no-go；PR-4a 是否开工；M1 保持 frozen |
 
 ### M2 P0 已交付

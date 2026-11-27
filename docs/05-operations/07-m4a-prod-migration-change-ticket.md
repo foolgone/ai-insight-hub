@@ -5,6 +5,7 @@
 > **不得随 PR 合并自动上生产；必须单独评审、单独签字。**
 > pre-prod：accepted（2026-11-27，见 `docs/releases/preprod-acceptance-20261127.md`）
 > 仍缺：MinIO/S3 smoke 或风险接受、生产 nginx/TLS、生产备份/恢复演练、监控、签字。
+> 开发侧评审包：`docs/releases/prod-review-package-20261127.md`（submitted_incomplete / NO-GO）。
 
 ## 1. 基本信息
 

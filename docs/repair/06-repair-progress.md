@@ -1661,3 +1661,9 @@ alembic check   : No new upgrade operations detected
 - 收尾：测试账号密码文件已删除；`aiinsight_preprod`/`aiinsight_preprod_restore`/备份保留为证据，不再用于新测试；本机 API/worker/Vite 已停止；dev 库未写入，仍 022。
 - 生产：migration blocked；变更单进入评审，需补 MinIO/S3、nginx/TLS、生产备份/恢复、监控、签字。
 
+### 生产 migration 评审包提交（2026-11-27，submitted_incomplete / NO-GO）
+- 开发侧提交 `docs/releases/prod-review-package-20261127.md`：变更摘要、六项门禁、开发已完成证据、运维/DBA 待补项、storage/nginx/备份/审计/监控/签字清单。
+- 六项状态：1 MinIO/S3 未完成；2 nginx/TLS 未完成；3 生产备份/恢复未完成；4 生产 tenant 审计待窗口执行；5 监控待确认；6 签字待签。
+- 结论：NO-GO，不排生产窗口；生产 migration 不随 RC tag 自动执行。
+- 当前仍只允许 P0 bugfix / 验收证据 / 发布文档；RC1 frozen。
+
