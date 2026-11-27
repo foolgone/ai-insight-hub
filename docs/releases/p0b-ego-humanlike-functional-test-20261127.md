@@ -76,7 +76,7 @@
 
 | 项 | 修复 | 自检 |
 |---|---|---|
-| F1 数据清洗空态 | 无数据源时展示「新建数据源 / 去数据源管理」，禁用“新建清洗任务”；弹窗无数据源时给 CTA，有数据源时默认选中 | 浏览器：有数据源时弹窗显示真实选项 PASS；无数据源 CTA 单测 PASS |
+| F1 数据清洗空态 | 无数据源时展示「新建数据源 / 去数据源管理」，禁用“新建清洗任务”；弹窗无数据源时给 CTA，有数据源时默认选中 | 浏览器：无数据源 CTA → 新建数据源 Drawer PASS；有数据源时弹窗显示真实选项 PASS |
 | F2 质量结果 | 订阅任务流，`evaluate` 任务 completed 后失效 quality 查询 | 浏览器：新评估完成后质量总数 5 → 10，未点“刷新” PASS |
 | F3 FAQ 列表 | 订阅任务流，`extract` 任务 completed 后失效 knowledge 查询 | 浏览器：提取 202 后自动发起 FAQ GET PASS |
 | stale localStorage | 列表为空时清 currentId；页面查询 404 时清 currentId 并回到数据源引导 | 浏览器：伪造 currentId 后不再出现“数据源不存在” PASS |

@@ -4,6 +4,7 @@
   "frontend_tests": { "passed": 460, "failed": 0 },
   "lint": "PASS",
   "build": "PASS",
+  "f1_empty_state_browser": "PASS",
   "f1_with_datasource_modal_options": "PASS",
   "stale_datasource_reset": "PASS",
   "f2_quality_auto_refresh": {
