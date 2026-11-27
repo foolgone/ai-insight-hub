@@ -1,0 +1,135 @@
+{
+  "tester": "AI agent (OpenCode), owner-authorized; not independent human",
+  "environment": {
+    "db": "aiinsight_demo",
+    "rag": "mock",
+    "flag": false
+  },
+  "started_at": "2026-11-27T13:04:35.733Z",
+  "steps": [
+    {
+      "name": "登录",
+      "started_at": "2026-11-27T13:04:36.957Z",
+      "t": 1795784676957,
+      "ended_at": "2026-11-27T13:04:39.654Z",
+      "seconds": 3
+    },
+    {
+      "name": "数据源创建与上传",
+      "started_at": "2026-11-27T13:04:39.654Z",
+      "t": 1795784679654,
+      "ended_at": "2026-11-27T13:04:41.399Z",
+      "seconds": 2
+    },
+    {
+      "name": "清洗等待",
+      "started_at": "2026-11-27T13:04:41.399Z",
+      "t": 1795784681399,
+      "ended_at": "2026-11-27T13:04:47.558Z",
+      "seconds": 6,
+      "datasource_id": "46f247aa-f050-4f0b-a2f1-7e3ca8222aa0"
+    },
+    {
+      "name": "质量评估",
+      "started_at": "2026-11-27T13:04:47.558Z",
+      "t": 1795784687558,
+      "ended_at": "2026-11-27T13:05:09.917Z",
+      "seconds": 22
+    },
+    {
+      "name": "知识库提取",
+      "started_at": "2026-11-27T13:05:09.917Z",
+      "t": 1795784709917,
+      "ended_at": "2026-11-27T13:05:47.347Z",
+      "seconds": 37
+    },
+    {
+      "name": "QA 数据集创建/导入/发布",
+      "started_at": "2026-11-27T13:05:47.347Z",
+      "t": 1795784747347,
+      "ended_at": "2026-11-27T13:05:48.617Z",
+      "seconds": 1
+    },
+    {
+      "name": "run1",
+      "started_at": "2026-11-27T13:05:48.618Z",
+      "t": 1795784748618,
+      "ended_at": "2026-11-27T13:06:10.763Z",
+      "seconds": 22,
+      "run_id": "382a0146-36de-48c8-ac9b-f90b666b6206",
+      "top_k": 3
+    },
+    {
+      "name": "run2",
+      "started_at": "2026-11-27T13:06:10.929Z",
+      "t": 1795784770929,
+      "ended_at": "2026-11-27T13:06:30.071Z",
+      "seconds": 19,
+      "run_id": "41556235-9c96-4577-b0e0-8c4b43fc984b",
+      "top_k": 5
+    },
+    {
+      "name": "Run 对比与导出",
+      "started_at": "2026-11-27T13:06:30.071Z",
+      "t": 1795784790071,
+      "ended_at": "2026-11-27T13:06:31.109Z",
+      "seconds": 1
+    },
+    {
+      "name": "报告生成与下载",
+      "started_at": "2026-11-27T13:06:31.109Z",
+      "t": 1795784791109,
+      "ended_at": "2026-11-27T13:06:38.463Z",
+      "seconds": 7
+    },
+    {
+      "name": "Beta 提示",
+      "started_at": "2026-11-27T13:06:38.463Z",
+      "t": 1795784798463,
+      "ended_at": "2026-11-27T13:06:39.000Z",
+      "seconds": 1
+    }
+  ],
+  "ids": {
+    "upload_task_id": "0c1484cc-1c3b-4ef2-a3cf-e522e9d88ad1",
+    "clean_task_id": "0c1484cc-1c3b-4ef2-a3cf-e522e9d88ad1",
+    "clean_task_status": "completed",
+    "datasource_id": "46f247aa-f050-4f0b-a2f1-7e3ca8222aa0",
+    "quality_task_id": "929c39d0-f47c-4f68-86db-02e6e9c7a738",
+    "quality_result_id": "f68f1efc-932c-4711-a8f2-ae8594a4e604",
+    "extract_task_id": "f7ddfc56-098f-4850-90c3-f5c692e806bd",
+    "faq_count": 5,
+    "faq_first_question": "签收后多久可以申请换货？",
+    "qa_dataset_id": "5ce71172-1471-46da-b415-82b15fe96473",
+    "qa_version_id": "6b4edf7b-8031-4e3f-a7ac-a20d59848e98",
+    "run1_status": "completed",
+    "run1_id": "382a0146-36de-48c8-ac9b-f90b666b6206",
+    "run1_top_k": 3,
+    "run2_status": "completed",
+    "run2_id": "41556235-9c96-4577-b0e0-8c4b43fc984b",
+    "run2_top_k": 5,
+    "report_id": "90c8af98-99e6-44f4-9ca3-f5d7741fd399",
+    "report_status": "completed"
+  },
+  "downloads": [
+    "C:\\Users\\The Fool\\AppData\\Local\\Temp\\opencode\\p0b-evidence\\compare.csv",
+    "C:\\Users\\The Fool\\AppData\\Local\\Temp\\opencode\\p0b-evidence\\report.md"
+  ],
+  "screenshots": [
+    "C:\\Users\\The Fool\\AppData\\Local\\Temp\\opencode\\p0b-evidence\\01-dashboard.png",
+    "C:\\Users\\The Fool\\AppData\\Local\\Temp\\opencode\\p0b-evidence\\02-datasource-form.png",
+    "C:\\Users\\The Fool\\AppData\\Local\\Temp\\opencode\\p0b-evidence\\03-data-cleaning.png",
+    "C:\\Users\\The Fool\\AppData\\Local\\Temp\\opencode\\p0b-evidence\\04-quality.png",
+    "C:\\Users\\The Fool\\AppData\\Local\\Temp\\opencode\\p0b-evidence\\05-knowledge.png",
+    "C:\\Users\\The Fool\\AppData\\Local\\Temp\\opencode\\p0b-evidence\\06-dataset-published.png",
+    "C:\\Users\\The Fool\\AppData\\Local\\Temp\\opencode\\p0b-evidence\\07-run1.png",
+    "C:\\Users\\The Fool\\AppData\\Local\\Temp\\opencode\\p0b-evidence\\07-run2.png",
+    "C:\\Users\\The Fool\\AppData\\Local\\Temp\\opencode\\p0b-evidence\\08-compare.png",
+    "C:\\Users\\The Fool\\AppData\\Local\\Temp\\opencode\\p0b-evidence\\09-report.png",
+    "C:\\Users\\The Fool\\AppData\\Local\\Temp\\opencode\\p0b-evidence\\10-beta.png"
+  ],
+  "blockers": [],
+  "finished_at": "2026-11-27T13:06:39.000Z",
+  "total_seconds": 123,
+  "result": "PASSED_AI_AGENT"
+}

@@ -1,6 +1,7 @@
 # P0-B 端到端演示 runbook（UI-only）
 
-> 状态：`ready_for_non_developer_test`
+> 状态：`ai_agent_test_passed / pending_owner_acceptance`
+> 实测记录：`docs/releases/p0b-e2e-test-record.md`（AI 执行，非独立人类）
 > 环境：独立 demo 库 `aiinsight_demo`（**不写 aiinsight_preprod，不碰生产**）
 > 目标：非开发人员不碰命令行，≤30 分钟完成一次完整流程
 > 当前 demo 栈：API `http://127.0.0.1:8000`，前端 `http://127.0.0.1:5173`
@@ -31,6 +32,7 @@ $env:STORAGE_BACKEND="local"
 $env:STORAGE_LOCAL_DIR=".storage/demo-p0b"
 $env:RAG_ADAPTER="mock"
 $env:TENANT_ENFORCEMENT_ENABLED="false"
+$env:RATE_LIMIT_ENABLED="false"
 $env:ALLOW_SERVER_KEY_FALLBACK="true"
 $env:DEEPSEEK_BASE_URL="https://dashscope.aliyuncs.com/compatible-mode/v1"
 $env:DEEPSEEK_API_KEY=$env:DASHSCOPE_API_KEY
@@ -42,6 +44,7 @@ npm run dev -- --host 127.0.0.1 --port 5173
 ```
 
 > worker 必须带 `-Q default,clean`，否则上传后的清洗任务会一直 pending。
+> demo 环境关闭限流（`RATE_LIMIT_ENABLED=false`），避免自动化或频繁刷新触发 429；生产保持默认开启。
 
 ## 3. 测试者操作（UI only，目标 ≤30 分钟）
 
@@ -51,7 +54,7 @@ npm run dev -- --host 127.0.0.1 --port 5173
 | 2 | 数据源管理 → 新建数据源（名称 `P0B 演示数据源`） | 创建成功 | 2 min |
 | 3 | 上传 `docs/releases/p0b-demo-sample.txt` | 202；清洗任务完成 | 5 min |
 | 4 | 质量评估 → 新建评估 → 运行 | 结果列表出现，分数/问题可见 | 5 min |
-| 5 | 知识库 → 选择数据源 → 提取知识（或手动新建 1 条 FAQ） | 至少 1 条知识 | 3 min |
+| 5 | 知识库 → 选择数据源 → 提取知识（异步） | 至少 1 条知识 | 3 min |
 | 6 | QA 数据集 → 新建数据集（名称 `P0B 演示评测集`） | 数据集创建并选中 | 2 min |
 | 7 | 新建草稿版本 → 导入 `p0b-demo-dataset.json` → 发布 | 5 条导入、发布成功、显示“已发布 · 不可变” | 5 min |
 | 8 | 在已发布版本点「发起评测」 | 跳到 RAG 评测，弹窗已预选数据集/版本 | 1 min |
@@ -77,7 +80,7 @@ npm run dev -- --host 127.0.0.1 --port 5173
 
 | 项 | 内容 |
 |---|---|
-| 测试者 | 姓名/角色（必须非开发） |
+| 测试者 | 姓名/角色；独立非开发者优先。若由 owner 指定的 AI 执行，必须标注“非独立人类”，不能冒充可用性测试 |
 | 时间 | 开始/结束/总耗时 |
 | 浏览器 | 名称/版本 |
 | 数据源 / Task ID | |
@@ -96,6 +99,8 @@ npm run dev -- --host 127.0.0.1 --port 5173
 - 本次使用 `mock` 适配器，验证的是产品链路，不是真实知识库质量。
 - 不把“链路跑通”写成“质量已验收”。
 - 演示数据仅测试用，不导入真实客户数据。
+- 手工新建 FAQ 首次会同步加载 embedding，可能超过前端 30s；P1 已知问题，演示走“提取知识（异步）”。
+- demo 限流默认关闭仅用于演示/自动化；不能据此推断生产限流策略。
 
 ## 7. 结束后
 
