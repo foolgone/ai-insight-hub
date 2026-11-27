@@ -1,8 +1,9 @@
 # P0-B 类人操作功能测试记录（ego-browser）
 
-> 状态：`AI_HUMANLIKE_TEST / P0-B BLOCKED_RECOMMENDED / PENDING_OWNER_CONFIRMATION`
+> 状态：`AI_HUMANLIKE_TEST / FIXED_SELF_CHECK_PASSED / PENDING_HUMAN_RETEST`
 > 测试者：**AI agent（owner 授权，ego lite 本地浏览器操作）**；不是人类，不冒充独立测试。
-> 结论：核心链路可跑通，但空状态 CTA 有断点、质量/知识列表不自动刷新，**建议 P0-B blocked，修复后人类复测**。
+> 原始结论：核心链路可跑通，但空状态 CTA 有断点、质量/知识列表不自动刷新；P0-B blocked。
+> 2026-11-27 修复后：F1/F2/F3 + stale localStorage 已修，AI 自检通过；仍待人类复测，不标 accepted。
 > 证据目录：`docs/releases/evidence/p0b-ego-20261127/`
 
 ## 1. 测试范围
@@ -62,7 +63,7 @@
 
 ## 5. 结论与建议
 
-1. **P0-B 建议 blocked**：F1 直接违反“空状态 CTA 全部勾选”的验收条件；F2/F3 让非开发用户误以为任务失败。
+1. **原始结论：P0-B 建议 blocked**（已按第 6 节修复）：F1 直接违反“空状态 CTA 全部勾选”的验收条件；F2/F3 让非开发用户误以为任务失败。
 2. 修复建议：
    - 数据清洗空态在无数据源时提供“去数据源管理/新建数据源”入口，或禁用“新建清洗任务”并给出明确指引；
    - 质量任务完成后失效/重取质量结果查询；
@@ -71,7 +72,26 @@
 3. 修复后由**人类**按 `p0b-e2e-demo-runbook.md` 复测；AI 本次结果只作功能证据，不作验收通过。
 4. P0-C 继续不开始。
 
-## 6. 证据索引
+## 6. 修复自检（2026-11-27）
+
+| 项 | 修复 | 自检 |
+|---|---|---|
+| F1 数据清洗空态 | 无数据源时展示「新建数据源 / 去数据源管理」，禁用“新建清洗任务”；弹窗无数据源时给 CTA，有数据源时默认选中 | 浏览器：有数据源时弹窗显示真实选项 PASS；无数据源 CTA 单测 PASS |
+| F2 质量结果 | 订阅任务流，`evaluate` 任务 completed 后失效 quality 查询 | 浏览器：新评估完成后质量总数 5 → 10，未点“刷新” PASS |
+| F3 FAQ 列表 | 订阅任务流，`extract` 任务 completed 后失效 knowledge 查询 | 浏览器：提取 202 后自动发起 FAQ GET PASS |
+| stale localStorage | 列表为空时清 currentId；页面查询 404 时清 currentId 并回到数据源引导 | 浏览器：伪造 currentId 后不再出现“数据源不存在” PASS |
+| 稳定进程 | 新增 `scripts/demo-p0b.ps1`，独立终端启动 API/worker/Vite，健康检查后保持窗口 | 语法检查 PASS；人类测试前需按 runbook 预热 10 分钟 |
+
+验证命令：
+
+- `npm run test:run`：**460 passed**
+- `npm run lint`：通过
+- `npm run build`：通过
+- 自检原始结果：`docs/releases/evidence/p0b-ego-20261127/fix-selfcheck-20261127.json`
+
+> 以上是 AI 修复自检，不是人类验收；P0-B 仍保持 blocked，直到人类按 runbook 复测通过。自检产生的新质量/知识任务数据会在人类测试前通过重置 demo 库清掉。
+
+## 7. 证据索引
 
 | 文件 | 内容 |
 |---|---|

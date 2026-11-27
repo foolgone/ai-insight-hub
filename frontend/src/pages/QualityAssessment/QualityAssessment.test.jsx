@@ -1,10 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { act, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import QualityAssessment from './index'
 import { listQualityResults, listQualityRuns } from '../../api/quality'
+import { useTaskStream } from '../../hooks/useTaskStream'
 import { useDatasourceStore } from '../../stores/datasourceStore'
 
 vi.mock('../../api/quality', () => ({
@@ -21,6 +22,9 @@ vi.mock('../../api/datasources', () => ({
   updateDataSource: vi.fn(),
   deleteDataSource: vi.fn(),
   uploadDataSourceFile: vi.fn(),
+}))
+vi.mock('../../hooks/useTaskStream', () => ({
+  useTaskStream: vi.fn(() => ({ connected: false })),
 }))
 
 const RESULT = {
@@ -94,5 +98,47 @@ describe('QualityAssessmentPage', () => {
 
     expect(await screen.findByText('尚未选择数据源')).toBeInTheDocument()
     expect(listQualityResults).not.toHaveBeenCalled()
+  })
+
+  it('评估任务 completed 后自动刷新结果', async () => {
+    let calls = 0
+    listQualityResults.mockReset()
+    listQualityResults.mockImplementation(() => {
+      calls += 1
+      return Promise.resolve(
+        calls <= 2
+          ? {
+              items: [],
+              pagination: { page: 1, limit: 10, total: 0, pages: 0 },
+              summary: { total: 0, avg_overall_score: 0, needs_review_count: 0 },
+            }
+          : {
+              items: [RESULT],
+              pagination: { page: 1, limit: 10, total: 1, pages: 1 },
+              summary: { total: 1, avg_overall_score: 82, needs_review_count: 1 },
+            }
+      )
+    })
+
+    renderPage()
+    expect(await screen.findByText('暂无评估结果，先新建评估任务')).toBeInTheDocument()
+
+    const { onTasks } = useTaskStream.mock.calls.at(-1)[1]
+    act(() => {
+      onTasks({
+        items: [{ id: 't-eval', task_type: 'evaluate', status: 'completed' }],
+      })
+    })
+
+    expect(await screen.findByText('82.0')).toBeInTheDocument()
+  })
+
+  it('数据源 404 时清理本地选中项并展示引导', async () => {
+    useDatasourceStore.setState({ currentId: 'ds-deleted' })
+    listQualityResults.mockRejectedValue({ status: 404, code: 'NOT_FOUND' })
+    renderPage()
+
+    await waitFor(() => expect(useDatasourceStore.getState().currentId).toBeNull())
+    expect(await screen.findByText('尚未选择数据源')).toBeInTheDocument()
   })
 })

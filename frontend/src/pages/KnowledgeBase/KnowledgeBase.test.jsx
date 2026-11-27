@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { act, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
@@ -12,6 +12,7 @@ import {
   searchKnowledge,
   updateGap,
 } from '../../api/knowledge'
+import { useTaskStream } from '../../hooks/useTaskStream'
 import { useDatasourceStore } from '../../stores/datasourceStore'
 
 vi.mock('../../api/knowledge', () => ({
@@ -24,6 +25,9 @@ vi.mock('../../api/knowledge', () => ({
   createFaq: vi.fn(),
   updateFaq: vi.fn(),
   deleteFaq: vi.fn(),
+}))
+vi.mock('../../hooks/useTaskStream', () => ({
+  useTaskStream: vi.fn(() => ({ connected: false })),
 }))
 
 const FAQ = {
@@ -185,5 +189,40 @@ describe('KnowledgeBasePage', () => {
 
     expect(await screen.findByText('尚未选择数据源')).toBeInTheDocument()
     expect(listFaq).not.toHaveBeenCalled()
+  })
+
+  it('知识提取任务 completed 后自动刷新 FAQ 列表', async () => {
+    let calls = 0
+    listFaq.mockReset()
+    listFaq.mockImplementation(() => {
+      calls += 1
+      return Promise.resolve(
+        calls === 1
+          ? { items: [], pagination: { page: 1, has_next: false, total: 0 } }
+          : { items: [FAQ], pagination: { page: 1, has_next: false, total: 1 } }
+      )
+    })
+
+    renderPage()
+    expect(await screen.findByText('暂无知识条目')).toBeInTheDocument()
+
+    const { onTasks } = useTaskStream.mock.calls.at(-1)[1]
+    act(() => {
+      onTasks({
+        items: [{ id: 't-extract', task_type: 'extract', status: 'completed' }],
+      })
+    })
+
+    expect(await screen.findByRole('heading', { name: '如何退款？' })).toBeInTheDocument()
+  })
+
+  it('数据源 404 时清理本地选中项并展示引导', async () => {
+    useDatasourceStore.setState({ currentId: 'ds-deleted' })
+    listFaq.mockReset()
+    listFaq.mockRejectedValue({ status: 404, code: 'NOT_FOUND' })
+    renderPage()
+
+    await waitFor(() => expect(useDatasourceStore.getState().currentId).toBeNull())
+    expect(await screen.findByText('尚未选择数据源')).toBeInTheDocument()
   })
 })

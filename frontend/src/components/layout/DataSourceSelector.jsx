@@ -31,11 +31,15 @@ export function DataSourceSelector() {
   const current = items.find(item => item.id === currentId)
 
   useEffect(() => {
-    if (items.length === 0) return
+    if (isLoading || isError) return
+    if (items.length === 0) {
+      if (currentId) setCurrentId(null)
+      return
+    }
     if (!currentId || !items.some(item => item.id === currentId)) {
       setCurrentId(items[0].id)
     }
-  }, [items, currentId, setCurrentId])
+  }, [items, currentId, setCurrentId, isLoading, isError])
 
   const filteredItems = useMemo(() => {
     const keyword = query.trim().toLowerCase()

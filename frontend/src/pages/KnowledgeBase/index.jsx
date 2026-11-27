@@ -1,5 +1,6 @@
-import { useMemo, useState } from 'react'
+import { useCallback, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { useQueryClient } from '@tanstack/react-query'
 import { LuDownload, LuPlus, LuSparkles } from 'react-icons/lu'
 import { AsyncState } from '../../components/common/AsyncState'
 import { PageLoading } from '../../components/common/PageLoading'
@@ -14,6 +15,7 @@ import { KnowledgeEntryCard } from '../../components/business/KnowledgeEntryCard
 import { FaqDrawer } from '../../components/knowledge/FaqDrawer'
 import { ExtractKnowledgeModal } from '../../components/knowledge/ExtractKnowledgeModal'
 import {
+  knowledgeKeys,
   useDeleteFaq,
   useFaqInfiniteQuery,
   useCoverageQuery,
@@ -22,6 +24,8 @@ import {
   useUpdateFaq,
   useUpdateGap,
 } from '../../hooks/useKnowledge'
+import { useClearStaleDatasource } from '../../hooks/useClearStaleDatasource'
+import { useTaskStream } from '../../hooks/useTaskStream'
 import { useDatasourceStore } from '../../stores/datasourceStore'
 import { downloadTextFile, toCsv } from '../../lib/download'
 import { formatDateTime } from '../../lib/format'
@@ -137,6 +141,25 @@ export default function KnowledgeBase() {
   const searchQuery = useKnowledgeSearchQuery(currentDatasourceId, searchTerm, { limit: 10 })
   const deleteMutation = useDeleteFaq()
   const updateMutation = useUpdateFaq()
+  const queryClient = useQueryClient()
+  const seenCompleted = useRef(new Set())
+  useClearStaleDatasource(faqQuery.error, currentDatasourceId)
+
+  const handleTasks = useCallback(
+    payload => {
+      const fresh = (payload?.items || []).filter(
+        task =>
+          task.task_type === 'extract' &&
+          task.status === 'completed' &&
+          !seenCompleted.current.has(task.id)
+      )
+      if (fresh.length === 0) return
+      fresh.forEach(task => seenCompleted.current.add(task.id))
+      queryClient.invalidateQueries({ queryKey: knowledgeKeys.all })
+    },
+    [queryClient]
+  )
+  useTaskStream(Boolean(currentDatasourceId), { onTasks: handleTasks })
 
   const faqItems = useMemo(
     () => (faqQuery.data?.pages || []).flatMap(page => page.items || []),

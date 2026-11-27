@@ -141,12 +141,30 @@ describe('DataCleaningPage', () => {
     )
   })
 
-  it('未选择数据源时结果区展示引导', async () => {
+  it('未选择数据源时展示 CTA，并禁用新建清洗任务', async () => {
     useDatasourceStore.setState({ currentId: null })
     renderPage()
 
     expect(await screen.findByText('尚未选择数据源')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: '新建数据源' })).toHaveAttribute(
+      'href',
+      '/data-sources?action=create'
+    )
+    expect(screen.getByRole('link', { name: '去数据源管理' })).toHaveAttribute(
+      'href',
+      '/data-sources'
+    )
+    expect(screen.getByRole('button', { name: '新建清洗任务' })).toBeDisabled()
     expect(listCleanedData).not.toHaveBeenCalled()
+  })
+
+  it('数据源 404 时清理本地选中项并展示引导', async () => {
+    useDatasourceStore.setState({ currentId: 'ds-deleted' })
+    listCleanedData.mockRejectedValue({ status: 404, code: 'NOT_FOUND' })
+    renderPage()
+
+    await waitFor(() => expect(useDatasourceStore.getState().currentId).toBeNull())
+    expect(await screen.findByText('尚未选择数据源')).toBeInTheDocument()
   })
 
   it('点击查看打开清洗结果详情', async () => {
@@ -167,5 +185,7 @@ describe('DataCleaningPage', () => {
     await user.click(screen.getByRole('button', { name: '新建清洗任务' }))
 
     expect(await screen.findByRole('dialog', { name: '新建清洗任务' })).toBeInTheDocument()
+    expect(await screen.findByText('客服1月')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '启动清洗' })).toBeEnabled()
   })
 })

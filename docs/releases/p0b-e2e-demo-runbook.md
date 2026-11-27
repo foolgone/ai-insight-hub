@@ -1,8 +1,8 @@
 # P0-B 端到端演示 runbook（人类 UI 测试）
 
-> 状态：`blocked_pending_fix`
+> 状态：`ready_for_human_retest`
 > AI 功能证据：`docs/releases/p0b-e2e-test-record.md`（AI 执行，仅功能证据，**不作验收**）
-> 2026-11-27 类人功能测试发现阻塞项：`docs/releases/p0b-ego-humanlike-functional-test-20261127.md`；修复后再人类复测
+> 2026-11-27 类人功能测试与修复自检：`docs/releases/p0b-ego-humanlike-functional-test-20261127.md`；待人类复测
 > 环境：独立 demo 库 `aiinsight_demo`（**不写 aiinsight_preprod，不碰生产**）
 > 目标：未参与开发的人类测试者，从空库完成一次完整流程，≤30 分钟
 > 当前 demo 栈：API `http://127.0.0.1:8000`，前端 `http://127.0.0.1:5173`
@@ -34,6 +34,25 @@
 
 ## 2. 启动（开发/运维，测试者无需执行）
 
+**推荐：用一个独立 PowerShell 窗口运行稳定启动脚本，测试期间不要关闭窗口。**
+
+```powershell
+cd D:\code\AI Project Engineering\ai-insight-hub
+powershell -ExecutionPolicy Bypass -File scripts\demo-p0b.ps1
+```
+
+脚本会：
+
+- 启动 API 8000、Celery worker、Vite 5173；
+- 保持 `RATE_LIMIT_ENABLED=true`；
+- 等待 8000/5173 健康后打印就绪；
+- 任一进程退出就停止全部，便于记录“是否重启过”。
+
+> 人类测试前至少预热 10 分钟，确认 `http://127.0.0.1:8000/health` 和 `http://127.0.0.1:5173` 持续可访问；记录预热开始时间与是否发生重启。
+
+<details>
+<summary>手动启动命令（脚本不可用时）</summary>
+
 ```powershell
 cd backend
 $env:DATABASE_URL="postgresql://<user>:<password>@192.168.150.100:5433/aiinsight_demo"
@@ -54,6 +73,8 @@ $env:DEFAULT_LLM_MODEL="qwen-flash"
 cd ..\frontend
 npm run dev -- --host 127.0.0.1 --port 5173
 ```
+
+</details>
 
 > worker 必须带 `-Q default,clean`，否则上传后的清洗任务会一直 pending。
 > 限流必须保持开启；若页面出现 429，记录为卡点，不要关闭限流绕过。
@@ -130,9 +151,9 @@ npm run dev -- --host 127.0.0.1 --port 5173
 - 演示数据仅测试用，不导入真实客户数据。
 - 手工新建 FAQ 首次会同步加载 embedding，可能超过前端 30s；P1 已知问题，演示走“提取知识（异步）”。
 - 默认限流下若出现 429，属于待评估的体验问题（P1），记录即可，不关闭限流绕过。
-- **当前阻塞（2026-11-27）**：数据清洗空态「新建清洗任务」打开弹窗后无数据源可选，也没有“去数据源管理”入口；修复前人类测试会在该步骤卡住。
-- **当前 P1**：质量任务完成后结果列表不自动刷新；知识提取完成后 FAQ 列表不自动刷新，需手动刷新/整页刷新。
-- **环境要求**：本地 API/Vite 需在稳定终端或进程守护下运行；AI 测试中曾两次退出，重启后数据保留。
+- **已修复（2026-11-27）**：数据清洗无数据源时提供「新建数据源/去数据源管理」入口，并禁用新建按钮；弹窗有数据源时默认选中，无数据源时给 CTA，不再空白死路。
+- **已修复（2026-11-27）**：质量任务完成后自动刷新结果；知识提取完成后自动刷新 FAQ；stale localStorage 遇到 404 自动清理并回到数据源引导。
+- **环境要求**：用 `scripts/demo-p0b.ps1` 在独立终端启动，测试前预热 10 分钟；若进程退出，记录重启，不在人类计时中隐藏。
 
 ## 7. 结束后
 
