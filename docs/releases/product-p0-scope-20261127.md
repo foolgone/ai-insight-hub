@@ -10,7 +10,7 @@
 > | 阶段 | 状态 |
 > |---|---|
 > | P0-A | accepted |
-> | P0-B | implementation `functional_verified`；验收 `pending_non_developer_test` |
+> | P0-B | **`blocked_recommended`**：AI 类人功能测试发现空状态 CTA 断点、质量/知识列表不自动刷新；修复后人类复测 |
 > | P0-C | 未开始，等 P0-B 人类测试通过 |
 > | 生产 migration | deferred / blocked |
 > | M1 | v1.2.5 beta / inactive |
@@ -89,7 +89,9 @@
 - CSV 导入映射、数据集归档/删除策略（需后端评审）；
 - 手工 FAQ 首次 embedding 同步加载超过前端 30s（演示改用异步提取）；
 - 默认限流下的轮询/429 体验；
-- gold_evidence 编辑。
+- gold_evidence 编辑；
+- 质量任务完成后结果列表不自动刷新，需要手动“刷新”；
+- 知识提取完成后 FAQ 列表不自动刷新，需要整页刷新。
 
 ## 4. 非目标
 

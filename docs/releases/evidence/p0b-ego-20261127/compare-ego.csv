@@ -1,0 +1,37 @@
+﻿# RAG Run Compare Export
+# schema_version=m3.compare.export.v1
+# exported_at=2026-11-27T14:01:07.829Z
+# base_run_id=ea63f595-e6ab-46fa-a362-32cce6b0bf32
+# target_run_id=ab7a19d2-cf56-4f3c-a7d0-d833e97b9b98
+# base_dataset=P0B 类人测试评测集 20261127
+# target_dataset=P0B 类人测试评测集 20261127
+# base_dataset_version_id=0e7234e6-a600-44bc-99f4-f94d9dbbf875
+# target_dataset_version_id=0e7234e6-a600-44bc-99f4-f94d9dbbf875
+# base_execution_mode=query
+# target_execution_mode=query
+# base_adapter=mock
+# target_adapter=mock
+# base_top_k=3
+# target_top_k=5
+# base_judge_model=qwen-flash
+# target_judge_model=qwen-flash
+# base_prompt_version=v1.0.0
+# target_prompt_version=v1.0.0
+# same_config=false
+# case_improved=0
+# case_regressed=1
+# case_unchanged=4
+# case_invalid=0
+# case_unprocessed=0
+# exported_cases=5
+# aligned_total=5
+# case_truncated=false
+# truncation_note=
+# noise_notice=Judge 为 beta；同配置/同输入的两条 Run 也可能出现 ±0.2 波动。delta 不代表因果变化，不能直接当作优化效果；建议重复 3 次或确认 RAG 输入/配置确实不同后再判断。
+
+dataset_item_id,item_key,question,base_faithfulness,target_faithfulness,delta_faithfulness,base_answer_correctness,target_answer_correctness,delta_answer_correctness,base_answer_relevancy,target_answer_relevancy,delta_answer_relevancy,verdict,verdict_label,driver_metric,driver_delta,note
+8c5626ab-7dab-4af5-af1c-77a4001b6a61,Q001,退款多久到账？,1,1,0,0.4,0.3,-0.1,0.3,0.4,0.1,regressed,变差,answer_correctness,-0.1,C -0.100
+69b38f62-961e-46df-a873-14ede8120755,Q002,多久发货？,1,1,0,0.3,0.3,0,0.3,0.3,0,unchanged,不变,faithfulness,0,
+9d8e48d3-6624-439b-914b-2e1817338684,Q003,怎么开发票？,0,0,0,0.3,0.3,0,0.6,0.6,0,unchanged,不变,faithfulness,0,
+d3b07fe6-c1d9-4854-9f8d-b65b2baab5be,Q004,保修多久？,1,1,0,0.3,0.3,0,0.2,0.2,0,unchanged,不变,faithfulness,0,
+27049a53-876e-46f3-9e71-6a232fe2cbba,Q005,可以换货吗？,0,0,0,0.3,0.3,0,1,1,0,unchanged,不变,faithfulness,0,

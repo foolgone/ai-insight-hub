@@ -3,6 +3,8 @@
 > 状态：`FUNCTIONAL_VERIFIED_BY_AI / PENDING_NON_DEVELOPER_TEST`
 > 测试者：**AI agent（owner 指定）**；不是独立人类，且同一 AI 参与过 P0-B 实现。
 > 因此本记录**只作为功能证据，不作为 P0-B 验收通过**。
+>
+> **2026-11-27 追加**：ego 类人操作功能测试发现 P0-B 阻塞项（数据清洗空态 CTA 断点；质量/知识列表不自动刷新），建议 P0-B blocked。详见 `docs/releases/p0b-ego-humanlike-functional-test-20261127.md`。
 > Runbook：`docs/releases/p0b-e2e-demo-runbook.md`
 > 环境：`aiinsight_demo`，**未写 `aiinsight_preprod` / 未碰生产**
 
