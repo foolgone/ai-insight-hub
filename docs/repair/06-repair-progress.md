@@ -1667,3 +1667,12 @@ alembic check   : No new upgrade operations detected
 - 结论：NO-GO，不排生产窗口；生产 migration 不随 RC tag 自动执行。
 - 当前仍只允许 P0 bugfix / 验收证据 / 发布文档；RC1 frozen。
 
+### 产品优先 / 生产多租户 deferred（2026-11-27）
+- 决策：生产多租户 migration `deferred_by_product_priority`；不补六项运维证据，不排生产窗口。
+- 停止：生产评审包补证、生产 migration/变更单、PR-4 代码、M4-A tenant 生产化、M1 校准/target/baseline/10/40。
+- 继续：产品演示/体验、M2/M3 工作台、preprod 真实 Run、产品功能补齐、客户反馈。
+- 状态：RC1 frozen；preprod accepted 并保留；生产未碰/未迁移/未激活；M1 v1.2.5 beta / inactive。
+- 新产品 scope：`docs/releases/product-p0-scope-20261127.md`（QA 数据集管理页 + 端到端演示；draft_scope，未批准实施）。
+- 现状：QA 数据集后端 API 完整，前端无 `/qa-datasets` 页面/创建/导入/发布 client；新建评测只能只读选数据集；retry/cancel API 已有但 UI 未接。
+- 验收目标：一个用户不碰命令行，在 preprod 完成「建数据集 → 跑评测 → 看对比 → 导出/报告」。
+

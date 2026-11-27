@@ -1,11 +1,11 @@
 # 生产 migration 评审包（开发侧提交，draft / NO-GO）
 
 > 提交角色：开发
-> 状态：`submitted_incomplete`（2026-11-27）；**不是生产批准**
+> 状态：`deferred_by_product_priority`（2026-11-27）；**不是生产批准，也不再补证**
 > 变更单：`docs/05-operations/07-m4a-prod-migration-change-ticket.md`
 > Pre-prod 证据：`docs/releases/preprod-acceptance-20261127.md`（accepted）
 > RC：`rc-m4a-tenant-20261126` / 提交 `51d6619` / 运行时 `e2eaebd`
-> 结论：**NO-GO**，六项未齐，不排生产窗口。
+> 结论：**DEFERRED**。产品优先，生产多租户暂缓；六项运维证据停止收集，生产 migration 不排期。
 
 ## 1. 变更摘要
 
@@ -86,14 +86,18 @@
 
 ## 5. Go/No-Go
 
-**当前：NO-GO。**
+**当前：DEFERRED by product priority。**
+
+不是技术 NO-GO，而是产品决策暂缓；恢复时需重新提交评审包并补六项证据。
 
 - 1/2/3/5/6 未完成；4 需迁移窗口执行；
 - 只有六项齐全并签字后，才可排生产维护窗口；
 - 生产 migration 不跟随 RC tag 自动执行；
 - Pre-prod accepted 不等于 production ready，尤其不覆盖 MinIO/S3 与 nginx/TLS。
 
-## 6. 下一步
+## 6. 恢复条件（非当前行动）
+
+只有产品决定恢复多租户生产时，才重新启动以下步骤：
 
 1. 运维提供 1/2/5 证据或风险接受；
 2. DBA/运维提供 3 的演练记录与窗口；
@@ -102,3 +106,11 @@
 5. 另开生产 migration 批准，不自动执行。
 
 > 本评审包由开发提交；完整性审查、风险接受和 go/no-go 由决策/owner 角色完成。
+
+## 7. 产品优先决策（2026-11-27）
+
+- 生产多租户 migration：`deferred_by_product_priority`；
+- 停止：生产评审包补证、生产 migration/变更单、PR-4 代码、M4-A tenant 生产化、M1 校准；
+- 继续：产品演示与体验、M2/M3 工作台、preprod 真实 Run、产品功能补齐、客户反馈；
+- 生产保持：未碰、未迁移、未激活；RC1 frozen；
+- 恢复多租户生产时，本评审包需重新做完整性审查，不自动沿用。

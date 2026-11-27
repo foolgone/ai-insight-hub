@@ -1,11 +1,12 @@
 # M4-A 生产 migration 变更单（模板，未批准）
 
-> 状态：`draft / review_package`（2026-11-27；**未批准**）
+> 状态：`deferred_by_product_priority`（2026-11-27；**未批准、暂缓**）
 > 变更：生产 `alembic upgrade head`（含 023 / 024 / 025）
 > **不得随 PR 合并自动上生产；必须单独评审、单独签字。**
 > pre-prod：accepted（2026-11-27，见 `docs/releases/preprod-acceptance-20261127.md`）
 > 仍缺：MinIO/S3 smoke 或风险接受、生产 nginx/TLS、生产备份/恢复演练、监控、签字。
-> 开发侧评审包：`docs/releases/prod-review-package-20261127.md`（submitted_incomplete / NO-GO）。
+> 开发侧评审包：`docs/releases/prod-review-package-20261127.md`（deferred_by_product_priority）。
+> 恢复条件：产品决定恢复多租户生产后，重新提交评审包并补六项证据。
 
 ## 1. 基本信息
 

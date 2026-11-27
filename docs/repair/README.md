@@ -8,8 +8,8 @@
 > 4. 未冻结的定义/目标，不得进入代码实现。
 >
 > 最后更新：2026-11-26
-> 当前阶段：**RC1 `rc-m4a-tenant-20261126` 冻结；VM pre-prod accepted；生产评审包已提交但 NO-GO**
-> 当前决策：**pre-prod accepted（2026-11-27，偏差已追认）；PR-4 scope frozen，代码/migration 未批准；生产 migration blocked，等变更单评审 + storage/nginx/备份/监控/签字**
+> 当前阶段：**产品优先；生产多租户 migration deferred；RC1 frozen；preprod 保留为演示/验证环境**
+> 当前决策：**pre-prod accepted；生产多租户 `deferred_by_product_priority`；停止生产评审补证/PR-4/M4-A 生产化/M1；转产品 P0（数据集页 + 端到端演示）**
 > 当前不做：target 校准、5-case 模型对比、10/40 Judge、v1.2.6、M1-E 验收
 
 ---
@@ -24,10 +24,10 @@
 | M1 校准 | **已停止**：target v1.0.3、5-case 对比、10/40、v1.2.6、M1-E 全部冻结 |
 | 平台验收 | 用户能完成一次完整评测，看到可解释结果和报告；不以 target 通过率为门槛 |
 | Judge 展示 | invalid / skipped / known issues 原样展示；人工复核可覆盖 |
-| 当前可写代码？ | **仅 P0 bugfix / 验收证据 / 发布文档**；不写新功能、PR-4、M1 |
+| 当前可写代码？ | **仅 P0 bugfix / 验收证据 / 发布文档**；产品 P0 scope 批准后再写数据集页/E2E 演示 |
 | 当前可跑 Judge？ | **否**（仅 beta 展示；不新增校准调用） |
-| 下一个交付 | 运维/DBA 补齐生产评审包 1/2/3/5/6；开发在窗口跑 tenant 审计（4）；见 `prod-review-package-20261127.md` |
-| 之后 | 生产 go/no-go；PR-4a 是否开工；M1 保持 frozen |
+| 下一个交付 | 产品 P0 scope 评审：`docs/releases/product-p0-scope-20261127.md`（数据集管理页 + 端到端演示） |
+| 之后 | 产品 P0 实施/验收；单租户上线 vs 多租户 SaaS 由客户反馈决定；M1 保持 frozen |
 
 ### M2 P0 已交付
 
