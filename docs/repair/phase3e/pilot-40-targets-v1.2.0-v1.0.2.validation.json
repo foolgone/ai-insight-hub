@@ -1,0 +1,113 @@
+{
+ "file": "pilot-40-targets-v1.2.0-v1.0.2.json",
+ "sha256": "3ee15dfca66fe13f0a45fda84ecf2612483f2de107ad079b196a6bd6344d5846",
+ "sha256_file": "pilot-40-targets-v1.2.0-v1.0.2.sha256",
+ "supersedes_file": "pilot-40-targets-v1.2.0.json",
+ "supersedes_sha256": "34357b34c3d0fc85e78f90eeebb353b25a148926e3a55b19f17cc23b08b2b5eb",
+ "row_count": 40,
+ "revision": "v1.0.2",
+ "status": "freeze_draft_pending_human",
+ "checks": [
+  {
+   "name": "row_count_40",
+   "ok": true,
+   "detail": 40
+  },
+  {
+   "name": "unique_case_ids",
+   "ok": true,
+   "detail": 40
+  },
+  {
+   "name": "all_case_ids_q01_q40",
+   "ok": true,
+   "detail": "Q01-Q40"
+  },
+  {
+   "name": "target_values_identical_to_v1_0_1",
+   "ok": true,
+   "detail": true
+  },
+  {
+   "name": "f_target_metric",
+   "ok": true,
+   "detail": "faithfulness"
+  },
+  {
+   "name": "f_target_denominator",
+   "ok": true,
+   "detail": "S+U+I"
+  },
+  {
+   "name": "f_target_denominator_long",
+   "ok": true,
+   "detail": "supported_plus_unsupported_plus_insufficient"
+  },
+  {
+   "name": "f_strict_metric",
+   "ok": true,
+   "detail": "faithfulness_strict"
+  },
+  {
+   "name": "f_strict_role",
+   "ok": true,
+   "detail": "diagnostic"
+  },
+  {
+   "name": "f_strict_target_null",
+   "ok": true,
+   "detail": null
+  },
+  {
+   "name": "target_values_changed_false",
+   "ok": true,
+   "detail": false
+  },
+  {
+   "name": "supersedes_sha256_matches_old",
+   "ok": true,
+   "detail": "34357b34c3d0fc85e78f90eeebb353b25a148926e3a55b19f17cc23b08b2b5eb"
+  },
+  {
+   "name": "old_file_sha_unchanged",
+   "ok": true,
+   "detail": "34357b34c3d0fc85e78f90eeebb353b25a148926e3a55b19f17cc23b08b2b5eb"
+  },
+  {
+   "name": "runtime_active_false",
+   "ok": true,
+   "detail": false
+  },
+  {
+   "name": "not_for_run_true",
+   "ok": true,
+   "detail": true
+  },
+  {
+   "name": "status_freeze_draft_pending_human",
+   "ok": true,
+   "detail": "freeze_draft_pending_human"
+  },
+  {
+   "name": "revision_v1_0_2",
+   "ok": true,
+   "detail": "v1.0.2"
+  },
+  {
+   "name": "final_labels_sha_unchanged",
+   "ok": true,
+   "detail": "f139623fef80b55716fce0c773e776d284a5167683eb91559b23e49cabd000eb"
+  },
+  {
+   "name": "q32_precondition_present",
+   "ok": true,
+   "detail": true
+  },
+  {
+   "name": "sha256_file_contains_new_sha",
+   "ok": true,
+   "detail": "3ee15dfca66fe13f0a45fda84ecf2612483f2de107ad079b196a6bd6344d5846"
+  }
+ ],
+ "all_pass": true
+}

@@ -1,0 +1,72 @@
+{
+  "version": "v1.1.2",
+  "status": "design_draft",
+  "active": false,
+  "date": "2026-11-17",
+  "note": "v1.1.2：F 增加 quote 单行/保留换行、Q22/Q36/Q21 few-shot、总起句 meta 规则、虚拟商品 §1/§12 拆分、文档范围/absence meta 规则、引用原文逐事实拆分、absence 不进分母；C/R 继承 v1.1.1；默认仍 v1.0.0。",
+  "schema_version": "rag_judge_schema_v2",
+  "rubric_version": "v1.1.2",
+  "metric_version_mapping": {
+    "faithfulness": "v2",
+    "answer_correctness": "v2",
+    "answer_relevancy": "v2",
+    "retrieval_metrics": "v1"
+  },
+  "prompts": {
+    "faithfulness.txt": "e95f04b556dd1a86e7abfbdd5dad75d3b834628490cdf460adb608dd02713b30",
+    "answer_correctness.txt": "2ab6eac2abe57dcfd647df328244ac3e5681fc93222938d6614e71037d49ae77",
+    "answer_relevancy.txt": "0f8576b7dbf2e7ea1a02752680b0afe8c66677fe2eda823f4bcd28371ae4da84"
+  },
+  "changes": {
+    "faithfulness": [
+      "quote 必须逐字连续复制；跨行引用保留换行，优先只引单行连续子串",
+      "Q22 few-shot：cl1-cl4 supported、cl5 absence 不进分母",
+      "Q36 canonical 8 条 few-shot：cl1 用普通商品 7 天 core claim；cl5/cl6 拆 §1/§12；所有 quote 单句；cl8 仅 disclosure variant",
+      "回答开头的总起/分类引导句（如“能否退款，取决于……”）归 non_factual/meta，不建 factual claim、不进分母",
+      "虚拟商品即使写在同一 bullet，也拆成 §1 已激活 / §12 一经售出 两条 claim，各引对应单句",
+      "文档未提及例外/促销/会员豁免 -> non_factual/absence，不得标 factual/policy/insufficient",
+      "其余规则继承 v1.1.1",
+      "文档覆盖范围描述归 non_factual/meta；“文档未提及/未涉及/未说明”归 absence；不得标 factual/policy/insufficient",
+      "回答中的引用/转述原文同样是回答内容；引用中的时间/条件/动作/主体逐条建 claim，不得因前文概括而省略",
+      "Q21 few-shot：5 scorable（3 supported + 2 insufficient），Q21#3 质量期/保修推广标 insufficient"
+    ],
+    "answer_correctness": [
+      "继承 v1.1.1（Q01 额外信息规则、Q36 冲突披露）"
+    ],
+    "answer_relevancy": [
+      "继承 v1.1.1"
+    ]
+  },
+  "activation_requirements": [
+    "人工审核通过 v1.1.2 设计",
+    "Schema 增加 claim_id/claim_type/claim_subtype/support_status/is_contradictory/contradiction_with/evidence_refs",
+    "Service 过滤 non_factual、zero-denominator skipped、evidence 校验、claim_subtype 校验",
+    "版本加载器显式选择 v1.1.2（默认仍 v1.0.0）",
+    "metric_version 升到 v2，metric_version_for 接收 prompt_version/config",
+    "10 条对照实验通过验收矩阵后才考虑 40 条"
+  ],
+  "open_issues": [
+    "Q22 F 单案例已通过（F=1.0，4/4 supported，cl5 absence）",
+    "Q36 精修后 F=1.0、7 scorable 全 supported、evidence 7/7、validation_errors=[]、document_conflict=0",
+    "Q29 skipped(no_scorable_claims)；Q15 F=0.667；Q10 F=1.0；Q20 F=0.8；Q21 F=0.6（Q21#3 insufficient）",
+    "10 条闸门（F SHA e95f04b5…）：10/10 通过；Q31 仍有 5 条 quote_not_found，provisional 目标命中",
+    "40 条规模/回归：23/40 停在 Q23 F=0.0（目标 0.4-0.5）；Q23 是 Human Gold，cl2/cl3/cl4 quote 合成为“生鲜食品质量问题需…”，6 条 quote_not_found 降级；重跑 0.0/0.0/0.428571，2/3 复现",
+    "Q14 C=0.7 是 known Human Gold C miss（目标 0.8-1.0，不移动目标）；Q14 F=skipped(context_unavailable)",
+    "Q16 R=0.7 是 known Human Gold R miss（judge over-strictness；三次稳定 0.7；回答与金标一致）",
+    "Q10 evidence typo 字形规则留待 v1.1.2 之后评估",
+    "Q36 canonical 冲突口径未业务确认"
+  ],
+  "design_revision": "2026-11-17-v112f",
+  "acceptance_matrix": "docs/repair/phase3e/prompt-v1.1.1-acceptance-matrix.json",
+  "fixtures": "docs/repair/phase3e/prompt-v1.1.1-fixtures.json",
+  "human_gold_coverage": {
+    "Q23": "human_gold",
+    "Q35": "human_gold",
+    "Q36": "human_gold",
+    "Q21#3": "human_gold_claim_only",
+    "Q11": "ai_draft_pending_human",
+    "Q29": "ai_draft_pending_human"
+  },
+  "implementation_status": "implemented_default_off",
+  "default_prompt_version": "v1.0.0"
+}

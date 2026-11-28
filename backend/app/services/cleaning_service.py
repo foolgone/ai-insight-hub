@@ -24,6 +24,7 @@ if TYPE_CHECKING:
 
 from app.core.config import settings
 from app.core.ownership import assert_owner
+from app.core.tenancy import require_tenant, tenant_id_for_write
 from app.core.pagination import PaginationParams
 from app.core.exceptions import (
     CleanedDataNotFoundError,
@@ -120,6 +121,7 @@ async def create_clean_task(
     params: dict[str, Any],
 ) -> Task:
     task = Task(
+        tenant_id=tenant_id_for_write(user),
         task_type=CLEAN_TASK_TYPE,
         task_name=task_name,
         datasource_id=datasource_id,
@@ -341,6 +343,7 @@ async def persist_dialogues(
             issues.append("missing_timestamp")
         rows.append(
             {
+                "tenant_id": raw.tenant_id,
                 "datasource_id": raw.datasource_id,
                 "raw_data_id": raw.id,
                 "dialogue_id": dialogue_uuid(raw.id, dialogue_id),
@@ -707,6 +710,7 @@ async def list_cleaned_data(
     datasource = await session.get(DataSource, datasource_id)
     if datasource is None or datasource.deleted_at is not None:
         raise DataSourceNotFoundError(details={"datasource_id": str(datasource_id)})
+    require_tenant(datasource, user, DataSourceNotFoundError)
     assert_owner(datasource.user_id, user)
 
     return await cleaned_repo.list_for_datasource(
@@ -731,6 +735,7 @@ async def get_cleaned_data(
     datasource = await session.get(DataSource, datasource_id)
     if datasource is None or datasource.deleted_at is not None:
         raise DataSourceNotFoundError(details={"datasource_id": str(datasource_id)})
+    require_tenant(datasource, user, DataSourceNotFoundError)
     assert_owner(datasource.user_id, user)
 
     item = await cleaned_repo.get(session, data_id)

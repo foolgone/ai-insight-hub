@@ -1,0 +1,122 @@
+{
+  "meta": {
+    "name": "m1d6-v1.2.5-model-comparison-flash-preflight",
+    "status": "preflight_passed",
+    "revision": "r1",
+    "date": "2026-11-24",
+    "provider": "dashscope",
+    "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+    "scope": "model_comparison_diagnostic",
+    "judge_run": false,
+    "judge_calls": 0,
+    "prompt_version": "v1.2.5",
+    "prompt_status": "frozen",
+    "prompt_active": false,
+    "freeze_commit": "e9e5f8e",
+    "agent_commit": "318b302",
+    "note": "DashScope 充值后恢复；按用户要求只用 flash，不用任何 max 模型，不使用 OpenCode/deepseek。"
+  },
+  "account": {
+    "api_key_env": "DASHSCOPE_API_KEY",
+    "models_endpoint": { "status": 200, "model_count": 191 },
+    "chat_endpoint": { "status": 200 },
+    "arrears_resolved": true,
+    "evidence": "qwen3.8-flash chat 返回 200；此前 qwen-max 400 欠费已消失。"
+  },
+  "flash_candidates": [
+    "qwen3.8-flash",
+    "qwen3.7-flash",
+    "qwen3.7-flash-2026-07-15",
+    "qwen3.6-flash",
+    "qwen3.6-flash-2026-04-16",
+    "qwen3.5-flash",
+    "qwen-flash",
+    "qwen-flash-2025-07-28"
+  ],
+  "selected_model": {
+    "model": "qwen3.8-flash",
+    "reason": "最新 flash 世代；DashScope 原生；非 max 模型。",
+    "enable_thinking": false,
+    "why_disable_thinking": "开启 thinking 时 1.5k prompt 已消耗 3649 reasoning tokens，真实 7k prompt 会撞满 max_tokens=8192 并截断（deepseek 已复现该类失败）；关闭后 6.8k 输入仅 631 输出，finish_reason=stop。",
+    "also_matches_baseline": "qwen-max 历史 baseline 无 reasoning，关闭 thinking 使对比条件更接近。"
+  },
+  "excluded": [
+    { "model": "qwen-max", "reason": "用户明确要求不使用 max 模型" },
+    { "model": "qwen3.8-max", "reason": "max 模型，用户禁止" },
+    { "model": "qwen4-max", "reason": "max 模型，用户禁止" },
+    { "model": "deepseek-v4.1-flash (OpenCode)", "reason": "用户要求不使用 OpenCode/deepseek；相关产物已回滚" }
+  ],
+  "probes": [
+    {
+      "id": "P1",
+      "kind": "thinking_on",
+      "model": "qwen3.8-flash",
+      "status": 200,
+      "prompt_tokens": 1571,
+      "completion_tokens": 4398,
+      "reasoning_tokens": 3649,
+      "latency_s": 31.6,
+      "finish_reason": "stop",
+      "json_valid": true,
+      "claims": 6,
+      "note": "thinking 默认开启；reasoning 占比高，7k prompt 下会截断。"
+    },
+    {
+      "id": "P2",
+      "kind": "thinking_off",
+      "model": "qwen3.8-flash",
+      "status": 200,
+      "prompt_tokens": 1535,
+      "completion_tokens": 633,
+      "reasoning_tokens": 0,
+      "latency_s": 3.62,
+      "finish_reason": "stop",
+      "json_valid": true,
+      "claims": 5,
+      "note": "enable_thinking=false 生效；JSON 合法、quote 连续、absence 正确。"
+    },
+    {
+      "id": "P3",
+      "kind": "thinking_off_large_prompt",
+      "model": "qwen3.8-flash",
+      "status": 200,
+      "prompt_tokens": 6801,
+      "completion_tokens": 631,
+      "reasoning_tokens": 0,
+      "latency_s": 10.02,
+      "finish_reason": "stop",
+      "json_valid": true,
+      "claims": 5,
+      "quote_contiguous_claims": 4,
+      "note": "接近真实 F prompt 规模；输出远低于 8192，无截断。"
+    }
+  ],
+  "cost_model": {
+    "pricing_basis": "qwen-max CNY 表（输入 2.4 / 输出 9.6 每百万）作为 flash 的上界代理；DashScope 未在响应中返回单次费用，实际 flash 单价更低。",
+    "input_cny_per_mtok": 2.4,
+    "output_cny_per_mtok": 9.6,
+    "ceiling_cny": 0.6,
+    "probe_cost_upper_bound_cny": 0.07814,
+    "expected_run_upper_bound_cny": 0.17,
+    "note": "预算判断使用上界，宁保守不超支。"
+  },
+  "baseline": {
+    "model": "qwen-max",
+    "source": "docs/repair/phase3e/m1d6-v125-failure-mode-results.json",
+    "results_sha256": "309fa9b8306174f9f74fe7968a9aa1bc70109af140c7a465a6a52f5dc3294b50",
+    "new_calls": 0,
+    "per_case": {
+      "Q23": { "status": "invalid", "invalid_class": "initial_schema_invalid" },
+      "Q35": { "status": "invalid", "invalid_class": "initial_schema_invalid" },
+      "Q36": { "status": "invalid", "invalid_class": "patch_null" },
+      "Q17": { "status": "evaluated", "score": 0.6, "target": [0.7, 0.9] },
+      "Q21": { "status": "evaluated", "score": 0.8, "target": [0.6, 0.7] }
+    }
+  },
+  "conclusion": {
+    "preflight_passed": true,
+    "judge_ready": true,
+    "selected_arm": "qwen3.8-flash (enable_thinking=false)",
+    "judge_calls": 0
+  }
+}

@@ -1,0 +1,64 @@
+{
+  "version": "v1.1.4",
+  "status": "design_draft",
+  "active": false,
+  "date": "2026-11-17",
+  "note": "v1.1.4：F 增加 Q30 范围/地域推断归 meta/absence、混合句拆分、Q30 few-shot；R/C 继承 v1.1.3；默认仍 v1.0.0。",
+  "schema_version": "rag_judge_schema_v2",
+  "rubric_version": "v1.1.4",
+  "metric_version_mapping": {
+    "faithfulness": "v2",
+    "answer_correctness": "v2",
+    "answer_relevancy": "v2",
+    "retrieval_metrics": "v1"
+  },
+  "prompts": {
+    "faithfulness.txt": "576f571975ae37623088b1c753b1c7a4ee11e74f91e852c37ef03330ba7629f5",
+    "answer_correctness.txt": "2ab6eac2abe57dcfd647df328244ac3e5681fc93222938d6614e71037d49ae77",
+    "answer_relevancy.txt": "394cd30c1453f0474ec6d25cf0305d8e3fb066151ac0f85e004b16117906891b"
+  },
+  "changes": {
+    "faithfulness": [
+      "继承 v1.1.3 全部规则",
+      "文档未明确写的适用范围/地域推断 -> non_factual/meta 或 absence，不建 factual claim",
+      "混合句拆分：事实部分 factual，未定义/范围推断部分 absence/meta，不得整句 factual/insufficient",
+      "Q30 few-shot：7 条（absence / 偏远运费 supported / meta / meta / 签收起算 supported / absence / advice）"
+    ],
+    "answer_correctness": [
+      "继承 v1.1.3（C 正文不变）"
+    ],
+    "answer_relevancy": [
+      "继承 v1.1.3（R 正文不变）"
+    ]
+  },
+  "activation_requirements": [
+    "人工审核通过 v1.1.4 设计",
+    "Q30 F 重跑 3 次均 0.4-1.0，且范围推断不再被标 factual",
+    "10 条闸门 v1.1.4 通过",
+    "40 条 v1.1.4 规模/回归完成；不是 40 条 Human Gold 验收",
+    "版本加载器显式选择 v1.1.4（默认仍 v1.0.0）"
+  ],
+  "open_issues": [
+    "Q30 F 已验证 3/3：1.0/1.0/1.0，2 scorable（偏远运费、签收起算）+ 5 non_factual；范围/地域推断归 meta/absence 生效；C=0.9、R=0.9",
+    "10 条闸门 v1.1.4：Q01/Q04/Q11 通过；Q17 F=0.8 停止（目标 0.9-1.0）",
+    "Q17 cl5“该规则与是否满 99 元无关，不因包邮资格而改变退货运费责任归属”被标 factual/insufficient；v1.0.0/v1.1.3 标 supported；属于规则关系/独立性推断",
+    "v1.1.3 的 10/30 结果全部作废，不能与 v1.1.4 混用",
+    "Q14 F=unavailable；C=0.9 本次 pass；历史 C 0.7/0.7/0.9 方差；不重复记 C miss",
+    "Q28 provisional F 0.8-1.0 已注册；F=0.857/重跑 0.875，PASS",
+    "Q10 evidence typo 字形规则留待后续评估",
+    "Q36 canonical 冲突口径未业务确认"
+  ],
+  "design_revision": "2026-11-17-v114",
+  "acceptance_matrix": "docs/repair/phase3e/prompt-v1.1.1-acceptance-matrix.json",
+  "fixtures": "docs/repair/phase3e/prompt-v1.1.1-fixtures.json",
+  "human_gold_coverage": {
+    "Q23": "human_gold",
+    "Q35": "human_gold",
+    "Q36": "human_gold",
+    "Q21#3": "human_gold_claim_only",
+    "Q11": "ai_draft_pending_human",
+    "Q29": "ai_draft_pending_human"
+  },
+  "implementation_status": "implemented_default_off",
+  "default_prompt_version": "v1.0.0"
+}

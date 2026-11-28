@@ -36,6 +36,8 @@ def test_all_task_modules_are_registered() -> None:
         "tasks.analyze_insights",
         "tasks.generate_report",
         "tasks.weekly_digest",
+        "tasks.rag_evaluation",
+        "tasks.recover_stale_rag_runs",
     }
     missing = expected - set(celery_app.tasks)
     assert not missing, f"未注册的任务：{sorted(missing)}"

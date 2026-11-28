@@ -1,0 +1,366 @@
+{
+  "case_id": "Q32",
+  "prompt_version": "v1.1.5",
+  "runs": [
+    {
+      "repeat": 1,
+      "status": "evaluated",
+      "score": 0.75,
+      "counts": {
+        "scorable_claim_count": 4,
+        "supported_claim_count": 3,
+        "insufficient_evidence_count": 1,
+        "non_factual_count": 3
+      },
+      "validation_errors": [],
+      "claims": [
+        {
+          "claim": "无法确认积分支持礼品兑换功能",
+          "supported": null,
+          "evidence": [],
+          "reason": "上下文未提及积分可用于兑换礼品",
+          "claim_id": "cl1",
+          "claim_type": "factual_claim",
+          "claim_subtype": "policy",
+          "support_status": "insufficient_evidence",
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_refs": []
+        },
+        {
+          "claim": "消费 1 元积 1 分，100 积分可抵扣 1 元",
+          "supported": null,
+          "evidence": [],
+          "reason": "C1 最短连续子串",
+          "claim_id": "cl2",
+          "claim_type": "factual_claim",
+          "claim_subtype": "policy",
+          "support_status": "supported",
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_refs": [
+            {
+              "context_id": "C1",
+              "quote": "消费 1 元积 1 分，100 积分可抵扣 1 元"
+            }
+          ]
+        },
+        {
+          "claim": "积分自获得之日起 12 个月内有效，逾期清零",
+          "supported": null,
+          "evidence": [],
+          "reason": "C1 最短连续子串",
+          "claim_id": "cl3",
+          "claim_type": "factual_claim",
+          "claim_subtype": "policy",
+          "support_status": "supported",
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_refs": [
+            {
+              "context_id": "C1",
+              "quote": "积分自获得之日起 12 个月内有效，逾期清零"
+            }
+          ]
+        },
+        {
+          "claim": "积分不可转让、不可提现，仅限本账户使用",
+          "supported": null,
+          "evidence": [],
+          "reason": "C1 最短连续子串",
+          "claim_id": "cl4",
+          "claim_type": "factual_claim",
+          "claim_subtype": "policy",
+          "support_status": "supported",
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_refs": [
+            {
+              "context_id": "C1",
+              "quote": "积分不可转让、不可提现，仅限本账户使用"
+            }
+          ]
+        },
+        {
+          "claim": "文档未提及积分可用于兑换礼品，也未列出任何积分兑换商品、礼包或实物礼品的选项或规则",
+          "supported": null,
+          "evidence": [],
+          "reason": "absence",
+          "claim_id": "cl5",
+          "claim_type": "non_factual",
+          "claim_subtype": "absence",
+          "support_status": null,
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_refs": []
+        },
+        {
+          "claim": "是否开通此功能需参考平台其他未提供的政策（如会员中心页面、活动公告或积分商城说明）",
+          "supported": null,
+          "evidence": [],
+          "reason": "文档未明确写出的范围推断",
+          "claim_id": "cl6",
+          "claim_type": "non_factual",
+          "claim_subtype": "meta",
+          "support_status": null,
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_refs": []
+        },
+        {
+          "claim": "建议访问「我的账户 → 积分商城」或联系客服核实最新积分权益",
+          "supported": null,
+          "evidence": [],
+          "reason": "纯建议",
+          "claim_id": "cl7",
+          "claim_type": "non_factual",
+          "claim_subtype": "advice",
+          "support_status": null,
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_refs": []
+        }
+      ]
+    },
+    {
+      "repeat": 2,
+      "status": "evaluated",
+      "score": 0.75,
+      "counts": {
+        "scorable_claim_count": 4,
+        "supported_claim_count": 3,
+        "insufficient_evidence_count": 1,
+        "non_factual_count": 3
+      },
+      "validation_errors": [],
+      "claims": [
+        {
+          "claim": "无法确认积分支持礼品兑换功能",
+          "supported": null,
+          "evidence": [],
+          "reason": "文档未提及积分可用于兑换礼品",
+          "claim_id": "cl1",
+          "claim_type": "factual_claim",
+          "claim_subtype": "policy",
+          "support_status": "insufficient_evidence",
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_refs": []
+        },
+        {
+          "claim": "消费 1 元积 1 分，100 积分可抵扣 1 元",
+          "supported": null,
+          "evidence": [],
+          "reason": "C1 最短连续子串",
+          "claim_id": "cl2",
+          "claim_type": "factual_claim",
+          "claim_subtype": "policy",
+          "support_status": "supported",
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_refs": [
+            {
+              "context_id": "C1",
+              "quote": "消费 1 元积 1 分，100 积分可抵扣 1 元"
+            }
+          ]
+        },
+        {
+          "claim": "积分自获得之日起 12 个月内有效，逾期清零",
+          "supported": null,
+          "evidence": [],
+          "reason": "C1 最短连续子串",
+          "claim_id": "cl3",
+          "claim_type": "factual_claim",
+          "claim_subtype": "policy",
+          "support_status": "supported",
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_refs": [
+            {
+              "context_id": "C1",
+              "quote": "积分自获得之日起 12 个月内有效，逾期清零"
+            }
+          ]
+        },
+        {
+          "claim": "积分不可转让、不可提现，仅限本账户使用",
+          "supported": null,
+          "evidence": [],
+          "reason": "C1 最短连续子串",
+          "claim_id": "cl4",
+          "claim_type": "factual_claim",
+          "claim_subtype": "policy",
+          "support_status": "supported",
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_refs": [
+            {
+              "context_id": "C1",
+              "quote": "积分不可转让、不可提现，仅限本账户使用"
+            }
+          ]
+        },
+        {
+          "claim": "文档未提及积分可用于兑换礼品",
+          "supported": null,
+          "evidence": [],
+          "reason": "absence",
+          "claim_id": "cl5",
+          "claim_type": "non_factual",
+          "claim_subtype": "absence",
+          "support_status": null,
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_refs": []
+        },
+        {
+          "claim": "是否开通此功能需参考平台其他未提供的政策（如会员中心页面、活动公告或积分商城说明）",
+          "supported": null,
+          "evidence": [],
+          "reason": "文档未明确写出的范围推断",
+          "claim_id": "cl6",
+          "claim_type": "non_factual",
+          "claim_subtype": "meta",
+          "support_status": null,
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_refs": []
+        },
+        {
+          "claim": "建议访问「我的账户 → 积分商城」或联系客服核实最新积分权益",
+          "supported": null,
+          "evidence": [],
+          "reason": "纯建议",
+          "claim_id": "cl7",
+          "claim_type": "non_factual",
+          "claim_subtype": "advice",
+          "support_status": null,
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_refs": []
+        }
+      ]
+    },
+    {
+      "repeat": 3,
+      "status": "evaluated",
+      "score": 0.75,
+      "counts": {
+        "scorable_claim_count": 4,
+        "supported_claim_count": 3,
+        "insufficient_evidence_count": 1,
+        "non_factual_count": 3
+      },
+      "validation_errors": [],
+      "claims": [
+        {
+          "claim": "无法确认积分支持礼品兑换功能",
+          "supported": null,
+          "evidence": [],
+          "reason": "文档未提及积分可用于兑换礼品",
+          "claim_id": "cl1",
+          "claim_type": "factual_claim",
+          "claim_subtype": "policy",
+          "support_status": "insufficient_evidence",
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_refs": []
+        },
+        {
+          "claim": "消费 1 元积 1 分，100 积分可抵扣 1 元",
+          "supported": null,
+          "evidence": [],
+          "reason": "C1 最短连续子串",
+          "claim_id": "cl2",
+          "claim_type": "factual_claim",
+          "claim_subtype": "policy",
+          "support_status": "supported",
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_refs": [
+            {
+              "context_id": "C1",
+              "quote": "消费 1 元积 1 分，100 积分可抵扣 1 元"
+            }
+          ]
+        },
+        {
+          "claim": "积分自获得之日起 12 个月内有效，逾期清零",
+          "supported": null,
+          "evidence": [],
+          "reason": "C1 最短连续子串",
+          "claim_id": "cl3",
+          "claim_type": "factual_claim",
+          "claim_subtype": "policy",
+          "support_status": "supported",
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_refs": [
+            {
+              "context_id": "C1",
+              "quote": "积分自获得之日起 12 个月内有效，逾期清零"
+            }
+          ]
+        },
+        {
+          "claim": "积分不可转让、不可提现，仅限本账户使用",
+          "supported": null,
+          "evidence": [],
+          "reason": "C1 最短连续子串",
+          "claim_id": "cl4",
+          "claim_type": "factual_claim",
+          "claim_subtype": "policy",
+          "support_status": "supported",
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_refs": [
+            {
+              "context_id": "C1",
+              "quote": "积分不可转让、不可提现，仅限本账户使用"
+            }
+          ]
+        },
+        {
+          "claim": "文档未提及积分可用于兑换礼品，也未列出任何积分兑换商品、礼包或实物礼品的选项或规则",
+          "supported": null,
+          "evidence": [],
+          "reason": "absence",
+          "claim_id": "cl5",
+          "claim_type": "non_factual",
+          "claim_subtype": "absence",
+          "support_status": null,
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_refs": []
+        },
+        {
+          "claim": "是否开通此功能需参考平台其他未提供的政策（如会员中心页面、活动公告或积分商城说明）",
+          "supported": null,
+          "evidence": [],
+          "reason": "文档覆盖范围描述",
+          "claim_id": "cl6",
+          "claim_type": "non_factual",
+          "claim_subtype": "meta",
+          "support_status": null,
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_refs": []
+        },
+        {
+          "claim": "建议访问「我的账户 → 积分商城」或联系客服核实最新积分权益",
+          "supported": null,
+          "evidence": [],
+          "reason": "纯建议",
+          "claim_id": "cl7",
+          "claim_type": "non_factual",
+          "claim_subtype": "advice",
+          "support_status": null,
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_refs": []
+        }
+      ]
+    }
+  ]
+}

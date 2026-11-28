@@ -15,6 +15,7 @@ from sqlalchemy.orm import InstrumentedAttribute
 
 from app.core.ownership import assert_owner
 from app.core.pagination import PaginationParams
+from app.core.tenancy import apply_tenant_filter, require_tenant, tenant_id_for_write
 from app.repositories.pagination import paginate
 from app.core.exceptions import (
     DataSourceNotFoundError,
@@ -61,6 +62,7 @@ async def _get_or_404(session: AsyncSession, datasource_id: uuid.UUID, user: Use
     datasource = await session.get(DataSource, datasource_id)
     if datasource is None or datasource.deleted_at is not None:
         raise DataSourceNotFoundError(details={"datasource_id": str(datasource_id)})
+    require_tenant(datasource, user, DataSourceNotFoundError)
     assert_owner(datasource.user_id, user)
     return datasource
 
@@ -85,6 +87,7 @@ async def create(session: AsyncSession, *, user: User, data: DataSourceCreate) -
         raise DataSourceQuotaExceededError(details={"max_datasources": limit, "current": used})
 
     datasource = DataSource(
+        tenant_id=tenant_id_for_write(user),
         name=data.name,
         description=data.description,
         type=data.type,
@@ -98,7 +101,7 @@ async def create(session: AsyncSession, *, user: User, data: DataSourceCreate) -
     if data.init_seed_knowledge:
         from app.data.seed_knowledge import seed_knowledge
 
-        seeded = await seed_knowledge(session, datasource.id)
+        seeded = await seed_knowledge(session, datasource.id, tenant_id=datasource.tenant_id)
         if seeded:
             await session.refresh(datasource)
 
@@ -114,7 +117,8 @@ async def list_datasources(
     data_source_type: str | None = None,
 ) -> tuple[list[DataSource], Pagination]:
     stmt = select(DataSource).where(DataSource.deleted_at.is_(None))
-    if user.role != "admin":
+    stmt = apply_tenant_filter(stmt, DataSource, user)
+    if user.role != "platform_admin":
         stmt = stmt.where(DataSource.user_id == user.id)
     if status:
         stmt = stmt.where(DataSource.status == status)

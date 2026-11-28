@@ -49,12 +49,13 @@ def main() -> None:
             text("SELECT id FROM users WHERE email = :email"), {"email": DEMO_EMAIL}
         ).fetchone()
         if existing:
+            user_id = existing[0]
             print(f"已存在，跳过：{DEMO_EMAIL}")
         else:
-            conn.execute(
+            user_id = conn.execute(
                 text(
                     "INSERT INTO users (email, password_hash, name, role, is_active) "
-                    "VALUES (:email, :pwd, :name, :role, TRUE)"
+                    "VALUES (:email, :pwd, :name, :role, TRUE) RETURNING id"
                 ),
                 {
                     "email": DEMO_EMAIL,
@@ -62,7 +63,7 @@ def main() -> None:
                     "name": "演示管理员",
                     "role": "admin",
                 },
-            )
+            ).scalar_one()
             print(f"已创建演示用户：{DEMO_EMAIL} / {DEMO_PASSWORD}")
 
         ds_exists = conn.execute(
@@ -74,14 +75,15 @@ def main() -> None:
         else:
             conn.execute(
                 text(
-                    "INSERT INTO data_sources (name, type, description, status) "
-                    "VALUES (:name, :type, :desc, :status)"
+                    "INSERT INTO data_sources (name, type, description, status, user_id) "
+                    "VALUES (:name, :type, :desc, :status, :user_id)"
                 ),
                 {
                     "name": "演示数据源",
                     "type": "customer_service",
                     "desc": "seed_data.py 生成的演示数据源",
                     "status": "active",
+                    "user_id": user_id,
                 },
             )
             print("已创建演示数据源")

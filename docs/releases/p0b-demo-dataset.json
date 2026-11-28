@@ -1,0 +1,82 @@
+[
+  {
+    "item_key": "Q001",
+    "query": "退款多久到账？",
+    "gold_answer": "审核通过后 3-5 个工作日原路退回。",
+    "gold_evidence": [
+      {
+        "evidence_text": "退款将在审核通过后 3-5 个工作日内原路退回。",
+        "document_id": "doc-refund",
+        "chunk_id": "chunk-1",
+        "page_number": 1
+      }
+    ],
+    "category": "售后",
+    "difficulty": "easy",
+    "split": "test"
+  },
+  {
+    "item_key": "Q002",
+    "query": "多久发货？",
+    "gold_answer": "现货商品付款后 48 小时内发出。",
+    "gold_evidence": [
+      {
+        "evidence_text": "现货商品在付款后 48 小时内发出。",
+        "document_id": "doc-shipping",
+        "chunk_id": "chunk-1",
+        "page_number": 1
+      }
+    ],
+    "category": "物流",
+    "difficulty": "easy",
+    "split": "test"
+  },
+  {
+    "item_key": "Q003",
+    "query": "怎么开发票？",
+    "gold_answer": "发货后可在订单页申请电子发票。",
+    "gold_evidence": [
+      {
+        "evidence_text": "发货后可在订单页申请电子发票并发送至预留邮箱。",
+        "document_id": "doc-invoice",
+        "chunk_id": "chunk-1",
+        "page_number": 1
+      }
+    ],
+    "category": "发票",
+    "difficulty": "easy",
+    "split": "test"
+  },
+  {
+    "item_key": "Q004",
+    "query": "保修多久？",
+    "gold_answer": "整机保修一年。",
+    "gold_evidence": [
+      {
+        "evidence_text": "整机保修一年，主要部件按国家三包政策执行。",
+        "document_id": "doc-warranty",
+        "chunk_id": "chunk-1",
+        "page_number": 1
+      }
+    ],
+    "category": "售后",
+    "difficulty": "easy",
+    "split": "test"
+  },
+  {
+    "item_key": "Q005",
+    "query": "可以换货吗？",
+    "gold_answer": "签收后 7 天内可申请换货。",
+    "gold_evidence": [
+      {
+        "evidence_text": "签收后 7 天内商品保持完好可申请换货。",
+        "document_id": "doc-exchange",
+        "chunk_id": "chunk-1",
+        "page_number": 1
+      }
+    ],
+    "category": "售后",
+    "difficulty": "easy",
+    "split": "test"
+  }
+]

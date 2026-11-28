@@ -8,6 +8,7 @@ from app.models import Base, CleanedData, KnowledgeBase, LlmCall, PromptVersion,
 pytestmark = pytest.mark.unit
 
 EXPECTED_TABLES = {
+    "tenants",
     "users",
     "data_sources",
     "datasource_types",
@@ -26,6 +27,15 @@ EXPECTED_TABLES = {
     "version_rollback_logs",
     "llm_calls",
     "user_llm_credentials",
+    # RAG 评测数据集（迁移 019，Phase 1）
+    "qa_datasets",
+    "qa_dataset_versions",
+    "qa_dataset_items",
+    # RAG Trace（迁移 020，Phase 2）
+    "rag_traces",
+    # RAG 批量评测（迁移 021，Phase 3C）
+    "rag_evaluation_runs",
+    "rag_evaluation_results",
 }
 
 
@@ -35,13 +45,17 @@ def _table(name: str):
 
 def test_all_tables_registered() -> None:
     assert set(Base.metadata.tables) == EXPECTED_TABLES
-    assert len(Base.metadata.tables) == 18
+    assert len(Base.metadata.tables) == 25
 
 
 @pytest.mark.parametrize(
     ("table", "columns"),
     [
-        ("users", {"id", "email", "password_hash", "role", "quota", "usage", "deleted_at"}),
+        ("tenants", {"id", "name", "slug", "kind", "status", "created_at", "updated_at"}),
+        (
+            "users",
+            {"id", "tenant_id", "email", "password_hash", "role", "quota", "usage", "deleted_at"},
+        ),
         ("data_sources", {"id", "user_id", "type", "status", "workflow_status", "config"}),
         (
             "datasource_types",
@@ -60,6 +74,86 @@ def test_all_tables_registered() -> None:
         ("prompt_usage_logs", {"id", "prompt_version_id", "agent_name", "version", "cost"}),
         ("version_rollback_logs", {"id", "agent_name", "from_version", "to_version"}),
         ("llm_calls", {"id", "idempotency_key", "model", "total_cost", "status"}),
+        # RAG 评测数据集（迁移 019）
+        ("qa_datasets", {"id", "user_id", "name", "source_type", "created_at"}),
+        (
+            "qa_dataset_versions",
+            {"id", "dataset_id", "version", "status", "item_count", "checksum"},
+        ),
+        (
+            "qa_dataset_items",
+            {
+                "id",
+                "version_id",
+                "item_key",
+                "query",
+                "gold_answer",
+                "gold_evidence",
+                "split",
+                "metadata",
+            },
+        ),
+        (
+            "rag_traces",
+            {
+                "id",
+                "user_id",
+                "dataset_item_id",
+                "adapter",
+                "mode",
+                "context_source",
+                "retrieved_contexts",
+                "status",
+                "missing",
+            },
+        ),
+        # RAG 批量评测（迁移 021）
+        (
+            "rag_evaluation_runs",
+            {
+                "id",
+                "user_id",
+                "task_id",
+                "parent_run_id",
+                "attempt",
+                "retry_scope",
+                "dataset_version_id",
+                "dataset_checksum",
+                "execution_mode",
+                "adapter",
+                "retrieval_config",
+                "judge_config",
+                "config_snapshot",
+                "item_selection",
+                "total_items",
+                "completed_items",
+                "skipped_items",
+                "failed_items",
+                "status",
+                "aggregate",
+                "last_heartbeat_at",
+            },
+        ),
+        (
+            "rag_evaluation_results",
+            {
+                "id",
+                "run_id",
+                "dataset_item_id",
+                "trace_id",
+                "metric_name",
+                "metric_version",
+                "status",
+                "score",
+                "skipped_reason",
+                "details",
+                "judge_config",
+                "raw_output",
+                "raw_truncated",
+                "latency_ms",
+                "error_message",
+            },
+        ),
     ],
 )
 def test_required_columns_exist(table: str, columns: set[str]) -> None:
@@ -90,7 +184,7 @@ def test_cleaned_data_fk_cascades_on_delete() -> None:
 
 
 def test_audit_log_user_fk_sets_null() -> None:
-    fk = next(iter(_table("audit_logs").foreign_keys))
+    fk = next(item for item in _table("audit_logs").foreign_keys if item.parent.name == "user_id")
     assert fk.ondelete == "SET NULL"
 
 
@@ -150,3 +244,29 @@ def test_enum_check_constraints() -> None:
         "ck_tasks_task_type_valid",
         "ck_tasks_progress_range",
     } <= checks
+
+
+def test_tenant_columns_registered() -> None:
+    business_tables = [
+        "users",
+        "data_sources",
+        "raw_data",
+        "cleaned_data",
+        "analysis_results",
+        "knowledge_base",
+        "knowledge_gaps",
+        "tasks",
+        "reports",
+        "qa_datasets",
+        "qa_dataset_versions",
+        "qa_dataset_items",
+        "rag_traces",
+        "rag_evaluation_runs",
+        "rag_evaluation_results",
+    ]
+    for table in business_tables:
+        assert "tenant_id" in Base.metadata.tables[table].c, table
+        assert Base.metadata.tables[table].c.tenant_id.nullable is False, table
+    for table in ("audit_logs", "llm_calls"):
+        assert "tenant_id" in Base.metadata.tables[table].c, table
+        assert Base.metadata.tables[table].c.tenant_id.nullable is True, table

@@ -14,6 +14,7 @@ from typing import Any
 import factory
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.tenancy import DEFAULT_TENANT_ID
 from app.models import (
     AnalysisResult,
     CleanedData,
@@ -38,6 +39,7 @@ class UserFactory(factory.Factory):
         model = User
 
     id = factory.LazyFunction(_uuid)
+    tenant_id = DEFAULT_TENANT_ID
     email = factory.Sequence(lambda n: f"user{n}@example.com")
     password_hash = "$2b$12$0123456789012345678901234567890123456789012345678901"
     name = "Test User"
@@ -53,6 +55,7 @@ class DataSourceFactory(factory.Factory):
         model = DataSource
 
     id = factory.LazyFunction(_uuid)
+    tenant_id = DEFAULT_TENANT_ID
     user_id = factory.LazyFunction(_uuid)
     name = factory.Sequence(lambda n: f"datasource-{n}")
     description = "测试数据源"
@@ -68,6 +71,7 @@ class RawDataFactory(factory.Factory):
         model = RawData
 
     id = factory.LazyFunction(_uuid)
+    tenant_id = DEFAULT_TENANT_ID
     datasource_id = factory.LazyFunction(_uuid)
     raw_content = factory.LazyFunction(
         lambda: {"text": "客户: 你好\n客服: 您好", "format": "csv", "encoding": "utf-8"}
@@ -82,6 +86,7 @@ class CleanedDataFactory(factory.Factory):
         model = CleanedData
 
     id = factory.LazyFunction(_uuid)
+    tenant_id = DEFAULT_TENANT_ID
     datasource_id = factory.LazyFunction(_uuid)
     raw_data_id = factory.LazyFunction(_uuid)
     dialogue_id = factory.LazyFunction(_uuid)
@@ -99,6 +104,7 @@ class AnalysisResultFactory(factory.Factory):
         model = AnalysisResult
 
     id = factory.LazyFunction(_uuid)
+    tenant_id = DEFAULT_TENANT_ID
     datasource_id = factory.LazyFunction(_uuid)
     data_id = factory.LazyFunction(_uuid)
     analysis_type = "quality"
@@ -120,6 +126,7 @@ class KnowledgeBaseFactory(factory.Factory):
         model = KnowledgeBase
 
     id = factory.LazyFunction(_uuid)
+    tenant_id = DEFAULT_TENANT_ID
     datasource_id = factory.LazyFunction(_uuid)
     question = factory.Sequence(lambda n: f"常见问题 {n}")
     answer = "标准答案"
@@ -137,6 +144,7 @@ class TaskFactory(factory.Factory):
         model = Task
 
     id = factory.LazyFunction(_uuid)
+    tenant_id = DEFAULT_TENANT_ID
     task_type = "clean"
     task_name = "清洗任务"
     status = "pending"
@@ -156,11 +164,12 @@ async def persist_cleaned(
 
     未显式传 ``raw_data_id`` 时先建一条 raw_data 再引用，避免孤儿行触发外键错误。
     """
+    tenant_id = overrides.pop("tenant_id", DEFAULT_TENANT_ID)
     if "raw_data_id" not in overrides:
-        raw = RawDataFactory(datasource_id=datasource_id)
+        raw = RawDataFactory(datasource_id=datasource_id, tenant_id=tenant_id)
         await persist(session, raw)
         overrides["raw_data_id"] = raw.id
-    cleaned = CleanedDataFactory(datasource_id=datasource_id, **overrides)
+    cleaned = CleanedDataFactory(datasource_id=datasource_id, tenant_id=tenant_id, **overrides)
     await persist(session, cleaned)
     return cleaned
 

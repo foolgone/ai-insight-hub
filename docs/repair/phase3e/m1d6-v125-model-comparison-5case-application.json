@@ -1,0 +1,205 @@
+{
+  "meta": {
+    "name": "m1d6-v1.2.5-model-comparison-5case-application",
+    "status": "pending_approval",
+    "revision": "r1",
+    "date": "2026-11-24",
+    "scope": "model_comparison_diagnostic",
+    "case_count": 5,
+    "arms": 2,
+    "runs_per_case_per_arm": 1,
+    "hg_repeats": false,
+    "no_repeats": true,
+    "metric": "faithfulness",
+    "diagnostic_only": true,
+    "counts_toward_10": false,
+    "judge_run": false,
+    "runtime_activated": false,
+    "prompt_version": "v1.2.5",
+    "prompt_status": "frozen",
+    "prompt_active": false,
+    "default_prompt_version": "v1.0.0",
+    "freeze_commit": "e9e5f8e",
+    "agent_commit": "318b302",
+    "test_fix_commit": "e690b00",
+    "implementation_report_commit": "e22eb04",
+    "design_commit": "c09cf15",
+    "manifest_sha256": "2e4ef8bf93f4a6f39a96eeee49e75b4939ca8e3242e12f3028c9b3d8733930c1",
+    "validation_sha256": "20ab5ca34ad408ed2fc90b6f77b7bab04c39ea02ed5539300c9a3c027ab81998",
+    "prompt_sha256": {
+      "faithfulness.txt": "9c80d4d5cd60ea7c95ad02c71f97ab566cc2fd82e2a2230124ee4b21247b9d8e",
+      "answer_correctness.txt": "ca489fcf39691e9a71aec004a01938fb6c70b7b17da3c55fb0ada066e1d24968",
+      "answer_relevancy.txt": "f3efe431683ed26ba0a7338e6e2b5841d65d42dadde5cac30b8340e2ca95dfdc"
+    },
+    "patch_schema_sha256": "bfc71529c4ef057dec7256c35ad31341cc31924f5a2784469721323f74547f33",
+    "patch_example_sha256": "43f48a420ead52cb21f0472a89040de4ef0480cebbe476a104a0edcbc0d62a6d",
+    "quote_validator_sha256": "153ab4a6f203ca0398133a2cc2ca6fda834f7670afa90651c66cfa44b92c722a",
+    "leakage_audit_sha256": "28937947e07d2169b6336b2762a51f958518f0f27d18ae1867b97ef6a715a904",
+    "leakage_findings": 0,
+    "fixture_file": "docs/repair/phase3e/pilot-10-v1.1.5-gate.json",
+    "fixture_sha256": "dc7be14b6026b579c15dea1a13d498b7479e14081aa17419ef2bfa525ae9be70",
+    "target_file": "docs/repair/phase3e/pilot-40-targets-v1.2.0-v1.0.2.json",
+    "target_sha256": "3ee15dfca66fe13f0a45fda84ecf2612483f2de107ad079b196a6bd6344d5846",
+    "target_version": "v1.0.2",
+    "target_status": "active",
+    "target_draft": "docs/repair/phase3e/pilot-40-targets-v1.2.0-v1.0.3-draft.json",
+    "target_draft_used": false,
+    "labels_file": "docs/repair/phase3e/pilot-40-final-labels.json",
+    "labels_sha256": "f139623fef80b55716fce0c773e776d284a5167683eb91559b23e49cabd000eb",
+    "preflight_file": "docs/repair/phase3e/m1d6-v125-model-comparison-5case-preflight.json",
+    "schema_version": "rag_judge_schema_v3",
+    "rubric_version": "v1.2.0",
+    "metric_version": "v3",
+    "ledger_file": "docs/repair/phase3e/m1d6-v125-model-comparison-5case-ledger.jsonl",
+    "ledger_initial_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "ledger_policy": "append-only started/finished at LLM boundary; primary/patch/repair/retry all counted; started without finished => uncertain_call=true; budget counts started"
+  },
+  "arms": [
+    {
+      "arm_id": "A1",
+      "model": "qwen-max",
+      "provider": "dashscope",
+      "enable_thinking": null,
+      "role": "baseline_arm",
+      "why": "历史 baseline 模型；本次在同一 5 cases 上重跑，作为同条件对照。"
+    },
+    {
+      "arm_id": "A2",
+      "model": "qwen3.8-flash",
+      "provider": "dashscope",
+      "enable_thinking": false,
+      "role": "candidate_arm",
+      "why": "用户指定的 flash 模型；关闭 thinking 以适配 8192 输出预算（thinking 开启会截断）。"
+    }
+  ],
+  "baseline": {
+    "mode": "within_run_arm",
+    "note": "A1 qwen-max 在同 case 上重跑，作为同条件基线；历史 failure-mode 结果仅作参考，不直接混用。",
+    "historical_reference": {
+      "file": "docs/repair/phase3e/m1d6-v125-failure-mode-results.json",
+      "sha256": "309fa9b8306174f9f74fe7968a9aa1bc70109af140c7a465a6a52f5dc3294b50",
+      "qwen_max_5cases": {
+        "Q23": { "status": "invalid", "invalid_class": "initial_schema_invalid" },
+        "Q35": { "status": "invalid", "invalid_class": "initial_schema_invalid" },
+        "Q36": { "status": "invalid", "invalid_class": "patch_null" },
+        "Q17": { "status": "evaluated", "score": 0.6 },
+        "Q21": { "status": "evaluated", "score": 0.8 }
+      }
+    }
+  },
+  "run_config": {
+    "execution_mode": "judge_only_fixture_model_comparison",
+    "execution_vehicle": "rag_judge_service.judge_trace(session=None, trace=synthetic RagTrace, item=synthetic item, prompt_version='v1.2.5'); per-arm client wrapper",
+    "service_path": {
+      "entrypoint": "rag_judge_service.judge_trace",
+      "session": null,
+      "creates_run": false,
+      "writes_db": false,
+      "uses_c3_scoring": true,
+      "driver_reimplements_scoring": false
+    },
+    "no_rag_call": true,
+    "no_platform_run": true,
+    "no_db_write": true,
+    "no_weknora_call": true,
+    "fixture": {
+      "file": "docs/repair/phase3e/pilot-10-v1.1.5-gate.json",
+      "sha256": "dc7be14b6026b579c15dea1a13d498b7479e14081aa17419ef2bfa525ae9be70",
+      "case_ids": ["Q23", "Q35", "Q36", "Q17", "Q21"],
+      "case_count": 5,
+      "fixed_inputs": true
+    },
+    "runs_per_case": 1,
+    "run_order": "A1 qwen-max for all 5 cases, then A2 qwen3.8-flash for all 5 cases",
+    "temperature": 0.0,
+    "max_tokens": 8192,
+    "response_format": { "type": "json_object" },
+    "agent_timeout_seconds": 300,
+    "max_retries": 0,
+    "encoding_rule": "UTF-8 file I/O only; never pipe Chinese payloads through PowerShell stdin"
+  },
+  "cases": [
+    { "case_id": "Q23", "group": "human_gold", "category": "constraint", "focus": "factual+absence / patch" },
+    { "case_id": "Q35", "group": "provisional", "category": "multi", "focus": "factual+absence / derived" },
+    { "case_id": "Q36", "group": "provisional", "category": "constraint", "focus": "patch_null" },
+    { "case_id": "Q17", "group": "human_gold", "category": "multi", "focus": "claim 分解 / target miss" },
+    { "case_id": "Q21", "group": "provisional", "category": "constraint", "focus": "豁免 claim / cl3 补集推断" }
+  ],
+  "budget": {
+    "primary_judge_calls": 10,
+    "primary_breakdown": "5 cases × 2 arms × 1 run",
+    "patch_reserve": 10,
+    "retry_reserve": 3,
+    "max_judge_calls": 23,
+    "estimated_cny_upper_bound": 0.42,
+    "ceiling_cny": 0.6,
+    "pricing_basis": "qwen-max CNY 表（2.4 / 9.6 每百万）作为两 arm 上界代理",
+    "count_rule": "count every LLM chat call at the LLM boundary; stop before a call that would exceed 23 calls or CNY 0.60"
+  },
+  "diagnostic_policy": {
+    "continue_on_invalid": true,
+    "hard_stops": [
+      "budget_ceiling",
+      "credential_failure",
+      "fingerprint_mismatch",
+      "ledger_integrity",
+      "preflight_failure",
+      "unprocessed_case"
+    ],
+    "no_pass": true,
+    "no_retry_until_pass": true,
+    "no_target_change": true,
+    "no_hg_repeats": true,
+    "no_prompt_change": true,
+    "invalid_classification": [
+      "patch_null",
+      "initial_schema_invalid",
+      "patch_refusal",
+      "semantic_support",
+      "quote_continuity",
+      "output_truncated",
+      "other"
+    ]
+  },
+  "report_requirements": [
+    "每 arm × case 的 F status / score / target hit（target 用 active v1.0.2）",
+    "invalid 分类（含 output_truncated）与计数",
+    "claim 分解：claim_count、supported、unsupported、insufficient、non_factual、derived",
+    "Q23/Q35 的 factual+absence 是否复现",
+    "Q36 的 patch_null 是否复现",
+    "Q17/Q21 在 cl3 修正口径下的 F（只观察，不改 target）",
+    "两 arm 的差异：invalid 数、F、claim 粒度、patch 行为",
+    "finish_reason、reasoning_tokens、latency",
+    "token 用量与 CNY 上界成本",
+    "ledger SHA / calls / cost / uncertain",
+    "明确 diagnostic_only、不计入 10 条、不写 PASS、不改 target"
+  ],
+  "decision_guide": [
+    {
+      "observed": "flash 的 invalid 明显少于 qwen-max，且 Q23/Q35/Q36 转 valid",
+      "reading": "模型能力/世代是主因；可提模型切换提案 + 重新基线"
+    },
+    {
+      "observed": "两 arm invalid 数接近",
+      "reading": "invalid 不是模型单方面问题；进 contract harness / 规则评估"
+    },
+    {
+      "observed": "flash 在 Q17/Q21 的 F 低于 qwen-max",
+      "reading": "模型切换有代价；需在选定模型上校准 target，不能同时改 target 和换模型"
+    },
+    {
+      "observed": "两 arm 仍复现 patch_null 或 factual+absence",
+      "reading": "contract/harness 问题为主；停止 prompt-only"
+    }
+  ],
+  "boundaries": [
+    "5 cases × 2 arms × F only × 1 次；不做 C/R；不做 HG repeats",
+    "diagnostic_only=true；不计入 10 条；不写 PASS；不替代正式验收",
+    "target 使用 active v1.0.2；v1.0.3 draft 不参与评分",
+    "不创建 RagEvaluationRun、不写 DB、不调 WeKnora/RAG adapter",
+    "不激活 v1.2.5；默认仍 v1.0.0",
+    "不修改 v1.2.5 frozen 资产/Prompt/Agent/Service/validator/patch schema/example/fixture",
+    "不启动 flash 全量重新基线；不做正式 10/40；不出 v1.2.6",
+    "M1-D-6 仍 blocked；M1-C/M1-D 未 accepted"
+  ]
+}

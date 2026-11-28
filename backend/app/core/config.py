@@ -120,6 +120,12 @@ class Settings(BaseSettings):
     JWT_ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
     JWT_REFRESH_TOKEN_EXPIRE_DAYS: int = 7
 
+    # ---------------- 租户隔离（M4-A PR-2） ----------------
+    # 默认关闭：保持单租户行为；staging 在 PR-3 删除 server_default 后才可开启。
+    TENANT_ENFORCEMENT_ENABLED: bool = False
+    # 旧 access token（无 tenant_id claim）兼容期，按 iat 计算。
+    TENANT_CLAIM_GRACE_DAYS: int = 7
+
     # ---------------- 认证 Cookie（T4：refresh token 只放 HttpOnly Cookie） ----------------
     AUTH_COOKIE_NAME: str = "aiih_refresh"
     AUTH_COOKIE_PATH: str = "/api/v1/auth"
@@ -201,6 +207,26 @@ class Settings(BaseSettings):
     SEED_DEMO_PASSWORD: str = "demo123"
     # demo 账号邮箱：禁止改密/删除，避免演示环境被破坏（P1-4）
     DEMO_ACCOUNT_EMAIL: str = "demo@example.com"
+
+    # ---------------- RAG 评测：外部 RAG 接入（Phase 2） ----------------
+    # mock=本地确定性适配器（测试/演示）；weknora=外部 WeKnora 服务
+    RAG_ADAPTER: str = "mock"
+    RAG_TIMEOUT_SECONDS: float = 60.0
+    RAG_MAX_RETRIES: int = 3
+    # Judge 输出含 claim 级细节，推理模型还会消耗 reasoning token；4096 容易截断
+    RAG_JUDGE_MAX_TOKENS: int = 8192
+    # Judge Prompt 版本：默认 v1.0.0；v1.1.1 必须显式设置才加载（目录存在不等于激活）
+    RAG_JUDGE_PROMPT_VERSION: str = "v1.0.0"
+    # 批量评测：单 Run 条目上限 / 时间预算（秒） / stale 判定（秒）
+    RAG_EVAL_MAX_ITEMS: int = 200
+    RAG_EVAL_SOFT_BUDGET_SECONDS: int = 1500
+    RAG_EVAL_STALE_SECONDS: int = 900
+    # WeKnora 连接信息：只从环境变量注入，**禁止**写入代码或提交仓库
+    WEKNORA_BASE_URL: str = ""
+    WEKNORA_API_KEY: str = ""
+    WEKNORA_AGENT_ID: str = ""
+    WEKNORA_KB_ID: str = ""
+    WEKNORA_TENANT_ID: str = ""
 
 
 @lru_cache

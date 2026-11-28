@@ -15,8 +15,8 @@ if TYPE_CHECKING:
 
 
 def assert_owner(resource_user_id: uuid.UUID | None, current_user: User) -> None:
-    """校验资源归属：admin 全通，其余必须本人（越权 → 403）。"""
-    if current_user.role == "admin":
+    """校验资源归属：platform_admin 全通，其余必须本人（越权 → 403）。"""
+    if current_user.role == "platform_admin":
         return
     if resource_user_id is None or resource_user_id != current_user.id:
         raise PermissionDeniedError("Access to another user's resource is forbidden")

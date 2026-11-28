@@ -1,0 +1,187 @@
+{
+  "case_id": "Q23",
+  "metric": "faithfulness",
+  "prompt_version": "v1.1.1",
+  "model": "qwen-max",
+  "temperature": 0.0,
+  "max_tokens": 8192,
+  "prompt_sha256": "3519fd3b1bbbab9b117abd04f69304609146c2d2a05c39699483dea1740eda19",
+  "status": "evaluated",
+  "score": 0.5,
+  "skipped_reason": null,
+  "error": null,
+  "judge_config": {
+    "agent": "rag_judge_faithfulness",
+    "model": "qwen-max",
+    "temperature": 0.0,
+    "max_tokens": 8192,
+    "prompt_version": "v1.1.1",
+    "resolved_prompt_version": "v1.1.1",
+    "prompt_sha256": "3519fd3b1bbbab9b117abd04f69304609146c2d2a05c39699483dea1740eda19",
+    "schema_version": "rag_judge_schema_v2",
+    "rubric_version": "v1.1.1",
+    "metric_version": "v2"
+  },
+  "token_usage": {
+    "input": 4881,
+    "output": 860
+  },
+  "scorable_claim_count": 6,
+  "supported_claim_count": 3,
+  "unsupported_claim_count": 1,
+  "insufficient_evidence_count": 2,
+  "non_factual_count": 2,
+  "contradiction_count": 1,
+  "document_conflict_count": 0,
+  "validation_errors": [],
+  "evidence_validation": [
+    {
+      "claim_id": "cl2",
+      "context_id": "C1",
+      "quote": "质量问题需在签收后 24 小时内拍照反馈",
+      "ok": true,
+      "error": null
+    },
+    {
+      "claim_id": "cl3",
+      "context_id": "C1",
+      "quote": "生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。",
+      "ok": true,
+      "error": null
+    },
+    {
+      "claim_id": "cl5",
+      "context_id": "C1",
+      "quote": "质量问题需在签收后 24 小时内拍照反馈。",
+      "ok": true,
+      "error": null
+    }
+  ],
+  "claims": [
+    {
+      "claim": "可以按政策反馈",
+      "supported": null,
+      "evidence": [],
+      "reason": "首句结论与后文/金标矛盾",
+      "claim_id": "cl1",
+      "claim_type": "factual_claim",
+      "claim_subtype": "policy",
+      "support_status": "unsupported",
+      "is_contradictory": true,
+      "contradiction_with": [
+        "cl2"
+      ],
+      "evidence_refs": []
+    },
+    {
+      "claim": "超过 24 小时反馈不符合受理条件",
+      "supported": null,
+      "evidence": [],
+      "reason": "C1 连续原文",
+      "claim_id": "cl2",
+      "claim_type": "factual_claim",
+      "claim_subtype": "policy",
+      "support_status": "supported",
+      "is_contradictory": false,
+      "contradiction_with": [],
+      "evidence_refs": [
+        {
+          "context_id": "C1",
+          "quote": "质量问题需在签收后 24 小时内拍照反馈"
+        }
+      ]
+    },
+    {
+      "claim": "生鲜食品质量问题需在签收后 24 小时内拍照反馈",
+      "supported": null,
+      "evidence": [],
+      "reason": "C1 整句原文",
+      "claim_id": "cl3",
+      "claim_type": "factual_claim",
+      "claim_subtype": "policy",
+      "support_status": "supported",
+      "is_contradictory": false,
+      "contradiction_with": [],
+      "evidence_refs": [
+        {
+          "context_id": "C1",
+          "quote": "生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。"
+        }
+      ]
+    },
+    {
+      "claim": "24 小时起算点为签收完成时间（非签收日零点）",
+      "supported": null,
+      "evidence": [],
+      "reason": "上下文未说明起算点",
+      "claim_id": "cl4",
+      "claim_type": "factual_claim",
+      "claim_subtype": "policy",
+      "support_status": "insufficient_evidence",
+      "is_contradictory": false,
+      "contradiction_with": [],
+      "evidence_refs": []
+    },
+    {
+      "claim": "该时限是硬性要求",
+      "supported": null,
+      "evidence": [],
+      "reason": "C1 连续原文",
+      "claim_id": "cl5",
+      "claim_type": "factual_claim",
+      "claim_subtype": "policy",
+      "support_status": "supported",
+      "is_contradictory": false,
+      "contradiction_with": [],
+      "evidence_refs": [
+        {
+          "context_id": "C1",
+          "quote": "质量问题需在签收后 24 小时内拍照反馈。"
+        }
+      ]
+    },
+    {
+      "claim": "需保留问题实物及包装证据",
+      "supported": null,
+      "evidence": [],
+      "reason": "规范性要求，但上下文未写",
+      "claim_id": "cl6",
+      "claim_type": "factual_claim",
+      "claim_subtype": "policy",
+      "support_status": "insufficient_evidence",
+      "is_contradictory": false,
+      "contradiction_with": [],
+      "evidence_refs": []
+    },
+    {
+      "claim": "文档未提及例外/宽限期",
+      "supported": null,
+      "evidence": [],
+      "reason": "absence",
+      "claim_id": "cl7",
+      "claim_type": "non_factual",
+      "claim_subtype": "absence",
+      "support_status": null,
+      "is_contradictory": false,
+      "contradiction_with": [],
+      "evidence_refs": []
+    },
+    {
+      "claim": "建议联系客服/提交带时间水印照片",
+      "supported": null,
+      "evidence": [],
+      "reason": "纯建议",
+      "claim_id": "cl8",
+      "claim_type": "non_factual",
+      "claim_subtype": "advice",
+      "support_status": null,
+      "is_contradictory": false,
+      "contradiction_with": [],
+      "evidence_refs": []
+    }
+  ],
+  "raw_output": "{\n  \"claims\": [\n    {\n      \"claim_id\": \"cl1\",\n      \"claim\": \"可以按政策反馈\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"unsupported\",\n      \"is_contradictory\": true,\n      \"contradiction_with\": [\"cl2\"],\n      \"evidence_refs\": [],\n      \"reason\": \"首句结论与后文/金标矛盾\"\n    },\n    {\n      \"claim_id\": \"cl2\",\n      \"claim\": \"超过 24 小时反馈不符合受理条件\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"质量问题需在签收后 24 小时内拍照反馈\"}\n      ],\n      \"reason\": \"C1 连续原文\"\n    },\n    {\n      \"claim_id\": \"cl3\",\n      \"claim\": \"生鲜食品质量问题需在签收后 24 小时内拍照反馈\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。\"}\n      ],\n      \"reason\": \"C1 整句原文\"\n    },\n    {\n      \"claim_id\": \"cl4\",\n      \"claim\": \"24 小时起算点为签收完成时间（非签收日零点）\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"insufficient_evidence\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [],\n      \"reason\": \"上下文未说明起算点\"\n    },\n    {\n      \"claim_id\": \"cl5\",\n      \"claim\": \"该时限是硬性要求\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"质量问题需在签收后 24 小时内拍照反馈。\"}\n      ],\n      \"reason\": \"C1 连续原文\"\n    },\n    {\n      \"claim_id\": \"cl6\",\n      \"claim\": \"需保留问题实物及包装证据\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"insufficient_evidence\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [],\n      \"reason\": \"规范性要求，但上下文未写\"\n    },\n    {\n      \"claim_id\": \"cl7\",\n      \"claim\": \"文档未提及例外/宽限期\",\n      \"claim_type\": \"non_factual\",\n      \"claim_subtype\": \"absence\",\n      \"support_status\": null,\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [],\n      \"reason\": \"absence\"\n    },\n    {\n      \"claim_id\": \"cl8\",\n      \"claim\": \"建议联系客服/提交带时间水印照片\",\n      \"claim_type\": \"non_factual\",\n      \"claim_subtype\": \"advice\",\n      \"support_status\": null,\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [],\n      \"reason\": \"纯建议\"\n    }\n  ],\n  \"reason\": \"\"\n}",
+  "original_raw_output": null,
+  "evidence_count": 3,
+  "evidence_ok": 3
+}

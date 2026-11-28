@@ -1,0 +1,2653 @@
+{
+ "meta": {
+  "name": "m1d6-v1.2.5-c-single-case-results",
+  "status": "collected",
+  "diagnostic_only": true,
+  "counts_toward_10": false,
+  "pass_written": false,
+  "date": "2026-11-23",
+  "application_sha256": "f53dd12eb9115a0688b500929620294831f338ae5841df359378a7a511be2975",
+  "prompt_version": "v1.2.5",
+  "prompt_status": "frozen",
+  "prompt_active": false,
+  "rubric_version": "v1.2.0",
+  "schema_version": "rag_judge_schema_v3",
+  "metric_version": "v3",
+  "default_prompt_version": "v1.0.0",
+  "manifest_sha256": "2e4ef8bf93f4a6f39a96eeee49e75b4939ca8e3242e12f3028c9b3d8733930c1",
+  "validation_sha256": "20ab5ca34ad408ed2fc90b6f77b7bab04c39ea02ed5539300c9a3c027ab81998",
+  "leakage_audit_sha256": "28937947e07d2169b6336b2762a51f958518f0f27d18ae1867b97ef6a715a904",
+  "leakage_findings": 0,
+  "fixture_sha256": "dc7be14b6026b579c15dea1a13d498b7479e14081aa17419ef2bfa525ae9be70",
+  "target_sha256": "3ee15dfca66fe13f0a45fda84ecf2612483f2de107ad079b196a6bd6344d5846",
+  "labels_sha256": "f139623fef80b55716fce0c773e776d284a5167683eb91559b23e49cabd000eb",
+  "patch_schema_sha256": "bfc71529c4ef057dec7256c35ad31341cc31924f5a2784469721323f74547f33",
+  "patch_example_sha256": "43f48a420ead52cb21f0472a89040de4ef0480cebbe476a104a0edcbc0d62a6d",
+  "quote_validator_sha256": "153ab4a6f203ca0398133a2cc2ca6fda834f7670afa90651c66cfa44b92c722a",
+  "freeze_commit": "e9e5f8e",
+  "agent_commit": "318b302",
+  "test_fix_commit": "e690b00",
+  "implementation_report_commit": "e22eb04",
+  "design_commit": "c09cf15",
+  "git_head": "6fd47d3483d287c4a66475087704262df71fad1a",
+  "created_run": false,
+  "wrote_db": false,
+  "runtime_activated": false,
+  "weknora_called": false,
+  "rag_adapter_called": false,
+  "ran_10": false,
+  "ran_40": false,
+  "stop_triggered": false,
+  "stop_reason": null,
+  "stop_codes": [],
+  "ledger_sha256": "69c2a5a40e1c724d676b08c819e4d7125dd1d86838ec8f8f83f826964ee08ad2",
+  "ledger_total_attempts": 15,
+  "ledger_finished_calls": 15,
+  "ledger_uncertain_calls": 0,
+  "total_judge_calls": 15,
+  "cost_cny": 0.183756,
+  "ceiling_cny": 0.4,
+  "max_judge_calls": 18,
+  "budget_error": null,
+  "q23_f_median": null,
+  "q23_f_min": null,
+  "q23_f_max": null,
+  "q23_f_valid_runs": 0,
+  "q23_f_invalid_runs": [
+   "Q23-F1",
+   "Q23-F2",
+   "Q23-F3"
+  ],
+  "q23_f_target_hit_count": 0,
+  "q23_f_target_hit_rate": null,
+  "q23_f_median_in_target": false,
+  "q23_f_insufficient_valid_runs": true,
+  "diagnostic_verdict": "failed_no_valid_runs",
+  "diagnostic_verdict_reason": "Q23 F 0/3 valid; Q21/Q11 F invalid"
+ },
+ "preflight": {
+  "application_sha256": "f53dd12eb9115a0688b500929620294831f338ae5841df359378a7a511be2975",
+  "fixture_sha256": "dc7be14b6026b579c15dea1a13d498b7479e14081aa17419ef2bfa525ae9be70",
+  "target_sha256": "3ee15dfca66fe13f0a45fda84ecf2612483f2de107ad079b196a6bd6344d5846",
+  "labels_sha256": "f139623fef80b55716fce0c773e776d284a5167683eb91559b23e49cabd000eb",
+  "manifest_sha256": "2e4ef8bf93f4a6f39a96eeee49e75b4939ca8e3242e12f3028c9b3d8733930c1",
+  "validation_sha256": "20ab5ca34ad408ed2fc90b6f77b7bab04c39ea02ed5539300c9a3c027ab81998",
+  "leakage_audit_sha256": "28937947e07d2169b6336b2762a51f958518f0f27d18ae1867b97ef6a715a904",
+  "leakage_findings": 0,
+  "prompt_sha256": {
+   "faithfulness.txt": "9c80d4d5cd60ea7c95ad02c71f97ab566cc2fd82e2a2230124ee4b21247b9d8e",
+   "answer_correctness.txt": "ca489fcf39691e9a71aec004a01938fb6c70b7b17da3c55fb0ada066e1d24968",
+   "answer_relevancy.txt": "f3efe431683ed26ba0a7338e6e2b5841d65d42dadde5cac30b8340e2ca95dfdc"
+  },
+  "patch_schema_sha256": "bfc71529c4ef057dec7256c35ad31341cc31924f5a2784469721323f74547f33",
+  "patch_example_sha256": "43f48a420ead52cb21f0472a89040de4ef0480cebbe476a104a0edcbc0d62a6d",
+  "quote_validator_sha256": "153ab4a6f203ca0398133a2cc2ca6fda834f7670afa90651c66cfa44b92c722a",
+  "ledger_file": "docs\\repair\\phase3e\\m1d6-v125-ledger.jsonl",
+  "ledger_initial_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "ledger_empty": true,
+  "budget_self_test": {
+   "ok": true,
+   "errors": [],
+   "attempts": 18,
+   "finished_calls": 18,
+   "uncertain_calls": 0,
+   "nineteenth_rejected": true,
+   "max_judge_calls": 18,
+   "ceiling_cny": 0.4
+  },
+  "git_head": "6fd47d3483d287c4a66475087704262df71fad1a",
+  "freeze_commit": "e9e5f8e",
+  "agent_commit": "318b302",
+  "test_fix_commit": "e690b00",
+  "implementation_report_commit": "e22eb04",
+  "design_commit": "c09cf15",
+  "frozen_assets_unchanged_since_freeze": true,
+  "agent_unchanged_since_agent_commit": true,
+  "call_matrix": {
+   "segments": [
+    {
+     "segment": "Q23 F x 3",
+     "primary": 3,
+     "patch": 3
+    },
+    {
+     "segment": "Q23 C / R",
+     "primary": 2,
+     "patch": 0
+    },
+    {
+     "segment": "Q21",
+     "primary": 3,
+     "patch": 1
+    },
+    {
+     "segment": "Q11",
+     "primary": 3,
+     "patch": 1
+    }
+   ],
+   "primary": 11,
+   "patch": 5,
+   "shared_reserve": 2,
+   "max_judge_calls": 18,
+   "ceiling_cny": 0.4
+  },
+  "errors": []
+ },
+ "call_matrix": {
+  "segments": [
+   {
+    "segment": "Q23 F x 3",
+    "primary": 3,
+    "patch": 3
+   },
+   {
+    "segment": "Q23 C / R",
+    "primary": 2,
+    "patch": 0
+   },
+   {
+    "segment": "Q21",
+    "primary": 3,
+    "patch": 1
+   },
+   {
+    "segment": "Q11",
+    "primary": 3,
+    "patch": 1
+   }
+  ],
+  "primary": 11,
+  "patch": 5,
+  "shared_reserve": 2,
+  "max_judge_calls": 18,
+  "ceiling_cny": 0.4
+ },
+ "effective_prompts": [
+  {
+   "run_id": "Q23-F1",
+   "metric": "faithfulness",
+   "prompt_version": "v1.2.5",
+   "prompt_sha256": "9c80d4d5cd60ea7c95ad02c71f97ab566cc2fd82e2a2230124ee4b21247b9d8e",
+   "expected_prompt_sha256": "9c80d4d5cd60ea7c95ad02c71f97ab566cc2fd82e2a2230124ee4b21247b9d8e"
+  },
+  {
+   "run_id": "Q23-F2",
+   "metric": "faithfulness",
+   "prompt_version": "v1.2.5",
+   "prompt_sha256": "9c80d4d5cd60ea7c95ad02c71f97ab566cc2fd82e2a2230124ee4b21247b9d8e",
+   "expected_prompt_sha256": "9c80d4d5cd60ea7c95ad02c71f97ab566cc2fd82e2a2230124ee4b21247b9d8e"
+  },
+  {
+   "run_id": "Q23-F3",
+   "metric": "faithfulness",
+   "prompt_version": "v1.2.5",
+   "prompt_sha256": "9c80d4d5cd60ea7c95ad02c71f97ab566cc2fd82e2a2230124ee4b21247b9d8e",
+   "expected_prompt_sha256": "9c80d4d5cd60ea7c95ad02c71f97ab566cc2fd82e2a2230124ee4b21247b9d8e"
+  },
+  {
+   "run_id": "Q23-CR",
+   "metric": "answer_correctness",
+   "prompt_version": "v1.2.5",
+   "prompt_sha256": "ca489fcf39691e9a71aec004a01938fb6c70b7b17da3c55fb0ada066e1d24968",
+   "expected_prompt_sha256": "ca489fcf39691e9a71aec004a01938fb6c70b7b17da3c55fb0ada066e1d24968"
+  },
+  {
+   "run_id": "Q23-CR",
+   "metric": "answer_relevancy",
+   "prompt_version": "v1.2.5",
+   "prompt_sha256": "f3efe431683ed26ba0a7338e6e2b5841d65d42dadde5cac30b8340e2ca95dfdc",
+   "expected_prompt_sha256": "f3efe431683ed26ba0a7338e6e2b5841d65d42dadde5cac30b8340e2ca95dfdc"
+  },
+  {
+   "run_id": "Q21",
+   "metric": "faithfulness",
+   "prompt_version": "v1.2.5",
+   "prompt_sha256": "9c80d4d5cd60ea7c95ad02c71f97ab566cc2fd82e2a2230124ee4b21247b9d8e",
+   "expected_prompt_sha256": "9c80d4d5cd60ea7c95ad02c71f97ab566cc2fd82e2a2230124ee4b21247b9d8e"
+  },
+  {
+   "run_id": "Q21",
+   "metric": "answer_correctness",
+   "prompt_version": "v1.2.5",
+   "prompt_sha256": "ca489fcf39691e9a71aec004a01938fb6c70b7b17da3c55fb0ada066e1d24968",
+   "expected_prompt_sha256": "ca489fcf39691e9a71aec004a01938fb6c70b7b17da3c55fb0ada066e1d24968"
+  },
+  {
+   "run_id": "Q21",
+   "metric": "answer_relevancy",
+   "prompt_version": "v1.2.5",
+   "prompt_sha256": "f3efe431683ed26ba0a7338e6e2b5841d65d42dadde5cac30b8340e2ca95dfdc",
+   "expected_prompt_sha256": "f3efe431683ed26ba0a7338e6e2b5841d65d42dadde5cac30b8340e2ca95dfdc"
+  },
+  {
+   "run_id": "Q11",
+   "metric": "faithfulness",
+   "prompt_version": "v1.2.5",
+   "prompt_sha256": "9c80d4d5cd60ea7c95ad02c71f97ab566cc2fd82e2a2230124ee4b21247b9d8e",
+   "expected_prompt_sha256": "9c80d4d5cd60ea7c95ad02c71f97ab566cc2fd82e2a2230124ee4b21247b9d8e"
+  },
+  {
+   "run_id": "Q11",
+   "metric": "answer_correctness",
+   "prompt_version": "v1.2.5",
+   "prompt_sha256": "ca489fcf39691e9a71aec004a01938fb6c70b7b17da3c55fb0ada066e1d24968",
+   "expected_prompt_sha256": "ca489fcf39691e9a71aec004a01938fb6c70b7b17da3c55fb0ada066e1d24968"
+  },
+  {
+   "run_id": "Q11",
+   "metric": "answer_relevancy",
+   "prompt_version": "v1.2.5",
+   "prompt_sha256": "f3efe431683ed26ba0a7338e6e2b5841d65d42dadde5cac30b8340e2ca95dfdc",
+   "expected_prompt_sha256": "f3efe431683ed26ba0a7338e6e2b5841d65d42dadde5cac30b8340e2ca95dfdc"
+  }
+ ],
+ "q23": {
+  "runs": [
+   {
+    "run_id": "Q23-F1",
+    "case_id": "Q23",
+    "f_status": "invalid",
+    "f_score": null,
+    "f_invalid_reason": "contract_violation",
+    "f_strict_status": "invalid",
+    "f_strict_score": null,
+    "counts": {
+     "claim_count": null,
+     "supported_count": null,
+     "unsupported_count": null,
+     "insufficient_evidence_count": null,
+     "non_factual_count": null,
+     "scorable_claim_count": null
+    },
+    "target": [
+     0.4,
+     0.5
+    ],
+    "target_hit": false,
+    "claims": [],
+    "cl1": null,
+    "derived_claims": [],
+    "derived_count": 0,
+    "premise_insufficient_conclusion_supported": false,
+    "effective_id_mapping": [
+     {
+      "index": 1,
+      "raw_claim_id": "cl1",
+      "effective_claim_id": "cl1"
+     },
+     {
+      "index": 2,
+      "raw_claim_id": "cl2",
+      "effective_claim_id": "cl2"
+     },
+     {
+      "index": 3,
+      "raw_claim_id": "cl3",
+      "effective_claim_id": "cl3"
+     },
+     {
+      "index": 4,
+      "raw_claim_id": "cl4",
+      "effective_claim_id": "cl4"
+     },
+     {
+      "index": 5,
+      "raw_claim_id": "cl5",
+      "effective_claim_id": "cl5"
+     },
+     {
+      "index": 6,
+      "raw_claim_id": "cl6",
+      "effective_claim_id": "cl6"
+     },
+     {
+      "index": 7,
+      "raw_claim_id": "cl7",
+      "effective_claim_id": "cl7"
+     }
+    ],
+    "patch": {
+     "triggered": true,
+     "applied_claims": [],
+     "refusal": null,
+     "unsupported_quote_claims": [],
+     "expected_claims": [
+      "cl2"
+     ],
+     "provided_claims": [],
+     "missing_claims": [],
+     "final_errors": [
+      {
+       "code": "patch_schema_invalid",
+       "error_type": "StructuredOutputError",
+       "validation_errors": "1 validation error for EvidencePatchV125\nfixes.0.evidence_refs\n  Input should be a valid array [type=list_type, input_value=None, input_type=NoneType]\n    For further information visit https://errors.pydantic.dev/2.14/v/list_type"
+      }
+     ],
+     "example_quote_copied": false,
+     "merged_output_present": false
+    },
+    "initial_output": "```json\n{\n  \"claims\": [\n    {\n      \"claim_id\": \"cl1\",\n      \"claim\": \"可以按政策反馈\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"unsupported\",\n      \"is_contradictory\": true,\n      \"contradiction_with\": [\"cl2\"],\n      \"evidence_refs\": [],\n      \"reason\": \"与后续 claim cl2 矛盾\"\n    },\n    {\n      \"claim_id\": \"cl2\",\n      \"claim\": \"已超出政策规定的反馈时效，因此原则上不符合质量反馈受理条件\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"derived\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"生鲜食品质量问题需在签收后 24 小时内拍照反馈。\"}\n      ],\n      \"reason\": \"根据文档第12条的规定推导得出\"\n    },\n    {\n      \"claim_id\": \"cl3\",\n      \"claim\": \"该时限是硬性要求，文档未提及例外情形或宽限期\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"condition\",\n      \"support_status\": \"insufficient_evidence\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [],\n      \"reason\": \"文档没有明确说明是否有例外情形或宽限期\"\n    },\n    {\n      \"claim_id\": \"cl4\",\n      \"claim\": \"24 小时起算点为“签收完成时间”（非签收日零点），且须“拍照反馈”（需保留问题实物及包装证据）\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"normative_requirement\",\n      \"support_status\": \"insufficient_evidence\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [],\n      \"reason\": \"文档没有明确说明24小时的起算点和具体拍照要求\"\n    },\n    {\n      \"claim_id\": \"cl5\",\n      \"claim\": \"建议操作：若尚未超时，立即通过订单页面或联系在线客服（9:00–21:00）提交带时间水印的照片凭证\",\n      \"claim_type\": \"non_factual\",\n      \"claim_subtype\": \"advice\",\n      \"support_status\": null,\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [],\n      \"reason\": \"纯建议\"\n    },\n    {\n      \"claim_id\": \"cl6\",\n      \"claim\": \"若已超时，可尝试联系客服说明具体情况（如物流延误导致开箱延迟、问题明显且可验证等），但是否受理由商家个案判断，政策不保证支持\",\n      \"claim_type\": \"non_factual\",\n      \"claim_subtype\": \"advice\",\n      \"support_status\": null,\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [],\n      \"reason\": \"纯建议\"\n    },\n    {\n      \"claim_id\": \"cl7\",\n      \"claim\": \"文档未说明超时后申诉渠道或人工复核机制\",\n      \"claim_type\": \"non_factual\",\n      \"claim_subtype\": \"absence\",\n      \"support_status\": null,\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [],\n      \"reason\": \"文档确实未提及\"\n    }\n  ],\n  \"reason\": \"\"\n}\n```",
+    "patch_output": "{\"fixes\":[{\"claim_id\":\"cl2\",\"evidence_refs\":null}]}",
+    "merged_output": null,
+    "agent_contract": {
+     "contract_version": "v1.2.5",
+     "quote_validator_sha256": "153ab4a6f203ca0398133a2cc2ca6fda834f7670afa90651c66cfa44b92c722a",
+     "quote_precheck_errors": [
+      {
+       "claim_id": "cl2",
+       "context_id": "C1",
+       "code": "quote_not_found",
+       "quote": "生鲜食品质量问题需在签收后 24 小时内拍照反馈。",
+       "context_excerpt": "生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。"
+      }
+     ],
+     "mixed_sentence_warnings": [
+      {
+       "claim_id": "cl3",
+       "claim": "该时限是硬性要求，文档未提及例外情形或宽限期",
+       "code": "mixed_sentence_factual_absence"
+      }
+     ],
+     "repair_triggered": true,
+     "repair_count": 1,
+     "passed_after_repair": false,
+     "final_errors": [
+      {
+       "code": "patch_schema_invalid",
+       "error_type": "StructuredOutputError",
+       "validation_errors": "1 validation error for EvidencePatchV125\nfixes.0.evidence_refs\n  Input should be a valid array [type=list_type, input_value=None, input_type=NoneType]\n    For further information visit https://errors.pydantic.dev/2.14/v/list_type"
+      }
+     ],
+     "patch_schema_sha256": "bfc71529c4ef057dec7256c35ad31341cc31924f5a2784469721323f74547f33",
+     "patch_applied_claims": [],
+     "patch_semantic_review_required": false,
+     "patch_refusal": null,
+     "patch_unsupported_quote_claims": [],
+     "patch_expected_claims": [
+      "cl2"
+     ],
+     "patch_provided_claims": [],
+     "patch_missing_claims": []
+    },
+    "validation_errors": [],
+    "mixed_sentence_warnings": [
+     {
+      "claim_id": "cl3",
+      "claim": "该时限是硬性要求，文档未提及例外情形或宽限期",
+      "code": "mixed_sentence_factual_absence"
+     }
+    ],
+    "absence_fields": [],
+    "outcomes": [
+     {
+      "metric_name": "faithfulness",
+      "metric_version": "v3",
+      "status": "invalid",
+      "score": null,
+      "skipped_reason": null,
+      "invalid_reason": "contract_violation",
+      "error_type": "StructuredOutputError",
+      "error_message": "StructuredOutputError: v1.2.5 evidence patch schema is invalid",
+      "latency_ms": 22305,
+      "judge_config": {
+       "agent": "rag_judge_faithfulness",
+       "model": "qwen-max",
+       "temperature": 0.0,
+       "max_tokens": 8192,
+       "prompt_version": "v1.2.5",
+       "resolved_prompt_version": "v1.2.5",
+       "prompt_sha256": "9c80d4d5cd60ea7c95ad02c71f97ab566cc2fd82e2a2230124ee4b21247b9d8e",
+       "schema_version": "rag_judge_schema_v3",
+       "rubric_version": "v1.2.0",
+       "metric_version": "v3",
+       "contract_repair_version": "v1.2.5",
+       "quote_validator_sha256": "153ab4a6f203ca0398133a2cc2ca6fda834f7670afa90651c66cfa44b92c722a"
+      },
+      "details": {
+       "errors": [
+        "StructuredOutputError: v1.2.5 evidence patch schema is invalid"
+       ],
+       "failure_kind": "contract",
+       "agent_error_type": "StructuredOutputError",
+       "original_raw_output": "{\"fixes\":[{\"claim_id\":\"cl2\",\"evidence_refs\":null}]}",
+       "original_raw_truncated": false,
+       "token_usage": {
+        "input": 7534,
+        "output": 800
+       },
+       "cost": "0",
+       "agent_contract": {
+        "contract_version": "v1.2.5",
+        "quote_validator_sha256": "153ab4a6f203ca0398133a2cc2ca6fda834f7670afa90651c66cfa44b92c722a",
+        "quote_precheck_errors": [
+         {
+          "claim_id": "cl2",
+          "context_id": "C1",
+          "code": "quote_not_found",
+          "quote": "生鲜食品质量问题需在签收后 24 小时内拍照反馈。",
+          "context_excerpt": "生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。"
+         }
+        ],
+        "mixed_sentence_warnings": [
+         {
+          "claim_id": "cl3",
+          "claim": "该时限是硬性要求，文档未提及例外情形或宽限期",
+          "code": "mixed_sentence_factual_absence"
+         }
+        ],
+        "repair_triggered": true,
+        "repair_count": 1,
+        "passed_after_repair": false,
+        "final_errors": [
+         {
+          "code": "patch_schema_invalid",
+          "error_type": "StructuredOutputError",
+          "validation_errors": "1 validation error for EvidencePatchV125\nfixes.0.evidence_refs\n  Input should be a valid array [type=list_type, input_value=None, input_type=NoneType]\n    For further information visit https://errors.pydantic.dev/2.14/v/list_type"
+         }
+        ],
+        "patch_schema_sha256": "bfc71529c4ef057dec7256c35ad31341cc31924f5a2784469721323f74547f33",
+        "patch_applied_claims": [],
+        "patch_semantic_review_required": false,
+        "patch_refusal": null,
+        "patch_unsupported_quote_claims": [],
+        "patch_expected_claims": [
+         "cl2"
+        ],
+        "patch_provided_claims": [],
+        "patch_missing_claims": []
+       }
+      },
+      "raw_output": "{\"fixes\":[{\"claim_id\":\"cl2\",\"evidence_refs\":null}]}",
+      "raw_truncated": false
+     },
+     {
+      "metric_name": "faithfulness_strict",
+      "metric_version": "v3",
+      "status": "invalid",
+      "score": null,
+      "skipped_reason": null,
+      "invalid_reason": "contract_violation",
+      "error_type": "StructuredOutputError",
+      "error_message": null,
+      "latency_ms": 0,
+      "judge_config": {
+       "agent": "rag_judge_faithfulness",
+       "model": "qwen-max",
+       "temperature": 0.0,
+       "max_tokens": 8192,
+       "prompt_version": "v1.2.5",
+       "resolved_prompt_version": "v1.2.5",
+       "prompt_sha256": "9c80d4d5cd60ea7c95ad02c71f97ab566cc2fd82e2a2230124ee4b21247b9d8e",
+       "schema_version": "rag_judge_schema_v3",
+       "rubric_version": "v1.2.0",
+       "metric_version": "v3",
+       "contract_repair_version": "v1.2.5",
+       "quote_validator_sha256": "153ab4a6f203ca0398133a2cc2ca6fda834f7670afa90651c66cfa44b92c722a"
+      },
+      "details": {
+       "failure_kind": "contract",
+       "agent_error_type": "StructuredOutputError",
+       "agent_contract": {
+        "contract_version": "v1.2.5",
+        "quote_validator_sha256": "153ab4a6f203ca0398133a2cc2ca6fda834f7670afa90651c66cfa44b92c722a",
+        "quote_precheck_errors": [
+         {
+          "claim_id": "cl2",
+          "context_id": "C1",
+          "code": "quote_not_found",
+          "quote": "生鲜食品质量问题需在签收后 24 小时内拍照反馈。",
+          "context_excerpt": "生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。"
+         }
+        ],
+        "mixed_sentence_warnings": [
+         {
+          "claim_id": "cl3",
+          "claim": "该时限是硬性要求，文档未提及例外情形或宽限期",
+          "code": "mixed_sentence_factual_absence"
+         }
+        ],
+        "repair_triggered": true,
+        "repair_count": 1,
+        "passed_after_repair": false,
+        "final_errors": [
+         {
+          "code": "patch_schema_invalid",
+          "error_type": "StructuredOutputError",
+          "validation_errors": "1 validation error for EvidencePatchV125\nfixes.0.evidence_refs\n  Input should be a valid array [type=list_type, input_value=None, input_type=NoneType]\n    For further information visit https://errors.pydantic.dev/2.14/v/list_type"
+         }
+        ],
+        "patch_schema_sha256": "bfc71529c4ef057dec7256c35ad31341cc31924f5a2784469721323f74547f33",
+        "patch_applied_claims": [],
+        "patch_semantic_review_required": false,
+        "patch_refusal": null,
+        "patch_unsupported_quote_claims": [],
+        "patch_expected_claims": [
+         "cl2"
+        ],
+        "patch_provided_claims": [],
+        "patch_missing_claims": []
+       }
+      },
+      "raw_output": null,
+      "raw_truncated": false
+     }
+    ],
+    "fingerprint_errors": [],
+    "credential_failure": false,
+    "call_summary": {
+     "calls": 2,
+     "primary": 1,
+     "patch": 1,
+     "repair": 0,
+     "retry": 0,
+     "input_tokens": 9239,
+     "output_tokens": 817,
+     "cost_cny": 0.0300168
+    },
+    "initial_claims": [
+     {
+      "claim_id": "cl1",
+      "raw_claim_id": "cl1",
+      "claim": "可以按政策反馈",
+      "claim_type": "factual_claim",
+      "claim_subtype": "policy",
+      "support_status": "unsupported",
+      "is_contradictory": true,
+      "contradiction_with": [
+       "cl2"
+      ],
+      "evidence_refs": []
+     },
+     {
+      "claim_id": "cl2",
+      "raw_claim_id": "cl2",
+      "claim": "已超出政策规定的反馈时效，因此原则上不符合质量反馈受理条件",
+      "claim_type": "factual_claim",
+      "claim_subtype": "derived",
+      "support_status": "supported",
+      "is_contradictory": false,
+      "contradiction_with": [],
+      "evidence_refs": [
+       {
+        "context_id": "C1",
+        "quote": "生鲜食品质量问题需在签收后 24 小时内拍照反馈。"
+       }
+      ]
+     },
+     {
+      "claim_id": "cl3",
+      "raw_claim_id": "cl3",
+      "claim": "该时限是硬性要求，文档未提及例外情形或宽限期",
+      "claim_type": "factual_claim",
+      "claim_subtype": "condition",
+      "support_status": "insufficient_evidence",
+      "is_contradictory": false,
+      "contradiction_with": [],
+      "evidence_refs": []
+     },
+     {
+      "claim_id": "cl4",
+      "raw_claim_id": "cl4",
+      "claim": "24 小时起算点为“签收完成时间”（非签收日零点），且须“拍照反馈”（需保留问题实物及包装证据）",
+      "claim_type": "factual_claim",
+      "claim_subtype": "normative_requirement",
+      "support_status": "insufficient_evidence",
+      "is_contradictory": false,
+      "contradiction_with": [],
+      "evidence_refs": []
+     },
+     {
+      "claim_id": "cl5",
+      "raw_claim_id": "cl5",
+      "claim": "建议操作：若尚未超时，立即通过订单页面或联系在线客服（9:00–21:00）提交带时间水印的照片凭证",
+      "claim_type": "non_factual",
+      "claim_subtype": "advice",
+      "support_status": null,
+      "is_contradictory": false,
+      "contradiction_with": [],
+      "evidence_refs": []
+     },
+     {
+      "claim_id": "cl6",
+      "raw_claim_id": "cl6",
+      "claim": "若已超时，可尝试联系客服说明具体情况（如物流延误导致开箱延迟、问题明显且可验证等），但是否受理由商家个案判断，政策不保证支持",
+      "claim_type": "non_factual",
+      "claim_subtype": "advice",
+      "support_status": null,
+      "is_contradictory": false,
+      "contradiction_with": [],
+      "evidence_refs": []
+     },
+     {
+      "claim_id": "cl7",
+      "raw_claim_id": "cl7",
+      "claim": "文档未说明超时后申诉渠道或人工复核机制",
+      "claim_type": "non_factual",
+      "claim_subtype": "absence",
+      "support_status": null,
+      "is_contradictory": false,
+      "contradiction_with": [],
+      "evidence_refs": []
+     }
+    ],
+    "initial_preview": {
+     "scorable_claim_count": 4,
+     "supported_count": 1,
+     "unsupported_count": 1,
+     "insufficient_evidence_count": 2,
+     "non_factual_count": 3,
+     "f_preview": 0.25,
+     "note": "preview ignores quote validity and is not a Service F score"
+    },
+    "initial_cl1": {
+     "claim_id": "cl1",
+     "raw_claim_id": "cl1",
+     "claim": "可以按政策反馈",
+     "claim_type": "factual_claim",
+     "claim_subtype": "policy",
+     "support_status": "unsupported",
+     "is_contradictory": true,
+     "contradiction_with": [
+      "cl2"
+     ],
+     "evidence_refs": []
+    },
+    "initial_derived_claims": [
+     {
+      "claim_id": "cl2",
+      "raw_claim_id": "cl2",
+      "claim": "已超出政策规定的反馈时效，因此原则上不符合质量反馈受理条件",
+      "claim_type": "factual_claim",
+      "claim_subtype": "derived",
+      "support_status": "supported",
+      "is_contradictory": false,
+      "contradiction_with": [],
+      "evidence_refs": [
+       {
+        "context_id": "C1",
+        "quote": "生鲜食品质量问题需在签收后 24 小时内拍照反馈。"
+       }
+      ]
+     }
+    ],
+    "initial_derived_count": 1
+   },
+   {
+    "run_id": "Q23-F2",
+    "case_id": "Q23",
+    "f_status": "invalid",
+    "f_score": null,
+    "f_invalid_reason": "contract_violation",
+    "f_strict_status": "invalid",
+    "f_strict_score": null,
+    "counts": {
+     "claim_count": null,
+     "supported_count": null,
+     "unsupported_count": null,
+     "insufficient_evidence_count": null,
+     "non_factual_count": null,
+     "scorable_claim_count": null
+    },
+    "target": [
+     0.4,
+     0.5
+    ],
+    "target_hit": false,
+    "claims": [],
+    "cl1": null,
+    "derived_claims": [],
+    "derived_count": 0,
+    "premise_insufficient_conclusion_supported": false,
+    "effective_id_mapping": [
+     {
+      "index": 1,
+      "raw_claim_id": "cl1",
+      "effective_claim_id": "cl1"
+     },
+     {
+      "index": 2,
+      "raw_claim_id": "cl2",
+      "effective_claim_id": "cl2"
+     },
+     {
+      "index": 3,
+      "raw_claim_id": "cl3",
+      "effective_claim_id": "cl3"
+     },
+     {
+      "index": 4,
+      "raw_claim_id": "cl4",
+      "effective_claim_id": "cl4"
+     },
+     {
+      "index": 5,
+      "raw_claim_id": "cl5",
+      "effective_claim_id": "cl5"
+     },
+     {
+      "index": 6,
+      "raw_claim_id": "cl6",
+      "effective_claim_id": "cl6"
+     },
+     {
+      "index": 7,
+      "raw_claim_id": "cl7",
+      "effective_claim_id": "cl7"
+     },
+     {
+      "index": 8,
+      "raw_claim_id": "cl8",
+      "effective_claim_id": "cl8"
+     },
+     {
+      "index": 9,
+      "raw_claim_id": "cl9",
+      "effective_claim_id": "cl9"
+     }
+    ],
+    "patch": {
+     "triggered": false,
+     "applied_claims": [],
+     "refusal": null,
+     "unsupported_quote_claims": [],
+     "expected_claims": [],
+     "provided_claims": [],
+     "missing_claims": [],
+     "final_errors": [
+      {
+       "code": "initial_schema_invalid",
+       "error_type": "ValidationError",
+       "validation_errors": "1 validation error for FaithfulnessOutputV3\nclaims.4\n  Value error, claim_subtype 'absence' is not valid for factual_claim [type=value_error, input_value={'claim_id': 'cl5', 'clai...是否有例外情况'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.14/v/value_error"
+      }
+     ],
+     "example_quote_copied": false,
+     "merged_output_present": false
+    },
+    "initial_output": "```json\n{\n  \"claims\": [\n    {\n      \"claim_id\": \"cl1\",\n      \"claim\": \"可以按政策反馈\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"unsupported\",\n      \"is_contradictory\": true,\n      \"contradiction_with\": [\"cl2\"],\n      \"evidence_refs\": [],\n      \"reason\": \"与后续 claim cl2 矛盾\"\n    },\n    {\n      \"claim_id\": \"cl2\",\n      \"claim\": \"生鲜食品质量问题需在签收后 24 小时内拍照反馈\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"生鲜食品质量问题需在签收后 24 小时内拍照反馈。\"}\n      ],\n      \"reason\": \"C1 逐字原文\"\n    },\n    {\n      \"claim_id\": \"cl3\",\n      \"claim\": \"您是在签收后第 2 天（即超过 24 小时）才发现并反馈，已超出政策规定的反馈时效\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"derived\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"生鲜食品质量问题需在签收后 24 小时内拍照反馈。\"}\n      ],\n      \"reason\": \"由 C1 的规则推导得出\"\n    },\n    {\n      \"claim_id\": \"cl4\",\n      \"claim\": \"因此原则上不符合质量反馈受理条件\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"condition\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"生鲜食品质量问题需在签收后 24 小时内拍照反馈。\"}\n      ],\n      \"reason\": \"由 C1 的规则推导得出\"\n    },\n    {\n      \"claim_id\": \"cl5\",\n      \"claim\": \"该时限是硬性要求，文档未提及例外情形或宽限期\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"absence\",\n      \"support_status\": \"insufficient_evidence\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [],\n      \"reason\": \"文档没有明确说明是否有例外情况\"\n    },\n    {\n      \"claim_id\": \"cl6\",\n      \"claim\": \"24 小时起算点为“签收完成时间”（非签收日零点），且须“拍照反馈”（需保留问题实物及包装证据）\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"condition\",\n      \"support_status\": \"insufficient_evidence\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [],\n      \"reason\": \"文档没有明确说明起算点和具体拍照要求\"\n    },\n    {\n      \"claim_id\": \"cl7\",\n      \"claim\": \"建议操作：若尚未超时，立即通过订单页面或联系在线客服（9:00–21:00）提交带时间水印的照片凭证\",\n      \"claim_type\": \"non_factual\",\n      \"claim_subtype\": \"advice\",\n      \"support_status\": null,\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [],\n      \"reason\": \"纯建议\"\n    },\n    {\n      \"claim_id\": \"cl8\",\n      \"claim\": \"若已超时，可尝试联系客服说明具体情况（如物流延误导致开箱延迟、问题明显且可验证等），但是否受理由商家个案判断，政策不保证支持\",\n      \"claim_type\": \"non_factual\",\n      \"claim_subtype\": \"advice\",\n      \"support_status\": null,\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [],\n      \"reason\": \"纯建议\"\n    },\n    {\n      \"claim_id\": \"cl9\",\n      \"claim\": \"文档未说明超时后申诉渠道或人工复核机制\",\n      \"claim_type\": \"non_factual\",\n      \"claim_subtype\": \"absence\",\n      \"support_status\": null,\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [],\n      \"reason\": \"文档未提及\"\n    }\n  ],\n  \"reason\": \"\"\n}\n```",
+    "patch_output": null,
+    "merged_output": null,
+    "agent_contract": {
+     "contract_version": "v1.2.5",
+     "quote_validator_sha256": "153ab4a6f203ca0398133a2cc2ca6fda834f7670afa90651c66cfa44b92c722a",
+     "quote_precheck_errors": [],
+     "mixed_sentence_warnings": [],
+     "repair_triggered": false,
+     "repair_count": 0,
+     "passed_after_repair": false,
+     "final_errors": [
+      {
+       "code": "initial_schema_invalid",
+       "error_type": "ValidationError",
+       "validation_errors": "1 validation error for FaithfulnessOutputV3\nclaims.4\n  Value error, claim_subtype 'absence' is not valid for factual_claim [type=value_error, input_value={'claim_id': 'cl5', 'clai...是否有例外情况'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.14/v/value_error"
+      }
+     ],
+     "patch_schema_sha256": "bfc71529c4ef057dec7256c35ad31341cc31924f5a2784469721323f74547f33",
+     "patch_applied_claims": [],
+     "patch_semantic_review_required": false,
+     "patch_refusal": null,
+     "patch_unsupported_quote_claims": [],
+     "patch_expected_claims": [],
+     "patch_provided_claims": [],
+     "patch_missing_claims": []
+    },
+    "validation_errors": [],
+    "mixed_sentence_warnings": [],
+    "absence_fields": [],
+    "outcomes": [
+     {
+      "metric_name": "faithfulness",
+      "metric_version": "v3",
+      "status": "invalid",
+      "score": null,
+      "skipped_reason": null,
+      "invalid_reason": "contract_violation",
+      "error_type": "StructuredOutputError",
+      "error_message": "StructuredOutputError: initial faithfulness output is schema-invalid",
+      "latency_ms": 23077,
+      "judge_config": {
+       "agent": "rag_judge_faithfulness",
+       "model": "qwen-max",
+       "temperature": 0.0,
+       "max_tokens": 8192,
+       "prompt_version": "v1.2.5",
+       "resolved_prompt_version": "v1.2.5",
+       "prompt_sha256": "9c80d4d5cd60ea7c95ad02c71f97ab566cc2fd82e2a2230124ee4b21247b9d8e",
+       "schema_version": "rag_judge_schema_v3",
+       "rubric_version": "v1.2.0",
+       "metric_version": "v3",
+       "contract_repair_version": "v1.2.5",
+       "quote_validator_sha256": "153ab4a6f203ca0398133a2cc2ca6fda834f7670afa90651c66cfa44b92c722a"
+      },
+      "details": {
+       "errors": [
+        "StructuredOutputError: initial faithfulness output is schema-invalid"
+       ],
+       "failure_kind": "contract",
+       "agent_error_type": "StructuredOutputError",
+       "original_raw_output": "```json\n{\n  \"claims\": [\n    {\n      \"claim_id\": \"cl1\",\n      \"claim\": \"可以按政策反馈\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"unsupported\",\n      \"is_contradictory\": true,\n      \"contradiction_with\": [\"cl2\"],\n      \"evidence_refs\": [],\n      \"reason\": \"与后续 claim cl2 矛盾\"\n    },\n    {\n      \"claim_id\": \"cl2\",\n      \"claim\": \"生鲜食品质量问题需在签收后 24 小时内拍照反馈\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"生鲜食品质量问题需在签收后 24 小时内拍照反馈。\"}\n      ],\n      \"reason\": \"C1 逐字原文\"\n    },\n    {\n      \"claim_id\": \"cl3\",\n      \"claim\": \"您是在签收后第 2 天（即超过 24 小时）才发现并反馈，已超出政策规定的反馈时效\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"derived\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"生鲜食品质量问题需在签收后 24 小时内拍照反馈。\"}\n      ],\n      \"reason\": \"由 C1 的规则推导得出\"\n    },\n    {\n      \"claim_id\": \"cl4\",\n      \"claim\": \"因此原则上不符合质量反馈受理条件\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"condition\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"生鲜食品质量问题需在签收后 24 小时内拍照反馈。\"}\n      ],\n      \"reason\": \"由 C1 的规则推导得出\"\n    },\n    {\n      \"claim_id\": \"cl5\",\n      \"claim\": \"该时限是硬性要求，文档未提及例外情形或宽限期\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"absence\",\n      \"support_status\": \"insufficient_evidence\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [],\n      \"reason\": \"文档没有明确说明是否有例外情况\"\n    },\n    {\n      \"claim_id\": \"cl6\",\n      \"claim\": \"24 小时起算点为“签收完成时间”（非签收日零点），且须“拍照反馈”（需保留问题实物及包装证据）\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"condition\",\n      \"support_status\": \"insufficient_evidence\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [],\n      \"reason\": \"文档没有明确说明起算点和具体拍照要求\"\n    },\n    {\n      \"claim_id\": \"cl7\",\n      \"claim\": \"建议操作：若尚未超时，立即通过订单页面或联系在线客服（9:00–21:00）提交带时间水印的照片凭证\",\n      \"claim_type\": \"non_factual\",\n      \"claim_subtype\": \"advice\",\n      \"support_status\": null,\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [],\n      \"reason\": \"纯建议\"\n    },\n    {\n      \"claim_id\": \"cl8\",\n      \"claim\": \"若已超时，可尝试联系客服说明具体情况（如物流延误导致开箱延迟、问题明显且可验证等），但是否受理由商家个案判断，政策不保证支持\",\n      \"claim_type\": \"non_factual\",\n      \"claim_subtype\": \"advice\",\n      \"support_status\": null,\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [],\n      \"reason\": \"纯建议\"\n    },\n    {\n      \"claim_id\": \"cl9\",\n      \"claim\": \"文档未说明超时后申诉渠道或人工复核机制\",\n      \"claim_type\": \"non_factual\",\n      \"claim_subtype\": \"absence\",\n      \"support_status\": null,\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [],\n      \"reason\": \"文档未提及\"\n    }\n  ],\n  \"reason\": \"\"\n}\n```",
+       "original_raw_truncated": false,
+       "token_usage": {
+        "input": 7534,
+        "output": 1060
+       },
+       "cost": "0",
+       "agent_contract": {
+        "contract_version": "v1.2.5",
+        "quote_validator_sha256": "153ab4a6f203ca0398133a2cc2ca6fda834f7670afa90651c66cfa44b92c722a",
+        "quote_precheck_errors": [],
+        "mixed_sentence_warnings": [],
+        "repair_triggered": false,
+        "repair_count": 0,
+        "passed_after_repair": false,
+        "final_errors": [
+         {
+          "code": "initial_schema_invalid",
+          "error_type": "ValidationError",
+          "validation_errors": "1 validation error for FaithfulnessOutputV3\nclaims.4\n  Value error, claim_subtype 'absence' is not valid for factual_claim [type=value_error, input_value={'claim_id': 'cl5', 'clai...是否有例外情况'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.14/v/value_error"
+         }
+        ],
+        "patch_schema_sha256": "bfc71529c4ef057dec7256c35ad31341cc31924f5a2784469721323f74547f33",
+        "patch_applied_claims": [],
+        "patch_semantic_review_required": false,
+        "patch_refusal": null,
+        "patch_unsupported_quote_claims": [],
+        "patch_expected_claims": [],
+        "patch_provided_claims": [],
+        "patch_missing_claims": []
+       }
+      },
+      "raw_output": "```json\n{\n  \"claims\": [\n    {\n      \"claim_id\": \"cl1\",\n      \"claim\": \"可以按政策反馈\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"unsupported\",\n      \"is_contradictory\": true,\n      \"contradiction_with\": [\"cl2\"],\n      \"evidence_refs\": [],\n      \"reason\": \"与后续 claim cl2 矛盾\"\n    },\n    {\n      \"claim_id\": \"cl2\",\n      \"claim\": \"生鲜食品质量问题需在签收后 24 小时内拍照反馈\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"生鲜食品质量问题需在签收后 24 小时内拍照反馈。\"}\n      ],\n      \"reason\": \"C1 逐字原文\"\n    },\n    {\n      \"claim_id\": \"cl3\",\n      \"claim\": \"您是在签收后第 2 天（即超过 24 小时）才发现并反馈，已超出政策规定的反馈时效\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"derived\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"生鲜食品质量问题需在签收后 24 小时内拍照反馈。\"}\n      ],\n      \"reason\": \"由 C1 的规则推导得出\"\n    },\n    {\n      \"claim_id\": \"cl4\",\n      \"claim\": \"因此原则上不符合质量反馈受理条件\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"condition\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"生鲜食品质量问题需在签收后 24 小时内拍照反馈。\"}\n      ],\n      \"reason\": \"由 C1 的规则推导得出\"\n    },\n    {\n      \"claim_id\": \"cl5\",\n      \"claim\": \"该时限是硬性要求，文档未提及例外情形或宽限期\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"absence\",\n      \"support_status\": \"insufficient_evidence\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [],\n      \"reason\": \"文档没有明确说明是否有例外情况\"\n    },\n    {\n      \"claim_id\": \"cl6\",\n      \"claim\": \"24 小时起算点为“签收完成时间”（非签收日零点），且须“拍照反馈”（需保留问题实物及包装证据）\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"condition\",\n      \"support_status\": \"insufficient_evidence\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [],\n      \"reason\": \"文档没有明确说明起算点和具体拍照要求\"\n    },\n    {\n      \"claim_id\": \"cl7\",\n      \"claim\": \"建议操作：若尚未超时，立即通过订单页面或联系在线客服（9:00–21:00）提交带时间水印的照片凭证\",\n      \"claim_type\": \"non_factual\",\n      \"claim_subtype\": \"advice\",\n      \"support_status\": null,\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [],\n      \"reason\": \"纯建议\"\n    },\n    {\n      \"claim_id\": \"cl8\",\n      \"claim\": \"若已超时，可尝试联系客服说明具体情况（如物流延误导致开箱延迟、问题明显且可验证等），但是否受理由商家个案判断，政策不保证支持\",\n      \"claim_type\": \"non_factual\",\n      \"claim_subtype\": \"advice\",\n      \"support_status\": null,\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [],\n      \"reason\": \"纯建议\"\n    },\n    {\n      \"claim_id\": \"cl9\",\n      \"claim\": \"文档未说明超时后申诉渠道或人工复核机制\",\n      \"claim_type\": \"non_factual\",\n      \"claim_subtype\": \"absence\",\n      \"support_status\": null,\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [],\n      \"reason\": \"文档未提及\"\n    }\n  ],\n  \"reason\": \"\"\n}\n```",
+      "raw_truncated": false
+     },
+     {
+      "metric_name": "faithfulness_strict",
+      "metric_version": "v3",
+      "status": "invalid",
+      "score": null,
+      "skipped_reason": null,
+      "invalid_reason": "contract_violation",
+      "error_type": "StructuredOutputError",
+      "error_message": null,
+      "latency_ms": 0,
+      "judge_config": {
+       "agent": "rag_judge_faithfulness",
+       "model": "qwen-max",
+       "temperature": 0.0,
+       "max_tokens": 8192,
+       "prompt_version": "v1.2.5",
+       "resolved_prompt_version": "v1.2.5",
+       "prompt_sha256": "9c80d4d5cd60ea7c95ad02c71f97ab566cc2fd82e2a2230124ee4b21247b9d8e",
+       "schema_version": "rag_judge_schema_v3",
+       "rubric_version": "v1.2.0",
+       "metric_version": "v3",
+       "contract_repair_version": "v1.2.5",
+       "quote_validator_sha256": "153ab4a6f203ca0398133a2cc2ca6fda834f7670afa90651c66cfa44b92c722a"
+      },
+      "details": {
+       "failure_kind": "contract",
+       "agent_error_type": "StructuredOutputError",
+       "agent_contract": {
+        "contract_version": "v1.2.5",
+        "quote_validator_sha256": "153ab4a6f203ca0398133a2cc2ca6fda834f7670afa90651c66cfa44b92c722a",
+        "quote_precheck_errors": [],
+        "mixed_sentence_warnings": [],
+        "repair_triggered": false,
+        "repair_count": 0,
+        "passed_after_repair": false,
+        "final_errors": [
+         {
+          "code": "initial_schema_invalid",
+          "error_type": "ValidationError",
+          "validation_errors": "1 validation error for FaithfulnessOutputV3\nclaims.4\n  Value error, claim_subtype 'absence' is not valid for factual_claim [type=value_error, input_value={'claim_id': 'cl5', 'clai...是否有例外情况'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.14/v/value_error"
+         }
+        ],
+        "patch_schema_sha256": "bfc71529c4ef057dec7256c35ad31341cc31924f5a2784469721323f74547f33",
+        "patch_applied_claims": [],
+        "patch_semantic_review_required": false,
+        "patch_refusal": null,
+        "patch_unsupported_quote_claims": [],
+        "patch_expected_claims": [],
+        "patch_provided_claims": [],
+        "patch_missing_claims": []
+       }
+      },
+      "raw_output": null,
+      "raw_truncated": false
+     }
+    ],
+    "fingerprint_errors": [],
+    "credential_failure": false,
+    "call_summary": {
+     "calls": 1,
+     "primary": 1,
+     "patch": 0,
+     "repair": 0,
+     "retry": 0,
+     "input_tokens": 7534,
+     "output_tokens": 1060,
+     "cost_cny": 0.0282576
+    },
+    "initial_claims": [
+     {
+      "claim_id": "cl1",
+      "raw_claim_id": "cl1",
+      "claim": "可以按政策反馈",
+      "claim_type": "factual_claim",
+      "claim_subtype": "policy",
+      "support_status": "unsupported",
+      "is_contradictory": true,
+      "contradiction_with": [
+       "cl2"
+      ],
+      "evidence_refs": []
+     },
+     {
+      "claim_id": "cl2",
+      "raw_claim_id": "cl2",
+      "claim": "生鲜食品质量问题需在签收后 24 小时内拍照反馈",
+      "claim_type": "factual_claim",
+      "claim_subtype": "policy",
+      "support_status": "supported",
+      "is_contradictory": false,
+      "contradiction_with": [],
+      "evidence_refs": [
+       {
+        "context_id": "C1",
+        "quote": "生鲜食品质量问题需在签收后 24 小时内拍照反馈。"
+       }
+      ]
+     },
+     {
+      "claim_id": "cl3",
+      "raw_claim_id": "cl3",
+      "claim": "您是在签收后第 2 天（即超过 24 小时）才发现并反馈，已超出政策规定的反馈时效",
+      "claim_type": "factual_claim",
+      "claim_subtype": "derived",
+      "support_status": "supported",
+      "is_contradictory": false,
+      "contradiction_with": [],
+      "evidence_refs": [
+       {
+        "context_id": "C1",
+        "quote": "生鲜食品质量问题需在签收后 24 小时内拍照反馈。"
+       }
+      ]
+     },
+     {
+      "claim_id": "cl4",
+      "raw_claim_id": "cl4",
+      "claim": "因此原则上不符合质量反馈受理条件",
+      "claim_type": "factual_claim",
+      "claim_subtype": "condition",
+      "support_status": "supported",
+      "is_contradictory": false,
+      "contradiction_with": [],
+      "evidence_refs": [
+       {
+        "context_id": "C1",
+        "quote": "生鲜食品质量问题需在签收后 24 小时内拍照反馈。"
+       }
+      ]
+     },
+     {
+      "claim_id": "cl5",
+      "raw_claim_id": "cl5",
+      "claim": "该时限是硬性要求，文档未提及例外情形或宽限期",
+      "claim_type": "factual_claim",
+      "claim_subtype": "absence",
+      "support_status": "insufficient_evidence",
+      "is_contradictory": false,
+      "contradiction_with": [],
+      "evidence_refs": []
+     },
+     {
+      "claim_id": "cl6",
+      "raw_claim_id": "cl6",
+      "claim": "24 小时起算点为“签收完成时间”（非签收日零点），且须“拍照反馈”（需保留问题实物及包装证据）",
+      "claim_type": "factual_claim",
+      "claim_subtype": "condition",
+      "support_status": "insufficient_evidence",
+      "is_contradictory": false,
+      "contradiction_with": [],
+      "evidence_refs": []
+     },
+     {
+      "claim_id": "cl7",
+      "raw_claim_id": "cl7",
+      "claim": "建议操作：若尚未超时，立即通过订单页面或联系在线客服（9:00–21:00）提交带时间水印的照片凭证",
+      "claim_type": "non_factual",
+      "claim_subtype": "advice",
+      "support_status": null,
+      "is_contradictory": false,
+      "contradiction_with": [],
+      "evidence_refs": []
+     },
+     {
+      "claim_id": "cl8",
+      "raw_claim_id": "cl8",
+      "claim": "若已超时，可尝试联系客服说明具体情况（如物流延误导致开箱延迟、问题明显且可验证等），但是否受理由商家个案判断，政策不保证支持",
+      "claim_type": "non_factual",
+      "claim_subtype": "advice",
+      "support_status": null,
+      "is_contradictory": false,
+      "contradiction_with": [],
+      "evidence_refs": []
+     },
+     {
+      "claim_id": "cl9",
+      "raw_claim_id": "cl9",
+      "claim": "文档未说明超时后申诉渠道或人工复核机制",
+      "claim_type": "non_factual",
+      "claim_subtype": "absence",
+      "support_status": null,
+      "is_contradictory": false,
+      "contradiction_with": [],
+      "evidence_refs": []
+     }
+    ],
+    "initial_preview": {
+     "scorable_claim_count": 6,
+     "supported_count": 3,
+     "unsupported_count": 1,
+     "insufficient_evidence_count": 2,
+     "non_factual_count": 3,
+     "f_preview": 0.5,
+     "note": "preview ignores quote validity and is not a Service F score"
+    },
+    "initial_cl1": {
+     "claim_id": "cl1",
+     "raw_claim_id": "cl1",
+     "claim": "可以按政策反馈",
+     "claim_type": "factual_claim",
+     "claim_subtype": "policy",
+     "support_status": "unsupported",
+     "is_contradictory": true,
+     "contradiction_with": [
+      "cl2"
+     ],
+     "evidence_refs": []
+    },
+    "initial_derived_claims": [
+     {
+      "claim_id": "cl3",
+      "raw_claim_id": "cl3",
+      "claim": "您是在签收后第 2 天（即超过 24 小时）才发现并反馈，已超出政策规定的反馈时效",
+      "claim_type": "factual_claim",
+      "claim_subtype": "derived",
+      "support_status": "supported",
+      "is_contradictory": false,
+      "contradiction_with": [],
+      "evidence_refs": [
+       {
+        "context_id": "C1",
+        "quote": "生鲜食品质量问题需在签收后 24 小时内拍照反馈。"
+       }
+      ]
+     }
+    ],
+    "initial_derived_count": 1
+   },
+   {
+    "run_id": "Q23-F3",
+    "case_id": "Q23",
+    "f_status": "invalid",
+    "f_score": null,
+    "f_invalid_reason": "contract_violation",
+    "f_strict_status": "invalid",
+    "f_strict_score": null,
+    "counts": {
+     "claim_count": null,
+     "supported_count": null,
+     "unsupported_count": null,
+     "insufficient_evidence_count": null,
+     "non_factual_count": null,
+     "scorable_claim_count": null
+    },
+    "target": [
+     0.4,
+     0.5
+    ],
+    "target_hit": false,
+    "claims": [],
+    "cl1": null,
+    "derived_claims": [],
+    "derived_count": 0,
+    "premise_insufficient_conclusion_supported": false,
+    "effective_id_mapping": [
+     {
+      "index": 1,
+      "raw_claim_id": "cl1",
+      "effective_claim_id": "cl1"
+     },
+     {
+      "index": 2,
+      "raw_claim_id": "cl2",
+      "effective_claim_id": "cl2"
+     },
+     {
+      "index": 3,
+      "raw_claim_id": "cl3",
+      "effective_claim_id": "cl3"
+     },
+     {
+      "index": 4,
+      "raw_claim_id": "cl4",
+      "effective_claim_id": "cl4"
+     },
+     {
+      "index": 5,
+      "raw_claim_id": "cl5",
+      "effective_claim_id": "cl5"
+     },
+     {
+      "index": 6,
+      "raw_claim_id": "cl6",
+      "effective_claim_id": "cl6"
+     },
+     {
+      "index": 7,
+      "raw_claim_id": "cl7",
+      "effective_claim_id": "cl7"
+     },
+     {
+      "index": 8,
+      "raw_claim_id": "cl8",
+      "effective_claim_id": "cl8"
+     },
+     {
+      "index": 9,
+      "raw_claim_id": "cl9",
+      "effective_claim_id": "cl9"
+     }
+    ],
+    "patch": {
+     "triggered": true,
+     "applied_claims": [],
+     "refusal": null,
+     "unsupported_quote_claims": [],
+     "expected_claims": [
+      "cl2",
+      "cl3"
+     ],
+     "provided_claims": [],
+     "missing_claims": [],
+     "final_errors": [
+      {
+       "code": "patch_schema_invalid",
+       "error_type": "StructuredOutputError",
+       "validation_errors": "2 validation errors for EvidencePatchV125\nfixes.0.evidence_refs\n  Input should be a valid array [type=list_type, input_value=None, input_type=NoneType]\n    For further information visit https://errors.pydantic.dev/2.14/v/list_type\nfixes.1.evidence_refs\n  Input should be a valid array [type=list_type, input_value=None, input_type=NoneType]\n    For further information visit https://errors.pydantic.dev/2.14/v/list_type"
+      }
+     ],
+     "example_quote_copied": false,
+     "merged_output_present": false
+    },
+    "initial_output": "```json\n{\n  \"claims\": [\n    {\n      \"claim_id\": \"cl1\",\n      \"claim\": \"是的，可以按政策反馈。\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"unsupported\",\n      \"is_contradictory\": true,\n      \"contradiction_with\": [\"cl2\"],\n      \"evidence_refs\": [],\n      \"reason\": \"与后文提到的超时反馈不符\"\n    },\n    {\n      \"claim_id\": \"cl2\",\n      \"claim\": \"生鲜食品质量问题需在签收后 24 小时内拍照反馈\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"生鲜食品质量问题需在签收后 24 小时内拍照反馈。\"}\n      ],\n      \"reason\": \"C1 逐字原文\"\n    },\n    {\n      \"claim_id\": \"cl3\",\n      \"claim\": \"您是在签收后第 2 天（即超过 24 小时）才发现并反馈，已超出政策规定的反馈时效\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"derived\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"生鲜食品质量问题需在签收后 24 小时内拍照反馈。\"}\n      ],\n      \"reason\": \"由 C1 的政策推导得出\"\n    },\n    {\n      \"claim_id\": \"cl4\",\n      \"claim\": \"因此原则上不符合质量反馈受理条件\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"condition\",\n      \"support_status\": \"insufficient_evidence\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [],\n      \"reason\": \"文档未明确说明超时后的处理方式\"\n    },\n    {\n      \"claim_id\": \"cl5\",\n      \"claim\": \"该时限是硬性要求，文档未提及例外情形或宽限期\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"condition\",\n      \"support_status\": \"insufficient_evidence\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [],\n      \"reason\": \"文档未明确说明是否有例外情形或宽限期\"\n    },\n    {\n      \"claim_id\": \"cl6\",\n      \"claim\": \"24 小时起算点为“签收完成时间”（非签收日零点），且须“拍照反馈”（需保留问题实物及包装证据）\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"process\",\n      \"support_status\": \"insufficient_evidence\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [],\n      \"reason\": \"文档未明确说明起算点和具体拍照要求\"\n    },\n    {\n      \"claim_id\": \"cl7\",\n      \"claim\": \"若尚未超时，立即通过订单页面或联系在线客服（9:00–21:00）提交带时间水印的照片凭证\",\n      \"claim_type\": \"non_factual\",\n      \"claim_subtype\": \"advice\",\n      \"support_status\": null,\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [],\n      \"reason\": \"纯建议\"\n    },\n    {\n      \"claim_id\": \"cl8\",\n      \"claim\": \"若已超时，可尝试联系客服说明具体情况（如物流延误导致开箱延迟、问题明显且可验证等），但是否受理由商家个案判断，政策不保证支持\",\n      \"claim_type\": \"non_factual\",\n      \"claim_subtype\": \"advice\",\n      \"support_status\": null,\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [],\n      \"reason\": \"纯建议\"\n    },\n    {\n      \"claim_id\": \"cl9\",\n      \"claim\": \"文档未说明超时后申诉渠道或人工复核机制\",\n      \"claim_type\": \"non_factual\",\n      \"claim_subtype\": \"absence\",\n      \"support_status\": null,\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [],\n      \"reason\": \"文档未提及\"\n    }\n  ],\n  \"reason\": \"\"\n}\n```",
+    "patch_output": "{\"fixes\":[{\"claim_id\":\"cl2\",\"evidence_refs\":null},{\"claim_id\":\"cl3\",\"evidence_refs\":null}]}",
+    "merged_output": null,
+    "agent_contract": {
+     "contract_version": "v1.2.5",
+     "quote_validator_sha256": "153ab4a6f203ca0398133a2cc2ca6fda834f7670afa90651c66cfa44b92c722a",
+     "quote_precheck_errors": [
+      {
+       "claim_id": "cl2",
+       "context_id": "C1",
+       "code": "quote_not_found",
+       "quote": "生鲜食品质量问题需在签收后 24 小时内拍照反馈。",
+       "context_excerpt": "生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。"
+      },
+      {
+       "claim_id": "cl3",
+       "context_id": "C1",
+       "code": "quote_not_found",
+       "quote": "生鲜食品质量问题需在签收后 24 小时内拍照反馈。",
+       "context_excerpt": "生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。"
+      }
+     ],
+     "mixed_sentence_warnings": [
+      {
+       "claim_id": "cl5",
+       "claim": "该时限是硬性要求，文档未提及例外情形或宽限期",
+       "code": "mixed_sentence_factual_absence"
+      }
+     ],
+     "repair_triggered": true,
+     "repair_count": 1,
+     "passed_after_repair": false,
+     "final_errors": [
+      {
+       "code": "patch_schema_invalid",
+       "error_type": "StructuredOutputError",
+       "validation_errors": "2 validation errors for EvidencePatchV125\nfixes.0.evidence_refs\n  Input should be a valid array [type=list_type, input_value=None, input_type=NoneType]\n    For further information visit https://errors.pydantic.dev/2.14/v/list_type\nfixes.1.evidence_refs\n  Input should be a valid array [type=list_type, input_value=None, input_type=NoneType]\n    For further information visit https://errors.pydantic.dev/2.14/v/list_type"
+      }
+     ],
+     "patch_schema_sha256": "bfc71529c4ef057dec7256c35ad31341cc31924f5a2784469721323f74547f33",
+     "patch_applied_claims": [],
+     "patch_semantic_review_required": false,
+     "patch_refusal": null,
+     "patch_unsupported_quote_claims": [],
+     "patch_expected_claims": [
+      "cl2",
+      "cl3"
+     ],
+     "patch_provided_claims": [],
+     "patch_missing_claims": []
+    },
+    "validation_errors": [],
+    "mixed_sentence_warnings": [
+     {
+      "claim_id": "cl5",
+      "claim": "该时限是硬性要求，文档未提及例外情形或宽限期",
+      "code": "mixed_sentence_factual_absence"
+     }
+    ],
+    "absence_fields": [],
+    "outcomes": [
+     {
+      "metric_name": "faithfulness",
+      "metric_version": "v3",
+      "status": "invalid",
+      "score": null,
+      "skipped_reason": null,
+      "invalid_reason": "contract_violation",
+      "error_type": "StructuredOutputError",
+      "error_message": "StructuredOutputError: v1.2.5 evidence patch schema is invalid",
+      "latency_ms": 25695,
+      "judge_config": {
+       "agent": "rag_judge_faithfulness",
+       "model": "qwen-max",
+       "temperature": 0.0,
+       "max_tokens": 8192,
+       "prompt_version": "v1.2.5",
+       "resolved_prompt_version": "v1.2.5",
+       "prompt_sha256": "9c80d4d5cd60ea7c95ad02c71f97ab566cc2fd82e2a2230124ee4b21247b9d8e",
+       "schema_version": "rag_judge_schema_v3",
+       "rubric_version": "v1.2.0",
+       "metric_version": "v3",
+       "contract_repair_version": "v1.2.5",
+       "quote_validator_sha256": "153ab4a6f203ca0398133a2cc2ca6fda834f7670afa90651c66cfa44b92c722a"
+      },
+      "details": {
+       "errors": [
+        "StructuredOutputError: v1.2.5 evidence patch schema is invalid"
+       ],
+       "failure_kind": "contract",
+       "agent_error_type": "StructuredOutputError",
+       "original_raw_output": "{\"fixes\":[{\"claim_id\":\"cl2\",\"evidence_refs\":null},{\"claim_id\":\"cl3\",\"evidence_refs\":null}]}",
+       "original_raw_truncated": false,
+       "token_usage": {
+        "input": 7534,
+        "output": 1032
+       },
+       "cost": "0",
+       "agent_contract": {
+        "contract_version": "v1.2.5",
+        "quote_validator_sha256": "153ab4a6f203ca0398133a2cc2ca6fda834f7670afa90651c66cfa44b92c722a",
+        "quote_precheck_errors": [
+         {
+          "claim_id": "cl2",
+          "context_id": "C1",
+          "code": "quote_not_found",
+          "quote": "生鲜食品质量问题需在签收后 24 小时内拍照反馈。",
+          "context_excerpt": "生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。"
+         },
+         {
+          "claim_id": "cl3",
+          "context_id": "C1",
+          "code": "quote_not_found",
+          "quote": "生鲜食品质量问题需在签收后 24 小时内拍照反馈。",
+          "context_excerpt": "生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。"
+         }
+        ],
+        "mixed_sentence_warnings": [
+         {
+          "claim_id": "cl5",
+          "claim": "该时限是硬性要求，文档未提及例外情形或宽限期",
+          "code": "mixed_sentence_factual_absence"
+         }
+        ],
+        "repair_triggered": true,
+        "repair_count": 1,
+        "passed_after_repair": false,
+        "final_errors": [
+         {
+          "code": "patch_schema_invalid",
+          "error_type": "StructuredOutputError",
+          "validation_errors": "2 validation errors for EvidencePatchV125\nfixes.0.evidence_refs\n  Input should be a valid array [type=list_type, input_value=None, input_type=NoneType]\n    For further information visit https://errors.pydantic.dev/2.14/v/list_type\nfixes.1.evidence_refs\n  Input should be a valid array [type=list_type, input_value=None, input_type=NoneType]\n    For further information visit https://errors.pydantic.dev/2.14/v/list_type"
+         }
+        ],
+        "patch_schema_sha256": "bfc71529c4ef057dec7256c35ad31341cc31924f5a2784469721323f74547f33",
+        "patch_applied_claims": [],
+        "patch_semantic_review_required": false,
+        "patch_refusal": null,
+        "patch_unsupported_quote_claims": [],
+        "patch_expected_claims": [
+         "cl2",
+         "cl3"
+        ],
+        "patch_provided_claims": [],
+        "patch_missing_claims": []
+       }
+      },
+      "raw_output": "{\"fixes\":[{\"claim_id\":\"cl2\",\"evidence_refs\":null},{\"claim_id\":\"cl3\",\"evidence_refs\":null}]}",
+      "raw_truncated": false
+     },
+     {
+      "metric_name": "faithfulness_strict",
+      "metric_version": "v3",
+      "status": "invalid",
+      "score": null,
+      "skipped_reason": null,
+      "invalid_reason": "contract_violation",
+      "error_type": "StructuredOutputError",
+      "error_message": null,
+      "latency_ms": 0,
+      "judge_config": {
+       "agent": "rag_judge_faithfulness",
+       "model": "qwen-max",
+       "temperature": 0.0,
+       "max_tokens": 8192,
+       "prompt_version": "v1.2.5",
+       "resolved_prompt_version": "v1.2.5",
+       "prompt_sha256": "9c80d4d5cd60ea7c95ad02c71f97ab566cc2fd82e2a2230124ee4b21247b9d8e",
+       "schema_version": "rag_judge_schema_v3",
+       "rubric_version": "v1.2.0",
+       "metric_version": "v3",
+       "contract_repair_version": "v1.2.5",
+       "quote_validator_sha256": "153ab4a6f203ca0398133a2cc2ca6fda834f7670afa90651c66cfa44b92c722a"
+      },
+      "details": {
+       "failure_kind": "contract",
+       "agent_error_type": "StructuredOutputError",
+       "agent_contract": {
+        "contract_version": "v1.2.5",
+        "quote_validator_sha256": "153ab4a6f203ca0398133a2cc2ca6fda834f7670afa90651c66cfa44b92c722a",
+        "quote_precheck_errors": [
+         {
+          "claim_id": "cl2",
+          "context_id": "C1",
+          "code": "quote_not_found",
+          "quote": "生鲜食品质量问题需在签收后 24 小时内拍照反馈。",
+          "context_excerpt": "生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。"
+         },
+         {
+          "claim_id": "cl3",
+          "context_id": "C1",
+          "code": "quote_not_found",
+          "quote": "生鲜食品质量问题需在签收后 24 小时内拍照反馈。",
+          "context_excerpt": "生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。"
+         }
+        ],
+        "mixed_sentence_warnings": [
+         {
+          "claim_id": "cl5",
+          "claim": "该时限是硬性要求，文档未提及例外情形或宽限期",
+          "code": "mixed_sentence_factual_absence"
+         }
+        ],
+        "repair_triggered": true,
+        "repair_count": 1,
+        "passed_after_repair": false,
+        "final_errors": [
+         {
+          "code": "patch_schema_invalid",
+          "error_type": "StructuredOutputError",
+          "validation_errors": "2 validation errors for EvidencePatchV125\nfixes.0.evidence_refs\n  Input should be a valid array [type=list_type, input_value=None, input_type=NoneType]\n    For further information visit https://errors.pydantic.dev/2.14/v/list_type\nfixes.1.evidence_refs\n  Input should be a valid array [type=list_type, input_value=None, input_type=NoneType]\n    For further information visit https://errors.pydantic.dev/2.14/v/list_type"
+         }
+        ],
+        "patch_schema_sha256": "bfc71529c4ef057dec7256c35ad31341cc31924f5a2784469721323f74547f33",
+        "patch_applied_claims": [],
+        "patch_semantic_review_required": false,
+        "patch_refusal": null,
+        "patch_unsupported_quote_claims": [],
+        "patch_expected_claims": [
+         "cl2",
+         "cl3"
+        ],
+        "patch_provided_claims": [],
+        "patch_missing_claims": []
+       }
+      },
+      "raw_output": null,
+      "raw_truncated": false
+     }
+    ],
+    "fingerprint_errors": [],
+    "credential_failure": false,
+    "call_summary": {
+     "calls": 2,
+     "primary": 1,
+     "patch": 1,
+     "repair": 0,
+     "retry": 0,
+     "input_tokens": 9425,
+     "output_tokens": 1061,
+     "cost_cny": 0.0328056
+    },
+    "initial_claims": [
+     {
+      "claim_id": "cl1",
+      "raw_claim_id": "cl1",
+      "claim": "是的，可以按政策反馈。",
+      "claim_type": "factual_claim",
+      "claim_subtype": "policy",
+      "support_status": "unsupported",
+      "is_contradictory": true,
+      "contradiction_with": [
+       "cl2"
+      ],
+      "evidence_refs": []
+     },
+     {
+      "claim_id": "cl2",
+      "raw_claim_id": "cl2",
+      "claim": "生鲜食品质量问题需在签收后 24 小时内拍照反馈",
+      "claim_type": "factual_claim",
+      "claim_subtype": "policy",
+      "support_status": "supported",
+      "is_contradictory": false,
+      "contradiction_with": [],
+      "evidence_refs": [
+       {
+        "context_id": "C1",
+        "quote": "生鲜食品质量问题需在签收后 24 小时内拍照反馈。"
+       }
+      ]
+     },
+     {
+      "claim_id": "cl3",
+      "raw_claim_id": "cl3",
+      "claim": "您是在签收后第 2 天（即超过 24 小时）才发现并反馈，已超出政策规定的反馈时效",
+      "claim_type": "factual_claim",
+      "claim_subtype": "derived",
+      "support_status": "supported",
+      "is_contradictory": false,
+      "contradiction_with": [],
+      "evidence_refs": [
+       {
+        "context_id": "C1",
+        "quote": "生鲜食品质量问题需在签收后 24 小时内拍照反馈。"
+       }
+      ]
+     },
+     {
+      "claim_id": "cl4",
+      "raw_claim_id": "cl4",
+      "claim": "因此原则上不符合质量反馈受理条件",
+      "claim_type": "factual_claim",
+      "claim_subtype": "condition",
+      "support_status": "insufficient_evidence",
+      "is_contradictory": false,
+      "contradiction_with": [],
+      "evidence_refs": []
+     },
+     {
+      "claim_id": "cl5",
+      "raw_claim_id": "cl5",
+      "claim": "该时限是硬性要求，文档未提及例外情形或宽限期",
+      "claim_type": "factual_claim",
+      "claim_subtype": "condition",
+      "support_status": "insufficient_evidence",
+      "is_contradictory": false,
+      "contradiction_with": [],
+      "evidence_refs": []
+     },
+     {
+      "claim_id": "cl6",
+      "raw_claim_id": "cl6",
+      "claim": "24 小时起算点为“签收完成时间”（非签收日零点），且须“拍照反馈”（需保留问题实物及包装证据）",
+      "claim_type": "factual_claim",
+      "claim_subtype": "process",
+      "support_status": "insufficient_evidence",
+      "is_contradictory": false,
+      "contradiction_with": [],
+      "evidence_refs": []
+     },
+     {
+      "claim_id": "cl7",
+      "raw_claim_id": "cl7",
+      "claim": "若尚未超时，立即通过订单页面或联系在线客服（9:00–21:00）提交带时间水印的照片凭证",
+      "claim_type": "non_factual",
+      "claim_subtype": "advice",
+      "support_status": null,
+      "is_contradictory": false,
+      "contradiction_with": [],
+      "evidence_refs": []
+     },
+     {
+      "claim_id": "cl8",
+      "raw_claim_id": "cl8",
+      "claim": "若已超时，可尝试联系客服说明具体情况（如物流延误导致开箱延迟、问题明显且可验证等），但是否受理由商家个案判断，政策不保证支持",
+      "claim_type": "non_factual",
+      "claim_subtype": "advice",
+      "support_status": null,
+      "is_contradictory": false,
+      "contradiction_with": [],
+      "evidence_refs": []
+     },
+     {
+      "claim_id": "cl9",
+      "raw_claim_id": "cl9",
+      "claim": "文档未说明超时后申诉渠道或人工复核机制",
+      "claim_type": "non_factual",
+      "claim_subtype": "absence",
+      "support_status": null,
+      "is_contradictory": false,
+      "contradiction_with": [],
+      "evidence_refs": []
+     }
+    ],
+    "initial_preview": {
+     "scorable_claim_count": 6,
+     "supported_count": 2,
+     "unsupported_count": 1,
+     "insufficient_evidence_count": 3,
+     "non_factual_count": 3,
+     "f_preview": 0.333333,
+     "note": "preview ignores quote validity and is not a Service F score"
+    },
+    "initial_cl1": {
+     "claim_id": "cl1",
+     "raw_claim_id": "cl1",
+     "claim": "是的，可以按政策反馈。",
+     "claim_type": "factual_claim",
+     "claim_subtype": "policy",
+     "support_status": "unsupported",
+     "is_contradictory": true,
+     "contradiction_with": [
+      "cl2"
+     ],
+     "evidence_refs": []
+    },
+    "initial_derived_claims": [
+     {
+      "claim_id": "cl3",
+      "raw_claim_id": "cl3",
+      "claim": "您是在签收后第 2 天（即超过 24 小时）才发现并反馈，已超出政策规定的反馈时效",
+      "claim_type": "factual_claim",
+      "claim_subtype": "derived",
+      "support_status": "supported",
+      "is_contradictory": false,
+      "contradiction_with": [],
+      "evidence_refs": [
+       {
+        "context_id": "C1",
+        "quote": "生鲜食品质量问题需在签收后 24 小时内拍照反馈。"
+       }
+      ]
+     }
+    ],
+    "initial_derived_count": 1
+   }
+  ],
+  "summary": {
+   "runs": 3,
+   "valid_scores": [],
+   "valid_run_count": 0,
+   "invalid_runs": [
+    "Q23-F1",
+    "Q23-F2",
+    "Q23-F3"
+   ],
+   "invalid_run_count": 3,
+   "median": null,
+   "min": null,
+   "max": null,
+   "target_hit_count": 0,
+   "target_hit_rate": null,
+   "median_in_target": false,
+   "insufficient_valid_runs": true,
+   "all_runs_completed": true
+  },
+  "c_r_snapshot": {
+   "run_id": "Q23-CR",
+   "case_id": "Q23",
+   "c_status": "evaluated",
+   "c_score": 0.0,
+   "c_target": [
+    0.0,
+    0.2
+   ],
+   "c_target_hit": true,
+   "c_warning": null,
+   "r_status": "evaluated",
+   "r_score": 0.7,
+   "r_target": [
+    0.7,
+    1.0
+   ],
+   "r_target_hit": true,
+   "outcomes": [
+    {
+     "metric_name": "answer_correctness",
+     "metric_version": "v3",
+     "status": "evaluated",
+     "score": 0.0,
+     "skipped_reason": null,
+     "invalid_reason": null,
+     "error_type": null,
+     "error_message": null,
+     "latency_ms": 2260,
+     "judge_config": {
+      "agent": "rag_judge_answer_correctness",
+      "model": "qwen-max",
+      "temperature": 0.0,
+      "max_tokens": 8192,
+      "prompt_version": "v1.2.5",
+      "resolved_prompt_version": "v1.2.5",
+      "prompt_sha256": "ca489fcf39691e9a71aec004a01938fb6c70b7b17da3c55fb0ada066e1d24968",
+      "schema_version": "rag_judge_schema_v3",
+      "rubric_version": "v1.2.0",
+      "metric_version": "v3"
+     },
+     "details": {
+      "missing_points": [
+       "不能按该条款反馈"
+      ],
+      "wrong_facts": [
+       "是的，可以按政策反馈"
+      ],
+      "reason": "首句给出无依据的确定性结论，与金标矛盾",
+      "token_usage": {
+       "input": 2287,
+       "output": 62
+      },
+      "cost": "0",
+      "agent_contract": {
+       "contract_version": "v1.2.5",
+       "correctness_first_sentence_warning": null
+      }
+     },
+     "raw_output": "```json\n{\n  \"score\": 0.0,\n  \"missing_points\": [\"不能按该条款反馈\"],\n  \"wrong_facts\": [\"是的，可以按政策反馈\"],\n  \"reason\": \"首句给出无依据的确定性结论，与金标矛盾\"\n}\n```",
+     "raw_truncated": false
+    },
+    {
+     "metric_name": "answer_relevancy",
+     "metric_version": "v3",
+     "status": "evaluated",
+     "score": 0.7,
+     "skipped_reason": null,
+     "invalid_reason": null,
+     "error_type": null,
+     "error_message": null,
+     "latency_ms": 1801,
+     "judge_config": {
+      "agent": "rag_judge_answer_relevancy",
+      "model": "qwen-max",
+      "temperature": 0.0,
+      "max_tokens": 8192,
+      "prompt_version": "v1.2.5",
+      "resolved_prompt_version": "v1.2.5",
+      "prompt_sha256": "f3efe431683ed26ba0a7338e6e2b5841d65d42dadde5cac30b8340e2ca95dfdc",
+      "schema_version": "rag_judge_schema_v3",
+      "rubric_version": "v1.2.0",
+      "metric_version": "v3"
+     },
+     "details": {
+      "reason": "回答回应了主要部分，解释了政策规定和超时情况，但缺少对用户具体问题的明确下一步建议。",
+      "token_usage": {
+       "input": 1562,
+       "output": 47
+      },
+      "cost": "0"
+     },
+     "raw_output": "```json\n{\n  \"score\": 0.7,\n  \"reason\": \"回答回应了主要部分，解释了政策规定和超时情况，但缺少对用户具体问题的明确下一步建议。\"\n}\n```",
+     "raw_truncated": false
+    }
+   ],
+   "fingerprint_errors": [],
+   "call_summary": {
+    "calls": 2,
+    "primary": 2,
+    "patch": 0,
+    "repair": 0,
+    "retry": 0,
+    "input_tokens": 3849,
+    "output_tokens": 109,
+    "cost_cny": 0.010284
+   },
+   "snapshot_only": true
+  }
+ },
+ "q21": {
+  "run_id": "Q21",
+  "case_id": "Q21",
+  "metrics": {
+   "faithfulness": {
+    "status": "invalid",
+    "score": null,
+    "target": [
+     0.6,
+     0.7
+    ],
+    "target_hit": false
+   },
+   "answer_correctness": {
+    "status": "evaluated",
+    "score": 0.9,
+    "target": null,
+    "target_hit": null
+   },
+   "answer_relevancy": {
+    "status": "evaluated",
+    "score": 0.9,
+    "target": null,
+    "target_hit": null
+   }
+  },
+  "f_target_hit": false,
+  "exemption_claims": [],
+  "forbidden_quote": false,
+  "claims": [],
+  "outcomes": [
+   {
+    "metric_name": "faithfulness",
+    "metric_version": "v3",
+    "status": "invalid",
+    "score": null,
+    "skipped_reason": null,
+    "invalid_reason": "contract_violation",
+    "error_type": "StructuredOutputError",
+    "error_message": "StructuredOutputError: v1.2.5 evidence patch refused",
+    "latency_ms": 18757,
+    "judge_config": {
+     "agent": "rag_judge_faithfulness",
+     "model": "qwen-max",
+     "temperature": 0.0,
+     "max_tokens": 8192,
+     "prompt_version": "v1.2.5",
+     "resolved_prompt_version": "v1.2.5",
+     "prompt_sha256": "9c80d4d5cd60ea7c95ad02c71f97ab566cc2fd82e2a2230124ee4b21247b9d8e",
+     "schema_version": "rag_judge_schema_v3",
+     "rubric_version": "v1.2.0",
+     "metric_version": "v3",
+     "contract_repair_version": "v1.2.5",
+     "quote_validator_sha256": "153ab4a6f203ca0398133a2cc2ca6fda834f7670afa90651c66cfa44b92c722a"
+    },
+    "details": {
+     "errors": [
+      "StructuredOutputError: v1.2.5 evidence patch refused"
+     ],
+     "failure_kind": "contract",
+     "agent_error_type": "StructuredOutputError",
+     "original_raw_output": "{\"refusal\": {\"claim_ids\": [\"cl5\"], \"reason_code\": \"no_direct_quote\", \"reason\": \"在提供的上下文中找不到直接支持该 claim 的连续原文。\"}}",
+     "original_raw_truncated": false,
+     "token_usage": {
+      "input": 7667,
+      "output": 784
+     },
+     "cost": "0",
+     "agent_contract": {
+      "contract_version": "v1.2.5",
+      "quote_validator_sha256": "153ab4a6f203ca0398133a2cc2ca6fda834f7670afa90651c66cfa44b92c722a",
+      "quote_precheck_errors": [
+       {
+        "claim_id": "cl5",
+        "context_id": "C1",
+        "code": "quote_not_found",
+        "quote": "若商品存在**质量问题**，则不受 7 天无理由限制，仍可依据保修或退换货政策主张权益（如申请换货或质量退换，需提供凭证并符合相应条款）",
+        "context_excerpt": "因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。"
+       }
+      ],
+      "mixed_sentence_warnings": [],
+      "repair_triggered": true,
+      "repair_count": 1,
+      "passed_after_repair": false,
+      "final_errors": [
+       {
+        "code": "patch_refused",
+        "error_type": "StructuredOutputError",
+        "validation_errors": "{\"claim_ids\": [\"cl5\"], \"reason_code\": \"no_direct_quote\", \"reason\": \"在提供的上下文中找不到直接支持该 claim 的连续原文。\"}"
+       }
+      ],
+      "patch_schema_sha256": "bfc71529c4ef057dec7256c35ad31341cc31924f5a2784469721323f74547f33",
+      "patch_applied_claims": [],
+      "patch_semantic_review_required": false,
+      "patch_refusal": {
+       "claim_ids": [
+        "cl5"
+       ],
+       "reason_code": "no_direct_quote",
+       "reason": "在提供的上下文中找不到直接支持该 claim 的连续原文。"
+      },
+      "patch_unsupported_quote_claims": [],
+      "patch_expected_claims": [
+       "cl5"
+      ],
+      "patch_provided_claims": [
+       "cl5"
+      ],
+      "patch_missing_claims": []
+     }
+    },
+    "raw_output": "{\"refusal\": {\"claim_ids\": [\"cl5\"], \"reason_code\": \"no_direct_quote\", \"reason\": \"在提供的上下文中找不到直接支持该 claim 的连续原文。\"}}",
+    "raw_truncated": false
+   },
+   {
+    "metric_name": "faithfulness_strict",
+    "metric_version": "v3",
+    "status": "invalid",
+    "score": null,
+    "skipped_reason": null,
+    "invalid_reason": "contract_violation",
+    "error_type": "StructuredOutputError",
+    "error_message": null,
+    "latency_ms": 0,
+    "judge_config": {
+     "agent": "rag_judge_faithfulness",
+     "model": "qwen-max",
+     "temperature": 0.0,
+     "max_tokens": 8192,
+     "prompt_version": "v1.2.5",
+     "resolved_prompt_version": "v1.2.5",
+     "prompt_sha256": "9c80d4d5cd60ea7c95ad02c71f97ab566cc2fd82e2a2230124ee4b21247b9d8e",
+     "schema_version": "rag_judge_schema_v3",
+     "rubric_version": "v1.2.0",
+     "metric_version": "v3",
+     "contract_repair_version": "v1.2.5",
+     "quote_validator_sha256": "153ab4a6f203ca0398133a2cc2ca6fda834f7670afa90651c66cfa44b92c722a"
+    },
+    "details": {
+     "failure_kind": "contract",
+     "agent_error_type": "StructuredOutputError",
+     "agent_contract": {
+      "contract_version": "v1.2.5",
+      "quote_validator_sha256": "153ab4a6f203ca0398133a2cc2ca6fda834f7670afa90651c66cfa44b92c722a",
+      "quote_precheck_errors": [
+       {
+        "claim_id": "cl5",
+        "context_id": "C1",
+        "code": "quote_not_found",
+        "quote": "若商品存在**质量问题**，则不受 7 天无理由限制，仍可依据保修或退换货政策主张权益（如申请换货或质量退换，需提供凭证并符合相应条款）",
+        "context_excerpt": "因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。"
+       }
+      ],
+      "mixed_sentence_warnings": [],
+      "repair_triggered": true,
+      "repair_count": 1,
+      "passed_after_repair": false,
+      "final_errors": [
+       {
+        "code": "patch_refused",
+        "error_type": "StructuredOutputError",
+        "validation_errors": "{\"claim_ids\": [\"cl5\"], \"reason_code\": \"no_direct_quote\", \"reason\": \"在提供的上下文中找不到直接支持该 claim 的连续原文。\"}"
+       }
+      ],
+      "patch_schema_sha256": "bfc71529c4ef057dec7256c35ad31341cc31924f5a2784469721323f74547f33",
+      "patch_applied_claims": [],
+      "patch_semantic_review_required": false,
+      "patch_refusal": {
+       "claim_ids": [
+        "cl5"
+       ],
+       "reason_code": "no_direct_quote",
+       "reason": "在提供的上下文中找不到直接支持该 claim 的连续原文。"
+      },
+      "patch_unsupported_quote_claims": [],
+      "patch_expected_claims": [
+       "cl5"
+      ],
+      "patch_provided_claims": [
+       "cl5"
+      ],
+      "patch_missing_claims": []
+     }
+    },
+    "raw_output": null,
+    "raw_truncated": false
+   },
+   {
+    "metric_name": "answer_correctness",
+    "metric_version": "v3",
+    "status": "evaluated",
+    "score": 0.9,
+    "skipped_reason": null,
+    "invalid_reason": null,
+    "error_type": null,
+    "error_message": null,
+    "latency_ms": 1763,
+    "judge_config": {
+     "agent": "rag_judge_answer_correctness",
+     "model": "qwen-max",
+     "temperature": 0.0,
+     "max_tokens": 8192,
+     "prompt_version": "v1.2.5",
+     "resolved_prompt_version": "v1.2.5",
+     "prompt_sha256": "ca489fcf39691e9a71aec004a01938fb6c70b7b17da3c55fb0ada066e1d24968",
+     "schema_version": "rag_judge_schema_v3",
+     "rubric_version": "v1.2.0",
+     "metric_version": "v3"
+    },
+    "details": {
+     "missing_points": [],
+     "wrong_facts": [],
+     "reason": "回答准确且完整地覆盖了金标中的关键事实，并补充了相关的政策细节。",
+     "token_usage": {
+      "input": 2400,
+      "output": 53
+     },
+     "cost": "0",
+     "agent_contract": {
+      "contract_version": "v1.2.5",
+      "correctness_first_sentence_warning": null
+     }
+    },
+    "raw_output": "```json\n{\n  \"score\": 0.9,\n  \"missing_points\": [],\n  \"wrong_facts\": [],\n  \"reason\": \"回答准确且完整地覆盖了金标中的关键事实，并补充了相关的政策细节。\"\n}\n```",
+    "raw_truncated": false
+   },
+   {
+    "metric_name": "answer_relevancy",
+    "metric_version": "v3",
+    "status": "evaluated",
+    "score": 0.9,
+    "skipped_reason": null,
+    "invalid_reason": null,
+    "error_type": null,
+    "error_message": null,
+    "latency_ms": 1686,
+    "judge_config": {
+     "agent": "rag_judge_answer_relevancy",
+     "model": "qwen-max",
+     "temperature": 0.0,
+     "max_tokens": 8192,
+     "prompt_version": "v1.2.5",
+     "resolved_prompt_version": "v1.2.5",
+     "prompt_sha256": "f3efe431683ed26ba0a7338e6e2b5841d65d42dadde5cac30b8340e2ca95dfdc",
+     "schema_version": "rag_judge_schema_v3",
+     "rubric_version": "v1.2.0",
+     "metric_version": "v3"
+    },
+    "details": {
+     "reason": "回答明确指出签收后第10天已超出7天无理由退款时效，并补充了质量问题的处理方式，同时建议联系客服进一步核实。",
+     "token_usage": {
+      "input": 1695,
+      "output": 54
+     },
+     "cost": "0"
+    },
+    "raw_output": "```json\n{\n  \"score\": 0.9,\n  \"reason\": \"回答明确指出签收后第10天已超出7天无理由退款时效，并补充了质量问题的处理方式，同时建议联系客服进一步核实。\"\n}\n```",
+    "raw_truncated": false
+   }
+  ],
+  "fingerprint_errors": [],
+  "call_summary": {
+   "calls": 4,
+   "primary": 3,
+   "patch": 1,
+   "repair": 0,
+   "retry": 0,
+   "input_tokens": 13528,
+   "output_tokens": 930,
+   "cost_cny": 0.0413952
+  }
+ },
+ "q11": {
+  "run_id": "Q11",
+  "case_id": "Q11",
+  "metrics": {
+   "faithfulness": {
+    "status": "invalid",
+    "score": null,
+    "target": [
+     0.6,
+     0.9
+    ],
+    "target_hit": false
+   },
+   "answer_correctness": {
+    "status": "evaluated",
+    "score": 0.9,
+    "target": [
+     0.8,
+     1.0
+    ],
+    "target_hit": true
+   },
+   "answer_relevancy": {
+    "status": "evaluated",
+    "score": 0.9,
+    "target": [
+     0.9,
+     1.0
+    ],
+    "target_hit": true
+   }
+  },
+  "claims": [],
+  "quote_checks": [],
+  "contexts_count": 2,
+  "outcomes": [
+   {
+    "metric_name": "faithfulness",
+    "metric_version": "v3",
+    "status": "invalid",
+    "score": null,
+    "skipped_reason": null,
+    "invalid_reason": "contract_violation",
+    "error_type": "StructuredOutputError",
+    "error_message": "StructuredOutputError: v1.2.5 evidence patch schema is invalid",
+    "latency_ms": 19830,
+    "judge_config": {
+     "agent": "rag_judge_faithfulness",
+     "model": "qwen-max",
+     "temperature": 0.0,
+     "max_tokens": 8192,
+     "prompt_version": "v1.2.5",
+     "resolved_prompt_version": "v1.2.5",
+     "prompt_sha256": "9c80d4d5cd60ea7c95ad02c71f97ab566cc2fd82e2a2230124ee4b21247b9d8e",
+     "schema_version": "rag_judge_schema_v3",
+     "rubric_version": "v1.2.0",
+     "metric_version": "v3",
+     "contract_repair_version": "v1.2.5",
+     "quote_validator_sha256": "153ab4a6f203ca0398133a2cc2ca6fda834f7670afa90651c66cfa44b92c722a"
+    },
+    "details": {
+     "errors": [
+      "StructuredOutputError: v1.2.5 evidence patch schema is invalid"
+     ],
+     "failure_kind": "contract",
+     "agent_error_type": "StructuredOutputError",
+     "original_raw_output": "{\"fixes\":[{\"claim_id\":\"cl1\",\"evidence_refs\":null},{\"claim_id\":\"cl4\",\"evidence_refs\":null}]}",
+     "original_raw_truncated": false,
+     "token_usage": {
+      "input": 7517,
+      "output": 838
+     },
+     "cost": "0",
+     "agent_contract": {
+      "contract_version": "v1.2.5",
+      "quote_validator_sha256": "153ab4a6f203ca0398133a2cc2ca6fda834f7670afa90651c66cfa44b92c722a",
+      "quote_precheck_errors": [
+       {
+        "claim_id": "cl1",
+        "context_id": "C1",
+        "code": "quote_not_found",
+        "quote": "订单签收后 7 天内可申请无理由退款。定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。",
+        "context_excerpt": "定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。"
+       },
+       {
+        "claim_id": "cl4",
+        "context_id": "C1",
+        "code": "quote_not_found",
+        "quote": "订单签收后 7 天内可申请无理由退款。定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。",
+        "context_excerpt": "定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。"
+       }
+      ],
+      "mixed_sentence_warnings": [],
+      "repair_triggered": true,
+      "repair_count": 1,
+      "passed_after_repair": false,
+      "final_errors": [
+       {
+        "code": "patch_schema_invalid",
+        "error_type": "StructuredOutputError",
+        "validation_errors": "2 validation errors for EvidencePatchV125\nfixes.0.evidence_refs\n  Input should be a valid array [type=list_type, input_value=None, input_type=NoneType]\n    For further information visit https://errors.pydantic.dev/2.14/v/list_type\nfixes.1.evidence_refs\n  Input should be a valid array [type=list_type, input_value=None, input_type=NoneType]\n    For further information visit https://errors.pydantic.dev/2.14/v/list_type"
+       }
+      ],
+      "patch_schema_sha256": "bfc71529c4ef057dec7256c35ad31341cc31924f5a2784469721323f74547f33",
+      "patch_applied_claims": [],
+      "patch_semantic_review_required": false,
+      "patch_refusal": null,
+      "patch_unsupported_quote_claims": [],
+      "patch_expected_claims": [
+       "cl1",
+       "cl4"
+      ],
+      "patch_provided_claims": [],
+      "patch_missing_claims": []
+     }
+    },
+    "raw_output": "{\"fixes\":[{\"claim_id\":\"cl1\",\"evidence_refs\":null},{\"claim_id\":\"cl4\",\"evidence_refs\":null}]}",
+    "raw_truncated": false
+   },
+   {
+    "metric_name": "faithfulness_strict",
+    "metric_version": "v3",
+    "status": "invalid",
+    "score": null,
+    "skipped_reason": null,
+    "invalid_reason": "contract_violation",
+    "error_type": "StructuredOutputError",
+    "error_message": null,
+    "latency_ms": 0,
+    "judge_config": {
+     "agent": "rag_judge_faithfulness",
+     "model": "qwen-max",
+     "temperature": 0.0,
+     "max_tokens": 8192,
+     "prompt_version": "v1.2.5",
+     "resolved_prompt_version": "v1.2.5",
+     "prompt_sha256": "9c80d4d5cd60ea7c95ad02c71f97ab566cc2fd82e2a2230124ee4b21247b9d8e",
+     "schema_version": "rag_judge_schema_v3",
+     "rubric_version": "v1.2.0",
+     "metric_version": "v3",
+     "contract_repair_version": "v1.2.5",
+     "quote_validator_sha256": "153ab4a6f203ca0398133a2cc2ca6fda834f7670afa90651c66cfa44b92c722a"
+    },
+    "details": {
+     "failure_kind": "contract",
+     "agent_error_type": "StructuredOutputError",
+     "agent_contract": {
+      "contract_version": "v1.2.5",
+      "quote_validator_sha256": "153ab4a6f203ca0398133a2cc2ca6fda834f7670afa90651c66cfa44b92c722a",
+      "quote_precheck_errors": [
+       {
+        "claim_id": "cl1",
+        "context_id": "C1",
+        "code": "quote_not_found",
+        "quote": "订单签收后 7 天内可申请无理由退款。定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。",
+        "context_excerpt": "定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。"
+       },
+       {
+        "claim_id": "cl4",
+        "context_id": "C1",
+        "code": "quote_not_found",
+        "quote": "订单签收后 7 天内可申请无理由退款。定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。",
+        "context_excerpt": "定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。"
+       }
+      ],
+      "mixed_sentence_warnings": [],
+      "repair_triggered": true,
+      "repair_count": 1,
+      "passed_after_repair": false,
+      "final_errors": [
+       {
+        "code": "patch_schema_invalid",
+        "error_type": "StructuredOutputError",
+        "validation_errors": "2 validation errors for EvidencePatchV125\nfixes.0.evidence_refs\n  Input should be a valid array [type=list_type, input_value=None, input_type=NoneType]\n    For further information visit https://errors.pydantic.dev/2.14/v/list_type\nfixes.1.evidence_refs\n  Input should be a valid array [type=list_type, input_value=None, input_type=NoneType]\n    For further information visit https://errors.pydantic.dev/2.14/v/list_type"
+       }
+      ],
+      "patch_schema_sha256": "bfc71529c4ef057dec7256c35ad31341cc31924f5a2784469721323f74547f33",
+      "patch_applied_claims": [],
+      "patch_semantic_review_required": false,
+      "patch_refusal": null,
+      "patch_unsupported_quote_claims": [],
+      "patch_expected_claims": [
+       "cl1",
+       "cl4"
+      ],
+      "patch_provided_claims": [],
+      "patch_missing_claims": []
+     }
+    },
+    "raw_output": null,
+    "raw_truncated": false
+   },
+   {
+    "metric_name": "answer_correctness",
+    "metric_version": "v3",
+    "status": "evaluated",
+    "score": 0.9,
+    "skipped_reason": null,
+    "invalid_reason": null,
+    "error_type": null,
+    "error_message": null,
+    "latency_ms": 2081,
+    "judge_config": {
+     "agent": "rag_judge_answer_correctness",
+     "model": "qwen-max",
+     "temperature": 0.0,
+     "max_tokens": 8192,
+     "prompt_version": "v1.2.5",
+     "resolved_prompt_version": "v1.2.5",
+     "prompt_sha256": "ca489fcf39691e9a71aec004a01938fb6c70b7b17da3c55fb0ada066e1d24968",
+     "schema_version": "rag_judge_schema_v3",
+     "rubric_version": "v1.2.0",
+     "metric_version": "v3"
+    },
+    "details": {
+     "missing_points": [],
+     "wrong_facts": [],
+     "reason": "回答正确且完整，补充了与质量问题相关的政策，但不影响主要结论。",
+     "token_usage": {
+      "input": 2244,
+      "output": 51
+     },
+     "cost": "0",
+     "agent_contract": {
+      "contract_version": "v1.2.5",
+      "correctness_first_sentence_warning": null
+     }
+    },
+    "raw_output": "```json\n{\n  \"score\": 0.9,\n  \"missing_points\": [],\n  \"wrong_facts\": [],\n  \"reason\": \"回答正确且完整，补充了与质量问题相关的政策，但不影响主要结论。\"\n}\n```",
+    "raw_truncated": false
+   },
+   {
+    "metric_name": "answer_relevancy",
+    "metric_version": "v3",
+    "status": "evaluated",
+    "score": 0.9,
+    "skipped_reason": null,
+    "invalid_reason": null,
+    "error_type": null,
+    "error_message": null,
+    "latency_ms": 1666,
+    "judge_config": {
+     "agent": "rag_judge_answer_relevancy",
+     "model": "qwen-max",
+     "temperature": 0.0,
+     "max_tokens": 8192,
+     "prompt_version": "v1.2.5",
+     "resolved_prompt_version": "v1.2.5",
+     "prompt_sha256": "f3efe431683ed26ba0a7338e6e2b5841d65d42dadde5cac30b8340e2ca95dfdc",
+     "schema_version": "rag_judge_schema_v3",
+     "rubric_version": "v1.2.0",
+     "metric_version": "v3"
+    },
+    "details": {
+     "reason": "完整回应了问题，明确说明定制商品不支持无理由退款，并补充了质量问题的退换货政策。",
+     "token_usage": {
+      "input": 1545,
+      "output": 45
+     },
+     "cost": "0"
+    },
+    "raw_output": "```json\n{\n  \"score\": 0.9,\n  \"reason\": \"完整回应了问题，明确说明定制商品不支持无理由退款，并补充了质量问题的退换货政策。\"\n}\n```",
+    "raw_truncated": false
+   }
+  ],
+  "fingerprint_errors": [],
+  "call_summary": {
+   "calls": 4,
+   "primary": 3,
+   "patch": 1,
+   "repair": 0,
+   "retry": 0,
+   "input_tokens": 13230,
+   "output_tokens": 963,
+   "cost_cny": 0.0409968
+  }
+ },
+ "ledger": {
+  "file": "docs\\repair\\phase3e\\m1d6-v125-ledger.jsonl",
+  "sha256": "69c2a5a40e1c724d676b08c819e4d7125dd1d86838ec8f8f83f826964ee08ad2",
+  "initial_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "total_attempts": 15,
+  "finished_calls": 15,
+  "uncertain_calls": 0,
+  "started_by_kind": {
+   "primary": 11,
+   "patch": 4
+  },
+  "started_by_run": {
+   "Q23-F1": 2,
+   "Q23-F2": 1,
+   "Q23-F3": 2,
+   "Q23-CR": 2,
+   "Q21": 4,
+   "Q11": 4
+  },
+  "input_tokens": 56805,
+  "output_tokens": 4940,
+  "cost_cny": 0.183756,
+  "ceiling_cny": 0.4,
+  "max_judge_calls": 18,
+  "budget_error": null,
+  "rows": [
+   {
+    "seq": 1,
+    "call_id": "call-001",
+    "case_id": "Q23",
+    "run_id": "Q23-F1",
+    "metric": "faithfulness",
+    "kind": "primary",
+    "model_requested": "qwen-max",
+    "response_model": "qwen-max",
+    "temperature": 0.0,
+    "max_tokens": 8192,
+    "prompt_version": "v1.2.5",
+    "prompt_sha256": "9c80d4d5cd60ea7c95ad02c71f97ab566cc2fd82e2a2230124ee4b21247b9d8e",
+    "system_prompt_sha256": "9c80d4d5cd60ea7c95ad02c71f97ab566cc2fd82e2a2230124ee4b21247b9d8e",
+    "patch_claim_ids": [],
+    "started_at": "2026-11-23T14:22:21.570Z",
+    "finished_at": "2026-11-23T14:22:42.674Z",
+    "status": "ok",
+    "input_tokens": 7534,
+    "output_tokens": 800,
+    "cost_cny": 0.0257616,
+    "error": null
+   },
+   {
+    "seq": 2,
+    "call_id": "call-002",
+    "case_id": "Q23",
+    "run_id": "Q23-F1",
+    "metric": "faithfulness",
+    "kind": "patch",
+    "model_requested": null,
+    "response_model": "qwen-max",
+    "temperature": 0.0,
+    "max_tokens": null,
+    "prompt_version": "v1.2.5",
+    "prompt_sha256": "9c80d4d5cd60ea7c95ad02c71f97ab566cc2fd82e2a2230124ee4b21247b9d8e",
+    "system_prompt_sha256": "7d2ce57e5b2bef451925d8e5f353a1e9331db2d93e99abea04d583a8676ba313",
+    "patch_claim_ids": [
+     "cl2"
+    ],
+    "started_at": "2026-11-23T14:22:42.681Z",
+    "finished_at": "2026-11-23T14:22:43.838Z",
+    "status": "ok",
+    "input_tokens": 1705,
+    "output_tokens": 17,
+    "cost_cny": 0.0042552,
+    "error": null
+   },
+   {
+    "seq": 3,
+    "call_id": "call-003",
+    "case_id": "Q23",
+    "run_id": "Q23-F2",
+    "metric": "faithfulness",
+    "kind": "primary",
+    "model_requested": "qwen-max",
+    "response_model": "qwen-max",
+    "temperature": 0.0,
+    "max_tokens": 8192,
+    "prompt_version": "v1.2.5",
+    "prompt_sha256": "9c80d4d5cd60ea7c95ad02c71f97ab566cc2fd82e2a2230124ee4b21247b9d8e",
+    "system_prompt_sha256": "9c80d4d5cd60ea7c95ad02c71f97ab566cc2fd82e2a2230124ee4b21247b9d8e",
+    "patch_claim_ids": [],
+    "started_at": "2026-11-23T14:22:43.879Z",
+    "finished_at": "2026-11-23T14:23:06.939Z",
+    "status": "ok",
+    "input_tokens": 7534,
+    "output_tokens": 1060,
+    "cost_cny": 0.0282576,
+    "error": null
+   },
+   {
+    "seq": 4,
+    "call_id": "call-004",
+    "case_id": "Q23",
+    "run_id": "Q23-F3",
+    "metric": "faithfulness",
+    "kind": "primary",
+    "model_requested": "qwen-max",
+    "response_model": "qwen-max",
+    "temperature": 0.0,
+    "max_tokens": 8192,
+    "prompt_version": "v1.2.5",
+    "prompt_sha256": "9c80d4d5cd60ea7c95ad02c71f97ab566cc2fd82e2a2230124ee4b21247b9d8e",
+    "system_prompt_sha256": "9c80d4d5cd60ea7c95ad02c71f97ab566cc2fd82e2a2230124ee4b21247b9d8e",
+    "patch_claim_ids": [],
+    "started_at": "2026-11-23T14:23:06.963Z",
+    "finished_at": "2026-11-23T14:23:31.247Z",
+    "status": "ok",
+    "input_tokens": 7534,
+    "output_tokens": 1032,
+    "cost_cny": 0.0279888,
+    "error": null
+   },
+   {
+    "seq": 5,
+    "call_id": "call-005",
+    "case_id": "Q23",
+    "run_id": "Q23-F3",
+    "metric": "faithfulness",
+    "kind": "patch",
+    "model_requested": null,
+    "response_model": "qwen-max",
+    "temperature": 0.0,
+    "max_tokens": null,
+    "prompt_version": "v1.2.5",
+    "prompt_sha256": "9c80d4d5cd60ea7c95ad02c71f97ab566cc2fd82e2a2230124ee4b21247b9d8e",
+    "system_prompt_sha256": "7d2ce57e5b2bef451925d8e5f353a1e9331db2d93e99abea04d583a8676ba313",
+    "patch_claim_ids": [
+     "cl2",
+     "cl3"
+    ],
+    "started_at": "2026-11-23T14:23:31.251Z",
+    "finished_at": "2026-11-23T14:23:32.646Z",
+    "status": "ok",
+    "input_tokens": 1891,
+    "output_tokens": 29,
+    "cost_cny": 0.0048168,
+    "error": null
+   },
+   {
+    "seq": 6,
+    "call_id": "call-006",
+    "case_id": "Q23",
+    "run_id": "Q23-CR",
+    "metric": "answer_correctness",
+    "kind": "primary",
+    "model_requested": "qwen-max",
+    "response_model": "qwen-max",
+    "temperature": 0.0,
+    "max_tokens": 8192,
+    "prompt_version": "v1.2.5",
+    "prompt_sha256": "ca489fcf39691e9a71aec004a01938fb6c70b7b17da3c55fb0ada066e1d24968",
+    "system_prompt_sha256": "ca489fcf39691e9a71aec004a01938fb6c70b7b17da3c55fb0ada066e1d24968",
+    "patch_claim_ids": [],
+    "started_at": "2026-11-23T14:23:32.665Z",
+    "finished_at": "2026-11-23T14:23:34.918Z",
+    "status": "ok",
+    "input_tokens": 2287,
+    "output_tokens": 62,
+    "cost_cny": 0.006084,
+    "error": null
+   },
+   {
+    "seq": 7,
+    "call_id": "call-007",
+    "case_id": "Q23",
+    "run_id": "Q23-CR",
+    "metric": "answer_relevancy",
+    "kind": "primary",
+    "model_requested": "qwen-max",
+    "response_model": "qwen-max",
+    "temperature": 0.0,
+    "max_tokens": 8192,
+    "prompt_version": "v1.2.5",
+    "prompt_sha256": "f3efe431683ed26ba0a7338e6e2b5841d65d42dadde5cac30b8340e2ca95dfdc",
+    "system_prompt_sha256": "f3efe431683ed26ba0a7338e6e2b5841d65d42dadde5cac30b8340e2ca95dfdc",
+    "patch_claim_ids": [],
+    "started_at": "2026-11-23T14:23:34.929Z",
+    "finished_at": "2026-11-23T14:23:36.726Z",
+    "status": "ok",
+    "input_tokens": 1562,
+    "output_tokens": 47,
+    "cost_cny": 0.0042,
+    "error": null
+   },
+   {
+    "seq": 8,
+    "call_id": "call-008",
+    "case_id": "Q21",
+    "run_id": "Q21",
+    "metric": "faithfulness",
+    "kind": "primary",
+    "model_requested": "qwen-max",
+    "response_model": "qwen-max",
+    "temperature": 0.0,
+    "max_tokens": 8192,
+    "prompt_version": "v1.2.5",
+    "prompt_sha256": "9c80d4d5cd60ea7c95ad02c71f97ab566cc2fd82e2a2230124ee4b21247b9d8e",
+    "system_prompt_sha256": "9c80d4d5cd60ea7c95ad02c71f97ab566cc2fd82e2a2230124ee4b21247b9d8e",
+    "patch_claim_ids": [],
+    "started_at": "2026-11-23T14:23:36.736Z",
+    "finished_at": "2026-11-23T14:23:53.885Z",
+    "status": "ok",
+    "input_tokens": 7667,
+    "output_tokens": 784,
+    "cost_cny": 0.0259272,
+    "error": null
+   },
+   {
+    "seq": 9,
+    "call_id": "call-009",
+    "case_id": "Q21",
+    "run_id": "Q21",
+    "metric": "faithfulness",
+    "kind": "patch",
+    "model_requested": null,
+    "response_model": "qwen-max",
+    "temperature": 0.0,
+    "max_tokens": null,
+    "prompt_version": "v1.2.5",
+    "prompt_sha256": "9c80d4d5cd60ea7c95ad02c71f97ab566cc2fd82e2a2230124ee4b21247b9d8e",
+    "system_prompt_sha256": "7d2ce57e5b2bef451925d8e5f353a1e9331db2d93e99abea04d583a8676ba313",
+    "patch_claim_ids": [
+     "cl5"
+    ],
+    "started_at": "2026-11-23T14:23:53.893Z",
+    "finished_at": "2026-11-23T14:23:55.484Z",
+    "status": "ok",
+    "input_tokens": 1766,
+    "output_tokens": 39,
+    "cost_cny": 0.0046128,
+    "error": null
+   },
+   {
+    "seq": 10,
+    "call_id": "call-010",
+    "case_id": "Q21",
+    "run_id": "Q21",
+    "metric": "answer_correctness",
+    "kind": "primary",
+    "model_requested": "qwen-max",
+    "response_model": "qwen-max",
+    "temperature": 0.0,
+    "max_tokens": 8192,
+    "prompt_version": "v1.2.5",
+    "prompt_sha256": "ca489fcf39691e9a71aec004a01938fb6c70b7b17da3c55fb0ada066e1d24968",
+    "system_prompt_sha256": "ca489fcf39691e9a71aec004a01938fb6c70b7b17da3c55fb0ada066e1d24968",
+    "patch_claim_ids": [],
+    "started_at": "2026-11-23T14:23:55.498Z",
+    "finished_at": "2026-11-23T14:23:57.258Z",
+    "status": "ok",
+    "input_tokens": 2400,
+    "output_tokens": 53,
+    "cost_cny": 0.0062688,
+    "error": null
+   },
+   {
+    "seq": 11,
+    "call_id": "call-011",
+    "case_id": "Q21",
+    "run_id": "Q21",
+    "metric": "answer_relevancy",
+    "kind": "primary",
+    "model_requested": "qwen-max",
+    "response_model": "qwen-max",
+    "temperature": 0.0,
+    "max_tokens": 8192,
+    "prompt_version": "v1.2.5",
+    "prompt_sha256": "f3efe431683ed26ba0a7338e6e2b5841d65d42dadde5cac30b8340e2ca95dfdc",
+    "system_prompt_sha256": "f3efe431683ed26ba0a7338e6e2b5841d65d42dadde5cac30b8340e2ca95dfdc",
+    "patch_claim_ids": [],
+    "started_at": "2026-11-23T14:23:57.266Z",
+    "finished_at": "2026-11-23T14:23:58.948Z",
+    "status": "ok",
+    "input_tokens": 1695,
+    "output_tokens": 54,
+    "cost_cny": 0.0045864,
+    "error": null
+   },
+   {
+    "seq": 12,
+    "call_id": "call-012",
+    "case_id": "Q11",
+    "run_id": "Q11",
+    "metric": "faithfulness",
+    "kind": "primary",
+    "model_requested": "qwen-max",
+    "response_model": "qwen-max",
+    "temperature": 0.0,
+    "max_tokens": 8192,
+    "prompt_version": "v1.2.5",
+    "prompt_sha256": "9c80d4d5cd60ea7c95ad02c71f97ab566cc2fd82e2a2230124ee4b21247b9d8e",
+    "system_prompt_sha256": "9c80d4d5cd60ea7c95ad02c71f97ab566cc2fd82e2a2230124ee4b21247b9d8e",
+    "patch_claim_ids": [],
+    "started_at": "2026-11-23T14:23:58.958Z",
+    "finished_at": "2026-11-23T14:24:17.397Z",
+    "status": "ok",
+    "input_tokens": 7517,
+    "output_tokens": 838,
+    "cost_cny": 0.0260856,
+    "error": null
+   },
+   {
+    "seq": 13,
+    "call_id": "call-013",
+    "case_id": "Q11",
+    "run_id": "Q11",
+    "metric": "faithfulness",
+    "kind": "patch",
+    "model_requested": null,
+    "response_model": "qwen-max",
+    "temperature": 0.0,
+    "max_tokens": null,
+    "prompt_version": "v1.2.5",
+    "prompt_sha256": "9c80d4d5cd60ea7c95ad02c71f97ab566cc2fd82e2a2230124ee4b21247b9d8e",
+    "system_prompt_sha256": "7d2ce57e5b2bef451925d8e5f353a1e9331db2d93e99abea04d583a8676ba313",
+    "patch_claim_ids": [
+     "cl1",
+     "cl4"
+    ],
+    "started_at": "2026-11-23T14:24:17.401Z",
+    "finished_at": "2026-11-23T14:24:18.779Z",
+    "status": "ok",
+    "input_tokens": 1924,
+    "output_tokens": 29,
+    "cost_cny": 0.004896,
+    "error": null
+   },
+   {
+    "seq": 14,
+    "call_id": "call-014",
+    "case_id": "Q11",
+    "run_id": "Q11",
+    "metric": "answer_correctness",
+    "kind": "primary",
+    "model_requested": "qwen-max",
+    "response_model": "qwen-max",
+    "temperature": 0.0,
+    "max_tokens": 8192,
+    "prompt_version": "v1.2.5",
+    "prompt_sha256": "ca489fcf39691e9a71aec004a01938fb6c70b7b17da3c55fb0ada066e1d24968",
+    "system_prompt_sha256": "ca489fcf39691e9a71aec004a01938fb6c70b7b17da3c55fb0ada066e1d24968",
+    "patch_claim_ids": [],
+    "started_at": "2026-11-23T14:24:18.792Z",
+    "finished_at": "2026-11-23T14:24:20.872Z",
+    "status": "ok",
+    "input_tokens": 2244,
+    "output_tokens": 51,
+    "cost_cny": 0.0058752,
+    "error": null
+   },
+   {
+    "seq": 15,
+    "call_id": "call-015",
+    "case_id": "Q11",
+    "run_id": "Q11",
+    "metric": "answer_relevancy",
+    "kind": "primary",
+    "model_requested": "qwen-max",
+    "response_model": "qwen-max",
+    "temperature": 0.0,
+    "max_tokens": 8192,
+    "prompt_version": "v1.2.5",
+    "prompt_sha256": "f3efe431683ed26ba0a7338e6e2b5841d65d42dadde5cac30b8340e2ca95dfdc",
+    "system_prompt_sha256": "f3efe431683ed26ba0a7338e6e2b5841d65d42dadde5cac30b8340e2ca95dfdc",
+    "patch_claim_ids": [],
+    "started_at": "2026-11-23T14:24:20.879Z",
+    "finished_at": "2026-11-23T14:24:22.539Z",
+    "status": "ok",
+    "input_tokens": 1545,
+    "output_tokens": 45,
+    "cost_cny": 0.00414,
+    "error": null
+   }
+  ]
+ },
+ "completed_runs": [
+  "Q23-F1",
+  "Q23-F2",
+  "Q23-F3",
+  "Q23-CR",
+  "Q21",
+  "Q11"
+ ],
+ "missing_runs": []
+}

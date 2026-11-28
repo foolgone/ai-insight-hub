@@ -1,0 +1,711 @@
+{
+  "meta": {
+    "name": "phase3e-pilot-40-targets-v1.0.3-draft",
+    "version": "v1.0.3-draft",
+    "status": "draft_pending_m1a_review",
+    "row_count": 40,
+    "semantic_spec": "v1.2.0 frozen 2026-11-18",
+    "final_labels_file": "pilot-40-final-labels.json",
+    "final_labels_sha256": "f139623fef80b55716fce0c773e776d284a5167683eb91559b23e49cabd000eb",
+    "old_targets_file": "pilot-40-targets.json",
+    "old_targets_sha256": "8ae37ac4ee73f9378000874eb173cbf5b1fee28ec6fabebac83e7900a4832b71",
+    "old_targets_status": "read_only",
+    "target_source_priority": "matrix > pilot10 > additional > none",
+    "target_source_note": "final_labels target_source reflects pre-reapproval; pilot-40-targets-v1.2.0.json is authoritative for targets.",
+    "q32_precondition": "Q32 F 0.9-1.0 assumes the 3 factual points (1 yuan=1 point, 12-month validity, non-transferable) remain factual. If v1.2.0 classifies them as uncertainty/absence and F becomes skipped, it is a target miss; no skipped fallback.",
+    "target_source_counts": {
+      "pilot10": 5,
+      "none": 22,
+      "matrix": 5,
+      "additional": 8
+    },
+    "target_status_counts": {
+      "unchanged": 31,
+      "known_non_pass_reapproval": 1,
+      "reapproval_required": 2,
+      "new_target_proposed": 2,
+      "unchanged_rebaseline": 3,
+      "reapproval_with_variant": 1
+    },
+    "sha256_file": "pilot-40-targets-v1.2.0-v1.0.2.sha256",
+    "runtime_active": false,
+    "note": "M1-B-003 freeze draft; not accepted; not for runtime. Target values are identical to v1.0.1; only metric metadata was added.",
+    "revision": "v1.0.2",
+    "target_status_note": "target_status records pre-freeze change provenance; all rows are approved in this frozen table. reapproval_required/new_target_proposed are historical change types, not pending approvals.",
+    "revision_note": "v1.0.2 metadata-only revision: add dual-metric target metadata; all 40 target values unchanged from v1.0.1; old v1.0.1 file/SHA is not overwritten.",
+    "drafted_at": "2026-11-19",
+    "draft_prepared_by": "Agent",
+    "supersedes_file": "pilot-40-targets-v1.2.0.json",
+    "supersedes_sha256": "34357b34c3d0fc85e78f90eeebb353b25a148926e3a55b19f17cc23b08b2b5eb",
+    "target_values_changed": false,
+    "f_target_metric": "faithfulness",
+    "f_target_denominator": "S+U+I",
+    "f_target_denominator_long": "supported_plus_unsupported_plus_insufficient",
+    "f_target_display": "Faithfulness（证据覆盖）",
+    "f_strict_metric": "faithfulness_strict",
+    "f_strict_role": "diagnostic",
+    "f_strict_target": null,
+    "f_strict_display": "Strict Faithfulness（可判定事实）",
+    "metric_version": "v3",
+    "schema_version": "rag_judge_schema_v3",
+    "not_for_run": true,
+    "active": false,
+    "based_on": "pilot-40-targets-v1.2.0-v1.0.2.json",
+    "based_on_sha256": "3ee15dfca66fe13f0a45fda84ecf2612483f2de107ad079b196a6bd6344d5846",
+    "draft_at": "2026-11-24",
+    "draft_by": "开发 Agent（待 M1-A 审核）",
+    "rubric_version": "v1.2.0",
+    "prompt_version": "v1.2.5",
+    "prompt_status": "frozen",
+    "change_scope": "Q17.F and Q21.F only",
+    "changes": [
+      {
+        "case_id": "Q17",
+        "field": "targets.F",
+        "from": [
+          0.7,
+          0.9
+        ],
+        "to": [
+          0.5,
+          0.7
+        ],
+        "evidence": "flash 0.5 / qwen-max 0.6; both insufficient claims correct"
+      },
+      {
+        "case_id": "Q21",
+        "field": "targets.F",
+        "from": [
+          0.6,
+          0.7
+        ],
+        "to": [
+          0.5,
+          0.7
+        ],
+        "evidence": "cl3 insufficient; flash 0.5 / qwen-max 0.6"
+      }
+    ]
+  },
+  "cases": [
+    {
+      "case_id": "Q01",
+      "group": "provisional",
+      "final_category": "direct",
+      "target_source": "pilot10",
+      "targets": {
+        "F": [
+          0.9,
+          1.0
+        ],
+        "C": [
+          0.9,
+          1.0
+        ],
+        "R": [
+          0.8,
+          1.0
+        ]
+      },
+      "target_status": "unchanged",
+      "semantic_reason": "none",
+      "known_non_pass": false
+    },
+    {
+      "case_id": "Q02",
+      "group": "provisional",
+      "final_category": "direct",
+      "target_source": "none",
+      "targets": {},
+      "target_status": "unchanged",
+      "semantic_reason": "none",
+      "known_non_pass": false
+    },
+    {
+      "case_id": "Q03",
+      "group": "provisional",
+      "final_category": "direct",
+      "target_source": "none",
+      "targets": {},
+      "target_status": "unchanged",
+      "semantic_reason": "none",
+      "known_non_pass": false
+    },
+    {
+      "case_id": "Q04",
+      "group": "provisional",
+      "final_category": "direct",
+      "target_source": "pilot10",
+      "targets": {
+        "F": [
+          1.0,
+          1.0
+        ],
+        "C": [
+          0.8,
+          1.0
+        ],
+        "R": [
+          0.9,
+          1.0
+        ]
+      },
+      "target_status": "unchanged",
+      "semantic_reason": "none",
+      "known_non_pass": false
+    },
+    {
+      "case_id": "Q05",
+      "group": "human_gold",
+      "final_category": "direct",
+      "target_source": "none",
+      "targets": {},
+      "target_status": "unchanged",
+      "semantic_reason": "none",
+      "known_non_pass": false
+    },
+    {
+      "case_id": "Q06",
+      "group": "provisional",
+      "final_category": "direct",
+      "target_source": "none",
+      "targets": {},
+      "target_status": "unchanged",
+      "semantic_reason": "none",
+      "known_non_pass": false
+    },
+    {
+      "case_id": "Q07",
+      "group": "provisional",
+      "final_category": "direct",
+      "target_source": "none",
+      "targets": {},
+      "target_status": "unchanged",
+      "semantic_reason": "none",
+      "known_non_pass": false
+    },
+    {
+      "case_id": "Q08",
+      "group": "provisional",
+      "final_category": "direct",
+      "target_source": "none",
+      "targets": {},
+      "target_status": "unchanged",
+      "semantic_reason": "none",
+      "known_non_pass": false
+    },
+    {
+      "case_id": "Q09",
+      "group": "provisional",
+      "final_category": "direct",
+      "target_source": "none",
+      "targets": {},
+      "target_status": "unchanged",
+      "semantic_reason": "none",
+      "known_non_pass": false
+    },
+    {
+      "case_id": "Q10",
+      "group": "provisional",
+      "final_category": "direct",
+      "target_source": "none",
+      "targets": {},
+      "target_status": "unchanged",
+      "semantic_reason": "none",
+      "known_non_pass": false
+    },
+    {
+      "case_id": "Q11",
+      "group": "provisional",
+      "final_category": "multi",
+      "target_source": "matrix",
+      "targets": {
+        "F": [
+          0.6,
+          0.9
+        ],
+        "C": [
+          0.8,
+          1.0
+        ],
+        "R": [
+          0.9,
+          1.0
+        ]
+      },
+      "target_status": "unchanged",
+      "semantic_reason": "none",
+      "known_non_pass": false
+    },
+    {
+      "case_id": "Q12",
+      "group": "provisional",
+      "final_category": "multi",
+      "target_source": "none",
+      "targets": {},
+      "target_status": "unchanged",
+      "semantic_reason": "none",
+      "known_non_pass": false
+    },
+    {
+      "case_id": "Q13",
+      "group": "human_gold",
+      "final_category": "multi",
+      "target_source": "none",
+      "targets": {},
+      "target_status": "unchanged",
+      "semantic_reason": "none",
+      "known_non_pass": false
+    },
+    {
+      "case_id": "Q14",
+      "group": "human_gold",
+      "final_category": "multi",
+      "target_source": "additional",
+      "targets": {
+        "F": "unavailable",
+        "C": [
+          0.8,
+          1.0
+        ],
+        "R": [
+          0.8,
+          1.0
+        ]
+      },
+      "target_status": "known_non_pass_reapproval",
+      "semantic_reason": "F unavailable; C/R 0.8-1.0; C 0.7 variance retained; known non-pass",
+      "known_non_pass": true
+    },
+    {
+      "case_id": "Q15",
+      "group": "human_gold",
+      "final_category": "direct",
+      "target_source": "additional",
+      "targets": {
+        "F": [
+          0.6,
+          1.0
+        ],
+        "C": [
+          0.8,
+          1.0
+        ],
+        "R": [
+          0.8,
+          1.0
+        ]
+      },
+      "target_status": "unchanged",
+      "semantic_reason": "none",
+      "known_non_pass": false
+    },
+    {
+      "case_id": "Q16",
+      "group": "human_gold",
+      "final_category": "constraint",
+      "target_source": "none",
+      "targets": {},
+      "target_status": "unchanged",
+      "semantic_reason": "none",
+      "known_non_pass": false
+    },
+    {
+      "case_id": "Q17",
+      "group": "provisional",
+      "final_category": "multi",
+      "target_source": "pilot10",
+      "targets": {
+        "F": [
+          0.5,
+          0.7
+        ],
+        "C": [
+          0.8,
+          1.0
+        ],
+        "R": [
+          0.8,
+          1.0
+        ]
+      },
+      "target_status": "draft_recalibrated",
+      "semantic_reason": "policy_scope 与 policy_relationship 均为 insufficient；4-claim 0.5、5-claim 0.6；下界 0.7 不可达，改为 [0.5,0.7]。",
+      "known_non_pass": false
+    },
+    {
+      "case_id": "Q18",
+      "group": "provisional",
+      "final_category": "multi",
+      "target_source": "none",
+      "targets": {},
+      "target_status": "unchanged",
+      "semantic_reason": "none",
+      "known_non_pass": false
+    },
+    {
+      "case_id": "Q19",
+      "group": "human_gold",
+      "final_category": "multi",
+      "target_source": "additional",
+      "targets": {
+        "F": [
+          0.6,
+          1.0
+        ],
+        "C": [
+          0.8,
+          1.0
+        ],
+        "R": [
+          0.8,
+          1.0
+        ]
+      },
+      "target_status": "new_target_proposed",
+      "semantic_reason": "absence/meta removed from denominator; F may rise; new reference target proposed",
+      "known_non_pass": false
+    },
+    {
+      "case_id": "Q20",
+      "group": "provisional",
+      "final_category": "multi",
+      "target_source": "additional",
+      "targets": {
+        "F": [
+          0.6,
+          1.0
+        ],
+        "C": [
+          0.8,
+          1.0
+        ],
+        "R": [
+          0.8,
+          1.0
+        ]
+      },
+      "target_status": "unchanged_rebaseline",
+      "semantic_reason": "policy_scope factual; 0.6-1.0 retained; re-baseline",
+      "known_non_pass": false
+    },
+    {
+      "case_id": "Q21",
+      "group": "provisional",
+      "final_category": "constraint",
+      "target_source": "matrix",
+      "targets": {
+        "F": [
+          0.5,
+          0.7
+        ]
+      },
+      "target_status": "draft_recalibrated",
+      "semantic_reason": "cl3（普通商品适用）按 §5.2 判 insufficient；flash 2/4=0.5、qwen-max 3/5=0.6；旧 [0.6,0.7] 与 [0.7,0.9] 均不合适，改为 [0.5,0.7]。",
+      "known_non_pass": false
+    },
+    {
+      "case_id": "Q22",
+      "group": "human_gold",
+      "final_category": "constraint",
+      "target_source": "additional",
+      "targets": {
+        "F": [
+          0.8,
+          1.0
+        ],
+        "C": [
+          0.9,
+          1.0
+        ],
+        "R": [
+          0.9,
+          1.0
+        ]
+      },
+      "target_status": "unchanged",
+      "semantic_reason": "none",
+      "known_non_pass": false
+    },
+    {
+      "case_id": "Q23",
+      "group": "human_gold",
+      "final_category": "constraint",
+      "target_source": "matrix",
+      "targets": {
+        "F": [
+          0.4,
+          0.5
+        ],
+        "C": [
+          0.0,
+          0.2
+        ],
+        "R": [
+          0.7,
+          1.0
+        ]
+      },
+      "target_status": "unchanged",
+      "semantic_reason": "none",
+      "known_non_pass": false
+    },
+    {
+      "case_id": "Q24",
+      "group": "provisional",
+      "final_category": "constraint",
+      "target_source": "none",
+      "targets": {},
+      "target_status": "unchanged",
+      "semantic_reason": "none",
+      "known_non_pass": false
+    },
+    {
+      "case_id": "Q25",
+      "group": "provisional",
+      "final_category": "constraint",
+      "target_source": "none",
+      "targets": {},
+      "target_status": "unchanged",
+      "semantic_reason": "none",
+      "known_non_pass": false
+    },
+    {
+      "case_id": "Q26",
+      "group": "provisional",
+      "final_category": "constraint",
+      "target_source": "none",
+      "targets": {},
+      "target_status": "unchanged",
+      "semantic_reason": "none",
+      "known_non_pass": false
+    },
+    {
+      "case_id": "Q27",
+      "group": "provisional",
+      "final_category": "constraint",
+      "target_source": "none",
+      "targets": {},
+      "target_status": "unchanged",
+      "semantic_reason": "none",
+      "known_non_pass": false
+    },
+    {
+      "case_id": "Q28",
+      "group": "provisional",
+      "final_category": "constraint",
+      "target_source": "additional",
+      "targets": {
+        "F": [
+          0.8,
+          1.0
+        ]
+      },
+      "target_status": "unchanged",
+      "semantic_reason": "none",
+      "known_non_pass": false
+    },
+    {
+      "case_id": "Q29",
+      "group": "provisional",
+      "final_category": "unanswerable",
+      "target_source": "pilot10",
+      "targets": {
+        "F": "skipped",
+        "C": [
+          0.9,
+          1.0
+        ],
+        "R": [
+          0.9,
+          1.0
+        ]
+      },
+      "target_status": "unchanged",
+      "semantic_reason": "none",
+      "known_non_pass": false
+    },
+    {
+      "case_id": "Q30",
+      "group": "human_gold",
+      "final_category": "unanswerable",
+      "target_source": "additional",
+      "targets": {
+        "F": [
+          0.4,
+          1.0
+        ],
+        "C": [
+          0.8,
+          1.0
+        ],
+        "R": [
+          0.8,
+          1.0
+        ]
+      },
+      "target_status": "reapproval_required",
+      "semantic_reason": "policy_scope factual; F may return to 0.5; expected 0.5, range 0.4-1.0 retained",
+      "known_non_pass": false
+    },
+    {
+      "case_id": "Q31",
+      "group": "provisional",
+      "final_category": "unanswerable",
+      "target_source": "pilot10",
+      "targets": {
+        "F": [
+          0.6,
+          1.0
+        ],
+        "C": [
+          0.8,
+          1.0
+        ],
+        "R": [
+          0.8,
+          1.0
+        ]
+      },
+      "target_status": "unchanged_rebaseline",
+      "semantic_reason": "absence/meta removed; 0.6-1.0 retained; re-baseline",
+      "known_non_pass": false
+    },
+    {
+      "case_id": "Q32",
+      "group": "provisional",
+      "final_category": "unanswerable",
+      "target_source": "additional",
+      "targets": {
+        "F": [
+          0.9,
+          1.0
+        ],
+        "C": [
+          0.8,
+          1.0
+        ],
+        "R": [
+          0.8,
+          1.0
+        ]
+      },
+      "target_status": "new_target_proposed",
+      "semantic_reason": "uncertainty non_factual; 3 factual points remain -> F expected 1.0, not skipped",
+      "known_non_pass": false
+    },
+    {
+      "case_id": "Q33",
+      "group": "provisional",
+      "final_category": "unanswerable",
+      "target_source": "none",
+      "targets": {},
+      "target_status": "unchanged",
+      "semantic_reason": "none",
+      "known_non_pass": false
+    },
+    {
+      "case_id": "Q34",
+      "group": "provisional",
+      "final_category": "unanswerable",
+      "target_source": "none",
+      "targets": {},
+      "target_status": "unchanged",
+      "semantic_reason": "none",
+      "known_non_pass": false
+    },
+    {
+      "case_id": "Q35",
+      "group": "human_gold",
+      "final_category": "ambiguous",
+      "target_source": "matrix",
+      "targets": {
+        "F": [
+          0.8,
+          1.0
+        ],
+        "C": [
+          0.7,
+          1.0
+        ],
+        "R": [
+          0.8,
+          1.0
+        ]
+      },
+      "target_status": "unchanged_rebaseline",
+      "semantic_reason": "absence removed; 0.8-1.0 retained; re-baseline",
+      "known_non_pass": false
+    },
+    {
+      "case_id": "Q36",
+      "group": "human_gold",
+      "final_category": "ambiguous",
+      "target_source": "matrix",
+      "targets": {
+        "F": [
+          0.8,
+          1.0
+        ],
+        "C": [
+          0.5,
+          0.6
+        ],
+        "R": [
+          0.8,
+          1.0
+        ]
+      },
+      "target_status": "reapproval_with_variant",
+      "semantic_reason": "condition sentence factual; F 0.8-1.0; C base 0.5-0.6, variant 0.9-1.0",
+      "known_non_pass": false,
+      "variant_targets": {
+        "C": [
+          0.9,
+          1.0
+        ]
+      },
+      "variant_note": "base C 0.5-0.6; disclosure variant C 0.9-1.0"
+    },
+    {
+      "case_id": "Q37",
+      "group": "human_gold",
+      "final_category": "ambiguous",
+      "target_source": "none",
+      "targets": {},
+      "target_status": "unchanged",
+      "semantic_reason": "none",
+      "known_non_pass": false
+    },
+    {
+      "case_id": "Q38",
+      "group": "provisional",
+      "final_category": "ambiguous",
+      "target_source": "none",
+      "targets": {},
+      "target_status": "unchanged",
+      "semantic_reason": "none",
+      "known_non_pass": false
+    },
+    {
+      "case_id": "Q39",
+      "group": "provisional",
+      "final_category": "ambiguous",
+      "target_source": "none",
+      "targets": {},
+      "target_status": "unchanged",
+      "semantic_reason": "none",
+      "known_non_pass": false
+    },
+    {
+      "case_id": "Q40",
+      "group": "human_gold",
+      "final_category": "direct",
+      "target_source": "none",
+      "targets": {},
+      "target_status": "unchanged",
+      "semantic_reason": "none",
+      "known_non_pass": false
+    }
+  ]
+}

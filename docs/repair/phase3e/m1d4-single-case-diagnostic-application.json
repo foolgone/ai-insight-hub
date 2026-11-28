@@ -1,0 +1,390 @@
+{
+ "meta": {
+  "name": "m1d4-v1.2.2-single-case-diagnostic-application",
+  "status": "pending_approval",
+  "revision": "r1",
+  "previous_review": "new_single_case_diagnostic_after_v1.2.2_metadata_freeze",
+  "revision_notes": [
+   "v1.2.2 frozen Prompt；F ed21979a… / C a50520de… / R a5386070…；MANIFEST 81dd3a32…",
+   "只申请 Q23/Q21/Q11 三个案例、各跑 1 次、每次 3 指标；不是 10 条，也不是 40 条",
+   "rubric_version=v1.2.0；Schema v3 / Metric v3；target v1.0.2 未重算；默认仍 v1.0.0",
+   "执行载体 judge_trace(session=None)；不建 Run、不写 DB、不调 WeKnora、不激活 v1.2.2",
+   "Q23 契约合规优先；Q21 语义支持优先且目标单独报；Q11 回归不倒退",
+   "不复用 v1.2.1 的 10 条批准；单案例结果不得计入 10 条样本"
+  ],
+  "scope": "single_case_diagnostic",
+  "case_count": 3,
+  "runs_per_case": 1,
+  "not_approved": true,
+  "judge_run": false,
+  "runtime_activated": false,
+  "date": "2026-11-22",
+  "agent_commit": "2ef9200",
+  "freeze_commit": "159880b",
+  "freeze_record": "docs/repair/37-m1d4-v1.2.2-freeze-record.md",
+  "fixture_file": "docs/repair/phase3e/pilot-10-v1.1.5-gate.json",
+  "fixture_sha256": "dc7be14b6026b579c15dea1a13d498b7479e14081aa17419ef2bfa525ae9be70",
+  "prompt_version": "v1.2.2",
+  "prompt_status": "frozen",
+  "prompt_active": false,
+  "manifest_sha256": "81dd3a3219f6f2437b83264e1fd28d74db05c243e3335b9ce321bac9dbb22f5d",
+  "prompt_sha256": {
+   "faithfulness.txt": "ed21979abd71dedd522ee97636b17509bae9d1b845d54fa114f4a1fbf8f01cf3",
+   "answer_correctness.txt": "a50520de0122216c9238d23c110967c3bbe259586ef24db100ee874a4ce35e95",
+   "answer_relevancy.txt": "a5386070407381098bcc14fc8c67a8853f94ebaa91d188e473ef92237dc58d88"
+  },
+  "validation_file": "docs/repair/phase3e/m1d4-prompt-v1.2.2-validation.json",
+  "validation_sha256": "fadef85639363bccf67e0052e0b36fcf780b970fb177d67d992f59c8b380e2f8",
+  "repair_example_version": "v1.2.2",
+  "repair_example_sha256": "7541fe3f4d079f2c173ae6347a247b9614de14f30f761d216c1267bc4a591869",
+  "schema_version": "rag_judge_schema_v3",
+  "rubric_version": "v1.2.0",
+  "metric_version": "v3",
+  "target_file": "pilot-40-targets-v1.2.0-v1.0.2.json",
+  "target_sha256": "3ee15dfca66fe13f0a45fda84ecf2612483f2de107ad079b196a6bd6344d5846",
+  "labels_file": "pilot-40-final-labels.json",
+  "labels_sha256": "f139623fef80b55716fce0c773e776d284a5167683eb91559b23e49cabd000eb",
+  "report_template": "docs/repair/phase3e/m1c-c4-report-template.md",
+  "application_target": "v1.2.2",
+  "previous_application": "M1-D-3 v1.2.1 ten-case application (approved; execution stopped at Q23)",
+  "not_reusing_previous_approval": true
+ },
+ "judge_run": false,
+ "runtime_activated": false,
+ "run_config": {
+  "execution_mode": "judge_only_fixture",
+  "execution_vehicle": "production Service replay: rag_judge_service.judge_trace(session=None, trace=synthetic RagTrace, item=synthetic item, prompt_version='v1.2.2'); driver only aggregates JudgeOutcome; no reimplementation of F scoring",
+  "service_path": {
+   "entrypoint": "rag_judge_service.judge_trace",
+   "session": null,
+   "creates_run": false,
+   "writes_db": false,
+   "uses_c3_scoring": true,
+   "driver_reimplements_scoring": false,
+   "outputs": [
+    "faithfulness",
+    "faithfulness_strict",
+    "answer_correctness",
+    "answer_relevancy"
+   ],
+   "service_components": [
+    "_faithfulness_score_v3",
+    "_strict_from_outcome",
+    "_failure_fields",
+    "metric_version_for_prompt"
+   ]
+  },
+  "synthetic_trace": {
+   "object": "RagTrace-compatible in-memory object",
+   "fields": {
+    "id": "stable UUID per case",
+    "user_id": "fixed UUID for all 3 cases",
+    "task_id": null,
+    "dataset_item_id": null,
+    "adapter": "fixture",
+    "mode": "query",
+    "context_source": "agent_chat",
+    "query": "fixture question",
+    "answer": "fixture answer",
+    "retrieved_contexts": [
+     {
+      "content": "fixture contexts[].content"
+     }
+    ],
+    "status": "success"
+   },
+   "item": {
+    "gold_answer": "fixture gold_answer"
+   },
+   "note": "context_source=agent_chat is required by _skip_reason for F; no RAG adapter call; no RagEvaluationRun"
+  },
+  "adapter": null,
+  "top_k": null,
+  "end_to_end": false,
+  "no_rag_call": true,
+  "no_platform_run": true,
+  "no_db_write": true,
+  "no_weknora_call": true,
+  "fixture": {
+   "file": "docs/repair/phase3e/pilot-10-v1.1.5-gate.json",
+   "sha256": "dc7be14b6026b579c15dea1a13d498b7479e14081aa17419ef2bfa525ae9be70",
+   "case_ids": [
+    "Q23",
+    "Q21",
+    "Q11"
+   ],
+   "case_count": 3,
+   "input_fields": [
+    "question",
+    "answer",
+    "contexts[].content",
+    "gold_answer"
+   ],
+   "fixed_inputs": true,
+   "note": "fixed v1.1.5 gate answer/contexts/gold; no mutation of fixture; fixture target field is historical, v1.0.2 target is authoritative"
+  },
+  "judge_metrics": [
+   "faithfulness",
+   "answer_correctness",
+   "answer_relevancy"
+  ],
+  "derived_metrics": [
+   "faithfulness_strict"
+  ],
+  "judge_prompt_version": "v1.2.2",
+  "default_prompt_version": "v1.0.0",
+  "model": "qwen-max",
+  "temperature": 0.0,
+  "max_tokens": 8192,
+  "llm_endpoint": "existing DashScope-compatible endpoint used by prior qwen-max gates; no key in repo",
+  "credential_scope": "existing runtime LLM credential (BYOK or server-key fallback); preflight must verify; no key in repo",
+  "env_scope": "process-local for this Judge-only replay only; do not write to repo/.env; restore after replay",
+  "env": {
+   "DEFAULT_LLM_MODEL": "qwen-max",
+   "DEFAULT_TEMPERATURE": "0.0",
+   "RAG_JUDGE_MAX_TOKENS": "8192",
+   "RAG_JUDGE_PROMPT_VERSION": "v1.0.0"
+  },
+  "top_k_note": "not applicable: contexts are fixed fixture inputs; no retrieval/adapter call",
+  "rubric_version": "v1.2.0"
+ },
+ "case_summary": {
+  "case_count": 3,
+  "group_counts": {
+   "human_gold": 1,
+   "provisional": 2
+  },
+  "evaluated_expected": 3,
+  "skipped_expected": 0,
+  "runs_per_case": 1
+ },
+ "cases": [
+  {
+   "case_id": "Q23",
+   "group": "human_gold",
+   "final_category": "constraint",
+   "context_count": 2,
+   "expected_status": "evaluated",
+   "expected_strict_status": "evaluated",
+   "targets": {
+    "F": [
+     0.4,
+     0.5
+    ],
+    "C": [
+     0.0,
+     0.2
+    ],
+    "R": [
+     0.7,
+     1.0
+    ]
+   },
+   "target_source": "matrix",
+   "target_status": "unchanged",
+   "acceptance": {
+    "primary": "contract_compliance",
+    "absence_claim": {
+     "claim_type": "non_factual",
+     "claim_subtype": "absence",
+     "support_status": null,
+     "evidence_refs": []
+    },
+    "forbidden": [
+     "factual_claim + absence",
+     "absence marked supported",
+     "absence with evidence_refs",
+     "mixed sentence kept as one factual claim"
+    ],
+    "mixed_sentence_split": true,
+    "c_r_status": "evaluated",
+    "no_placeholder_zero": true,
+    "target_unchanged": true,
+    "target_miss_policy": "report F vs [0.4, 0.5]; do not change target"
+   }
+  },
+  {
+   "case_id": "Q21",
+   "group": "provisional",
+   "final_category": "constraint",
+   "context_count": 2,
+   "expected_status": "evaluated",
+   "expected_strict_status": "not_required",
+   "targets": {
+    "F": [
+     0.6,
+     0.7
+    ]
+   },
+   "target_source": "matrix",
+   "target_status": "unchanged",
+   "acceptance": {
+    "primary": "semantic_support",
+    "semantic_rule": "claim about 质量问题不受 7 天限制 must be insufficient_evidence unless a quote directly states that exemption",
+    "forbidden_support": [
+     "运费由责任方承担 quote supporting 7-day exemption",
+     "7 天内可换货 quote supporting 7-day exemption",
+     "exclusion inference directly marked supported"
+    ],
+    "exclusion_inference": "insufficient_evidence",
+    "f_status": "evaluated",
+    "target_report": "report whether F falls in [0.6, 0.7]",
+    "target_miss_policy": "semantic_pass_target_miss -> stop and await human target review; do not change target",
+    "f_one_policy": "if F remains 1.0 and freight/exchange quote still supports 7-day exemption -> diagnostic fail; no in-round rerun"
+   }
+  },
+  {
+   "case_id": "Q11",
+   "group": "provisional",
+   "final_category": "multi",
+   "context_count": 2,
+   "expected_status": "evaluated",
+   "expected_strict_status": "not_required",
+   "targets": {
+    "F": [
+     0.6,
+     0.9
+    ],
+    "C": [
+     0.8,
+     1.0
+    ],
+    "R": [
+     0.9,
+     1.0
+    ]
+   },
+   "target_source": "matrix",
+   "target_status": "unchanged",
+   "acceptance": {
+    "primary": "regression",
+    "f_status": "evaluated",
+    "targets": {
+     "F": [
+      0.6,
+      0.9
+     ],
+     "C": [
+      0.8,
+      1.0
+     ],
+     "R": [
+      0.9,
+      1.0
+     ]
+    },
+    "quote_rule": "single contiguous verbatim span; no cross-fragment concatenation",
+    "forbidden": [
+     "quote_not_found",
+     "contract violation",
+     "target below range"
+    ]
+   }
+  }
+ ],
+ "budget": {
+  "primary_judge_calls": 9,
+  "primary_math": "3 cases x 1 run x 3 metrics = 9",
+  "repair_reserve": 3,
+  "retry_reserve": 2,
+  "max_judge_calls": 14,
+  "runs_per_case": 1,
+  "estimated_cost_cny": 0.10,
+  "ceiling_cny": 0.30,
+  "count_rule": "count every Judge model call, including repair and retry; stop when > 14 calls or > CNY 0.30",
+  "no_repeat_policy": "no repeat runs; single-case results are diagnostic only and are not counted toward the 10-case sample"
+ },
+ "acceptance_assertions": [
+  "Q23 F / F_strict 均为 evaluated，不得 invalid",
+  "Q23 absence claim 为 non_factual + absence + support_status=null + evidence_refs=[]",
+  "Q23 不得出现 factual_claim + absence、absence 标 supported 或 absence 附 evidence",
+  "Q23 混合句拆分事实部分与 absence 部分",
+  "Q23 F 与 [0.4, 0.5] 比较，不修改目标",
+  "Q23 C / R 真实 evaluated，不得为占位 0.0",
+  "Q21 “质量问题不受 7 天限制” claim 为 insufficient_evidence，或有直接写明该豁免的 quote",
+  "Q21 不得用运费或 7 天换货 quote 支持 7 天限制豁免",
+  "Q21 排除项反推只能 insufficient_evidence，不得 supported",
+  "Q21 F evaluated，不得 invalid",
+  "Q21 F 目标 [0.6, 0.7] 单独报告；semantic_pass_target_miss 停止待人工复核",
+  "Q21 F=1.0 且仍用运费/换货 quote 支持 → 诊断失败，本轮不得重跑",
+  "Q11 F evaluated",
+  "Q11 F / C / R 分别落在 [0.6, 0.9] / [0.8, 1.0] / [0.9, 1.0]",
+  "Q11 quote 为单段逐字连续原文，不得跨片段拼接",
+  "Q11 无 quote_not_found 或其它 contract violation",
+  "每 case/metric 原始输出包含实际使用的 repair 轮",
+  "报告 Q21/Q23 claim 级明细",
+  "Prompt/MANIFEST/fixture/target/agent repair SHA 不漂移",
+  "不创建 RagEvaluationRun、不写 DB、不调 WeKnora、不激活 v1.2.2"
+ ],
+ "stop_conditions": [
+  {
+   "code": "invalid_contract",
+   "condition": "任一指标返回 invalid(contract_violation)"
+  },
+  {
+   "code": "failed_execution",
+   "condition": "failed(execution) 重试一次后仍失败"
+  },
+  {
+   "code": "q23_absence_contract",
+   "condition": "Q23 absence 仍为 factual 或 supported，或 absence 附 evidence"
+  },
+  {
+   "code": "q21_semantic_support_or_f_one",
+   "condition": "Q21 仍用运费/换货 quote 支持 7 天豁免，或 F 仍为 1.0"
+  },
+  {
+   "code": "q11_quote_or_target",
+   "condition": "Q11 quote 拼接、契约违约，或目标跌出区间"
+  },
+  {
+   "code": "fingerprint_mismatch",
+   "condition": "Prompt/MANIFEST/fixture/target/agent repair SHA 与申请不一致"
+  },
+  {
+   "code": "budget_ceiling",
+   "condition": "Judge 调用超过 14 次或成本超过 CNY 0.30"
+  },
+  {
+   "code": "unprocessed_case",
+   "condition": "Q23/Q21/Q11 任一缺完整 F/C/R 结果"
+  }
+ ],
+ "report_requirements": [
+  "使用 docs/repair/phase3e/m1c-c4-report-template.md",
+  "逐 case/metric 报告 status、score、repair 轮、token/cost",
+  "报告 Q23/Q21 claim 级明细，含 claim_type、claim_subtype、support_status、evidence_refs",
+  "报告 Q23 absence 契约检查与混合句拆分",
+  "Q21 语义支持证据与目标分开报告；必要时使用 semantic_pass_target_miss",
+  "报告 Q11 quote 连续性与三项目标区间",
+  "写 prompt_version=v1.2.2、rubric_version=v1.2.0、F/C/R SHA、MANIFEST SHA、fixture SHA、target SHA、agent_commit、repair_example_sha256",
+  "写 model/temperature/max_tokens 与 judge_trace production Service replay 方法",
+  "结果标记为 diagnostic only，不计入 10 条样本",
+  "结论只能写 implemented/verified/blocked；不得写 accepted"
+ ],
+ "boundaries": [
+  "只跑 Q23/Q21/Q11，各 1 次、每次 3 指标；不是 10 条，也不是 40 条",
+  "不复用 v1.2.1 的 10 条批准；本申请必须单独批准",
+  "不创建 RagEvaluationRun、不写 DB、不调 WeKnora、不调 RAG adapter",
+  "不激活 v1.2.2；active/runtime_active 保持 false；默认仍 v1.0.0",
+  "不修改 Prompt、MANIFEST、Agent repair 代码、Schema v3、Metric v3、Service invalid 契约、r2、target v1.0.2、fixture",
+  "看到结果后不得改目标，包括 Q21 目标 [0.6, 0.7]",
+  "不得跑 10/40；单案例通过后才可重新提交 10 条申请",
+  "单案例结果只作诊断，不得计入 10 条样本；10 条必须重新跑",
+  "不得把 M1-C/M1-D 标 accepted；M1-D-1/M1-D-3 保持 blocked",
+  "不启动 M2/M3"
+ ],
+ "approval_items": [
+  "确认这是 v1.2.2 单案例诊断申请，不是 10/40，且不复用 v1.2.1 批准",
+  "确认 prompt_version=v1.2.2、F ed21979a…、C a50520de…、R a5386070…、MANIFEST 81dd3a32…",
+  "确认 validation fadef856…、prompt_status=frozen、active=false、默认 v1.0.0",
+  "确认 agent_commit=2ef9200、repair_example_sha256=7541fe3f…",
+  "确认 fixture dc7be14b…、target 3ee15dfc…、labels f139623f…",
+  "确认 cases 固定 Q23/Q21/Q11，各 1 次、3 指标",
+  "确认预算 9 主调用 + 3 repair + 2 retry = 最多 14 calls，ceiling CNY 0.30",
+  "确认 Q23 契约、Q21 语义、Q11 回归验收标准",
+  "确认 8 条停止条件，且执行中不改 Prompt/fixture",
+  "确认不建 Run/不写 DB/不调 WeKnora、不激活、不改默认版本、不启动 M2/M3",
+  "先批准再执行；执行后报告并停止"
+ ]
+}

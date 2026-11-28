@@ -1,0 +1,44 @@
+{
+  "version": "v1.1.0",
+  "status": "pending_review",
+  "active": false,
+  "date": "2026-11-14",
+  "note": "仅设计稿；未切换、未运行。激活前需人工审核 + schema/scoring 支持。",
+  "prompts": {
+    "faithfulness.txt": "d113653b18120e9abc67d8ea536d743a15a716c2108998eb0cfdb9da1bc999ec",
+    "answer_correctness.txt": "c3f7fc6b10cd6fb7f49f03e4069ebfb240c6c61e20e54d514ce19fc16ae5e09f",
+    "answer_relevancy.txt": "e17ed6bb1650472a53b252472cdcfcc64df427052f35fded2579271ef6425cf5"
+  },
+  "changes": {
+    "faithfulness": [
+      "结论句必须作为第一条 claim",
+      "claim_type: factual_claim / non_factual / contradictory",
+      "non_factual 不计入分母；含事实承诺的建议仍按 factual_claim",
+      "contradictory 作为诊断标签，仍判断 supported"
+    ],
+    "answer_correctness": [
+      "增加模糊问题的条件式回答 rubric（0.8~1.0 / 0.4~0.6 / ≤0.3）",
+      "增加无答案问题 rubric（正确拒答 1.0，编造 ≤0.2）",
+      "首句/后文矛盾或同时给出可以/不可以 → ≤0.3，并写入 wrong_facts"
+    ],
+    "answer_relevancy": [
+      "只评价是否围绕问题展开",
+      "合理拒答/信息不足/下一步建议可高分，但不自动 1.0",
+      "正确拒答 vs 错误拒答交给 Correctness"
+    ]
+  },
+  "pilot_cases": [
+    "Q23",
+    "Q35",
+    "Q36",
+    "Q29",
+    "Q11",
+    "Q21"
+  ],
+  "activation_requires": [
+    "人工审核通过",
+    "Faithfulness 输出 schema 增加 claim_type/contradiction_with",
+    "scoring 过滤 non_factual",
+    "版本加载器切换（默认仍为 v1.0.0）"
+  ]
+}

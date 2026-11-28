@@ -1,10 +1,10 @@
 """清洗相关 Celery 任务（B-305 骨架，B-313 接入真实清洗 Agent）。"""
 from __future__ import annotations
 
-import asyncio
 from typing import Any
 
 from app.core.celery import celery_app
+from app.core.async_task import run_task
 
 
 @celery_app.task(name="tasks.clean_datasource", acks_late=True)
@@ -16,7 +16,7 @@ def clean_datasource(task_id: str) -> dict[str, Any]:
     """
     from app.services.cleaning_service import run_clean_task
 
-    result = asyncio.run(run_clean_task(task_id))
+    result = run_task(run_clean_task(task_id))
 
     # 转写与切分已拆成两个任务：转写完成后自动串接切分（用户仍是一步操作）
     for structure_task_id in result.get("structure_task_ids") or []:

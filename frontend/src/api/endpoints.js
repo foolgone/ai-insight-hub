@@ -61,6 +61,28 @@ export const endpoints = {
     byId: reportId => `/reports/${reportId}`,
     download: reportId => `/reports/${reportId}/download`,
   },
+  ragEvaluations: {
+    root: '/rag/evaluations',
+    byId: runId => `/rag/evaluations/${runId}`,
+    results: runId => `/rag/evaluations/${runId}/results`,
+    failures: runId => `/rag/evaluations/${runId}/failures`,
+    retry: runId => `/rag/evaluations/${runId}/retry`,
+    cancel: runId => `/rag/evaluations/${runId}/cancel`,
+  },
+  rag: {
+    trace: traceId => `/rag/traces/${traceId}`,
+  },
+  qaDatasets: {
+    root: '/qa-datasets',
+    byId: datasetId => `/qa-datasets/${datasetId}`,
+    versions: datasetId => `/qa-datasets/${datasetId}/versions`,
+    importItems: (datasetId, versionId) => `/qa-datasets/${datasetId}/versions/${versionId}/import`,
+    publish: (datasetId, versionId) => `/qa-datasets/${datasetId}/versions/${versionId}/publish`,
+    items: (datasetId, versionId) => `/qa-datasets/${datasetId}/versions/${versionId}/items`,
+    item: (datasetId, versionId, itemId) =>
+      `/qa-datasets/${datasetId}/versions/${versionId}/items/${itemId}`,
+    stats: datasetId => `/qa-datasets/${datasetId}/stats`,
+  },
   tasks: {
     list: '/tasks',
     stream: '/tasks/stream',

@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { MemoryRouter } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { CreateCleaningModal } from './CreateCleaningModal'
 import { listDataSources } from '../../api/datasources'
@@ -26,7 +27,9 @@ function renderModal(onClose = () => {}) {
   })
   return render(
     <QueryClientProvider client={queryClient}>
-      <CreateCleaningModal open onClose={onClose} defaultDatasourceId="ds-1" />
+      <MemoryRouter>
+        <CreateCleaningModal open onClose={onClose} defaultDatasourceId="ds-1" />
+      </MemoryRouter>
     </QueryClientProvider>
   )
 }
@@ -90,14 +93,20 @@ describe('CreateCleaningModal', () => {
     expect(await screen.findByText('已有同类任务在运行，请稍后再试')).toBeInTheDocument()
   })
 
-  it('无数据源时提示选择', async () => {
+  it('无数据源时提供新建/管理入口，不留下空白死路', async () => {
     listDataSources.mockResolvedValue({ items: [], pagination: { total: 0 } })
-    const user = userEvent.setup()
     renderModal()
 
-    await user.click(screen.getByRole('button', { name: '启动清洗' }))
-
-    expect(await screen.findByRole('alert')).toHaveTextContent('请选择数据源')
+    expect(await screen.findByRole('alert')).toHaveTextContent('还没有可用数据源')
+    expect(screen.getByRole('link', { name: '新建数据源' })).toHaveAttribute(
+      'href',
+      '/data-sources?action=create'
+    )
+    expect(screen.getByRole('link', { name: '去数据源管理' })).toHaveAttribute(
+      'href',
+      '/data-sources'
+    )
+    expect(screen.getByRole('button', { name: '启动清洗' })).toBeDisabled()
     expect(startCleaning).not.toHaveBeenCalled()
   })
 })

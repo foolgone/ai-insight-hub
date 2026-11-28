@@ -12,6 +12,7 @@ from sqlalchemy.orm import InstrumentedAttribute
 
 from app.core.ownership import assert_owner
 from app.core.pagination import PaginationParams
+from app.core.tenancy import apply_tenant_filter, require_tenant
 from app.repositories.pagination import paginate
 from app.application import task_control
 from app.core.exceptions import (
@@ -40,6 +41,7 @@ async def _get_or_404(session: AsyncSession, task_id: uuid.UUID, user: User) -> 
     task = await session.get(Task, task_id)
     if task is None:
         raise TaskNotFoundError(details={"task_id": str(task_id)})
+    require_tenant(task, user, TaskNotFoundError)
     assert_owner(task.user_id, user)
     return task
 
@@ -54,7 +56,8 @@ async def list_tasks(
     status: str | None = None,
 ) -> tuple[list[Task], Pagination]:
     stmt = select(Task)
-    if user.role != "admin":
+    stmt = apply_tenant_filter(stmt, Task, user)
+    if user.role != "platform_admin":
         stmt = stmt.where(Task.user_id == user.id)
     if datasource_id is not None:
         stmt = stmt.where(Task.datasource_id == datasource_id)

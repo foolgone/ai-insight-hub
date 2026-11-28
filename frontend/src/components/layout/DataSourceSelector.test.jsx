@@ -85,6 +85,18 @@ describe('DataSourceSelector', () => {
     expect(screen.getByRole('button', { name: '新建数据源' })).toBeInTheDocument()
   })
 
+  it('空库列表返回空时清理残留的 currentId', async () => {
+    useDatasourceStore.setState({ currentId: 'ds-deleted' })
+    listDataSources.mockResolvedValue({
+      items: [],
+      pagination: { page: 1, limit: 100, total: 0, pages: 0 },
+    })
+    renderSelector()
+
+    await waitFor(() => expect(useDatasourceStore.getState().currentId).toBeNull())
+    expect(screen.getByRole('button', { name: '数据源选择器' })).toHaveTextContent('选择数据源')
+  })
+
   it('加载失败展示重试', async () => {
     listDataSources.mockRejectedValue({ status: 500, code: 'INTERNAL_ERROR' })
     renderSelector()

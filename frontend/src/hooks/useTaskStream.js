@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { subscribeTaskStream } from '../lib/taskStream'
 import { taskKeys } from './useTasks'
@@ -11,11 +11,17 @@ import { taskKeys } from './useTasks'
  *
  * 测试环境（MODE=test）不建立连接，避免 jsdom 里的真实网络与重连定时器。
  * @param {boolean} [enabled]
+ * @param {{ onTasks?: (payload: { items: Array }) => void }} [handlers]
  * @returns {{ connected: boolean }}
  */
-export function useTaskStream(enabled = true) {
+export function useTaskStream(enabled = true, { onTasks } = {}) {
   const queryClient = useQueryClient()
   const [connected, setConnected] = useState(false)
+  const onTasksRef = useRef(onTasks)
+
+  useEffect(() => {
+    onTasksRef.current = onTasks
+  }, [onTasks])
 
   useEffect(() => {
     if (!enabled || import.meta.env.MODE === 'test') {
@@ -25,8 +31,9 @@ export function useTaskStream(enabled = true) {
     const unsubscribe = subscribeTaskStream({
       onOpen: () => setConnected(true),
       onError: () => setConnected(false),
-      onTasks: () => {
+      onTasks: payload => {
         queryClient.invalidateQueries({ queryKey: taskKeys.all })
+        onTasksRef.current?.(payload)
       },
     })
     return () => {

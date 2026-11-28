@@ -75,6 +75,38 @@ describe('apiClient 401 刷新', () => {
     setUnauthorizedHandler(null)
   })
 
+  it('有持久会话但无 access token 时先静默刷新再发请求', async () => {
+    clearAccessToken()
+    saveAuth({ user: USER, remember: true })
+    const { adapter, state } = buildAdapter({ secureFailures: 0 })
+    apiClient.defaults.adapter = adapter
+    refreshClient.defaults.adapter = adapter
+
+    const response = await apiClient.get('/datasources')
+
+    expect(response.data).toEqual({ ok: true })
+    expect(state.refreshCalls).toBe(1)
+    expect(state.secureCalls).toBe(1)
+    expect(state.tokens[0]).toBe('Bearer new-token')
+  })
+
+  it('静默刷新失败时只刷新一次并清会话', async () => {
+    clearAccessToken()
+    saveAuth({ user: USER, remember: true })
+    const { adapter, state } = buildAdapter({ refreshStatus: 401 })
+    const onUnauthorized = vi.fn()
+    apiClient.defaults.adapter = adapter
+    refreshClient.defaults.adapter = adapter
+    setUnauthorizedHandler(onUnauthorized)
+
+    await expect(apiClient.get('/datasources')).rejects.toMatchObject({ status: 401 })
+
+    expect(state.refreshCalls).toBe(1)
+    expect(onUnauthorized).toHaveBeenCalledTimes(1)
+    expect(localStorage.getItem('aiih.auth')).toBeNull()
+    expect(sessionStorage.getItem('aiih.auth')).toBeNull()
+  })
+
   it('401 后刷新一次并重放原请求', async () => {
     const { adapter, state } = buildAdapter({ secureFailures: 1 })
     apiClient.defaults.adapter = adapter

@@ -57,8 +57,8 @@ from app.services.credential_service import PROVIDER_ASR, credential_service
 
 router = APIRouter()
 
-READ_ROLES = ("admin", "user", "viewer")
-WRITE_ROLES = ("admin", "user")
+READ_ROLES = ("platform_admin", "tenant_admin", "user", "viewer")
+WRITE_ROLES = ("platform_admin", "tenant_admin", "user")
 
 # raw_data.raw_content.text 入库上限（更大文件由对象存储承载，清洗 Agent 走存储读取）
 MAX_RAW_TEXT_CHARS = 200_000
@@ -276,6 +276,7 @@ async def upload_file(
 
         stored = storage_service.save_upload_from_path(
             tmp_path,
+            tenant_id=datasource.tenant_id,
             datasource_id=datasource.id,
             filename=filename,
             content_type=file.content_type,
@@ -304,6 +305,7 @@ async def upload_file(
             }
 
         raw_data = RawData(
+            tenant_id=datasource.tenant_id,
             datasource_id=datasource.id,
             raw_content=raw_content,
             file_info={

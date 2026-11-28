@@ -1,0 +1,121 @@
+{
+ "name": "m1d4-prompt-v1.2.2-validation",
+ "kind": "static_prompt_asset_validation_not_judge_run",
+ "generated_on": "2026-11-22",
+ "status": "pass",
+ "prompt_version": "v1.2.2",
+ "prompt_status": "frozen",
+ "active": false,
+ "schema_version": "rag_judge_schema_v3",
+ "rubric_version": "v1.2.0",
+ "default_prompt_version": "v1.0.0",
+ "repair_example_version": "v1.2.2",
+ "prompt_sha256": {
+  "faithfulness.txt": "ed21979abd71dedd522ee97636b17509bae9d1b845d54fa114f4a1fbf8f01cf3",
+  "answer_correctness.txt": "a50520de0122216c9238d23c110967c3bbe259586ef24db100ee874a4ce35e95",
+  "answer_relevancy.txt": "a5386070407381098bcc14fc8c67a8853f94ebaa91d188e473ef92237dc58d88"
+ },
+ "base_prompt_sha256": {
+  "faithfulness.txt": "9efdc64df1eebafa727bc0946a03192c2d9e9907bd7a3170f867f19774211068",
+  "answer_correctness.txt": "a50520de0122216c9238d23c110967c3bbe259586ef24db100ee874a4ce35e95",
+  "answer_relevancy.txt": "a5386070407381098bcc14fc8c67a8853f94ebaa91d188e473ef92237dc58d88"
+ },
+ "manifest_sha256": "81dd3a3219f6f2437b83264e1fd28d74db05c243e3335b9ce321bac9dbb22f5d",
+ "script_sha256": "90b80a2d25b5ed996f8271694c3052b313e8b13f0f7066595e7b4a989f183011",
+ "checks": [
+  {
+   "check": "manifest_version",
+   "ok": true
+  },
+  {
+   "check": "manifest_status_frozen",
+   "ok": true
+  },
+  {
+   "check": "manifest_active_false",
+   "ok": true
+  },
+  {
+   "check": "manifest_frozen_true",
+   "ok": true
+  },
+  {
+   "check": "manifest_schema_v3",
+   "ok": true
+  },
+  {
+   "check": "manifest_rubric_v120",
+   "ok": true
+  },
+  {
+   "check": "manifest_default_v100",
+   "ok": true
+  },
+  {
+   "check": "repair_example_version",
+   "ok": true
+  },
+  {
+   "check": "prompt_files_registered",
+   "ok": true
+  },
+  {
+   "check": "prompt_sha256",
+   "ok": true
+  },
+  {
+   "check": "faithfulness_changed_from_v121",
+   "ok": true
+  },
+  {
+   "check": "correctness_sha_unchanged",
+   "ok": true
+  },
+  {
+   "check": "relevancy_sha_unchanged",
+   "ok": true
+  },
+  {
+   "check": "absence_rule",
+   "ok": true
+  },
+  {
+   "check": "direct_support_rule",
+   "ok": true
+  },
+  {
+   "check": "no_case_specific_ids",
+   "ok": true
+  },
+  {
+   "check": "strict_not_judge_metric",
+   "ok": true
+  },
+  {
+   "check": "strict_derived",
+   "ok": true
+  },
+  {
+   "check": "v122_schema_mapping",
+   "ok": true
+  },
+  {
+   "check": "repair_branch_isolated",
+   "ok": true
+  },
+  {
+   "check": "v1.2.1_faithfulness.txt_sha256",
+   "ok": true
+  },
+  {
+   "check": "v1.2.1_answer_correctness.txt_sha256",
+   "ok": true
+  },
+  {
+   "check": "v1.2.1_answer_relevancy.txt_sha256",
+   "ok": true
+  }
+ ],
+ "judge_run": false,
+ "runtime_activated": false
+}

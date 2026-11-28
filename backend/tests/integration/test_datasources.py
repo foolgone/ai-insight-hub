@@ -210,7 +210,7 @@ async def test_admin_sees_and_reads_all_datasources(
     client, auth_headers, db_session, test_user
 ) -> None:
     created = await _create(client, auth_headers)
-    admin = UserFactory(password_hash=hash_password("admin12345"), role="admin")
+    admin = UserFactory(password_hash=hash_password("admin12345"), role="platform_admin")
     await persist(db_session, admin)
     admin_token = await _login(client, admin.email, "admin12345")
     headers = {"Authorization": f"Bearer {admin_token}"}

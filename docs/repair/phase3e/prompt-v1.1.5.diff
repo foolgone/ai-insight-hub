@@ -1,0 +1,111 @@
+--- v1.1.4/faithfulness.txt
++++ v1.1.5/faithfulness.txt
+@@ -20,6 +20,7 @@
+   - 回答开头的总起/分类引导句（如“能否退款，取决于具体商品类型和签收时间”）属于 meta，不建 `factual_claim`，不进分母；只对具体商品、时限、运费、流程建 claim。
+   - 对文档覆盖范围/章节内容的描述（如“文档详细说明了退款时效、换货、发票……”）属于 meta；对“文档未提及/未涉及/未说明某事项”的陈述属于 absence；两者都不建 `factual_claim`，不进分母，不得标 factual/policy/insufficient。
+   - 文档未明确写的适用范围/地域推断（如“默认适用于中国大陆境内订单”“以国内履约场景为前提”“未定义签收是否包含境外地址”）→ `non_factual/meta` 或 `absence`，不建 factual claim；只有文档明确写出的适用范围才建 factual claim。
++  - 规则之间的关系、独立性、适用范围推断（如“该规则与是否满 99 元无关”“不因包邮资格改变责任归属”“某规则不依赖另一规则”）→ `non_factual/meta`，不建 factual claim；只有文档明确写出的规则或规则关系才建 factual claim。
+ 
+ `claim_subtype`（诊断标签，必须填写）：
+ - `policy`：政策/规则断言（factual_claim）
+@@ -63,7 +64,7 @@
+ 
+ ## 4. 原子性与顺序
+ - 一条 claim 只表达一个可判定事实；不要合并多条事实。
+-- 混合句必须拆分：事实部分建 factual_claim，未定义/范围推断部分建 `non_factual/meta` 或 `absence`；不得整句标 factual/insufficient。
++- 混合句必须拆分：事实部分建 factual_claim，未定义/范围/规则关系推断部分建 `non_factual/meta` 或 `absence`；不得整句标 factual/insufficient。若一句话同时包含事实和关系推断，拆开：事实部分 factual，关系部分 meta。
+ - 回答中的引用/转述原文（包括 `>` 引用块、`<kb ...>` 标注前的原文）同样是回答内容；引用中的每个独立事实（时间、条件、动作、主体）都要单独建 claim，不得因为前文已概括而省略。
+   例：引用“大件商品（家具、家电）发货时间为 5 个工作日内，配送前会电话预约。”应拆成“发货时间为 5 个工作日内”和“配送前会电话预约”两条。
+ - 虚拟商品必须拆 §1/§12：即使回答把“已激活的虚拟商品（如充值、会员、课程等，一经售出不支持退款）”写在同一句/同一 bullet，也要拆成两条 claim：
+@@ -669,3 +670,91 @@
+   ],
+   "reason": ""
+ }
++## Few-shot I（Q17：规则关系/独立性归 meta）
++上下文 C1（节选）：
++“单笔订单实付满 99 元包邮；未满 99 元收取 10 元运费。……因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。”
++
++回答：
++“订单满 99 元包邮适用于正向发货环节。退货运费取决于退换货原因：质量问题由商家承担，非质量问题由买家承担。该规则与是否满 99 元无关，不因包邮资格而改变退货运费责任归属。建议联系客服确认具体订单。”
++
++说明：cl5 是规则关系/独立性推断，不是文档明确写出的政策事实，必须归 non_factual/meta；不要标 factual/insufficient。
++完整输出：
++{
++  "claims": [
++    {
++      "claim_id": "cl1",
++      "claim": "订单满 99 元包邮适用于正向发货环节",
++      "claim_type": "factual_claim",
++      "claim_subtype": "policy",
++      "support_status": "supported",
++      "is_contradictory": false,
++      "contradiction_with": [],
++      "evidence_refs": [
++        {"context_id": "C1", "quote": "单笔订单实付满 99 元包邮"}
++      ],
++      "reason": "C1 最短连续子串"
++    },
++    {
++      "claim_id": "cl2",
++      "claim": "退货运费取决于退换货原因",
++      "claim_type": "factual_claim",
++      "claim_subtype": "policy",
++      "support_status": "supported",
++      "is_contradictory": false,
++      "contradiction_with": [],
++      "evidence_refs": [
++        {"context_id": "C1", "quote": "因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担"}
++      ],
++      "reason": "C1 最短连续子串"
++    },
++    {
++      "claim_id": "cl3",
++      "claim": "质量问题退换货运费由商家承担",
++      "claim_type": "factual_claim",
++      "claim_subtype": "policy",
++      "support_status": "supported",
++      "is_contradictory": false,
++      "contradiction_with": [],
++      "evidence_refs": [
++        {"context_id": "C1", "quote": "因质量问题产生的退换货运费由商家承担"}
++      ],
++      "reason": "C1 最短连续子串"
++    },
++    {
++      "claim_id": "cl4",
++      "claim": "非质量问题退货运费由买家承担",
++      "claim_type": "factual_claim",
++      "claim_subtype": "policy",
++      "support_status": "supported",
++      "is_contradictory": false,
++      "contradiction_with": [],
++      "evidence_refs": [
++        {"context_id": "C1", "quote": "非质量问题的退货运费由买家承担"}
++      ],
++      "reason": "C1 最短连续子串"
++    },
++    {
++      "claim_id": "cl5",
++      "claim": "该规则与是否满 99 元无关，不因包邮资格而改变退货运费责任归属",
++      "claim_type": "non_factual",
++      "claim_subtype": "meta",
++      "support_status": null,
++      "is_contradictory": false,
++      "contradiction_with": [],
++      "evidence_refs": [],
++      "reason": "规则关系/独立性推断，文档未明确写出"
++    },
++    {
++      "claim_id": "cl6",
++      "claim": "建议联系客服确认具体订单",
++      "claim_type": "non_factual",
++      "claim_subtype": "advice",
++      "support_status": null,
++      "is_contradictory": false,
++      "contradiction_with": [],
++      "evidence_refs": [],
++      "reason": "纯建议"
++    }
++  ],
++  "reason": ""
++}

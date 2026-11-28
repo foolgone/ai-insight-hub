@@ -83,6 +83,36 @@ async def test_parse_fails_after_one_repair() -> None:
         await parse_with_repair(text="bad", schema=_Answer, llm=llm)
 
     assert len(llm.calls) == 1
+    assert exc_info.value.original_output == "bad"
     assert exc_info.value.raw_output == "still not json"
     assert exc_info.value.validation_errors
     assert exc_info.value.retryable is False
+
+
+async def test_repair_prompt_uses_compact_example_without_full_schema() -> None:
+    llm = _StubLLM(['{"answer": "fixed"}'])
+
+    result = await parse_with_repair(
+        text="not json",
+        schema=_Answer,
+        llm=llm,
+        repair_example='{"answer": "ok"}',
+    )
+
+    assert result.answer == "fixed"
+    system = llm.calls[0][0]["content"]
+    assert '{"answer": "ok"}' in system
+    assert '"$defs"' not in system
+    assert '"properties"' not in system
+
+
+async def test_default_repair_prompt_includes_schema() -> None:
+    llm = _StubLLM(['{"answer": "fixed"}'])
+
+    result = await parse_with_repair(text="not json", schema=_Answer, llm=llm)
+
+    assert result.answer == "fixed"
+    system = llm.calls[0][0]["content"]
+    assert "JSON Schema" in system
+    assert '"properties"' in system
+    assert '"answer"' in system

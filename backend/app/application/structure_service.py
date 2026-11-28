@@ -345,6 +345,7 @@ async def _run_agent(
 async def _persist_knowledge(
     session: AsyncSession,
     *,
+    tenant_id: uuid.UUID,
     datasource_id: uuid.UUID,
     raw_data_id: uuid.UUID,
     payload: dict[str, Any],
@@ -362,6 +363,7 @@ async def _persist_knowledge(
         await knowledge_repo.add(
             session,
             KnowledgeBase(
+                tenant_id=tenant_id,
                 datasource_id=datasource_id,
                 raw_data_id=raw_data_id,
                 question=title[:2000],
@@ -383,6 +385,7 @@ async def _persist_knowledge(
 async def _persist_summary(
     session: AsyncSession,
     *,
+    tenant_id: uuid.UUID,
     datasource_id: uuid.UUID,
     task_id: uuid.UUID,
     raw_data_id: uuid.UUID,
@@ -395,6 +398,7 @@ async def _persist_summary(
     await analysis_repo.add(
         session,
         AnalysisResult(
+            tenant_id=tenant_id,
             datasource_id=datasource_id,
             data_id=None,
             task_id=task_id,
@@ -500,11 +504,16 @@ async def apply(
     structure = payload.get("structure")
     if structure == "knowledge":
         await _persist_knowledge(
-            session, datasource_id=datasource_id, raw_data_id=raw.id, payload=payload
+            session,
+            tenant_id=raw.tenant_id,
+            datasource_id=datasource_id,
+            raw_data_id=raw.id,
+            payload=payload,
         )
     elif structure == "summary":
         await _persist_summary(
             session,
+            tenant_id=raw.tenant_id,
             datasource_id=datasource_id,
             task_id=task_id,
             raw_data_id=raw.id,

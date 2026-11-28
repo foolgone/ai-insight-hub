@@ -1,5 +1,6 @@
-import { useMemo, useState } from 'react'
+import { useCallback, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { useQueryClient } from '@tanstack/react-query'
 import { LuPlus, LuRefreshCw } from 'react-icons/lu'
 import { AsyncState } from '../../components/common/AsyncState'
 import { PageLoading } from '../../components/common/PageLoading'
@@ -12,7 +13,9 @@ import { Progress } from '../../components/Progress'
 import { Table } from '../../components/Table'
 import { CreateEvaluationModal } from '../../components/quality/CreateEvaluationModal'
 import { RunComparisonPanel } from '../../components/quality/RunComparisonPanel'
-import { useQualityResultsQuery } from '../../hooks/useQuality'
+import { useQualityResultsQuery, qualityKeys } from '../../hooks/useQuality'
+import { useClearStaleDatasource } from '../../hooks/useClearStaleDatasource'
+import { useTaskStream } from '../../hooks/useTaskStream'
 import { useDatasourceStore } from '../../stores/datasourceStore'
 import { formatDateTime } from '../../lib/format'
 import { countQualityLevels, qualityLevelForScore, QUALITY_LEVELS } from '../../lib/quality'
@@ -49,6 +52,9 @@ export default function QualityAssessment() {
   const [page, setPage] = useState(1)
   const [createOpen, setCreateOpen] = useState(false)
 
+  const queryClient = useQueryClient()
+  const seenCompleted = useRef(new Set())
+
   const listQuery = useQualityResultsQuery(currentDatasourceId, {
     page,
     limit: PAGE_SIZE,
@@ -59,6 +65,23 @@ export default function QualityAssessment() {
     limit: 100,
     sort: '-created_at',
   })
+  useClearStaleDatasource(listQuery.error, currentDatasourceId)
+
+  const handleTasks = useCallback(
+    payload => {
+      const fresh = (payload?.items || []).filter(
+        task =>
+          task.task_type === 'evaluate' &&
+          task.status === 'completed' &&
+          !seenCompleted.current.has(task.id)
+      )
+      if (fresh.length === 0) return
+      fresh.forEach(task => seenCompleted.current.add(task.id))
+      queryClient.invalidateQueries({ queryKey: qualityKeys.all })
+    },
+    [queryClient]
+  )
+  useTaskStream(Boolean(currentDatasourceId), { onTasks: handleTasks })
 
   const items = useMemo(() => listQuery.data?.items || [], [listQuery.data])
   const distribution = useMemo(
@@ -160,6 +183,14 @@ export default function QualityAssessment() {
         <Empty
           title="尚未选择数据源"
           description="在顶部「数据源选择器」中选择数据源后查看评估结果。"
+          action={
+            <Link
+              to="/data-sources"
+              className="inline-flex h-8 items-center rounded border border-gray-300 px-3 text-xs text-gray-700 hover:bg-gray-50"
+            >
+              去数据源管理
+            </Link>
+          }
         />
       ) : listQuery.isError ? (
         <AsyncState error={listQuery.error} onRetry={() => listQuery.refetch()} />

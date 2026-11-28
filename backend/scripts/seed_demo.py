@@ -65,6 +65,7 @@ async def _ensure_datasource(session) -> tuple[User, DataSource]:
 
     datasource = DataSource(
         id=DEMO_DATASOURCE_ID,
+        tenant_id=user.tenant_id,
         user_id=user.id,
         name="电商客服示例数据集（2026年Q3）",
         description="预置的 AI 客服对话样例，含清洗结果、质量评估、知识库与报告，供体验展示",
@@ -85,6 +86,7 @@ async def _seed_dialogues(session, datasource: DataSource) -> None:
         if raw is None:
             raw = RawData(
                 id=raw_id,
+                tenant_id=datasource.tenant_id,
                 datasource_id=datasource.id,
                 raw_content={"format": "txt", "content": f"{user_message}\n{ai_response}"},
                 status="completed",
@@ -101,6 +103,7 @@ async def _seed_dialogues(session, datasource: DataSource) -> None:
             continue
         session.add(
             CleanedData(
+                tenant_id=datasource.tenant_id,
                 datasource_id=datasource.id,
                 raw_data_id=raw.id,
                 dialogue_id=dialogue_id,
@@ -126,6 +129,7 @@ async def _seed_analysis(session, datasource: DataSource) -> None:
     session.add(
         AnalysisResult(
             id=analysis_id,
+            tenant_id=datasource.tenant_id,
             datasource_id=datasource.id,
             data_id=cleaned.id if cleaned else uuid.uuid5(DEMO_DATASOURCE_ID, "dialogue-1"),
             analysis_type="quality",
@@ -163,6 +167,7 @@ async def _seed_faqs(session, datasource: DataSource) -> None:
         session.add(
             KnowledgeBase(
                 id=faq_id,
+                tenant_id=datasource.tenant_id,
                 datasource_id=datasource.id,
                 question=question,
                 answer=answer,
@@ -180,6 +185,7 @@ async def _seed_faqs(session, datasource: DataSource) -> None:
         session.add(
             KnowledgeBase(
                 id=gap_id,
+                tenant_id=datasource.tenant_id,
                 datasource_id=datasource.id,
                 question="可以开专票吗？",
                 answer="（待补充）",
@@ -207,13 +213,14 @@ async def _seed_report(session, user: User, datasource: DataSource) -> None:
     # 同时落一份文件，保证报告页面「下载」可用（MinIO 不可用时自动回退本地）
     stored = storage_service.save_bytes(
         markdown.encode(),
-        object_name=f"reports/{report_id}.md",
+        object_name=f"tenant/{datasource.tenant_id}/reports/{report_id}.md",
         content_type="text/markdown",
     )
 
     session.add(
         Report(
             id=report_id,
+            tenant_id=datasource.tenant_id,
             datasource_id=datasource.id,
             user_id=user.id,
             title="电商客服质量综合报告（示例）",

@@ -18,6 +18,7 @@ from app.tasks import (  # noqa: E402,F401
     evaluation,
     insight,
     knowledge,
+    rag_evaluation,
     report,
     structure,
 )

@@ -49,7 +49,7 @@ def _to_item(row: DataSourceType, usage_count: int) -> DataSourceTypeItem:
 )
 async def list_datasource_types(
     include_inactive: bool = Query(default=False, description="是否包含已停用类型"),
-    user: User = Depends(require_roles("admin", "user", "viewer")),
+    user: User = Depends(require_roles("platform_admin", "tenant_admin", "user", "viewer")),
     session: AsyncSession = Depends(get_db),
 ) -> DataSourceTypeList:
     rows = await datasource_type_service.list_types(
@@ -67,7 +67,7 @@ async def list_datasource_types(
 )
 async def create_datasource_type(
     payload: DataSourceTypeCreate,
-    user: User = Depends(require_roles("admin", "user")),
+    user: User = Depends(require_roles("platform_admin", "tenant_admin", "user")),
     session: AsyncSession = Depends(get_db),
 ) -> DataSourceTypeItem:
     row = await datasource_type_service.create(session, user.id, payload)
@@ -83,7 +83,7 @@ async def create_datasource_type(
 async def update_datasource_type(
     type_id: uuid.UUID,
     payload: DataSourceTypeUpdate,
-    user: User = Depends(require_roles("admin", "user")),
+    user: User = Depends(require_roles("platform_admin", "tenant_admin", "user")),
     session: AsyncSession = Depends(get_db),
 ) -> DataSourceTypeItem:
     row = await datasource_type_service.update(session, user.id, type_id, payload)
@@ -99,7 +99,7 @@ async def update_datasource_type(
 )
 async def delete_datasource_type(
     type_id: uuid.UUID,
-    user: User = Depends(require_roles("admin", "user")),
+    user: User = Depends(require_roles("platform_admin", "tenant_admin", "user")),
     session: AsyncSession = Depends(get_db),
 ) -> Response:
     await datasource_type_service.delete(session, user.id, type_id)

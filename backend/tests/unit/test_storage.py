@@ -25,6 +25,7 @@ def test_save_upload_from_path_moves_file(local_storage: Path, tmp_path: Path) -
 
     stored = storage_service.save_upload_from_path(
         source,
+        tenant_id="tenant-1",
         datasource_id="ds-1",
         filename="big.mp3",
         content_type="audio/mpeg",
@@ -39,6 +40,7 @@ def test_save_upload_from_path_moves_file(local_storage: Path, tmp_path: Path) -
 def test_save_and_read_local(local_storage: Path) -> None:
     stored = storage_service.save_upload(
         b"hello-storage",
+        tenant_id="tenant-1",
         datasource_id="ds-1",
         filename="data.csv",
         content_type="text/csv",
@@ -51,8 +53,11 @@ def test_save_and_read_local(local_storage: Path) -> None:
 
 
 def test_object_name_strips_directory_traversal(local_storage: Path) -> None:
-    stored = storage_service.save_upload(b"x", datasource_id="ds-2", filename="../../etc/passwd")
+    stored = storage_service.save_upload(
+        b"x", tenant_id="tenant-2", datasource_id="ds-2", filename="../../etc/passwd"
+    )
 
+    assert stored.object_name.startswith("tenant/tenant-2/uploads/ds-2/")
     assert ".." not in stored.object_name
     assert stored.object_name.endswith("passwd")
 
@@ -66,7 +71,9 @@ def test_auto_falls_back_to_local_when_minio_unavailable(tmp_path: Path, monkeyp
 
     monkeypatch.setattr(storage_service, "_save_minio", _broken_minio)
 
-    stored = storage_service.save_upload(b"fallback", datasource_id="ds-3", filename="a.txt")
+    stored = storage_service.save_upload(
+        b"fallback", tenant_id="tenant-3", datasource_id="ds-3", filename="a.txt"
+    )
 
     assert stored.backend == "local"
     assert Path(stored.url).is_file()
@@ -82,7 +89,9 @@ def test_minio_strict_mode_raises(tmp_path: Path, monkeypatch) -> None:
     monkeypatch.setattr(storage_service, "_save_minio", _broken_minio)
 
     with pytest.raises(ConnectionError):
-        storage_service.save_upload(b"fail", datasource_id="ds-4", filename="a.txt")
+        storage_service.save_upload(
+            b"fail", tenant_id="tenant-4", datasource_id="ds-4", filename="a.txt"
+        )
 
 
 def test_auto_read_prefers_local_when_present(tmp_path: Path, monkeypatch) -> None:
@@ -125,3 +134,13 @@ def test_auto_read_falls_back_to_minio_when_local_missing(tmp_path: Path, monkey
     monkeypatch.setattr(storage_service, "_minio_client", lambda: _Client())
 
     assert storage_service.read_bytes("reports/r2.md") == b"minio-report"
+
+
+def test_legacy_key_still_readable(local_storage: Path) -> None:
+    """旧对象保留旧 key（无 tenant 前缀），读取路径继续兼容。"""
+    legacy_key = "legacy-ds/legacy-report.md"
+    storage_service.save_bytes(
+        b"legacy-report", object_name=legacy_key, content_type="text/markdown"
+    )
+
+    assert storage_service.read_upload(legacy_key) == b"legacy-report"

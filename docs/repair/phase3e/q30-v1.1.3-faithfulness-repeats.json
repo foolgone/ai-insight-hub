@@ -1,0 +1,370 @@
+{
+  "case_id": "Q30",
+  "prompt_version": "v1.1.3",
+  "runs": [
+    {
+      "repeat": 1,
+      "status": "evaluated",
+      "score": 0.25,
+      "counts": {
+        "scorable_claim_count": 4,
+        "supported_claim_count": 1,
+        "insufficient_evidence_count": 3,
+        "non_factual_count": 3
+      },
+      "validation_errors": [],
+      "claims": [
+        {
+          "claim": "该知识库文档未说明支持海外配送",
+          "supported": null,
+          "evidence": [],
+          "reason": "文档未提及，absence 不进分母",
+          "claim_id": "cl1",
+          "claim_type": "non_factual",
+          "claim_subtype": "absence",
+          "support_status": null,
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_refs": []
+        },
+        {
+          "claim": "文档中仅明确了以下与地域相关的物流/运费规则",
+          "supported": null,
+          "evidence": [],
+          "reason": "纯元信息",
+          "claim_id": "cl2",
+          "claim_type": "non_factual",
+          "claim_subtype": "meta",
+          "support_status": null,
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_refs": []
+        },
+        {
+          "claim": "新疆、西藏、内蒙古等偏远地区运费为 20 元，不参与包邮活动",
+          "supported": null,
+          "evidence": [],
+          "reason": "C1 单句原文",
+          "claim_id": "cl3",
+          "claim_type": "factual_claim",
+          "claim_subtype": "policy",
+          "support_status": "supported",
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_refs": [
+            {
+              "context_id": "C1",
+              "quote": "新疆、西藏、内蒙古等偏远地区运费为 20 元，不参与包邮活动。"
+            }
+          ]
+        },
+        {
+          "claim": "发货与物流条款均以国内履约场景为前提",
+          "supported": null,
+          "evidence": [],
+          "reason": "上下文未明确写明“国内履约场景”，但有相关表述",
+          "claim_id": "cl4",
+          "claim_type": "factual_claim",
+          "claim_subtype": "policy",
+          "support_status": "insufficient_evidence",
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_refs": []
+        },
+        {
+          "claim": "所有政策节点（如退款、换货、保修）均以“签收”为起算基准，但未定义签收是否包含境外地址，亦未说明清关、国际运输、跨境售后等配套安排",
+          "supported": null,
+          "evidence": [],
+          "reason": "上下文未明确写明境外地址及跨境售后安排",
+          "claim_id": "cl5",
+          "claim_type": "factual_claim",
+          "claim_subtype": "policy",
+          "support_status": "insufficient_evidence",
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_refs": []
+        },
+        {
+          "claim": "现有条款默认适用于中国大陆境内订单",
+          "supported": null,
+          "evidence": [],
+          "reason": "上下文未明确写明适用范围",
+          "claim_id": "cl6",
+          "claim_type": "factual_claim",
+          "claim_subtype": "policy",
+          "support_status": "insufficient_evidence",
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_refs": []
+        },
+        {
+          "claim": "建议查阅官网「配送范围」页面、联系在线客服或拨打客服热线进行核实",
+          "supported": null,
+          "evidence": [],
+          "reason": "纯建议",
+          "claim_id": "cl7",
+          "claim_type": "non_factual",
+          "claim_subtype": "advice",
+          "support_status": null,
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_refs": []
+        }
+      ]
+    },
+    {
+      "repeat": 2,
+      "status": "evaluated",
+      "score": 0.5,
+      "counts": {
+        "scorable_claim_count": 4,
+        "supported_claim_count": 2,
+        "insufficient_evidence_count": 2,
+        "non_factual_count": 3
+      },
+      "validation_errors": [],
+      "claims": [
+        {
+          "claim": "文档未说明支持海外配送",
+          "supported": null,
+          "evidence": [],
+          "reason": "文档未提及",
+          "claim_id": "cl1",
+          "claim_type": "non_factual",
+          "claim_subtype": "absence",
+          "support_status": null,
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_refs": []
+        },
+        {
+          "claim": "文档未明确禁止海外配送",
+          "supported": null,
+          "evidence": [],
+          "reason": "文档未提及",
+          "claim_id": "cl2",
+          "claim_type": "non_factual",
+          "claim_subtype": "absence",
+          "support_status": null,
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_refs": []
+        },
+        {
+          "claim": "运费规则中列出了新疆、西藏、内蒙古等偏远地区的特殊运费（20 元），并说明其“不参与包邮活动”",
+          "supported": null,
+          "evidence": [],
+          "reason": "C1 单句原文",
+          "claim_id": "cl3",
+          "claim_type": "factual_claim",
+          "claim_subtype": "policy",
+          "support_status": "supported",
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_refs": [
+            {
+              "context_id": "C1",
+              "quote": "新疆、西藏、内蒙古等偏远地区运费为 20 元，不参与包邮活动。"
+            }
+          ]
+        },
+        {
+          "claim": "发货与物流条款均以国内履约场景为前提",
+          "supported": null,
+          "evidence": [],
+          "reason": "多条单句原文共同推出",
+          "claim_id": "cl4",
+          "claim_type": "factual_claim",
+          "claim_subtype": "policy",
+          "support_status": "supported",
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_refs": [
+            {
+              "context_id": "C1",
+              "quote": "订单发货后可在「我的订单」查看物流单号与实时轨迹。"
+            },
+            {
+              "context_id": "C1",
+              "quote": "大件商品（家具、家电）发货时间为 5 个工作日内，配送前会电话预约。"
+            }
+          ]
+        },
+        {
+          "claim": "所有政策节点（如退款、换货、保修）均以“签收”为起算基准，但未定义签收是否包含境外地址",
+          "supported": null,
+          "evidence": [],
+          "reason": "上下文未定义签收是否包含境外地址",
+          "claim_id": "cl5",
+          "claim_type": "factual_claim",
+          "claim_subtype": "policy",
+          "support_status": "insufficient_evidence",
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_refs": []
+        },
+        {
+          "claim": "现有条款默认适用于中国大陆境内订单",
+          "supported": null,
+          "evidence": [],
+          "reason": "上下文未明确写明，默认推断",
+          "claim_id": "cl6",
+          "claim_type": "factual_claim",
+          "claim_subtype": "policy",
+          "support_status": "insufficient_evidence",
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_refs": []
+        },
+        {
+          "claim": "建议查阅官网「配送范围」页面、联系在线客服或拨打客服热线进行核实",
+          "supported": null,
+          "evidence": [],
+          "reason": "纯建议",
+          "claim_id": "cl7",
+          "claim_type": "non_factual",
+          "claim_subtype": "advice",
+          "support_status": null,
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_refs": []
+        }
+      ]
+    },
+    {
+      "repeat": 3,
+      "status": "evaluated",
+      "score": 0.5,
+      "counts": {
+        "scorable_claim_count": 4,
+        "supported_claim_count": 2,
+        "insufficient_evidence_count": 2,
+        "non_factual_count": 2
+      },
+      "validation_errors": [
+        {
+          "claim_id": "cl4",
+          "code": "quote_not_found",
+          "message": "evidence quote is not a verbatim substring",
+          "context_id": "C1"
+        },
+        {
+          "claim_id": "cl4",
+          "code": "evidence_validation_failed",
+          "message": "supported claim has invalid evidence; downgraded"
+        }
+      ],
+      "claims": [
+        {
+          "claim": "文档未说明支持海外配送",
+          "supported": null,
+          "evidence": [],
+          "reason": "文档未提及，absence 不进分母",
+          "claim_id": "cl1",
+          "claim_type": "non_factual",
+          "claim_subtype": "absence",
+          "support_status": null,
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_refs": []
+        },
+        {
+          "claim": "运费规则中列出了“新疆、西藏、内蒙古等偏远地区”的特殊运费（20 元），并说明其“不参与包邮活动”",
+          "supported": null,
+          "evidence": [],
+          "reason": "C1 单句原文",
+          "claim_id": "cl2",
+          "claim_type": "factual_claim",
+          "claim_subtype": "policy",
+          "support_status": "supported",
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_refs": [
+            {
+              "context_id": "C1",
+              "quote": "新疆、西藏、内蒙古等偏远地区运费为 20 元，不参与包邮活动。"
+            }
+          ]
+        },
+        {
+          "claim": "发货与物流条款均以国内履约场景为前提（如“电话预约”“我的订单”查看轨迹、“快递拦截”“改派”等表述）",
+          "supported": null,
+          "evidence": [],
+          "reason": "多条单句原文共同推出",
+          "claim_id": "cl3",
+          "claim_type": "factual_claim",
+          "claim_subtype": "policy",
+          "support_status": "supported",
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_refs": [
+            {
+              "context_id": "C1",
+              "quote": "大件商品（家具、家电）发货时间为 5 个工作日内，配送前会电话预约。"
+            },
+            {
+              "context_id": "C1",
+              "quote": "订单发货后可在「我的订单」查看物流单号与实时轨迹。"
+            },
+            {
+              "context_id": "C1",
+              "quote": "已发货订单无法修改地址，可联系快递拦截或申请改派。"
+            }
+          ]
+        },
+        {
+          "claim": "所有政策节点（如退款、换货、保修）均以“签收”为起算基准，但未定义签收是否包含境外地址，亦未说明清关、国际运输、跨境售后等配套安排",
+          "supported": null,
+          "evidence": [],
+          "reason": "多条单句原文共同推出",
+          "claim_id": "cl4",
+          "claim_type": "factual_claim",
+          "claim_subtype": "policy",
+          "support_status": "insufficient_evidence",
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_refs": [
+            {
+              "context_id": "C1",
+              "quote": "订单签收后 7 天内可申请无理由退款。"
+            },
+            {
+              "context_id": "C1",
+              "quote": "签收后 7 天内，商品未使用且包装完整可申请换货。"
+            },
+            {
+              "context_id": "C1",
+              "quote": "电子产品自签收之日起保修 12 个月，配件保修 3 个月。"
+            }
+          ]
+        },
+        {
+          "claim": "现有条款默认适用于中国大陆境内订单",
+          "supported": null,
+          "evidence": [],
+          "reason": "上下文未明确写明，默认推断",
+          "claim_id": "cl5",
+          "claim_type": "factual_claim",
+          "claim_subtype": "policy",
+          "support_status": "insufficient_evidence",
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_refs": []
+        },
+        {
+          "claim": "建议查阅官网「配送范围」页面、联系在线客服（9:00–21:00）或拨打客服热线 400-800-1234 进行核实",
+          "supported": null,
+          "evidence": [],
+          "reason": "纯建议",
+          "claim_id": "cl6",
+          "claim_type": "non_factual",
+          "claim_subtype": "advice",
+          "support_status": null,
+          "is_contradictory": false,
+          "contradiction_with": [],
+          "evidence_refs": []
+        }
+      ]
+    }
+  ]
+}

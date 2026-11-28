@@ -1,0 +1,34 @@
+{
+  "case_id": "Q01",
+  "metric": "answer_correctness",
+  "prompt_version": "v1.1.1",
+  "model": "qwen-max",
+  "temperature": 0.0,
+  "max_tokens": 8192,
+  "prompt_sha256": "2ab6eac2abe57dcfd647df328244ac3e5681fc93222938d6614e71037d49ae77",
+  "status": "evaluated",
+  "score": 0.9,
+  "skipped_reason": null,
+  "error": null,
+  "judge_config": {
+    "agent": "rag_judge_answer_correctness",
+    "model": "qwen-max",
+    "temperature": 0.0,
+    "max_tokens": 8192,
+    "prompt_version": "v1.1.1",
+    "resolved_prompt_version": "v1.1.1",
+    "prompt_sha256": "2ab6eac2abe57dcfd647df328244ac3e5681fc93222938d6614e71037d49ae77",
+    "schema_version": "rag_judge_schema_v2",
+    "rubric_version": "v1.1.1",
+    "metric_version": "v2"
+  },
+  "token_usage": {
+    "input": 2290,
+    "output": 51
+  },
+  "missing_points": [],
+  "wrong_facts": [],
+  "reason": "回答正确且完整地覆盖了金标中的关键事实，并补充了相关且正确的例外情况。",
+  "raw_output": "{\n  \"score\": 0.9,\n  \"missing_points\": [],\n  \"wrong_facts\": [],\n  \"reason\": \"回答正确且完整地覆盖了金标中的关键事实，并补充了相关且正确的例外情况。\"\n}",
+  "original_raw_output": null
+}

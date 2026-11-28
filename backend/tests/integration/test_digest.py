@@ -59,6 +59,7 @@ async def test_collect_digest_counts_recent_tasks_cost_and_gaps(
         db_session,
         KnowledgeGap(
             id=uuid.uuid4(),
+            tenant_id=datasource.tenant_id,
             datasource_id=datasource.id,
             question="支持发票吗？",
             question_key=f"key-{uuid.uuid4().hex[:8]}",

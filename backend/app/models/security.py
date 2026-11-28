@@ -70,6 +70,7 @@ class AuditLog(Base):
 
     __tablename__ = "audit_logs"
     __table_args__ = (
+        Index("idx_audit_logs_tenant_created", "tenant_id", "created_at"),
         Index("idx_audit_user_id", "user_id", "created_at"),
         Index("idx_audit_resource", "resource_type", "resource_id"),
         Index("idx_audit_action", "action", "created_at"),
@@ -79,6 +80,9 @@ class AuditLog(Base):
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
     user_id: Mapped[uuid.UUID | None] = mapped_column(
         PG_UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL")
+    )
+    tenant_id: Mapped[uuid.UUID | None] = mapped_column(
+        PG_UUID(as_uuid=True), ForeignKey("tenants.id", ondelete="RESTRICT")
     )
     action: Mapped[str] = mapped_column(String(100), nullable=False)
     resource_type: Mapped[str] = mapped_column(String(100), nullable=False)

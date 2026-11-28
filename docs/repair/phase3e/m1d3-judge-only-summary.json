@@ -1,0 +1,307 @@
+{
+ "name": "m1d3-judge-only-summary",
+ "kind": "derived_summary_from_raw_results_not_judge_run",
+ "status": "stopped",
+ "verified": false,
+ "stop_triggered": true,
+ "stop_reason": "Q23 run 1: faithfulness=invalid(contract_violation), faithfulness_strict=invalid(contract_violation)",
+ "attempted_cases": [
+  "Q01",
+  "Q04",
+  "Q11",
+  "Q17",
+  "Q21",
+  "Q23"
+ ],
+ "unprocessed_cases": [
+  "Q29",
+  "Q31",
+  "Q35",
+  "Q36"
+ ],
+ "invalid_details": [
+  {
+   "case_id": "Q23",
+   "run": 1,
+   "metric": "faithfulness",
+   "status": "invalid",
+   "invalid_reason": "contract_violation",
+   "error_type": "StructuredOutputError",
+   "error_message": "StructuredOutputError: structured output is still invalid after repair",
+   "errors": [
+    "StructuredOutputError: structured output is still invalid after repair"
+   ]
+  },
+  {
+   "case_id": "Q23",
+   "run": 1,
+   "metric": "faithfulness_strict",
+   "status": "invalid",
+   "invalid_reason": "contract_violation",
+   "error_type": "StructuredOutputError",
+   "error_message": null,
+   "errors": null
+  }
+ ],
+ "cases": [
+  {
+   "case_id": "Q01",
+   "group": "provisional",
+   "targets": {
+    "F": [
+     0.9,
+     1.0
+    ],
+    "C": [
+     0.9,
+     1.0
+    ],
+    "R": [
+     0.8,
+     1.0
+    ]
+   },
+   "attempted": true,
+   "runs": 1,
+   "F": "1.000000",
+   "F_strict": "1.000000",
+   "C": "0.900000",
+   "R": "0.900000",
+   "target": "PASS"
+  },
+  {
+   "case_id": "Q04",
+   "group": "provisional",
+   "targets": {
+    "F": [
+     1.0,
+     1.0
+    ],
+    "C": [
+     0.8,
+     1.0
+    ],
+    "R": [
+     0.9,
+     1.0
+    ]
+   },
+   "attempted": true,
+   "runs": 1,
+   "F": "1.000000",
+   "F_strict": "1.000000",
+   "C": "0.900000",
+   "R": "1.000000",
+   "target": "PASS"
+  },
+  {
+   "case_id": "Q11",
+   "group": "provisional",
+   "targets": {
+    "F": [
+     0.6,
+     0.9
+    ],
+    "C": [
+     0.8,
+     1.0
+    ],
+    "R": [
+     0.9,
+     1.0
+    ]
+   },
+   "attempted": true,
+   "runs": 1,
+   "F": "0.800000",
+   "F_strict": "1.000000",
+   "C": "0.900000",
+   "R": "0.900000",
+   "target": "PASS"
+  },
+  {
+   "case_id": "Q17",
+   "group": "provisional",
+   "targets": {
+    "F": [
+     0.7,
+     0.9
+    ],
+    "C": [
+     0.8,
+     1.0
+    ],
+    "R": [
+     0.8,
+     1.0
+    ]
+   },
+   "attempted": true,
+   "runs": 1,
+   "F": "0.800000",
+   "F_strict": "1.000000",
+   "C": "0.900000",
+   "R": "0.900000",
+   "target": "PASS"
+  },
+  {
+   "case_id": "Q21",
+   "group": "provisional",
+   "targets": {
+    "F": [
+     0.6,
+     0.7
+    ]
+   },
+   "attempted": true,
+   "runs": 1,
+   "F": "1.000000",
+   "F_strict": "1.000000",
+   "C": "0.900000",
+   "R": "0.900000",
+   "target": "FAIL"
+  },
+  {
+   "case_id": "Q23",
+   "group": "human_gold",
+   "targets": {
+    "F": [
+     0.4,
+     0.5
+    ],
+    "C": [
+     0.0,
+     0.2
+    ],
+    "R": [
+     0.7,
+     1.0
+    ]
+   },
+   "attempted": true,
+   "runs": 1,
+   "F": "invalid(contract_violation)",
+   "F_strict": "invalid(contract_violation)",
+   "C": "0.000000",
+   "R": "0.900000",
+   "target": "BLOCKED"
+  },
+  {
+   "case_id": "Q29",
+   "group": "provisional",
+   "targets": {
+    "F": "skipped",
+    "C": [
+     0.9,
+     1.0
+    ],
+    "R": [
+     0.9,
+     1.0
+    ]
+   },
+   "attempted": false,
+   "runs": 0,
+   "F": "—",
+   "F_strict": "—",
+   "C": "—",
+   "R": "—",
+   "target": "NOT_RUN"
+  },
+  {
+   "case_id": "Q31",
+   "group": "provisional",
+   "targets": {
+    "F": [
+     0.6,
+     1.0
+    ],
+    "C": [
+     0.8,
+     1.0
+    ],
+    "R": [
+     0.8,
+     1.0
+    ]
+   },
+   "attempted": false,
+   "runs": 0,
+   "F": "—",
+   "F_strict": "—",
+   "C": "—",
+   "R": "—",
+   "target": "NOT_RUN"
+  },
+  {
+   "case_id": "Q35",
+   "group": "human_gold",
+   "targets": {
+    "F": [
+     0.8,
+     1.0
+    ],
+    "C": [
+     0.7,
+     1.0
+    ],
+    "R": [
+     0.8,
+     1.0
+    ]
+   },
+   "attempted": false,
+   "runs": 0,
+   "F": "—",
+   "F_strict": "—",
+   "C": "—",
+   "R": "—",
+   "target": "NOT_RUN"
+  },
+  {
+   "case_id": "Q36",
+   "group": "human_gold",
+   "targets": {
+    "F": [
+     0.8,
+     1.0
+    ],
+    "C": [
+     0.5,
+     0.6
+    ],
+    "R": [
+     0.8,
+     1.0
+    ]
+   },
+   "attempted": false,
+   "runs": 0,
+   "F": "—",
+   "F_strict": "—",
+   "C": "—",
+   "R": "—",
+   "target": "NOT_RUN"
+  }
+ ],
+ "totals": {
+  "case_runs": 6,
+  "judge_calls": 18,
+  "input_tokens": 58335,
+  "output_tokens": 5039,
+  "cost_cny": 0.1883784,
+  "preflight_input_tokens": 9,
+  "preflight_output_tokens": 6,
+  "ceiling_cny": 1.0,
+  "max_judge_calls": 51
+ },
+ "raw_results_sha256": "96ff0d9b03add2365f5a74219402deb59a3015f7c6adc1f174cb039cdb34c526",
+ "application_sha256": "7077477ef6108dcf7996b5ce17b2c492752cbbc85644856d91abdb3b5f45da28",
+ "fixture_sha256": "dc7be14b6026b579c15dea1a13d498b7479e14081aa17419ef2bfa525ae9be70",
+ "manifest_sha256": "8bdd673cd44ed772dfc1630280e571d4cdd8ed786066eb72eb553a9be8b0b278",
+ "target_sha256": "3ee15dfca66fe13f0a45fda84ecf2612483f2de107ad079b196a6bd6344d5846",
+ "created_run": false,
+ "wrote_db": false,
+ "runtime_activated": false,
+ "default_prompt_version": "v1.0.0"
+}

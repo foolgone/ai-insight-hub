@@ -2,3 +2,35 @@
 # Windows 检出若变成 CRLF，会报 `bad interpreter: /usr/bin/env bash^M`，
 # 且 tar 打包部署会把 CRLF 一起带到服务器，所以这里强制 LF。
 *.sh text eol=lf
+
+# M1-D-6 单案例证据：ledger / raw results / analysis / report 的 SHA 需要逐字节可复现。
+docs/repair/phase3e/m1d6-single-case-ledger.jsonl text eol=lf
+docs/repair/phase3e/m1d6-single-case-results.json text eol=lf
+docs/repair/phase3e/m1d6-single-case-analysis.json text eol=lf
+docs/repair/49-m1d6-v1.2.4-single-case-diagnostic-results.md text eol=lf
+
+# M1-D-6 v1.2.5 C 单案例证据：ledger / dry-run / raw results / report 的 SHA 需要逐字节可复现。
+docs/repair/phase3e/m1d6-v125-ledger.jsonl text eol=lf
+docs/repair/phase3e/m1d6-v125-dry-run.json text eol=lf
+docs/repair/phase3e/m1d6-v125-results.json text eol=lf
+docs/repair/56-m1d6-v1.2.5-c-single-case-results.md text eol=lf
+
+# M1-D-6 v1.2.5 failure-mode 证据：SHA 需要逐字节可复现。
+docs/repair/phase3e/m1d6-v125-failure-mode-ledger.jsonl text eol=lf
+docs/repair/phase3e/m1d6-v125-failure-mode-dry-run.json text eol=lf
+docs/repair/phase3e/m1d6-v125-failure-mode-results.json text eol=lf
+docs/repair/58-m1d6-v1.2.5-failure-mode-diagnostic-results.md text eol=lf
+docs/repair/phase3e/m1d6-v125-model-comparison-flash-preflight.json text eol=lf
+docs/repair/phase3e/m1d6-v125-model-comparison-flash-application.json text eol=lf
+docs/repair/phase3e/m1d6-v125-model-comparison-flash-dry-run.json text eol=lf
+docs/repair/phase3e/m1d6-v125-model-comparison-flash-ledger.jsonl text eol=lf
+docs/repair/phase3e/m1d6-v125-model-comparison-flash-results.json text eol=lf
+docs/repair/60-m1d6-v1.2.5-model-comparison-flash-results.md text eol=lf
+docs/repair/phase3e/m1d6-q17-q21-target-review.json text eol=lf
+docs/repair/61-m1d6-q17-q21-target-review.md text eol=lf
+docs/repair/62-m1d6-target-v1.0.3-draft.md text eol=lf
+docs/repair/63-m1d6-model-comparison-5case-application.md text eol=lf
+docs/repair/phase3e/pilot-40-targets-v1.2.0-v1.0.3-draft.json text eol=lf
+docs/repair/phase3e/pilot-40-targets-v1.2.0-v1.0.3-draft-validation.json text eol=lf
+docs/repair/phase3e/m1d6-v125-model-comparison-5case-preflight.json text eol=lf
+docs/repair/phase3e/m1d6-v125-model-comparison-5case-application.json text eol=lf

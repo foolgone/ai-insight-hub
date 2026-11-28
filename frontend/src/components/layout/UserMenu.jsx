@@ -7,6 +7,8 @@ import { useCredentialGate } from '../../lib/credentialGate'
 import { notify } from '../../lib/toast'
 
 const ROLE_LABELS = {
+  platform_admin: '平台管理员',
+  tenant_admin: '租户管理员',
   admin: '管理员',
   user: '普通用户',
   viewer: '访客',

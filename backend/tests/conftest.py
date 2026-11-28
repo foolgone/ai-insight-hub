@@ -13,9 +13,28 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from fastapi.testclient import TestClient  # noqa: E402
+from sqlalchemy.engine import make_url  # noqa: E402
 
 from app.core.config import settings  # noqa: E402
 from app.main import app  # noqa: E402
+
+
+@pytest.fixture(autouse=True)
+def guard_test_database(request) -> None:
+    """集成/安全测试必须使用 ``*_test`` 库，避免读写共享 dev 库。"""
+    uses_db = "db_session" in request.fixturenames or any(
+        request.node.get_closest_marker(marker) for marker in ("integration", "security")
+    )
+    if not uses_db:
+        return
+    database = make_url(settings.DATABASE_URL).database or ""
+    if not database.endswith("_test"):
+        pytest.exit(
+            f"拒绝在非测试库 {database!r} 上运行集成/安全测试；"
+            "请使用 backend/scripts/run_tests_local.py，或设置 "
+            "TEST_DATABASE_URL=postgresql://.../aiinsight_test",
+            returncode=1,
+        )
 
 
 @pytest.fixture(autouse=True)

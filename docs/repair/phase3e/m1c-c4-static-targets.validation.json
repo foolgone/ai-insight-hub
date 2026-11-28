@@ -1,0 +1,55 @@
+{
+ "name": "m1c-c4-static-targets-validation",
+ "status": "pass",
+ "checks": [
+  {
+   "check": "target_sha256",
+   "ok": true
+  },
+  {
+   "check": "labels_sha256",
+   "ok": true
+  },
+  {
+   "check": "recalc_sha256",
+   "ok": true
+  },
+  {
+   "check": "row_count",
+   "ok": true
+  },
+  {
+   "check": "q17_expected",
+   "ok": true
+  },
+  {
+   "check": "q32_expected",
+   "ok": true
+  },
+  {
+   "check": "q11_observed",
+   "ok": true
+  },
+  {
+   "check": "q21_observed",
+   "ok": true
+  },
+  {
+   "check": "q23_observed",
+   "ok": true
+  },
+  {
+   "check": "all_target_in",
+   "ok": true
+  },
+  {
+   "check": "q17_coverage",
+   "ok": true
+  },
+  {
+   "check": "q32_coverage",
+   "ok": true
+  }
+ ],
+ "output_sha256": "3ead3bdf8e354d3968d6dcc77561068d9c2a455ec42070e16dda20e58d2c5f44"
+}

@@ -6,9 +6,11 @@ import uuid
 import pytest
 
 from app.composition import enqueue
+from app.core.config import settings
+from app.core.tenancy import DEFAULT_TENANT_ID
 from app.agents.base import AgentResult
-from app.models import Report
-from app.services import report_service
+from app.models import QaDataset, QaDatasetVersion, RagEvaluationRun, Report
+from app.services import report_service, storage_service
 from tests.factories import UserFactory, persist
 
 pytestmark = pytest.mark.integration
@@ -51,6 +53,108 @@ async def _datasource(client, auth_headers, name: str = "report-ds") -> str:
     return response.json()["id"]
 
 
+async def _comparison_runs(db_session, user, count: int = 2) -> list[RagEvaluationRun]:
+    dataset = QaDataset(
+        tenant_id=user.tenant_id,
+        user_id=user.id,
+        name=f"cmp-ds-{uuid.uuid4().hex[:8]}",
+        source_type="doc",
+    )
+    await persist(db_session, dataset)
+    version = QaDatasetVersion(
+        tenant_id=dataset.tenant_id,
+        dataset_id=dataset.id,
+        version=1,
+        status="published",
+        item_count=1,
+        checksum=uuid.uuid4().hex,
+    )
+    await persist(db_session, version)
+    runs: list[RagEvaluationRun] = []
+    for _ in range(count):
+        run = RagEvaluationRun(
+            tenant_id=user.tenant_id,
+            user_id=user.id,
+            dataset_id=dataset.id,
+            dataset_name=dataset.name,
+            dataset_version_id=version.id,
+            execution_mode="query",
+            adapter="mock",
+            retrieval_config={"top_k": 3},
+            judge_config={"model": "qwen-flash", "prompt_version": "v1.2.5"},
+            config_snapshot={},
+            item_selection={},
+            total_items=120,
+            completed_items=120,
+            evaluated_items=120,
+            invalid_items=0,
+            status="completed",
+        )
+        await persist(db_session, run)
+        runs.append(run)
+    return runs
+
+
+def _comparison_payload(runs: list[RagEvaluationRun], *, same_config: bool = True) -> dict:
+    base, target = runs
+    side = {
+        "dataset_name": base.dataset_name,
+        "dataset_version_id": str(base.dataset_version_id),
+        "execution_mode": "query",
+        "adapter": "mock",
+        "top_k": 3,
+        "completed_at": "2026-11-25T03:33:00Z",
+        "judge_model": "qwen-flash",
+        "prompt_version": "v1.2.5",
+        "total_items": 120,
+        "evaluated_items": 120,
+        "invalid_items": 0,
+        "failed_items": 0,
+        "skipped_items": 0,
+        "unprocessed_items": 0,
+    }
+    case = {
+        "dataset_item_id": "item-1",
+        "item_key": "P12-001",
+        "question": "退款申请提交后多久审批？",
+        "verdict": "improved",
+        "driver_metric": "answer_relevancy",
+        "driver_delta": 0.2,
+        "note": "R +0.200",
+    }
+    return {
+        "base": {"run_id": str(base.id), **side},
+        "target": {"run_id": str(target.id), **side},
+        "metrics": [
+            {
+                "metric_name": "faithfulness",
+                "metric_short": "F",
+                "label": "Faithfulness",
+                "base": 0.776,
+                "target": 0.801,
+                "delta": 0.026,
+            }
+        ],
+        "case_summary": {
+            "improved": 31,
+            "regressed": 32,
+            "unchanged": 57,
+            "invalid": 0,
+            "unprocessed": 0,
+            "total": 120,
+            "aligned_total": 120,
+            "exported_cases": 120,
+            "case_truncated": False,
+        },
+        "top_improved": [case],
+        "top_regressed": [
+            {**case, "item_key": "P12-002", "verdict": "regressed", "driver_delta": -0.2}
+        ],
+        "same_config": same_config,
+        "compare_url": "/rag-evaluations/compare?base=a&target=b",
+    }
+
+
 def _patch_agent(monkeypatch, result: AgentResult | None = None) -> None:
     monkeypatch.setattr(report_service, "_build_agent", lambda: _FakeAgent(result or _result()))
     monkeypatch.setattr(enqueue, "enqueue_report", lambda report_id: "celery-report")
@@ -76,6 +180,7 @@ async def test_markdown_report_lifecycle(client, auth_headers, db_session, monke
     assert row is not None
     assert row.status == "completed"
     assert row.file_size and row.file_size > 0
+    assert row.file_path.startswith(f"tenant/{DEFAULT_TENANT_ID}/reports/")
     assert row.data["summary"] == "整体质量良好。"
 
     detail = await client.get(f"/api/v1/reports/{report_id}", headers=auth_headers)
@@ -98,6 +203,35 @@ async def test_markdown_report_lifecycle(client, auth_headers, db_session, monke
     missing = await client.get(f"/api/v1/reports/{report_id}", headers=auth_headers)
     assert missing.status_code == 404
     assert missing.json()["error"]["code"] == "REPORT_NOT_FOUND"
+
+
+async def test_legacy_report_key_still_downloadable(
+    client, auth_headers, test_user, db_session, monkeypatch, tmp_path
+) -> None:
+    """旧报告仍按旧 key（reports/<id>.md）读取，不要求搬迁后才能下载。"""
+    monkeypatch.setattr(settings, "STORAGE_BACKEND", "local")
+    monkeypatch.setattr(settings, "STORAGE_LOCAL_DIR", str(tmp_path))
+    datasource_id = await _datasource(client, auth_headers, "legacy-report-ds")
+    legacy_key = f"reports/legacy-{uuid.uuid4().hex}.md"
+    storage_service.save_bytes(
+        "旧报告内容".encode(), object_name=legacy_key, content_type="text/markdown"
+    )
+    report = Report(
+        tenant_id=test_user.tenant_id,
+        datasource_id=uuid.UUID(datasource_id),
+        user_id=test_user.id,
+        title="旧 key 报告",
+        report_type="quality",
+        format="markdown",
+        status="completed",
+        file_path=legacy_key,
+        file_size=18,
+    )
+    await persist(db_session, report)
+
+    response = await client.get(f"/api/v1/reports/{report.id}/download", headers=auth_headers)
+    assert response.status_code == 200, response.text
+    assert response.content.decode() == "旧报告内容"
 
 
 async def test_excel_report_generation(client, auth_headers, db_session, monkeypatch) -> None:
@@ -220,3 +354,76 @@ async def test_report_task_registered() -> None:
     from app.core.celery import celery_app
 
     assert "tasks.generate_report" in celery_app.tasks
+
+
+async def test_comparison_report_markdown_without_llm(
+    client, auth_headers, test_user, db_session, monkeypatch
+) -> None:
+    """P1-3b：Run 对比报告走确定性渲染，不调用报告 Agent。"""
+    datasource_id = await _datasource(client, auth_headers, "report-compare-ds")
+    runs = await _comparison_runs(db_session, test_user)
+    monkeypatch.setattr(enqueue, "enqueue_report", lambda report_id: "celery-report")
+
+    def _must_not_run() -> None:
+        raise AssertionError("comparison report must not call report agent")
+
+    monkeypatch.setattr(report_service, "_build_agent", _must_not_run)
+
+    created = await client.post(
+        f"/api/v1/datasources/{datasource_id}/reports",
+        headers=auth_headers,
+        json={
+            "title": "Run 对比报告",
+            "report_type": "comprehensive",
+            "format": "markdown",
+            "config": {"run_comparison": _comparison_payload(runs)},
+        },
+    )
+    assert created.status_code == 202, created.text
+    report_id = created.json()["id"]
+
+    outcome = await report_service.run_report_task(report_id, session=db_session)
+    assert outcome["status"] == "completed"
+
+    download = await client.get(f"/api/v1/reports/{report_id}/download", headers=auth_headers)
+    assert download.status_code == 200
+    text = download.text
+    assert "## Run 对比" in text
+    assert "变好 31 / 变差 32 / 不变 57" in text
+    assert "Judge beta 噪声提示" in text
+    assert "同配置比较" in text
+    assert "P12-001" in text
+    assert "导出 CSV / 导出 JSON" in text
+
+    row = await db_session.get(Report, uuid.UUID(report_id))
+    assert row is not None
+    assert row.data["metadata"]["comparison"] is True
+    assert row.data["metadata"]["same_config"] is True
+
+
+async def test_comparison_report_rejects_other_user_run(
+    client, auth_headers, test_user, db_session, monkeypatch
+) -> None:
+    """跨租户 Run 不能进入报告：创建时直接 404。"""
+    from app.core.security import hash_password
+
+    datasource_id = await _datasource(client, auth_headers, "report-compare-403-ds")
+    own_runs = await _comparison_runs(db_session, test_user, count=1)
+    other = UserFactory(password_hash=hash_password("other12345"))
+    await persist(db_session, other)
+    other_runs = await _comparison_runs(db_session, other, count=1)
+    monkeypatch.setattr(enqueue, "enqueue_report", lambda report_id: "celery-report")
+
+    response = await client.post(
+        f"/api/v1/datasources/{datasource_id}/reports",
+        headers=auth_headers,
+        json={
+            "title": "越权对比报告",
+            "report_type": "comprehensive",
+            "format": "markdown",
+            "config": {"run_comparison": _comparison_payload([own_runs[0], other_runs[0]])},
+        },
+    )
+
+    assert response.status_code == 404, response.text
+    assert response.json()["error"]["code"] == "RAG_EVALUATION_NOT_FOUND"

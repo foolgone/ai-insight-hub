@@ -1,0 +1,75 @@
+{
+ "file": "m1b003-static-recalc.json",
+ "sha256": "53787fbb2a434953354bd821b62581e6e56ba5db10751149c236f1e7656437bb",
+ "sha256_file": "m1b003-static-recalc.sha256",
+ "kind": "static_recalculation_not_judge_run",
+ "row_count": 40,
+ "checks": [
+  {
+   "name": "output_sha_matches_sha_file",
+   "ok": true,
+   "detail": "53787fbb2a434953354bd821b62581e6e56ba5db10751149c236f1e7656437bb"
+  },
+  {
+   "name": "row_count_40",
+   "ok": true,
+   "detail": 40
+  },
+  {
+   "name": "observed_evaluated_30",
+   "ok": true,
+   "detail": 30
+  },
+  {
+   "name": "observed_total_32",
+   "ok": true,
+   "detail": 32
+  },
+  {
+   "name": "not_run_count_8",
+   "ok": true,
+   "detail": 8
+  },
+  {
+   "name": "skipped_count_2",
+   "ok": true,
+   "detail": 2
+  },
+  {
+   "name": "input_sha_matches",
+   "ok": true,
+   "detail": "29732088952ad406d296b2c7d8fd5d34f427fd1e703b9818e2bebf80374a5c68"
+  },
+  {
+   "name": "target_sha_matches",
+   "ok": true,
+   "detail": "3ee15dfca66fe13f0a45fda84ecf2612483f2de107ad079b196a6bd6344d5846"
+  },
+  {
+   "name": "q17_expected_separated",
+   "ok": true,
+   "detail": 0.8
+  },
+  {
+   "name": "q32_expected_separated",
+   "ok": true,
+   "detail": 1.0
+  },
+  {
+   "name": "q14_context_unavailable",
+   "ok": true,
+   "detail": "context_unavailable"
+  },
+  {
+   "name": "q29_no_scorable",
+   "ok": true,
+   "detail": "no_scorable_claims"
+  },
+  {
+   "name": "coverage_matches_old_f_30",
+   "ok": true,
+   "detail": 30
+  }
+ ],
+ "all_pass": true
+}

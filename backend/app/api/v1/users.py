@@ -21,7 +21,7 @@ router = APIRouter()
     summary="获取当前用户信息",
 )
 async def get_me(
-    user: User = Depends(require_roles("admin", "user", "viewer")),
+    user: User = Depends(require_roles("platform_admin", "tenant_admin", "user", "viewer")),
 ) -> UserMe:
     return UserMe.model_validate(user)
 
@@ -34,7 +34,7 @@ async def get_me(
 )
 async def update_me(
     payload: UserUpdateRequest,
-    user: User = Depends(require_roles("admin", "user")),
+    user: User = Depends(require_roles("platform_admin", "tenant_admin", "user")),
     session: AsyncSession = Depends(get_db),
 ) -> UserMe:
     data = payload.model_dump(exclude_unset=True)
@@ -50,7 +50,7 @@ async def update_me(
 )
 async def change_password(
     payload: PasswordChangeRequest,
-    user: User = Depends(require_roles("admin", "user")),
+    user: User = Depends(require_roles("platform_admin", "tenant_admin", "user")),
     session: AsyncSession = Depends(get_db),
 ) -> MessageResponse:
     await user_service.change_password(

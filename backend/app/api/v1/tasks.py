@@ -15,6 +15,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.deps import require_roles
 from app.api.deps import pagination_params
 from app.core.pagination import PaginationParams
+from app.core.tenancy import apply_tenant_filter
 from app.composition import executors
 from app.core.database import SessionLocal, get_db
 from app.models import Task, User
@@ -29,8 +30,8 @@ from app.services import task_service
 
 router = APIRouter()
 
-READ_ROLES = ("admin", "user", "viewer")
-WRITE_ROLES = ("admin", "user")
+READ_ROLES = ("platform_admin", "tenant_admin", "user", "viewer")
+WRITE_ROLES = ("platform_admin", "tenant_admin", "user")
 
 # SSE 参数：服务端 1s 轮询快照、变化即推；15s 心跳保活
 STREAM_POLL_SECONDS = 1.0
@@ -52,10 +53,11 @@ def _task_snapshot(task: Task) -> dict[str, Any]:
 
 
 async def _task_snapshots(user: User) -> list[dict[str, Any]]:
-    """按用户权限取最近任务快照（admin 看全部，其余只看自己的）。"""
+    """按用户权限取最近任务快照（platform_admin 看全部，其余只看自己的）。"""
     async with SessionLocal() as session:
         stmt = select(Task).order_by(Task.created_at.desc()).limit(STREAM_LIMIT)
-        if user.role != "admin":
+        stmt = apply_tenant_filter(stmt, Task, user)
+        if user.role != "platform_admin":
             stmt = stmt.where(Task.user_id == user.id)
         rows = list((await session.execute(stmt)).scalars().all())
     return [_task_snapshot(row) for row in rows]

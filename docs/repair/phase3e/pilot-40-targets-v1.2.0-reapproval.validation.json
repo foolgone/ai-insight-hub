@@ -1,0 +1,320 @@
+{
+  "file": "pilot-40-targets-v1.2.0-reapproval.json",
+  "status": "proposed_pending_human",
+  "row_count": 40,
+  "final_labels_sha256": "f139623fef80b55716fce0c773e776d284a5167683eb91559b23e49cabd000eb",
+  "checks": [
+    {
+      "name": "row_count_40",
+      "ok": true,
+      "detail": 40
+    },
+    {
+      "name": "unique_ids",
+      "ok": true,
+      "detail": [
+        "Q01",
+        "Q02",
+        "Q03",
+        "Q04",
+        "Q05",
+        "Q06",
+        "Q07",
+        "Q08",
+        "Q09",
+        "Q10",
+        "Q11",
+        "Q12",
+        "Q13",
+        "Q14",
+        "Q15",
+        "Q16",
+        "Q17",
+        "Q18",
+        "Q19",
+        "Q20",
+        "Q21",
+        "Q22",
+        "Q23",
+        "Q24",
+        "Q25",
+        "Q26",
+        "Q27",
+        "Q28",
+        "Q29",
+        "Q30",
+        "Q31",
+        "Q32",
+        "Q33",
+        "Q34",
+        "Q35",
+        "Q36",
+        "Q37",
+        "Q38",
+        "Q39",
+        "Q40"
+      ]
+    },
+    {
+      "name": "final_labels_sha",
+      "ok": true,
+      "detail": "f139623fef80b55716fce0c773e776d284a5167683eb91559b23e49cabd000eb"
+    },
+    {
+      "name": "old_targets_match",
+      "ok": true,
+      "detail": "all cases"
+    },
+    {
+      "name": "affected_q17",
+      "ok": true,
+      "detail": {
+        "F": [
+          0.7,
+          0.9
+        ],
+        "C": [
+          0.8,
+          1.0
+        ],
+        "R": [
+          0.8,
+          1.0
+        ]
+      }
+    },
+    {
+      "name": "affected_q30",
+      "ok": true,
+      "detail": {
+        "F": [
+          0.4,
+          1.0
+        ],
+        "C": [
+          0.8,
+          1.0
+        ],
+        "R": [
+          0.8,
+          1.0
+        ]
+      }
+    },
+    {
+      "name": "affected_q32",
+      "ok": true,
+      "detail": {
+        "F": [
+          0.9,
+          1.0
+        ],
+        "C": [
+          0.8,
+          1.0
+        ],
+        "R": [
+          0.8,
+          1.0
+        ]
+      }
+    },
+    {
+      "name": "affected_q19",
+      "ok": true,
+      "detail": {
+        "F": [
+          0.6,
+          1.0
+        ],
+        "C": [
+          0.8,
+          1.0
+        ],
+        "R": [
+          0.8,
+          1.0
+        ]
+      }
+    },
+    {
+      "name": "affected_q20",
+      "ok": true,
+      "detail": {
+        "F": [
+          0.6,
+          1.0
+        ],
+        "C": [
+          0.8,
+          1.0
+        ],
+        "R": [
+          0.8,
+          1.0
+        ]
+      }
+    },
+    {
+      "name": "affected_q31",
+      "ok": true,
+      "detail": {
+        "F": [
+          0.6,
+          1.0
+        ],
+        "C": [
+          0.8,
+          1.0
+        ],
+        "R": [
+          0.8,
+          1.0
+        ]
+      }
+    },
+    {
+      "name": "affected_q35",
+      "ok": true,
+      "detail": {
+        "F": [
+          0.8,
+          1.0
+        ],
+        "C": [
+          0.7,
+          1.0
+        ],
+        "R": [
+          0.8,
+          1.0
+        ]
+      }
+    },
+    {
+      "name": "affected_q36",
+      "ok": true,
+      "detail": {
+        "case_id": "Q36",
+        "group": "human_gold",
+        "final_category": "ambiguous",
+        "target_source": "matrix",
+        "old_targets": {
+          "F": [
+            0.8,
+            1.0
+          ],
+          "C": [
+            0.5,
+            0.6
+          ],
+          "R": [
+            0.8,
+            1.0
+          ]
+        },
+        "proposed_targets": {
+          "F": [
+            0.8,
+            1.0
+          ],
+          "C": [
+            0.5,
+            0.6
+          ],
+          "R": [
+            0.8,
+            1.0
+          ]
+        },
+        "target_status": "reapproval_with_variant",
+        "semantic_reason": "condition sentence factual; F 0.8-1.0; C base 0.5-0.6, variant 0.9-1.0",
+        "approval": "pending_human",
+        "not_for_run": true,
+        "known_non_pass": false,
+        "variant_targets": {
+          "C": [
+            0.9,
+            1.0
+          ]
+        },
+        "variant_note": "base C 0.5-0.6; disclosure variant C 0.9-1.0"
+      }
+    },
+    {
+      "name": "affected_q14",
+      "ok": true,
+      "detail": {
+        "case_id": "Q14",
+        "group": "human_gold",
+        "final_category": "multi",
+        "target_source": "additional",
+        "old_targets": {
+          "F": "unavailable",
+          "C": [
+            0.8,
+            1.0
+          ],
+          "R": [
+            0.8,
+            1.0
+          ]
+        },
+        "proposed_targets": {
+          "F": "unavailable",
+          "C": [
+            0.8,
+            1.0
+          ],
+          "R": [
+            0.8,
+            1.0
+          ]
+        },
+        "target_status": "known_non_pass_reapproval",
+        "semantic_reason": "F unavailable; C/R 0.8-1.0; C 0.7 variance retained; known non-pass",
+        "approval": "pending_human",
+        "not_for_run": true,
+        "known_non_pass": true
+      }
+    },
+    {
+      "name": "target_source_match_final_labels",
+      "ok": true,
+      "detail": "except Q19/Q32 new additional"
+    },
+    {
+      "name": "q19_q32_source_additional",
+      "ok": true,
+      "detail": {
+        "Q19": "additional",
+        "Q32": "additional"
+      }
+    },
+    {
+      "name": "all_pending",
+      "ok": true,
+      "detail": {
+        "pending_human": 40
+      }
+    },
+    {
+      "name": "not_for_run",
+      "ok": true,
+      "detail": true
+    },
+    {
+      "name": "status_counts",
+      "ok": true,
+      "detail": {
+        "unchanged": 31,
+        "known_non_pass_reapproval": 1,
+        "reapproval_required": 2,
+        "new_target_proposed": 2,
+        "unchanged_rebaseline": 3,
+        "reapproval_with_variant": 1
+      }
+    }
+  ],
+  "all_pass": true
+}

@@ -1,0 +1,81 @@
+{
+  "version": "v1.2.2",
+  "status": "frozen",
+  "active": false,
+  "frozen": true,
+  "runtime_active": false,
+  "date": "2026-11-22",
+  "note": "M1-D-4：v1.2.2 已完成 metadata-only freeze。absence/mixed sentence 与 evidence 直接支持 patch；rubric_version 保持 v1.2.0；target v1.0.2 未重算；active=false，默认仍 v1.0.0，未跑 Judge。",
+  "schema_version": "rag_judge_schema_v3",
+  "rubric_version": "v1.2.0",
+  "metric_version_mapping": {
+    "faithfulness": "v3",
+    "faithfulness_strict": "v3",
+    "answer_correctness": "v3",
+    "answer_relevancy": "v3",
+    "retrieval_metrics": "v1"
+  },
+  "judge_metrics": [
+    "faithfulness",
+    "answer_correctness",
+    "answer_relevancy"
+  ],
+  "derived_metrics": [
+    "faithfulness_strict"
+  ],
+  "faithfulness_strict": {
+    "source": "derived_from_faithfulness",
+    "prompt": null,
+    "role": "diagnostic",
+    "target": null
+  },
+  "prompts": {
+    "faithfulness.txt": "ed21979abd71dedd522ee97636b17509bae9d1b845d54fa114f4a1fbf8f01cf3",
+    "answer_correctness.txt": "a50520de0122216c9238d23c110967c3bbe259586ef24db100ee874a4ce35e95",
+    "answer_relevancy.txt": "a5386070407381098bcc14fc8c67a8853f94ebaa91d188e473ef92237dc58d88"
+  },
+  "changes": {
+    "faithfulness": [
+      "absence：文档未提及/未说明/未规定 -> non_factual/absence，support_status=null，evidence_refs=[]",
+      "混合句拆分：事实部分 factual，absence/文档覆盖部分 non_factual",
+      "禁止 factual_claim + absence + supported；禁止给 absence 附 evidence",
+      "evidence 必须直接支持 claim 的谓词/条件/结论，不得只凭主题相关",
+      "derived claim 必须引用推导前提；找不到直接支持 -> insufficient_evidence",
+      "增加 absence/mixed sentence 与直接支持的模式级反例"
+    ],
+    "answer_correctness": [
+      "从 v1.2.1 复制；Prompt SHA 不变"
+    ],
+    "answer_relevancy": [
+      "从 v1.2.1 复制；Prompt SHA 不变"
+    ]
+  },
+  "repair_example_version": "v1.2.2",
+  "agent_repair_example_required": true,
+  "rubric_semantics": {
+    "rubric_version": "v1.2.0",
+    "prompt_contract_revision": "v1.2.2",
+    "target_revision": "v1.0.2",
+    "targets_recalculated": false,
+    "note": "只改 prompt 契约与 repair example 分支，不升级 rubric；报告必须同时写 version=v1.2.2 与 rubric_version=v1.2.0"
+  },
+  "activation_requirements": [
+    "人工审核 absence/mixed sentence 与 evidence 直接支持规则",
+    "人工审核 MANIFEST：version=v1.2.2、rubric_version=v1.2.0、schema v3、metric v3",
+    "确认 C/R Prompt SHA 与 v1.2.1 完全一致",
+    "确认 Agent repair example 按 prompt_version 隔离，v1.2.0/v1.2.1 不变",
+    "另开 freeze record，人工批准后才允许 status=frozen",
+    "冻结后先做 Q23/Q21/Q11 单案例诊断；通过后才重新申请 10 条",
+    "默认 RAG_JUDGE_PROMPT_VERSION 仍为 v1.0.0；v1.2.2 只显式加载"
+  ],
+  "open_issues": [
+    "本版本为 design_draft，未冻结、未激活、未跑 Judge",
+    "Q23 absence/mixed sentence 与 Q21 evidence 直接支持需 freeze 后单案例验证",
+    "Q21 目标 0.6–0.7 不修改；若语义修正后 F 仍为 1.0，再人工复核目标",
+    "Q11 继续保持 evaluated / 连续 quote 合法",
+    "40 条、M2/M3、v1.2.2 激活均未批准"
+  ],
+  "default_prompt_version": "v1.0.0",
+  "implementation_status": "design_draft_default_off",
+  "design_record": "docs/repair/35-m1d4-v1.2.2-prompt-patch-scope.md"
+}

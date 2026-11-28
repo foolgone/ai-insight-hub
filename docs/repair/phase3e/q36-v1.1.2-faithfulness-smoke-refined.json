@@ -1,0 +1,266 @@
+{
+  "case_id": "Q36",
+  "variant": "base_no_disclosure",
+  "metric": "faithfulness",
+  "prompt_version": "v1.1.2",
+  "prompt_sha256": "0e2701163fbb90f8da6ebaab3260b60306a9689481ce635d0c1f3a0b0e20a1d7",
+  "status": "evaluated",
+  "score": 1.0,
+  "scorable_claim_count": 9,
+  "supported_claim_count": 9,
+  "unsupported_claim_count": 0,
+  "insufficient_evidence_count": 0,
+  "non_factual_count": 0,
+  "document_conflict_count": 0,
+  "contradiction_count": 0,
+  "evidence_count": 9,
+  "evidence_ok": 9,
+  "validation_errors": [],
+  "claims": [
+    {
+      "claim": "普通商品在签收后 7 天内可申请无理由退款",
+      "supported": null,
+      "evidence": [],
+      "reason": "C1 单句原文",
+      "claim_id": "cl1",
+      "claim_type": "factual_claim",
+      "claim_subtype": "policy",
+      "support_status": "supported",
+      "is_contradictory": false,
+      "contradiction_with": [],
+      "evidence_refs": [
+        {
+          "context_id": "C1",
+          "quote": "订单签收后 7 天内可申请无理由退款。"
+        }
+      ]
+    },
+    {
+      "claim": "审核通过后，款项将在 1–3 个工作日内原路退回",
+      "supported": null,
+      "evidence": [],
+      "reason": "C1 单句原文",
+      "claim_id": "cl2",
+      "claim_type": "factual_claim",
+      "claim_subtype": "policy",
+      "support_status": "supported",
+      "is_contradictory": false,
+      "contradiction_with": [],
+      "evidence_refs": [
+        {
+          "context_id": "C1",
+          "quote": "审核通过后，款项将在 1-3 个工作日内原路退回。"
+        }
+      ]
+    },
+    {
+      "claim": "定制类商品不支持无理由退款",
+      "supported": null,
+      "evidence": [],
+      "reason": "C1 单句原文",
+      "claim_id": "cl3",
+      "claim_type": "factual_claim",
+      "claim_subtype": "policy",
+      "support_status": "supported",
+      "is_contradictory": false,
+      "contradiction_with": [],
+      "evidence_refs": [
+        {
+          "context_id": "C1",
+          "quote": "定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。"
+        }
+      ]
+    },
+    {
+      "claim": "生鲜食品不支持无理由退款",
+      "supported": null,
+      "evidence": [],
+      "reason": "C1 单句原文",
+      "claim_id": "cl4",
+      "claim_type": "factual_claim",
+      "claim_subtype": "policy",
+      "support_status": "supported",
+      "is_contradictory": false,
+      "contradiction_with": [],
+      "evidence_refs": [
+        {
+          "context_id": "C1",
+          "quote": "定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。"
+        }
+      ]
+    },
+    {
+      "claim": "生鲜食品质量问题需在签收后 24 小时内拍照反馈",
+      "supported": null,
+      "evidence": [],
+      "reason": "C1 单句原文",
+      "claim_id": "cl5",
+      "claim_type": "factual_claim",
+      "claim_subtype": "policy",
+      "support_status": "supported",
+      "is_contradictory": false,
+      "contradiction_with": [],
+      "evidence_refs": [
+        {
+          "context_id": "C1",
+          "quote": "生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。"
+        }
+      ]
+    },
+    {
+      "claim": "已激活的虚拟商品不支持无理由退款",
+      "supported": null,
+      "evidence": [],
+      "reason": "§1 单句原文",
+      "claim_id": "cl6",
+      "claim_type": "factual_claim",
+      "claim_subtype": "policy",
+      "support_status": "supported",
+      "is_contradictory": false,
+      "contradiction_with": [],
+      "evidence_refs": [
+        {
+          "context_id": "C1",
+          "quote": "定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。"
+        }
+      ]
+    },
+    {
+      "claim": "虚拟商品（充值、会员、课程）一经售出不支持退款",
+      "supported": null,
+      "evidence": [],
+      "reason": "§12 单句原文，不与 §1 合并",
+      "claim_id": "cl7",
+      "claim_type": "factual_claim",
+      "claim_subtype": "policy",
+      "support_status": "supported",
+      "is_contradictory": false,
+      "contradiction_with": [],
+      "evidence_refs": [
+        {
+          "context_id": "C1",
+          "quote": "虚拟商品（充值、会员、课程）一经售出不支持退款。"
+        }
+      ]
+    },
+    {
+      "claim": "若因商品质量问题退换货，运费由商家承担",
+      "supported": null,
+      "evidence": [],
+      "reason": "C1 单句原文",
+      "claim_id": "cl8",
+      "claim_type": "factual_claim",
+      "claim_subtype": "policy",
+      "support_status": "supported",
+      "is_contradictory": false,
+      "contradiction_with": [],
+      "evidence_refs": [
+        {
+          "context_id": "C1",
+          "quote": "因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。"
+        }
+      ]
+    },
+    {
+      "claim": "若为非质量问题退货，运费由买家承担",
+      "supported": null,
+      "evidence": [],
+      "reason": "C1 单句原文",
+      "claim_id": "cl9",
+      "claim_type": "factual_claim",
+      "claim_subtype": "policy",
+      "support_status": "supported",
+      "is_contradictory": false,
+      "contradiction_with": [],
+      "evidence_refs": [
+        {
+          "context_id": "C1",
+          "quote": "因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。"
+        }
+      ]
+    }
+  ],
+  "evidence_validation": [
+    {
+      "claim_id": "cl1",
+      "context_id": "C1",
+      "quote": "订单签收后 7 天内可申请无理由退款。",
+      "ok": true,
+      "error": null
+    },
+    {
+      "claim_id": "cl2",
+      "context_id": "C1",
+      "quote": "审核通过后，款项将在 1-3 个工作日内原路退回。",
+      "ok": true,
+      "error": null
+    },
+    {
+      "claim_id": "cl3",
+      "context_id": "C1",
+      "quote": "定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。",
+      "ok": true,
+      "error": null
+    },
+    {
+      "claim_id": "cl4",
+      "context_id": "C1",
+      "quote": "定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。",
+      "ok": true,
+      "error": null
+    },
+    {
+      "claim_id": "cl5",
+      "context_id": "C1",
+      "quote": "生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。",
+      "ok": true,
+      "error": null
+    },
+    {
+      "claim_id": "cl6",
+      "context_id": "C1",
+      "quote": "定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。",
+      "ok": true,
+      "error": null
+    },
+    {
+      "claim_id": "cl7",
+      "context_id": "C1",
+      "quote": "虚拟商品（充值、会员、课程）一经售出不支持退款。",
+      "ok": true,
+      "error": null
+    },
+    {
+      "claim_id": "cl8",
+      "context_id": "C1",
+      "quote": "因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。",
+      "ok": true,
+      "error": null
+    },
+    {
+      "claim_id": "cl9",
+      "context_id": "C1",
+      "quote": "因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。",
+      "ok": true,
+      "error": null
+    }
+  ],
+  "token_usage": {
+    "input": 7891,
+    "output": 1178
+  },
+  "judge_config": {
+    "agent": "rag_judge_faithfulness",
+    "model": "qwen-max",
+    "temperature": 0.0,
+    "max_tokens": 8192,
+    "prompt_version": "v1.1.2",
+    "resolved_prompt_version": "v1.1.2",
+    "prompt_sha256": "0e2701163fbb90f8da6ebaab3260b60306a9689481ce635d0c1f3a0b0e20a1d7",
+    "schema_version": "rag_judge_schema_v2",
+    "rubric_version": "v1.1.2",
+    "metric_version": "v2"
+  },
+  "raw_output": "{\n  \"claims\": [\n    {\n      \"claim_id\": \"cl1\",\n      \"claim\": \"普通商品在签收后 7 天内可申请无理由退款\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"订单签收后 7 天内可申请无理由退款。\"}\n      ],\n      \"reason\": \"C1 单句原文\"\n    },\n    {\n      \"claim_id\": \"cl2\",\n      \"claim\": \"审核通过后，款项将在 1–3 个工作日内原路退回\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"审核通过后，款项将在 1-3 个工作日内原路退回。\"}\n      ],\n      \"reason\": \"C1 单句原文\"\n    },\n    {\n      \"claim_id\": \"cl3\",\n      \"claim\": \"定制类商品不支持无理由退款\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。\"}\n      ],\n      \"reason\": \"C1 单句原文\"\n    },\n    {\n      \"claim_id\": \"cl4\",\n      \"claim\": \"生鲜食品不支持无理由退款\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。\"}\n      ],\n      \"reason\": \"C1 单句原文\"\n    },\n    {\n      \"claim_id\": \"cl5\",\n      \"claim\": \"生鲜食品质量问题需在签收后 24 小时内拍照反馈\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。\"}\n      ],\n      \"reason\": \"C1 单句原文\"\n    },\n    {\n      \"claim_id\": \"cl6\",\n      \"claim\": \"已激活的虚拟商品不支持无理由退款\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。\"}\n      ],\n      \"reason\": \"§1 单句原文\"\n    },\n    {\n      \"claim_id\": \"cl7\",\n      \"claim\": \"虚拟商品（充值、会员、课程）一经售出不支持退款\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"虚拟商品（充值、会员、课程）一经售出不支持退款。\"}\n      ],\n      \"reason\": \"§12 单句原文，不与 §1 合并\"\n    },\n    {\n      \"claim_id\": \"cl8\",\n      \"claim\": \"若因商品质量问题退换货，运费由商家承担\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。\"}\n      ],\n      \"reason\": \"C1 单句原文\"\n    },\n    {\n      \"claim_id\": \"cl9\",\n      \"claim\": \"若为非质量问题退货，运费由买家承担\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C1\", \"quote\": \"因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。\"}\n      ],\n      \"reason\": \"C1 单句原文\"\n    }\n  ],\n  \"reason\": \"\"\n}",
+  "original_raw_output": null
+}

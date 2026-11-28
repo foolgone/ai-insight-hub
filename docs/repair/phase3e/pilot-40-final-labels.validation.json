@@ -1,0 +1,262 @@
+{
+  "file": "pilot-40-final-labels.json",
+  "sha256": "f139623fef80b55716fce0c773e776d284a5167683eb91559b23e49cabd000eb",
+  "sha256_file": "pilot-40-final-labels.sha256",
+  "row_count": 40,
+  "group_counts": {
+    "human_gold": 13,
+    "provisional": 27
+  },
+  "category_counts": {
+    "direct": 12,
+    "multi": 8,
+    "constraint": 9,
+    "unanswerable": 6,
+    "ambiguous": 5
+  },
+  "checks": [
+    {
+      "name": "row_count_40",
+      "ok": true,
+      "detail": 40
+    },
+    {
+      "name": "unique_ids",
+      "ok": true,
+      "detail": [
+        "Q01",
+        "Q02",
+        "Q03",
+        "Q04",
+        "Q05",
+        "Q06",
+        "Q07",
+        "Q08",
+        "Q09",
+        "Q10",
+        "Q11",
+        "Q12",
+        "Q13",
+        "Q14",
+        "Q15",
+        "Q16",
+        "Q17",
+        "Q18",
+        "Q19",
+        "Q20",
+        "Q21",
+        "Q22",
+        "Q23",
+        "Q24",
+        "Q25",
+        "Q26",
+        "Q27",
+        "Q28",
+        "Q29",
+        "Q30",
+        "Q31",
+        "Q32",
+        "Q33",
+        "Q34",
+        "Q35",
+        "Q36",
+        "Q37",
+        "Q38",
+        "Q39",
+        "Q40"
+      ]
+    },
+    {
+      "name": "groups_13_27",
+      "ok": true,
+      "detail": {
+        "human_gold": 13,
+        "provisional": 27
+      }
+    },
+    {
+      "name": "category_counts_12_8_9_6_5",
+      "ok": true,
+      "detail": {
+        "direct": 12,
+        "multi": 8,
+        "constraint": 9,
+        "unanswerable": 6,
+        "ambiguous": 5
+      }
+    },
+    {
+      "name": "q15_direct_hg",
+      "ok": true,
+      "detail": {
+        "case_id": "Q15",
+        "group": "human_gold",
+        "final_category": "direct",
+        "category_source": "human-gold.json",
+        "context_availability": "2",
+        "target_source": "additional",
+        "known_issue": "purpose_inference",
+        "notes": "category changed multi→direct (human-gold); F 0.667/0.75/1.0; target 0.6-1.0.",
+        "baseline_status": "reused"
+      }
+    },
+    {
+      "name": "q16_constraint_hg",
+      "ok": true,
+      "detail": {
+        "case_id": "Q16",
+        "group": "human_gold",
+        "final_category": "constraint",
+        "category_source": "human-gold.json",
+        "context_availability": "2",
+        "target_source": "none",
+        "known_issue": "R_overstrict_history",
+        "notes": "category changed multi→constraint (human-gold); v1.1.3 R rule fixed; target none.",
+        "baseline_status": "reused"
+      }
+    },
+    {
+      "name": "q40_direct_hg",
+      "ok": true,
+      "detail": {
+        "case_id": "Q40",
+        "group": "human_gold",
+        "final_category": "direct",
+        "category_source": "human-gold.json",
+        "context_availability": "1",
+        "target_source": "none",
+        "known_issue": "C1_only;not_run;category_changed",
+        "notes": "HG; category changed ambiguous→direct; only C1; not run; baseline missing.",
+        "baseline_status": "missing"
+      }
+    },
+    {
+      "name": "hg_categories_match_human_gold",
+      "ok": true,
+      "detail": {
+        "Q23": "constraint",
+        "Q36": "ambiguous",
+        "Q14": "multi",
+        "Q15": "direct",
+        "Q16": "constraint",
+        "Q19": "multi",
+        "Q37": "ambiguous",
+        "Q40": "direct",
+        "Q05": "direct",
+        "Q13": "multi",
+        "Q22": "constraint",
+        "Q30": "unanswerable",
+        "Q35": "ambiguous"
+      }
+    },
+    {
+      "name": "provisional_categories_match_candidates",
+      "ok": true,
+      "detail": {
+        "Q01": "direct",
+        "Q02": "direct",
+        "Q03": "direct",
+        "Q04": "direct",
+        "Q06": "direct",
+        "Q07": "direct",
+        "Q08": "direct",
+        "Q09": "direct",
+        "Q10": "direct",
+        "Q11": "multi",
+        "Q12": "multi",
+        "Q17": "multi",
+        "Q18": "multi",
+        "Q20": "multi",
+        "Q21": "constraint",
+        "Q24": "constraint",
+        "Q25": "constraint",
+        "Q26": "constraint",
+        "Q27": "constraint",
+        "Q28": "constraint",
+        "Q29": "unanswerable",
+        "Q31": "unanswerable",
+        "Q32": "unanswerable",
+        "Q33": "unanswerable",
+        "Q34": "unanswerable",
+        "Q38": "ambiguous",
+        "Q39": "ambiguous"
+      }
+    },
+    {
+      "name": "context_unavailable_q14_q33",
+      "ok": true,
+      "detail": {
+        "Q14": "unavailable",
+        "Q33": "unavailable"
+      }
+    },
+    {
+      "name": "c1_only_set",
+      "ok": true,
+      "detail": [
+        "Q22",
+        "Q26",
+        "Q27",
+        "Q34",
+        "Q37",
+        "Q40"
+      ]
+    },
+    {
+      "name": "target_source_allowed",
+      "ok": true,
+      "detail": [
+        "additional",
+        "matrix",
+        "none",
+        "pilot10"
+      ]
+    },
+    {
+      "name": "baseline_30_2_2_6",
+      "ok": true,
+      "detail": {
+        "reused": 30,
+        "new": 2,
+        "missing": 6,
+        "available_old_run": 2
+      }
+    },
+    {
+      "name": "known_issue_Q14",
+      "ok": true,
+      "detail": "context_unavailable;C_variance;known_non_pass"
+    },
+    {
+      "name": "known_issue_Q32",
+      "ok": true,
+      "detail": "uncertainty_misclass"
+    },
+    {
+      "name": "known_issue_Q35",
+      "ok": true,
+      "detail": "absence_quote_diagnostic"
+    },
+    {
+      "name": "known_issue_Q36",
+      "ok": true,
+      "detail": "condition_sentence;conflict_disclosure"
+    },
+    {
+      "name": "q14_known_non_pass",
+      "ok": true,
+      "detail": "context_unavailable;C_variance;known_non_pass"
+    },
+    {
+      "name": "q36_condition_sentence",
+      "ok": true,
+      "detail": "condition_sentence;conflict_disclosure"
+    }
+  ],
+  "all_pass": true,
+  "notes": [
+    "target_source priority: matrix > pilot10 > additional > none; one source per case.",
+    "Q29 is pilot10 because the 10-gate target has the same values as the matrix target; matrix count is 5, not 6.",
+    "This note does not change labels, scores, or the frozen SHA."
+  ]
+}

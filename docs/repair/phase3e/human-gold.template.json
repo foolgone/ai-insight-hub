@@ -1,0 +1,1184 @@
+{
+  "meta": {
+    "provenance": "human_gold_template",
+    "review_status": "pending_human",
+    "note": "Fill human fields only after checking the source document; do not copy AI drafts blindly.",
+    "source_document": "phase3d_doc.md (Phase 3E v2)"
+  },
+  "samples": [
+    {
+      "id": "Q01",
+      "question": "退款申请期限是多久？",
+      "category": "direct",
+      "ai_draft": {
+        "reference_answer": "订单签收后 7 天内可申请无理由退款。",
+        "gold_evidence": [
+          {
+            "section": "1. 退款时效",
+            "quote": "订单签收后 7 天内可申请无理由退款。审核通过后，款项将在 1-3 个工作日内原路退回。定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。"
+          }
+        ],
+        "key_facts": [
+          "签收后 7 天内"
+        ],
+        "answerability": "answerable"
+      },
+      "human": {
+        "reference_answer": "",
+        "gold_evidence": [],
+        "key_facts": [],
+        "answerability": "",
+        "claims": [],
+        "review_status": "pending_human",
+        "reviewer": "",
+        "reviewed_at": "",
+        "notes": ""
+      }
+    },
+    {
+      "id": "Q02",
+      "question": "退款审核通过后多久能到账？",
+      "category": "direct",
+      "ai_draft": {
+        "reference_answer": "款项将在 1-3 个工作日内原路退回。",
+        "gold_evidence": [
+          {
+            "section": "1. 退款时效",
+            "quote": "订单签收后 7 天内可申请无理由退款。审核通过后，款项将在 1-3 个工作日内原路退回。定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。"
+          },
+          {
+            "section": "2. 退款流程",
+            "quote": "在「我的订单」中选择退款，填写原因并上传凭证，商家会在 48 小时内审核。审核通过后按原支付渠道退回；审核驳回会显示原因，可补充材料后重新提交。"
+          }
+        ],
+        "key_facts": [
+          "1-3 个工作日",
+          "原路退回"
+        ],
+        "answerability": "answerable"
+      },
+      "human": {
+        "reference_answer": "",
+        "gold_evidence": [],
+        "key_facts": [],
+        "answerability": "",
+        "claims": [],
+        "review_status": "pending_human",
+        "reviewer": "",
+        "reviewed_at": "",
+        "notes": ""
+      }
+    },
+    {
+      "id": "Q03",
+      "question": "同一订单可以换货几次？",
+      "category": "direct",
+      "ai_draft": {
+        "reference_answer": "同一订单仅支持一次换货。",
+        "gold_evidence": [
+          {
+            "section": "3. 换货政策",
+            "quote": "签收后 7 天内，商品未使用且包装完整可申请换货，同一订单仅支持一次换货。换货需先寄回原商品，商家收到并验收后 48 小时内寄出新品；运费由责任方承担。"
+          }
+        ],
+        "key_facts": [
+          "仅一次"
+        ],
+        "answerability": "answerable"
+      },
+      "human": {
+        "reference_answer": "",
+        "gold_evidence": [],
+        "key_facts": [],
+        "answerability": "",
+        "claims": [],
+        "review_status": "pending_human",
+        "reviewer": "",
+        "reviewed_at": "",
+        "notes": ""
+      }
+    },
+    {
+      "id": "Q04",
+      "question": "目前支持哪种发票？",
+      "category": "direct",
+      "ai_draft": {
+        "reference_answer": "仅支持电子发票。",
+        "gold_evidence": [
+          {
+            "section": "4. 发票说明",
+            "quote": "仅支持电子发票，提交申请后 24 小时内发送至下单邮箱。发票抬头可在开具前修改；已开具的发票需先申请红冲，再重新开具。暂不支持纸质发票和增值税专用发票。"
+          }
+        ],
+        "key_facts": [
+          "仅电子发票"
+        ],
+        "answerability": "answerable"
+      },
+      "human": {
+        "reference_answer": "",
+        "gold_evidence": [],
+        "key_facts": [],
+        "answerability": "",
+        "claims": [],
+        "review_status": "pending_human",
+        "reviewer": "",
+        "reviewed_at": "",
+        "notes": ""
+      }
+    },
+    {
+      "id": "Q05",
+      "question": "发票提交申请后多久发送？",
+      "category": "direct",
+      "ai_draft": {
+        "reference_answer": "提交申请后 24 小时内发送至下单邮箱。",
+        "gold_evidence": [
+          {
+            "section": "4. 发票说明",
+            "quote": "仅支持电子发票，提交申请后 24 小时内发送至下单邮箱。发票抬头可在开具前修改；已开具的发票需先申请红冲，再重新开具。暂不支持纸质发票和增值税专用发票。"
+          }
+        ],
+        "key_facts": [
+          "24 小时内",
+          "下单邮箱"
+        ],
+        "answerability": "answerable"
+      },
+      "human": {
+        "reference_answer": "",
+        "gold_evidence": [],
+        "key_facts": [],
+        "answerability": "",
+        "claims": [],
+        "review_status": "pending_human",
+        "reviewer": "",
+        "reviewed_at": "",
+        "notes": ""
+      }
+    },
+    {
+      "id": "Q06",
+      "question": "现货商品付款后多久发出？",
+      "category": "direct",
+      "ai_draft": {
+        "reference_answer": "现货商品在付款后 48 小时内发出。",
+        "gold_evidence": [
+          {
+            "section": "5. 发货时效",
+            "quote": "现货商品在付款后 48 小时内发出；预售商品以商品页标注的发货时间为准。大件商品（家具、家电）发货时间为 5 个工作日内，配送前会电话预约。"
+          }
+        ],
+        "key_facts": [
+          "48 小时内"
+        ],
+        "answerability": "answerable"
+      },
+      "human": {
+        "reference_answer": "",
+        "gold_evidence": [],
+        "key_facts": [],
+        "answerability": "",
+        "claims": [],
+        "review_status": "pending_human",
+        "reviewer": "",
+        "reviewed_at": "",
+        "notes": ""
+      }
+    },
+    {
+      "id": "Q07",
+      "question": "大件商品发货时间是多久？",
+      "category": "direct",
+      "ai_draft": {
+        "reference_answer": "大件商品发货时间为 5 个工作日内，配送前会电话预约。",
+        "gold_evidence": [
+          {
+            "section": "5. 发货时效",
+            "quote": "现货商品在付款后 48 小时内发出；预售商品以商品页标注的发货时间为准。大件商品（家具、家电）发货时间为 5 个工作日内，配送前会电话预约。"
+          }
+        ],
+        "key_facts": [
+          "5 个工作日",
+          "电话预约"
+        ],
+        "answerability": "answerable"
+      },
+      "human": {
+        "reference_answer": "",
+        "gold_evidence": [],
+        "key_facts": [],
+        "answerability": "",
+        "claims": [],
+        "review_status": "pending_human",
+        "reviewer": "",
+        "reviewed_at": "",
+        "notes": ""
+      }
+    },
+    {
+      "id": "Q08",
+      "question": "单笔订单满多少元包邮？",
+      "category": "direct",
+      "ai_draft": {
+        "reference_answer": "单笔订单实付满 99 元包邮。",
+        "gold_evidence": [
+          {
+            "section": "7. 运费规则",
+            "quote": "单笔订单实付满 99 元包邮；未满 99 元收取 10 元运费。新疆、西藏、内蒙古等偏远地区运费为 20 元，不参与包邮活动。因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。"
+          }
+        ],
+        "key_facts": [
+          "满 99 元"
+        ],
+        "answerability": "answerable"
+      },
+      "human": {
+        "reference_answer": "",
+        "gold_evidence": [],
+        "key_facts": [],
+        "answerability": "",
+        "claims": [],
+        "review_status": "pending_human",
+        "reviewer": "",
+        "reviewed_at": "",
+        "notes": ""
+      }
+    },
+    {
+      "id": "Q09",
+      "question": "电子产品保修期多久？",
+      "category": "direct",
+      "ai_draft": {
+        "reference_answer": "电子产品自签收之日起保修 12 个月，配件保修 3 个月。",
+        "gold_evidence": [
+          {
+            "section": "8. 保修政策",
+            "quote": "电子产品自签收之日起保修 12 个月，配件保修 3 个月。人为损坏、进水、私自拆修不在保修范围内。保修期内维修免费；保修期外维修需收取材料费和人工费。"
+          }
+        ],
+        "key_facts": [
+          "电子 12 个月",
+          "配件 3 个月"
+        ],
+        "answerability": "answerable"
+      },
+      "human": {
+        "reference_answer": "",
+        "gold_evidence": [],
+        "key_facts": [],
+        "answerability": "",
+        "claims": [],
+        "review_status": "pending_human",
+        "reviewer": "",
+        "reviewed_at": "",
+        "notes": ""
+      }
+    },
+    {
+      "id": "Q10",
+      "question": "优惠券有效期多久？",
+      "category": "direct",
+      "ai_draft": {
+        "reference_answer": "优惠券自领取之日起 30 天内有效。",
+        "gold_evidence": [
+          {
+            "section": "9. 优惠券规则",
+            "quote": "优惠券自领取之日起 30 天内有效，逾期自动失效。同一订单只能使用一张优惠券，不能与会员折扣叠加。退款时优惠券若仍在有效期内会退回账户，已过期则不退回。"
+          }
+        ],
+        "key_facts": [
+          "30 天"
+        ],
+        "answerability": "answerable"
+      },
+      "human": {
+        "reference_answer": "",
+        "gold_evidence": [],
+        "key_facts": [],
+        "answerability": "",
+        "claims": [],
+        "review_status": "pending_human",
+        "reviewer": "",
+        "reviewed_at": "",
+        "notes": ""
+      }
+    },
+    {
+      "id": "Q11",
+      "question": "签收第 5 天的定制商品可以无理由退款吗？",
+      "category": "multi",
+      "ai_draft": {
+        "reference_answer": "不可以。定制商品不支持无理由退款。",
+        "gold_evidence": [
+          {
+            "section": "1. 退款时效",
+            "quote": "订单签收后 7 天内可申请无理由退款。审核通过后，款项将在 1-3 个工作日内原路退回。定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。"
+          },
+          {
+            "section": "12. 特殊商品",
+            "quote": "生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。虚拟商品（充值、会员、课程）一经售出不支持退款。定制商品支持质量问题退换，不支持无理由退换。"
+          }
+        ],
+        "key_facts": [
+          "签收 5 天仍在 7 天内",
+          "定制商品排除无理由退款"
+        ],
+        "answerability": "answerable"
+      },
+      "human": {
+        "reference_answer": "",
+        "gold_evidence": [],
+        "key_facts": [],
+        "answerability": "",
+        "claims": [],
+        "review_status": "pending_human",
+        "reviewer": "",
+        "reviewed_at": "",
+        "notes": ""
+      }
+    },
+    {
+      "id": "Q12",
+      "question": "退款审核通过后按什么渠道退回？多久到账？",
+      "category": "multi",
+      "ai_draft": {
+        "reference_answer": "按原支付渠道退回，1-3 个工作日内到账。",
+        "gold_evidence": [
+          {
+            "section": "2. 退款流程",
+            "quote": "在「我的订单」中选择退款，填写原因并上传凭证，商家会在 48 小时内审核。审核通过后按原支付渠道退回；审核驳回会显示原因，可补充材料后重新提交。"
+          },
+          {
+            "section": "1. 退款时效",
+            "quote": "订单签收后 7 天内可申请无理由退款。审核通过后，款项将在 1-3 个工作日内原路退回。定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。"
+          }
+        ],
+        "key_facts": [
+          "原支付渠道",
+          "1-3 个工作日"
+        ],
+        "answerability": "answerable"
+      },
+      "human": {
+        "reference_answer": "",
+        "gold_evidence": [],
+        "key_facts": [],
+        "answerability": "",
+        "claims": [],
+        "review_status": "pending_human",
+        "reviewer": "",
+        "reviewed_at": "",
+        "notes": ""
+      }
+    },
+    {
+      "id": "Q13",
+      "question": "换货需要先寄回原商品吗？新品多久寄出？",
+      "category": "multi",
+      "ai_draft": {
+        "reference_answer": "需要先寄回原商品；商家收到并验收后 48 小时内寄出新品。",
+        "gold_evidence": [
+          {
+            "section": "3. 换货政策",
+            "quote": "签收后 7 天内，商品未使用且包装完整可申请换货，同一订单仅支持一次换货。换货需先寄回原商品，商家收到并验收后 48 小时内寄出新品；运费由责任方承担。"
+          }
+        ],
+        "key_facts": [
+          "先寄回",
+          "验收后 48 小时"
+        ],
+        "answerability": "answerable"
+      },
+      "human": {
+        "reference_answer": "",
+        "gold_evidence": [],
+        "key_facts": [],
+        "answerability": "",
+        "claims": [],
+        "review_status": "pending_human",
+        "reviewer": "",
+        "reviewed_at": "",
+        "notes": ""
+      }
+    },
+    {
+      "id": "Q14",
+      "question": "发票抬头开错了可以改吗？",
+      "category": "multi",
+      "ai_draft": {
+        "reference_answer": "未开具前可以修改；已开具的发票需先申请红冲，再重新开具。",
+        "gold_evidence": [
+          {
+            "section": "4. 发票说明",
+            "quote": "仅支持电子发票，提交申请后 24 小时内发送至下单邮箱。发票抬头可在开具前修改；已开具的发票需先申请红冲，再重新开具。暂不支持纸质发票和增值税专用发票。"
+          }
+        ],
+        "key_facts": [
+          "开具前可改",
+          "已开具先红冲再重开"
+        ],
+        "answerability": "answerable"
+      },
+      "human": {
+        "reference_answer": "",
+        "gold_evidence": [],
+        "key_facts": [],
+        "answerability": "",
+        "claims": [],
+        "review_status": "pending_human",
+        "reviewer": "",
+        "reviewed_at": "",
+        "notes": ""
+      }
+    },
+    {
+      "id": "Q15",
+      "question": "大件商品配送前会联系买家吗？",
+      "category": "multi",
+      "ai_draft": {
+        "reference_answer": "会，配送前会电话预约。",
+        "gold_evidence": [
+          {
+            "section": "5. 发货时效",
+            "quote": "现货商品在付款后 48 小时内发出；预售商品以商品页标注的发货时间为准。大件商品（家具、家电）发货时间为 5 个工作日内，配送前会电话预约。"
+          }
+        ],
+        "key_facts": [
+          "电话预约"
+        ],
+        "answerability": "answerable"
+      },
+      "human": {
+        "reference_answer": "",
+        "gold_evidence": [],
+        "key_facts": [],
+        "answerability": "",
+        "claims": [],
+        "review_status": "pending_human",
+        "reviewer": "",
+        "reviewed_at": "",
+        "notes": ""
+      }
+    },
+    {
+      "id": "Q16",
+      "question": "物流信息超过 24 小时没更新怎么办？",
+      "category": "multi",
+      "ai_draft": {
+        "reference_answer": "可联系客服协助核查。",
+        "gold_evidence": [
+          {
+            "section": "6. 物流查询",
+            "quote": "订单发货后可在「我的订单」查看物流单号与实时轨迹。物流信息超过 24 小时未更新时，可联系客服协助核查。"
+          }
+        ],
+        "key_facts": [
+          "超过 24 小时",
+          "联系客服"
+        ],
+        "answerability": "answerable"
+      },
+      "human": {
+        "reference_answer": "",
+        "gold_evidence": [],
+        "key_facts": [],
+        "answerability": "",
+        "claims": [],
+        "review_status": "pending_human",
+        "reviewer": "",
+        "reviewed_at": "",
+        "notes": ""
+      }
+    },
+    {
+      "id": "Q17",
+      "question": "订单满 99 元包邮，退货时运费谁承担？",
+      "category": "multi",
+      "ai_draft": {
+        "reference_answer": "因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。",
+        "gold_evidence": [
+          {
+            "section": "7. 运费规则",
+            "quote": "单笔订单实付满 99 元包邮；未满 99 元收取 10 元运费。新疆、西藏、内蒙古等偏远地区运费为 20 元，不参与包邮活动。因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。"
+          }
+        ],
+        "key_facts": [
+          "质量问题商家承担",
+          "非质量问题买家承担"
+        ],
+        "answerability": "answerable"
+      },
+      "human": {
+        "reference_answer": "",
+        "gold_evidence": [],
+        "key_facts": [],
+        "answerability": "",
+        "claims": [],
+        "review_status": "pending_human",
+        "reviewer": "",
+        "reviewed_at": "",
+        "notes": ""
+      }
+    },
+    {
+      "id": "Q18",
+      "question": "保修期内和保修期外维修分别怎么收费？",
+      "category": "multi",
+      "ai_draft": {
+        "reference_answer": "保修期内维修免费；保修期外维修需收取材料费和人工费。",
+        "gold_evidence": [
+          {
+            "section": "8. 保修政策",
+            "quote": "电子产品自签收之日起保修 12 个月，配件保修 3 个月。人为损坏、进水、私自拆修不在保修范围内。保修期内维修免费；保修期外维修需收取材料费和人工费。"
+          }
+        ],
+        "key_facts": [
+          "期内免费",
+          "期外材料费+人工费"
+        ],
+        "answerability": "answerable"
+      },
+      "human": {
+        "reference_answer": "",
+        "gold_evidence": [],
+        "key_facts": [],
+        "answerability": "",
+        "claims": [],
+        "review_status": "pending_human",
+        "reviewer": "",
+        "reviewed_at": "",
+        "notes": ""
+      }
+    },
+    {
+      "id": "Q19",
+      "question": "退款后优惠券会退回吗？",
+      "category": "multi",
+      "ai_draft": {
+        "reference_answer": "优惠券若仍在有效期内会退回账户，已过期则不退回。",
+        "gold_evidence": [
+          {
+            "section": "9. 优惠券规则",
+            "quote": "优惠券自领取之日起 30 天内有效，逾期自动失效。同一订单只能使用一张优惠券，不能与会员折扣叠加。退款时优惠券若仍在有效期内会退回账户，已过期则不退回。"
+          }
+        ],
+        "key_facts": [
+          "有效期内退回",
+          "过期不退"
+        ],
+        "answerability": "answerable"
+      },
+      "human": {
+        "reference_answer": "",
+        "gold_evidence": [],
+        "key_facts": [],
+        "answerability": "",
+        "claims": [],
+        "review_status": "pending_human",
+        "reviewer": "",
+        "reviewed_at": "",
+        "notes": ""
+      }
+    },
+    {
+      "id": "Q20",
+      "question": "会员积分怎么获得、怎么抵扣、有效期多久？",
+      "category": "multi",
+      "ai_draft": {
+        "reference_answer": "消费 1 元积 1 分，100 积分可抵扣 1 元；积分自获得之日起 12 个月内有效。",
+        "gold_evidence": [
+          {
+            "section": "10. 会员积分",
+            "quote": "消费 1 元积 1 分，100 积分可抵扣 1 元。积分自获得之日起 12 个月内有效，逾期清零。积分不可转让、不可提现，仅限本账户使用。"
+          }
+        ],
+        "key_facts": [
+          "1 元 1 分",
+          "100 分抵 1 元",
+          "12 个月"
+        ],
+        "answerability": "answerable"
+      },
+      "human": {
+        "reference_answer": "",
+        "gold_evidence": [],
+        "key_facts": [],
+        "answerability": "",
+        "claims": [],
+        "review_status": "pending_human",
+        "reviewer": "",
+        "reviewed_at": "",
+        "notes": ""
+      }
+    },
+    {
+      "id": "Q21",
+      "question": "签收后第 10 天，普通商品还能无理由退款吗？",
+      "category": "constraint",
+      "ai_draft": {
+        "reference_answer": "不能。无理由退款期限是签收后 7 天内。",
+        "gold_evidence": [
+          {
+            "section": "1. 退款时效",
+            "quote": "订单签收后 7 天内可申请无理由退款。审核通过后，款项将在 1-3 个工作日内原路退回。定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。"
+          }
+        ],
+        "key_facts": [
+          "第 10 天超过 7 天",
+          "不能无理由退款"
+        ],
+        "answerability": "answerable"
+      },
+      "human": {
+        "reference_answer": "",
+        "gold_evidence": [],
+        "key_facts": [],
+        "answerability": "",
+        "claims": [],
+        "review_status": "pending_human",
+        "reviewer": "",
+        "reviewed_at": "",
+        "notes": ""
+      }
+    },
+    {
+      "id": "Q22",
+      "question": "订单实付 89 元寄往新疆，运费多少？",
+      "category": "constraint",
+      "ai_draft": {
+        "reference_answer": "20 元。新疆属于偏远地区，运费 20 元且不参与包邮。",
+        "gold_evidence": [
+          {
+            "section": "7. 运费规则",
+            "quote": "单笔订单实付满 99 元包邮；未满 99 元收取 10 元运费。新疆、西藏、内蒙古等偏远地区运费为 20 元，不参与包邮活动。因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。"
+          }
+        ],
+        "key_facts": [
+          "新疆偏远地区 20 元",
+          "不参与包邮"
+        ],
+        "answerability": "answerable"
+      },
+      "human": {
+        "reference_answer": "",
+        "gold_evidence": [],
+        "key_facts": [],
+        "answerability": "",
+        "claims": [],
+        "review_status": "pending_human",
+        "reviewer": "",
+        "reviewed_at": "",
+        "notes": ""
+      }
+    },
+    {
+      "id": "Q23",
+      "question": "生鲜食品签收后第 2 天发现质量问题，还能按政策反馈吗？",
+      "category": "constraint",
+      "ai_draft": {
+        "reference_answer": "不能按该条款反馈。生鲜质量问题需在签收后 24 小时内拍照反馈，第 2 天已超过时限。",
+        "gold_evidence": [
+          {
+            "section": "12. 特殊商品",
+            "quote": "生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。虚拟商品（充值、会员、课程）一经售出不支持退款。定制商品支持质量问题退换，不支持无理由退换。"
+          }
+        ],
+        "key_facts": [
+          "生鲜质量问题 24 小时内",
+          "第 2 天超时"
+        ],
+        "answerability": "answerable"
+      },
+      "human": {
+        "reference_answer": "",
+        "gold_evidence": [],
+        "key_facts": [],
+        "answerability": "",
+        "claims": [],
+        "review_status": "pending_human",
+        "reviewer": "",
+        "reviewed_at": "",
+        "notes": ""
+      }
+    },
+    {
+      "id": "Q24",
+      "question": "已发货订单还能修改收货地址吗？",
+      "category": "constraint",
+      "ai_draft": {
+        "reference_answer": "不能修改地址，可联系快递拦截或申请改派。",
+        "gold_evidence": [
+          {
+            "section": "13. 收货信息修改",
+            "quote": "订单发货前可在「我的订单」修改收货地址和联系电话。已发货订单无法修改地址，可联系快递拦截或申请改派。"
+          }
+        ],
+        "key_facts": [
+          "已发货不能改地址",
+          "拦截或改派"
+        ],
+        "answerability": "answerable"
+      },
+      "human": {
+        "reference_answer": "",
+        "gold_evidence": [],
+        "key_facts": [],
+        "answerability": "",
+        "claims": [],
+        "review_status": "pending_human",
+        "reviewer": "",
+        "reviewed_at": "",
+        "notes": ""
+      }
+    },
+    {
+      "id": "Q25",
+      "question": "同一订单能同时使用两张优惠券吗？",
+      "category": "constraint",
+      "ai_draft": {
+        "reference_answer": "不能，同一订单只能使用一张优惠券。",
+        "gold_evidence": [
+          {
+            "section": "9. 优惠券规则",
+            "quote": "优惠券自领取之日起 30 天内有效，逾期自动失效。同一订单只能使用一张优惠券，不能与会员折扣叠加。退款时优惠券若仍在有效期内会退回账户，已过期则不退回。"
+          }
+        ],
+        "key_facts": [
+          "仅一张"
+        ],
+        "answerability": "answerable"
+      },
+      "human": {
+        "reference_answer": "",
+        "gold_evidence": [],
+        "key_facts": [],
+        "answerability": "",
+        "claims": [],
+        "review_status": "pending_human",
+        "reviewer": "",
+        "reviewed_at": "",
+        "notes": ""
+      }
+    },
+    {
+      "id": "Q26",
+      "question": "会员折扣和优惠券可以叠加吗？",
+      "category": "constraint",
+      "ai_draft": {
+        "reference_answer": "不能，优惠券不能与会员折扣叠加。",
+        "gold_evidence": [
+          {
+            "section": "9. 优惠券规则",
+            "quote": "优惠券自领取之日起 30 天内有效，逾期自动失效。同一订单只能使用一张优惠券，不能与会员折扣叠加。退款时优惠券若仍在有效期内会退回账户，已过期则不退回。"
+          }
+        ],
+        "key_facts": [
+          "不可叠加"
+        ],
+        "answerability": "answerable"
+      },
+      "human": {
+        "reference_answer": "",
+        "gold_evidence": [],
+        "key_facts": [],
+        "answerability": "",
+        "claims": [],
+        "review_status": "pending_human",
+        "reviewer": "",
+        "reviewed_at": "",
+        "notes": ""
+      }
+    },
+    {
+      "id": "Q27",
+      "question": "保修期内人为进水，能免费维修吗？",
+      "category": "constraint",
+      "ai_draft": {
+        "reference_answer": "不能。人为损坏、进水不在保修范围内。",
+        "gold_evidence": [
+          {
+            "section": "8. 保修政策",
+            "quote": "电子产品自签收之日起保修 12 个月，配件保修 3 个月。人为损坏、进水、私自拆修不在保修范围内。保修期内维修免费；保修期外维修需收取材料费和人工费。"
+          }
+        ],
+        "key_facts": [
+          "进水不在保修范围"
+        ],
+        "answerability": "answerable"
+      },
+      "human": {
+        "reference_answer": "",
+        "gold_evidence": [],
+        "key_facts": [],
+        "answerability": "",
+        "claims": [],
+        "review_status": "pending_human",
+        "reviewer": "",
+        "reviewed_at": "",
+        "notes": ""
+      }
+    },
+    {
+      "id": "Q28",
+      "question": "预售商品付款后 48 小时未发货，是否算延迟？",
+      "category": "constraint",
+      "ai_draft": {
+        "reference_answer": "不能仅按 48 小时判断；预售商品以商品页标注的发货时间为准。",
+        "gold_evidence": [
+          {
+            "section": "5. 发货时效",
+            "quote": "现货商品在付款后 48 小时内发出；预售商品以商品页标注的发货时间为准。大件商品（家具、家电）发货时间为 5 个工作日内，配送前会电话预约。"
+          }
+        ],
+        "key_facts": [
+          "预售以页面标注为准"
+        ],
+        "answerability": "answerable"
+      },
+      "human": {
+        "reference_answer": "",
+        "gold_evidence": [],
+        "key_facts": [],
+        "answerability": "",
+        "claims": [],
+        "review_status": "pending_human",
+        "reviewer": "",
+        "reviewed_at": "",
+        "notes": ""
+      }
+    },
+    {
+      "id": "Q29",
+      "question": "支持货到付款吗？",
+      "category": "unanswerable",
+      "ai_draft": {
+        "reference_answer": "文档未说明是否支持货到付款，无法确认。",
+        "gold_evidence": [],
+        "key_facts": [
+          "文档未提及"
+        ],
+        "answerability": "unanswerable"
+      },
+      "human": {
+        "reference_answer": "",
+        "gold_evidence": [],
+        "key_facts": [],
+        "answerability": "",
+        "claims": [],
+        "review_status": "pending_human",
+        "reviewer": "",
+        "reviewed_at": "",
+        "notes": ""
+      }
+    },
+    {
+      "id": "Q30",
+      "question": "支持海外配送吗？",
+      "category": "unanswerable",
+      "ai_draft": {
+        "reference_answer": "文档未说明是否支持海外配送，无法确认。",
+        "gold_evidence": [],
+        "key_facts": [
+          "文档未提及"
+        ],
+        "answerability": "unanswerable"
+      },
+      "human": {
+        "reference_answer": "",
+        "gold_evidence": [],
+        "key_facts": [],
+        "answerability": "",
+        "claims": [],
+        "review_status": "pending_human",
+        "reviewer": "",
+        "reviewed_at": "",
+        "notes": ""
+      }
+    },
+    {
+      "id": "Q31",
+      "question": "退货支持上门取件吗？",
+      "category": "unanswerable",
+      "ai_draft": {
+        "reference_answer": "文档只说明换货需寄回原商品，未说明是否支持上门取件。",
+        "gold_evidence": [],
+        "key_facts": [
+          "文档未提及上门取件"
+        ],
+        "answerability": "unanswerable"
+      },
+      "human": {
+        "reference_answer": "",
+        "gold_evidence": [],
+        "key_facts": [],
+        "answerability": "",
+        "claims": [],
+        "review_status": "pending_human",
+        "reviewer": "",
+        "reviewed_at": "",
+        "notes": ""
+      }
+    },
+    {
+      "id": "Q32",
+      "question": "积分可以兑换礼品吗？",
+      "category": "unanswerable",
+      "ai_draft": {
+        "reference_answer": "文档只说明积分可抵扣现金，未说明可以兑换礼品。",
+        "gold_evidence": [
+          {
+            "section": "10. 会员积分",
+            "quote": "消费 1 元积 1 分，100 积分可抵扣 1 元。积分自获得之日起 12 个月内有效，逾期清零。积分不可转让、不可提现，仅限本账户使用。"
+          }
+        ],
+        "key_facts": [
+          "仅说明抵扣",
+          "未说明礼品"
+        ],
+        "answerability": "unanswerable"
+      },
+      "human": {
+        "reference_answer": "",
+        "gold_evidence": [],
+        "key_facts": [],
+        "answerability": "",
+        "claims": [],
+        "review_status": "pending_human",
+        "reviewer": "",
+        "reviewed_at": "",
+        "notes": ""
+      }
+    },
+    {
+      "id": "Q33",
+      "question": "有生日双倍积分活动吗？",
+      "category": "unanswerable",
+      "ai_draft": {
+        "reference_answer": "文档未说明生日双倍积分活动，无法确认。",
+        "gold_evidence": [],
+        "key_facts": [
+          "文档未提及"
+        ],
+        "answerability": "unanswerable"
+      },
+      "human": {
+        "reference_answer": "",
+        "gold_evidence": [],
+        "key_facts": [],
+        "answerability": "",
+        "claims": [],
+        "review_status": "pending_human",
+        "reviewer": "",
+        "reviewed_at": "",
+        "notes": ""
+      }
+    },
+    {
+      "id": "Q34",
+      "question": "可以指定快递公司吗？",
+      "category": "unanswerable",
+      "ai_draft": {
+        "reference_answer": "文档未说明是否可以指定快递公司。",
+        "gold_evidence": [],
+        "key_facts": [
+          "文档未提及"
+        ],
+        "answerability": "unanswerable"
+      },
+      "human": {
+        "reference_answer": "",
+        "gold_evidence": [],
+        "key_facts": [],
+        "answerability": "",
+        "claims": [],
+        "review_status": "pending_human",
+        "reviewer": "",
+        "reviewed_at": "",
+        "notes": ""
+      }
+    },
+    {
+      "id": "Q35",
+      "question": "多久能到？",
+      "category": "ambiguous",
+      "ai_draft": {
+        "reference_answer": "信息不足：需要商品类型、发货状态、收货地区才能判断。",
+        "gold_evidence": [
+          {
+            "section": "5. 发货时效",
+            "quote": "现货商品在付款后 48 小时内发出；预售商品以商品页标注的发货时间为准。大件商品（家具、家电）发货时间为 5 个工作日内，配送前会电话预约。"
+          },
+          {
+            "section": "6. 物流查询",
+            "quote": "订单发货后可在「我的订单」查看物流单号与实时轨迹。物流信息超过 24 小时未更新时，可联系客服协助核查。"
+          }
+        ],
+        "key_facts": [
+          "缺商品/地区/发货信息"
+        ],
+        "answerability": "ambiguous"
+      },
+      "human": {
+        "reference_answer": "",
+        "gold_evidence": [],
+        "key_facts": [],
+        "answerability": "",
+        "claims": [],
+        "review_status": "pending_human",
+        "reviewer": "",
+        "reviewed_at": "",
+        "notes": ""
+      }
+    },
+    {
+      "id": "Q36",
+      "question": "能退吗？",
+      "category": "ambiguous",
+      "ai_draft": {
+        "reference_answer": "信息不足：需要商品类型、签收时间、是否定制/生鲜/虚拟商品才能判断。",
+        "gold_evidence": [
+          {
+            "section": "1. 退款时效",
+            "quote": "订单签收后 7 天内可申请无理由退款。审核通过后，款项将在 1-3 个工作日内原路退回。定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。"
+          },
+          {
+            "section": "12. 特殊商品",
+            "quote": "生鲜食品签收后不支持无理由退货，质量问题需在签收后 24 小时内拍照反馈。虚拟商品（充值、会员、课程）一经售出不支持退款。定制商品支持质量问题退换，不支持无理由退换。"
+          }
+        ],
+        "key_facts": [
+          "缺商品类型和签收时间"
+        ],
+        "answerability": "ambiguous"
+      },
+      "human": {
+        "reference_answer": "",
+        "gold_evidence": [],
+        "key_facts": [],
+        "answerability": "",
+        "claims": [],
+        "review_status": "pending_human",
+        "reviewer": "",
+        "reviewed_at": "",
+        "notes": ""
+      }
+    },
+    {
+      "id": "Q37",
+      "question": "发票怎么弄？",
+      "category": "ambiguous",
+      "ai_draft": {
+        "reference_answer": "信息不足：需要订单信息和发票抬头；一般流程是在订单中申请电子发票并填写抬头。",
+        "gold_evidence": [
+          {
+            "section": "4. 发票说明",
+            "quote": "仅支持电子发票，提交申请后 24 小时内发送至下单邮箱。发票抬头可在开具前修改；已开具的发票需先申请红冲，再重新开具。暂不支持纸质发票和增值税专用发票。"
+          }
+        ],
+        "key_facts": [
+          "缺订单/抬头信息"
+        ],
+        "answerability": "ambiguous"
+      },
+      "human": {
+        "reference_answer": "",
+        "gold_evidence": [],
+        "key_facts": [],
+        "answerability": "",
+        "claims": [],
+        "review_status": "pending_human",
+        "reviewer": "",
+        "reviewed_at": "",
+        "notes": ""
+      }
+    },
+    {
+      "id": "Q38",
+      "question": "运费多少？",
+      "category": "ambiguous",
+      "ai_draft": {
+        "reference_answer": "信息不足：需要订单实付金额和收货地区；满 99 元包邮，未满 99 元 10 元，偏远地区 20 元。",
+        "gold_evidence": [
+          {
+            "section": "7. 运费规则",
+            "quote": "单笔订单实付满 99 元包邮；未满 99 元收取 10 元运费。新疆、西藏、内蒙古等偏远地区运费为 20 元，不参与包邮活动。因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。"
+          }
+        ],
+        "key_facts": [
+          "缺金额和地区"
+        ],
+        "answerability": "ambiguous"
+      },
+      "human": {
+        "reference_answer": "",
+        "gold_evidence": [],
+        "key_facts": [],
+        "answerability": "",
+        "claims": [],
+        "review_status": "pending_human",
+        "reviewer": "",
+        "reviewed_at": "",
+        "notes": ""
+      }
+    },
+    {
+      "id": "Q39",
+      "question": "保修多久？",
+      "category": "ambiguous",
+      "ai_draft": {
+        "reference_answer": "信息不足：需要确认是电子产品还是配件；电子产品 12 个月，配件 3 个月。",
+        "gold_evidence": [
+          {
+            "section": "8. 保修政策",
+            "quote": "电子产品自签收之日起保修 12 个月，配件保修 3 个月。人为损坏、进水、私自拆修不在保修范围内。保修期内维修免费；保修期外维修需收取材料费和人工费。"
+          }
+        ],
+        "key_facts": [
+          "缺商品类型"
+        ],
+        "answerability": "ambiguous"
+      },
+      "human": {
+        "reference_answer": "",
+        "gold_evidence": [],
+        "key_facts": [],
+        "answerability": "",
+        "claims": [],
+        "review_status": "pending_human",
+        "reviewer": "",
+        "reviewed_at": "",
+        "notes": ""
+      }
+    },
+    {
+      "id": "Q40",
+      "question": "积分怎么用？",
+      "category": "ambiguous",
+      "ai_draft": {
+        "reference_answer": "信息不足：需要账户和订单场景；积分 100 分可抵扣 1 元，仅限本账户使用。",
+        "gold_evidence": [
+          {
+            "section": "10. 会员积分",
+            "quote": "消费 1 元积 1 分，100 积分可抵扣 1 元。积分自获得之日起 12 个月内有效，逾期清零。积分不可转让、不可提现，仅限本账户使用。"
+          }
+        ],
+        "key_facts": [
+          "缺账户/订单场景"
+        ],
+        "answerability": "ambiguous"
+      },
+      "human": {
+        "reference_answer": "",
+        "gold_evidence": [],
+        "key_facts": [],
+        "answerability": "",
+        "claims": [],
+        "review_status": "pending_human",
+        "reviewer": "",
+        "reviewed_at": "",
+        "notes": ""
+      }
+    }
+  ]
+}

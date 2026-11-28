@@ -20,6 +20,7 @@ if TYPE_CHECKING:
     from app.agents.insight_agent import InsightAnalysisAgent
 
 from app.core.ownership import assert_owner
+from app.core.tenancy import require_tenant, tenant_id_for_write
 from app.application import task_control
 from app.core.exceptions import DataSourceNotFoundError
 from app.repositories import cleaned_data as cleaned_repo
@@ -53,6 +54,7 @@ async def _datasource_or_404(
     datasource = await session.get(DataSource, datasource_id)
     if datasource is None or datasource.deleted_at is not None:
         raise DataSourceNotFoundError(details={"datasource_id": str(datasource_id)})
+    require_tenant(datasource, user, DataSourceNotFoundError)
     assert_owner(datasource.user_id, user)
     return datasource
 
@@ -84,6 +86,7 @@ async def create_insight_task(
         session, datasource_id=datasource_id, task_type=INSIGHT_TASK_TYPE
     )
     task = Task(
+        tenant_id=tenant_id_for_write(user),
         task_type=INSIGHT_TASK_TYPE,
         task_name="洞察分析",
         datasource_id=datasource_id,
@@ -180,6 +183,7 @@ async def _execute_insight(
         # 洞察是「数据源级」结果，没有单条对话，data_id 置空（迁移 012）。
         session.add(
             AnalysisResult(
+                tenant_id=task.tenant_id,
                 datasource_id=task.datasource_id,
                 data_id=None,
                 task_id=task.id,

@@ -1,0 +1,24 @@
+{
+ "name": "m1d7-prompt-leakage-audit",
+ "version": "v1.2.5",
+ "min_chars": 12,
+ "source_files": [
+  "docs\\repair\\phase3e\\pilot-10-v1.1.5-gate.json",
+  "docs\\repair\\phase3e\\m1d3-judge-only-results.json",
+  "docs\\repair\\phase3e\\m1d4-single-case-results.json",
+  "docs\\repair\\phase3e\\m1d6-single-case-results.json"
+ ],
+ "prompt_assets": [
+  "faithfulness.txt",
+  "answer_correctness.txt",
+  "answer_relevancy.txt",
+  "patch_example.json"
+ ],
+ "source_count": 152,
+ "finding_count": 0,
+ "non_whitelisted_count": 0,
+ "by_prompt": {},
+ "by_case": {},
+ "findings": [],
+ "status": "pass"
+}

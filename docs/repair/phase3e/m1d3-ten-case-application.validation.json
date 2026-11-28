@@ -1,0 +1,138 @@
+{
+ "name": "m1d3-ten-case-application-validation",
+ "kind": "static_application_validation_not_judge_run",
+ "status": "pass",
+ "checks": [
+  {
+   "check": "status_pending",
+   "ok": true
+  },
+  {
+   "check": "not_approved",
+   "ok": true
+  },
+  {
+   "check": "not_run",
+   "ok": true
+  },
+  {
+   "check": "not_activated",
+   "ok": true
+  },
+  {
+   "check": "no_reuse",
+   "ok": true
+  },
+  {
+   "check": "prompt_version",
+   "ok": true
+  },
+  {
+   "check": "prompt_frozen",
+   "ok": true
+  },
+  {
+   "check": "prompt_active_false",
+   "ok": true
+  },
+  {
+   "check": "prompt_sha",
+   "ok": true
+  },
+  {
+   "check": "manifest_sha",
+   "ok": true
+  },
+  {
+   "check": "rubric_v120",
+   "ok": true
+  },
+  {
+   "check": "schema_v3",
+   "ok": true
+  },
+  {
+   "check": "metric_v3",
+   "ok": true
+  },
+  {
+   "check": "default_v100",
+   "ok": true
+  },
+  {
+   "check": "target_sha",
+   "ok": true
+  },
+  {
+   "check": "labels_sha",
+   "ok": true
+  },
+  {
+   "check": "fixture_sha",
+   "ok": true
+  },
+  {
+   "check": "case_count",
+   "ok": true
+  },
+  {
+   "check": "case_ids",
+   "ok": true
+  },
+  {
+   "check": "targets_match",
+   "ok": true
+  },
+  {
+   "check": "labels_match",
+   "ok": true
+  },
+  {
+   "check": "execution_vehicle",
+   "ok": true
+  },
+  {
+   "check": "service_path",
+   "ok": true
+  },
+  {
+   "check": "synthetic_trace",
+   "ok": true
+  },
+  {
+   "check": "q11_bad",
+   "ok": true
+  },
+  {
+   "check": "q11_good",
+   "ok": true
+  },
+  {
+   "check": "budget",
+   "ok": true
+  },
+  {
+   "check": "q36_dual",
+   "ok": true
+  },
+  {
+   "check": "hg_repeat",
+   "ok": true
+  },
+  {
+   "check": "stop_conditions",
+   "ok": true
+  },
+  {
+   "check": "boundaries",
+   "ok": true
+  }
+ ],
+ "application_sha256": "7077477ef6108dcf7996b5ce17b2c492752cbbc85644856d91abdb3b5f45da28",
+ "target_sha256": "3ee15dfca66fe13f0a45fda84ecf2612483f2de107ad079b196a6bd6344d5846",
+ "labels_sha256": "f139623fef80b55716fce0c773e776d284a5167683eb91559b23e49cabd000eb",
+ "manifest_sha256": "8bdd673cd44ed772dfc1630280e571d4cdd8ed786066eb72eb553a9be8b0b278",
+ "fixture_sha256": "dc7be14b6026b579c15dea1a13d498b7479e14081aa17419ef2bfa525ae9be70",
+ "judge_run": false,
+ "runtime_activated": false
+}

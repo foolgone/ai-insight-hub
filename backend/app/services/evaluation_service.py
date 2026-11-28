@@ -21,6 +21,7 @@ if TYPE_CHECKING:
     from app.agents.evaluation_agent import QualityEvaluationAgent
 
 from app.core.ownership import assert_owner
+from app.core.tenancy import require_tenant, tenant_id_for_write
 from app.core.pagination import PaginationParams
 from app.repositories.pagination import paginate
 from app.repositories import analysis_results as analysis_repo
@@ -79,6 +80,7 @@ async def _datasource_or_404(
     datasource = await session.get(DataSource, datasource_id)
     if datasource is None or datasource.deleted_at is not None:
         raise DataSourceNotFoundError(details={"datasource_id": str(datasource_id)})
+    require_tenant(datasource, user, DataSourceNotFoundError)
     assert_owner(datasource.user_id, user)
     return datasource
 
@@ -95,6 +97,7 @@ async def create_evaluation_task(
         session, datasource_id=datasource_id, task_type=EVALUATE_TASK_TYPE
     )
     task = Task(
+        tenant_id=tenant_id_for_write(user),
         task_type=EVALUATE_TASK_TYPE,
         task_name="质量评估",
         datasource_id=datasource_id,
@@ -228,6 +231,7 @@ async def _execute_evaluation(
                 needs_review += 1
             session.add(
                 AnalysisResult(
+                    tenant_id=task.tenant_id,
                     datasource_id=task.datasource_id,
                     data_id=item.id,
                     # 批次归属：同一次评估的所有结果共享 task_id，供「批次对比」使用

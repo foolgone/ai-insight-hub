@@ -1,4 +1,4 @@
-﻿"""B-305 上传与清洗入队集成测试（413/415/409/202、raw_data 落库、celery_task_id 回写）。"""
+"""B-305 上传与清洗入队集成测试（413/415/409/202、raw_data 落库、celery_task_id 回写）。"""
 from __future__ import annotations
 
 import uuid
@@ -75,6 +75,11 @@ async def test_upload_creates_raw_data_and_task(
 
     datasource = await db_session.get(DataSource, uuid.UUID(datasource_id))
     assert datasource.workflow_status == "data_uploaded"
+    assert (
+        raw_data[0]
+        .file_info["object_name"]
+        .startswith(f"tenant/{datasource.tenant_id}/uploads/{datasource.id}/")
+    )
 
 
 async def test_upload_rejects_unsupported_format(client, auth_headers, monkeypatch) -> None:

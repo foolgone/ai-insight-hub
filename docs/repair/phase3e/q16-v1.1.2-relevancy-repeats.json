@@ -1,0 +1,42 @@
+{
+  "case_id": "Q16",
+  "prompt_version": "v1.1.2",
+  "runs": [
+    {
+      "repeat": 1,
+      "status": "evaluated",
+      "score": 0.7,
+      "details": {
+        "reason": "回答了主要部分，但缺少具体的核查步骤或进一步的建议。"
+      },
+      "token_usage": {
+        "input": 1130,
+        "output": 32
+      }
+    },
+    {
+      "repeat": 2,
+      "status": "evaluated",
+      "score": 0.7,
+      "details": {
+        "reason": "回答了主要部分，但缺少具体的核查步骤或进一步建议。"
+      },
+      "token_usage": {
+        "input": 1130,
+        "output": 31
+      }
+    },
+    {
+      "repeat": 3,
+      "status": "evaluated",
+      "score": 0.7,
+      "details": {
+        "reason": "回应了主要部分，但缺少具体的操作步骤或进一步的建议。"
+      },
+      "token_usage": {
+        "input": 1130,
+        "output": 32
+      }
+    }
+  ]
+}

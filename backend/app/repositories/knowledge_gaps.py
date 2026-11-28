@@ -12,7 +12,7 @@ from sqlalchemy import func, select
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models import KnowledgeGap
+from app.models import DataSource, KnowledgeGap
 
 _WHITESPACE = re.compile(r"\s+")
 
@@ -30,7 +30,8 @@ def _now() -> datetime:
 async def upsert_many(
     session: AsyncSession,
     *,
-    datasource_id: uuid.UUID,
+    tenant_id: uuid.UUID | None = None,
+    datasource_id: uuid.UUID | None = None,
     gaps: Iterable[Mapping[str, Any]],
     task_id: uuid.UUID | None = None,
 ) -> int:
@@ -38,6 +39,11 @@ async def upsert_many(
 
     状态不因重跑而回退（``adopted`` / ``ignored`` 保持不变）。
     """
+    if tenant_id is None and datasource_id is not None:
+        datasource = await session.get(DataSource, datasource_id)
+        tenant_id = datasource.tenant_id if datasource is not None else None
+    if datasource_id is None:
+        raise ValueError("datasource_id is required")
     rows: list[dict[str, Any]] = []
     dedup: dict[str, dict[str, Any]] = {}
     for gap in gaps:
@@ -52,6 +58,7 @@ async def upsert_many(
             continue
         dedup[key] = {
             "id": uuid.uuid4(),
+            "tenant_id": tenant_id,
             "datasource_id": datasource_id,
             "question": question[:2000],
             "question_key": key,

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { Button } from '../Button'
 import { Modal } from '../Modal'
 import { Select } from '../Select'
@@ -13,7 +14,11 @@ import { notify } from '../../lib/toast'
  * @param {{ open: boolean, onClose: () => void, defaultDatasourceId?: string|null }} props
  */
 export function CreateCleaningModal({ open, onClose, defaultDatasourceId = null }) {
-  const { data } = useDataSourcesQuery({ page: 1, limit: 100, sort: '-created_at' })
+  const { data, isLoading, isError, refetch } = useDataSourcesQuery({
+    page: 1,
+    limit: 100,
+    sort: '-created_at',
+  })
   const mutation = useStartCleaning()
 
   const [datasourceId, setDatasourceId] = useState('')
@@ -25,6 +30,7 @@ export function CreateCleaningModal({ open, onClose, defaultDatasourceId = null 
     () => (data?.items || []).map(item => ({ label: item.name, value: item.id })),
     [data]
   )
+  const hasDatasourceOptions = datasourceOptions.length > 0
 
   useEffect(() => {
     if (!open) return
@@ -64,7 +70,11 @@ export function CreateCleaningModal({ open, onClose, defaultDatasourceId = null 
           <Button variant="secondary" onClick={onClose} disabled={mutation.isPending}>
             取消
           </Button>
-          <Button onClick={handleSubmit} loading={mutation.isPending} disabled={mutation.isPending}>
+          <Button
+            onClick={handleSubmit}
+            loading={mutation.isPending}
+            disabled={mutation.isPending || isLoading || !hasDatasourceOptions}
+          >
             启动清洗
           </Button>
         </>
@@ -82,13 +92,50 @@ export function CreateCleaningModal({ open, onClose, defaultDatasourceId = null 
 
         <div>
           <span className="mb-1 block text-sm font-medium text-gray-700">数据源</span>
-          <Select
-            options={datasourceOptions}
-            value={datasourceId}
-            onChange={setDatasourceId}
-            placeholder="请选择数据源"
-            disabled={mutation.isPending}
-          />
+          {isLoading ? (
+            <p className="text-sm text-gray-500">正在加载数据源...</p>
+          ) : isError ? (
+            <div
+              role="alert"
+              className="flex flex-wrap items-center justify-between gap-2 rounded border border-error-200 bg-error-50 px-3 py-2 text-sm text-error-700"
+            >
+              数据源加载失败
+              <Button size="sm" variant="outline" onClick={() => refetch()}>
+                重试
+              </Button>
+            </div>
+          ) : !hasDatasourceOptions ? (
+            <div
+              role="alert"
+              className="rounded border border-warning-200 bg-warning-50 px-3 py-2 text-sm text-warning-700"
+            >
+              <p>还没有可用数据源，先创建或选择一个数据源。</p>
+              <div className="mt-2 flex flex-wrap items-center gap-2">
+                <Link
+                  to="/data-sources?action=create"
+                  onClick={onClose}
+                  className="inline-flex h-8 items-center rounded border border-gray-300 bg-white px-3 text-xs text-gray-700 hover:bg-gray-50"
+                >
+                  新建数据源
+                </Link>
+                <Link
+                  to="/data-sources"
+                  onClick={onClose}
+                  className="inline-flex h-8 items-center rounded border border-gray-300 bg-white px-3 text-xs text-gray-700 hover:bg-gray-50"
+                >
+                  去数据源管理
+                </Link>
+              </div>
+            </div>
+          ) : (
+            <Select
+              options={datasourceOptions}
+              value={datasourceId}
+              onChange={setDatasourceId}
+              placeholder="请选择数据源"
+              disabled={mutation.isPending}
+            />
+          )}
         </div>
 
         <div className="space-y-3 rounded border border-gray-200 p-3">

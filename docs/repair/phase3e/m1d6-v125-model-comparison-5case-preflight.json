@@ -1,0 +1,91 @@
+{
+  "meta": {
+    "name": "m1d6-v1.2.5-model-comparison-5case-preflight",
+    "status": "preflight_passed",
+    "revision": "r1",
+    "date": "2026-11-24",
+    "provider": "dashscope",
+    "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+    "scope": "model_comparison_diagnostic",
+    "judge_run": false,
+    "judge_calls": 0,
+    "prompt_version": "v1.2.5",
+    "prompt_status": "frozen",
+    "prompt_active": false,
+    "freeze_commit": "e9e5f8e",
+    "agent_commit": "318b302",
+    "note": "用户批准的 5-case 双模型对比：qwen-max + qwen3.8-flash；target 使用 active v1.0.2，不使用 v1.0.3 draft。"
+  },
+  "account": {
+    "api_key_env": "DASHSCOPE_API_KEY",
+    "models_endpoint": { "status": 200, "model_count": 191 },
+    "arrears_resolved": true
+  },
+  "probes": [
+    {
+      "id": "P1",
+      "model": "qwen-max",
+      "status": 200,
+      "finish_reason": "stop",
+      "prompt_tokens": 19,
+      "completion_tokens": 8,
+      "latency_s": 0.64,
+      "note": "充值后 qwen-max 恢复可用；仅最小 JSON 探针，不是 Judge 调用。"
+    },
+    {
+      "id": "P2",
+      "model": "qwen3.8-flash",
+      "enable_thinking": false,
+      "status": 200,
+      "finish_reason": "stop",
+      "prompt_tokens": 36,
+      "completion_tokens": 5,
+      "latency_s": 0.6,
+      "note": "flash + 关闭 thinking 正常。"
+    },
+    {
+      "id": "P3",
+      "model": "qwen3.8-flash",
+      "enable_thinking": true,
+      "status": 200,
+      "prompt_tokens": 1571,
+      "completion_tokens": 4398,
+      "reasoning_tokens": 3649,
+      "finish_reason": "stop",
+      "note": "thinking 开启时 reasoning 占比过高；7k prompt 会撞满 8192，故对比 arm 关闭 thinking。"
+    },
+    {
+      "id": "P4",
+      "model": "qwen3.8-flash",
+      "enable_thinking": false,
+      "prompt_tokens": 6801,
+      "completion_tokens": 631,
+      "finish_reason": "stop",
+      "note": "6.8k 输入仅 631 输出，无截断。"
+    }
+  ],
+  "cost_model": {
+    "pricing_basis": "qwen-max CNY 表（输入 2.4 / 输出 9.6 每百万）作为两 arm 的上界代理；DashScope 不返回单次费用。",
+    "input_cny_per_mtok": 2.4,
+    "output_cny_per_mtok": 9.6,
+    "ceiling_cny": 0.6,
+    "expected_upper_bound_cny": 0.42,
+    "historical_reference": {
+      "qwen_max_18_calls_cny": 0.197098,
+      "flash_6_calls_cny": 0.1576632
+    }
+  },
+  "target_policy": {
+    "active_target": "docs/repair/phase3e/pilot-40-targets-v1.2.0-v1.0.2.json",
+    "active_target_sha256": "3ee15dfca66fe13f0a45fda84ecf2612483f2de107ad079b196a6bd6344d5846",
+    "draft_target": "docs/repair/phase3e/pilot-40-targets-v1.2.0-v1.0.3-draft.json",
+    "draft_used": false,
+    "note": "对比使用 active v1.0.2；v1.0.3 draft 未激活，不参与本次评分。"
+  },
+  "conclusion": {
+    "preflight_passed": true,
+    "judge_ready": true,
+    "arms": ["qwen-max", "qwen3.8-flash (enable_thinking=false)"],
+    "judge_calls": 0
+  }
+}

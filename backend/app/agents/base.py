@@ -141,6 +141,12 @@ class AgentResult:
     duration: float = 0.0
     token_usage: dict[str, int] = field(default_factory=lambda: {"input": 0, "output": 0})
     cost: Decimal = Decimal("0")
+    # 失败结构类型（异常类名）；成功为 None。用于区分输出违约/执行失败。
+    error_type: str | None = None
+    # 最后一次实际用于解析的模型输出原文（含修复轮）；默认 None，不影响既有 Agent。
+    raw_text: str | None = None
+    # 首次（未修复）模型输出；仅结构化失败时保留，便于定位原始非法点。
+    original_raw_text: str | None = None
 
 
 # --------------------------------------------------------------------------- 基类
@@ -213,6 +219,10 @@ class BaseAgent(ABC):
         """
         return None
 
+    def _repair_example(self) -> str | None:
+        """结构化修复轮使用的完整合法 JSON 示例；默认不提供。"""
+        return None
+
     # -- 对外唯一入口 -----------------------------------------------------
     async def invoke(
         self,
@@ -237,6 +247,9 @@ class BaseAgent(ABC):
         guard_hits: list[str] = []
         # 修复轮也会消耗 token，失败时要一起记账（否则失败调用显示 0 token）
         repair_usage: list[LLMUsage] = []
+        # 结构化解析可能触发修复轮：记录「最终实际用于解析」的原始文本
+        raw_text_sink: list[str] = []
+        last_raw_text: str | None = None
 
         # ── BYOK：解析本次调用使用的凭据（必须在 try 之外，异常向上冒泡） ──
         # 只有"有 user_id + session"且未开 fallback 时才要求用户 Key；
@@ -300,15 +313,18 @@ class BaseAgent(ABC):
                 return response
 
             response = await async_retry(_call, config=retry_config, guard=guard)
+            last_raw_text = response.content
 
             payload: Any = response.content
             if self.output_schema is not None:
-                payload = await _parse_structured(
+                payload = await self._parse_structured_output(
                     self.output_schema,
                     text=response.content,
                     llm=agent_llm,
                     usage_collector=repair_usage,
                     validator=self._validate_parsed,
+                    raw_sink=raw_text_sink,
+                    repair_example=self._repair_example(),
                 )
             data = self._validate_output(payload)
 
@@ -336,6 +352,7 @@ class BaseAgent(ABC):
                 duration=duration,
                 token_usage=token_usage,
                 cost=cost,
+                raw_text=raw_text_sink[-1] if raw_text_sink else last_raw_text,
             )
             await self._track_success(
                 session,
@@ -407,9 +424,12 @@ class BaseAgent(ABC):
                     "input_guard_hits": len(guard_hits),
                 },
                 errors=[f"{type(exc).__name__}: {exc}"],
+                error_type=type(exc).__name__,
                 warnings=list(guard_hits),
                 duration=duration,
                 token_usage=token_usage,
+                raw_text=getattr(exc, "raw_output", None) or last_raw_text,
+                original_raw_text=getattr(exc, "original_output", None),
             )
 
         finally:
@@ -495,6 +515,28 @@ class BaseAgent(ABC):
         except Exception as exc:  # noqa: BLE001
             logger.opt(exception=exc).error("failure tracking failed")
 
+    async def _parse_structured_output(
+        self,
+        schema: type[BaseModel],
+        *,
+        text: str,
+        llm: Any,
+        usage_collector: list[LLMUsage] | None = None,
+        validator: Any = None,
+        raw_sink: list[str] | None = None,
+        repair_example: str | None = None,
+    ) -> Any:
+        """Parse structured output; overridable for version-gated repair strategies."""
+        return await _parse_structured(
+            schema,
+            text=text,
+            llm=llm,
+            usage_collector=usage_collector if usage_collector is not None else [],
+            validator=validator,
+            raw_sink=raw_sink,
+            repair_example=repair_example,
+        )
+
 
 async def _parse_structured(
     schema: type[BaseModel],
@@ -503,6 +545,8 @@ async def _parse_structured(
     llm: LLMPort,
     usage_collector: list[LLMUsage],
     validator: Callable[[Any], None] | None = None,
+    raw_sink: list[str] | None = None,
+    repair_example: str | None = None,
 ) -> BaseModel:
     """延迟导入避免模块循环（structured_output 依赖 llm，不依赖 base）。"""
     from app.agents.structured_output import parse_with_repair
@@ -513,6 +557,8 @@ async def _parse_structured(
         llm=llm,
         usage_collector=usage_collector,
         validator=validator,
+        raw_sink=raw_sink,
+        repair_example=repair_example,
     )
 
 

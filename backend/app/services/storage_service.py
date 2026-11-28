@@ -2,7 +2,8 @@
 
 - 默认 MinIO（S3 兼容）；``STORAGE_BACKEND=auto`` 时 MinIO 不可用自动回退本地文件系统
   （本地 VM 上 MinIO 未启动，属预期路径）；
-- 对象命名：``{datasource_id}/{uuid}_{filename}``（filename 取 basename，防目录穿越）；
+- 对象命名：``tenant/<tenant_id>/uploads/<datasource_id>/<uuid>_<filename>``；
+  旧对象保留旧 key（``<datasource_id>/...``），读取兼容；
 - 返回 ``StoredFile``（object_name / url / backend / size），由调用方写入 ``raw_data.file_info``。
 """
 from __future__ import annotations
@@ -26,9 +27,9 @@ class StoredFile:
     size: int
 
 
-def _object_name(datasource_id: object, filename: str) -> str:
+def _object_name(tenant_id: object, datasource_id: object, filename: str) -> str:
     safe_name = Path(filename).name or "upload.bin"
-    return f"{datasource_id}/{uuid_module.uuid4().hex}_{safe_name}"
+    return f"tenant/{tenant_id}/uploads/{datasource_id}/{uuid_module.uuid4().hex}_{safe_name}"
 
 
 def _minio_client():
@@ -84,13 +85,14 @@ def _save_local(content: bytes, *, object_name: str) -> StoredFile:
 def save_upload(
     content: bytes,
     *,
+    tenant_id: object,
     datasource_id: object,
     filename: str,
     content_type: str | None = None,
 ) -> StoredFile:
     """保存上传文件：优先 MinIO，``auto`` 模式下失败回退本地。"""
     backend = (settings.STORAGE_BACKEND or "auto").lower()
-    object_name = _object_name(datasource_id, filename)
+    object_name = _object_name(tenant_id, datasource_id, filename)
 
     if backend in ("auto", "minio"):
         try:
@@ -119,6 +121,7 @@ def save_upload(
 def save_upload_from_path(
     path: Path,
     *,
+    tenant_id: object,
     datasource_id: object,
     filename: str,
     content_type: str | None = None,
@@ -130,7 +133,7 @@ def save_upload_from_path(
     - 本地：移动到存储目录（跨设备时自动复制）。
     """
     backend = (settings.STORAGE_BACKEND or "auto").lower()
-    object_name = _object_name(datasource_id, filename)
+    object_name = _object_name(tenant_id, datasource_id, filename)
     file_size = int(size if size is not None else path.stat().st_size)
 
     if backend in ("auto", "minio"):

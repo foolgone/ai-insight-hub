@@ -1,0 +1,331 @@
+{
+  "meta": {
+    "name": "m1d6-v1.2.5-c-single-case-diagnostic-application",
+    "status": "approved",
+    "revision": "r1",
+    "approval": "user_preauthorized_c_single_case_2026-11-23",
+    "approved_by": "项目决策角色（代江晚）",
+    "approved_date": "2026-11-23",
+    "scope": "c_single_case_diagnostic",
+    "case_count": 3,
+    "q23_f_runs": 3,
+    "q23_cr_runs": 1,
+    "q21_runs": 1,
+    "q11_runs": 1,
+    "not_approved_for_10_or_40": true,
+    "judge_run": false,
+    "runtime_activated": false,
+    "diagnostic_only": true,
+    "counts_toward_10": false,
+    "date": "2026-11-23",
+    "prompt_version": "v1.2.5",
+    "prompt_status": "frozen",
+    "prompt_active": false,
+    "freeze_commit": "e9e5f8e",
+    "freeze_record": "docs/repair/54-m1d6-v1.2.5-freeze-record.md",
+    "design_commit": "c09cf15",
+    "agent_commit": "318b302",
+    "test_fix_commit": "e690b00",
+    "implementation_report_commit": "e22eb04",
+    "fixture_file": "docs/repair/phase3e/pilot-10-v1.1.5-gate.json",
+    "fixture_sha256": "dc7be14b6026b579c15dea1a13d498b7479e14081aa17419ef2bfa525ae9be70",
+    "manifest_sha256": "2e4ef8bf93f4a6f39a96eeee49e75b4939ca8e3242e12f3028c9b3d8733930c1",
+    "validation_file": "docs/repair/phase3e/m1d7-prompt-v1.2.5-validation.json",
+    "validation_sha256": "20ab5ca34ad408ed2fc90b6f77b7bab04c39ea02ed5539300c9a3c027ab81998",
+    "prompt_sha256": {
+      "faithfulness.txt": "9c80d4d5cd60ea7c95ad02c71f97ab566cc2fd82e2a2230124ee4b21247b9d8e",
+      "answer_correctness.txt": "ca489fcf39691e9a71aec004a01938fb6c70b7b17da3c55fb0ada066e1d24968",
+      "answer_relevancy.txt": "f3efe431683ed26ba0a7338e6e2b5841d65d42dadde5cac30b8340e2ca95dfdc"
+    },
+    "patch_schema_sha256": "bfc71529c4ef057dec7256c35ad31341cc31924f5a2784469721323f74547f33",
+    "patch_example_sha256": "43f48a420ead52cb21f0472a89040de4ef0480cebbe476a104a0edcbc0d62a6d",
+    "quote_validator_sha256": "153ab4a6f203ca0398133a2cc2ca6fda834f7670afa90651c66cfa44b92c722a",
+    "leakage_audit_file": "docs/repair/phase3e/m1d7-prompt-leakage-audit.json",
+    "leakage_audit_sha256": "28937947e07d2169b6336b2762a51f958518f0f27d18ae1867b97ef6a715a904",
+    "leakage_findings": 0,
+    "schema_version": "rag_judge_schema_v3",
+    "rubric_version": "v1.2.0",
+    "metric_version": "v3",
+    "target_file": "docs/repair/phase3e/pilot-40-targets-v1.2.0-v1.0.2.json",
+    "target_sha256": "3ee15dfca66fe13f0a45fda84ecf2612483f2de107ad079b196a6bd6344d5846",
+    "labels_file": "docs/repair/phase3e/pilot-40-final-labels.json",
+    "labels_sha256": "f139623fef80b55716fce0c773e776d284a5167683eb91559b23e49cabd000eb",
+    "default_prompt_version": "v1.0.0",
+    "ledger_file": "docs/repair/phase3e/m1d6-v125-ledger.jsonl",
+    "ledger_initial_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "ledger_policy": "append-only started/finished at LLM boundary; primary/patch/repair/retry all counted; started without finished => uncertain_call=true; budget counts started",
+    "not_reusing_previous_approval": true,
+    "previous_application": "v1.2.4 Q23/Q21/Q11 single-case (stopped at Q23; not reused)"
+  },
+  "run_config": {
+    "execution_mode": "judge_only_fixture_c_diagnostic",
+    "execution_vehicle": "rag_judge_service.judge_trace(session=None, trace=synthetic RagTrace, item=synthetic item, prompt_version='v1.2.5'); driver only aggregates JudgeOutcome and median",
+    "service_path": {
+      "entrypoint": "rag_judge_service.judge_trace",
+      "session": null,
+      "creates_run": false,
+      "writes_db": false,
+      "uses_c3_scoring": true,
+      "driver_reimplements_scoring": false,
+      "outputs": [
+        "faithfulness",
+        "faithfulness_strict",
+        "answer_correctness",
+        "answer_relevancy"
+      ]
+    },
+    "synthetic_trace": {
+      "object": "RagTrace-compatible in-memory object",
+      "fields": {
+        "id": "stable UUID per case/run",
+        "user_id": "fixed UUID for all cases",
+        "adapter": "fixture",
+        "mode": "query",
+        "context_source": "agent_chat",
+        "query": "fixture question",
+        "answer": "fixture answer",
+        "retrieved_contexts": [
+          {
+            "content": "fixture contexts[].content"
+          }
+        ],
+        "status": "success"
+      },
+      "item": {
+        "gold_answer": "fixture gold_answer"
+      },
+      "note": "context_source=agent_chat required for F; no RAG adapter; no RagEvaluationRun"
+    },
+    "adapter": null,
+    "top_k": null,
+    "end_to_end": false,
+    "no_rag_call": true,
+    "no_platform_run": true,
+    "no_db_write": true,
+    "no_weknora_call": true,
+    "fixture": {
+      "file": "docs/repair/phase3e/pilot-10-v1.1.5-gate.json",
+      "sha256": "dc7be14b6026b579c15dea1a13d498b7479e14081aa17419ef2bfa525ae9be70",
+      "case_ids": [
+        "Q23",
+        "Q21",
+        "Q11"
+      ],
+      "case_count": 3,
+      "fixed_inputs": true
+    },
+    "judge_metrics": [
+      "faithfulness",
+      "answer_correctness",
+      "answer_relevancy"
+    ],
+    "derived_metrics": [
+      "faithfulness_strict"
+    ],
+    "q23_f_runs": 3,
+    "q23_cr_runs": 1,
+    "q21_runs": 1,
+    "q11_runs": 1,
+    "judge_prompt_version": "v1.2.5",
+    "default_prompt_version": "v1.0.0",
+    "model": "qwen-max",
+    "temperature": 0.0,
+    "max_tokens": 8192,
+    "env": {
+      "DEFAULT_LLM_MODEL": "qwen-max",
+      "DEFAULT_TEMPERATURE": "0.0",
+      "RAG_JUDGE_MAX_TOKENS": "8192",
+      "RAG_JUDGE_PROMPT_VERSION": "v1.0.0"
+    },
+    "rubric_version": "v1.2.0"
+  },
+  "case_summary": {
+    "case_count": 3,
+    "q23_f_runs": 3,
+    "q23_cr_runs": 1,
+    "q21_runs": 1,
+    "q11_runs": 1,
+    "diagnostic_only": true,
+    "counts_toward_10": false
+  },
+  "cases": [
+    {
+      "case_id": "Q23",
+      "group": "human_gold",
+      "final_category": "constraint",
+      "context_count": 2,
+      "f_runs": 3,
+      "cr_runs": 1,
+      "targets": {
+        "F": [
+          0.4,
+          0.5
+        ],
+        "C": [
+          0.0,
+          0.2
+        ],
+        "R": [
+          0.7,
+          1.0
+        ]
+      },
+      "acceptance": {
+        "primary": "c_diagnostic",
+        "q23_f_median_report": true,
+        "q23_f_min_max_report": true,
+        "q23_f_per_run_claim_decomposition": true,
+        "q23_f_valid_runs_at_least": 2,
+        "q23_f_median_target": [
+          0.4,
+          0.5
+        ],
+        "q23_f_invalid_policy": "record invalid and continue; do not impute 0",
+        "cl1_expected": "unsupported + is_contradictory=true + contradiction_with",
+        "cl3_cl4_expected": "one derived claim, no premise-insufficient + conclusion-supported double count",
+        "patch_completeness": "fixes/refusal must cover all quote error claims",
+        "patch_refusal": "refusal -> invalid; no downgrade",
+        "absence_contract": "non_factual + absence + null + []",
+        "c_r_snapshot": true,
+        "c_r_not_stability_claim": true,
+        "effective_id_mapping_required": true
+      }
+    },
+    {
+      "case_id": "Q21",
+      "group": "provisional",
+      "final_category": "constraint",
+      "context_count": 2,
+      "f_runs": 1,
+      "cr_runs": 1,
+      "targets": {
+        "F": [
+          0.6,
+          0.7
+        ]
+      },
+      "acceptance": {
+        "primary": "semantic_support",
+        "semantic_rule": "质量问题不受 7 天限制 must be insufficient_evidence unless direct exemption quote",
+        "forbidden_support": [
+          "运费由责任方承担 quote",
+          "7 天内可换货 quote",
+          "exclusion inference directly supported"
+        ],
+        "f_status": "evaluated",
+        "c_r_snapshot": true,
+        "c_r_target": "not registered; diagnostic only",
+        "target_miss_policy": "record; no target change"
+      }
+    },
+    {
+      "case_id": "Q11",
+      "group": "provisional",
+      "final_category": "multi",
+      "context_count": 2,
+      "f_runs": 1,
+      "cr_runs": 1,
+      "targets": {
+        "F": [
+          0.6,
+          0.9
+        ],
+        "C": [
+          0.8,
+          1.0
+        ],
+        "R": [
+          0.9,
+          1.0
+        ]
+      },
+      "acceptance": {
+        "primary": "regression",
+        "quote_rule": "single contiguous verbatim span",
+        "no_quote_not_found": true,
+        "target_miss_policy": "record; no target change"
+      }
+    }
+  ],
+  "budget": {
+    "q23_f_primary": 3,
+    "q23_f_patch": 3,
+    "q23_cr_primary": 2,
+    "q21_primary": 3,
+    "q21_patch": 1,
+    "q11_primary": 3,
+    "q11_patch": 1,
+    "primary_judge_calls": 11,
+    "patch_reserve": 5,
+    "retry_repair_reserve": 2,
+    "max_judge_calls": 18,
+    "estimated_cost_cny": 0.18,
+    "ceiling_cny": 0.40,
+    "count_rule": "count every LLM chat call (primary/patch/repair/retry) at LLM boundary; stop when >18 or >CNY0.40"
+  },
+  "diagnostic_policy": {
+    "continue_on_invalid": true,
+    "hard_stops": [
+      "budget_ceiling",
+      "credential_failure",
+      "fingerprint_mismatch",
+      "ledger_integrity",
+      "preflight_failure",
+      "unprocessed_case"
+    ],
+    "no_pass": true,
+    "no_retry_until_pass": true,
+    "no_target_change": true,
+    "q23_f_invalid_does_not_impute_zero": true,
+    "q23_cr_snapshot_not_stability": true
+  },
+  "stop_conditions": [
+    {
+      "code": "budget_ceiling",
+      "condition": "超过 18 calls 或 CNY 0.40"
+    },
+    {
+      "code": "credential_failure",
+      "condition": "LLM 凭证未配置/失效"
+    },
+    {
+      "code": "fingerprint_mismatch",
+      "condition": "Prompt/MANIFEST/fixture/target/patch schema/example/validator SHA 漂移"
+    },
+    {
+      "code": "ledger_integrity",
+      "condition": "ledger 缺失/SHA 不匹配/uncertain_call=true"
+    },
+    {
+      "code": "preflight_failure",
+      "condition": "application/frozen 资产/ledger 空/自测失败"
+    },
+    {
+      "code": "unprocessed_case",
+      "condition": "任一 case 未收集到计划内的 metrics/runs"
+    }
+  ],
+  "report_requirements": [
+    "Q23 F 逐次 status/score/counts/patch/refusal/claims",
+    "Q23 median/min/max/valid_runs/invalid_runs/target_hit_count",
+    "Q23 cl1 unsupported+is_contradictory; cl3/cl4 合并 derived; effective ID 映射",
+    "Q23 C/R snapshot；明确不是稳定性结论",
+    "Q21 metrics + exemption claim/quote；C/R snapshot",
+    "Q11 metrics + quote 连续性 + 三项目标",
+    "ledger SHA/attempts/uncertain calls",
+    "停止条件与 diagnostic invalid 继续记录",
+    "prompt_version=v1.2.5 / rubric_version=v1.2.0",
+    "全部资产 SHA、agent_commit、freeze_commit",
+    "明确 diagnostic_only、不计入 10 条、不写 PASS"
+  ],
+  "boundaries": [
+    "只跑 Q23/Q21/Q11；Q23 F×3 + C/R×1；Q21/Q11 各 1 次×3 指标；不是 10/40",
+    "diagnostic_only=true；不计入 10 条；不写 PASS；不替代正式验收",
+    "不创建 RagEvaluationRun、不写 DB、不调 WeKnora/RAG adapter",
+    "不激活 v1.2.5；active/runtime_active 保持 false；默认仍 v1.0.0",
+    "不修改 v1.2.5 frozen 资产/Prompt/Agent/Service/validator/patch schema/example/target/fixture",
+    "不复用 v1.2.4 的 14 calls / CNY 0.30 批准",
+    "不因单案例失败自动出 v1.2.6；target 变更只走 M1-A",
+    "10/40 正式 Judge 未批准；M1-D-6 仍 blocked"
+  ]
+}

@@ -1,0 +1,165 @@
+{
+  "case_id": "Q17",
+  "prompt_version": "v1.1.1",
+  "model": "qwen-max",
+  "temperature": 0.0,
+  "max_tokens": 8192,
+  "prompt_sha256": "4ee65afb3e7ea8b4b5e361e41ea75b74173142a8c26c97dedc7139ba37c86317",
+  "status": "evaluated",
+  "score": 1.0,
+  "skipped_reason": null,
+  "error": null,
+  "judge_config": {
+    "agent": "rag_judge_faithfulness",
+    "model": "qwen-max",
+    "temperature": 0.0,
+    "max_tokens": 8192,
+    "prompt_version": "v1.1.1",
+    "resolved_prompt_version": "v1.1.1",
+    "prompt_sha256": "4ee65afb3e7ea8b4b5e361e41ea75b74173142a8c26c97dedc7139ba37c86317",
+    "schema_version": "rag_judge_schema_v2",
+    "rubric_version": "v1.1.1",
+    "metric_version": "v2"
+  },
+  "token_usage": {
+    "input": 3632,
+    "output": 647
+  },
+  "claim_count": 5,
+  "supported_claim_count": 5,
+  "evidence_count": 5,
+  "evidence_ok": 5,
+  "validation_errors": [],
+  "document_conflict": false,
+  "claims": [
+    {
+      "claim": "订单满 99 元包邮适用于正向发货环节",
+      "supported": null,
+      "evidence": [],
+      "reason": "C2 原文",
+      "claim_id": "cl1",
+      "claim_type": "factual_claim",
+      "claim_subtype": "policy",
+      "support_status": "supported",
+      "is_contradictory": false,
+      "contradiction_with": [],
+      "evidence_refs": [
+        {
+          "context_id": "C2",
+          "quote": "单笔订单实付满 99 元包邮"
+        }
+      ]
+    },
+    {
+      "claim": "退货时的运费承担方取决于退换货原因",
+      "supported": null,
+      "evidence": [],
+      "reason": "C2 原文",
+      "claim_id": "cl2",
+      "claim_type": "factual_claim",
+      "claim_subtype": "policy",
+      "support_status": "supported",
+      "is_contradictory": false,
+      "contradiction_with": [],
+      "evidence_refs": [
+        {
+          "context_id": "C2",
+          "quote": "因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。"
+        }
+      ]
+    },
+    {
+      "claim": "若因质量问题退换货，运费由商家承担",
+      "supported": null,
+      "evidence": [],
+      "reason": "C2 原文",
+      "claim_id": "cl3",
+      "claim_type": "factual_claim",
+      "claim_subtype": "policy",
+      "support_status": "supported",
+      "is_contradictory": false,
+      "contradiction_with": [],
+      "evidence_refs": [
+        {
+          "context_id": "C2",
+          "quote": "因质量问题产生的退换货运费由商家承担"
+        }
+      ]
+    },
+    {
+      "claim": "若为非质量问题（如无理由退货），运费由买家承担",
+      "supported": null,
+      "evidence": [],
+      "reason": "C2 原文",
+      "claim_id": "cl4",
+      "claim_type": "factual_claim",
+      "claim_subtype": "policy",
+      "support_status": "supported",
+      "is_contradictory": false,
+      "contradiction_with": [],
+      "evidence_refs": [
+        {
+          "context_id": "C2",
+          "quote": "非质量问题的退货运费由买家承担"
+        }
+      ]
+    },
+    {
+      "claim": "该规则与是否满 99 元无关，不因包邮资格而改变退货运费责任归属",
+      "supported": null,
+      "evidence": [],
+      "reason": "C2 原文",
+      "claim_id": "cl5",
+      "claim_type": "factual_claim",
+      "claim_subtype": "policy",
+      "support_status": "supported",
+      "is_contradictory": false,
+      "contradiction_with": [],
+      "evidence_refs": [
+        {
+          "context_id": "C2",
+          "quote": "因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。"
+        }
+      ]
+    }
+  ],
+  "evidence_validation": [
+    {
+      "claim_id": "cl1",
+      "context_id": "C2",
+      "quote": "单笔订单实付满 99 元包邮",
+      "ok": true,
+      "error": null
+    },
+    {
+      "claim_id": "cl2",
+      "context_id": "C2",
+      "quote": "因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。",
+      "ok": true,
+      "error": null
+    },
+    {
+      "claim_id": "cl3",
+      "context_id": "C2",
+      "quote": "因质量问题产生的退换货运费由商家承担",
+      "ok": true,
+      "error": null
+    },
+    {
+      "claim_id": "cl4",
+      "context_id": "C2",
+      "quote": "非质量问题的退货运费由买家承担",
+      "ok": true,
+      "error": null
+    },
+    {
+      "claim_id": "cl5",
+      "context_id": "C2",
+      "quote": "因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。",
+      "ok": true,
+      "error": null
+    }
+  ],
+  "raw_output": "{\n  \"claims\": [\n    {\n      \"claim_id\": \"cl1\",\n      \"claim\": \"订单满 99 元包邮适用于正向发货环节\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C2\", \"quote\": \"单笔订单实付满 99 元包邮\"}\n      ],\n      \"reason\": \"C2 原文\"\n    },\n    {\n      \"claim_id\": \"cl2\",\n      \"claim\": \"退货时的运费承担方取决于退换货原因\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C2\", \"quote\": \"因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。\"}\n      ],\n      \"reason\": \"C2 原文\"\n    },\n    {\n      \"claim_id\": \"cl3\",\n      \"claim\": \"若因质量问题退换货，运费由商家承担\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C2\", \"quote\": \"因质量问题产生的退换货运费由商家承担\"}\n      ],\n      \"reason\": \"C2 原文\"\n    },\n    {\n      \"claim_id\": \"cl4\",\n      \"claim\": \"若为非质量问题（如无理由退货），运费由买家承担\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C2\", \"quote\": \"非质量问题的退货运费由买家承担\"}\n      ],\n      \"reason\": \"C2 原文\"\n    },\n    {\n      \"claim_id\": \"cl5\",\n      \"claim\": \"该规则与是否满 99 元无关，不因包邮资格而改变退货运费责任归属\",\n      \"claim_type\": \"factual_claim\",\n      \"claim_subtype\": \"policy\",\n      \"support_status\": \"supported\",\n      \"is_contradictory\": false,\n      \"contradiction_with\": [],\n      \"evidence_refs\": [\n        {\"context_id\": \"C2\", \"quote\": \"因质量问题产生的退换货运费由商家承担；非质量问题的退货运费由买家承担。\"}\n      ],\n      \"reason\": \"C2 原文\"\n    }\n  ],\n  \"reason\": \"\"\n}",
+  "original_raw_output": null
+}

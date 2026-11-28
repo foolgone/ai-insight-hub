@@ -1,0 +1,21 @@
+{
+  "date": "2026-11-27",
+  "tester": "AI agent (owner-authorized, Playwright self-check; not human acceptance)",
+  "frontend_tests": { "passed": 460, "failed": 0 },
+  "lint": "PASS",
+  "build": "PASS",
+  "f1_empty_state_browser": "PASS",
+  "f1_with_datasource_modal_options": "PASS",
+  "stale_datasource_reset": "PASS",
+  "f2_quality_auto_refresh": {
+    "before_total": 5,
+    "after_total": 10,
+    "manual_refresh": false,
+    "result": "PASS"
+  },
+  "f3_knowledge_auto_refresh": {
+    "faq_get_after_extract_202": true,
+    "manual_reload": false,
+    "result": "PASS"
+  }
+}

@@ -34,7 +34,9 @@ async def _make_user_headers(
 
 @pytest.fixture()
 async def admin_headers(client, db_session) -> dict[str, str]:
-    _, headers = await _make_user_headers(client, db_session, role="admin", password="admin12345")
+    _, headers = await _make_user_headers(
+        client, db_session, role="tenant_admin", password="admin12345"
+    )
     return headers
 
 

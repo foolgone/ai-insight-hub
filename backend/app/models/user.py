@@ -3,15 +3,18 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-from sqlalchemy import Boolean, CheckConstraint, DateTime, Index, String, text
+from sqlalchemy import Boolean, CheckConstraint, DateTime, ForeignKey, Index, String, text
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
 
 from app.models.base import Base
+
+if TYPE_CHECKING:
+    from app.models.tenant import Tenant
 
 _QUOTA_DEFAULT = text(
     """'{"max_datasources": 10, "max_monthly_records": 100000, """
@@ -27,7 +30,11 @@ class User(Base):
 
     __tablename__ = "users"
     __table_args__ = (
-        CheckConstraint("role IN ('admin', 'user', 'viewer')", name="role_valid"),
+        Index("idx_users_tenant_created", "tenant_id", "created_at"),
+        CheckConstraint(
+            "role IN ('platform_admin', 'tenant_admin', 'user', 'viewer')",
+            name="role_valid",
+        ),
         Index("idx_users_email", "email", postgresql_where=text("deleted_at IS NULL")),
         Index("idx_users_role", "role", postgresql_where=text("deleted_at IS NULL")),
         Index("idx_users_created_at", "created_at"),
@@ -35,6 +42,11 @@ class User(Base):
 
     id: Mapped[uuid.UUID] = mapped_column(
         PG_UUID(as_uuid=True), primary_key=True, server_default=text("gen_random_uuid()")
+    )
+    tenant_id: Mapped[uuid.UUID] = mapped_column(
+        PG_UUID(as_uuid=True),
+        ForeignKey("tenants.id", ondelete="RESTRICT"),
+        nullable=False,
     )
     email: Mapped[str] = mapped_column(String(255), nullable=False, unique=True)
     password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
@@ -49,3 +61,5 @@ class User(Base):
     updated_at: Mapped[datetime | None] = mapped_column(DateTime, server_default=func.now())
     last_login_at: Mapped[datetime | None] = mapped_column(DateTime)
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime)
+
+    tenant: Mapped["Tenant"] = relationship(back_populates="users")

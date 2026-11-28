@@ -33,6 +33,7 @@ class LlmCall(Base):
 
     __tablename__ = "llm_calls"
     __table_args__ = (
+        Index("idx_llm_calls_tenant_user_created", "tenant_id", "user_id", "created_at"),
         CheckConstraint("status IN ('success', 'failed')", name="status_valid"),
         Index("uk_llm_calls_idempotency", "idempotency_key", unique=True),
         Index("idx_llm_calls_user_date", "user_id", "created_at"),
@@ -44,6 +45,9 @@ class LlmCall(Base):
 
     id: Mapped[uuid.UUID] = mapped_column(
         PG_UUID(as_uuid=True), primary_key=True, server_default=text("gen_random_uuid()")
+    )
+    tenant_id: Mapped[uuid.UUID | None] = mapped_column(
+        PG_UUID(as_uuid=True), ForeignKey("tenants.id", ondelete="RESTRICT")
     )
     user_id: Mapped[uuid.UUID | None] = mapped_column(PG_UUID(as_uuid=True), ForeignKey("users.id"))
     datasource_id: Mapped[uuid.UUID | None] = mapped_column(

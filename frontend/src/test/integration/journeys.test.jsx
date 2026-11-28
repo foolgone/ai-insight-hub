@@ -112,7 +112,18 @@ describe('页面级集成（F-502）', () => {
     useDatasourceStore.setState({ currentId: 'ds-1' })
 
     login.mockResolvedValue({ user: USER, access_token: 'a', refresh_token: 'r' })
-    listDataSources.mockResolvedValue({ items: [], pagination: { total: 0 } })
+    listDataSources.mockResolvedValue({
+      items: [
+        {
+          id: 'ds-1',
+          name: '客服1月',
+          type: 'csv',
+          status: 'ready',
+          created_at: '2026-10-25T10:00:00Z',
+        },
+      ],
+      pagination: { total: 1 },
+    })
     listTasks.mockResolvedValue({ items: [], pagination: { total: 0 } })
     listCleanedData.mockResolvedValue({ items: [], pagination: { total: 0 } })
     listQualityResults.mockResolvedValue({

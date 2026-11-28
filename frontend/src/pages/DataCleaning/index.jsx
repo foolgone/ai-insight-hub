@@ -1,4 +1,6 @@
-import { useMemo, useState } from 'react'
+import { useCallback, useMemo, useRef, useState } from 'react'
+import { Link } from 'react-router-dom'
+import { useQueryClient } from '@tanstack/react-query'
 import { LuPlus, LuRefreshCw } from 'react-icons/lu'
 import { Badge } from '../../components/Badge'
 import { PageHeader } from '../../components/common/PageHeader'
@@ -15,7 +17,8 @@ import { AgentStatusBadge } from '../../components/business/AgentStatusBadge'
 import { CleanedDataDrawer } from '../../components/cleaning/CleanedDataDrawer'
 import { CreateCleaningModal } from '../../components/cleaning/CreateCleaningModal'
 import { RawDataPanel } from '../../components/cleaning/RawDataPanel'
-import { useCleanedDataQuery } from '../../hooks/useCleaning'
+import { cleanedDataKeys, useCleanedDataQuery } from '../../hooks/useCleaning'
+import { useClearStaleDatasource } from '../../hooks/useClearStaleDatasource'
 import { useTaskStream } from '../../hooks/useTaskStream'
 import { useCancelTask, useRetryTask, useTasksQuery } from '../../hooks/useTasks'
 import { useDatasourceStore } from '../../stores/datasourceStore'
@@ -66,8 +69,26 @@ export default function DataCleaning() {
 
   const cancelMutation = useCancelTask()
   const retryMutation = useRetryTask()
+  const queryClient = useQueryClient()
+  const seenCompleted = useRef(new Set())
+  const handleTasks = useCallback(
+    payload => {
+      const fresh = (payload?.items || []).filter(
+        task =>
+          task.task_type === 'clean' &&
+          task.status === 'completed' &&
+          !seenCompleted.current.has(task.id)
+      )
+      if (fresh.length === 0) return
+      fresh.forEach(task => seenCompleted.current.add(task.id))
+      queryClient.invalidateQueries({ queryKey: cleanedDataKeys.all })
+    },
+    [queryClient]
+  )
   // T11：优先用 SSE 推送；连接不可用时回退到 3s 轮询
-  const { connected: streamConnected } = useTaskStream(Boolean(currentDatasourceId))
+  const { connected: streamConnected } = useTaskStream(Boolean(currentDatasourceId), {
+    onTasks: handleTasks,
+  })
 
   const taskParams = useMemo(
     () => ({
@@ -102,6 +123,7 @@ export default function DataCleaning() {
   )
 
   const cleanedQuery = useCleanedDataQuery(currentDatasourceId, resultParams)
+  useClearStaleDatasource(cleanedQuery.error, currentDatasourceId)
 
   const handleCancel = async task => {
     try {
@@ -272,7 +294,11 @@ export default function DataCleaning() {
             >
               刷新
             </Button>
-            <Button icon={<LuPlus className="h-4 w-4" />} onClick={() => setCreateOpen(true)}>
+            <Button
+              icon={<LuPlus className="h-4 w-4" />}
+              onClick={() => setCreateOpen(true)}
+              disabled={!currentDatasourceId}
+            >
               新建清洗任务
             </Button>
           </>
@@ -280,131 +306,64 @@ export default function DataCleaning() {
       />
 
       <div className="rounded-md border border-gray-200 bg-white p-4">
-        <Tabs
-          items={TASK_TABS}
-          value={activeStatus}
-          onChange={value => {
-            setActiveStatus(value)
-            setTaskPage(1)
-          }}
-        />
-
-        <div className="mt-4">
-          <Table
-            columns={taskColumns}
-            dataSource={tasks}
-            loading={tasksQuery.isLoading}
-            emptyText={activeStatus === 'all' ? '暂无清洗任务，先新建一个吧' : '当前状态下暂无任务'}
-            caption="清洗任务列表"
-          />
-
-          {tasksQuery.isError ? (
-            <div className="mt-3 flex items-center justify-between rounded border border-error-200 bg-error-50 px-3 py-2 text-sm text-error-700">
-              任务列表加载失败：{getErrorMessage(tasksQuery.error)}
-              <Button size="sm" variant="outline" onClick={() => tasksQuery.refetch()}>
-                重试
-              </Button>
-            </div>
-          ) : null}
-
-          {taskPagination && taskPagination.total > 0 ? (
-            <Pagination
-              current={taskPage}
-              pageSize={TASK_PAGE_SIZE}
-              total={taskPagination.total}
-              onChange={page => setTaskPage(page)}
-              className="mt-3"
-            />
-          ) : null}
-        </div>
-      </div>
-
-      <RawDataPanel datasourceId={currentDatasourceId} />
-
-      <div id="cleaned-results" className="rounded-md border border-gray-200 bg-white p-4">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h2 className="text-lg font-semibold text-gray-900">清洗结果</h2>
-            <p className="mt-0.5 text-xs text-gray-500">
-              按当前数据源（Header 选择器）查询，可按质量分/问题/日期筛选。
-            </p>
-          </div>
-          {currentDatasourceId ? (
-            <Button
-              variant="outline"
-              icon={<LuRefreshCw className="h-4 w-4" />}
-              onClick={() => cleanedQuery.refetch()}
-            >
-              刷新结果
-            </Button>
-          ) : null}
-        </div>
-
         {!currentDatasourceId ? (
-          <div className="mt-4">
-            <Empty
-              title="尚未选择数据源"
-              description="在顶部「数据源选择器」中选择一个数据源后查看清洗结果。"
-            />
-          </div>
+          <Empty
+            title="尚未选择数据源"
+            description="先创建或选择一个数据源，再新建清洗任务。"
+            action={
+              <div className="flex flex-wrap items-center justify-center gap-2">
+                <Link
+                  to="/data-sources?action=create"
+                  className="inline-flex h-8 items-center rounded border border-gray-300 px-3 text-xs text-gray-700 hover:bg-gray-50"
+                >
+                  新建数据源
+                </Link>
+                <Link
+                  to="/data-sources"
+                  className="inline-flex h-8 items-center rounded border border-gray-300 px-3 text-xs text-gray-700 hover:bg-gray-50"
+                >
+                  去数据源管理
+                </Link>
+              </div>
+            }
+          />
         ) : (
           <>
-            <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              <Input
-                type="number"
-                value={minScore}
-                onChange={value => {
-                  setMinScore(value)
-                  setResultPage(1)
-                }}
-                placeholder="最低质量分（0–100）"
-                aria-label="最低质量分"
-              />
-              <div className="flex items-center">
-                <Checkbox
-                  label="仅看有问题"
-                  checked={onlyIssues}
-                  onCheckedChange={checked => {
-                    setOnlyIssues(checked === true)
-                    setResultPage(1)
-                  }}
-                />
-              </div>
-              <div className="sm:col-span-2">
-                <DatePicker
-                  value={dateRange}
-                  onChange={value => {
-                    setDateRange(value)
-                    setResultPage(1)
-                  }}
-                />
-              </div>
-            </div>
+            <Tabs
+              items={TASK_TABS}
+              value={activeStatus}
+              onChange={value => {
+                setActiveStatus(value)
+                setTaskPage(1)
+              }}
+            />
 
             <div className="mt-4">
               <Table
-                columns={resultColumns}
-                dataSource={cleanedItems}
-                loading={cleanedQuery.isLoading}
-                emptyText="当前筛选条件下暂无清洗结果"
-                caption="清洗结果列表"
+                columns={taskColumns}
+                dataSource={tasks}
+                loading={tasksQuery.isLoading}
+                emptyText={
+                  activeStatus === 'all' ? '暂无清洗任务，先新建一个吧' : '当前状态下暂无任务'
+                }
+                caption="清洗任务列表"
               />
 
-              {cleanedQuery.isError ? (
+              {tasksQuery.isError ? (
                 <div className="mt-3 flex items-center justify-between rounded border border-error-200 bg-error-50 px-3 py-2 text-sm text-error-700">
-                  清洗结果加载失败：{getErrorMessage(cleanedQuery.error)}
-                  <Button size="sm" variant="outline" onClick={() => cleanedQuery.refetch()}>
+                  任务列表加载失败：{getErrorMessage(tasksQuery.error)}
+                  <Button size="sm" variant="outline" onClick={() => tasksQuery.refetch()}>
                     重试
                   </Button>
                 </div>
               ) : null}
 
-              {cleanedPagination && cleanedPagination.total > 0 ? (
+              {taskPagination && taskPagination.total > 0 ? (
                 <Pagination
-                  current={resultPage}
-                  pageSize={RESULT_PAGE_SIZE}
-                  total={cleanedPagination.total}
-                  onChange={page => setResultPage(page)}
+                  current={taskPage}
+                  pageSize={TASK_PAGE_SIZE}
+                  total={taskPagination.total}
+                  onChange={page => setTaskPage(page)}
                   className="mt-3"
                 />
               ) : null}
@@ -412,6 +371,108 @@ export default function DataCleaning() {
           </>
         )}
       </div>
+
+      <RawDataPanel datasourceId={currentDatasourceId} />
+
+      {currentDatasourceId ? (
+        <div id="cleaned-results" className="rounded-md border border-gray-200 bg-white p-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900">清洗结果</h2>
+              <p className="mt-0.5 text-xs text-gray-500">
+                按当前数据源（Header 选择器）查询，可按质量分/问题/日期筛选。
+              </p>
+            </div>
+            <Button
+              variant="outline"
+              icon={<LuRefreshCw className="h-4 w-4" />}
+              onClick={() => cleanedQuery.refetch()}
+            >
+              刷新结果
+            </Button>
+          </div>
+
+          {!currentDatasourceId ? (
+            <div className="mt-4">
+              <Empty
+                title="尚未选择数据源"
+                description="在顶部「数据源选择器」中选择一个数据源后查看清洗结果。"
+                action={
+                  <Link
+                    to="/data-sources"
+                    className="inline-flex h-8 items-center rounded border border-gray-300 px-3 text-xs text-gray-700 hover:bg-gray-50"
+                  >
+                    去数据源管理
+                  </Link>
+                }
+              />
+            </div>
+          ) : (
+            <>
+              <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                <Input
+                  type="number"
+                  value={minScore}
+                  onChange={value => {
+                    setMinScore(value)
+                    setResultPage(1)
+                  }}
+                  placeholder="最低质量分（0–100）"
+                  aria-label="最低质量分"
+                />
+                <div className="flex items-center">
+                  <Checkbox
+                    label="仅看有问题"
+                    checked={onlyIssues}
+                    onCheckedChange={checked => {
+                      setOnlyIssues(checked === true)
+                      setResultPage(1)
+                    }}
+                  />
+                </div>
+                <div className="sm:col-span-2">
+                  <DatePicker
+                    value={dateRange}
+                    onChange={value => {
+                      setDateRange(value)
+                      setResultPage(1)
+                    }}
+                  />
+                </div>
+              </div>
+
+              <div className="mt-4">
+                <Table
+                  columns={resultColumns}
+                  dataSource={cleanedItems}
+                  loading={cleanedQuery.isLoading}
+                  emptyText="当前筛选条件下暂无清洗结果"
+                  caption="清洗结果列表"
+                />
+
+                {cleanedQuery.isError ? (
+                  <div className="mt-3 flex items-center justify-between rounded border border-error-200 bg-error-50 px-3 py-2 text-sm text-error-700">
+                    清洗结果加载失败：{getErrorMessage(cleanedQuery.error)}
+                    <Button size="sm" variant="outline" onClick={() => cleanedQuery.refetch()}>
+                      重试
+                    </Button>
+                  </div>
+                ) : null}
+
+                {cleanedPagination && cleanedPagination.total > 0 ? (
+                  <Pagination
+                    current={resultPage}
+                    pageSize={RESULT_PAGE_SIZE}
+                    total={cleanedPagination.total}
+                    onChange={page => setResultPage(page)}
+                    className="mt-3"
+                  />
+                ) : null}
+              </div>
+            </>
+          )}
+        </div>
+      ) : null}
 
       <CreateCleaningModal
         open={createOpen}

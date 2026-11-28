@@ -69,7 +69,31 @@ export function normalizeError(error) {
   }
 }
 
-apiClient.interceptors.request.use(config => {
+const AUTH_ENDPOINTS = [
+  endpoints.auth.login,
+  endpoints.auth.refresh,
+  endpoints.auth.logout,
+  endpoints.auth.register,
+]
+
+apiClient.interceptors.request.use(async config => {
+  const isAuthCall = AUTH_ENDPOINTS.some(path => config.url?.includes(path))
+  // 页面刷新后 access token 只在内存、必然缺失：先用 HttpOnly refresh cookie
+  // 静默换一次 token，避免首个请求 401（P1-1 auth hydration 竞态）。
+  if (!getAccessToken() && loadAuth()?.user && !isAuthCall) {
+    try {
+      if (!refreshPromise) {
+        refreshPromise = refreshSession().finally(() => {
+          refreshPromise = null
+        })
+      }
+      const token = await refreshPromise
+      config.headers.Authorization = `Bearer ${token}`
+    } catch {
+      // 让请求继续，401 处理器统一清会话/跳登录；标记避免重复刷新
+      config._authRefreshFailed = true
+    }
+  }
   const token = getAccessToken()
   if (token) config.headers.Authorization = `Bearer ${token}`
   return config
@@ -83,6 +107,12 @@ apiClient.interceptors.response.use(
     const isRefreshRequest = original?.url?.includes(endpoints.auth.refresh)
 
     if (status === 401 && original && !original._retry && !isRefreshRequest) {
+      if (original._authRefreshFailed) {
+        clearAuth()
+        setAccessToken(null)
+        unauthorizedHandler()
+        return Promise.reject(normalizeError(error))
+      }
       original._retry = true
       const hasSession = Boolean(loadAuth()?.user)
 

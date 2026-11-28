@@ -215,6 +215,7 @@ async def create_structure_task(
             details={"raw_data_id": str(raw.id), "task_type": STRUCTURE_TASK_TYPE}
         )
     task = Task(
+        tenant_id=raw.tenant_id,
         task_type=STRUCTURE_TASK_TYPE,
         task_name="转写切分",
         datasource_id=raw.datasource_id,

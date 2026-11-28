@@ -27,14 +27,16 @@ if TYPE_CHECKING:
 
 from app.core.ownership import assert_owner
 from app.core.pagination import PaginationParams
+from app.core.tenancy import apply_tenant_filter, require_tenant, tenant_id_for_write
 from app.repositories.pagination import paginate
 from app.repositories import cleaned_data as cleaned_repo
 from app.core.exceptions import (
     DataSourceNotFoundError,
+    RagEvaluationNotFoundError,
     ReportFormatInvalidError,
     ReportNotFoundError,
 )
-from app.models import AnalysisResult, DataSource, Report, Task, User
+from app.models import AnalysisResult, DataSource, RagEvaluationRun, Report, Task, User
 from app.schemas.agents.report import (
     REPORT_TYPE_LABELS,
     REPORT_TYPES,
@@ -43,6 +45,7 @@ from app.schemas.agents.report import (
     ReportInput,
 )
 from app.services.credential_service import credential_service
+from app.services.report_comparison import build_comparison_output
 from app.services import knowledge_status, storage_service
 
 TEMPLATE_DIR = Path(__file__).resolve().parents[1] / "templates" / "reports"
@@ -246,6 +249,7 @@ def render_markdown(report: Report, output: dict[str, Any], data: dict[str, Any]
     generated_at = output.get("generated_at") or _now_naive().isoformat()
     status = output.get("metadata") or {}
     insight_missing = bool(status.get("insight_degraded"))
+    comparison_report = bool(status.get("comparison"))
     time_range = (report.config or {}).get("time_range") or {}
     time_range_text = (
         f"{time_range.get('start', '')} ~ {time_range.get('end', '')}" if time_range else "未指定"
@@ -259,9 +263,17 @@ def render_markdown(report: Report, output: dict[str, Any], data: dict[str, Any]
         "__HIGHLIGHTS__": _bullets(output.get("highlights") or []),
         "__SECTIONS__": _sections_markdown(output.get("sections") or []),
         "__RECOMMENDATIONS__": _bullets(output.get("recommendations") or []),
-        "__QUALITY_STATUS__": _quality_status_text(data),
-        "__KNOWLEDGE_STATUS__": _knowledge_status_text(data),
-        "__INSIGHT_NOTICE__": ("暂无洞察数据（报告已降级生成）" if insight_missing else "洞察数据已包含在报告中"),
+        "__QUALITY_STATUS__": (
+            "本报告为 Run 对比报告，不含质量评估数据" if comparison_report else _quality_status_text(data)
+        ),
+        "__KNOWLEDGE_STATUS__": (
+            "本报告为 Run 对比报告，不含知识库数据" if comparison_report else _knowledge_status_text(data)
+        ),
+        "__INSIGHT_NOTICE__": (
+            "本报告为 Run 对比报告，不含洞察数据"
+            if comparison_report
+            else ("暂无洞察数据（报告已降级生成）" if insight_missing else "洞察数据已包含在报告中")
+        ),
     }
     for token, value in replacements.items():
         template = template.replace(token, str(value))
@@ -427,8 +439,29 @@ async def _datasource_or_404(
     datasource = await session.get(DataSource, datasource_id)
     if datasource is None or datasource.deleted_at is not None:
         raise DataSourceNotFoundError(details={"datasource_id": str(datasource_id)})
+    require_tenant(datasource, user, DataSourceNotFoundError)
     assert_owner(datasource.user_id, user)
     return datasource
+
+
+async def _ensure_comparison_runs_owned(session: AsyncSession, user: User, comparison: Any) -> None:
+    """校验对比报告引用的 Run 属于当前用户（跨租户一律 404）。"""
+    run_ids: list[uuid.UUID] = []
+    for side in (comparison.base, comparison.target):
+        try:
+            run_ids.append(uuid.UUID(str(side.run_id)))
+        except (TypeError, ValueError):
+            raise RagEvaluationNotFoundError(details={"run_id": side.run_id}) from None
+    rows = await session.execute(
+        select(RagEvaluationRun.id).where(
+            RagEvaluationRun.id.in_(run_ids),
+            RagEvaluationRun.user_id == user.id,
+        )
+    )
+    found = set(rows.scalars().all())
+    if not set(run_ids).issubset(found):
+        missing = [str(run_id) for run_id in run_ids if run_id not in found]
+        raise RagEvaluationNotFoundError(details={"run_ids": missing})
 
 
 async def create_report(
@@ -444,8 +477,11 @@ async def create_report(
     """创建报告记录 + 对应任务记录（task_type=report，params.report_id 关联）。"""
     await _datasource_or_404(session, datasource_id, user)
     validate_create(report_type=report_type, format=format)
+    if config.run_comparison is not None:
+        await _ensure_comparison_runs_owned(session, user, config.run_comparison)
 
     report = Report(
+        tenant_id=tenant_id_for_write(user),
         datasource_id=datasource_id,
         user_id=user.id,
         title=title,
@@ -459,6 +495,7 @@ async def create_report(
     await session.refresh(report)
 
     task = Task(
+        tenant_id=report.tenant_id,
         task_type="report",
         task_name=f"生成报告：{title}"[:255],
         datasource_id=datasource_id,
@@ -502,26 +539,36 @@ async def _execute_report(
     await session.flush()
 
     try:
-        data = await _collect_data(session, report)
         config = ReportConfig(**(report.config or {}))
-        payload = ReportInput(
-            datasource_id=report.datasource_id,
-            title=report.title,
-            report_type=report.report_type,  # type: ignore[arg-type]
-            data=data,
-            config=config,
-        )
-        agent = _build_agent()
-        result = await agent.generate(
-            payload.model_dump(mode="json"),
-            session=session,
-            task_id=task.id if task is not None else None,
-            user_id=report.user_id,
-            scope=f"report:{report.id}",
-            datasource_id=report.datasource_id,
-        )
-        if not result.success or not result.data:
-            raise RuntimeError("report generation failed: " + "; ".join(result.errors))
+        if config.run_comparison is not None:
+            # 对比报告为确定性渲染，不调用 LLM；数字来自对比页快照。
+            data: dict[str, Any] = {}
+            output = build_comparison_output(
+                report,
+                config.run_comparison,
+                generated_at=_now_naive().isoformat(),
+            )
+        else:
+            data = await _collect_data(session, report)
+            payload = ReportInput(
+                datasource_id=report.datasource_id,
+                title=report.title,
+                report_type=report.report_type,  # type: ignore[arg-type]
+                data=data,
+                config=config,
+            )
+            agent = _build_agent()
+            result = await agent.generate(
+                payload.model_dump(mode="json"),
+                session=session,
+                task_id=task.id if task is not None else None,
+                user_id=report.user_id,
+                scope=f"report:{report.id}",
+                datasource_id=report.datasource_id,
+            )
+            if not result.success or not result.data:
+                raise RuntimeError("report generation failed: " + "; ".join(result.errors))
+            output = result.data
 
         # Agent 调用期间可能被取消：复查数据库状态，避免覆盖 cancelled
         if task is not None:
@@ -535,7 +582,6 @@ async def _execute_report(
                     await session.commit()
                 return {"status": "cancelled", "report_id": str(report.id)}
 
-        output = result.data
         if report.format == "markdown":
             content = render_markdown(report, output, data).encode("utf-8")
         elif report.format == "pdf":
@@ -543,7 +589,7 @@ async def _execute_report(
         else:
             content = render_excel(report, output)
         extension = EXTENSIONS[report.format]
-        object_name = f"reports/{report.id}.{extension}"
+        object_name = f"tenant/{report.tenant_id}/reports/{report.id}.{extension}"
         stored = storage_service.save_bytes(
             content,
             object_name=object_name,
@@ -621,6 +667,7 @@ async def list_reports(
 ) -> tuple[list[Report], Any]:
     await _datasource_or_404(session, datasource_id, user)
     stmt = select(Report).where(Report.datasource_id == datasource_id)
+    stmt = apply_tenant_filter(stmt, Report, user)
     if report_type:
         stmt = stmt.where(Report.report_type == report_type)
     if status:
@@ -632,6 +679,7 @@ async def _report_or_404(session: AsyncSession, report_id: uuid.UUID, user: User
     report = await session.get(Report, report_id)
     if report is None:
         raise ReportNotFoundError(details={"report_id": str(report_id)})
+    require_tenant(report, user, ReportNotFoundError)
     await _datasource_or_404(session, report.datasource_id, user)
     return report
 

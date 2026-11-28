@@ -5,6 +5,7 @@ const ROOT_LABELS = {
   'data-sources': '数据源管理',
   'data-cleaning': '数据清洗',
   'quality-assessment': '质量评估',
+  'qa-datasets': 'QA 数据集',
   'knowledge-base': '知识库',
   reports: '报告中心',
 }

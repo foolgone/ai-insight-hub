@@ -1,0 +1,657 @@
+{
+ "meta": {
+  "name": "m1d3-ten-case-judge-application",
+  "status": "pending_approval",
+  "revision": "r4",
+  "previous_review": "new_application_after_v1.2.1_freeze",
+  "revision_notes": [
+   "v1.2.1 frozen Prompt；F 9efdc64d… / C a50520de… / R a5386070…；MANIFEST 8bdd673c…",
+   "rubric_version=v1.2.0；Schema v3 / Metric v3；target v1.0.2 未重算",
+   "Judge-only fixed fixture；production Service replay via judge_trace(session=None)",
+   "Q11 bad 非连续 quote -> invalid(contract_violation)+quote_not_found；good 连续 quote -> evaluated 1.0",
+   "Q36 C base/variant 双报，不参与 PASS/FAIL；Q23 3/3、Q35/Q36 >=2/3；最多 51 calls / CNY 1.00",
+   "不复用 v1.2.0 的 10 条批准；未跑 Judge"
+  ],
+  "not_approved": true,
+  "judge_run": false,
+  "runtime_activated": false,
+  "date": "2026-11-22",
+  "design_commit": "916e60a",
+  "freeze_commit": "3f4d580",
+  "freeze_record": "docs/repair/32-m1d2-v1.2.1-freeze-record.md",
+  "fixture_file": "docs/repair/phase3e/pilot-10-v1.1.5-gate.json",
+  "fixture_sha256": "dc7be14b6026b579c15dea1a13d498b7479e14081aa17419ef2bfa525ae9be70",
+  "prompt_version": "v1.2.1",
+  "prompt_status": "frozen",
+  "prompt_active": false,
+  "manifest_sha256": "8bdd673cd44ed772dfc1630280e571d4cdd8ed786066eb72eb553a9be8b0b278",
+  "prompt_sha256": {
+   "faithfulness.txt": "9efdc64df1eebafa727bc0946a03192c2d9e9907bd7a3170f867f19774211068",
+   "answer_correctness.txt": "a50520de0122216c9238d23c110967c3bbe259586ef24db100ee874a4ce35e95",
+   "answer_relevancy.txt": "a5386070407381098bcc14fc8c67a8853f94ebaa91d188e473ef92237dc58d88"
+  },
+  "schema_version": "rag_judge_schema_v3",
+  "rubric_version": "v1.2.0",
+  "metric_version": "v3",
+  "target_file": "pilot-40-targets-v1.2.0-v1.0.2.json",
+  "target_sha256": "3ee15dfca66fe13f0a45fda84ecf2612483f2de107ad079b196a6bd6344d5846",
+  "labels_file": "pilot-40-final-labels.json",
+  "labels_sha256": "f139623fef80b55716fce0c773e776d284a5167683eb91559b23e49cabd000eb",
+  "report_template": "docs/repair/phase3e/m1c-c4-report-template.md",
+  "application_target": "v1.2.1",
+  "previous_application": "m1d1 r3 (v1.2.0) — not reused",
+  "not_reusing_previous_approval": true,
+  "header_fix_commit": "27bf5fc",
+  "q11_evidence": {
+   "fixture_sha256": "dc7be14b6026b579c15dea1a13d498b7479e14081aa17419ef2bfa525ae9be70",
+   "bad": {
+    "quote": "订单签收后 7 天内可申请无理由退款。定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。",
+    "expected": {
+     "status": "invalid",
+     "invalid_reason": "contract_violation",
+     "error_code": "quote_not_found"
+    }
+   },
+   "good": {
+    "claim": "定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。",
+    "claim_type": "factual_claim",
+    "claim_subtype": "condition",
+    "support_status": "supported",
+    "quote": "定制类商品、生鲜食品、已激活的虚拟商品不支持无理由退款。",
+    "expected": {
+     "status": "evaluated",
+     "score": 1.0
+    }
+   },
+   "tests": [
+    "test_v121_bad_noncontiguous_quote_is_invalid",
+    "test_v121_good_contiguous_quote_is_supported"
+   ]
+  }
+ },
+ "run_config": {
+  "execution_mode": "judge_only_fixture",
+  "execution_vehicle": "production Service replay: rag_judge_service.judge_trace(session=None, trace=synthetic RagTrace, item=synthetic item, prompt_version='v1.2.1'); driver only aggregates JudgeOutcome; no reimplementation of F scoring",
+  "service_path": {
+   "entrypoint": "rag_judge_service.judge_trace",
+   "session": null,
+   "creates_run": false,
+   "writes_db": false,
+   "uses_c3_scoring": true,
+   "driver_reimplements_scoring": false,
+   "outputs": [
+    "faithfulness",
+    "faithfulness_strict",
+    "answer_correctness",
+    "answer_relevancy"
+   ],
+   "service_components": [
+    "_faithfulness_score_v3",
+    "_strict_from_outcome",
+    "_failure_fields",
+    "metric_version_for_prompt"
+   ]
+  },
+  "synthetic_trace": {
+   "object": "RagTrace-compatible in-memory object",
+   "fields": {
+    "id": "stable UUID per case",
+    "user_id": "fixed UUID for all 10 cases",
+    "task_id": null,
+    "dataset_item_id": null,
+    "adapter": "fixture",
+    "mode": "query",
+    "context_source": "agent_chat",
+    "query": "fixture question",
+    "answer": "fixture answer",
+    "retrieved_contexts": [
+     {
+      "content": "fixture contexts[].content"
+     }
+    ],
+    "status": "success"
+   },
+   "item": {
+    "gold_answer": "fixture gold_answer"
+   },
+   "note": "context_source=agent_chat is required by _skip_reason for F; no RAG adapter call; no RagEvaluationRun"
+  },
+  "adapter": null,
+  "top_k": null,
+  "end_to_end": false,
+  "no_rag_call": true,
+  "no_platform_run": true,
+  "fixture": {
+   "file": "docs/repair/phase3e/pilot-10-v1.1.5-gate.json",
+   "sha256": "dc7be14b6026b579c15dea1a13d498b7479e14081aa17419ef2bfa525ae9be70",
+   "case_ids": [
+    "Q01",
+    "Q04",
+    "Q11",
+    "Q17",
+    "Q21",
+    "Q23",
+    "Q29",
+    "Q31",
+    "Q35",
+    "Q36"
+   ],
+   "case_count": 10,
+   "input_fields": [
+    "question",
+    "answer",
+    "contexts[].content",
+    "gold_answer"
+   ],
+   "fixed_inputs": true,
+   "note": "fixed v1.1.5 10-case gate answer/contexts/gold; no WeKnora, no retrieval, no new answer generation; fixture target field is historical, v1.0.2 target is authoritative"
+  },
+  "judge_metrics": [
+   "faithfulness",
+   "answer_correctness",
+   "answer_relevancy"
+  ],
+  "derived_metrics": [
+   "faithfulness_strict"
+  ],
+  "judge_prompt_version": "v1.2.1",
+  "default_prompt_version": "v1.0.0",
+  "model": "qwen-max",
+  "temperature": 0.0,
+  "max_tokens": 8192,
+  "schema_version": "rag_judge_schema_v3",
+  "metric_version": "v3",
+  "llm_endpoint": "existing DashScope-compatible endpoint used by prior qwen-max gates; no key in repo",
+  "credential_scope": "existing runtime LLM credential (BYOK or server-key fallback); preflight must verify; no key in repo",
+  "env_scope": "process-local for this Judge-only replay only; do not write to repo/.env; restore after replay",
+  "env": {
+   "DEFAULT_LLM_MODEL": "qwen-max",
+   "DEFAULT_TEMPERATURE": "0.0",
+   "RAG_JUDGE_MAX_TOKENS": "8192",
+   "RAG_JUDGE_PROMPT_VERSION": "v1.0.0"
+  },
+  "top_k_note": "not applicable: contexts are fixed fixture inputs; no retrieval/adapter call",
+  "rubric_version": "v1.2.0"
+ },
+ "case_summary": {
+  "case_count": 10,
+  "group_counts": {
+   "human_gold": 3,
+   "provisional": 7
+  },
+  "evaluated_expected": 9,
+  "skipped_expected": 1
+ },
+ "cases": [
+  {
+   "case_id": "Q01",
+   "group": "provisional",
+   "final_category": "direct",
+   "context_count": 2,
+   "baseline_status": "reused",
+   "baseline_reference": "reused v1.1.5 baseline; reference only",
+   "expected_status": "evaluated",
+   "targets": {
+    "F": [
+     0.9,
+     1.0
+    ],
+    "C": [
+     0.9,
+     1.0
+    ],
+    "R": [
+     0.8,
+     1.0
+    ]
+   },
+   "target_source": "pilot10",
+   "target_status": "unchanged",
+   "variant_targets": {},
+   "variant_note": "",
+   "known_issue": "",
+   "known_non_pass": false
+  },
+  {
+   "case_id": "Q04",
+   "group": "provisional",
+   "final_category": "direct",
+   "context_count": 2,
+   "baseline_status": "reused",
+   "baseline_reference": "reused v1.1.5 baseline; reference only",
+   "expected_status": "evaluated",
+   "targets": {
+    "F": [
+     1.0,
+     1.0
+    ],
+    "C": [
+     0.8,
+     1.0
+    ],
+    "R": [
+     0.9,
+     1.0
+    ]
+   },
+   "target_source": "pilot10",
+   "target_status": "unchanged",
+   "variant_targets": {},
+   "variant_note": "",
+   "known_issue": "",
+   "known_non_pass": false
+  },
+  {
+   "case_id": "Q11",
+   "group": "provisional",
+   "final_category": "multi",
+   "context_count": 2,
+   "baseline_status": "reused",
+   "baseline_reference": "reused v1.1.5 baseline; reference only",
+   "expected_status": "evaluated",
+   "targets": {
+    "F": [
+     0.6,
+     0.9
+    ],
+    "C": [
+     0.8,
+     1.0
+    ],
+    "R": [
+     0.9,
+     1.0
+    ]
+   },
+   "target_source": "matrix",
+   "target_status": "unchanged",
+   "variant_targets": {},
+   "variant_note": "",
+   "known_issue": "normative_requirement",
+   "known_non_pass": false
+  },
+  {
+   "case_id": "Q17",
+   "group": "provisional",
+   "final_category": "multi",
+   "context_count": 2,
+   "baseline_status": "reused",
+   "baseline_reference": "reused v1.1.5 baseline; reference only",
+   "expected_status": "evaluated",
+   "targets": {
+    "F": [
+     0.7,
+     0.9
+    ],
+    "C": [
+     0.8,
+     1.0
+    ],
+    "R": [
+     0.8,
+     1.0
+    ]
+   },
+   "target_source": "pilot10",
+   "target_status": "reapproval_required",
+   "variant_targets": {},
+   "variant_note": "",
+   "known_issue": "policy_relationship_target_reapproval",
+   "known_non_pass": false
+  },
+  {
+   "case_id": "Q21",
+   "group": "provisional",
+   "final_category": "constraint",
+   "context_count": 2,
+   "baseline_status": "reused",
+   "baseline_reference": "reused v1.1.5 baseline; reference only",
+   "expected_status": "evaluated",
+   "targets": {
+    "F": [
+     0.6,
+     0.7
+    ]
+   },
+   "target_source": "matrix",
+   "target_status": "unchanged",
+   "variant_targets": {},
+   "variant_note": "",
+   "known_issue": "Q21#3_insufficient",
+   "known_non_pass": false
+  },
+  {
+   "case_id": "Q23",
+   "group": "human_gold",
+   "final_category": "constraint",
+   "context_count": 2,
+   "baseline_status": "reused",
+   "baseline_reference": "reused v1.1.5 baseline; reference only",
+   "expected_status": "evaluated",
+   "targets": {
+    "F": [
+     0.4,
+     0.5
+    ],
+    "C": [
+     0.0,
+     0.2
+    ],
+    "R": [
+     0.7,
+     1.0
+    ]
+   },
+   "target_source": "matrix",
+   "target_status": "unchanged",
+   "variant_targets": {},
+   "variant_note": "",
+   "known_issue": "quote_synthesis_history;internal_contradiction",
+   "known_non_pass": false
+  },
+  {
+   "case_id": "Q29",
+   "group": "provisional",
+   "final_category": "unanswerable",
+   "context_count": 2,
+   "baseline_status": "reused",
+   "baseline_reference": "reused v1.1.5 baseline; reference only",
+   "expected_status": "skipped(no_scorable_claims)",
+   "targets": {
+    "F": "skipped",
+    "C": [
+     0.9,
+     1.0
+    ],
+    "R": [
+     0.9,
+     1.0
+    ]
+   },
+   "target_source": "pilot10",
+   "target_status": "unchanged",
+   "variant_targets": {},
+   "variant_note": "",
+   "known_issue": "correct_skip",
+   "known_non_pass": false
+  },
+  {
+   "case_id": "Q31",
+   "group": "provisional",
+   "final_category": "unanswerable",
+   "context_count": 2,
+   "baseline_status": "reused",
+   "baseline_reference": "reused v1.1.5 baseline; reference only",
+   "expected_status": "evaluated",
+   "targets": {
+    "F": [
+     0.6,
+     1.0
+    ],
+    "C": [
+     0.8,
+     1.0
+    ],
+    "R": [
+     0.8,
+     1.0
+    ]
+   },
+   "target_source": "pilot10",
+   "target_status": "unchanged_rebaseline",
+   "variant_targets": {},
+   "variant_note": "",
+   "known_issue": "quote_absence_diagnostic",
+   "known_non_pass": false
+  },
+  {
+   "case_id": "Q35",
+   "group": "human_gold",
+   "final_category": "ambiguous",
+   "context_count": 2,
+   "baseline_status": "available_old_run",
+   "baseline_reference": "old run only; not v1.2.0 measured",
+   "expected_status": "evaluated",
+   "targets": {
+    "F": [
+     0.8,
+     1.0
+    ],
+    "C": [
+     0.7,
+     1.0
+    ],
+    "R": [
+     0.8,
+     1.0
+    ]
+   },
+   "target_source": "matrix",
+   "target_status": "unchanged_rebaseline",
+   "variant_targets": {},
+   "variant_note": "",
+   "known_issue": "absence_quote_diagnostic",
+   "known_non_pass": false
+  },
+  {
+   "case_id": "Q36",
+   "group": "human_gold",
+   "final_category": "ambiguous",
+   "context_count": 2,
+   "baseline_status": "available_old_run",
+   "baseline_reference": "old run only; not v1.2.0 measured",
+   "expected_status": "evaluated",
+   "targets": {
+    "F": [
+     0.8,
+     1.0
+    ],
+    "C": [
+     0.5,
+     0.6
+    ],
+    "R": [
+     0.8,
+     1.0
+    ]
+   },
+   "target_source": "matrix",
+   "target_status": "reapproval_with_variant",
+   "variant_targets": {
+    "C": [
+     0.9,
+     1.0
+    ]
+   },
+   "variant_note": "base C 0.5-0.6; disclosure variant C 0.9-1.0",
+   "known_issue": "condition_sentence;conflict_disclosure",
+   "known_non_pass": false
+  }
+ ],
+ "q36_c_policy": {
+  "mode": "dual_report_diagnostic",
+  "base": [
+   0.5,
+   0.6
+  ],
+  "variant": [
+   0.9,
+   1.0
+  ],
+  "pass_fail": "C not used for 10-case PASS/FAIL; report base and variant; F/R still use targets",
+  "no_post_hoc_selection": true
+ },
+ "budget": {
+  "primary_case_runs": 10,
+  "primary_judge_calls": 30,
+  "repeat_policy": {
+   "cases": [
+    "Q23",
+    "Q35",
+    "Q36"
+   ],
+   "runs_per_case": 3,
+   "trigger": "always scheduled; no first-run condition; no discretionary decision",
+   "decision_owner": "pre-registered by this application; no post-hoc choice",
+   "synthesis": {
+    "Q23": "PASS only if 3/3 in target and no invalid/HG quote violation",
+    "Q35": "PASS if >=2/3 in target and no invalid/HG quote violation",
+    "Q36": "PASS if >=2/3 in target for F/R and no invalid/HG quote violation; C diagnostic only"
+   },
+   "report": "all 3 runs; median/min/max; no best-only reporting"
+  },
+  "extra_case_runs": 6,
+  "retry_reserve_case_runs": 1,
+  "max_case_runs": 17,
+  "max_judge_calls": 51,
+  "token_estimate": {
+   "method": "conservative per-metric estimate: prompt tokens + fixed fixture payload tokens + output tokens; Chinese text ~1 token per character; actual usage from LLMUsage is authoritative",
+   "per_case": {
+    "faithfulness": {
+     "prompt": 3200,
+     "fixture": 3500,
+     "output": 1500
+    },
+    "answer_correctness": {
+     "prompt": 1000,
+     "fixture": 1800,
+     "output": 150
+    },
+    "answer_relevancy": {
+     "prompt": 700,
+     "fixture": 1500,
+     "output": 80
+    }
+   },
+   "primary_input_tokens": 117000,
+   "primary_output_tokens": 17300,
+   "max_input_tokens": 198900,
+   "max_output_tokens": 29410
+  },
+  "pricing": {
+   "input_cny_per_1k": 0.0024,
+   "output_cny_per_1k": 0.0096,
+   "source": "qwen-max public price used by prior project docs (pilot-10-v1.0.0-vs-v1.1.1.md; pilot-10-v1.1.2-gate-final2.md); actual DashScope bill is authoritative"
+  },
+  "calculation": {
+   "formula": "input_tokens/1000*0.0024 + output_tokens/1000*0.0096",
+   "primary_cost_cny": 0.44688,
+   "max_cost_cny": 0.759696,
+   "buffer_ratio": 0.2,
+   "buffered_upper_cny": 0.9116352,
+   "ceiling_cny": 1.0
+  },
+  "estimated_cost_cny": {
+   "expected": 0.44688,
+   "upper": 0.759696,
+   "ceiling": 1.0
+  },
+  "hard_stop": "After each case, read actual usage; if cumulative or projected cost exceeds CNY 1.00, or calls exceed 51, stop immediately; no further calls",
+  "note": "51 calls = 16 planned case-runs (10 primary + 6 HG repeats) + 1 execution-retry reserve case-run; no 40-case spend; not repeated prompt tuning"
+ },
+ "stop_conditions": [
+  {
+   "code": "preflight_failure",
+   "condition": "fixture SHA、10 个 case/answer/contexts/gold、LLM endpoint/model/credential、Prompt/MANIFEST SHA 或 22/22 validation 任一不满足",
+   "action": "拒绝启动 Judge-only replay；不得跳过 preflight"
+  },
+  {
+   "code": "invalid_contract",
+   "condition": "任一 case/metric 出现 invalid(contract_violation)，包括 schema/subtype/evidence/quote/conflict 违约",
+   "action": "立即停止；保留已完成结果；不得改 Prompt 或放宽契约后重跑"
+  },
+  {
+   "code": "failed_execution",
+   "condition": "任一 case/metric 出现 failed(execution)",
+   "action": "同配置最多重试一次；再次失败立即停止"
+  },
+  {
+   "code": "hg_supported_quote_invalid",
+   "condition": "Q23/Q35/Q36 任一 supported claim 的 quote 非逐字、跨片段拼接或引用 answer",
+   "action": "立即停止；不得把 HG quote invalid 当 known diagnostic 放行"
+  },
+  {
+   "code": "q29_not_skipped",
+   "condition": "Q29 的 F 不是 skipped(no_scorable_claims)",
+   "action": "立即停止；不得用 0.0 或其它 skipped 兜底"
+  },
+  {
+   "code": "unexplained_drop",
+   "condition": "有 baseline 的 case 出现 old - new > 0.10 + 1e-9 的未解释下降",
+   "action": "停止并人工复核；恰好 0.10 不停止"
+  },
+  {
+   "code": "second_typo_or_number_change",
+   "condition": "第二次出现 evidence typo、数字/日期/金额改动",
+   "action": "立即停止"
+  },
+  {
+   "code": "missing_case_output",
+   "condition": "10 个 case 未全部产出 3 个指标结果，或任一 case 缺 F/C/R",
+   "action": "停止；不得把缺失 case 当 skipped"
+  },
+  {
+   "code": "budget_ceiling",
+   "condition": "累计或预估成本超过 CNY 1.00，或 Judge 调用超过 51 次",
+   "action": "立即停止；不得追加调用"
+  },
+  {
+   "code": "fingerprint_mismatch",
+   "condition": "prompt SHA / MANIFEST SHA / fixture SHA / schema / metric / model / temperature / max_tokens 与申请不一致",
+   "action": "拒绝启动或立即停止；不得静默换版本"
+  },
+  {
+   "code": "activation_drift",
+   "condition": "v1.2.1 被设为默认、active=true 或 runtime_active=true",
+   "action": "立即停止；回到 frozen / active=false"
+  },
+  {
+   "code": "q11_quote_continuity",
+   "condition": "Q11 非连续 quote 未被 Service 判 invalid，或 good 连续 quote 未 evaluated",
+   "action": "立即停止；不得放宽 Service 或改 fixture"
+  }
+ ],
+ "failure_handling": {
+  "invalid": "不重试；保留 invalid_reason 与 validation_errors；停止并复审",
+  "failed_execution": "同配置最多重试一次；不得改 Prompt/Schema/model",
+  "skipped": "按 case 语义单独记录；不得把 skipped 当 PASS",
+  "budget": "达到 CNY 1.00 或 51 次调用即停止；不得追加预算",
+  "stop": "保留已完成结果与配置快照；不启动 40；重新申请后才可继续",
+  "no_prompt_tuning": "10 条期间不得改 Prompt、Schema、Service、目标或 stop conditions"
+ },
+ "report_requirements": [
+  "使用 docs/repair/phase3e/m1c-c4-report-template.md",
+  "逐条报告 status、F_coverage、F_strict（仅诊断）、C、R、invalid/skipped/failed、insufficient_count/ratio、known issue",
+  "逐条写 PASS/FAIL/BLOCKED；Q29 只能按 skipped 语义判定",
+  "HG 3 条（Q23/Q35/Q36）与 provisional 7 条分开，不混算均值",
+  "Q17 标 policy_relationship_target_reapproval；Q35/Q36 标 old run only",
+  "报告写 prompt_version=v1.2.1、rubric_version=v1.2.0、F/C/R SHA、MANIFEST SHA、fixture SHA、target SHA",
+  "报告写 model/temperature/max_tokens 与 judge_trace production Service replay 方法",
+  "Q23/Q35/Q36 报告 3 次全部结果、median/min/max，不报最好一次",
+  "Q36 的 C 同时报 base 0.5–0.6 与 variant 0.9–1.0，只作诊断，不参与 PASS/FAIL",
+  "报告 Q11 bad/good 结果：invalid(contract_violation)+quote_not_found / evaluated 1.0",
+  "结论只能写 implemented/verified/blocked；不得自行写 accepted"
+ ],
+ "boundaries": [
+  "本文件是 v1.2.1 新申请材料，不是 Judge 运行；未调用模型、未创建 Run",
+  "方法 A：Judge-only 固定 pilot answer/contexts/gold；不调用 WeKnora、不做检索、不生成新答案",
+  "执行载体：rag_judge_service.judge_trace(session=None, synthetic RagTrace, item, prompt_version=v1.2.1)",
+  "不复用 v1.2.0 的 10 条批准；本申请必须重新批准",
+  "不激活 v1.2.1；active 保持 false、runtime_active 保持 false；默认仍 v1.0.0",
+  "不修改 Prompt、MANIFEST、Schema、Service、API、DB、migration 022、r2、target v1.0.2、Q11 fixture",
+  "不运行 40 条；10 条通过后才可单独申请 40 条",
+  "不启动 M2/M3；不把 M1-C/M1-D 标 accepted"
+ ],
+ "approval_items": [
+  "确认这是 v1.2.1 新申请，不复用 v1.2.0 批准",
+  "确认 prompt_version=v1.2.1、F 9efdc64d…、C a50520de…、R a5386070…、MANIFEST 8bdd673c…",
+  "确认 rubric_version=v1.2.0、Schema v3、Metric v3、target v1.0.2",
+  "确认 Q11 bad/good 证据与 Service invalid 契约",
+  "确认 Judge-only fixture、Q36 C 双报、HG 重复与 51 次预算",
+  "确认停止条件与失败处理",
+  "确认不会激活 v1.2.1、不会改默认版本、不会跑 40",
+  "批准后才执行 10 条；执行后停下报告"
+ ],
+ "judge_run": false,
+ "runtime_activated": false
+}

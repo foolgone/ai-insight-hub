@@ -1,0 +1,33 @@
+{
+  "case_id": "Q36",
+  "variant": "disclosure",
+  "metric": "answer_correctness",
+  "prompt_version": "v1.1.1",
+  "prompt_sha256": "2ab6eac2abe57dcfd647df328244ac3e5681fc93222938d6614e71037d49ae77",
+  "model": "qwen-max",
+  "temperature": 0.0,
+  "max_tokens": 8192,
+  "status": "evaluated",
+  "score": 0.9,
+  "missing_points": [],
+  "wrong_facts": [],
+  "reason": "回答覆盖了所有关键事实、条件和分支，并且正确披露了文档冲突。",
+  "token_usage": {
+    "input": 2043,
+    "output": 48
+  },
+  "judge_config": {
+    "agent": "rag_judge_answer_correctness",
+    "model": "qwen-max",
+    "temperature": 0.0,
+    "max_tokens": 8192,
+    "prompt_version": "v1.1.1",
+    "resolved_prompt_version": "v1.1.1",
+    "prompt_sha256": "2ab6eac2abe57dcfd647df328244ac3e5681fc93222938d6614e71037d49ae77",
+    "schema_version": "rag_judge_schema_v2",
+    "rubric_version": "v1.1.1",
+    "metric_version": "v2"
+  },
+  "raw_output": "{\n  \"score\": 0.9,\n  \"missing_points\": [],\n  \"wrong_facts\": [],\n  \"reason\": \"回答覆盖了所有关键事实、条件和分支，并且正确披露了文档冲突。\"\n}",
+  "target": "0.9-1.0"
+}
