@@ -10,7 +10,7 @@
 > | 阶段 | 状态 |
 > |---|---|
 > | P0-A | accepted |
-> | P0-B | **`blocked`**：F1/F2/F3 + stale localStorage 已修复，AI 自检通过；仍待人类复测后才能 accepted |
+> | P0-B | **`blocked / ready_for_human_retest`**：F1/F2/F3 + F7 + stale localStorage + HF 离线/预热已修复，AI 自检通过；仍待人类复测后才能 accepted |
 > | P0-C | 未开始，等 P0-B 人类测试通过 |
 > | 生产 migration | deferred / blocked |
 > | M1 | v1.2.5 beta / inactive |

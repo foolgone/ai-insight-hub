@@ -84,12 +84,23 @@
 
 验证命令：
 
-- `npm run test:run`：**460 passed**
+- `npm run test:run`：**461 passed**
 - `npm run lint`：通过
 - `npm run build`：通过
-- 自检原始结果：`docs/releases/evidence/p0b-ego-20261127/fix-selfcheck-20261127.json`
+- 自检原始结果：`docs/releases/evidence/p0b-ego-20261127/fix-selfcheck-20261127.json`、`fix-selfcheck-20261128.json`
 
 > 以上是 AI 修复自检，不是人类验收；P0-B 仍保持 blocked，直到人类按 runbook 复测通过。自检产生的新质量/知识任务数据会在人类测试前通过重置 demo 库清掉。
+
+### 6.1 2026-11-27 ego 复测追加
+
+| 项 | 结果 |
+|---|---|
+| 7 项空状态 CTA | PASS（数据清洗 CTA + 按钮禁用；质量/知识/报告、QA、RAG、对比入口均可达） |
+| 质量自动刷新 | PASS（评估完成后 5 条结果自动出现） |
+| 清洗结果自动刷新 | 原 **FAIL（F7，P1）**；已修：clean completed 失效 `cleanedDataKeys`，并加自动刷新测试。2026-11-28 自检 **PASS**（未点刷新，5 条结果自动出现） |
+| 知识提取 | 原环境阻塞：worker 访问 huggingface.co 超时；已加 `HF_HUB_OFFLINE=1` / `TRANSFORMERS_OFFLINE=1`、`EMBEDDING_CACHE_DIR`、启动前 embedding 预热、`/health` ready 校验。2026-11-28 自检 **PASS**（5 条 FAQ 自动出现，未整页刷新） |
+| 服务稳定性 | AI 后台进程多次退出；人类测试必须用独立终端 `scripts/demo-p0b.ps1`，预热 10 分钟 |
+| 全流程 | 该轮未完成（未到数据集/Run/报告）；不作为验收通过 |
 
 ## 7. 证据索引
 
@@ -115,6 +126,8 @@
 | `37-both-runs-completed.png` | 两个 Run completed |
 | `40a-compare-base-selected.png` | 对比指标 + Beta/噪声提示 |
 | `42-report-created-toast.png` | 报告 completed + 下载 |
+| `fix2-f7-cleaning-auto-refresh.png` | 2026-11-28 F7 自检：清洗结果自动出现 |
+| `fix2-knowledge-auto-refresh.png` | 2026-11-28 知识提取自动出现 FAQ |
 | `compare-ego.csv` | 对比 CSV |
 | `report-ego.md` | 报告正文 |
 

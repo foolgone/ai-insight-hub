@@ -1,0 +1,23 @@
+{
+  "date": "2026-11-28",
+  "checker": "AI agent (Playwright self-check; not human acceptance)",
+  "health": {
+    "embedding_ready": true,
+    "offline": true,
+    "cache_dir": "D:\\soft\\cache\\huggingface\\hub"
+  },
+  "f7_cleaning_auto_refresh": {
+    "clean_task_id": "e67a18a3-bec6-4d35-a126-70c1b10f06ff",
+    "cleaned_records": 5,
+    "manual_refresh": false,
+    "result": "PASS"
+  },
+  "knowledge_auto_refresh": {
+    "extract_task_id": "c95fdd61-1d82-4076-b780-b4921aa9333a",
+    "faq_count": 5,
+    "manual_reload": false,
+    "result": "PASS"
+  },
+  "elapsed_seconds": 40,
+  "result": "AI_SELF_CHECK_PASSED"
+}

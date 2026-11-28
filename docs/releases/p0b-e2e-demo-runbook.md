@@ -45,7 +45,9 @@ powershell -ExecutionPolicy Bypass -File scripts\demo-p0b.ps1
 
 - 启动 API 8000、Celery worker、Vite 5173；
 - 保持 `RATE_LIMIT_ENABLED=true`；
-- 等待 8000/5173 健康后打印就绪；
+- 设置 `HF_HUB_OFFLINE=1` / `TRANSFORMERS_OFFLINE=1`（API 和 worker 都继承）；
+- 启动前预热 embedding，失败则直接停止；
+- 等待 8000/5173 健康，并校验 `/health` 的 `embedding.ready=true`；
 - 任一进程退出就停止全部，便于记录“是否重启过”。
 
 > 人类测试前至少预热 10 分钟，确认 `http://127.0.0.1:8000/health` 和 `http://127.0.0.1:5173` 持续可访问；记录预热开始时间与是否发生重启。
@@ -65,9 +67,14 @@ $env:RAG_ADAPTER="mock"
 $env:TENANT_ENFORCEMENT_ENABLED="false"
 $env:RATE_LIMIT_ENABLED="true"
 $env:ALLOW_SERVER_KEY_FALLBACK="true"
+$env:HF_HUB_OFFLINE="1"
+$env:TRANSFORMERS_OFFLINE="1"
+$env:EMBEDDING_CACHE_DIR="$env:HF_HOME\hub"
 $env:DEEPSEEK_BASE_URL="https://dashscope.aliyuncs.com/compatible-mode/v1"
 $env:DEEPSEEK_API_KEY=$env:DASHSCOPE_API_KEY
 $env:DEFAULT_LLM_MODEL="qwen-flash"
+# 先预热 embedding；失败就不要启动测试
+.\venv\Scripts\python.exe -c "import asyncio; from app.services.embedding_service import encode_text; print(len(asyncio.run(encode_text('prewarm'))))"
 .\venv\Scripts\python.exe -m uvicorn app.main:app --port 8000
 .\venv\Scripts\celery.exe -A app.core.celery.celery_app worker -l info -P solo -Q default,clean
 cd ..\frontend
@@ -152,7 +159,8 @@ npm run dev -- --host 127.0.0.1 --port 5173
 - 手工新建 FAQ 首次会同步加载 embedding，可能超过前端 30s；P1 已知问题，演示走“提取知识（异步）”。
 - 默认限流下若出现 429，属于待评估的体验问题（P1），记录即可，不关闭限流绕过。
 - **已修复（2026-11-27）**：数据清洗无数据源时提供「新建数据源/去数据源管理」入口，并禁用新建按钮；弹窗有数据源时默认选中，无数据源时给 CTA，不再空白死路。
-- **已修复（2026-11-27）**：质量任务完成后自动刷新结果；知识提取完成后自动刷新 FAQ；stale localStorage 遇到 404 自动清理并回到数据源引导。
+- **已修复（2026-11-27）**：质量任务完成后自动刷新结果；知识提取完成后自动刷新 FAQ；清洗任务完成后自动刷新清洗结果；stale localStorage 遇到 404 自动清理并回到数据源引导。
+- **Embedding 离线**：启动脚本设置 `HF_HUB_OFFLINE=1` / `TRANSFORMERS_OFFLINE=1`，启动前预热并校验 `/health` 的 `embedding.ready=true`；缓存缺失则停止，不让人等待网络超时。
 - **环境要求**：用 `scripts/demo-p0b.ps1` 在独立终端启动，测试前预热 10 分钟；若进程退出，记录重启，不在人类计时中隐藏。
 
 ## 7. 结束后

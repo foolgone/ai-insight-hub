@@ -1,5 +1,6 @@
-import { useMemo, useState } from 'react'
+import { useCallback, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { useQueryClient } from '@tanstack/react-query'
 import { LuPlus, LuRefreshCw } from 'react-icons/lu'
 import { Badge } from '../../components/Badge'
 import { PageHeader } from '../../components/common/PageHeader'
@@ -16,7 +17,7 @@ import { AgentStatusBadge } from '../../components/business/AgentStatusBadge'
 import { CleanedDataDrawer } from '../../components/cleaning/CleanedDataDrawer'
 import { CreateCleaningModal } from '../../components/cleaning/CreateCleaningModal'
 import { RawDataPanel } from '../../components/cleaning/RawDataPanel'
-import { useCleanedDataQuery } from '../../hooks/useCleaning'
+import { cleanedDataKeys, useCleanedDataQuery } from '../../hooks/useCleaning'
 import { useClearStaleDatasource } from '../../hooks/useClearStaleDatasource'
 import { useTaskStream } from '../../hooks/useTaskStream'
 import { useCancelTask, useRetryTask, useTasksQuery } from '../../hooks/useTasks'
@@ -68,8 +69,26 @@ export default function DataCleaning() {
 
   const cancelMutation = useCancelTask()
   const retryMutation = useRetryTask()
+  const queryClient = useQueryClient()
+  const seenCompleted = useRef(new Set())
+  const handleTasks = useCallback(
+    payload => {
+      const fresh = (payload?.items || []).filter(
+        task =>
+          task.task_type === 'clean' &&
+          task.status === 'completed' &&
+          !seenCompleted.current.has(task.id)
+      )
+      if (fresh.length === 0) return
+      fresh.forEach(task => seenCompleted.current.add(task.id))
+      queryClient.invalidateQueries({ queryKey: cleanedDataKeys.all })
+    },
+    [queryClient]
+  )
   // T11：优先用 SSE 推送；连接不可用时回退到 3s 轮询
-  const { connected: streamConnected } = useTaskStream(Boolean(currentDatasourceId))
+  const { connected: streamConnected } = useTaskStream(Boolean(currentDatasourceId), {
+    onTasks: handleTasks,
+  })
 
   const taskParams = useMemo(
     () => ({
